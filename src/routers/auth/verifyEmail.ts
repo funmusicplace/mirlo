@@ -1,9 +1,8 @@
 import prisma from "@mirlo/prisma";
-import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
 
-import { sendMail } from "../../jobs/send-mail";
 import logger from "../../logger";
+import { sendMailQueue } from "../../queues/send-mail-queue";
 import { AppError } from "../../utils/error";
 import { getClient } from "../../utils/getClient";
 import { findOrCreateUserBasedOnEmail } from "../../utils/user";
@@ -134,20 +133,18 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
       log.info(`auth/verifyEmail: sending verification email ${email}`);
 
       try {
-        await sendMail({
-          data: {
-            template: "verify-email",
-            message: {
-              to: email,
-            },
-            locals: {
-              host: process.env.API_DOMAIN,
-              client: client.id,
-              code: generatedCode,
-              contextSubject: req.body.contextSubject,
-            },
+        await sendMailQueue.add("send-mail", {
+          template: "verify-email",
+          message: {
+            to: email,
           },
-        } as Job);
+          locals: {
+            host: process.env.API_DOMAIN,
+            client: client.id,
+            code: generatedCode,
+            contextSubject: req.body.contextSubject,
+          },
+        });
       } catch (e) {
         log.error(
           `auth/verifyEmail: failed to send verification email to ${email}: ${e}`

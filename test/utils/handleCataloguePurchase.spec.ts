@@ -8,7 +8,7 @@ import assert from "assert";
 import { describe, it } from "mocha";
 import sinon from "sinon";
 
-import * as sendMail from "../../src/jobs/send-mail";
+import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import { handleCataloguePurchase } from "../../src/utils/handleFinishedTransactions";
 import { calculateAppFee } from "../../src/utils/processingPayments";
 import {
@@ -32,7 +32,7 @@ describe("handleCataloguePurchase", () => {
   });
 
   it("should pass a resolved, correctly-scaled platformCut to the artist notification template", async () => {
-    const stub = sinon.spy(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -62,12 +62,11 @@ describe("handleCataloguePurchase", () => {
       .getCalls()
       .find(
         (call) =>
-          call.args[0].data.template ===
-          "catalogue-purchase-artist-notification"
+          call.args[1].template === "catalogue-purchase-artist-notification"
       );
     assert.ok(notificationCall, "should send the artist notification email");
 
-    const locals = notificationCall!.args[0].data.locals as {
+    const locals = notificationCall!.args[1].locals as {
       platformCut: number;
       pricePaid: number;
     };

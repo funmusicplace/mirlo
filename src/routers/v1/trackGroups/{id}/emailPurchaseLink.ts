@@ -1,11 +1,10 @@
 import prisma from "@mirlo/prisma";
-import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated } from "../../../../auth/passport";
-import sendMail from "../../../../jobs/send-mail";
-import { getClient } from "../../../../utils/getClient";
+import { sendMailQueue } from "../../../../queues/send-mail-queue";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
+import { getClient } from "../../../../utils/getClient";
 
 export default function () {
   const operations = {
@@ -30,18 +29,16 @@ export default function () {
         res.status(404);
         return next();
       }
-      sendMail({
-        data: {
-          template: "album-purchase-link",
-          message: {
-            to: email,
-          },
-          locals: {
-            trackGroup: processSingleTrackGroup(trackGroup),
-            client: (await getClient()).applicationUrl,
-          },
+      await sendMailQueue.add("send-mail", {
+        template: "album-purchase-link",
+        message: {
+          to: email,
         },
-      } as Job);
+        locals: {
+          trackGroup: processSingleTrackGroup(trackGroup),
+          client: (await getClient()).applicationUrl,
+        },
+      });
       res.status(200).json({ message: "success" });
     } catch (e) {
       next(e);

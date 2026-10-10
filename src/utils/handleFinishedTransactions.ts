@@ -6,9 +6,7 @@ import {
   Fundraiser,
 } from "@mirlo/prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
-import { Job } from "bullmq";
 
-import sendMail from "../jobs/send-mail";
 import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
 import { serializeProfile } from "../serializers/artist";
@@ -320,28 +318,26 @@ export const sendPurchaseReceipt = async (
 ) => {
   const { applicationUrl } = await getClient();
 
-  await sendMail<PurchaseReceiptEmailType>({
-    data: {
-      template: "purchase-receipt",
-      message: {
-        to: purchaser.email,
-      },
-      locals: {
-        artist: serializeProfile(
-          artist
-        ) as unknown as PurchaseReceiptEmailType["artist"],
-        transactions: transactions.map(
-          (t) =>
-            serializeUserTransaction(t, {
-              emailShape: true,
-            }) as unknown as PurchaseTransaction
-        ),
-        email: purchaser.email,
-        client: applicationUrl,
-        host: process.env.API_DOMAIN,
-      } as PurchaseReceiptEmailType,
+  await sendMailQueue.add("send-mail", {
+    template: "purchase-receipt",
+    message: {
+      to: purchaser.email,
     },
-  } as Job);
+    locals: {
+      artist: serializeProfile(
+        artist
+      ) as unknown as PurchaseReceiptEmailType["artist"],
+      transactions: transactions.map(
+        (t) =>
+          serializeUserTransaction(t, {
+            emailShape: true,
+          }) as unknown as PurchaseTransaction
+      ),
+      email: purchaser.email,
+      client: applicationUrl,
+      host: process.env.API_DOMAIN,
+    } as PurchaseReceiptEmailType,
+  });
 };
 
 /**
@@ -368,32 +364,27 @@ export const sendArtistSaleNotification = async ({
       }) as unknown as PurchaseTransaction
   );
 
-  await sendMail<ArtistPurchaseNotificationEmailType>({
-    data: {
-      template: "artist-purchase-notification",
-      message: {
-        to: payee.email,
-        cc: payee.accountingEmail,
-      },
-      locals: {
-        transactions: serializedTransactions,
-        totalGross: serializedTransactions.reduce(
-          (acc, t) => acc + t.amount,
-          0
-        ),
-        totalNet: serializedTransactions.reduce(
-          (acc, t) =>
-            acc + (t.amount - (t.platformCut ?? 0) - (t.stripeCut ?? 0)),
-          0
-        ),
-        currency: serializedTransactions[0]?.currency ?? "usd",
-        message: message ?? null,
-        email: purchaser.email,
-        client: applicationUrl,
-        host: process.env.API_DOMAIN,
-      } as ArtistPurchaseNotificationEmailType,
+  await sendMailQueue.add("send-mail", {
+    template: "artist-purchase-notification",
+    message: {
+      to: payee.email,
+      cc: payee.accountingEmail,
     },
-  } as Job);
+    locals: {
+      transactions: serializedTransactions,
+      totalGross: serializedTransactions.reduce((acc, t) => acc + t.amount, 0),
+      totalNet: serializedTransactions.reduce(
+        (acc, t) =>
+          acc + (t.amount - (t.platformCut ?? 0) - (t.stripeCut ?? 0)),
+        0
+      ),
+      currency: serializedTransactions[0]?.currency ?? "usd",
+      message: message ?? null,
+      email: purchaser.email,
+      client: applicationUrl,
+      host: process.env.API_DOMAIN,
+    } as ArtistPurchaseNotificationEmailType,
+  });
 };
 
 type SaleArtist = Profile & {
@@ -455,28 +446,24 @@ const attachTrackGroup = async (
       ? new Date(trackGroup.releaseDate) > new Date()
       : false;
 
-    await sendMail<AlbumPurchaseEmailType>({
-      data: {
-        template: newUser ? "album-download" : "album-purchase-receipt",
-        message: {
-          to: user.email,
-        },
-        locals: {
-          trackGroup: processSingleTrackGroup(
-            trackGroup
-          ) as unknown as AlbumPurchaseEmailType["trackGroup"],
-          purchase: purchaseForAlbumPurchaseEmail(purchase),
-          isBeforeReleaseDate,
-          token: purchase.singleDownloadToken,
-          email: user.email,
-          client: applicationUrl,
-          host: process.env.API_DOMAIN,
-          hasSubscriptionTiers: await hasSubscriptionTiers(
-            trackGroup.profileId
-          ),
-        },
+    await sendMailQueue.add("send-mail", {
+      template: newUser ? "album-download" : "album-purchase-receipt",
+      message: {
+        to: user.email,
       },
-    } as Job);
+      locals: {
+        trackGroup: processSingleTrackGroup(
+          trackGroup
+        ) as unknown as AlbumPurchaseEmailType["trackGroup"],
+        purchase: purchaseForAlbumPurchaseEmail(purchase),
+        isBeforeReleaseDate,
+        token: purchase.singleDownloadToken,
+        email: user.email,
+        client: applicationUrl,
+        host: process.env.API_DOMAIN,
+        hasSubscriptionTiers: await hasSubscriptionTiers(trackGroup.profileId),
+      },
+    });
 
     await sendBasecampAMessage(
       `New album purchase: <i>${trackGroup.title}</i> by ${trackGroup.profile.name}, purchased by <b>${user.email}</b>`
@@ -673,47 +660,43 @@ const attachCatalogue = async (
   if (user && profileTrackGroups.length > 0) {
     const { applicationUrl } = await getClient();
     const serializedProfile = serializeProfile(profile);
-    await sendMail({
-      data: {
-        template: "catalogue-receipt",
-        message: {
-          to: user.email,
-        },
-        locals: {
-          artist: serializedProfile,
-          trackGroups: profileTrackGroups.map((tg) => ({
-            ...processSingleTrackGroup(tg),
-            token: downloadTokensByTrackGroupId.get(tg.id),
-          })),
-          email: user.email,
-          client: applicationUrl,
-          host: process.env.API_DOMAIN,
-          hasSubscriptionTiers: await hasSubscriptionTiers(profile.id),
-        },
+    await sendMailQueue.add("send-mail", {
+      template: "catalogue-receipt",
+      message: {
+        to: user.email,
       },
-    } as Job);
+      locals: {
+        artist: serializedProfile,
+        trackGroups: profileTrackGroups.map((tg) => ({
+          ...processSingleTrackGroup(tg),
+          token: downloadTokensByTrackGroupId.get(tg.id),
+        })),
+        email: user.email,
+        client: applicationUrl,
+        host: process.env.API_DOMAIN,
+        hasSubscriptionTiers: await hasSubscriptionTiers(profile.id),
+      },
+    });
 
     const catalogueAppFee = await calculateAppFee(
       item.amount,
       transaction.currency
     );
     const payee = resolvePayee({ profile });
-    await sendMail({
-      data: {
-        template: "catalogue-purchase-artist-notification",
-        message: {
-          to: payee.email,
-          cc: payee.accountingEmail,
-        },
-        locals: {
-          artist: serializedProfile,
-          pricePaid: item.amount,
-          currencyPaid: transaction.currency,
-          platformCut: (catalogueAppFee ?? 0) / 100,
-          email: user.email,
-        },
+    await sendMailQueue.add("send-mail", {
+      template: "catalogue-purchase-artist-notification",
+      message: {
+        to: payee.email,
+        cc: payee.accountingEmail,
       },
-    } as Job);
+      locals: {
+        artist: serializedProfile,
+        pricePaid: item.amount,
+        currencyPaid: transaction.currency,
+        platformCut: (catalogueAppFee ?? 0) / 100,
+        email: user.email,
+      },
+    });
   }
 
   return { sale: { artist: profile } };

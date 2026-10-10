@@ -1,13 +1,12 @@
 import { randomInt } from "crypto";
 
 import prisma from "@mirlo/prisma";
-import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../auth/passport";
-import { sendMail } from "../../../../../jobs/send-mail";
 import logger from "../../../../../logger";
+import { sendMailQueue } from "../../../../../queues/send-mail-queue";
 import { AppError, HttpCode } from "../../../../../utils/error";
 
 type Params = {
@@ -68,13 +67,11 @@ export default function () {
 
       log.info(`stripe/resetCode: emailing reset code to user ${user.id}`);
 
-      await sendMail({
-        data: {
-          template: "stripe-reset-code",
-          message: { to: user.email },
-          locals: { code },
-        },
-      } as Job);
+      await sendMailQueue.add("send-mail", {
+        template: "stripe-reset-code",
+        message: { to: user.email },
+        locals: { code },
+      });
 
       return res.json({ result: { sent: true } });
     } catch (e) {

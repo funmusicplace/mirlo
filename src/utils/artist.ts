@@ -9,11 +9,10 @@ import {
   DefaultArgs,
   PrismaClientKnownRequestError,
 } from "@prisma/client/runtime/client";
-import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
 
-import sendMail from "../jobs/send-mail";
 import logger from "../logger";
+import { sendMailQueue } from "../queues/send-mail-queue";
 import { serializeProfile } from "../serializers/artist";
 
 import { AppError } from "./error";
@@ -293,21 +292,19 @@ export const createSubscriptionConfirmation = async (
         },
       });
 
-    return sendMail({
-      data: {
-        template: "artist-subscription-confirmation",
-        message: {
-          to: email,
-        },
-        locals: {
-          artist: serializeProfile(profile),
-          email,
-          token: subscriptionConfirmation.token,
-          host: process.env.API_DOMAIN,
-          client: (await getClient()).applicationUrl,
-        },
+    return sendMailQueue.add("send-mail", {
+      template: "artist-subscription-confirmation",
+      message: {
+        to: email,
       },
-    } as Job);
+      locals: {
+        artist: serializeProfile(profile),
+        email,
+        token: subscriptionConfirmation.token,
+        host: process.env.API_DOMAIN,
+        client: (await getClient()).applicationUrl,
+      },
+    });
   } catch (e) {
     if (e instanceof PrismaClientKnownRequestError) {
       // skip
@@ -554,22 +551,20 @@ export const sendSubscriptionCancellationEmail = async (
   endsAt: Date | null,
   cancelledByArtist: boolean = false
 ) => {
-  return sendMail({
-    data: {
-      template: "artist-subscription-cancelled",
-      message: {
-        to: email,
-      },
-      locals: {
-        artist: serializeProfile(profile),
-        email,
-        endsAt: endsAt ? endsAt.toISOString() : null,
-        cancelledByArtist,
-        host: process.env.API_DOMAIN,
-        client: (await getClient()).applicationUrl,
-      },
+  return sendMailQueue.add("send-mail", {
+    template: "artist-subscription-cancelled",
+    message: {
+      to: email,
     },
-  } as Job);
+    locals: {
+      artist: serializeProfile(profile),
+      email,
+      endsAt: endsAt ? endsAt.toISOString() : null,
+      cancelledByArtist,
+      host: process.env.API_DOMAIN,
+      client: (await getClient()).applicationUrl,
+    },
+  });
 };
 
 /**

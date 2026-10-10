@@ -1,10 +1,9 @@
 import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
-import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated } from "../../../../auth/passport";
-import sendMail from "../../../../jobs/send-mail";
+import { sendMailQueue } from "../../../../queues/send-mail-queue";
 import { serializeProfile } from "../../../../serializers/artist";
 import { checkCloudFlareTurnstile } from "../../../../utils/cloudflare";
 import { AppError } from "../../../../utils/error";
@@ -124,22 +123,20 @@ export default function () {
       });
 
       const senderName = sender.name || sender.email;
-      sendMail({
-        data: {
-          template: "artist-contact-message",
-          message: {
-            to: profile.user.email,
-            replyTo: sender.email,
-          },
-          locals: {
-            artist: serializeProfile(profile),
-            sender: { name: senderName, email: sender.email },
-            message: trimmed,
-            host: process.env.API_DOMAIN,
-            client: (await getClient()).applicationUrl,
-          },
+      await sendMailQueue.add("send-mail", {
+        template: "artist-contact-message",
+        message: {
+          to: profile.user.email,
+          replyTo: sender.email,
         },
-      } as Job);
+        locals: {
+          artist: serializeProfile(profile),
+          sender: { name: senderName, email: sender.email },
+          message: trimmed,
+          host: process.env.API_DOMAIN,
+          client: (await getClient()).applicationUrl,
+        },
+      });
 
       return res
         .status(200)

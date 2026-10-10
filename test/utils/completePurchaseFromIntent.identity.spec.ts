@@ -6,7 +6,7 @@ import { describe, it } from "mocha";
 import sinon from "sinon";
 import Stripe from "stripe";
 
-import * as sendMail from "../../src/jobs/send-mail";
+import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import { completePurchaseFromIntent } from "../../src/utils/stripe";
 import {
   clearTables,
@@ -30,7 +30,7 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
   });
 
   it("recovers the buyer from receipt_email when the metadata carries no identity", async () => {
-    sinon.stub(sendMail, "default").resolves();
+    sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({ email: "artist@test.com" });
     const artist = await createArtist(artistUser.id);
@@ -65,7 +65,7 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
   });
 
   it("prefers the metadata email over receipt_email when both are present", async () => {
-    sinon.stub(sendMail, "default").resolves();
+    sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({ email: "artist@test.com" });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });

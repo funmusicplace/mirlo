@@ -1,8 +1,7 @@
 import prisma from "@mirlo/prisma";
-import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
 
-import sendMail from "../../jobs/send-mail";
+import { sendMailQueue } from "../../queues/send-mail-queue";
 import { processSingleTrackGroup } from "../../serializers/trackGroup";
 import { checkCloudFlareTurnstile } from "../../utils/cloudflare";
 import { AppError } from "../../utils/error";
@@ -51,22 +50,20 @@ export default function () {
         },
       });
 
-      await sendMail({
-        data: {
-          template: "report-album-problem",
-          message: {
-            to: "hi@mirlo.space",
-          },
-          locals: {
-            client: (await getClient()).applicationUrl,
-            email,
-            reason,
-            description,
-            trackGroupId,
-            trackGroup: processSingleTrackGroup(trackGroup),
-          },
+      await sendMailQueue.add("send-mail", {
+        template: "report-album-problem",
+        message: {
+          to: "hi@mirlo.space",
         },
-      } as Job);
+        locals: {
+          client: (await getClient()).applicationUrl,
+          email,
+          reason,
+          description,
+          trackGroupId,
+          trackGroup: processSingleTrackGroup(trackGroup),
+        },
+      });
       return res.json({
         message: "success",
       });

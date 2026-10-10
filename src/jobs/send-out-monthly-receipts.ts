@@ -1,12 +1,10 @@
 import prisma from "@mirlo/prisma";
-import { Job } from "bullmq";
 import { groupBy } from "lodash";
 
 import logger from "../logger";
-import { getClient } from "../utils/getClient";
+import { sendMailQueue } from "../queues/send-mail-queue";
 import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
-
-import sendMail from "./send-mail";
+import { getClient } from "../utils/getClient";
 
 export type AnnounceMonthlyReceiptsEmailType = {
   userSubscriptions: {
@@ -58,21 +56,19 @@ const sendOutMonthlyReceipts = async () => {
             `user ${userId} subscribes to ${userSubscriptions.length} artists`
           );
 
-          return sendMail<AnnounceMonthlyReceiptsEmailType>({
-            data: {
-              template: "announce-monthly-receipts",
-              message: {
-                to: userSubscriptions[0].user.email,
-              },
-              locals: {
-                userSubscriptions: userSubscriptions.map((sub) =>
-                  serializeProfileUserSubscription(sub)
-                ),
-                user: userSubscriptions[0].user,
-                host: process.env.API_DOMAIN || "",
-                client: (await getClient()).applicationUrl,
-              },
+          return sendMailQueue.add("send-mail", {
+            template: "announce-monthly-receipts",
+            message: {
+              to: userSubscriptions[0].user.email,
             },
+            locals: {
+              userSubscriptions: userSubscriptions.map((sub) =>
+                serializeProfileUserSubscription(sub)
+              ),
+              user: userSubscriptions[0].user,
+              host: process.env.API_DOMAIN || "",
+              client: (await getClient()).applicationUrl,
+            } satisfies AnnounceMonthlyReceiptsEmailType,
           });
         }
       })

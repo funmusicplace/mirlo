@@ -4,7 +4,7 @@ import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 import sinon from "sinon";
 
-import * as sendMail from "../../src/jobs/send-mail";
+import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import signup from "../../src/routers/auth/signup";
 import { clearTables, createUser } from "../utils";
 
@@ -42,7 +42,7 @@ describe("auth/signup", () => {
   });
 
   it("signup should create new user and send confirmation email", async () => {
-    const stub = sinon.stub(sendMail, "sendMail");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     await prisma.client.create({
       data: {
@@ -61,11 +61,11 @@ describe("auth/signup", () => {
       },
     });
     assert(createdUser);
-    assert(stub.calledWithMatch({ data: { template: "new-user" } }));
+    assert(stub.calledWithMatch("send-mail", { template: "new-user" }));
   });
 
   it("signup should error if no password supplied", async () => {
-    sinon.stub(sendMail, "sendMail");
+    sinon.stub(sendMailQueue, "add").resolves();
 
     await prisma.client.create({
       data: {
@@ -96,7 +96,7 @@ describe("auth/signup", () => {
   });
 
   it("signup should error if user exists but incomplete", async () => {
-    sinon.stub(sendMail, "sendMail");
+    sinon.stub(sendMailQueue, "add").resolves();
 
     await prisma.client.create({
       data: {
@@ -127,7 +127,7 @@ describe("auth/signup", () => {
   });
 
   it("signup should error if user exists and has password", async () => {
-    sinon.stub(sendMail, "sendMail");
+    sinon.stub(sendMailQueue, "add").resolves();
 
     await prisma.client.create({
       data: {
@@ -166,7 +166,7 @@ describe("auth/signup", () => {
   });
 
   it("signup should flag expired confirmation tokens", async () => {
-    sinon.stub(sendMail, "sendMail");
+    sinon.stub(sendMailQueue, "add").resolves();
 
     await prisma.client.create({
       data: {

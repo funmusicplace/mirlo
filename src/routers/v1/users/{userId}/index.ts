@@ -3,7 +3,6 @@ import { randomUUID } from "crypto";
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import bcrypt from "bcryptjs";
-import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
@@ -11,8 +10,8 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import sendMail from "../../../../jobs/send-mail";
 import { logger } from "../../../../logger";
+import { sendMailQueue } from "../../../../queues/send-mail-queue";
 import { serializeUser } from "../../../../serializers/user";
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
@@ -215,8 +214,8 @@ export default function () {
 
       if (pendingEmailSent && refreshedUser?.pendingEmail) {
         const client = await getClient();
-        sendMail({
-          data: {
+        sendMailQueue
+          .add("send-mail", {
             template: "confirm-email-change",
             message: {
               to: refreshedUser.pendingEmail,
@@ -228,13 +227,13 @@ export default function () {
               clientDomain: client.applicationUrl,
               host: process.env.API_DOMAIN,
             },
-          },
-        } as Job).catch((emailError) => {
-          log.error(
-            "Failed to send email change confirmation email",
-            emailError
-          );
-        });
+          })
+          .catch((emailError) => {
+            log.error(
+              "Failed to send email change confirmation email",
+              emailError
+            );
+          });
       }
       res.json({ result: refreshedUser });
     } catch (e) {

@@ -1,12 +1,11 @@
 import prisma from "@mirlo/prisma";
-import { Job } from "bullmq";
 import { Request, Response } from "express";
 
 import { userAuthenticated } from "../../../../../auth/passport";
-import sendMail from "../../../../../jobs/send-mail";
-import { getClient } from "../../../../../utils/getClient";
-import { omitApPrivateKey } from "../../../../../serializers/utils";
+import { sendMailQueue } from "../../../../../queues/send-mail-queue";
 import { serializeMerchPurchase } from "../../../../../serializers/merchPurchase";
+import { omitApPrivateKey } from "../../../../../serializers/utils";
+import { getClient } from "../../../../../utils/getClient";
 
 export default function () {
   const operations = {
@@ -47,21 +46,19 @@ export default function () {
 
       if (profile) {
         // Send email to artist
-        sendMail({
-          data: {
-            template: "artist-merch-contact-form",
-            message: {
-              to: profile.user.email,
-            },
-            locals: {
-              purchase: serializeMerchPurchase(purchase),
-              artist: omitApPrivateKey(profile),
-              message,
-              host: process.env.API_DOMAIN,
-              client: (await getClient()).applicationUrl,
-            },
+        await sendMailQueue.add("send-mail", {
+          template: "artist-merch-contact-form",
+          message: {
+            to: profile.user.email,
           },
-        } as Job);
+          locals: {
+            purchase: serializeMerchPurchase(purchase),
+            artist: omitApPrivateKey(profile),
+            message,
+            host: process.env.API_DOMAIN,
+            client: (await getClient()).applicationUrl,
+          },
+        });
       }
       return res.status(200).json({
         message: "Message sent to artist successfully",

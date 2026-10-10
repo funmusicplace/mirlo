@@ -3,10 +3,10 @@ dotenv.config();
 import { describe, it } from "mocha";
 import sinon from "sinon";
 
-import * as sendMail from "../../src/jobs/send-mail";
 import sendOutMonthlyIncomeReport, {
   MonthlyIncomeReportEmailType,
 } from "../../src/jobs/send-out-monthy-income-report";
+import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import {
   clearTables,
   createArtist,
@@ -40,7 +40,7 @@ describe("send-out-monthly-income-report", () => {
   });
 
   it("should send an income report to an artist who has sales", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -100,7 +100,7 @@ describe("send-out-monthly-income-report", () => {
     await sendOutMonthlyIncomeReport();
 
     assert.equal(stub.calledOnce, true);
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
     const locals = data0.locals as MonthlyIncomeReportEmailType;
@@ -116,7 +116,7 @@ describe("send-out-monthly-income-report", () => {
   });
 
   it("should send an income report to an artist who has gained a tip", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -165,7 +165,7 @@ describe("send-out-monthly-income-report", () => {
     await sendOutMonthlyIncomeReport();
 
     assert.equal(stub.calledOnce, true);
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
     const locals = data0.locals as MonthlyIncomeReportEmailType;
@@ -178,7 +178,7 @@ describe("send-out-monthly-income-report", () => {
   });
 
   it("should not send an e-mail if sale is from two months ago", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -242,7 +242,7 @@ describe("send-out-monthly-income-report", () => {
   });
 
   it("should not include sales from this current month", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -306,7 +306,7 @@ describe("send-out-monthly-income-report", () => {
   });
 
   it("should not send an income report to an artist who's not had any sales", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -348,7 +348,7 @@ describe("send-out-monthly-income-report", () => {
   });
 
   it("should send an income report to different artists for different sales", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -453,7 +453,7 @@ describe("send-out-monthly-income-report", () => {
     await sendOutMonthlyIncomeReport();
 
     assert.equal(stub.calledTwice, true);
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
     const locals = data0.locals as MonthlyIncomeReportEmailType;
@@ -462,7 +462,7 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals.subscriptionPayments[0].amount, 5);
     assert.equal(locals.subscriptionPayments[0].artist[0]?.id, artist.id);
 
-    const data1 = stub.getCall(1).args[0].data;
+    const data1 = stub.getCall(1).args[1];
     assert.equal(data1.template, "announce-monthly-income-report");
     assert.equal(data1.message.to, "artist2@artist.com");
     const locals2 = data1.locals as MonthlyIncomeReportEmailType;
@@ -473,7 +473,7 @@ describe("send-out-monthly-income-report", () => {
   });
 
   it("should include buyer details and last month's cancellations, excluding tier switches", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -554,7 +554,7 @@ describe("send-out-monthly-income-report", () => {
     await sendOutMonthlyIncomeReport();
 
     assert.equal(stub.calledOnce, true);
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     const locals = data0.locals as MonthlyIncomeReportEmailType;
     assert.equal(locals.subscriptionPayments.length, 1);
     assert.equal(locals.subscriptionPayments[0].user.name, "Fan");
@@ -573,7 +573,7 @@ describe("send-out-monthly-income-report", () => {
   });
 
   it("should send an income report for multiple artists if a user has more than one artist sales", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -656,7 +656,7 @@ describe("send-out-monthly-income-report", () => {
     await sendOutMonthlyIncomeReport();
 
     assert.equal(stub.calledOnce, true);
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     assert.equal(data0.template, "announce-monthly-income-report");
     assert.equal(data0.message.to, "artist@artist.com");
     const locals = data0.locals as MonthlyIncomeReportEmailType;
@@ -672,7 +672,7 @@ describe("send-out-monthly-income-report", () => {
   });
 
   it("should list each transaction once, splitting sales from subscription payments", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -734,7 +734,7 @@ describe("send-out-monthly-income-report", () => {
     await sendOutMonthlyIncomeReport();
 
     assert.equal(stub.calledOnce, true);
-    const locals = stub.getCall(0).args[0].data
+    const locals = stub.getCall(0).args[1]
       .locals as MonthlyIncomeReportEmailType;
     assert.equal(locals.sales.length, 1);
     assert.equal(locals.sales[0].saleTypeLabel, "Album");
@@ -746,7 +746,7 @@ describe("send-out-monthly-income-report", () => {
   });
 
   it("should send a report to an artist whose only news is a cancellation", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -777,7 +777,7 @@ describe("send-out-monthly-income-report", () => {
     await sendOutMonthlyIncomeReport();
 
     assert.equal(stub.calledOnce, true);
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     assert.equal(data0.message.to, "artist@artist.com");
     const locals = data0.locals as MonthlyIncomeReportEmailType;
     assert.equal(locals.sales.length, 0);

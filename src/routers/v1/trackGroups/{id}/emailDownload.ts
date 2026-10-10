@@ -1,11 +1,10 @@
 import { randomUUID } from "crypto";
 
 import prisma from "@mirlo/prisma";
-import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import sendMail from "../../../../jobs/send-mail";
+import { sendMailQueue } from "../../../../queues/send-mail-queue";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import { getClient } from "../../../../utils/getClient";
 import { hasSubscriptionTiers } from "../../../../utils/subscriptionTier";
@@ -74,24 +73,22 @@ export default function () {
           },
         });
 
-        sendMail({
-          data: {
-            template: "album-free-download",
-            message: {
-              to: email,
-            },
-            locals: {
-              trackGroup: processSingleTrackGroup(trackGroup),
-              email,
-              host: process.env.API_DOMAIN,
-              client: (await getClient()).applicationUrl,
-              token: purchase.singleDownloadToken,
-              hasSubscriptionTiers: await hasSubscriptionTiers(
-                trackGroup.profileId
-              ),
-            },
+        await sendMailQueue.add("send-mail", {
+          template: "album-free-download",
+          message: {
+            to: email,
           },
-        } as Job);
+          locals: {
+            trackGroup: processSingleTrackGroup(trackGroup),
+            email,
+            host: process.env.API_DOMAIN,
+            client: (await getClient()).applicationUrl,
+            token: purchase.singleDownloadToken,
+            hasSubscriptionTiers: await hasSubscriptionTiers(
+              trackGroup.profileId
+            ),
+          },
+        });
         res.status(200).json({ message: "success" });
       } else {
         res.status(500).json({
