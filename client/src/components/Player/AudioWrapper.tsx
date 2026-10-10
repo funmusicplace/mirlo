@@ -72,17 +72,27 @@ export const AudioWrapper: React.FC<{
     showBuyModalRef.current = showBuyModal;
   }, [showBuyModal]);
 
+  const hlsRef = React.useRef<Hls | null>(null);
+  const ensureLoading = React.useCallback(() => {
+    const hls = hlsRef.current;
+    if (hls && !hls.loadingEnabled) {
+      hls.startLoad();
+    }
+  }, []);
+
   const onHLSInstance = React.useCallback(
     (hls: Hls) => {
+      hlsRef.current = hls;
       hls.once(Hls.Events.MANIFEST_PARSED, () => {
         if (playingRef.current && !showBuyModalRef.current) {
+          ensureLoading();
           playerRef.current?.play().catch(() => {
             dispatch({ type: "setPlaying", playing: false });
           });
         }
       });
     },
-    [dispatch]
+    [dispatch, ensureLoading]
   );
 
   const onEnded = React.useCallback(async () => {
@@ -153,6 +163,7 @@ export const AudioWrapper: React.FC<{
             }
           } else {
             playerRef.current.playsInline = true;
+            ensureLoading();
             playerRef.current.play().catch(() => {
               dispatch({ type: "setPlaying", playing: false });
             });
