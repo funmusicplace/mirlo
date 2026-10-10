@@ -3,13 +3,10 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-import request from "supertest";
 import prisma from "@mirlo/prisma";
 
 import { clearTables, createSiteSettings, createUser } from "../../../utils";
-
-const baseURL = `${process.env.API_DOMAIN}/v1/`;
-const requestApp = request(baseURL);
+import { requestApp } from "../../utils";
 
 describe("admin/setup/complete", () => {
   beforeEach(async () => {
@@ -80,6 +77,34 @@ describe("admin/setup/complete", () => {
       const row = await prisma.settings.findFirst();
       assert.ok(row?.setupCompletedAt);
       assert.equal(row?.settings.platformPercent, 8);
+    });
+
+    it("should keep the first completion date on later calls", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      const { id } = await createSiteSettings({
+        instanceCustomization: { title: "Nightjar" },
+      });
+      const completedAt = new Date("2026-01-01T00:00:00.000Z");
+      await prisma.settings.update({
+        where: { id },
+        data: { setupCompletedAt: completedAt },
+      });
+
+      const response = await requestApp
+        .post("admin/setup/complete")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.setupStage, "done");
+      const row = await prisma.settings.findFirst();
+      assert.equal(
+        row?.setupCompletedAt?.toISOString(),
+        completedAt.toISOString()
+      );
     });
   });
 });
