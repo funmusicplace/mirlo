@@ -2,9 +2,14 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import logger from "../../../logger";
 import { AppError } from "../../../utils/error";
 import { setCdnUrl } from "../../../utils/images";
-import { setBucketConfig, BucketConfig } from "../../../utils/minio";
+import {
+  setBucketConfig,
+  BucketConfig,
+  ensureAllBucketsExist,
+} from "../../../utils/minio";
 import { clearPageCache } from "../../../utils/pageCache";
 import { getSiteSettings } from "../../../utils/settings";
 import { refreshStripeClient } from "../../../utils/stripe";
@@ -129,6 +134,10 @@ export default function () {
       await refreshStripeClient();
       if (bucketNames !== undefined) {
         setBucketConfig((bucketNames as BucketConfig | null) ?? null);
+        ensureAllBucketsExist().catch((e) => {
+          logger.error("Failed to create storage buckets after settings save");
+          logger.error(e);
+        });
       }
       clearPageCache();
       const refreshedSettings = await getSiteSettings();
