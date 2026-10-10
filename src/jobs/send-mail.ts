@@ -1,5 +1,7 @@
 import path from "path";
 
+import prisma from "@mirlo/prisma";
+import { UnrecoverableError } from "bullmq";
 import Email from "email-templates";
 import nodemailer, { Transporter } from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
@@ -256,6 +258,31 @@ async function getSender(): Promise<{
   }
 }
 
+type RecipientError = Error & {
+  recipient?: string;
+  responseCode?: number;
+  response?: string;
+};
+
+const permanentRecipientErrors = (errors?: RecipientError[]) =>
+  (errors ?? []).filter(
+    (error) => error.recipient && (error.responseCode ?? 0) >= 500
+  );
+
+export const recordBouncedRecipients = async (errors: RecipientError[]) => {
+  await Promise.all(
+    errors.map((error) =>
+      prisma.user.updateMany({
+        where: { email: error.recipient },
+        data: {
+          emailBouncedAt: new Date(),
+          emailBounceReason: error.response ?? error.message,
+        },
+      })
+    )
+  );
+};
+
 export const sendMail = async <T>(job: {
   data: {
     template: string;
@@ -303,11 +330,18 @@ export const sendMail = async <T>(job: {
       process.env.MAILHOG_PORT ||
       process.env.SEND_EMAILS_IN_DEV === "true"
     ) {
-      await email.send({
+      const info = await email.send({
         template: job.data.template,
         message,
         locals,
       });
+      const rejected = permanentRecipientErrors(info?.rejectedErrors);
+      if (rejected.length) {
+        logger.warn(
+          `sendMail: ${rejected.length} recipient(s) rejected for ${job.data.template}`
+        );
+        await recordBouncedRecipients(rejected);
+      }
     } else {
       // If there was a problem with mailhog, print to logs
       await email.render(job.data.template + "/html", locals).then(logger.info);
@@ -318,6 +352,13 @@ export const sendMail = async <T>(job: {
     return Promise.resolve({ fromEmail });
   } catch (err) {
     logger.error("MirloSendmailError", err);
+    const rejected = permanentRecipientErrors(
+      (err as { rejectedErrors?: RecipientError[] }).rejectedErrors
+    );
+    if (rejected.length) {
+      await recordBouncedRecipients(rejected);
+      throw new UnrecoverableError((err as Error).message);
+    }
     throw err;
   }
 };

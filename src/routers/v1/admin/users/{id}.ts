@@ -106,6 +106,8 @@ export default function () {
           },
           emailConfirmationToken: true,
           disabledAt: true,
+          emailBouncedAt: true,
+          emailBounceReason: true,
           trustLevel: true,
           spamStrikes: true,
           currency: true,
