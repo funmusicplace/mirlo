@@ -732,6 +732,18 @@ export const completePurchase = async (
     return;
   }
 
+  if (payment?.id) {
+    const existing = await prisma.userTransaction.findFirst({
+      where: { stripeId: payment.id, paymentStatus: "COMPLETED" },
+    });
+    if (existing) {
+      logger.info(
+        `completePurchase: payment ${payment.id} already recorded as transaction ${existing.id}, skipping`
+      );
+      return existing;
+    }
+  }
+
   const transaction = await recordCompletedTransaction(userId, payment);
   const user = await prisma.user.findFirst({ where: { id: userId } });
   const resolvedProfileId = profileId ?? Number(payment?.metadata.artistId);
@@ -896,7 +908,6 @@ export const handleFundraiserPledge = async (
   pledge: FundraiserPledge & {
     fundraiser: Fundraiser & { trackGroups: TrackGroup[] };
   },
-  stripeId: string,
   currency: string
 ) => {
   const transaction = await prisma.userTransaction.create({
@@ -906,13 +917,14 @@ export const handleFundraiserPledge = async (
       currency,
       createdAt: new Date(),
       paymentStatus: "PENDING",
-      stripeId,
+      associatedPledge: { connect: { id: pledge.id } },
     },
   });
 
   logger.info(
-    `Updated pledge ${pledge.id} as paid and created transaction ${transaction.id}`
+    `Created transaction ${transaction.id} for charging pledge ${pledge.id}`
   );
+  return transaction;
 };
 
 export const handleFundraiserPledgePaymentSuccess = async (
@@ -937,6 +949,13 @@ export const handleFundraiserPledgePaymentSuccess = async (
 
   if (transaction.associatedPledge === null) {
     console.error(`Transaction ${transactionId} has no associated pledge`);
+    return;
+  }
+
+  if (transaction.paymentStatus === "COMPLETED") {
+    logger.info(
+      `handleFundraiserPledgePaymentSuccess: transaction ${transactionId} already completed, skipping`
+    );
     return;
   }
 

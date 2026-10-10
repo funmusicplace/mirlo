@@ -121,4 +121,32 @@ describe("completePurchase", () => {
     });
     assert.equal(purchase?.message, "Love this record");
   });
+
+  it("records a payment only once when the webhook is delivered twice", async () => {
+    sinon.stub(sendMail, "default").resolves();
+    const { user: artistUser } = await createUser({ email: "artist@test.com" });
+    const { user: buyer } = await createUser({ email: "buyer@test.com" });
+    const artist = await createArtist(artistUser.id);
+    const merch = await createMerch(artist.id, { quantityRemaining: 5 });
+    const items = [
+      { type: "merch" as const, id: merch.id, quantity: 1, amount: 800 },
+    ];
+    const payment = fakePayment({ id: "pi_delivered_twice", amount: 800 });
+
+    await completePurchase(buyer.id, items, payment);
+    await completePurchase(buyer.id, items, payment);
+
+    const transactions = await prisma.userTransaction.findMany({
+      where: { stripeId: "pi_delivered_twice" },
+      include: { merchPurchases: true },
+    });
+    assert.equal(transactions.length, 1, "one transaction");
+    assert.equal(
+      transactions[0].merchPurchases.length,
+      1,
+      "one merch purchase"
+    );
+    const updated = await prisma.merch.findUnique({ where: { id: merch.id } });
+    assert.equal(updated?.quantityRemaining, 4, "stock decremented once");
+  });
 });
