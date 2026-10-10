@@ -4,6 +4,7 @@ import PlatformPolicySection from "components/Admin/settings/PlatformPolicySecti
 import PoliciesSection from "components/Admin/settings/PoliciesSection";
 import { FormSettings } from "components/Admin/settings/settingsForm";
 import useAdminSettingsForm from "components/Admin/settings/useAdminSettingsForm";
+import Box from "components/common/Box";
 import Button from "components/common/Button";
 import { SideNavLayout } from "components/common/SideNav";
 import WidthContainer from "components/common/WidthContainer";
@@ -14,15 +15,20 @@ import SetupGuideProgress from "components/Setup/guide/SetupGuideProgress";
 import { markSetupGuideSeen } from "components/Setup/guide/setupGuideSeen";
 import SetupGuideStep from "components/Setup/guide/SetupGuideStep";
 import SetupGuideSummary from "components/Setup/guide/SetupGuideSummary";
+import { countChecks } from "components/Setup/status/SetupChecklist";
+import SystemCheckStep from "components/Setup/status/SystemCheckStep";
+import { useSetupStatusQuery } from "queries/admin";
 import { useCompleteInstanceSetupMutation } from "queries/instanceSettings";
 import React from "react";
 import { FormProvider } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
+import { useConfirm } from "utils/useConfirm";
 
 const STEPS = [
   { key: "welcome", labelKey: "steps.welcome" },
+  { key: "systemCheck", labelKey: "steps.systemCheck" },
   { key: "identity", labelKey: "steps.identity" },
   { key: "email", labelKey: "steps.email" },
   { key: "platformPolicy", labelKey: "steps.platformPolicy" },
@@ -55,34 +61,48 @@ const STEP_FIELDS: Record<SavedStepKey, (keyof FormSettings)[]> = {
 const isSavedStep = (key: StepKey): key is SavedStepKey =>
   (SAVED_STEP_KEYS as readonly string[]).includes(key);
 
-const statusesFromSettings = (
-  settings: FormSettings
-): Partial<Record<StepKey, SetupStepStatus>> => ({
-  identity: settings.instanceCustomization?.title?.trim() ? "done" : "todo",
-  email: settings.emailProvider?.provider ? "done" : "todo",
-  platformPolicy:
-    settings.terms?.trim() || settings.contentPolicy?.trim() ? "done" : "todo",
-});
-
 const SetupGuide: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "setup" });
   const navigate = useNavigate();
   const snackbar = useSnackbar();
+  const { ask } = useConfirm();
   const { methods, isLoaded, hasLoadError, saveSettings } =
     useAdminSettingsForm();
   const { mutateAsync: completeSetup, isPending: isCompleting } =
     useCompleteInstanceSetupMutation();
+  const {
+    data: status,
+    isError: hasStatusError,
+    isFetching: isCheckingSystem,
+    refetch: rerunChecks,
+  } = useSetupStatusQuery();
   const [activeKey, setActiveKey] = React.useState<StepKey>("welcome");
   const [statuses, setStatuses] = React.useState<
     Partial<Record<StepKey, SetupStepStatus>>
   >({});
   const [isSaving, setIsSaving] = React.useState(false);
 
+  const { isDirty } = methods.formState;
+
   React.useEffect(() => {
-    if (isLoaded) {
-      setStatuses(statusesFromSettings(methods.getValues()));
+    if (status) {
+      setStatuses((current) => {
+        const next: Partial<Record<StepKey, SetupStepStatus>> = {
+          ...current,
+          systemCheck:
+            countChecks(status.checks, "error") === 0 ? "done" : "todo",
+        };
+        for (const key of SAVED_STEP_KEYS) {
+          next[key] = status.steps[key]
+            ? "done"
+            : current[key] === "skipped"
+              ? "skipped"
+              : "todo";
+        }
+        return next;
+      });
     }
-  }, [isLoaded, methods]);
+  }, [status]);
 
   React.useEffect(() => {
     if (hasLoadError) {
@@ -101,8 +121,8 @@ const SetupGuide: React.FC = () => {
 
   const onSubmit = React.useCallback(
     async (data: FormSettings) => {
-      if (activeKey === "welcome") {
-        goTo(1);
+      if (activeKey === "welcome" || activeKey === "systemCheck") {
+        goTo(activeIndex + 1);
         return;
       }
       if (activeKey === "done") {
@@ -111,24 +131,13 @@ const SetupGuide: React.FC = () => {
           navigate(DASHBOARD_PATH);
         } catch (e) {
           console.error(e);
-          snackbar(t("saveError"), { type: "warning" });
+          snackbar(t("completeError"), { type: "warning" });
         }
         return;
       }
       setIsSaving(true);
       try {
         await saveSettings(data);
-        setStatuses((current) => {
-          const derived = statusesFromSettings(data);
-          const next = { ...current };
-          for (const key of SAVED_STEP_KEYS) {
-            next[key] =
-              derived[key] === "todo" && current[key] === "skipped"
-                ? "skipped"
-                : derived[key];
-          }
-          return next;
-        });
         goTo(activeIndex + 1);
       } catch (e) {
         console.error(e);
@@ -170,7 +179,10 @@ const SetupGuide: React.FC = () => {
     goTo(activeIndex + 1);
   };
 
-  const finishLater = () => {
+  const finishLater = async () => {
+    if (isDirty && !(await ask(t("unsavedChangesConfirm")))) {
+      return;
+    }
     markSetupGuideSeen();
     navigate(DASHBOARD_PATH);
   };
@@ -210,6 +222,23 @@ const SetupGuide: React.FC = () => {
                 submitLabel={t("start")}
               >
                 <SetupGuideSummary steps={SETTING_STEPS} statuses={statuses} />
+              </SetupGuideStep>
+            )}
+
+            {activeKey === "systemCheck" && (
+              <SetupGuideStep
+                kicker={stepKicker}
+                title={t("steps.systemCheck")}
+                description={t("systemCheck.description")}
+                onBack={() => goTo(activeIndex - 1)}
+                submitLabel={t("continue")}
+              >
+                <SystemCheckStep
+                  status={status}
+                  hasError={hasStatusError}
+                  isChecking={isCheckingSystem}
+                  onRerun={() => rerunChecks()}
+                />
               </SetupGuideStep>
             )}
 
@@ -266,8 +295,10 @@ const SetupGuide: React.FC = () => {
                 description={t("done.description")}
                 onBack={() => goTo(activeIndex - 1)}
                 isSaving={isCompleting}
+                canSubmit={isLoaded}
                 submitLabel={t("goToDashboard")}
               >
+                {isDirty && <Box variant="warning">{t("unsavedChanges")}</Box>}
                 <SetupGuideSummary steps={SETTING_STEPS} statuses={statuses} />
               </SetupGuideStep>
             )}

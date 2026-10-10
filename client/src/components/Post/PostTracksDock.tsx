@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 import { useGlobalStateContext } from "state/GlobalState";
-import { safeLocalStorage } from "utils/safeLocalStorage";
+import { safeLocalStorage } from "utils/safeStorage";
 import { isTrackOwnedOrPreview } from "utils/tracks";
 
 const COLLAPSED_KEY = (postId: number, isMobile: boolean) =>

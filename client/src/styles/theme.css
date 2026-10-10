@@ -45,6 +45,7 @@ html {
 
   --mi-warning-color: #f2897a;
   --mi-warning-background-color: var(--mi-warning-color);
+  --mi-warning-text-color: var(--mi-black);
 }
 
 html,

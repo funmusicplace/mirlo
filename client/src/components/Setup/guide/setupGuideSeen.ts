@@ -1,4 +1,4 @@
-import { safeLocalStorage } from "utils/safeLocalStorage";
+import { safeLocalStorage } from "utils/safeStorage";
 
 const SETUP_GUIDE_SEEN_KEY = "mirlo-setup-guide-seen";
 

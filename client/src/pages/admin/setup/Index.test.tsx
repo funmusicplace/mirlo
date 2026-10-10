@@ -2,6 +2,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { wasSetupGuideSeen } from "components/Setup/guide/setupGuideSeen";
+import {
+  HEALTHY_SETUP_STATUS,
+  TROUBLED_SETUP_STATUS,
+} from "components/Setup/status/setupStatusMocks";
 import * as fetchWrapper from "queries/fetch/fetchWrapper";
 import React from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
@@ -51,6 +55,11 @@ vi.mock("state/SnackbarContext", () => ({
   useSnackbar: () => snackbar,
 }));
 
+const ask = vi.fn();
+vi.mock("utils/useConfirm", () => ({
+  useConfirm: () => ({ ask }),
+}));
+
 import SetupGuide from "./Index";
 
 const storedSettings = (overrides: object = {}) => ({
@@ -86,18 +95,34 @@ function renderGuide() {
   );
 }
 
+const DEFAULT_SETUP_STATUS = {
+  ...HEALTHY_SETUP_STATUS,
+  steps: { identity: true, email: false, platformPolicy: false },
+};
+
+let setupStatus = DEFAULT_SETUP_STATUS;
+
+const mockSettings = (settings: object) => {
+  vi.mocked(api.get).mockImplementation((async (url: string) =>
+    url.includes("setup/status") ? { result: setupStatus } : settings) as any);
+};
+
 const startGuide = async () => {
   await screen.findByText("welcome.title");
   await waitFor(() => expect(api.get).toHaveBeenCalled());
   await userEvent.click(screen.getByRole("button", { name: "start" }));
+  await screen.findByText("systemCheck.description");
+  await userEvent.click(screen.getByRole("button", { name: "continue" }));
 };
 
 describe("SetupGuide", () => {
   beforeEach(() => {
     localStorage.clear();
     snackbar.mockClear();
+    ask.mockReset();
+    setupStatus = DEFAULT_SETUP_STATUS;
     vi.mocked(api.get).mockReset();
-    vi.mocked(api.get).mockResolvedValue(storedSettings() as any);
+    mockSettings(storedSettings());
     vi.mocked(api.post).mockReset();
     vi.mocked(api.post).mockImplementation(async (_endpoint, body) => ({
       result: body,
@@ -113,24 +138,78 @@ describe("SetupGuide", () => {
     expect(wasSetupGuideSeen()).toBe(false);
   });
 
-  test("derives the step states from the stored settings", async () => {
-    vi.mocked(api.get).mockResolvedValue(
-      storedSettings({
-        terms: "Some terms",
-        settings: {
-          platformPercent: 7,
-          instanceCustomization: { title: "Nightjar" },
-          emailProvider: { provider: "smtp" },
-        },
-      }) as any
-    );
+  test("derives the step states from the server status", async () => {
+    setupStatus = HEALTHY_SETUP_STATUS;
     renderGuide();
 
     const nav = await screen.findByRole("navigation", {
       name: "guideNavLabel",
     });
     await waitFor(() =>
-      expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(3)
+      expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(4)
+    );
+  });
+
+  test("shows the server checks and reruns them on demand", async () => {
+    renderGuide();
+    await screen.findByText("welcome.title");
+    await userEvent.click(screen.getByRole("button", { name: "start" }));
+
+    expect(await screen.findByText("database.label")).toBeInTheDocument();
+    const statusCalls = () =>
+      vi
+        .mocked(api.get)
+        .mock.calls.filter(([url]) => String(url).includes("setup/status"))
+        .length;
+    const before = statusCalls();
+    await userEvent.click(
+      screen.getByRole("button", { name: "systemCheck.rerun" })
+    );
+    await waitFor(() => expect(statusCalls()).toBe(before + 1));
+  });
+
+  test("says so when the checks cannot run", async () => {
+    vi.mocked(api.get).mockImplementation((async (url: string) => {
+      if (url.includes("setup/status")) {
+        throw new Error("Network error");
+      }
+      return storedSettings();
+    }) as any);
+    renderGuide();
+    await screen.findByText("welcome.title");
+    await userEvent.click(screen.getByRole("button", { name: "start" }));
+
+    expect(await screen.findByText("systemCheck.error")).toBeInTheDocument();
+    expect(screen.queryByText("systemCheck.loading")).not.toBeInTheDocument();
+  });
+
+  test("does not let a step be skipped before the settings are loaded", async () => {
+    vi.mocked(api.get).mockImplementation((async (url: string) =>
+      url.includes("setup/status")
+        ? { result: setupStatus }
+        : new Promise(() => {})) as any);
+    renderGuide();
+    await screen.findByText("welcome.title");
+    await userEvent.click(screen.getByRole("button", { name: "start" }));
+    await userEvent.click(screen.getByRole("button", { name: "continue" }));
+
+    expect(screen.getByRole("button", { name: "skipForNow" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "saveAndContinue" })
+    ).toBeDisabled();
+  });
+
+  test("does not count the system check as done while a check fails", async () => {
+    setupStatus = TROUBLED_SETUP_STATUS;
+    renderGuide();
+
+    const nav = await screen.findByRole("navigation", {
+      name: "guideNavLabel",
+    });
+    await screen.findByText("welcome.title");
+    await waitFor(() => expect(api.get).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(1)
     );
   });
 
@@ -158,6 +237,48 @@ describe("SetupGuide", () => {
     expect(await screen.findByText("email.description")).toBeInTheDocument();
   });
 
+  test("marks a step as to do again when it is saved empty", async () => {
+    setupStatus = {
+      ...HEALTHY_SETUP_STATUS,
+      steps: { identity: true, email: true, platformPolicy: false },
+    };
+    mockSettings(
+      storedSettings({
+        settings: {
+          platformPercent: 7,
+          instanceCustomization: { title: "Nightjar" },
+          emailProvider: { provider: "smtp" },
+        },
+      })
+    );
+    vi.mocked(api.post).mockImplementation((async (
+      _endpoint: string,
+      body: object
+    ) => {
+      setupStatus = DEFAULT_SETUP_STATUS;
+      return { result: body };
+    }) as any);
+    renderGuide();
+    await startGuide();
+    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
+
+    const nav = screen.getByRole("navigation", { name: "guideNavLabel" });
+    await waitFor(() =>
+      expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(3)
+    );
+    await userEvent.selectOptions(
+      screen.getByLabelText("emailProviderLabel"),
+      ""
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "saveAndContinue" })
+    );
+
+    await waitFor(() =>
+      expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(2)
+    );
+  });
+
   test("leaves a step to do when it is saved with nothing filled in", async () => {
     renderGuide();
     await startGuide();
@@ -172,7 +293,7 @@ describe("SetupGuide", () => {
       await screen.findByText("platformPolicy.description")
     ).toBeInTheDocument();
     const nav = screen.getByRole("navigation", { name: "guideNavLabel" });
-    expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(1);
+    expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(2);
     expect(nav).not.toHaveTextContent("stepSkipped");
   });
 
@@ -186,10 +307,14 @@ describe("SetupGuide", () => {
   });
 
   test("skips a step without saving", async () => {
-    vi.mocked(api.get).mockResolvedValue(
+    setupStatus = {
+      ...DEFAULT_SETUP_STATUS,
+      steps: { ...DEFAULT_SETUP_STATUS.steps, identity: false },
+    };
+    mockSettings(
       storedSettings({
         settings: { platformPercent: 7, instanceCustomization: {} },
-      }) as any
+      })
     );
     renderGuide();
     await startGuide();
@@ -286,7 +411,7 @@ describe("SetupGuide", () => {
 
     const nav = screen.getByRole("navigation", { name: "guideNavLabel" });
     expect(nav).not.toHaveTextContent("stepSkipped");
-    expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(1);
+    expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(2);
   });
 
   test("warns and stays when saving fails", async () => {
@@ -322,6 +447,36 @@ describe("SetupGuide", () => {
         undefined
       );
     });
+    expect(await screen.findByText("dashboard")).toBeInTheDocument();
+  });
+
+  test("warns on the last step about changes that were not saved", async () => {
+    renderGuide();
+    await startGuide();
+
+    await userEvent.type(screen.getByLabelText("instanceName"), " Records");
+    await userEvent.click(screen.getByRole("button", { name: "steps.done" }));
+
+    expect(await screen.findByText("unsavedChanges")).toBeInTheDocument();
+    expect(api.post).not.toHaveBeenCalled();
+  });
+
+  test("asks before finishing later with changes that were not saved", async () => {
+    ask.mockResolvedValueOnce(false);
+    renderGuide();
+    await startGuide();
+
+    await userEvent.type(screen.getByLabelText("instanceName"), " Records");
+    await userEvent.click(screen.getByRole("button", { name: "finishLater" }));
+
+    await waitFor(() =>
+      expect(ask).toHaveBeenCalledWith("unsavedChangesConfirm")
+    );
+    expect(screen.getByText("identity.description")).toBeInTheDocument();
+    expect(wasSetupGuideSeen()).toBe(false);
+
+    ask.mockResolvedValueOnce(true);
+    await userEvent.click(screen.getByRole("button", { name: "finishLater" }));
     expect(await screen.findByText("dashboard")).toBeInTheDocument();
   });
 

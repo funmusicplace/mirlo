@@ -12,9 +12,25 @@ import {
   DEFAULT_INSTANCE_NAME,
   getSiteSettings,
   resolveInstanceName,
+  SettingsType,
 } from "../utils/settings";
 
 const viewsDir = path.join(__dirname, "../emails");
+
+export const isEmailTransportConfigured = (settings: SettingsType): boolean => {
+  const emailSettings = settings.settings?.emailProvider;
+  return Boolean(
+    (emailSettings?.provider === "mailgun" &&
+      emailSettings.mailgun?.apiKey &&
+      emailSettings.mailgun?.domain) ||
+    (emailSettings?.provider === "sendgrid" &&
+      emailSettings.sendgrid?.apiKey) ||
+    (emailSettings?.provider === "postmark" &&
+      emailSettings.postmark?.apiKey) ||
+    (emailSettings?.provider === "smtp" && emailSettings.smtp?.host) ||
+    process.env.SENDGRID_API_KEY
+  );
+};
 
 /**
  * Creates a nodemailer transport based on site settings

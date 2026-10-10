@@ -9,6 +9,10 @@ vi.mock("services/api", () => ({
   default: { get: vi.fn() },
 }));
 
+vi.mock("components/Setup/status/SetupStatusCard", () => ({
+  default: () => null,
+}));
+
 // jsdom reports a 0x0 layout, so recharts' <ResponsiveContainer> never
 // renders its children. Stand in for the pieces Index.tsx uses so we can
 // assert on the data/props each chart is wired up with instead.

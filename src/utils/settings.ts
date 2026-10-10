@@ -31,13 +31,14 @@ export const getInstanceName = async (): Promise<string> =>
 
 export type SetupStage = "welcome" | "guide" | "done";
 
+export const hasInstanceName = (settings: SettingsType): boolean =>
+  Boolean(settings.settings?.instanceCustomization?.title?.trim());
+
 export const resolveSetupStage = (settings: SettingsType): SetupStage => {
   if (settings.setupCompletedAt) {
     return "done";
   }
-  return settings.settings?.instanceCustomization?.title?.trim()
-    ? "guide"
-    : "welcome";
+  return hasInstanceName(settings) ? "guide" : "welcome";
 };
 
 export const getSiteSettings = async (): Promise<SettingsType> => {

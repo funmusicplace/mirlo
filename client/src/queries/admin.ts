@@ -14,6 +14,7 @@ const QUERY_KEY_ADMIN_STATS = "admin-stats";
 const QUERY_KEY_ADMIN_TOP_ACCOUNTS = "admin-top-accounts";
 const QUERY_KEY_ADMIN_ARTIST = "admin-artist";
 const QUERY_KEY_ADMIN_CONTENT_FLAGS = "admin-content-flags";
+const QUERY_KEY_ADMIN_SETUP_STATUS = "admin-setup-status";
 
 /** Bucket size for the admin dashboard's time series. */
 export type StatsGranularity = "week" | "month";
@@ -465,3 +466,50 @@ export const queryAdminSettings = () =>
     queryFn: async () =>
       (await api.get<Partial<SettingsFromAPI>>("admin/settings/")).result,
   });
+
+export type SetupCheckStatus = "ok" | "warning" | "error";
+
+export interface SetupStatus {
+  checks: {
+    database: { status: SetupCheckStatus; migrations: number | null };
+    redis: { status: SetupCheckStatus };
+    worker: { status: SetupCheckStatus };
+    scheduledTasks: {
+      status: SetupCheckStatus;
+      enabled: boolean;
+      tasks: {
+        name: string;
+        nextRunAt: string | null;
+        lastCompletedAt: string | null;
+        lastFailedAt: string | null;
+      }[];
+    };
+    publicAddress: {
+      status: SetupCheckStatus;
+      apiDomainConfigured: boolean;
+      clientRegistered: boolean;
+    };
+    storage: {
+      status: SetupCheckStatus;
+      backend: "minio" | "backblaze";
+      missingBuckets: number;
+    };
+  };
+  steps: {
+    identity: boolean;
+    email: boolean;
+    platformPolicy: boolean;
+  };
+}
+
+export const querySetupStatus = () =>
+  queryOptions({
+    queryKey: [QUERY_KEY_ADMIN_SETUP_STATUS],
+    queryFn: async () => {
+      const { result } = await api.get<SetupStatus>("admin/setup/status");
+      return result;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+export const useSetupStatusQuery = () => useQuery(querySetupStatus());

@@ -26,12 +26,13 @@ export default function () {
             "The instance needs a name before its setup can be completed",
         });
       }
-      const { id } = settings;
-      await prisma.settings.update({
-        where: { id },
-        data: { setupCompletedAt: new Date() },
-      });
-      clearPageCache();
+      if (!settings.setupCompletedAt) {
+        await prisma.settings.update({
+          where: { id: settings.id },
+          data: { setupCompletedAt: new Date() },
+        });
+        clearPageCache();
+      }
 
       return res.status(200).json({
         result: serializeInstanceSettings(
@@ -47,7 +48,7 @@ export default function () {
   POST.apiDoc = {
     summary: "Marks the instance setup as completed",
     description:
-      "Records when the setup guide was finished. The public instance settings then report the done stage. Returns them. Refused while the instance has no name, since the first launch screens would never show again.",
+      "Records when the setup guide was finished, once: later calls keep the first date. The public instance settings then report the done stage. Returns them. Refused while the instance has no name, since the first launch screens would never show again.",
     responses: {
       200: {
         description: "The public instance settings after the update",
