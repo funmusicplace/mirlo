@@ -2,24 +2,20 @@ import { promises as fsPromises } from "fs";
 
 import logger from "../../logger";
 import { startCleaningUpOldFiles } from "../../queues/clean-up-old-files-queue";
-import {
-  removeObjectsFromBucket,
-  trackGroupFormatBucket,
-  getDownloadsBucket,
-} from "../../utils/minio";
+import { removeAllZips, removeZips, zipRootPath } from "../../utils/minio";
 
 const cleanUpFiles = async (incomingFolder: string) => {
   logger.info("cleanUpFiles");
-  const effectiveTrackGroupBucket = getDownloadsBucket(trackGroupFormatBucket);
-  if (incomingFolder.startsWith(effectiveTrackGroupBucket)) {
-    const split = incomingFolder.split(/\/(.*)/);
-    const bucket = split[0];
-    const albumId = split[1];
-    logger.info(
-      `cleaning up ${albumId ?? "all files"} in the ${trackGroupFormatBucket} container`
-    );
+  const zipRoot = zipRootPath("trackGroup");
+  if (incomingFolder === zipRoot || incomingFolder.startsWith(`${zipRoot}/`)) {
+    const albumId = incomingFolder.slice(zipRoot.length + 1);
+    logger.info(`cleaning up ${albumId || "all files"} in ${zipRoot}`);
 
-    await removeBucket(bucket, albumId);
+    if (albumId) {
+      await removeZips("trackGroup", Number(albumId));
+    } else {
+      await removeAllZips("trackGroup");
+    }
     return {
       deleted: incomingFolder,
     };
@@ -57,11 +53,6 @@ const cleanUpFiles = async (incomingFolder: string) => {
   return {
     deleted: counter,
   };
-};
-
-const removeBucket = async (bucketName: string, prefix: string) => {
-  logger.info(`Removing ${prefix ?? "all objects"} from ${bucketName}`);
-  await removeObjectsFromBucket(bucketName, prefix ?? "");
 };
 
 export default cleanUpFiles;
