@@ -8,7 +8,7 @@ import { processSingleTrackGroup } from "../serializers/trackGroup";
 import { getClient } from "../utils/getClient";
 import { registerPurchase } from "../utils/trackGroup";
 
-import { sendMailQueue } from "./send-mail-queue";
+import { BULK_MAIL_PRIORITY, sendMailQueue } from "./send-mail-queue";
 
 export type AutomaticallyReceivedAlbumEmailType = {
   trackGroup: {
@@ -150,20 +150,24 @@ export async function autoPurchaseNewAlbumsProcessor(job: {
     });
 
     // Queue the notification email (outside transaction to avoid holding locks)
-    await sendMailQueue.add("send-mail", {
-      template: "automatically-received-album",
-      message: {
-        to: subscription.user.email,
+    await sendMailQueue.add(
+      "send-mail",
+      {
+        template: "automatically-received-album",
+        message: {
+          to: subscription.user.email,
+        },
+        locals: {
+          trackGroup: processSingleTrackGroup(album),
+          artist:
+            serializeProfileUserSubscription(subscription)
+              .artistSubscriptionTier.artist,
+          host: process.env.API_DOMAIN,
+          client: (await getClient()).applicationUrl,
+        } as AutomaticallyReceivedAlbumEmailType,
       },
-      locals: {
-        trackGroup: processSingleTrackGroup(album),
-        artist:
-          serializeProfileUserSubscription(subscription).artistSubscriptionTier
-            .artist,
-        host: process.env.API_DOMAIN,
-        client: (await getClient()).applicationUrl,
-      } as AutomaticallyReceivedAlbumEmailType,
-    });
+      { priority: BULK_MAIL_PRIORITY }
+    );
 
     logger.info(
       `autoPurchaseNewAlbums: successfully purchased album ${album.id} for user ${subscription.userId}`

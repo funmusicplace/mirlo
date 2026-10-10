@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { groupBy } from "lodash";
 
 import logger from "../logger";
-import { sendMailQueue } from "../queues/send-mail-queue";
+import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
 import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
 import { getClient } from "../utils/getClient";
 
@@ -39,7 +39,7 @@ const sendOutMonthlyReceipts = async () => {
             profile: true,
           },
         },
-        user: true,
+        user: { select: { id: true, name: true, email: true } },
       },
       orderBy: {
         userId: "desc",
@@ -56,20 +56,24 @@ const sendOutMonthlyReceipts = async () => {
             `user ${userId} subscribes to ${userSubscriptions.length} artists`
           );
 
-          return sendMailQueue.add("send-mail", {
-            template: "announce-monthly-receipts",
-            message: {
-              to: userSubscriptions[0].user.email,
+          return sendMailQueue.add(
+            "send-mail",
+            {
+              template: "announce-monthly-receipts",
+              message: {
+                to: userSubscriptions[0].user.email,
+              },
+              locals: {
+                userSubscriptions: userSubscriptions.map((sub) =>
+                  serializeProfileUserSubscription(sub)
+                ),
+                user: userSubscriptions[0].user,
+                host: process.env.API_DOMAIN || "",
+                client: (await getClient()).applicationUrl,
+              } satisfies AnnounceMonthlyReceiptsEmailType,
             },
-            locals: {
-              userSubscriptions: userSubscriptions.map((sub) =>
-                serializeProfileUserSubscription(sub)
-              ),
-              user: userSubscriptions[0].user,
-              host: process.env.API_DOMAIN || "",
-              client: (await getClient()).applicationUrl,
-            } satisfies AnnounceMonthlyReceiptsEmailType,
-          });
+            { priority: BULK_MAIL_PRIORITY }
+          );
         }
       })
     );

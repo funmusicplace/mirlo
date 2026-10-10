@@ -1,9 +1,9 @@
 import prisma from "@mirlo/prisma";
 
 import logger from "../logger";
-import { sendMailQueue } from "../queues/send-mail-queue";
-import { getClient } from "../utils/getClient";
+import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
 import { serializeUser } from "../serializers/user";
+import { getClient } from "../utils/getClient";
 
 const sendOnboardingEmail = async () => {
   const date = new Date();
@@ -53,21 +53,25 @@ const sendOnboardingEmail = async () => {
             user.stripeAccountId === null &&
             !user.onboardingEmailsSent.includes("payment-processor")
           ) {
-            await sendMailQueue.add("send-mail", {
-              template: "admin-announcement",
-              message: {
-                to: user.email,
-              },
-              locals: {
-                user: serializeUser(user),
-                content: `<p>Hi ${user.name || user.email},</p>
+            await sendMailQueue.add(
+              "send-mail",
+              {
+                template: "admin-announcement",
+                message: {
+                  to: user.email,
+                },
+                locals: {
+                  user: serializeUser(user),
+                  content: `<p>Hi ${user.name || user.email},</p>
                 <p>We noticed that you have created an artist profile on our platform but haven't set up a payment processor yet. To start receiving payments for your music, please set up your payment processor as soon as possible.</p>
                 <p>If you have any questions or need assistance, feel free to reach out to us at hi@mirlo.space.</p>`,
 
-                host: process.env.API_DOMAIN,
-                client: (await getClient()).applicationUrl,
+                  host: process.env.API_DOMAIN,
+                  client: (await getClient()).applicationUrl,
+                },
               },
-            });
+              { priority: BULK_MAIL_PRIORITY }
+            );
             await prisma.user.update({
               where: { id: user.id },
               data: {

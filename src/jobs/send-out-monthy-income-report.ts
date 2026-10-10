@@ -3,7 +3,7 @@ import { SubscriptionDeleteReason } from "@mirlo/prisma/client";
 import { groupBy, keyBy, uniq } from "lodash";
 
 import logger from "../logger";
-import { sendMailQueue } from "../queues/send-mail-queue";
+import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
 import { findSales } from "../routers/v1/artists/{id}/supporters";
 import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
 import { serializeUserTransaction } from "../serializers/userTransaction";
@@ -182,32 +182,37 @@ const sendOutMonthlyIncomeReport = async () => {
       // Ensure user.name is not null
       const user = { ...artistUser, name: artistUser.name || "" };
       try {
-        await sendMailQueue.add("send-mail", {
-          template: "announce-monthly-income-report",
-          message: {
-            to: user.email,
+        await sendMailQueue.add(
+          "send-mail",
+          {
+            template: "announce-monthly-income-report",
+            message: {
+              to: user.email,
+            },
+            locals: {
+              user,
+              sales: oneOffSales.map((sale) => ({
+                ...serializeSale(sale),
+                saleTypeLabel: saleTypeLabel(sale),
+              })),
+              subscriptionPayments: subscriptionPayments.map(serializeSale),
+              cancelledSubscriptions: cancellations.map((subscription) =>
+                serializeProfileUserSubscription(subscription)
+              ),
+              salesTotal,
+              subscriptionTotal,
+              totalIncome: salesTotal + subscriptionTotal,
+              currency:
+                userSales[0]?.currency ||
+                cancellations[0]?.profileSubscriptionTier.profile.user
+                  .currency ||
+                "usd",
+              host: process.env.API_DOMAIN || "",
+              client: clientUrl,
+            } satisfies MonthlyIncomeReportEmailType,
           },
-          locals: {
-            user,
-            sales: oneOffSales.map((sale) => ({
-              ...serializeSale(sale),
-              saleTypeLabel: saleTypeLabel(sale),
-            })),
-            subscriptionPayments: subscriptionPayments.map(serializeSale),
-            cancelledSubscriptions: cancellations.map((subscription) =>
-              serializeProfileUserSubscription(subscription)
-            ),
-            salesTotal,
-            subscriptionTotal,
-            totalIncome: salesTotal + subscriptionTotal,
-            currency:
-              userSales[0]?.currency ||
-              cancellations[0]?.profileSubscriptionTier.profile.user.currency ||
-              "usd",
-            host: process.env.API_DOMAIN || "",
-            client: clientUrl,
-          } satisfies MonthlyIncomeReportEmailType,
-        });
+          { priority: BULK_MAIL_PRIORITY }
+        );
       } catch (error) {
         logger.error(
           `Error sending out monthly income report to artist ${userId} (${user.email})`,
