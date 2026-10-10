@@ -1,7 +1,6 @@
 import prisma from "@mirlo/prisma";
 import { ArtistLabel } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
-// @ts-ignore: Ignore import errors for github-slugger
 import { slug } from "github-slugger";
 
 import { assertLoggedIn } from "../../../auth/getLoggedInUser";
