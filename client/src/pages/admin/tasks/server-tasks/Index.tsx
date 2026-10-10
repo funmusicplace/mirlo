@@ -55,7 +55,6 @@ export const Index: React.FC = () => {
           <label>{t("whatTaskCall")}</label>
           <SelectEl {...methods.register("jobName")}>
             <option value="cleanUpFiles">cleanUpFiles</option>
-            <option value="moveBucketToBackblaze">moveBucketToBackblaze</option>
             <option value="initiateUserNotifications">
               initiateUserNotifications
             </option>
