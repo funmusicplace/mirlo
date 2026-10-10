@@ -3,6 +3,7 @@ import { moneyDisplay } from "components/common/Money";
 import Select from "components/common/Select";
 import StatCard from "components/common/StatCard";
 import WidthContainer from "components/common/WidthContainer";
+import SetupStatusCard from "components/Setup/status/SetupStatusCard";
 import { groupBy, sortBy, sumBy, uniq } from "lodash";
 import {
   AdminStats,
@@ -273,6 +274,8 @@ export const Index: React.FC = () => {
   return (
     <WidthContainer variant="big" justify="center" className="grow p-4">
       <h2 className="text-2xl font-bold mb-6">{t("title")}</h2>
+
+      <SetupStatusCard />
 
       <div className="grid grid-cols-3 gap-4 mb-8">
         <StatCard

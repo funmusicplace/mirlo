@@ -2144,6 +2144,18 @@
         "missing_other": "{{backend}}, {{count}} buckets missing or unreachable."
       }
     },
+    "card": {
+      "title": "Finish setting up your instance",
+      "itemsLeft_one": "{{count}} item left",
+      "itemsLeft_other": "{{count}} items left",
+      "resumeGuide": "Resume guide",
+      "progress": "{{done}} of {{total}} steps done",
+      "steps": {
+        "identity": "Identity",
+        "email": "Email",
+        "platformPolicy": "Platform policy"
+      }
+    },
     "welcome": {
       "title": "Your instance is up. Let's finish setting it up.",
       "description": "This guide walks you through the settings a platform needs before it can welcome artists and listeners. Each step can be skipped and revisited later from the admin settings."
