@@ -59,6 +59,7 @@ vi.mock("components/common/UserBanner", stub);
 vi.mock("components/CookieDisclaimer", stub);
 vi.mock("components/ManageArtist/ManageArtistButtons", stub);
 vi.mock("components/Player", stub);
+vi.mock("components/Setup/SetupBanner", stub);
 vi.mock("components/ScrollToTop", stub);
 vi.mock("./components/Header/Header", stub);
 

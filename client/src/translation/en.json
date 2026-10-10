@@ -2156,6 +2156,11 @@
         "platformPolicy": "Platform policy"
       }
     },
+    "banner": {
+      "title": "Some required steps of your instance are still waiting to be set up.",
+      "resume": "Resume setup",
+      "dismiss": "Hide for now"
+    },
     "welcome": {
       "title": "Your instance is up. Let's finish setting it up.",
       "description": "This guide walks you through the settings a platform needs before it can welcome artists and listeners. Each step can be skipped and revisited later from the admin settings."

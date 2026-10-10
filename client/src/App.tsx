@@ -12,6 +12,7 @@ import ManageArtistButtons from "components/ManageArtist/ManageArtistButtons";
 import Player from "components/Player";
 import useCurrentTrackHook from "components/Player/useCurrentTrackHook";
 import ScrollToTop from "components/ScrollToTop";
+import SetupBanner from "components/Setup/SetupBanner";
 import useSetupRedirect from "components/Setup/useSetupRedirect";
 import { isEmpty } from "lodash";
 import { useInstanceSettings } from "queries/instanceSettings";
@@ -99,6 +100,7 @@ function App() {
           <Header />
           <ReloadPrompt />
           <FailedSubscriptionBanner />
+          <SetupBanner />
           <TranslationHelpBanner />
           <CookieDisclaimer />
           <div className="hidden md:block">
