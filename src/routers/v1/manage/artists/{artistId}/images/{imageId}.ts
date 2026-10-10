@@ -7,10 +7,7 @@ import {
 } from "../../../../../../auth/passport";
 import { logger } from "../../../../../../logger";
 import { AppError } from "../../../../../../utils/error";
-import {
-  finalImageBucket,
-  removeObjectsFromBucket,
-} from "../../../../../../utils/minio";
+import { removeImagesByType } from "../../../../../../utils/minio";
 
 type Params = {
   artistId: string;
@@ -42,7 +39,7 @@ export default function () {
       await prisma.image.delete({ where: { id: imageId } });
 
       try {
-        await removeObjectsFromBucket(finalImageBucket, imageId);
+        await removeImagesByType("image", imageId);
       } catch (e) {
         log.info(`No stored objects for image ${imageId}, that's okay`);
       }

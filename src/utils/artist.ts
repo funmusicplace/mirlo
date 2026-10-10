@@ -24,7 +24,7 @@ import {
   finalArtistAvatarBucket,
   finalArtistBackgroundBucket,
   finalCoversBucket,
-  removeObjectsFromBucket,
+  removeImagesByType,
 } from "./minio";
 import { getSiteSettings } from "./settings";
 import stripe from "./stripe";
@@ -480,7 +480,7 @@ export const deleteProfileAvatar = async (profileId: number) => {
     });
 
     try {
-      removeObjectsFromBucket(finalArtistAvatarBucket, avatar.id);
+      await removeImagesByType("artistAvatar", avatar.id);
     } catch (e) {
       console.error("Found no files, that's okay");
     }
@@ -502,7 +502,7 @@ export const deleteProfileBackground = async (profileId: number) => {
     });
 
     try {
-      removeObjectsFromBucket(finalArtistBackgroundBucket, background.id);
+      await removeImagesByType("artistBackground", background.id);
     } catch (e) {
       console.error("Found no files, that's okay");
     }

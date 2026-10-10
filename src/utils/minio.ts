@@ -1153,9 +1153,15 @@ const zipBucket = (type: "track" | "trackGroup") =>
     ? getDownloadsBucket(trackFormatBucket)
     : getDownloadsBucket(trackGroupFormatBucket);
 
+const zipTypeFolder = (type: "track" | "trackGroup") =>
+  isConsolidatedMode() ? `${type === "track" ? "track" : "trackgroup"}/` : "";
+
 // The trailing slash keeps id 12 from matching 123 when used as a prefix.
 const zipFolder = (type: "track" | "trackGroup", id: number) =>
-  `${isConsolidatedMode() ? `${type === "track" ? "track" : "trackgroup"}/` : ""}${id}/`;
+  `${zipTypeFolder(type)}${id}/`;
+
+export const zipRootPath = (type: "track" | "trackGroup") =>
+  `${zipBucket(type)}/${zipTypeFolder(type)}`.replace(/\/$/, "");
 
 const zipKey = (type: "track" | "trackGroup", id: number, format: string) =>
   `${zipFolder(type, id)}${format}.zip`;
@@ -1203,6 +1209,9 @@ export const uploadZip = async (
 // Removes every cached format of a zip.
 export const removeZips = (type: "track" | "trackGroup", id: number) =>
   removeObjectsFromBucket(zipBucket(type), zipFolder(type, id));
+
+export const removeAllZips = (type: "track" | "trackGroup") =>
+  removeObjectsFromBucket(zipBucket(type), zipTypeFolder(type));
 
 const allLegacyBuckets = [
   incomingArtistBackgroundBucket,
