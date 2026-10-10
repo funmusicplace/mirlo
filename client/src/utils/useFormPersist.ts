@@ -3,7 +3,7 @@ import React from "react";
 import { FieldValues, Path, PathValue, UseFormReturn } from "react-hook-form";
 import { useDebouncedCallback } from "use-debounce";
 
-import { safeLocalStorage } from "./safeLocalStorage";
+import { safeLocalStorage } from "./safeStorage";
 
 interface UseFormPersistResult {
   hasRestoredDraft: boolean;

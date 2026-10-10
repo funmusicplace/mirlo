@@ -1,7 +1,7 @@
 import React from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-import { safeLocalStorage } from "./safeLocalStorage";
+import { safeLocalStorage } from "./safeStorage";
 
 interface UseBodyDraftResult {
   content: string;

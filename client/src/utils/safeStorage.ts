@@ -17,3 +17,18 @@ export const safeLocalStorage = {
     } catch {}
   },
 };
+
+export const safeSessionStorage = {
+  read(key: string): string | null {
+    try {
+      return window.sessionStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  write(key: string, value: string): void {
+    try {
+      window.sessionStorage.setItem(key, value);
+    } catch {}
+  },
+};
