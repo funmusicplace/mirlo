@@ -27,6 +27,8 @@ const queueOptions: QueueOptions = {
 
 export const sendMailQueue = new Queue("send-mail", queueOptions);
 
+export const BULK_MAIL_PRIORITY = 10;
+
 export const sendMailQueueEvents = new QueueEvents("send-mail", queueOptions);
 
 sendMailQueueEvents.on(

@@ -8,7 +8,7 @@ import assert from "assert";
 import { describe, it } from "mocha";
 import sinon from "sinon";
 
-import * as sendMail from "../../src/jobs/send-mail";
+import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import {
   ArtistPurchaseNotificationEmailType,
   handleProfileGift,
@@ -30,7 +30,7 @@ describe("handleProfileGift", () => {
   });
 
   it("should send out emails for artist gift", async () => {
-    const stub = sinon.spy(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
@@ -50,14 +50,14 @@ describe("handleProfileGift", () => {
     });
 
     assert.equal(stub.calledTwice, true);
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     assert.equal(data0.template, "purchase-receipt");
     assert.equal(data0.message.to, "follower@follower.com");
     const locals = data0.locals as PurchaseReceiptEmailType;
     assert.equal(locals.transactions[0].userId, tip?.userId);
     assert.equal(locals.transactions[0].tips?.[0].artist.id, tip?.profileId);
     assert.equal(locals.transactions[0].amount, 0);
-    const data1 = stub.getCall(1).args[0].data;
+    const data1 = stub.getCall(1).args[1];
     assert.equal(data1.template, "artist-purchase-notification");
     assert.equal(data1.message.to, profileOwner.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
@@ -100,7 +100,7 @@ describe("handleProfileGift", () => {
   });
 
   it("sends the artist notification to the artist's paymentToUser", async () => {
-    const stub = sinon.spy(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
@@ -124,10 +124,8 @@ describe("handleProfileGift", () => {
 
     const notification = stub
       .getCalls()
-      .find(
-        (call) => call.args[0].data.template === "artist-purchase-notification"
-      );
+      .find((call) => call.args[1].template === "artist-purchase-notification");
     assert.ok(notification, "should send the artist notification");
-    assert.equal(notification!.args[0].data.message.to, "label@label.com");
+    assert.equal(notification!.args[1].message.to, "label@label.com");
   });
 });

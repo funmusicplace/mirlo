@@ -2,9 +2,9 @@ import prisma from "@mirlo/prisma";
 import { Profile } from "@mirlo/prisma/client";
 
 import logger from "../logger";
-import { sendMailQueue } from "../queues/send-mail-queue";
-import { getClient } from "../utils/getClient";
+import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
 import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
+import { getClient } from "../utils/getClient";
 
 export type SubscriptionRenewalReminderEmailType = {
   interval: "MONTH" | "YEAR";
@@ -104,28 +104,33 @@ const sendSubscriptionRenewalReminders = async () => {
             : "unknown date";
 
           // Queue the email job
-          await sendMailQueue.add("send-mail", {
-            template: "subscription-renewal-reminder",
-            message: {
-              to: subscription.user.email,
-            },
-            locals: {
-              interval: serializedSubscription.artistSubscriptionTier.interval,
-              artist: serializedSubscription.artistSubscriptionTier.artist,
-              artistUserSubscription: {
-                id: serializedSubscription.id,
-                amount: serializedSubscription.amount,
-                artistSubscriptionTier: {
-                  name: serializedSubscription.artistSubscriptionTier.name,
-                },
-                createdAt: serializedSubscription.createdAt,
-                updatedAt: serializedSubscription.updatedAt,
+          await sendMailQueue.add(
+            "send-mail",
+            {
+              template: "subscription-renewal-reminder",
+              message: {
+                to: subscription.user.email,
               },
-              host: process.env.API_DOMAIN,
-              client: (await getClient()).applicationUrl,
-              renewalDate,
-            } as SubscriptionRenewalReminderEmailType,
-          });
+              locals: {
+                interval:
+                  serializedSubscription.artistSubscriptionTier.interval,
+                artist: serializedSubscription.artistSubscriptionTier.artist,
+                artistUserSubscription: {
+                  id: serializedSubscription.id,
+                  amount: serializedSubscription.amount,
+                  artistSubscriptionTier: {
+                    name: serializedSubscription.artistSubscriptionTier.name,
+                  },
+                  createdAt: serializedSubscription.createdAt,
+                  updatedAt: serializedSubscription.updatedAt,
+                },
+                host: process.env.API_DOMAIN,
+                client: (await getClient()).applicationUrl,
+                renewalDate,
+              } as SubscriptionRenewalReminderEmailType,
+            },
+            { priority: BULK_MAIL_PRIORITY }
+          );
 
           // Update timestamp
           await prisma.profileUserSubscription.update({

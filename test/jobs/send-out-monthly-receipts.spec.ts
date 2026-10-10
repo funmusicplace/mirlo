@@ -1,16 +1,17 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-
-import { clearTables, createPost, createUser } from "../utils";
+import sinon from "sinon";
 
 import sendOutMonthlyReceipts, {
   AnnounceMonthlyReceiptsEmailType,
 } from "../../src/jobs/send-out-monthly-receipts";
+import { sendMailQueue } from "../../src/queues/send-mail-queue";
+import { clearTables, createUser } from "../utils";
+
 import prisma from "@mirlo/prisma";
+
 import assert from "assert";
-import * as sendMail from "../../src/jobs/send-mail";
-import sinon from "sinon";
 
 describe("send-out-monthly-receipts", () => {
   beforeEach(async () => {
@@ -26,7 +27,7 @@ describe("send-out-monthly-receipts", () => {
   });
 
   it("should send out monthly receipt", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -65,7 +66,7 @@ describe("send-out-monthly-receipts", () => {
     await sendOutMonthlyReceipts();
 
     assert.equal(stub.calledOnce, true);
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     assert.equal(data0.template, "announce-monthly-receipts");
     assert.equal(data0.message.to, "follower@follower.com");
     const locals = data0.locals as AnnounceMonthlyReceiptsEmailType;
@@ -75,7 +76,7 @@ describe("send-out-monthly-receipts", () => {
   });
 
   it("should not send out monthly receipt if amount is 0", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -117,7 +118,7 @@ describe("send-out-monthly-receipts", () => {
   });
 
   it("should send out monthly receipt if some are greater than 0", async () => {
-    const stub = sinon.stub(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@artist.com",
@@ -181,7 +182,7 @@ describe("send-out-monthly-receipts", () => {
     await sendOutMonthlyReceipts();
 
     assert.equal(stub.calledOnce, true);
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     assert.equal(data0.template, "announce-monthly-receipts");
     assert.equal(data0.message.to, "follower@follower.com");
     const locals = data0.locals as AnnounceMonthlyReceiptsEmailType;

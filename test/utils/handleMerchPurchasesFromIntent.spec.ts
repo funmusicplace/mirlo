@@ -6,7 +6,7 @@ import { describe, it } from "mocha";
 import sinon from "sinon";
 import Stripe from "stripe";
 
-import * as sendMail from "../../src/jobs/send-mail";
+import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import {
   ArtistPurchaseNotificationEmailType,
   PurchaseReceiptEmailType,
@@ -248,7 +248,7 @@ describe("handleMerchPurchasesFromIntent", () => {
   });
 
   it("sends the buyer receipt and artist notification emails with the transaction and merch details", async () => {
-    const stub = sinon.spy(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
       email: "artist@test.com",
@@ -271,14 +271,14 @@ describe("handleMerchPurchasesFromIntent", () => {
 
     assert.equal(stub.calledTwice, true);
 
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     assert.equal(data0.template, "purchase-receipt");
     assert.equal(data0.message.to, "buyer@test.com");
     const locals0 = data0.locals as PurchaseReceiptEmailType;
     assert.equal(locals0.transactions[0].merchPurchases?.[0].merchId, merch.id);
     assert.equal(locals0.transactions[0].amount, 2000);
 
-    const data1 = stub.getCall(1).args[0].data;
+    const data1 = stub.getCall(1).args[1];
     assert.equal(data1.template, "artist-purchase-notification");
     assert.equal(data1.message.to, artistUser.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;

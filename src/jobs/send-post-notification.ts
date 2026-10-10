@@ -3,7 +3,7 @@ import * as cheerio from "cheerio";
 import { flatten, groupBy } from "lodash";
 
 import logger from "../logger";
-import { sendMailQueue } from "../queues/send-mail-queue";
+import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
 import { serializePost } from "../serializers/post";
 import { getClient } from "../utils/getClient";
 import { getSafeErrorContext } from "../utils/logging";
@@ -256,6 +256,7 @@ export default async function sendPostNotification(job: {
           },
           {
             jobId: `announce-post-published-${postId}-${notification.userId}`,
+            priority: BULK_MAIL_PRIORITY,
           }
         );
       }

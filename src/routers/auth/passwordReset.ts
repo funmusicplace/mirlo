@@ -1,11 +1,10 @@
 import { randomUUID } from "crypto";
 
 import prisma from "@mirlo/prisma";
-import { Job } from "bullmq";
 import { NextFunction, Request, Response } from "express";
 
-import { sendMail } from "../../jobs/send-mail";
 import logger from "../../logger";
+import { sendMailQueue } from "../../queues/send-mail-queue";
 import { getClient } from "../../utils/getClient";
 
 import { hashPassword, setTokens } from "./utils";
@@ -116,22 +115,20 @@ export const passwordResetInitiate = async (
           id: true,
         },
       });
-      await sendMail({
-        data: {
-          template: "password-reset",
-          message: {
-            to: user.email,
-          },
-          locals: {
-            user: result,
-            host: process.env.API_DOMAIN,
-            clientDomain: (await getClient()).applicationUrl,
-            redirectClient,
-            accountIncomplete,
-            token,
-          },
+      await sendMailQueue.add("send-mail", {
+        template: "password-reset",
+        message: {
+          to: user.email,
         },
-      } as Job);
+        locals: {
+          user: result,
+          host: process.env.API_DOMAIN,
+          clientDomain: (await getClient()).applicationUrl,
+          redirectClient,
+          accountIncomplete,
+          token,
+        },
+      });
 
       return res.status(200).send({ message: "Success" });
     }

@@ -9,7 +9,7 @@ import { describe, it } from "mocha";
 import sinon from "sinon";
 import Stripe from "stripe";
 
-import * as sendMail from "../../src/jobs/send-mail";
+import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import {
   AlbumPurchaseEmailType,
   ArtistPurchaseNotificationEmailType,
@@ -38,7 +38,7 @@ describe("handleTrackGroupPurchase", () => {
   });
 
   it("should send out emails for track group purchase", async () => {
-    const stub = sinon.spy(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
@@ -58,13 +58,13 @@ describe("handleTrackGroupPurchase", () => {
     await handleTrackGroupPurchase(purchaser.id, trackGroup.id);
 
     assert.equal(stub.calledTwice, true);
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     assert.equal(data0.template, "album-purchase-receipt");
     assert.equal(data0.message.to, "follower@follower.com");
     const locals0 = data0.locals as AlbumPurchaseEmailType;
     assert.equal(locals0.trackGroup.id, trackGroup.id);
     assert.equal(locals0.purchase.transaction?.amount, 0);
-    const data1 = stub.getCall(1).args[0].data;
+    const data1 = stub.getCall(1).args[1];
     assert.equal(data1.template, "artist-purchase-notification");
     assert.equal(data1.message.to, profileOwner.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
@@ -78,7 +78,7 @@ describe("handleTrackGroupPurchase", () => {
   });
 
   it("should send out emails for track group purchase without log-in", async () => {
-    const stub = sinon.spy(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
@@ -103,13 +103,13 @@ describe("handleTrackGroupPurchase", () => {
     );
 
     assert.equal(stub.calledTwice, true);
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     assert.equal(data0.template, "album-download");
     assert.equal(data0.message.to, "follower@follower.com");
     const locals0 = data0.locals as AlbumPurchaseEmailType;
     assert.equal(locals0.trackGroup.id, trackGroup.id);
     assert.equal(locals0.purchase.transaction?.amount, 0);
-    const data1 = stub.getCall(1).args[0].data;
+    const data1 = stub.getCall(1).args[1];
     assert.equal(data1.template, "artist-purchase-notification");
     assert.equal(data1.message.to, profileOwner.email);
     const locals1 = data1.locals as ArtistPurchaseNotificationEmailType;
@@ -123,7 +123,7 @@ describe("handleTrackGroupPurchase", () => {
   });
 
   it("should send artist notification to paymentToUser if set", async () => {
-    const stub = sinon.spy(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
@@ -149,11 +149,11 @@ describe("handleTrackGroupPurchase", () => {
     await handleTrackGroupPurchase(purchaser.id, trackGroup.id);
 
     assert.equal(stub.calledTwice, true);
-    const data0 = stub.getCall(0).args[0].data;
+    const data0 = stub.getCall(0).args[1];
     assert.equal(data0.template, "album-purchase-receipt");
     assert.equal(data0.message.to, "follower@follower.com");
 
-    const data1 = stub.getCall(1).args[0].data;
+    const data1 = stub.getCall(1).args[1];
     assert.equal(data1.template, "artist-purchase-notification");
     assert.equal(
       data1.message.to,
@@ -168,7 +168,7 @@ describe("handleTrackGroupPurchase", () => {
   });
 
   it("records the purchase and still notifies when the Stripe fee lookup fails", async () => {
-    const stub = sinon.spy(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
     // Simulate a Stripe outage while fetching the application fee. This used to
     // throw and abort the whole handler, so the charge succeeded in Stripe but
     // left no purchase record and sent no emails (#issue).
@@ -217,13 +217,13 @@ describe("handleTrackGroupPurchase", () => {
       "both the buyer receipt and the artist notification should still be sent"
     );
     assert.equal(
-      stub.getCall(1).args[0].data.template,
+      stub.getCall(1).args[1].template,
       "artist-purchase-notification"
     );
   });
 
   it("should increment userFriendlyId per user across multiple purchases", async () => {
-    const stub = sinon.spy(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
@@ -279,7 +279,7 @@ describe("handleTrackGroupPurchase", () => {
   });
 
   it("should pass all variables required by artist-purchase-notification template", async () => {
-    const stub = sinon.spy(sendMail, "default");
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: profileOwner } = await createUser({
       email: "artist@artist.com",
@@ -298,7 +298,7 @@ describe("handleTrackGroupPurchase", () => {
     await handleTrackGroupPurchase(purchaser.id, trackGroup.id);
 
     assert.equal(stub.calledTwice, true);
-    const data = stub.getCall(1).args[0].data;
+    const data = stub.getCall(1).args[1];
     assert.equal(data.template, "artist-purchase-notification");
 
     const locals = data.locals as ArtistPurchaseNotificationEmailType;

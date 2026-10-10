@@ -5,7 +5,7 @@ import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 import sinon from "sinon";
 
-import * as sendMail from "../../src/jobs/send-mail";
+import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import resendVerificationEmail from "../../src/routers/auth/resendVerificationEmail";
 import { clearTables, createUser } from "../utils";
 
@@ -31,7 +31,7 @@ describe("auth/resendVerificationEmail", () => {
   });
 
   it("should resend verification email for unverified users", async () => {
-    const sendMailStub = sinon.stub(sendMail, "sendMail").resolves();
+    const sendMailStub = sinon.stub(sendMailQueue, "add").resolves();
 
     const client = await prisma.client.create({
       data: {
@@ -87,7 +87,7 @@ describe("auth/resendVerificationEmail", () => {
   });
 
   it("should error when user does not require verification", async () => {
-    sinon.stub(sendMail, "sendMail");
+    sinon.stub(sendMailQueue, "add").resolves();
 
     await prisma.client.create({
       data: {
@@ -121,7 +121,7 @@ describe("auth/resendVerificationEmail", () => {
   });
 
   it("should respond with error when client not found", async () => {
-    sinon.stub(sendMail, "sendMail");
+    sinon.stub(sendMailQueue, "add").resolves();
 
     const { user } = await createUser({
       email: "missing-client@example.com",

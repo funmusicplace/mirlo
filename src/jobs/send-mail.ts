@@ -7,6 +7,7 @@ import postmarkTransport from "nodemailer-postmark-transport";
 import sendgrid from "nodemailer-sendgrid";
 
 import { logger } from "../logger";
+import { sendMailQueue } from "../queues/send-mail-queue";
 import {
   DEFAULT_INSTANCE_NAME,
   getSiteSettings,
@@ -118,16 +119,14 @@ async function createTransport(): Promise<Transporter> {
 }
 
 export const sendErrorEmail = async (error: Error) => {
-  sendMail({
-    data: {
-      template: "error-email",
-      message: {
-        to: "hi@mirlo.space",
-      },
-      locals: {
-        error: JSON.stringify(error.stack),
-        time: new Date().toDateString(),
-      },
+  await sendMailQueue.add("send-mail", {
+    template: "error-email",
+    message: {
+      to: "hi@mirlo.space",
+    },
+    locals: {
+      error: JSON.stringify(error.stack),
+      time: new Date().toDateString(),
     },
   });
 };

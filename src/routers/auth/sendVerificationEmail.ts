@@ -1,6 +1,4 @@
-import { Job } from "bullmq";
-
-import { sendMail } from "../../jobs/send-mail";
+import { sendMailQueue } from "../../queues/send-mail-queue";
 import { getClient } from "../../utils/getClient";
 
 export type VerificationAccountType = "artist" | "listener" | "label";
@@ -31,19 +29,17 @@ export const sendVerificationEmail = async <UserType extends { email: string }>(
 
   const client = await getClient();
 
-  await sendMail({
-    data: {
-      template: "new-user",
-      message: {
-        to: user.email,
-      },
-      locals: {
-        accountType,
-        user,
-        host: process.env.API_DOMAIN,
-        client: clientId,
-        clientDomain: client.applicationUrl,
-      },
+  await sendMailQueue.add("send-mail", {
+    template: "new-user",
+    message: {
+      to: user.email,
     },
-  } as Job);
+    locals: {
+      accountType,
+      user,
+      host: process.env.API_DOMAIN,
+      client: clientId,
+      clientDomain: client.applicationUrl,
+    },
+  });
 };

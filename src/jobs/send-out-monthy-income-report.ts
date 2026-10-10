@@ -3,12 +3,11 @@ import { SubscriptionDeleteReason } from "@mirlo/prisma/client";
 import { groupBy, keyBy, uniq } from "lodash";
 
 import logger from "../logger";
+import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
 import { findSales } from "../routers/v1/artists/{id}/supporters";
 import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
 import { serializeUserTransaction } from "../serializers/userTransaction";
 import { getClient } from "../utils/getClient";
-
-import sendMail from "./send-mail";
 
 type ReportSale = {
   artist: { name: string; id: number }[];
@@ -183,8 +182,9 @@ const sendOutMonthlyIncomeReport = async () => {
       // Ensure user.name is not null
       const user = { ...artistUser, name: artistUser.name || "" };
       try {
-        await sendMail<MonthlyIncomeReportEmailType>({
-          data: {
+        await sendMailQueue.add(
+          "send-mail",
+          {
             template: "announce-monthly-income-report",
             message: {
               to: user.email,
@@ -209,9 +209,10 @@ const sendOutMonthlyIncomeReport = async () => {
                 "usd",
               host: process.env.API_DOMAIN || "",
               client: clientUrl,
-            },
+            } satisfies MonthlyIncomeReportEmailType,
           },
-        });
+          { priority: BULK_MAIL_PRIORITY }
+        );
       } catch (error) {
         logger.error(
           `Error sending out monthly income report to artist ${userId} (${user.email})`,

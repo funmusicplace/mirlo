@@ -7,7 +7,7 @@ import prisma from "@mirlo/prisma";
 import { describe, it } from "mocha";
 import sinon from "sinon";
 
-import * as sendMail from "../../src/jobs/send-mail";
+import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import { completePurchase } from "../../src/utils/handleFinishedTransactions";
 import {
   clearTables,
@@ -35,7 +35,7 @@ describe("completePurchase", () => {
   });
 
   it("records every album in a two-album cart against one transaction", async () => {
-    sinon.stub(sendMail, "default").resolves();
+    sinon.stub(sendMailQueue, "add").resolves();
     const { user: artistUser } = await createUser({ email: "artist@test.com" });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
     const artist = await createArtist(artistUser.id);
@@ -64,7 +64,7 @@ describe("completePurchase", () => {
   });
 
   it("records both the album and the merch in a mixed cart, and notifies the artist once", async () => {
-    const mail = sinon.stub(sendMail, "default").resolves();
+    const mail = sinon.stub(sendMailQueue, "add").resolves();
     const { user: artistUser } = await createUser({ email: "artist@test.com" });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
     const artist = await createArtist(artistUser.id);
@@ -87,7 +87,7 @@ describe("completePurchase", () => {
     assert.equal(transaction?.trackGroupPurchases.length, 1);
     assert.equal(transaction?.merchPurchases.length, 1);
 
-    const templates = mail.getCalls().map((c) => c.args[0].data.template);
+    const templates = mail.getCalls().map((c) => c.args[1].template);
     assert.deepEqual(templates.sort(), [
       "album-purchase-receipt",
       "artist-purchase-notification",
@@ -96,7 +96,7 @@ describe("completePurchase", () => {
   });
 
   it("uses each item's own message", async () => {
-    sinon.stub(sendMail, "default").resolves();
+    sinon.stub(sendMailQueue, "add").resolves();
     const { user: artistUser } = await createUser({ email: "artist@test.com" });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
     const artist = await createArtist(artistUser.id);
@@ -123,7 +123,7 @@ describe("completePurchase", () => {
   });
 
   it("records a payment only once when the webhook is delivered twice", async () => {
-    sinon.stub(sendMail, "default").resolves();
+    sinon.stub(sendMailQueue, "add").resolves();
     const { user: artistUser } = await createUser({ email: "artist@test.com" });
     const { user: buyer } = await createUser({ email: "buyer@test.com" });
     const artist = await createArtist(artistUser.id);
