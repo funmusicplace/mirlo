@@ -9,11 +9,12 @@ import postmarkTransport from "nodemailer-postmark-transport";
 import sendgrid from "nodemailer-sendgrid";
 
 import { logger } from "../logger";
-import { sendMailQueue } from "../queues/send-mail-queue";
 import {
   DEFAULT_INSTANCE_NAME,
   getSiteSettings,
+  resolveContactEmail,
   resolveInstanceName,
+  resolveSupportEmail,
   SettingsType,
 } from "../utils/settings";
 
@@ -136,19 +137,6 @@ async function createTransport(): Promise<Transporter> {
   }
 }
 
-export const sendErrorEmail = async (error: Error) => {
-  await sendMailQueue.add("send-mail", {
-    template: "error-email",
-    message: {
-      to: "hi@mirlo.space",
-    },
-    locals: {
-      error: JSON.stringify(error.stack),
-      time: new Date().toDateString(),
-    },
-  });
-};
-
 /**
  * Validates if a string is a valid email address
  */
@@ -242,14 +230,18 @@ const dedupeRecipients = (message: Mail.Options): Mail.Options => {
 /**
  * Gets the 'from' email address and the instance name from settings
  */
-async function getSender(): Promise<{
+async function getEmailContext(): Promise<{
   fromEmail: string;
   instanceName: string;
+  contactEmail: string | null;
+  supportEmail: string | null;
 }> {
   try {
     const settings = await getSiteSettings();
     const emailSettings = settings.settings?.emailProvider;
     const instanceName = resolveInstanceName(settings);
+    const contactEmail = resolveContactEmail(settings);
+    const supportEmail = resolveSupportEmail(settings);
 
     const fromEmail =
       emailSettings?.fromEmail ??
@@ -261,15 +253,22 @@ async function getSender(): Promise<{
       logger.warn(
         `Invalid from email configured: "${fromEmail}", using default instead`
       );
-      return { fromEmail: "no-reply@mirlo.space", instanceName };
+      return {
+        fromEmail: "no-reply@mirlo.space",
+        instanceName,
+        contactEmail,
+        supportEmail,
+      };
     }
 
-    return { fromEmail, instanceName };
+    return { fromEmail, instanceName, contactEmail, supportEmail };
   } catch (err) {
     logger.error("Error getting from email, using default", err);
     return {
       fromEmail: process.env.SENDGRID_SENDER ?? "no-reply@mirlo.space",
       instanceName: DEFAULT_INSTANCE_NAME,
+      contactEmail: null,
+      supportEmail: null,
     };
   }
 }
@@ -327,7 +326,8 @@ export const sendMail = async <T>(job: {
   logger.info(`sendMail: sending: ${job.data.template}`);
   try {
     const transport = await createTransport();
-    const { fromEmail, instanceName } = await getSender();
+    const { fromEmail, instanceName, contactEmail, supportEmail } =
+      await getEmailContext();
     const message = dedupeRecipients(job.data.message);
 
     const email = new Email({
@@ -356,6 +356,8 @@ export const sendMail = async <T>(job: {
       ...(job.data.locals as Record<string, unknown>),
       fromEmail,
       instanceName,
+      contactEmail,
+      supportEmail,
     };
 
     if (

@@ -62,7 +62,6 @@ export default function () {
             artistName: artist.name,
             userName: artist.user.name,
             reason: `<p>${reasonHtml}</p>`,
-            supportEmail: "support@mirlo.space",
           },
         });
       }

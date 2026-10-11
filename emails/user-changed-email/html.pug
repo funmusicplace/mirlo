@@ -6,4 +6,5 @@ block content
 
     p #{newEmail}
 
-    p If this wasn't you, please contact hi@mirlo.space ASAP
+    if contactEmail
+      p If this wasn't you, please contact #{contactEmail} ASAP

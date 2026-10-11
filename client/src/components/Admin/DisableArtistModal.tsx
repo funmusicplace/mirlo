@@ -2,14 +2,17 @@ import Button from "components/common/Button";
 import Modal from "components/common/Modal";
 import TextArea from "components/common/TextArea";
 import { useUpdateAdminArtistMutation } from "queries/admin";
+import { useInstanceSettings } from "queries/instanceSettings";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useSnackbar } from "state/SnackbarContext";
 
-const PREFILL_CONTENT_POLICY =
-  "Your artist account has been disabled due to a violation of our Content Policy regarding AI-generated content: http://mirlo.space/pages/content-policy" +
+const prefillContentPolicy = (supportEmail?: string | null) =>
+  `Your artist account has been disabled due to a violation of our Content Policy regarding AI-generated content: ${window.location.origin}/pages/content-policy` +
   "\n\nThis determination was made after reviewing the artwork and/or music associated with your account. " +
-  "\n\nIf you believe this decision was made in error, you can contest it by emailing support@mirlo.space with evidence supporting your appeal." +
+  (supportEmail
+    ? `\n\nIf you believe this decision was made in error, you can contest it by emailing ${supportEmail} with evidence supporting your appeal.`
+    : "") +
   "\n\nWe recognize that for many in our community lean on AI tools because they don't have specific skills. We suggest joining our community or tagging us on socials, and we'll boost your post to connect you with people who might want to help.";
 
 const DisableArtistModal: React.FC<{
@@ -20,6 +23,7 @@ const DisableArtistModal: React.FC<{
 }> = ({ artistId, artistName, open, onClose }) => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const snackbar = useSnackbar();
+  const { supportEmail } = useInstanceSettings();
   const [disableReason, setDisableReason] = React.useState("");
   const { mutateAsync: updateArtist, isPending } =
     useUpdateAdminArtistMutation();
@@ -72,7 +76,7 @@ const DisableArtistModal: React.FC<{
 
         <div className="flex flex-col gap-2">
           <Button
-            onClick={() => setDisableReason(PREFILL_CONTENT_POLICY)}
+            onClick={() => setDisableReason(prefillContentPolicy(supportEmail))}
             type="button"
           >
             {t("prefillContentPolicy")}

@@ -25,4 +25,5 @@ block content
       em "#{message}"
 
   p The final money will be available via your Stripe dashboard
-  p If you have any questions please reach out to hi@mirlo.space
+  if contactEmail
+    p If you have any questions please reach out to #{contactEmail}

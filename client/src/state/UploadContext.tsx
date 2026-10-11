@@ -6,6 +6,7 @@ import {
   produceNewStatus,
 } from "components/ManageArtist/utils";
 import { pick } from "lodash";
+import { useInstanceSettings } from "queries/instanceSettings";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
@@ -76,6 +77,7 @@ export const UploadContextProvider: React.FC<{
 }> = ({ children }) => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "uploadPanel" });
+  const { contactEmail } = useInstanceSettings();
   const [queue, setQueue] = React.useState<UploadQueueItem[]>([]);
   const [imageQueue, setImageQueue] = React.useState<ImageQueueItem[]>([]);
   const activeBatchesRef = React.useRef<Set<number>>(new Set());
@@ -170,7 +172,12 @@ export const UploadContextProvider: React.FC<{
       } catch (e) {
         console.error(e);
         snackbar(
-          `Something went wrong uploading track ${packet.title}. Please report this incident to hi@mirlo.space`,
+          contactEmail
+            ? t("uploadFailedContact", {
+                title: packet.title,
+                email: contactEmail,
+              })
+            : t("uploadFailed", { title: packet.title }),
           { type: "warning" }
         );
       }
@@ -215,7 +222,7 @@ export const UploadContextProvider: React.FC<{
         runNext();
       }
     }
-  }, [snackbar, t]);
+  }, [snackbar, contactEmail, t]);
 
   const startImagePolling = React.useCallback(() => {
     if (imagePollerRef.current !== undefined) return;
