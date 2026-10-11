@@ -260,27 +260,43 @@ async function getSender(): Promise<{
 
 type RecipientError = Error & {
   recipient?: string;
-  responseCode?: number;
   response?: string;
 };
 
-const permanentRecipientErrors = (errors?: RecipientError[]) =>
-  (errors ?? []).filter(
-    (error) => error.recipient && (error.responseCode ?? 0) >= 500
-  );
+type Bounce = { email: string; reason: string };
 
-export const recordBouncedRecipients = async (errors: RecipientError[]) => {
-  await Promise.all(
-    errors.map((error) =>
-      prisma.user.updateMany({
-        where: { email: error.recipient },
-        data: {
-          emailBouncedAt: new Date(),
-          emailBounceReason: error.response ?? error.message,
-        },
-      })
+const deadAddressBounces = (errors: RecipientError[]): Bounce[] =>
+  errors
+    .filter(
+      (error) =>
+        error.recipient &&
+        /^5\d\d[ -]5\.(1\.\d+|2\.1)\b/.test(error.response ?? "")
     )
-  );
+    .map((error) => ({
+      email: error.recipient as string,
+      reason: error.response as string,
+    }));
+
+const escapeLikePattern = (value: string) => value.replace(/[\\%_]/g, "\\$&");
+
+export const recordBouncedRecipients = async (bounces: Bounce[]) => {
+  try {
+    await Promise.all(
+      bounces.map(({ email, reason }) =>
+        prisma.user.updateMany({
+          where: {
+            email: { equals: escapeLikePattern(email), mode: "insensitive" },
+          },
+          data: {
+            emailBouncedAt: new Date(),
+            emailBounceReason: reason,
+          },
+        })
+      )
+    );
+  } catch (err) {
+    logger.error("sendMail: failed to record bounced recipients", err);
+  }
 };
 
 export const sendMail = async <T>(job: {
@@ -335,12 +351,12 @@ export const sendMail = async <T>(job: {
         message,
         locals,
       });
-      const rejected = permanentRecipientErrors(info?.rejectedErrors);
-      if (rejected.length) {
+      const bounces = deadAddressBounces(info?.rejectedErrors ?? []);
+      if (bounces.length) {
         logger.warn(
-          `sendMail: ${rejected.length} recipient(s) rejected for ${job.data.template}`
+          `sendMail: ${bounces.length} recipient(s) rejected for ${job.data.template}`
         );
-        await recordBouncedRecipients(rejected);
+        await recordBouncedRecipients(bounces);
       }
     } else {
       // If there was a problem with mailhog, print to logs
@@ -352,12 +368,14 @@ export const sendMail = async <T>(job: {
     return Promise.resolve({ fromEmail });
   } catch (err) {
     logger.error("MirloSendmailError", err);
-    const rejected = permanentRecipientErrors(
-      (err as { rejectedErrors?: RecipientError[] }).rejectedErrors
-    );
-    if (rejected.length) {
-      await recordBouncedRecipients(rejected);
-      throw new UnrecoverableError((err as Error).message);
+    const rejectedErrors =
+      (err as { rejectedErrors?: RecipientError[] }).rejectedErrors ?? [];
+    const bounces = deadAddressBounces(rejectedErrors);
+    if (bounces.length) {
+      await recordBouncedRecipients(bounces);
+      if (bounces.length === rejectedErrors.length) {
+        throw new UnrecoverableError((err as Error).message);
+      }
     }
     throw err;
   }

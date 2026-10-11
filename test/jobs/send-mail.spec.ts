@@ -649,21 +649,25 @@ describe("send-mail job", () => {
       }
     };
 
-    it("marks the user as bounced and stops retrying on a permanent rejection", async () => {
-      const { user } = await createUser({ email: "gone@example.com" });
-      const error = Object.assign(
+    const allRejected = (...rejectedErrors: Error[]) =>
+      Object.assign(
         new Error("Can't send mail - all recipients were rejected"),
-        {
-          code: "EENVELOPE",
-          rejected: ["gone@example.com"],
-          rejectedErrors: [
-            rejection("gone@example.com", "550 5.1.1 User unknown"),
-          ],
-        }
+        { code: "EENVELOPE", rejectedErrors }
       );
-      sandbox.stub(nodemailer, "createTransport").returns({
-        sendMail: () => Promise.reject(error),
-      } as any);
+
+    const stubSendMail = (sendMail: () => Promise<unknown>) =>
+      sandbox.stub(nodemailer, "createTransport").returns({ sendMail } as any);
+
+    const bouncedAt = async (id: number) =>
+      (await prisma.user.findUniqueOrThrow({ where: { id } })).emailBouncedAt;
+
+    it("marks the user as bounced and stops retrying on an unknown address", async () => {
+      const { user } = await createUser({ email: "gone@example.com" });
+      stubSendMail(() =>
+        Promise.reject(
+          allRejected(rejection("gone@example.com", "550 5.1.1 User unknown"))
+        )
+      );
 
       await assert.rejects(send("gone@example.com"), UnrecoverableError);
 
@@ -676,49 +680,96 @@ describe("send-mail job", () => {
 
     it("marks rejected recipients when the send otherwise succeeds", async () => {
       const { user } = await createUser({ email: "gone@example.com" });
-      sandbox.stub(nodemailer, "createTransport").returns({
-        sendMail: () =>
-          Promise.resolve({
-            messageId: "123",
-            rejected: ["gone@example.com"],
-            rejectedErrors: [
-              rejection("gone@example.com", "550 5.1.1 User unknown"),
-            ],
-          }),
-      } as any);
+      stubSendMail(() =>
+        Promise.resolve({
+          messageId: "123",
+          rejected: ["gone@example.com"],
+          rejectedErrors: [
+            rejection("gone@example.com", "550 5.1.1 User unknown"),
+          ],
+        })
+      );
 
       await send("gone@example.com, other@example.com");
 
-      const updated = await prisma.user.findUniqueOrThrow({
-        where: { id: user.id },
+      assert.ok(await bouncedAt(user.id));
+    });
+
+    it("matches the stored email case-insensitively and literally", async () => {
+      const { user } = await createUser({ email: "Gone_Away@Example.com" });
+      const { user: lookalike } = await createUser({
+        email: "gonexaway@example.com",
       });
-      assert.ok(updated.emailBouncedAt);
+      stubSendMail(() =>
+        Promise.reject(
+          allRejected(
+            rejection("Gone_Away@example.com", "550 5.1.1 User unknown")
+          )
+        )
+      );
+
+      await assert.rejects(send("Gone_Away@Example.com"), UnrecoverableError);
+
+      assert.ok(await bouncedAt(user.id));
+      assert.equal(await bouncedAt(lookalike.id), null);
     });
 
     it("retries and leaves the user alone on a temporary rejection", async () => {
       const { user } = await createUser({ email: "busy@example.com" });
-      const error = Object.assign(
-        new Error("Can't send mail - all recipients were rejected"),
-        {
-          code: "EENVELOPE",
-          rejectedErrors: [
-            rejection("busy@example.com", "451 4.7.1 Try again later"),
-          ],
-        }
+      stubSendMail(() =>
+        Promise.reject(
+          allRejected(
+            rejection("busy@example.com", "451 4.7.1 Try again later")
+          )
+        )
       );
-      sandbox.stub(nodemailer, "createTransport").returns({
-        sendMail: () => Promise.reject(error),
-      } as any);
 
       await assert.rejects(send("busy@example.com"), (err: Error) => {
         assert.ok(!(err instanceof UnrecoverableError));
         return true;
       });
 
-      const updated = await prisma.user.findUniqueOrThrow({
-        where: { id: user.id },
+      assert.equal(await bouncedAt(user.id), null);
+    });
+
+    it("retries and leaves the user alone when the server refuses to relay", async () => {
+      const { user } = await createUser({ email: "fine@example.com" });
+      stubSendMail(() =>
+        Promise.reject(
+          allRejected(
+            rejection("fine@example.com", "550 5.7.1 Relaying denied")
+          )
+        )
+      );
+
+      await assert.rejects(send("fine@example.com"), (err: Error) => {
+        assert.ok(!(err instanceof UnrecoverableError));
+        return true;
       });
-      assert.equal(updated.emailBouncedAt, null);
+
+      assert.equal(await bouncedAt(user.id), null);
+    });
+
+    it("still retries when another recipient was only temporarily rejected", async () => {
+      const { user } = await createUser({ email: "gone@example.com" });
+      stubSendMail(() =>
+        Promise.reject(
+          allRejected(
+            rejection("gone@example.com", "550 5.1.1 User unknown"),
+            rejection("accounting@example.com", "451 4.7.1 Try again later")
+          )
+        )
+      );
+
+      await assert.rejects(
+        send("gone@example.com, accounting@example.com"),
+        (err: Error) => {
+          assert.ok(!(err instanceof UnrecoverableError));
+          return true;
+        }
+      );
+
+      assert.ok(await bouncedAt(user.id));
     });
   });
 });
