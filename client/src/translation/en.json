@@ -1752,7 +1752,7 @@
     "sectionPlatformPolicy": "Platform policy",
     "sectionFeaturedArtists": "Featured artists",
     "sectionStripe": "Stripe",
-    "sectionEmailProvider": "Email provider",
+    "sectionEmail": "Email",
     "sectionStorage": "Storage",
     "sectionPolicies": "Policies",
     "sectionTrustLevels": "Trust levels",
@@ -1762,6 +1762,12 @@
     "platformPolicySettings": "Platform policy",
     "instanceName": "Instance name",
     "instanceNameRequired": "Give your instance a name",
+    "contactEmail": "Contact email",
+    "contactEmailHint": "Public address shown in the footer and in the emails the instance sends.",
+    "contactEmailInvalid": "Enter a valid contact email",
+    "supportEmail": "Support email",
+    "supportEmailHint": "Given to artists appealing a moderation decision and to buyers whose payment failed. Leave empty to use the contact email.",
+    "supportEmailInvalid": "Enter a valid support email",
     "platformPercent": "Platform percent",
     "cdnUrl": "CDN URL",
     "isClosedToPublicArtistSignup": "Is closed to public artist signup",
@@ -1788,7 +1794,10 @@
     "stripeWebhookSynced": "The webhook's events are up to date.",
     "stripeWebhookRegistered": "The webhook is registered with Stripe.",
     "stripeWebhookRegisterFailed": "Couldn't register the webhook. Save your secret key first, and check that this instance's URL is public.",
-    "emailProviderSettings": "Email Provider Settings",
+    "emailSettings": "Email",
+    "whereToReachYou": "Where to reach you",
+    "outgoingEmail": "Outgoing email",
+    "outgoingEmailDescription": "Account confirmations, password resets, receipts and artist notifications are all sent by email. Without a provider, they are not delivered.",
     "emailProviderLabel": "Email provider",
     "emailProviderNone": "None",
     "emailFrom": "From email",
@@ -2050,6 +2059,7 @@
     "nameHint": "You can change it later.",
     "contactLead": "Add a contact email. It appears in the footer and in every email the instance sends.",
     "contactLabel": "Contact email",
+    "contactInvalid": "Please enter a valid email address",
     "contactPlaceholder": "hello@music.example.org",
     "colorLead": "Pick an accent color. Refine the palette later in settings.",
     "colorCustom": "or a custom one",
@@ -2177,7 +2187,7 @@
       "description": "Your platform's name and its color theme."
     },
     "email": {
-      "description": "Account confirmations, password resets, receipts and artist notifications are all sent by email. Without a provider, they are not delivered."
+      "description": "Where people can reach you, and how your platform sends email."
     },
     "platformPolicy": {
       "description": "How much of a percentage fee (if any) your platform takes, who gets to publish, and the rules everyone agrees to."

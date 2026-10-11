@@ -25,6 +25,7 @@ export default function () {
         "platformPercent",
         "featuredArtists",
         "instanceCustomization.title",
+        "instanceCustomization.contactEmail",
         "instanceCustomization.supportEmail",
         "instanceCustomization.artistId",
         "instanceCustomization.purchaseEmail",

@@ -70,7 +70,10 @@ const storedSettings = (overrides: object = {}) => ({
     contentPolicy: "",
     settings: {
       platformPercent: 7,
-      instanceCustomization: { title: "Nightjar" },
+      instanceCustomization: {
+        title: "Nightjar",
+        contactEmail: "hello@nightjar.test",
+      },
       emailProvider: {},
     },
     bucketNames: null,
@@ -246,7 +249,10 @@ describe("SetupGuide", () => {
       storedSettings({
         settings: {
           platformPercent: 7,
-          instanceCustomization: { title: "Nightjar" },
+          instanceCustomization: {
+            title: "Nightjar",
+            contactEmail: "hello@nightjar.test",
+          },
           emailProvider: { provider: "smtp" },
         },
       })
@@ -327,6 +333,17 @@ describe("SetupGuide", () => {
     expect(nav).toHaveTextContent("stepSkipped");
   });
 
+  test("reports no unsaved changes after skipping every step", async () => {
+    renderGuide();
+    await startGuide();
+    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
+    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
+    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
+
+    expect(screen.getByText("done.description")).toBeInTheDocument();
+    expect(screen.queryByText("unsavedChanges")).not.toBeInTheDocument();
+  });
+
   test("drops what was typed in a step when it is skipped", async () => {
     renderGuide();
     await startGuide();
@@ -340,6 +357,11 @@ describe("SetupGuide", () => {
       screen.getByLabelText("emailFrom"),
       "hello@nightjar.test"
     );
+    await userEvent.clear(screen.getByLabelText("contactEmail"));
+    await userEvent.type(
+      screen.getByLabelText("contactEmail"),
+      "typed@nightjar.test"
+    );
     await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
 
     expect(screen.getByText("platformPolicy.description")).toBeInTheDocument();
@@ -349,10 +371,17 @@ describe("SetupGuide", () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalled());
     const body = vi.mocked(api.post).mock.calls[0][1] as {
-      settings: { emailProvider: { provider?: string; fromEmail?: string } };
+      settings: {
+        emailProvider: { provider?: string; fromEmail?: string };
+        instanceCustomization: { title?: string; contactEmail?: string };
+      };
     };
     expect(body.settings.emailProvider.provider).toBeFalsy();
     expect(body.settings.emailProvider.fromEmail).toBeFalsy();
+    expect(body.settings.instanceCustomization).toMatchObject({
+      title: "Nightjar",
+      contactEmail: "hello@nightjar.test",
+    });
   });
 
   test("keeps the saved values when a step is skipped after a save", async () => {

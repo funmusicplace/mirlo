@@ -25,7 +25,7 @@ export const SETTINGS_SECTIONS = [
   { id: "settings-platform-policy", labelKey: "sectionPlatformPolicy" },
   { id: "settings-featured-artists", labelKey: "sectionFeaturedArtists" },
   { id: "settings-stripe", labelKey: "sectionStripe" },
-  { id: "settings-email-provider", labelKey: "sectionEmailProvider" },
+  { id: "settings-email", labelKey: "sectionEmail" },
   { id: "settings-storage", labelKey: "sectionStorage" },
   { id: "settings-policies", labelKey: "sectionPolicies" },
   { id: "settings-trust-levels", labelKey: "sectionTrustLevels" },

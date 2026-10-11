@@ -23,7 +23,7 @@ export default function () {
   GET.apiDoc = {
     summary: "Returns the public settings of this instance",
     description:
-      "Name, colours, hero flag, artist signup policy, trust level names, offered UI languages, how far the first setup went and the Stripe publishable key. Never includes secrets.",
+      "Name, colours, hero flag, artist signup policy, trust level names, offered UI languages, how far the first setup went, the Stripe publishable key, the public contact email and the support email (the contact email when unset). Never includes secrets.",
     responses: {
       200: {
         description: "The public instance settings",
@@ -64,6 +64,8 @@ export default function () {
                   enum: ["welcome", "guide", "done"],
                 },
                 stripePublishableKey: { type: "string" },
+                contactEmail: { type: "string" },
+                supportEmail: { type: "string" },
               },
             },
           },

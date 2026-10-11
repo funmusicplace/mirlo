@@ -17,10 +17,11 @@ import SetupGuideStep from "components/Setup/guide/SetupGuideStep";
 import SetupGuideSummary from "components/Setup/guide/SetupGuideSummary";
 import { countChecks } from "components/Setup/status/SetupChecklist";
 import SystemCheckStep from "components/Setup/status/SystemCheckStep";
+import { cloneDeep, get, has, set, unset } from "lodash";
 import { useSetupStatusQuery } from "queries/admin";
 import { useCompleteInstanceSetupMutation } from "queries/instanceSettings";
 import React from "react";
-import { FormProvider } from "react-hook-form";
+import { FormProvider, Path } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
@@ -45,9 +46,13 @@ const SAVED_STEP_KEYS = ["identity", "email", "platformPolicy"] as const;
 
 type SavedStepKey = (typeof SAVED_STEP_KEYS)[number];
 
-const STEP_FIELDS: Record<SavedStepKey, (keyof FormSettings)[]> = {
-  identity: ["instanceCustomization"],
-  email: ["emailProvider"],
+const STEP_FIELDS: Record<SavedStepKey, Path<FormSettings>[]> = {
+  identity: ["instanceCustomization.title", "instanceCustomization.colors"],
+  email: [
+    "emailProvider",
+    "instanceCustomization.contactEmail",
+    "instanceCustomization.supportEmail",
+  ],
   platformPolicy: [
     "platformPercent",
     "isClosedToPublicArtistSignup",
@@ -161,15 +166,15 @@ const SetupGuide: React.FC = () => {
   const skipStep = () => {
     if (isSavedStep(activeKey)) {
       const defaults = methods.formState.defaultValues ?? {};
-      methods.reset(
-        {
-          ...methods.getValues(),
-          ...Object.fromEntries(
-            STEP_FIELDS[activeKey].map((field) => [field, defaults[field]])
-          ),
-        },
-        { keepDefaultValues: true }
-      );
+      const values = cloneDeep(methods.getValues());
+      STEP_FIELDS[activeKey].forEach((field) => {
+        if (has(defaults, field)) {
+          set(values, field, cloneDeep(get(defaults, field)));
+        } else {
+          unset(values, field);
+        }
+      });
+      methods.reset(values, { keepDefaultValues: true });
     }
     setStatuses((current) =>
       current[activeKey] === "done"

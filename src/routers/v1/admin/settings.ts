@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import logger from "../../../logger";
+import { isValidEmail } from "../../../utils/email";
 import { AppError } from "../../../utils/error";
 import { setCdnUrl } from "../../../utils/images";
 import {
@@ -65,9 +66,13 @@ export default function () {
       }
       const storedSettings =
         (existingSettings.settings as Record<string, unknown> | null) ?? {};
-      const storedTitle = (
-        storedSettings.instanceCustomization as { title?: string } | undefined
-      )?.title?.trim();
+      const storedCustomization = storedSettings.instanceCustomization as
+        | { title?: string; contactEmail?: unknown }
+        | undefined;
+      const storedTitle = storedCustomization?.title?.trim();
+      const hasStoredContactEmail =
+        typeof storedCustomization?.contactEmail === "string" &&
+        storedCustomization.contactEmail.trim() !== "";
       const incomingTitle = settings?.instanceCustomization?.title;
       if (incomingTitle !== undefined && typeof incomingTitle !== "string") {
         throw new AppError({
@@ -86,6 +91,36 @@ export default function () {
           description: "The instance name cannot be removed",
         });
       }
+      const incomingContactEmail =
+        settings?.instanceCustomization?.contactEmail;
+      const incomingSupportEmail =
+        settings?.instanceCustomization?.supportEmail;
+      for (const [label, value] of [
+        ["contact", incomingContactEmail],
+        ["support", incomingSupportEmail],
+      ]) {
+        if (
+          value !== undefined &&
+          (typeof value !== "string" ||
+            (value.trim() !== "" && !isValidEmail(value.trim())))
+        ) {
+          throw new AppError({
+            httpCode: 400,
+            description: `The ${label} email is not a valid email address`,
+          });
+        }
+      }
+      if (
+        hasStoredContactEmail &&
+        settings &&
+        "instanceCustomization" in settings &&
+        !incomingContactEmail?.trim()
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description: "The contact email cannot be removed",
+        });
+      }
       const existingStripe = storedSettings.stripe as
         | Record<string, unknown>
         | undefined;
@@ -96,10 +131,18 @@ export default function () {
       const mergedSettings = {
         ...storedSettings,
         ...settings,
-        ...(typeof incomingTitle === "string" && {
+        ...(settings?.instanceCustomization && {
           instanceCustomization: {
             ...settings.instanceCustomization,
-            title: incomingTitle.trim(),
+            ...(typeof incomingTitle === "string" && {
+              title: incomingTitle.trim(),
+            }),
+            ...(typeof incomingContactEmail === "string" && {
+              contactEmail: incomingContactEmail.trim(),
+            }),
+            ...(typeof incomingSupportEmail === "string" && {
+              supportEmail: incomingSupportEmail.trim(),
+            }),
           },
         }),
         stripe: {

@@ -438,6 +438,164 @@ describe("admin/settings", () => {
       assert.equal(response.statusCode, 400);
     });
 
+    it("should trim the contact email before storing it", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({ platformPercent: 7 });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            instanceCustomization: {
+              title: "Nightjar",
+              contactEmail: "  help@nightjar.test ",
+            },
+          },
+        });
+
+      assert.equal(response.statusCode, 200);
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, any>;
+      assert.equal(
+        stored.instanceCustomization.contactEmail,
+        "help@nightjar.test"
+      );
+    });
+
+    it("should accept an empty contact email while none is set", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({ platformPercent: 7 });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            instanceCustomization: { title: "Nightjar", contactEmail: "" },
+          },
+        });
+
+      assert.equal(response.statusCode, 200);
+    });
+
+    it("should refuse to remove the contact email once it is set", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        instanceCustomization: {
+          title: "Nightjar",
+          contactEmail: "help@nightjar.test",
+        },
+      });
+
+      for (const instanceCustomization of [
+        { title: "Nightjar", contactEmail: " " },
+        { title: "Nightjar" },
+      ]) {
+        const response = await requestApp
+          .post("admin/settings")
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json")
+          .send({ settings: { platformPercent: 7, instanceCustomization } });
+
+        assert.equal(response.statusCode, 400);
+      }
+
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, any>;
+      assert.equal(
+        stored.instanceCustomization.contactEmail,
+        "help@nightjar.test"
+      );
+    });
+
+    it("should reject a contact email that is not an email address", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        instanceCustomization: {
+          title: "Nightjar",
+          contactEmail: "help@nightjar.test",
+        },
+      });
+
+      for (const contactEmail of ["not an email", 42]) {
+        const response = await requestApp
+          .post("admin/settings")
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json")
+          .send({
+            settings: {
+              platformPercent: 7,
+              instanceCustomization: { title: "Nightjar", contactEmail },
+            },
+          });
+
+        assert.equal(response.statusCode, 400);
+      }
+
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, any>;
+      assert.equal(
+        stored.instanceCustomization.contactEmail,
+        "help@nightjar.test"
+      );
+    });
+
+    it("should keep the support email optional but valid", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        instanceCustomization: {
+          title: "Nightjar",
+          contactEmail: "hello@nightjar.test",
+          supportEmail: "help@nightjar.test",
+        },
+      });
+      const post = (supportEmail: string) =>
+        requestApp
+          .post("admin/settings")
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json")
+          .send({
+            settings: {
+              platformPercent: 7,
+              instanceCustomization: {
+                title: "Nightjar",
+                contactEmail: "hello@nightjar.test",
+                supportEmail,
+              },
+            },
+          });
+
+      assert.equal((await post("not an email")).statusCode, 400);
+      assert.equal((await post("")).statusCode, 200);
+
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, any>;
+      assert.equal(stored.instanceCustomization.supportEmail, "");
+    });
+
     it("should save bucketNames: { prefix: 'foo-' } to DB and return it in response", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",

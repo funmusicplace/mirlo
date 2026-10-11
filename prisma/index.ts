@@ -48,6 +48,7 @@ declare global {
       };
       instanceCustomization?: {
         title?: string;
+        contactEmail?: string;
         supportEmail?: string;
         artistId?: string;
         purchaseEmail?: string;
