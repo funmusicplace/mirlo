@@ -93,12 +93,18 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
         const { user } = await findOrCreateUserBasedOnEmail(email);
 
         if (user) {
-          if (user.emailConfirmationToken || user.emailConfirmationExpiration) {
+          if (
+            user.emailConfirmationToken ||
+            user.emailConfirmationExpiration ||
+            user.emailBouncedAt
+          ) {
             await prisma.user.update({
               where: { id: user.id },
               data: {
                 emailConfirmationToken: null,
                 emailConfirmationExpiration: null,
+                emailBouncedAt: null,
+                emailBounceReason: null,
               },
             });
           }

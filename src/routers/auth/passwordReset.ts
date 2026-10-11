@@ -177,6 +177,8 @@ export const passwordResetSetPassword = async (
           passwordResetConfirmationExpiration: null,
           emailConfirmationExpiration: null, // At this point we've validated that the user has an e-mail address
           emailConfirmationToken: null,
+          emailBouncedAt: null,
+          emailBounceReason: null,
           password: await hashPassword(newPassword),
         },
         where: {
