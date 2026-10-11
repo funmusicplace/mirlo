@@ -276,6 +276,17 @@ describe("minio bucket routing", () => {
       assert.equal(key, `incoming/${finalArtistAvatarBucket}/abc123`);
     });
 
+    it("uploadIncomingImageByType(postImage) → mirlo-images / {prefix}/{id}, where it's served from", async () => {
+      await uploadIncomingImageByType(
+        "postImage",
+        "post-id.gif",
+        emptyReadable()
+      );
+      const [bucket, key] = putObjectStub.firstCall.args;
+      assert.equal(bucket, "mirlo-images");
+      assert.equal(key, `${finalPostImageBucket}/post-id.gif`);
+    });
+
     it("uploadIncomingImageByType(image) → mirlo-images with NO path prefix (prefix: undefined)", async () => {
       // The generic 'image' type has prefix: undefined — even in consolidated mode,
       // images are stored at the bucket root without a path prefix.

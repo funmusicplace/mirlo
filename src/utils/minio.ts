@@ -986,30 +986,35 @@ export const getImageFinalBucket = (imageType: ImageType): string =>
 export const imageTypeUsesQueue = (imageType: ImageType): boolean =>
   imageTypeBuckets[imageType].queue;
 
+const incomingImageKey = (imageType: ImageType, fileName: string) => {
+  const { prefix, queue } = imageTypeBuckets[imageType];
+  if (!isConsolidatedMode() || !prefix) return fileName;
+  return queue ? `incoming/${prefix}/${fileName}` : `${prefix}/${fileName}`;
+};
+
 export const uploadIncomingImageByType = async (
   imageType: ImageType,
   fileName: string,
   stream: Readable,
   options?: { contentType?: string }
 ) => {
-  const { incoming, prefix } = imageTypeBuckets[imageType];
-  const bucket = getImagesBucket(incoming);
+  const bucket = getImagesBucket(imageTypeBuckets[imageType].incoming);
   await ensureBucketCached(bucket, true);
-  const key =
-    isConsolidatedMode() && prefix
-      ? `incoming/${prefix}/${fileName}`
-      : fileName;
-  return uploadWrapper(bucket, key, stream, options);
+  return uploadWrapper(
+    bucket,
+    incomingImageKey(imageType, fileName),
+    stream,
+    options
+  );
 };
 
 export const downloadIncomingImageByType = (
   imageType: ImageType,
   imageId: string
 ) => {
-  const { incoming, prefix } = imageTypeBuckets[imageType];
   return getBufferFromStorage(
-    getImagesBucket(incoming),
-    isConsolidatedMode() && prefix ? `incoming/${prefix}/${imageId}` : imageId
+    getImagesBucket(imageTypeBuckets[imageType].incoming),
+    incomingImageKey(imageType, imageId)
   );
 };
 
@@ -1031,10 +1036,9 @@ export const removeIncomingImageByType = (
   imageType: ImageType,
   imageId: string
 ) => {
-  const { incoming, prefix } = imageTypeBuckets[imageType];
   return removeObjectFromStorage(
-    getImagesBucket(incoming),
-    isConsolidatedMode() && prefix ? `incoming/${prefix}/${imageId}` : imageId
+    getImagesBucket(imageTypeBuckets[imageType].incoming),
+    incomingImageKey(imageType, imageId)
   );
 };
 
