@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+import { css, cx } from "@emotion/css";
 import styled from "@emotion/styled";
 import { isEmpty } from "lodash";
 import { useInstanceSettings } from "queries/instanceSettings";
@@ -101,29 +101,32 @@ const Player = () => {
     >
       <PlayerActions />
       <div
-        className={css`
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          position: fixed;
-          width: 100%;
-          z-index: 12;
-          bottom: 0;
-          filter: drop-shadow(
-            0 0 0.1rem
-              color-mix(in srgb, var(--mi-fixed-fg-color) 30%, transparent)
-          );
-
-          background-color: var(--mi-darken-x-background-color);
-
-          --player-link: var(--mi-fixed-fg-color);
-          --player-icon: currentColor;
-          --player-control-border: none;
-
-          @media (max-width: ${bp.small}px) {
+        className={cx(
+          "web-scrobbler-player",
+          css`
+            display: flex;
             flex-direction: column;
-          }
-        `}
+            justify-content: space-between;
+            position: fixed;
+            width: 100%;
+            z-index: 12;
+            bottom: 0;
+            filter: drop-shadow(
+              0 0 0.1rem
+                color-mix(in srgb, var(--mi-fixed-fg-color) 30%, transparent)
+            );
+
+            background-color: var(--mi-darken-x-background-color);
+
+            --player-link: var(--mi-fixed-fg-color);
+            --player-icon: currentColor;
+            --player-control-border: none;
+
+            @media (max-width: ${bp.small}px) {
+              flex-direction: column;
+            }
+          `
+        )}
         id="player"
         role="region"
         aria-label={t("audioPlayer")}

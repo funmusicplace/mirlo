@@ -12,7 +12,7 @@ const AuthorName: React.FC<{
 }> = ({ artist, disableLink }) => {
   const content =
     artist.artistId && !disableLink ? (
-      <Link to={`/${artist.artistId}`} id="player-artist-name">
+      <Link to={`/${artist.artistId}`}>
         {artist.artistName}
       </Link>
     ) : (

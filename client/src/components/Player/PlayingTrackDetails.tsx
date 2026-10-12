@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+import { css, cx } from "@emotion/css";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { TrackTitleContent } from "components/Widget/TrackTitleContent";
 import React from "react";
@@ -37,7 +37,7 @@ export const TrackArtistLinks: React.FC<{
           ) : (
             <Link
               to={`/${artist.artistId}`}
-              id="player-artist-name"
+              className="web-scrobbler-artist"
               target={target}
               rel={target === "_blank" ? "noopener noreferrer" : undefined}
             >
@@ -87,11 +87,14 @@ const PlayingTrackDetails: React.FC<{
         square
         objectFit="contain"
         alt=""
-        className={css`
-          width: 48px;
-          height: 48px;
-          flex-basis: 48px;
-        `}
+        className={cx(
+          "web-scrobbler-track-art",
+          css`
+            width: 48px;
+            height: 48px;
+            flex-basis: 48px;
+          `
+        )}
       />
       <div
         className={css`
