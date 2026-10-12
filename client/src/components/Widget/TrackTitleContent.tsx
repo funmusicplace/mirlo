@@ -36,7 +36,10 @@ export const TrackTitleContent: React.FC<{
   const trackGroupLabel = track.trackGroup.title || tTrackGroup("untitled");
 
   const trackGroupLink = useTrackArtistLinks ? (
-    <Link to={getReleaseUrl(track.trackGroup.artist, track.trackGroup)}>
+    <Link
+      className="web-scrobbler-album"
+      to={getReleaseUrl(track.trackGroup.artist, track.trackGroup)}
+    >
       {trackGroupLabel}
     </Link>
   ) : (
@@ -65,7 +68,7 @@ export const TrackTitleContent: React.FC<{
 
   const titleNode = titleLinkTo ? (
     <Link className="hover:underline! ms-1" to={titleLinkTo}>
-      {track.title ?? ""}
+      <span className="web-scrobbler-track">{track.title ?? ""}</span>
       {track.lyrics && (
         <>
           <MdLyrics aria-hidden className="inline-block ms-1" />

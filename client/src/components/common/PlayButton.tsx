@@ -37,6 +37,7 @@ export const PlayButton: React.FC<{
     >
       {onArtistPage && (
         <ArtistButton
+          className="web-scrobbler-play-button"
           startIcon={<VscPlay />}
           onClick={onPlay ?? onPlayCallback}
           aria-label={`${t("play")}`}
@@ -47,6 +48,7 @@ export const PlayButton: React.FC<{
       )}
       {!onArtistPage && (
         <Button
+          className="web-scrobbler-play-button"
           startIcon={<VscPlay />}
           onClick={onPlay ?? onPlayCallback}
           aria-label={`${t("play")}`}
