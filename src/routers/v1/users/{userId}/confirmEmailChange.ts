@@ -70,6 +70,8 @@ export default function () {
           pendingEmail: null,
           pendingEmailToken: null,
           pendingEmailExpiration: null,
+          emailBouncedAt: null,
+          emailBounceReason: null,
         },
         select: {
           id: true,

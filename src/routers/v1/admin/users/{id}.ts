@@ -61,6 +61,10 @@ export default function () {
           disabledAt:
             disabled === undefined ? undefined : disabled ? new Date() : null,
           spamStrikes: resetSpamStrikes ? 0 : undefined,
+          ...(email !== undefined && {
+            emailBouncedAt: null,
+            emailBounceReason: null,
+          }),
         },
       });
       if (trustLevel !== undefined && req.user) {
@@ -106,6 +110,8 @@ export default function () {
           },
           emailConfirmationToken: true,
           disabledAt: true,
+          emailBouncedAt: true,
+          emailBounceReason: true,
           trustLevel: true,
           spamStrikes: true,
           currency: true,

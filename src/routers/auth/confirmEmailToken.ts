@@ -83,6 +83,8 @@ const confirmEmailToken = async (
       data: {
         emailConfirmationToken: null,
         emailConfirmationExpiration: null,
+        emailBouncedAt: null,
+        emailBounceReason: null,
       },
       where: {
         id: user.id,

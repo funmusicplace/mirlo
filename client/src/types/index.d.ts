@@ -459,6 +459,8 @@ interface UserFromAdmin {
   canCreateArtists: boolean;
   accountingEmail?: string;
   disabledAt?: string | null;
+  emailBouncedAt?: string | null;
+  emailBounceReason?: string | null;
 }
 
 interface UserTrustLevelChange {

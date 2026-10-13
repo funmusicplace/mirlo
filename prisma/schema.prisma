@@ -103,6 +103,8 @@ model User {
   pendingEmail                        String?
   pendingEmailToken                   String?                          @db.Uuid
   pendingEmailExpiration              DateTime?
+  emailBouncedAt                      DateTime?
+  emailBounceReason                   String?
   failedLoginAttempts                 Int                              @default(0)
   lockedUntil                         DateTime?
   disabledAt                          DateTime?
