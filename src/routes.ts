@@ -157,6 +157,7 @@ const routes = [
   "manage/posts/{postId}",
   "activityPub/webfinger",
   "webhooks/stripe/connect",
+  "webhooks/sendgrid",
   "jobs",
   "admin/tasks",
   "admin/tracks",

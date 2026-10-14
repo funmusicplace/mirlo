@@ -302,6 +302,7 @@ export const recordBouncedRecipients = async (bounces: Bounce[]) => {
         prisma.user.updateMany({
           where: {
             email: { equals: escapeLikePattern(email), mode: "insensitive" },
+            emailBouncedAt: null,
           },
           data: {
             emailBouncedAt: new Date(),

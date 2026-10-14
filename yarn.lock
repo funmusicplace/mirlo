@@ -7340,6 +7340,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sendgrid/eventwebhook@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "@sendgrid/eventwebhook@npm:8.0.0"
+  dependencies:
+    starkbank-ecdsa: "npm:^1.1.1"
+  checksum: 10/a1920d3304bb0c7ed394fa9f1bf49670dd5564382897248fa8129a4b129f2bc4d73fab64ad3cfd1a412695e243e8cd862669ac3953b42ebd9a2f719898b5e742
+  languageName: node
+  linkType: hard
+
 "@sendgrid/helpers@npm:^6.5.5":
   version: 6.5.5
   resolution: "@sendgrid/helpers@npm:6.5.5"
@@ -12332,6 +12341,13 @@ __metadata:
   version: 2.10.0
   resolution: "better-result@npm:2.10.0"
   checksum: 10/e3c7051dd466899ba6206890bab524a0e2070f8504d264e7816c80dc2ec18f0ff3d778864497c67534cb64bec1ea074613f917671706c198acce188f980eebc1
+  languageName: node
+  linkType: hard
+
+"big-integer@npm:^1.6.48":
+  version: 1.6.52
+  resolution: "big-integer@npm:1.6.52"
+  checksum: 10/4bc6ae152a96edc9f95020f5fc66b13d26a9ad9a021225a9f0213f7e3dc44269f423aa8c42e19d6ac4a63bb2b22140b95d10be8f9ca7a6d9aa1b22b330d1f514
   languageName: node
   linkType: hard
 
@@ -19523,6 +19539,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"js-sha256@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "js-sha256@npm:0.9.0"
+  checksum: 10/4dc16be74bf4e60d8ee2a482cc822c4d4f5cd060d9f92a060fe3ab1f143cd0946edda552cd274459251c279073df15872a5df47fc4bff054bbc3812e396e990b
+  languageName: node
+  linkType: hard
+
 "js-stringify@npm:^1.0.2":
   version: 1.0.2
   resolution: "js-stringify@npm:1.0.2"
@@ -21629,6 +21652,7 @@ __metadata:
     "@fedify/fedify": "npm:^2.3.4"
     "@fedify/redis": "npm:^2.3.4"
     "@prisma/client": "npm:7.10.0"
+    "@sendgrid/eventwebhook": "npm:^8.0.0"
     "@trivago/prettier-plugin-sort-imports": "npm:^6.0.2"
     "@types/archiver": "npm:^5.3.2"
     "@types/bcryptjs": "npm:^2.4.2"
@@ -26497,6 +26521,16 @@ __metadata:
   version: 2.1.0
   resolution: "standard-as-callback@npm:2.1.0"
   checksum: 10/88bec83ee220687c72d94fd86a98d5272c91d37ec64b66d830dbc0d79b62bfa6e47f53b71646011835fc9ce7fae62739545d13124262b53be4fbb3e2ebad551c
+  languageName: node
+  linkType: hard
+
+"starkbank-ecdsa@npm:^1.1.1":
+  version: 1.2.0
+  resolution: "starkbank-ecdsa@npm:1.2.0"
+  dependencies:
+    big-integer: "npm:^1.6.48"
+    js-sha256: "npm:^0.9.0"
+  checksum: 10/fe0acc543d0467d0dc0436d57cc495c263d11f9b6cb181c565aa6251d78372514eb04ef518232fa6b6dfcc9fd084a553ad32d8be5af41b9bdf0231c4d2121413
   languageName: node
   linkType: hard
 

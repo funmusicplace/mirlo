@@ -6,6 +6,8 @@ import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { EMAIL_REGEX } from "utils/email";
 
+import { API_ROOT } from "../../../constants";
+
 import { FormSettings } from "./settingsForm";
 import SettingsSection from "./SettingsSection";
 const EmailProviderSection: React.FC<{ hideTitle?: boolean }> = ({
@@ -73,6 +75,23 @@ const EmailProviderSection: React.FC<{ hideTitle?: boolean }> = ({
               className="max-w-md"
               {...register("emailProvider.sendgrid.apiKey")}
             />
+          </FormComponent>
+          <FormComponent>
+            <label htmlFor="input-sendgrid-webhook-public-key">
+              {t("sendgridWebhookPublicKey")}
+            </label>
+            <InputEl
+              id="input-sendgrid-webhook-public-key"
+              type="text"
+              className="max-w-md"
+              aria-describedby="hint-sendgrid-webhook-public-key"
+              {...register("emailProvider.sendgrid.webhookPublicKey")}
+            />
+            <small id="hint-sendgrid-webhook-public-key" className="max-w-md">
+              {t("sendgridWebhookPublicKeyHint", {
+                url: `${API_ROOT || window.location.origin}/v1/webhooks/sendgrid`,
+              })}
+            </small>
           </FormComponent>
         </fieldset>
       )}

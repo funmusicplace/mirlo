@@ -22,6 +22,7 @@ declare global {
         fromEmail?: string;
         sendgrid?: {
           apiKey?: string;
+          webhookPublicKey?: string;
         };
         mailgun?: {
           apiKey?: string;

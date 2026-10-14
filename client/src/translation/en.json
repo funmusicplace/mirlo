@@ -1794,6 +1794,8 @@
     "emailFrom": "From email",
     "emailFromInvalid": "Please enter a valid email address",
     "apiKey": "API key",
+    "sendgridWebhookPublicKey": "Event Webhook verification key",
+    "sendgridWebhookPublicKeyHint": "Lets Mirlo record bounced addresses. In SendGrid, point the Event Webhook at {{url}}, select Bounced and Dropped, turn on Signed Event Webhook, and paste the verification key here.",
     "mailgunDomain": "Domain",
     "smtpHost": "SMTP server",
     "smtpPort": "Port",
