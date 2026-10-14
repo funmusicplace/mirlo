@@ -1,8 +1,10 @@
 import {
   SettingsType,
   SetupStage,
+  resolveContactEmail,
   resolveInstanceName,
   resolveSetupStage,
+  resolveSupportEmail,
 } from "../utils/settings";
 import { AvailableLanguage } from "../utils/transifexLanguages";
 import { resolveTrustLevelNames } from "../utils/trustLevel";
@@ -23,6 +25,8 @@ export type InstanceSettings = {
   languages: AvailableLanguage[] | null;
   setupStage: SetupStage;
   stripePublishableKey: string | null;
+  contactEmail: string | null;
+  supportEmail: string | null;
 };
 
 const HEX_COLOR_REGEX = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -62,5 +66,7 @@ export const serializeInstanceSettings = (
     setupStage: resolveSetupStage(settings),
     stripePublishableKey:
       settings.settings?.stripe?.publishableKey?.trim() || null,
+    contactEmail: resolveContactEmail(settings),
+    supportEmail: resolveSupportEmail(settings),
   };
 };

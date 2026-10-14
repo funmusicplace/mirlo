@@ -6,6 +6,7 @@ import { processSingleTrackGroup } from "../../serializers/trackGroup";
 import { checkCloudFlareTurnstile } from "../../utils/cloudflare";
 import { AppError } from "../../utils/error";
 import { getClient } from "../../utils/getClient";
+import { getSiteSettings, resolveSupportEmail } from "../../utils/settings";
 
 export default function () {
   const operations = {
@@ -50,20 +51,23 @@ export default function () {
         },
       });
 
-      await sendMailQueue.add("send-mail", {
-        template: "report-album-problem",
-        message: {
-          to: "hi@mirlo.space",
-        },
-        locals: {
-          client: (await getClient()).applicationUrl,
-          email,
-          reason,
-          description,
-          trackGroupId,
-          trackGroup: processSingleTrackGroup(trackGroup),
-        },
-      });
+      const supportEmail = resolveSupportEmail(await getSiteSettings());
+      if (supportEmail) {
+        await sendMailQueue.add("send-mail", {
+          template: "report-album-problem",
+          message: {
+            to: supportEmail,
+          },
+          locals: {
+            client: (await getClient()).applicationUrl,
+            email,
+            reason,
+            description,
+            trackGroupId,
+            trackGroup: processSingleTrackGroup(trackGroup),
+          },
+        });
+      }
       return res.json({
         message: "success",
       });

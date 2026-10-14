@@ -54,7 +54,7 @@ const IdentitySettingsSection: React.FC<{ hideTitle?: boolean }> = ({
       </FormComponent>
 
       <fieldset>
-        <legend className="mb-2 font-semibold">{t("colors")}</legend>
+        <legend className="mb-2 text-lg font-bold">{t("colors")}</legend>
         <div className="grid grid-cols-4 gap-4 max-md:grid-cols-2">
           {COLOR_FIELDS.map(({ key, labelKey }) => (
             <FormComponent key={key}>

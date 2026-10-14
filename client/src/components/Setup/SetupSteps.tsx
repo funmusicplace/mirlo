@@ -6,6 +6,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { isLight } from "utils/colors";
+import { isValidEmail } from "utils/email";
 import { applyInstanceStyles } from "utils/instanceSettings";
 
 import AccentColorPicker from "./AccentColorPicker";
@@ -15,7 +16,7 @@ import SetupPreview from "./SetupPreview";
 
 type SetupForm = {
   name: string;
-  supportEmail: string;
+  contactEmail: string;
 };
 
 const STEPS = [
@@ -30,9 +31,16 @@ const buttonTextFor = (button: string) =>
 const SetupSteps: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "setup" });
   const instanceSettings = useInstanceSettings();
-  const { register, handleSubmit, watch, setFocus } = useForm<SetupForm>({
-    defaultValues: { name: "", supportEmail: "" },
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setFocus,
+    formState: { errors },
+  } = useForm<SetupForm>({
+    defaultValues: { name: "", contactEmail: "" },
   });
+  const contactEmailError = errors.contactEmail?.message;
   const [stepIndex, setStepIndex] = React.useState(0);
   const [accent, setAccent] = React.useState(instanceSettings.colors.button);
   const settingsForm = useAdminSettingsForm();
@@ -48,7 +56,7 @@ const SetupSteps: React.FC = () => {
     if (stepIndex === 0) {
       setFocus("name");
     } else if (stepIndex === 1) {
-      setFocus("supportEmail");
+      setFocus("contactEmail");
     } else {
       accentSwatchRef.current?.focus();
     }
@@ -77,7 +85,7 @@ const SetupSteps: React.FC = () => {
       }
       const settings = settingsForm.methods.getValues();
       const customization = settings.instanceCustomization ?? {};
-      const supportEmail = data.supportEmail.trim();
+      const contactEmail = data.contactEmail.trim();
       setIsPending(true);
       setIsError(false);
       try {
@@ -86,7 +94,7 @@ const SetupSteps: React.FC = () => {
           instanceCustomization: {
             ...customization,
             title: data.name.trim(),
-            ...(supportEmail && { supportEmail }),
+            contactEmail,
             colors: {
               ...customization.colors,
               button: accent,
@@ -145,9 +153,23 @@ const SetupSteps: React.FC = () => {
           <SetupInput
             id="input-contact-email"
             type="email"
+            required
             placeholder={t("contactPlaceholder")}
-            {...register("supportEmail")}
+            aria-describedby={
+              contactEmailError ? "error-contact-email" : undefined
+            }
+            aria-invalid={!!contactEmailError}
+            {...register("contactEmail", {
+              required: true,
+              validate: (value) =>
+                isValidEmail(value.trim()) || t("contactInvalid"),
+            })}
           />
+          {contactEmailError && (
+            <small id="error-contact-email" className="error">
+              {contactEmailError}
+            </small>
+          )}
         </FormComponent>
       )}
 

@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { getFinishedLanguages, setStoredLanguage } from "i18n";
+import { useInstanceSettings } from "queries/instanceSettings";
 import { Trans, useTranslation } from "react-i18next";
 import { FaInstagram, FaMastodon } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
@@ -12,6 +13,7 @@ import WidthContainer from "./common/WidthContainer";
 
 export const Footer = () => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "footer" });
+  const { contactEmail } = useInstanceSettings();
 
   const finishedLanguages = getFinishedLanguages();
 
@@ -29,7 +31,9 @@ export const Footer = () => {
       links: [
         { text: t("about"), href: "https://docs.mirlo.space" },
         { text: t("documentation"), href: "https://docs.mirlo.space" },
-        { text: t("contact"), href: "mailto:hi@mirlo.space" },
+        ...(contactEmail
+          ? [{ text: t("contact"), href: `mailto:${contactEmail}` }]
+          : []),
       ],
     },
     {

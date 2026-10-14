@@ -113,6 +113,10 @@ export const AdminColorStep: Story = {
       "Nightjar Records"
     );
     await userEvent.click(canvas.getByRole("button", { name: "Continue" }));
+    await userEvent.type(
+      await canvas.findByLabelText("Contact email"),
+      "hello@nightjar.test"
+    );
     await userEvent.click(canvas.getByRole("button", { name: "Continue" }));
     await canvas.findByRole("button", { name: "Open my platform" });
   },

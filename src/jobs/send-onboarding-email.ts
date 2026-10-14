@@ -1,9 +1,11 @@
 import prisma from "@mirlo/prisma";
+import { escape } from "lodash";
 
 import logger from "../logger";
 import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
 import { serializeUser } from "../serializers/user";
 import { getClient } from "../utils/getClient";
+import { getSiteSettings, resolveContactEmail } from "../utils/settings";
 
 const sendOnboardingEmail = async () => {
   const date = new Date();
@@ -24,6 +26,11 @@ const sendOnboardingEmail = async () => {
   });
 
   logger.info(`sendOnboardingEmail: found ${users.length} users`);
+
+  const contactEmail = resolveContactEmail(await getSiteSettings());
+  const contactParagraph = contactEmail
+    ? `<p>If you have any questions or need assistance, feel free to reach out to us at ${escape(contactEmail)}.</p>`
+    : "";
 
   try {
     await Promise.all(
@@ -64,7 +71,7 @@ const sendOnboardingEmail = async () => {
                   user: serializeUser(user),
                   content: `<p>Hi ${user.name || user.email},</p>
                 <p>We noticed that you have created an artist profile on our platform but haven't set up a payment processor yet. To start receiving payments for your music, please set up your payment processor as soon as possible.</p>
-                <p>If you have any questions or need assistance, feel free to reach out to us at hi@mirlo.space.</p>`,
+                ${contactParagraph}`,
 
                   host: process.env.API_DOMAIN,
                   client: (await getClient()).applicationUrl,

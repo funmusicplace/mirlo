@@ -9,7 +9,8 @@ import nodemailer from "nodemailer";
 import sinon from "sinon";
 import { Job, UnrecoverableError } from "bullmq";
 
-import sendMail from "../../src/jobs/send-mail";
+import sendMail, { isEmailTransportConfigured } from "../../src/jobs/send-mail";
+import { SettingsType } from "../../src/utils/settings";
 import { clearTables, createSiteSettings, createUser } from "../utils";
 
 describe("send-mail job", () => {
@@ -585,6 +586,130 @@ describe("send-mail job", () => {
       );
     });
 
+    describe("instance contact email", () => {
+      const renderTemplate = async (
+        template: string,
+        locals: Record<string, unknown>
+      ) => {
+        let sentHtml = "";
+        sandbox.stub(nodemailer, "createTransport").returns({
+          sendMail: (mail: { html?: string }) => {
+            sentHtml = mail.html ?? "";
+            return Promise.resolve({ messageId: "test-contact" });
+          },
+        } as any);
+        const originalMailhog = process.env.MAILHOG_PORT;
+        process.env.MAILHOG_PORT = "1025";
+        try {
+          await sendMail({
+            data: {
+              template,
+              locals,
+              message: { to: "recipient@example.com" },
+            },
+          } as Job);
+        } finally {
+          if (originalMailhog === undefined) {
+            delete process.env.MAILHOG_PORT;
+          } else {
+            process.env.MAILHOG_PORT = originalMailhog;
+          }
+        }
+        return sentHtml;
+      };
+
+      const emailChangeLocals = {
+        newEmail: "new@example.com",
+        clientDomain: "http://localhost",
+        token: "tok",
+        userId: 1,
+      };
+
+      const disabledArtistLocals = {
+        artistName: "Lumen Tide",
+        userName: "Jane",
+        reason: "<p>Spam</p>",
+      };
+
+      const mailgunProvider = {
+        provider: "mailgun" as const,
+        fromEmail: "hello@mirlo.test",
+        mailgun: { apiKey: "key-test", domain: "mg.mirlo.test" },
+      };
+
+      it("points users to the instance contact email", async () => {
+        await createSiteSettings({
+          instanceCustomization: { contactEmail: " help@nightjar.test " },
+          emailProvider: mailgunProvider,
+        });
+
+        const html = await renderTemplate(
+          "confirm-email-change",
+          emailChangeLocals
+        );
+
+        assert.ok(html.includes("please contact help@nightjar.test ASAP"));
+        assert.ok(!html.includes("mirlo.space"));
+      });
+
+      it("leaves the contact line out when the instance has no contact email", async () => {
+        await createSiteSettings({ emailProvider: mailgunProvider });
+
+        const html = await renderTemplate(
+          "confirm-email-change",
+          emailChangeLocals
+        );
+
+        assert.ok(html.includes("new@example.com"));
+        assert.ok(!html.includes("please contact"));
+      });
+
+      it("offers disabled artists an appeal through the support email", async () => {
+        await createSiteSettings({
+          instanceCustomization: {
+            contactEmail: "hello@nightjar.test",
+            supportEmail: "help@nightjar.test",
+          },
+          emailProvider: mailgunProvider,
+        });
+
+        const html = await renderTemplate(
+          "artist-disabled-notification",
+          disabledArtistLocals
+        );
+
+        assert.ok(html.includes("mailto:help@nightjar.test"));
+        assert.ok(!html.includes("hello@nightjar.test"));
+        assert.ok(html.includes("Next steps"));
+      });
+
+      it("falls back to the contact email for appeals without a support email", async () => {
+        await createSiteSettings({
+          instanceCustomization: { contactEmail: "hello@nightjar.test" },
+          emailProvider: mailgunProvider,
+        });
+
+        const html = await renderTemplate(
+          "artist-disabled-notification",
+          disabledArtistLocals
+        );
+
+        assert.ok(html.includes("mailto:hello@nightjar.test"));
+      });
+
+      it("leaves the appeal out when the instance has no contact email", async () => {
+        await createSiteSettings({ emailProvider: mailgunProvider });
+
+        const html = await renderTemplate(
+          "artist-disabled-notification",
+          disabledArtistLocals
+        );
+
+        assert.ok(html.includes("Lumen Tide"));
+        assert.ok(!html.includes("Next steps"));
+      });
+    });
+
     it("should use default when configured fromEmail is invalid", async () => {
       await createSiteSettings({
         emailProvider: {
@@ -770,6 +895,87 @@ describe("send-mail job", () => {
       );
 
       assert.ok(await bouncedAt(user.id));
+    });
+  });
+
+  describe("isEmailTransportConfigured", () => {
+    let originalApiKey: string | undefined;
+    let originalSender: string | undefined;
+
+    beforeEach(() => {
+      originalApiKey = process.env.SENDGRID_API_KEY;
+      originalSender = process.env.SENDGRID_SENDER;
+      delete process.env.SENDGRID_API_KEY;
+      delete process.env.SENDGRID_SENDER;
+    });
+
+    afterEach(() => {
+      if (originalApiKey !== undefined) {
+        process.env.SENDGRID_API_KEY = originalApiKey;
+      }
+      if (originalSender !== undefined) {
+        process.env.SENDGRID_SENDER = originalSender;
+      }
+    });
+
+    const withEmailProvider = (
+      emailProvider: NonNullable<SettingsType["settings"]>["emailProvider"]
+    ) =>
+      ({
+        platformPercent: 7,
+        settings: { emailProvider },
+      }) as SettingsType;
+
+    it("is not configured without a sender address", () => {
+      assert.equal(
+        isEmailTransportConfigured(
+          withEmailProvider({ provider: "smtp", smtp: { host: "mail.test" } })
+        ),
+        false
+      );
+      assert.equal(
+        isEmailTransportConfigured(
+          withEmailProvider({
+            provider: "smtp",
+            fromEmail: "  ",
+            smtp: { host: "mail.test" },
+          })
+        ),
+        false
+      );
+    });
+
+    it("is not configured with a sender that is not a string", () => {
+      assert.equal(
+        isEmailTransportConfigured(
+          withEmailProvider({
+            provider: "smtp",
+            fromEmail: 42 as unknown as string,
+            smtp: { host: "mail.test" },
+          })
+        ),
+        false
+      );
+    });
+
+    it("is configured with a provider, its credentials and a sender", () => {
+      assert.equal(
+        isEmailTransportConfigured(
+          withEmailProvider({
+            provider: "smtp",
+            fromEmail: "hello@nightjar.test",
+            smtp: { host: "mail.test" },
+          })
+        ),
+        true
+      );
+    });
+
+    it("accepts the sender from the environment", () => {
+      process.env.SENDGRID_API_KEY = "SG.env";
+      process.env.SENDGRID_SENDER = "env@nightjar.test";
+
+      assert.equal(isEmailTransportConfigured(withEmailProvider({})), true);
     });
   });
 });

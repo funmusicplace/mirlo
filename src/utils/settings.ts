@@ -29,6 +29,21 @@ export const resolveInstanceName = (settings: SettingsType): string =>
 export const getInstanceName = async (): Promise<string> =>
   resolveInstanceName(await getSiteSettings());
 
+const trimmedEmail = (value: unknown): string | null =>
+  typeof value === "string" ? value.trim() || null : null;
+
+export const resolveFromEmail = (settings: SettingsType): string =>
+  trimmedEmail(settings.settings?.emailProvider?.fromEmail) ||
+  process.env.SENDGRID_SENDER ||
+  "";
+
+export const resolveContactEmail = (settings: SettingsType): string | null =>
+  trimmedEmail(settings.settings?.instanceCustomization?.contactEmail);
+
+export const resolveSupportEmail = (settings: SettingsType): string | null =>
+  trimmedEmail(settings.settings?.instanceCustomization?.supportEmail) ??
+  resolveContactEmail(settings);
+
 export type SetupStage = "welcome" | "guide" | "done";
 
 export const hasInstanceName = (settings: SettingsType): boolean =>

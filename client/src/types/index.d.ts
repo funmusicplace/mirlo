@@ -19,6 +19,8 @@ interface InstanceSettings {
   languages: { short: string; name: string }[] | null;
   setupStage: "welcome" | "guide" | "done";
   stripePublishableKey?: string | null;
+  contactEmail?: string | null;
+  supportEmail?: string | null;
 }
 
 interface SettingsFromAPI {
@@ -35,6 +37,7 @@ interface SettingsFromAPI {
       };
       artistId?: string;
       title?: string;
+      contactEmail?: string;
       supportEmail?: string;
       purchaseEmail?: string;
       showHeroOnHome?: boolean;

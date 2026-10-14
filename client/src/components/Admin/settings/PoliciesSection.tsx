@@ -70,7 +70,7 @@ const PoliciesSection: React.FC = () => {
     const instanceName =
       getValues("instanceCustomization.title")?.trim() || MISSING_INSTANCE_NAME;
     const contactEmail =
-      getValues("instanceCustomization.supportEmail")?.trim() ||
+      getValues("instanceCustomization.contactEmail")?.trim() ||
       MISSING_CONTACT_EMAIL;
     setValue(
       key,

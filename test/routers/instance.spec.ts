@@ -39,6 +39,8 @@ describe("instance", () => {
         languages: null,
         setupStage: "welcome",
         stripePublishableKey: null,
+        contactEmail: null,
+        supportEmail: null,
       });
     });
 
@@ -46,7 +48,8 @@ describe("instance", () => {
       await createSiteSettings({
         instanceCustomization: {
           title: " Nightjar ",
-          supportEmail: "hello@nightjar.test",
+          contactEmail: "hello@nightjar.test",
+          supportEmail: "help@nightjar.test",
           purchaseEmail: "orders@nightjar.test",
           artistId: "7",
           showHeroOnHome: false,
@@ -84,16 +87,32 @@ describe("instance", () => {
       ]);
       assert.deepEqual(Object.keys(result).sort(), [
         "colors",
+        "contactEmail",
         "isClosedToPublicArtistSignup",
         "languages",
         "name",
         "setupStage",
         "showHeroOnHome",
         "stripePublishableKey",
+        "supportEmail",
         "trustLevelNames",
       ]);
       assert.equal(result.stripePublishableKey, "pk_live_public");
+      assert.equal(result.contactEmail, "hello@nightjar.test");
+      assert.equal(result.supportEmail, "help@nightjar.test");
       assert.ok(!JSON.stringify(response.body).includes("secret"));
+    });
+
+    it("falls back to the contact email when no support email is set", async () => {
+      await createSiteSettings({
+        instanceCustomization: { contactEmail: "hello@nightjar.test" },
+      });
+
+      const response = await requestApp
+        .get("instance")
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.result.supportEmail, "hello@nightjar.test");
     });
 
     it("reports the guide stage once the instance has a name", async () => {

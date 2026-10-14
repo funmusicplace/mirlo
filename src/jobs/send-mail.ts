@@ -9,18 +9,26 @@ import postmarkTransport from "nodemailer-postmark-transport";
 import sendgrid from "nodemailer-sendgrid";
 
 import { logger } from "../logger";
-import { sendMailQueue } from "../queues/send-mail-queue";
+import { isValidEmail } from "../utils/email";
 import {
   DEFAULT_INSTANCE_NAME,
   getSiteSettings,
+  resolveContactEmail,
+  resolveFromEmail,
   resolveInstanceName,
+  resolveSupportEmail,
   SettingsType,
 } from "../utils/settings";
 
 const viewsDir = path.join(__dirname, "../emails");
 
+const DEFAULT_FROM_EMAIL = "no-reply@mirlo.space";
+
 export const isEmailTransportConfigured = (settings: SettingsType): boolean => {
   const emailSettings = settings.settings?.emailProvider;
+  if (!isValidEmail(resolveFromEmail(settings))) {
+    return false;
+  }
   return Boolean(
     (emailSettings?.provider === "mailgun" &&
       emailSettings.mailgun?.apiKey &&
@@ -136,27 +144,6 @@ async function createTransport(): Promise<Transporter> {
   }
 }
 
-export const sendErrorEmail = async (error: Error) => {
-  await sendMailQueue.add("send-mail", {
-    template: "error-email",
-    message: {
-      to: "hi@mirlo.space",
-    },
-    locals: {
-      error: JSON.stringify(error.stack),
-      time: new Date().toDateString(),
-    },
-  });
-};
-
-/**
- * Validates if a string is a valid email address
- */
-function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-}
-
 type RecipientValue = string | Mail.Address;
 
 const splitRecipientString = (value: string): string[] =>
@@ -242,34 +229,45 @@ const dedupeRecipients = (message: Mail.Options): Mail.Options => {
 /**
  * Gets the 'from' email address and the instance name from settings
  */
-async function getSender(): Promise<{
+async function getEmailContext(): Promise<{
   fromEmail: string;
   instanceName: string;
+  contactEmail: string | null;
+  supportEmail: string | null;
 }> {
   try {
     const settings = await getSiteSettings();
-    const emailSettings = settings.settings?.emailProvider;
     const instanceName = resolveInstanceName(settings);
+    const contactEmail = resolveContactEmail(settings);
+    const supportEmail = resolveSupportEmail(settings);
 
-    const fromEmail =
-      emailSettings?.fromEmail ??
-      process.env.SENDGRID_SENDER ??
-      "no-reply@mirlo.space";
+    const configuredFromEmail = resolveFromEmail(settings);
+    if (!configuredFromEmail) {
+      logger.warn(`No from email configured, using ${DEFAULT_FROM_EMAIL}`);
+    }
+    const fromEmail = configuredFromEmail || DEFAULT_FROM_EMAIL;
 
     // Validate the email
     if (!isValidEmail(fromEmail)) {
       logger.warn(
         `Invalid from email configured: "${fromEmail}", using default instead`
       );
-      return { fromEmail: "no-reply@mirlo.space", instanceName };
+      return {
+        fromEmail: DEFAULT_FROM_EMAIL,
+        instanceName,
+        contactEmail,
+        supportEmail,
+      };
     }
 
-    return { fromEmail, instanceName };
+    return { fromEmail, instanceName, contactEmail, supportEmail };
   } catch (err) {
     logger.error("Error getting from email, using default", err);
     return {
-      fromEmail: process.env.SENDGRID_SENDER ?? "no-reply@mirlo.space",
+      fromEmail: process.env.SENDGRID_SENDER || DEFAULT_FROM_EMAIL,
       instanceName: DEFAULT_INSTANCE_NAME,
+      contactEmail: null,
+      supportEmail: null,
     };
   }
 }
@@ -327,7 +325,8 @@ export const sendMail = async <T>(job: {
   logger.info(`sendMail: sending: ${job.data.template}`);
   try {
     const transport = await createTransport();
-    const { fromEmail, instanceName } = await getSender();
+    const { fromEmail, instanceName, contactEmail, supportEmail } =
+      await getEmailContext();
     const message = dedupeRecipients(job.data.message);
 
     const email = new Email({
@@ -356,6 +355,8 @@ export const sendMail = async <T>(job: {
       ...(job.data.locals as Record<string, unknown>),
       fromEmail,
       instanceName,
+      contactEmail,
+      supportEmail,
     };
 
     if (

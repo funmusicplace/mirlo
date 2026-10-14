@@ -61,6 +61,7 @@ function makeSettings(overrides: object = {}) {
         platformPercent: 10,
         instanceCustomization: {
           title: "Nightjar",
+          contactEmail: "hello@nightjar.test",
           colors: {
             button: "#be3455",
             buttonText: "#ffffff",
@@ -328,6 +329,49 @@ describe("Settings", () => {
     });
   });
 
+  test("submits the edited contact email", async () => {
+    renderSettings();
+
+    await waitFor(() => screen.getByDisplayValue("10"));
+
+    await userEvent.clear(screen.getByLabelText("contactEmail"));
+    await userEvent.type(
+      screen.getByLabelText("contactEmail"),
+      "help@nightjar.test"
+    );
+    await userEvent.click(screen.getByRole("button", { name: /save/i }));
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith(
+        "admin/settings",
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            instanceCustomization: expect.objectContaining({
+              contactEmail: "help@nightjar.test",
+            }),
+          }),
+        })
+      );
+    });
+  });
+
+  test("refuses to save a contact email that is not an email address", async () => {
+    vi.mocked(api.post).mockClear();
+    renderSettings();
+
+    await waitFor(() => screen.getByDisplayValue("10"));
+
+    await userEvent.clear(screen.getByLabelText("contactEmail"));
+    await userEvent.type(
+      screen.getByLabelText("contactEmail"),
+      "admin@localhost"
+    );
+    await userEvent.click(screen.getByRole("button", { name: /save/i }));
+
+    expect(await screen.findByText("contactEmailInvalid")).toBeInTheDocument();
+    expect(api.post).not.toHaveBeenCalled();
+  });
+
   test("links to the setup guide while the setup is not finished", async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
@@ -364,7 +408,7 @@ describe("Settings", () => {
 
     expect(screen.getByText("generalSettings")).toBeInTheDocument();
     expect(screen.getByText("stripeSettings")).toBeInTheDocument();
-    expect(screen.getByText("emailProviderSettings")).toBeInTheDocument();
+    expect(screen.getByText("emailSettings")).toBeInTheDocument();
     expect(screen.getByText("storage")).toBeInTheDocument();
     expect(screen.getByText("trustLevels")).toBeInTheDocument();
     expect(screen.getByText("security")).toBeInTheDocument();

@@ -1,17 +1,19 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-
-import { clearTables, createUser } from "../utils";
-
-import prisma from "@mirlo/prisma";
-import assert from "assert";
 import sinon from "sinon";
+
+import sendOnboardingEmail from "../../src/jobs/send-onboarding-email";
 import {
   sendMailQueue,
   sendMailQueueEvents,
 } from "../../src/queues/send-mail-queue";
-import sendOnboardingEmail from "../../src/jobs/send-onboarding-email";
+import { clearTables, createSiteSettings, createUser } from "../utils";
+
+import prisma from "@mirlo/prisma";
+
+import assert from "assert";
+
 import { faker } from "@faker-js/faker";
 
 describe("send-onboarding-email", () => {
@@ -69,6 +71,38 @@ describe("send-onboarding-email", () => {
     assert.equal(args[0], "send-mail");
     const data = args[1];
     assert.equal(data.template, "admin-announcement");
+    assert.ok(!data.locals.content.includes("reach out"));
+  });
+
+  it("should point artists to the instance contact email", async () => {
+    const stub = sinon.stub(sendMailQueue, "add");
+    await createSiteSettings({
+      instanceCustomization: { contactEmail: "help@nightjar.test" },
+    });
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 2);
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+      receivePlatformEmails: true,
+      emailConfirmationToken: null,
+      createdAt: faker.date.recent({ days: 3, refDate: yesterday }),
+    });
+    await prisma.profile.create({
+      data: {
+        name: "Test artist",
+        urlSlug: "test-artist",
+        userId: artistUser.id,
+        enabled: true,
+      },
+    });
+
+    await sendOnboardingEmail();
+
+    assert.equal(stub.calledOnce, true);
+    assert.ok(
+      stub.getCall(0).args[1].locals.content.includes("help@nightjar.test")
+    );
   });
 
   it("should not send onboarding email to user who recently received an email", async () => {

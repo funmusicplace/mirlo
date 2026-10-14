@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { WidthWrapper } from "components/common/WidthContainer";
+import { useInstanceSettings } from "queries/instanceSettings";
 import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
@@ -37,6 +38,7 @@ function Index() {
   const { t } = useTranslation("translation", { keyPrefix: "checkoutError" });
   const [searchParams] = useSearchParams();
   const { artistId } = useParams<RouteParams>();
+  const { supportEmail } = useInstanceSettings();
 
   const reason = (searchParams.get("reason") ?? "").toLowerCase();
   const messageKey = REASON_TRANSLATION_MAP[reason] ?? DEFAULT_MESSAGE_KEY;
@@ -72,7 +74,11 @@ function Index() {
           t={t}
           i18nKey={messageKey}
           components={{
-            support: <a href="mailto:hi@mirlo.space"></a>,
+            support: supportEmail ? (
+              <a href={`mailto:${supportEmail}`}></a>
+            ) : (
+              <span />
+            ),
           }}
         />
       </p>

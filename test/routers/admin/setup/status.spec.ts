@@ -78,7 +78,11 @@ describe("admin/setup/status", () => {
       });
       const row = await createSiteSettings({
         instanceCustomization: { title: "Nightjar" },
-        emailProvider: { provider: "smtp", smtp: { host: "mail.test" } },
+        emailProvider: {
+          provider: "smtp",
+          fromEmail: "hello@nightjar.test",
+          smtp: { host: "mail.test" },
+        },
       });
       await prisma.settings.update({
         where: { id: row.id },

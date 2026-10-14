@@ -124,10 +124,7 @@ function Index() {
                     components={{
                       strong: <strong></strong>,
                       content: (
-                        <Link
-                          to="https://mirlo.space/pages/content-policy"
-                          target="_blank"
-                        ></Link>
+                        <Link to="/pages/content-policy" target="_blank"></Link>
                       ),
                     }}
                   />

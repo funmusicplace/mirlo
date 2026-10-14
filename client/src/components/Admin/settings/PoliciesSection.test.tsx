@@ -36,7 +36,7 @@ describe("PoliciesSection", () => {
       contentPolicy: "Our own.",
       instanceCustomization: {
         title: "Nightjar",
-        supportEmail: "hello@nightjar.test",
+        contactEmail: "hello@nightjar.test",
       },
     });
 
@@ -98,7 +98,7 @@ describe("PoliciesSection", () => {
       contentPolicy: "Our own.",
       instanceCustomization: {
         title: "Nightjar",
-        supportEmail: "hello@nightjar.test",
+        contactEmail: "hello@nightjar.test",
       },
     });
 

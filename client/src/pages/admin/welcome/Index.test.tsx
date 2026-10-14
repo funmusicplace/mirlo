@@ -87,12 +87,10 @@ const clickOpenMyPlatform = async () => {
   await userEvent.click(button);
 };
 
-const fillFirstTwoSteps = async (email?: string) => {
+const fillFirstTwoSteps = async (email = "hello@nightjar.test") => {
   await userEvent.type(screen.getByLabelText("nameLabel"), "Nightjar");
   await userEvent.click(screen.getByRole("button", { name: "continue" }));
-  if (email) {
-    await userEvent.type(screen.getByLabelText("contactLabel"), email);
-  }
+  await userEvent.type(screen.getByLabelText("contactLabel"), email);
   await userEvent.click(screen.getByRole("button", { name: "continue" }));
 };
 
@@ -179,7 +177,7 @@ describe("Welcome", () => {
     expect(lastSavedCustomization()).toEqual({
       artistId: "7",
       title: "Nightjar",
-      supportEmail: "hello@nightjar.test",
+      contactEmail: "hello@nightjar.test",
       colors: {
         button: "#eda100",
         buttonText: "#000000",
@@ -190,23 +188,16 @@ describe("Welcome", () => {
     await waitFor(() => expect(assign).toHaveBeenCalledWith("/admin/setup"));
   });
 
-  test("leaves the contact email out when it is skipped", async () => {
+  test("stays on the contact step without a valid contact email", async () => {
     renderWelcome("welcome");
 
-    await fillFirstTwoSteps();
-    await clickOpenMyPlatform();
+    await fillFirstTwoSteps("admin@localhost");
 
-    await waitFor(() => expect(api.post).toHaveBeenCalled());
-    expect(lastSavedCustomization()).toEqual({
-      artistId: "7",
-      title: "Nightjar",
-      colors: {
-        button: "#be3455",
-        buttonText: "#ffffff",
-        background: "#ffffff",
-        text: "#000000",
-      },
-    });
+    expect(screen.getByText("contactLead")).toBeInTheDocument();
+    expect(screen.getByLabelText("contactLabel")).toHaveAccessibleDescription(
+      "contactInvalid"
+    );
+    expect(api.post).not.toHaveBeenCalled();
   });
 
   test("stays on the first step without a name", async () => {
