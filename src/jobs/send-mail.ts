@@ -9,10 +9,12 @@ import postmarkTransport from "nodemailer-postmark-transport";
 import sendgrid from "nodemailer-sendgrid";
 
 import { logger } from "../logger";
+import { isValidEmail } from "../utils/email";
 import {
   DEFAULT_INSTANCE_NAME,
   getSiteSettings,
   resolveContactEmail,
+  resolveFromEmail,
   resolveInstanceName,
   resolveSupportEmail,
   SettingsType,
@@ -20,8 +22,13 @@ import {
 
 const viewsDir = path.join(__dirname, "../emails");
 
+const DEFAULT_FROM_EMAIL = "no-reply@mirlo.space";
+
 export const isEmailTransportConfigured = (settings: SettingsType): boolean => {
   const emailSettings = settings.settings?.emailProvider;
+  if (!isValidEmail(resolveFromEmail(settings))) {
+    return false;
+  }
   return Boolean(
     (emailSettings?.provider === "mailgun" &&
       emailSettings.mailgun?.apiKey &&
@@ -137,14 +144,6 @@ async function createTransport(): Promise<Transporter> {
   }
 }
 
-/**
- * Validates if a string is a valid email address
- */
-function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-}
-
 type RecipientValue = string | Mail.Address;
 
 const splitRecipientString = (value: string): string[] =>
@@ -238,15 +237,15 @@ async function getEmailContext(): Promise<{
 }> {
   try {
     const settings = await getSiteSettings();
-    const emailSettings = settings.settings?.emailProvider;
     const instanceName = resolveInstanceName(settings);
     const contactEmail = resolveContactEmail(settings);
     const supportEmail = resolveSupportEmail(settings);
 
-    const fromEmail =
-      emailSettings?.fromEmail ??
-      process.env.SENDGRID_SENDER ??
-      "no-reply@mirlo.space";
+    const configuredFromEmail = resolveFromEmail(settings);
+    if (!configuredFromEmail) {
+      logger.warn(`No from email configured, using ${DEFAULT_FROM_EMAIL}`);
+    }
+    const fromEmail = configuredFromEmail || DEFAULT_FROM_EMAIL;
 
     // Validate the email
     if (!isValidEmail(fromEmail)) {
@@ -254,7 +253,7 @@ async function getEmailContext(): Promise<{
         `Invalid from email configured: "${fromEmail}", using default instead`
       );
       return {
-        fromEmail: "no-reply@mirlo.space",
+        fromEmail: DEFAULT_FROM_EMAIL,
         instanceName,
         contactEmail,
         supportEmail,
@@ -265,7 +264,7 @@ async function getEmailContext(): Promise<{
   } catch (err) {
     logger.error("Error getting from email, using default", err);
     return {
-      fromEmail: process.env.SENDGRID_SENDER ?? "no-reply@mirlo.space",
+      fromEmail: process.env.SENDGRID_SENDER || DEFAULT_FROM_EMAIL,
       instanceName: DEFAULT_INSTANCE_NAME,
       contactEmail: null,
       supportEmail: null,

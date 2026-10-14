@@ -32,6 +32,11 @@ export const getInstanceName = async (): Promise<string> =>
 const trimmedEmail = (value: unknown): string | null =>
   typeof value === "string" ? value.trim() || null : null;
 
+export const resolveFromEmail = (settings: SettingsType): string =>
+  trimmedEmail(settings.settings?.emailProvider?.fromEmail) ||
+  process.env.SENDGRID_SENDER ||
+  "";
+
 export const resolveContactEmail = (settings: SettingsType): string | null =>
   trimmedEmail(settings.settings?.instanceCustomization?.contactEmail);
 

@@ -77,6 +77,36 @@ describe("admin/settings", () => {
       assert.equal(response.body.result.settings.stripe?.key, undefined);
     });
 
+    it("should return the stored sender and add no empty one", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      const row = await createSiteSettings({ platformPercent: 7 });
+      const get = () =>
+        requestApp
+          .get("admin/settings")
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json");
+
+      assert.equal((await get()).body.result.settings.emailProvider, undefined);
+
+      await prisma.settings.update({
+        where: { id: row.id },
+        data: {
+          settings: {
+            platformPercent: 7,
+            emailProvider: { fromEmail: " hello@nightjar.test " },
+          },
+        },
+      });
+
+      assert.equal(
+        (await get()).body.result.settings.emailProvider.fromEmail,
+        "hello@nightjar.test"
+      );
+    });
+
     it("should return keyConfigured: true and no raw key when a stripe key is set", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",

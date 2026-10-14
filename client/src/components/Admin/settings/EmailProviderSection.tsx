@@ -113,6 +113,7 @@ const EmailProviderSection: React.FC<{ hideTitle?: boolean }> = ({
             id="input-email-from"
             type="text"
             className="max-w-md"
+            required={!!provider}
             aria-describedby={fromEmailError ? "error-email-from" : undefined}
             aria-invalid={!!fromEmailError}
             {...register("emailProvider.fromEmail", {

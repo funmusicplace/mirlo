@@ -12,7 +12,11 @@ import {
   ensureAllBucketsExist,
 } from "../../../utils/minio";
 import { clearPageCache } from "../../../utils/pageCache";
-import { getSiteSettings } from "../../../utils/settings";
+import {
+  getSiteSettings,
+  resolveFromEmail,
+  SettingsType,
+} from "../../../utils/settings";
 import { refreshStripeClient } from "../../../utils/stripe";
 import { isTrustLevelNames } from "../../../utils/trustLevel";
 
@@ -25,7 +29,9 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     try {
       const settings = await getSiteSettings();
-      return res.status(200).json({ result: maskStripeKey(settings) });
+      return res
+        .status(200)
+        .json({ result: maskStripeKey(withResolvedSender(settings)) });
     } catch (e) {
       next(e);
     }
@@ -184,13 +190,32 @@ export default function () {
       }
       clearPageCache();
       const refreshedSettings = await getSiteSettings();
-      return res.status(200).json({ result: maskStripeKey(refreshedSettings) });
+      return res
+        .status(200)
+        .json({ result: maskStripeKey(withResolvedSender(refreshedSettings)) });
     } catch (e) {
       next(e);
     }
   }
 
   return operations;
+}
+
+function withResolvedSender(settings: SettingsType): SettingsType {
+  const fromEmail = resolveFromEmail(settings);
+  if (!settings.settings || !fromEmail) {
+    return settings;
+  }
+  return {
+    ...settings,
+    settings: {
+      ...settings.settings,
+      emailProvider: {
+        ...settings.settings.emailProvider,
+        fromEmail,
+      },
+    },
+  };
 }
 
 function maskStripeKey(settings: object) {

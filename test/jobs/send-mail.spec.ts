@@ -9,7 +9,8 @@ import nodemailer from "nodemailer";
 import sinon from "sinon";
 import { Job, UnrecoverableError } from "bullmq";
 
-import sendMail from "../../src/jobs/send-mail";
+import sendMail, { isEmailTransportConfigured } from "../../src/jobs/send-mail";
+import { SettingsType } from "../../src/utils/settings";
 import { clearTables, createSiteSettings, createUser } from "../utils";
 
 describe("send-mail job", () => {
@@ -894,6 +895,87 @@ describe("send-mail job", () => {
       );
 
       assert.ok(await bouncedAt(user.id));
+    });
+  });
+
+  describe("isEmailTransportConfigured", () => {
+    let originalApiKey: string | undefined;
+    let originalSender: string | undefined;
+
+    beforeEach(() => {
+      originalApiKey = process.env.SENDGRID_API_KEY;
+      originalSender = process.env.SENDGRID_SENDER;
+      delete process.env.SENDGRID_API_KEY;
+      delete process.env.SENDGRID_SENDER;
+    });
+
+    afterEach(() => {
+      if (originalApiKey !== undefined) {
+        process.env.SENDGRID_API_KEY = originalApiKey;
+      }
+      if (originalSender !== undefined) {
+        process.env.SENDGRID_SENDER = originalSender;
+      }
+    });
+
+    const withEmailProvider = (
+      emailProvider: NonNullable<SettingsType["settings"]>["emailProvider"]
+    ) =>
+      ({
+        platformPercent: 7,
+        settings: { emailProvider },
+      }) as SettingsType;
+
+    it("is not configured without a sender address", () => {
+      assert.equal(
+        isEmailTransportConfigured(
+          withEmailProvider({ provider: "smtp", smtp: { host: "mail.test" } })
+        ),
+        false
+      );
+      assert.equal(
+        isEmailTransportConfigured(
+          withEmailProvider({
+            provider: "smtp",
+            fromEmail: "  ",
+            smtp: { host: "mail.test" },
+          })
+        ),
+        false
+      );
+    });
+
+    it("is not configured with a sender that is not a string", () => {
+      assert.equal(
+        isEmailTransportConfigured(
+          withEmailProvider({
+            provider: "smtp",
+            fromEmail: 42 as unknown as string,
+            smtp: { host: "mail.test" },
+          })
+        ),
+        false
+      );
+    });
+
+    it("is configured with a provider, its credentials and a sender", () => {
+      assert.equal(
+        isEmailTransportConfigured(
+          withEmailProvider({
+            provider: "smtp",
+            fromEmail: "hello@nightjar.test",
+            smtp: { host: "mail.test" },
+          })
+        ),
+        true
+      );
+    });
+
+    it("accepts the sender from the environment", () => {
+      process.env.SENDGRID_API_KEY = "SG.env";
+      process.env.SENDGRID_SENDER = "env@nightjar.test";
+
+      assert.equal(isEmailTransportConfigured(withEmailProvider({})), true);
     });
   });
 });
