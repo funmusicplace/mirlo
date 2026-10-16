@@ -1,11 +1,13 @@
-import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../../../auth/passport";
-import busboy from "connect-busboy";
-import { processPostImage } from "../../../../../queues/processImages";
-import { doesPostBelongToUser } from "../../../../../utils/post";
-import { finalPostImageBucket } from "../../../../../utils/minio";
-import { generateFullStaticImageUrl } from "../../../../../utils/images";
 import prisma from "@mirlo/prisma";
+import busboy from "connect-busboy";
+import { NextFunction, Request, Response } from "express";
+
+import { userAuthenticated } from "../../../../../auth/passport";
+import { processPostImage } from "../../../../../queues/processImages";
+import { AppError } from "../../../../../utils/error";
+import { generateFullStaticImageUrl } from "../../../../../utils/images";
+import { finalPostImageBucket } from "../../../../../utils/minio";
+import { doesPostBelongToUser } from "../../../../../utils/post";
 
 type Params = {
   postId: string;
@@ -65,17 +67,21 @@ export default function () {
           id: imageId as string,
         },
       });
-      if (image) {
-        res.json({
-          result: {
-            jobId: generateFullStaticImageUrl(
-              image.id,
-              finalPostImageBucket,
-              image.extension
-            ),
-          },
-        });
+      if (!image) {
+        throw new AppError({ httpCode: 404, description: "Image not found" });
       }
+      const src = generateFullStaticImageUrl(
+        image.id,
+        finalPostImageBucket,
+        image.extension
+      );
+      res.json({
+        result: {
+          src,
+          jobId: src,
+          imageId: image.id,
+        },
+      });
     } catch (error) {
       next(error);
     }

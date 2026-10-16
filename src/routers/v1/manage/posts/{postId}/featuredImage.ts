@@ -1,9 +1,10 @@
-import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { Request, Response } from "express";
+
 import { userAuthenticated } from "../../../../../auth/passport";
-import { doesPostBelongToUser } from "../../../../../utils/post";
 import { serializePost } from "../../../../../serializers/post";
-import { AppError } from "../../../../../utils/error";
+import { doesPostBelongToUser } from "../../../../../utils/post";
+import { postImagesForContent } from "../../../../../utils/postContent";
 
 export default function () {
   const operations = {
@@ -18,6 +19,7 @@ export default function () {
       const updatedPost = await prisma.post.update({
         where: { id: Number(postId) },
         data: { featuredImageId },
+        include: { images: postImagesForContent },
       });
       res.json({
         result: serializePost(updatedPost, undefined, undefined, true),

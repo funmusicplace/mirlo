@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 
 import { singleInclude, whereForVisibleProfile } from "../utils/artist";
 import { merchImagesInclude } from "../utils/merch";
+import { postImagesForContent } from "../utils/postContent";
 
 export async function fetchArtistMetadata(artistSlug: string): Promise<any> {
   return await prisma.profile.findFirst({
@@ -64,6 +65,7 @@ export async function fetchPostMetadata(
     include: {
       profile: true,
       featuredImage: true,
+      images: postImagesForContent,
       tracks: { orderBy: { order: "asc" } },
     },
   });

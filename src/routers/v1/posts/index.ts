@@ -11,6 +11,7 @@ import {
   checkIsUserSubscriber,
   getEditableProfileIds,
 } from "../../../utils/artist";
+import { postImagesForContent } from "../../../utils/postContent";
 
 export default function () {
   const operations = {
@@ -78,6 +79,7 @@ export default function () {
         include: {
           profile: true,
           featuredImage: true,
+          images: postImagesForContent,
           tracks: {
             where: whereForVisiblePostTrack(),
             orderBy: {

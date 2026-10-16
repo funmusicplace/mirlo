@@ -3,6 +3,11 @@ import { Prisma, Profile, ProfileAvatar, Post } from "@mirlo/prisma/client";
 import { addSizesToImage } from "../utils/artist";
 import { generateFullStaticImageUrl } from "../utils/images";
 import { finalArtistAvatarBucket, finalPostImageBucket } from "../utils/minio";
+import {
+  ContentImage,
+  postImagesForContent,
+  resolvePostContent,
+} from "../utils/postContent";
 import { whereForVisibleTrackGroup } from "../utils/trackGroup";
 import { isTrackPlayable } from "../utils/trackPlayability";
 
@@ -66,6 +71,7 @@ export const postIncludeForUser = (userId?: number) => ({
     orderBy: { order: "asc" as const },
   },
   featuredImage: true,
+  images: postImagesForContent,
   minimumSubscriptionTier: true,
   postSubscriptionTiers: true,
   profile: {
@@ -81,6 +87,8 @@ type PostInput = Partial<Post> & {
   profileId?: number | null;
   profile?: (Partial<Profile> & { avatar?: ProfileAvatar | null }) | null;
 } & { featuredImage?: { extension: string; id: string } | null } & {
+  images: ContentImage[];
+} & {
   tracks?: {
     trackId: number;
     track?: {
@@ -106,7 +114,8 @@ export const serializePost = <T extends PostInput>(
   isContentHidden: boolean;
 } => {
   const contentVisible = !!(canSeeContent || post.isPublic);
-  const { profile, profileId, ...postRest } = post;
+  const { profile, profileId, images: _images, ...postRest } = post;
+  const content = resolvePostContent(post);
 
   return {
     ...postRest,
@@ -150,9 +159,7 @@ export const serializePost = <T extends PostInput>(
       ),
     },
     isContentHidden: !contentVisible,
-    content: !contentVisible
-      ? extractFirstParagraph(post.content ?? "")
-      : post.content,
+    content: !contentVisible ? extractFirstParagraph(content ?? "") : content,
   } as Serialized<T> & {
     trackCount: number;
     isContentHidden: boolean;

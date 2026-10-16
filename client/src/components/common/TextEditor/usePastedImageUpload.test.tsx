@@ -254,7 +254,7 @@ describe("usePastedImageUpload", () => {
     const reloadImages = vi.fn();
     const fetchMock = setupFetchMock();
     const deferred = createDeferred<{
-      result: { jobId: string; imageId: string };
+      result: { src: string; imageId: string };
     }>();
 
     vi.mocked(api.uploadFile).mockImplementation(() => deferred.promise);
@@ -278,7 +278,7 @@ describe("usePastedImageUpload", () => {
     });
 
     deferred.resolve({
-      result: { jobId: "uploaded-src", imageId: "image-123" },
+      result: { src: "uploaded-src", imageId: "image-123" },
     });
 
     await act(async () => {
@@ -308,7 +308,7 @@ describe("usePastedImageUpload", () => {
     const reloadImages = vi.fn();
     const fetchMock = setupFetchMock();
     const deferred = createDeferred<{
-      result: { jobId: string; imageId: string };
+      result: { src: string; imageId: string };
     }>();
 
     vi.mocked(api.uploadFile).mockImplementation(() => deferred.promise);
@@ -332,7 +332,7 @@ describe("usePastedImageUpload", () => {
     });
 
     deferred.resolve({
-      result: { jobId: "hosted-image", imageId: "image-456" },
+      result: { src: "hosted-image", imageId: "image-456" },
     });
 
     await act(async () => {

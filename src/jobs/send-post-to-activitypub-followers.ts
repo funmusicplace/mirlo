@@ -8,6 +8,7 @@ import {
 } from "../activityPub/utils";
 import logger from "../logger";
 import { getClient } from "../utils/getClient";
+import { postImagesForContent } from "../utils/postContent";
 
 /** * Sends published posts to ActivityPub followers' inboxes
  * This job should run periodically to deliver new posts to federated servers
@@ -28,6 +29,7 @@ const sendPostToActivityPubFollowers = async () => {
       id: true,
       title: true,
       content: true,
+      images: postImagesForContent,
       urlSlug: true,
       publishedAt: true,
       profile: {

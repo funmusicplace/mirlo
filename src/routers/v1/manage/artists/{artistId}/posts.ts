@@ -6,8 +6,9 @@ import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { AppError } from "../../../../../utils/error";
 import { serializePost } from "../../../../../serializers/post";
+import { AppError } from "../../../../../utils/error";
+import { postImagesForContent } from "../../../../../utils/postContent";
 
 export default function () {
   const operations = {
@@ -44,7 +45,7 @@ export default function () {
         prisma.post.findMany({
           where,
           orderBy: { publishedAt: "desc" },
-          include: { featuredImage: true },
+          include: { featuredImage: true, images: postImagesForContent },
           skip: Number(skip),
           take: Number(take),
         }),
@@ -139,6 +140,7 @@ export default function () {
             profile: { connect: { id: Number(artistId) } },
             minimumSubscriptionTier: { connect: { id: validTier.id } },
           },
+          include: { images: postImagesForContent },
         });
         res.json({
           result: serializePost(result, undefined, undefined, true),

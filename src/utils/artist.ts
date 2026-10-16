@@ -25,6 +25,7 @@ import {
   finalCoversBucket,
   removeImagesByType,
 } from "./minio";
+import { postImagesForContent } from "./postContent";
 import { getSiteSettings } from "./settings";
 import stripe from "./stripe";
 import {
@@ -741,6 +742,7 @@ export const singleInclude = (queryOptions?: {
       },
       include: {
         featuredImage: true,
+        images: postImagesForContent,
       },
     },
     user: {

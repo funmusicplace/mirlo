@@ -40,6 +40,7 @@ import {
   finalArtistAvatarBucket,
   finalArtistBackgroundBucket,
 } from "../utils/minio";
+import { postImagesForContent, resolvePostContent } from "../utils/postContent";
 import { isPost, isTrackGroup } from "../utils/typeguards";
 
 export async function ensureArtistHasApKeys(urlSlug: string) {
@@ -197,7 +198,7 @@ federation
           return buildPostCreateActivity(
             ctx,
             identifier,
-            item,
+            { ...item, images: [] },
             client.applicationUrl,
             parseMentionsFromContent(item.content ?? "")
           );
@@ -299,6 +300,7 @@ const findAPPostById = async (id: number) => {
     },
     include: {
       profile: true,
+      images: postImagesForContent,
     },
   });
 };
@@ -319,7 +321,7 @@ federation.setObjectDispatcher(
       attribution: ctx.getActorUri(identifier),
       to: PUBLIC_COLLECTION,
       name: post.title,
-      content: post.content ?? undefined,
+      content: resolvePostContent(post) ?? undefined,
       published: getTemporal(post.publishedAt),
       url: getPostUrl(client.applicationUrl, identifier, post),
     });

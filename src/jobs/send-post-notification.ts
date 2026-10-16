@@ -7,6 +7,7 @@ import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
 import { serializePost } from "../serializers/post";
 import { getClient } from "../utils/getClient";
 import { getSafeErrorContext } from "../utils/logging";
+import { postImagesForContent, resolvePostContent } from "../utils/postContent";
 
 import { parseOutIframes } from "./parse-out-iframes";
 
@@ -60,6 +61,7 @@ export default async function sendPostNotification(job: {
             extension: true,
           },
         },
+        images: postImagesForContent,
         minimumSubscriptionTier: {
           select: { minAmount: true },
         },
@@ -212,7 +214,20 @@ export default async function sendPostNotification(job: {
       // unreleased, deleted). Otherwise the email link 404s. See #1703.
       const { applicationUrl } = await getClient();
       const postUrl = `${applicationUrl}/${post.profile?.urlSlug ?? ""}/posts/${post.urlSlug ?? post.id}`;
-      const htmlContent = await parseOutIframes(post.content || "", postUrl);
+      const htmlContent = await parseOutIframes(
+        resolvePostContent(post) || "",
+        postUrl
+      );
+
+      const postForEmail = serializePost({
+        id: post.id,
+        title: post.title,
+        urlSlug: post.urlSlug,
+        featuredImage: post.featuredImage,
+        content: post.content,
+        images: post.images,
+        isPublic: post.isPublic,
+      });
 
       for (const notification of notificationsToEmail) {
         if (!notification.user?.email) {
@@ -221,15 +236,6 @@ export default async function sendPostNotification(job: {
           );
           continue;
         }
-
-        const postForEmail = serializePost({
-          id: post.id,
-          title: post.title,
-          urlSlug: post.urlSlug,
-          featuredImage: post.featuredImage,
-          content: post.content,
-          isPublic: post.isPublic,
-        });
 
         await sendMailQueue.add(
           "send-mail",

@@ -9,15 +9,16 @@ import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
 import { clearPageCache } from "../../../../../utils/pageCache";
 import { doesPostBelongToUser } from "../../../../../utils/post";
+import {
+  addImageRefs,
+  postImagesForContent,
+} from "../../../../../utils/postContent";
 
 async function syncPostImages(
-  postId: number,
+  postImages: { id: string }[],
   content: string,
   featuredImageId: string | null
 ) {
-  const postImages = await prisma.postImage.findMany({
-    where: { postId },
-  });
   const imagesToDelete = postImages
     .filter((image) => {
       const inContent = content.includes(image.id);
@@ -210,10 +211,22 @@ export default function () {
         }
       }
 
+      const postImages = await prisma.postImage.findMany({
+        where: { postId: Number(postId) },
+        select: { id: true },
+      });
+      const contentWithRefs =
+        typeof content === "string"
+          ? addImageRefs(
+              content,
+              postImages.map((image) => image.id)
+            )
+          : content;
+
       const updatedPost = await prisma.post.update({
         data: {
           title,
-          content,
+          content: contentWithRefs,
           isPublic,
           publishedAt,
           ...(tierIds
@@ -244,13 +257,13 @@ export default function () {
         });
       }
 
-      if (content) {
+      if (contentWithRefs) {
         await syncPostImages(
-          updatedPost.id,
-          content,
+          postImages,
+          contentWithRefs,
           updatedPost.featuredImageId
         );
-        await syncPostTracks(updatedPost.id, content);
+        await syncPostTracks(updatedPost.id, contentWithRefs);
       }
 
       const refreshedPost = await prisma.post.findFirst({
@@ -263,7 +276,7 @@ export default function () {
               order: "asc",
             },
           },
-          images: true,
+          images: postImagesForContent,
           postSubscriptionTiers: true,
         },
       });
@@ -333,6 +346,7 @@ export default function () {
               order: "asc",
             },
           },
+          images: postImagesForContent,
           // The edit form pre-checks the tiers a post is addressed to (#1253).
           postSubscriptionTiers: true,
         },

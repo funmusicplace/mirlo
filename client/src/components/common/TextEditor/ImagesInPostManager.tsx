@@ -8,6 +8,8 @@ import useErrorHandler from "services/useErrorHandler";
 
 import { InputEl } from "../Input";
 
+import { uploadPostImage } from "./uploadPostImage";
+
 const ImagesInPostManager: React.FC<{
   images?: PostImage[];
   reload: () => void;
@@ -33,15 +35,9 @@ const ImagesInPostManager: React.FC<{
       try {
         const file = e.target.files?.[0];
         if (file) {
-          const jobInfo = await api.uploadFile(
-            `manage/posts/${postId}/images`,
-            [file]
-          );
-          const splitUrl = jobInfo.result.jobId.split("/");
-          const imgName = splitUrl[splitUrl.length - 1].split(".");
-          const imageId = imgName[0];
+          const image = await uploadPostImage(postId, file);
 
-          markImageAsFeatured(imageId);
+          markImageAsFeatured(image.imageId);
         }
       } catch (e) {
         errorHandler(e);

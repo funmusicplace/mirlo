@@ -7,6 +7,7 @@ import { sendPostNotificationQueue } from "../../../../../queues/send-post-notif
 import { serializePost } from "../../../../../serializers/post";
 import { clearPageCache } from "../../../../../utils/pageCache";
 import { doesPostBelongToUser } from "../../../../../utils/post";
+import { postImagesForContent } from "../../../../../utils/postContent";
 
 export default function () {
   const operations = {
@@ -24,6 +25,7 @@ export default function () {
       const updatedPost = await prisma.post.update({
         where: { id: Number(postId) || undefined },
         data: { isDraft: !existingPost?.isDraft },
+        include: { images: postImagesForContent },
       });
 
       // If post is being reverted to draft (isDraft transitioning from false to true),
