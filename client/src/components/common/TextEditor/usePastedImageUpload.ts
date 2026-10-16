@@ -1,7 +1,12 @@
 import { prosemirrorNodeToHtml } from "@remirror/core-utils";
 import type { EditorState } from "prosemirror-state";
 import { useCallback, useEffect, useRef } from "react";
-import api from "services/api";
+
+import {
+  postImageAttrs,
+  UploadedPostImage,
+  uploadPostImage,
+} from "./uploadPostImage";
 
 export type UsePastedImageUploadArgs = {
   manager: { view: any };
@@ -66,7 +71,9 @@ export const usePastedImageUpload = ({
   setState,
   onChange,
 }: UsePastedImageUploadArgs) => {
-  const processedPastedImagesRef = useRef<Map<string, string>>(new Map());
+  const processedPastedImagesRef = useRef<Map<string, UploadedPostImage>>(
+    new Map()
+  );
   const uploadingPastedImagesRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -75,7 +82,7 @@ export const usePastedImageUpload = ({
   }, [postId]);
 
   const replaceImageSources = useCallback(
-    (replacements: Map<string, string>) => {
+    (replacements: Map<string, UploadedPostImage>) => {
       const view = manager.view;
       if (!view || replacements.size === 0) {
         return;
@@ -102,7 +109,7 @@ export const usePastedImageUpload = ({
 
         tr = tr.setNodeMarkup(pos, undefined, {
           ...node.attrs,
-          src: replacement,
+          ...postImageAttrs(replacement),
         });
         hasChanges = true;
       });
@@ -149,7 +156,7 @@ export const usePastedImageUpload = ({
       return;
     }
 
-    const replacements = new Map<string, string>();
+    const replacements = new Map<string, UploadedPostImage>();
     let shouldReloadImages = false;
 
     for (const [index, src] of Array.from(new Set(dataUriSrcs)).entries()) {
@@ -170,17 +177,15 @@ export const usePastedImageUpload = ({
       try {
         uploadingPastedImagesRef.current.add(src);
         const file = await dataUriToFile(src, index);
-        const response = await api.uploadFile(`manage/posts/${postId}/images`, [
-          file,
-        ]);
+        const image = await uploadPostImage(postId, file);
 
         if (!imageWithSrcExists(manager, src)) {
           processedPastedImagesRef.current.delete(src);
           continue;
         }
 
-        processedPastedImagesRef.current.set(src, response.result.jobId);
-        replacements.set(src, response.result.jobId);
+        processedPastedImagesRef.current.set(src, image);
+        replacements.set(src, image);
         shouldReloadImages = true;
       } catch (error) {
         console.error("Failed to upload pasted image", error);

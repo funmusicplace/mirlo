@@ -21,8 +21,6 @@ import {
 } from "remirror/extensions";
 import "remirror/styles/all.css";
 
-import api from "services/api";
-
 import FloatingLinkToolbar from "./FloatingLinkToolbar";
 import { IframeEnterExtension } from "./IframeEnterExtension";
 import MentionCommands from "./MentionCommands";
@@ -31,6 +29,7 @@ import SLASH_COMMANDS from "./slashCommandConfigs";
 import SlashCommands from "./SlashCommands";
 import { SlashCommandHighlightExtension } from "./SlashTrackHighlightExtension";
 import TopToolbar from "./TopToolbar";
+import { postImageAttrs, uploadPostImage } from "./uploadPostImage";
 import { usePastedImageUpload } from "./usePastedImageUpload";
 
 const extensions =
@@ -46,17 +45,17 @@ const extensions =
     new TableExtension({}),
     new DropCursorExtension({}),
     new ImageExtension({
+      extraAttributes: {
+        "data-image-id": { default: null },
+      },
       uploadHandler: (
         files: { file: File; progress: (progress: number) => void }[]
       ): DelayedPromiseCreator<ImageAttributes>[] => {
         if (postId) {
           return files.map((f) => async (props: CommandFunctionProps) => {
-            const response = await api.uploadFile(
-              `manage/posts/${postId}/images`,
-              [f.file]
-            );
+            const image = await uploadPostImage(postId, f.file);
             reload?.();
-            return { src: response.result.jobId };
+            return postImageAttrs(image);
           });
         }
         return [];

@@ -1,13 +1,15 @@
-import React from "react";
-import Button from "../Button";
-import Modal from "../Modal";
-import { FaImage } from "react-icons/fa";
-import { InputEl } from "../Input";
-import { useCommands } from "@remirror/react";
 import { css } from "@emotion/css";
+import { useCommands } from "@remirror/react";
+import React from "react";
 import { useForm } from "react-hook-form";
-import api from "services/api";
 import { useTranslation } from "react-i18next";
+import { FaImage } from "react-icons/fa";
+
+import Button from "../Button";
+import { InputEl } from "../Input";
+import Modal from "../Modal";
+
+import { postImageAttrs, uploadPostImage } from "./uploadPostImage";
 
 const InsertImageButton: React.FC<{ postId?: number }> = ({ postId }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -18,10 +20,8 @@ const InsertImageButton: React.FC<{ postId?: number }> = ({ postId }) => {
   const onAdd = React.useCallback(async () => {
     if (postId) {
       const images = getValues("images");
-      const response = await api.uploadFile(`manage/posts/${postId}/images`, [
-        images[0],
-      ]);
-      insertImage({ src: response.result.jobId });
+      const image = await uploadPostImage(postId, images[0]);
+      insertImage(postImageAttrs(image));
     }
     setIsOpen(false);
   }, [getValues, postId]);

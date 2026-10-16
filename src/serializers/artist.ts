@@ -21,6 +21,7 @@ import {
   finalArtistBackgroundBucket,
 } from "../utils/minio";
 import { resolvePayee } from "../utils/payments/payee";
+import { ContentImage } from "../utils/postContent";
 
 import { LocalArtistLabel, serializeArtistLabel } from "./artistLabel";
 import { serializeMerch } from "./merch";
@@ -39,7 +40,7 @@ import {
 
 export interface LocalProfile extends Profile {
   artistLabels?: LocalArtistLabel[];
-  posts?: Post[];
+  posts?: (Post & { images: ContentImage[] })[];
   background?: ProfileBackground | null;
   avatar?: ProfileAvatar | null;
   trackGroups?: LocalTrackGroup[] | null;
@@ -82,7 +83,7 @@ export const serializeProfile = <T extends LocalProfile>(
         canSeeSupporterContent
       )
     ),
-    posts: profile?.posts?.map((p: Post) =>
+    posts: profile?.posts?.map((p) =>
       serializePost(p, undefined, undefined, canSeeSupporterContent)
     ),
     merch: profile?.merch?.map((m) =>

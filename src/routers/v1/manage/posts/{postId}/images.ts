@@ -1,11 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../../../auth/passport";
-import busboy from "connect-busboy";
-import { processPostImage } from "../../../../../queues/processImages";
-import { doesPostBelongToUser } from "../../../../../utils/post";
-import { finalPostImageBucket } from "../../../../../utils/minio";
-import { generateFullStaticImageUrl } from "../../../../../utils/images";
 import prisma from "@mirlo/prisma";
+import busboy from "connect-busboy";
+import { NextFunction, Request, Response } from "express";
+
+import { userAuthenticated } from "../../../../../auth/passport";
+import { processPostImage } from "../../../../../queues/processImages";
+import { generateFullStaticImageUrl } from "../../../../../utils/images";
+import { finalPostImageBucket } from "../../../../../utils/minio";
+import { doesPostBelongToUser } from "../../../../../utils/post";
 
 type Params = {
   postId: string;
@@ -68,11 +69,12 @@ export default function () {
       if (image) {
         res.json({
           result: {
-            jobId: generateFullStaticImageUrl(
+            src: generateFullStaticImageUrl(
               image.id,
               finalPostImageBucket,
               image.extension
             ),
+            imageId: image.id,
           },
         });
       }

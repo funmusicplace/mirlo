@@ -461,6 +461,35 @@ describe("manage/posts/{postId}", () => {
       });
       assert.equal(refetchedImages.length, 2);
     });
+
+    it("should PUT and store image ids in the content", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id);
+      const image = await prisma.postImage.create({
+        data: { postId: post.id, mimeType: "image/png", extension: "png" },
+      });
+      const staleSrc = `https://old-cdn.example.com/file/post-images/${image.id}.png`;
+
+      const response = await requestApp
+        .put(`manage/posts/${post.id}`)
+        .send({
+          content: `<p>Hi</p><img src="${staleSrc}"><img src="https://example.org/cat.gif">`,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const stored = await prisma.post.findFirst({ where: { id: post.id } });
+      assert.equal(
+        stored?.content,
+        `<p>Hi</p><img data-image-id="${image.id}" src="${staleSrc}"><img src="https://example.org/cat.gif">`
+      );
+      assert(!response.body.result.content.includes(staleSrc));
+      assert(response.body.result.content.includes(`${image.id}.png"`));
+    });
   });
 
   describe("DELETE", () => {

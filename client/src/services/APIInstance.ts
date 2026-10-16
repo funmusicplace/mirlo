@@ -214,12 +214,12 @@ const APIInstance = (apiRoot: string, mirloApiKey: string) => {
      * @param bodyParams
      * @returns
      */
-    uploadFile: async (
+    uploadFile: async <R = { jobId: string; imageId: string }>(
       endpoint: string,
       files: File[],
       bodyParams?: { [key: string]: string },
       method: "PUT" | "POST" = "PUT"
-    ): Promise<{ result: { jobId: string } & { imageId: string } }> => {
+    ): Promise<{ result: R }> => {
       var fd = new FormData();
       if (bodyParams) {
         Object.keys(bodyParams).forEach((key) => {

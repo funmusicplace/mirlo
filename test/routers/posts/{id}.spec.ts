@@ -124,6 +124,34 @@ describe("posts/{id}", () => {
       assert.equal(response.body.result.content, testContent);
     });
 
+    it("should GET / and rebuild image urls from their ids", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, { isDraft: false });
+      const image = await prisma.postImage.create({
+        data: { postId: post.id, mimeType: "image/jpeg", extension: "jpg" },
+      });
+      const staleSrc = `https://old-cdn.example.com/post-images/${image.id}.jpg`;
+      await prisma.post.update({
+        where: { id: post.id },
+        data: {
+          content: `<p>Hi</p><img data-image-id="${image.id}" src="${staleSrc}">`,
+        },
+      });
+
+      const response = await requestApp
+        .get(`posts/${post.id}`)
+        .set("Accept", "application/json");
+
+      const { content, images } = response.body.result;
+      assert(content.includes(`data-image-id="${image.id}"`));
+      assert(content.includes(`${image.id}.jpg"`));
+      assert(!content.includes(staleSrc));
+      assert.equal(images, undefined);
+    });
+
     it("should GET / send hide content boolean if not public", async () => {
       const testContent = faker.lorem.paragraph();
       const { user } = await createUser({

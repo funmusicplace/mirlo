@@ -20,6 +20,7 @@ import {
   canUserSeePostContent,
   getUserSubscriptionsForProfile,
 } from "../../../../utils/postAccess";
+import { postImagesForContent } from "../../../../utils/postContent";
 import { turnItemsIntoRSS } from "../../../../utils/rss";
 import { getInstanceName } from "../../../../utils/settings";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
@@ -46,6 +47,7 @@ export const getPostsVisibleToUser = async (
         minimumSubscriptionTier: true,
         postSubscriptionTiers: true,
         featuredImage: true,
+        images: postImagesForContent,
         _count: { select: { tracks: true } },
       },
       orderBy: { publishedAt: "desc" },

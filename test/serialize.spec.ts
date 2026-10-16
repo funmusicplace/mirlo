@@ -546,6 +546,7 @@ describe("outbound serializers", () => {
         id: 10,
         isPublic: false,
         content: "<p>Secret</p><p>More</p>",
+        images: [],
         profileId: 4,
         profile: artistFixture(4),
       };
@@ -554,7 +555,7 @@ describe("outbound serializers", () => {
       assert.equal(post.artistId, 4);
       assert.equal(post.isContentHidden, true);
       assert.equal(post.content, "<p>Secret</p>");
-      assertPreservedKeys(input, post, "serializePost");
+      assertPreservedKeys(input, post, "serializePost", { omit: ["images"] });
       assertNoLeaks(post, "serializePost");
     });
 
@@ -564,6 +565,7 @@ describe("outbound serializers", () => {
           id: 10,
           isPublic: false,
           content: "<p>Secret</p><p>More</p>",
+          images: [],
           profileId: 4,
           profile: artistFixture(4),
         },
