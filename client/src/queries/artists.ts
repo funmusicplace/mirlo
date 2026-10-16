@@ -353,13 +353,17 @@ export type ArtistQueryOptions = {
   name?: string;
   isLabel?: boolean;
   locationSlug?: string;
+  includeUnpublished?: boolean;
 };
 
 const fetchArtists: QueryFunction<
   { results: Artist[]; total?: number },
   ["fetchArtists", ArtistQueryOptions, ...any]
 > = ({
-  queryKey: [_, { skip, take, orderBy, name, locationSlug, isLabel }],
+  queryKey: [
+    _,
+    { skip, take, orderBy, name, locationSlug, isLabel, includeUnpublished },
+  ],
   signal,
 }) => {
   const params = new URLSearchParams();
@@ -369,6 +373,7 @@ const fetchArtists: QueryFunction<
   if (name) params.append("name", name);
   if (locationSlug) params.append("locationSlug", locationSlug);
   if (isLabel !== undefined) params.append("isLabel", String(isLabel));
+  if (includeUnpublished) params.append("includeUnpublished", "true");
 
   return api.get(`v1/artists?${params}`, { signal });
 };
