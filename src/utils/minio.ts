@@ -14,11 +14,13 @@ import {
   HeadObjectCommand,
   HeadObjectCommandOutput,
   ListObjectsCommand,
+  ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
 import contentDisposition from "content-disposition";
+import { chunk } from "lodash";
 import { Client, BucketItem } from "minio";
 import * as Minio from "minio";
 import { Logger } from "winston";
@@ -609,7 +611,12 @@ export const uploadWrapper = async (
   if (backendStorage === "backblaze") {
     await uploadFilesToBackblaze(bucket, fileName, fileStream, options);
   } else if (backendStorage === "minio" && minioClient) {
-    await minioClient.putObject(bucket, fileName, fileStream);
+    await minioClient.putObject(bucket, fileName, fileStream, undefined, {
+      ...(options?.contentType ? { "Content-Type": options.contentType } : {}),
+      ...(options?.cacheControl
+        ? { "Cache-Control": options.cacheControl }
+        : {}),
+    });
   }
 };
 
@@ -630,25 +637,43 @@ export const removeObjectFromStorage = async (
   }
 };
 
+const storageS3Client = () => {
+  const client =
+    backendStorage === "backblaze" ? backblazeClient : localS3Client;
+  if (!client) {
+    throw new Error(`${backendStorage}: no S3 client`);
+  }
+  return client;
+};
+
 /**
  * Server-side copy: the bytes never leave the storage provider, and the
- * source's metadata (content type, cache control) carries over. Both B2 and
- * Garage implement CopyObject.
+ * source's metadata (content type, cache control) carries over unless a
+ * contentType is given, which replaces the type and keeps the cache control.
+ * Both B2 and Garage implement CopyObject.
  */
 export const copyObjectInStorage = async (
   fromBucket: string,
   fromKey: string,
   toBucket: string,
-  toKey: string
+  toKey: string,
+  options?: { contentType?: string }
 ) => {
-  const client =
-    backendStorage === "backblaze" ? backblazeClient : localS3Client;
-  if (!client) {
-    throw new Error(`${backendStorage}: no S3 client to copy with`);
-  }
+  const client = storageS3Client();
   logger.info(
     `${backendStorage}: copying ${fromBucket}/${fromKey} to ${toBucket}/${toKey}`
   );
+  const replaceMetadata = options?.contentType
+    ? {
+        MetadataDirective: "REPLACE" as const,
+        ContentType: options.contentType,
+        CacheControl: (
+          await client.send(
+            new HeadObjectCommand({ Bucket: fromBucket, Key: fromKey })
+          )
+        ).CacheControl,
+      }
+    : {};
   await client.send(
     new CopyObjectCommand({
       Bucket: toBucket,
@@ -657,8 +682,31 @@ export const copyObjectInStorage = async (
       CopySource: [fromBucket, ...fromKey.split("/")]
         .map(encodeURIComponent)
         .join("/"),
+      ...replaceMetadata,
     })
   );
+};
+
+const forEachObjectPage = async (
+  bucket: string,
+  callback: (keys: string[]) => Promise<void>
+) => {
+  const client = storageS3Client();
+  let continuationToken: string | undefined;
+  do {
+    const page = await client.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        ContinuationToken: continuationToken,
+      })
+    );
+    await callback(
+      (page.Contents ?? []).flatMap((c) => (c.Key ? [c.Key] : []))
+    );
+    continuationToken = page.IsTruncated
+      ? page.NextContinuationToken
+      : undefined;
+  } while (continuationToken);
 };
 
 export const getBufferFromStorage = async (
@@ -980,6 +1028,19 @@ export const removeAudioFiles = (audioId: string) =>
 
 // ── Images ────────────────────────────────────────────────────────────────────
 
+const imageContentTypes: Record<string, string> = {
+  webp: "image/webp",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  gif: "image/gif",
+  avif: "image/avif",
+  ico: "image/x-icon",
+};
+
+const imageContentType = (key: string): string | undefined =>
+  imageContentTypes[key.split(".").pop()?.toLowerCase() ?? ""];
+
 export const getImageFinalBucket = (imageType: ImageType): string =>
   imageTypeBuckets[imageType].final;
 
@@ -1088,11 +1149,51 @@ export const copyImagesBetweenTypes = async (
       fromBucket,
       `${fromPrefix}${name}`,
       toBucket,
-      `${toPrefix}${name}`
+      `${toPrefix}${name}`,
+      { contentType: imageContentType(name) }
     );
     copied.push(name);
   }
   return copied;
+};
+
+export const fixStoredImageContentTypes = async () => {
+  const summary = { checked: 0, fixed: 0, failed: 0 };
+  if (!isConsolidatedMode()) return summary;
+
+  const client = storageS3Client();
+  const bucket = getImagesBucket(finalImageBucket);
+
+  await forEachObjectPage(bucket, async (keys) => {
+    const images = keys.filter(
+      (key) => !key.startsWith("incoming/") && imageContentType(key)
+    );
+    for (const batch of chunk(images, 10)) {
+      await Promise.all(
+        batch.map(async (key) => {
+          const contentType = imageContentType(key)!;
+          try {
+            const head = await client.send(
+              new HeadObjectCommand({ Bucket: bucket, Key: key })
+            );
+            summary.checked += 1;
+            if (head.ContentType === contentType) return;
+            await copyObjectInStorage(bucket, key, bucket, key, {
+              contentType,
+            });
+            summary.fixed += 1;
+          } catch (e) {
+            logger.error(
+              `${backendStorage}: couldn't fix content type of ${bucket}/${key}`,
+              e
+            );
+            summary.failed += 1;
+          }
+        })
+      );
+    }
+  });
+  return summary;
 };
 
 export const getCoverBuffer = (coverId: string, ext: "webp" | "jpg") =>

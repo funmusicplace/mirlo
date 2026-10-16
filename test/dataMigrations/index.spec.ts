@@ -3,15 +3,23 @@ import assert from "node:assert";
 import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
-import { beforeEach, describe, it } from "mocha";
+import { afterEach, beforeEach, describe, it } from "mocha";
 
 import {
   DataMigration,
   runPendingDataMigrations,
 } from "../../src/dataMigrations";
+import imageContentTypes from "../../src/dataMigrations/imageContentTypes";
 import merchImagesToCentralImages from "../../src/dataMigrations/merchImagesToCentralImages";
 import postContentImageRefs from "../../src/dataMigrations/postContentImageRefs";
-import { uploadOptimizedImageByType } from "../../src/utils/minio";
+import {
+  finalCoversBucket,
+  finalImageBucket,
+  setBucketConfig,
+  statFile,
+  uploadOptimizedImageByType,
+  uploadWrapper,
+} from "../../src/utils/minio";
 import {
   clearTables,
   createMerch,
@@ -237,5 +245,58 @@ describe("dataMigrations: postContentImageRefs", () => {
       where: { id: post.id },
     });
     assert.equal(rerun.content, migrated.content);
+  });
+});
+
+describe("dataMigrations: imageContentTypes", () => {
+  beforeEach(() => setBucketConfig({ prefix: "" }));
+  afterEach(() => setBucketConfig(null));
+
+  const storedMetadata = async (key: string) => {
+    const { minioStat } = await statFile(finalImageBucket, key);
+    return minioStat?.metaData;
+  };
+
+  it("stores the content type and cache control on local uploads", async () => {
+    await uploadOptimizedImageByType(
+      "trackGroupCover",
+      "typed-cover-x600.webp",
+      Buffer.from("image"),
+      { contentType: "image/webp", cacheControl: "public, max-age=60" }
+    );
+
+    const metadata = await storedMetadata(
+      "trackgroup-covers/typed-cover-x600.webp"
+    );
+    assert.equal(metadata?.["content-type"], "image/webp");
+    assert.equal(metadata?.["cache-control"], "public, max-age=60");
+  });
+
+  it("re-saves images that have no content type, keeping cache control", async () => {
+    const key = "trackgroup-covers/untyped-cover-x600.jpg";
+    await uploadWrapper(finalImageBucket, key, Buffer.from("image"), {
+      cacheControl: "public, max-age=60",
+    });
+    assert.notEqual(
+      (await storedMetadata(key))?.["content-type"],
+      "image/jpeg"
+    );
+
+    assert.equal(await imageContentTypes.run(), true);
+
+    const metadata = await storedMetadata(key);
+    assert.equal(metadata?.["content-type"], "image/jpeg");
+    assert.equal(metadata?.["cache-control"], "public, max-age=60");
+  });
+
+  it("does nothing in the legacy layout", async () => {
+    setBucketConfig(null);
+    const key = "legacy-cover-x600.jpg";
+    await uploadWrapper(finalCoversBucket, key, Buffer.from("image"));
+
+    assert.equal(await imageContentTypes.run(), true);
+
+    const { minioStat } = await statFile(finalCoversBucket, key);
+    assert.notEqual(minioStat?.metaData?.["content-type"], "image/jpeg");
   });
 });
