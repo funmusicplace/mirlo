@@ -17,7 +17,7 @@ import {
   resolveFromEmail,
   SettingsType,
 } from "../../../utils/settings";
-import { refreshStripeClient } from "../../../utils/stripe";
+import { refreshStripeClient, stripeKeyMode } from "../../../utils/stripe";
 import { isTrustLevelNames } from "../../../utils/trustLevel";
 
 export default function () {
@@ -241,6 +241,7 @@ function maskSecrets(settings: object) {
             ...(stripeJson ?? {}),
             key: undefined,
             keyConfigured: !!stripeJson?.key,
+            keyMode: stripeKeyMode(stripeJson ?? undefined),
             webhookConnectSigningSecret: undefined,
             webhookSecretConfigured: !!stripeJson?.webhookConnectSigningSecret,
           },

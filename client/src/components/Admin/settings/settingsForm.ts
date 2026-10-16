@@ -85,6 +85,7 @@ export const formToSettingsPayload = (
     },
     stripe: omit(data.stripe ?? {}, [
       "keyConfigured",
+      "keyMode",
       "webhookSecretConfigured",
     ]),
     emailProvider: {

@@ -176,6 +176,25 @@ describe("admin/settings", () => {
       );
     });
 
+    it("should report whether the saved stripe key is a test or a live key", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        stripe: { key: "sk_live_secret" },
+      });
+
+      const response = await requestApp
+        .get("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.settings.stripe.keyMode, "live");
+    });
+
     it("should mask the webhook signing secret", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",

@@ -90,6 +90,18 @@ export const refreshStripeClient = async (): Promise<string> => {
 export const getStripeWebhookConnectSigningSecret = () =>
   webhookConnectSigningSecret;
 
+type StoredStripeCredentials = NonNullable<StripeSettings>["stripe"];
+
+const SECRET_KEY_MODE_REGEX = /^(?:sk|rk)_(test|live)_/;
+
+export const stripeKeyMode = (
+  stored: StoredStripeCredentials
+): "test" | "live" | null => {
+  const key = stored?.key?.trim() || envStripeKey();
+  const match = key.match(SECRET_KEY_MODE_REGEX);
+  return match ? (match[1] as "test" | "live") : null;
+};
+
 export const stripe = new Proxy({} as Stripe, {
   get(_target, prop) {
     return Reflect.get(stripeClient as unknown as object, prop, stripeClient);
