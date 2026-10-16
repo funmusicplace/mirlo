@@ -31,7 +31,7 @@ export default function () {
       const settings = await getSiteSettings();
       return res
         .status(200)
-        .json({ result: maskStripeKey(withResolvedSender(settings)) });
+        .json({ result: maskSecrets(withResolvedSender(settings)) });
     } catch (e) {
       next(e);
     }
@@ -134,6 +134,9 @@ export default function () {
       const incomingWebhookSecret = (
         settings?.stripe?.webhookConnectSigningSecret ?? ""
       ).trim();
+      const incomingTurnstileSecret = (
+        settings?.cloudflareTurnstileSecret ?? ""
+      ).trim();
       const mergedSettings = {
         ...storedSettings,
         ...settings,
@@ -159,6 +162,8 @@ export default function () {
             incomingWebhookSecret ||
             existingStripe?.webhookConnectSigningSecret,
         },
+        cloudflareTurnstileSecret:
+          incomingTurnstileSecret || storedSettings.cloudflareTurnstileSecret,
       };
       await prisma.settings.update({
         data: {
@@ -192,7 +197,7 @@ export default function () {
       const refreshedSettings = await getSiteSettings();
       return res
         .status(200)
-        .json({ result: maskStripeKey(withResolvedSender(refreshedSettings)) });
+        .json({ result: maskSecrets(withResolvedSender(refreshedSettings)) });
     } catch (e) {
       next(e);
     }
@@ -218,7 +223,7 @@ function withResolvedSender(settings: SettingsType): SettingsType {
   };
 }
 
-function maskStripeKey(settings: object) {
+function maskSecrets(settings: object) {
   const s = settings as Record<string, unknown>;
   const settingsJson = s.settings as Record<string, unknown> | null | undefined;
   const stripeJson = settingsJson?.stripe as
@@ -228,6 +233,7 @@ function maskStripeKey(settings: object) {
   const result = {
     ...s,
     stripe: undefined,
+    cloudflareTurnstileSecret: undefined,
     settings: settingsJson
       ? {
           ...settingsJson,
@@ -238,6 +244,9 @@ function maskStripeKey(settings: object) {
             webhookConnectSigningSecret: undefined,
             webhookSecretConfigured: !!stripeJson?.webhookConnectSigningSecret,
           },
+          cloudflareTurnstileSecret: undefined,
+          cloudflareTurnstileSecretConfigured:
+            !!settingsJson.cloudflareTurnstileSecret,
         }
       : settingsJson,
   };

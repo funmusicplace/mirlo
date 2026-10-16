@@ -9,7 +9,8 @@ import SettingsSection from "./SettingsSection";
 
 const SecuritySection: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
-  const { register } = useFormContext<FormSettings>();
+  const { register, watch } = useFormContext<FormSettings>();
+  const secretConfigured = watch("cloudflareTurnstileSecretConfigured");
 
   return (
     <SettingsSection id="settings-security" title={t("security")}>
@@ -19,8 +20,13 @@ const SecuritySection: React.FC = () => {
         </label>
         <InputEl
           id="input-cloudflare-turnstile-secret"
-          type="text"
+          type="password"
           className="max-w-md"
+          placeholder={
+            secretConfigured
+              ? t("cloudflareTurnstileSecretPlaceholderConfigured")
+              : t("cloudflareTurnstileSecretPlaceholderEmpty")
+          }
           {...register("cloudflareTurnstileSecret")}
         />
       </FormComponent>

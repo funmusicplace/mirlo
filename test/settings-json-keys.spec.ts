@@ -34,6 +34,7 @@ const THIS_BASENAME = basename(__filename);
 const RESPONSE_ONLY_SETTINGS_PATHS = new Set([
   "stripe.keyConfigured",
   "stripe.webhookSecretConfigured",
+  "cloudflareTurnstileSecretConfigured",
 ]);
 
 const listSourceFiles = (dir: string): string[] =>

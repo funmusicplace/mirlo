@@ -1833,6 +1833,8 @@
     "trustLevelName": "Level {{level}} name",
     "security": "Security",
     "cloudflareTurnstileSecret": "Cloudflare Turnstile secret",
+    "cloudflareTurnstileSecretPlaceholderConfigured": "Secret saved (leave blank to keep)",
+    "cloudflareTurnstileSecretPlaceholderEmpty": "No secret set",
     "defconLevel": "Defcon level",
     "editTrack": "Edit {{title}}",
     "deleteClient": "Delete client",

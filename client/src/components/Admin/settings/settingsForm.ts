@@ -13,6 +13,7 @@ export interface FormSettings {
   showQueueDashboard?: boolean;
   emailProvider?: SettingsFromAPI["settings"]["emailProvider"];
   cloudflareTurnstileSecret?: string;
+  cloudflareTurnstileSecretConfigured?: boolean;
   defconLevel?: number;
   useConsolidatedBuckets?: boolean;
   bucketPrefix?: string;
@@ -59,7 +60,9 @@ export const settingsToForm = (
   },
   useConsolidatedBuckets: settings.bucketNames != null,
   bucketPrefix: settings.bucketNames?.prefix ?? "",
-  cloudflareTurnstileSecret: settings.settings?.cloudflareTurnstileSecret,
+  cloudflareTurnstileSecret: "",
+  cloudflareTurnstileSecretConfigured:
+    settings.settings?.cloudflareTurnstileSecretConfigured,
   terms: settings.terms,
   privacyPolicy: settings.privacyPolicy,
   cookiePolicy: settings.cookiePolicy,

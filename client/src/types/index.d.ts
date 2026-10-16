@@ -74,6 +74,7 @@ interface SettingsFromAPI {
       };
     };
     cloudflareTurnstileSecret?: string;
+    cloudflareTurnstileSecretConfigured?: boolean;
     featuredArtistIds?: number[];
     trustLevelNames?: string[];
   };
