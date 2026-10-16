@@ -1,10 +1,12 @@
 // Stripe implementation of the PaymentProcessor interface.
 import logger from "../../logger";
 import { calculatePlatformPercent } from "../processingPayments";
+import { SettingsType } from "../settings";
 import stripe, {
   createOnlinePaymentIntent,
   createSubscriptionStripeProduct,
   findOrCreateStripeCustomer,
+  hasStripeCredentials,
   refreshStripeClient,
 } from "../stripe";
 import { getIntentStatus } from "../stripe/status";
@@ -350,6 +352,10 @@ export class StripePaymentProcessor implements PaymentProcessor {
 
   async refresh(): Promise<void> {
     await refreshStripeClient();
+  }
+
+  isConfigured(settings: SettingsType): boolean {
+    return hasStripeCredentials(settings.settings?.stripe);
   }
 
   async *listAccountStatuses(): AsyncIterable<PaymentAccountStatus> {

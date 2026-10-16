@@ -66,6 +66,7 @@ describe("admin/setup/status", () => {
       assert.equal(checks.redis.status, "ok");
       assert.equal(steps.identity, false);
       assert.equal(steps.platformPolicy, false);
+      assert.equal(steps.spamProtection, false);
       const body = JSON.stringify(response.body);
       assert.ok(!body.includes(process.env.JWT_SECRET ?? "unset"));
       assert.ok(!body.includes("postgresql://"));
@@ -83,6 +84,11 @@ describe("admin/setup/status", () => {
           fromEmail: "hello@nightjar.test",
           smtp: { host: "mail.test" },
         },
+        stripe: {
+          key: "sk_test_saved",
+          webhookConnectSigningSecret: "whsec_1",
+        },
+        cloudflareTurnstileSecret: "turnstile-secret",
       });
       await prisma.settings.update({
         where: { id: row.id },
@@ -98,6 +104,8 @@ describe("admin/setup/status", () => {
         identity: true,
         email: true,
         platformPolicy: true,
+        payments: true,
+        spamProtection: false,
       });
     });
   });

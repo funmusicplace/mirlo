@@ -128,6 +128,73 @@ describe("admin/settings", () => {
       assert.equal(response.body.result.stripe, undefined);
     });
 
+    it("should mask the Turnstile secret and say whether one is saved", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        cloudflareTurnstileSecret: "turnstile-secret",
+      });
+
+      const response = await requestApp
+        .get("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const { settings } = response.body.result;
+      assert.equal(settings.cloudflareTurnstileSecret, undefined);
+      assert.equal(settings.cloudflareTurnstileSecretConfigured, true);
+      assert.ok(!JSON.stringify(response.body).includes("turnstile-secret"));
+    });
+
+    it("should keep the saved Turnstile secret when a blank one is submitted", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        cloudflareTurnstileSecret: "turnstile-secret",
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: { platformPercent: 7, cloudflareTurnstileSecret: "" },
+        });
+
+      assert.equal(response.statusCode, 200);
+      const row = await prisma.settings.findFirst();
+      assert.equal(
+        (row?.settings as Record<string, unknown>).cloudflareTurnstileSecret,
+        "turnstile-secret"
+      );
+    });
+
+    it("should report whether the saved stripe key is a test or a live key", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        stripe: { key: "sk_live_secret" },
+      });
+
+      const response = await requestApp
+        .get("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.settings.stripe.keyMode, "live");
+    });
+
     it("should mask the webhook signing secret", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",
@@ -292,6 +359,35 @@ describe("admin/settings", () => {
       const stripe = (row?.settings as Record<string, unknown>)
         ?.stripe as Record<string, unknown>;
       assert.equal(stripe?.webhookConnectSigningSecret, "whsec_existing");
+    });
+
+    it("should keep the stored webhook endpoint id whatever the request sends", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        stripe: { webhookEndpointId: "we_current" },
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            stripe: { webhookEndpointId: "we_stale" },
+          },
+        });
+
+      assert.equal(response.statusCode, 200);
+
+      const row = await prisma.settings.findFirst();
+      const stripe = (row?.settings as Record<string, unknown>)
+        ?.stripe as Record<string, unknown>;
+      assert.equal(stripe?.webhookEndpointId, "we_current");
     });
 
     it("should keep the stored settings keys the request does not send", async () => {

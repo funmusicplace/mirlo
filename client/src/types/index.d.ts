@@ -45,6 +45,7 @@ interface SettingsFromAPI {
     stripe?: {
       key?: string;
       keyConfigured?: boolean;
+      keyMode?: "test" | "live" | null;
       publishableKey?: string;
       webhookSigningSecret?: string;
       webhookConnectSigningSecret?: string;
@@ -74,6 +75,7 @@ interface SettingsFromAPI {
       };
     };
     cloudflareTurnstileSecret?: string;
+    cloudflareTurnstileSecretConfigured?: boolean;
     featuredArtistIds?: number[];
     trustLevelNames?: string[];
   };

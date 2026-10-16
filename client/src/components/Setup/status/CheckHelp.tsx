@@ -20,14 +20,13 @@ const CheckHelp: React.FC<{
           variant="outlined"
           size="tiny"
           onlyIcon
+          startIcon={<span className="text-xs font-bold">?</span>}
           aria-expanded={isOpen}
           aria-controls={id}
           aria-label={t("helpToggle")}
           onClick={() => setIsOpen((open) => !open)}
-          className="rounded-full! text-xs font-bold opacity-60 hover:opacity-100"
-        >
-          ?
-        </Button>
+          className="rounded-full! opacity-60 hover:opacity-100"
+        />
       </span>
       <span className="mt-0.5 block text-sm opacity-70">{detail}</span>
       <small id={id} hidden={!isOpen} className="mt-1 block opacity-80">

@@ -457,8 +457,14 @@ async function registerStripeWebhook() {
   >("admin/stripeWebhook", {});
 }
 
-export const useRegisterStripeWebhookMutation = () =>
-  useMutation({ mutationFn: registerStripeWebhook });
+export const useRegisterStripeWebhookMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: registerStripeWebhook,
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: querySetupStatus().queryKey }),
+  });
+};
 
 export const queryAdminSettings = () =>
   queryOptions({
@@ -499,6 +505,8 @@ export interface SetupStatus {
     identity: boolean;
     email: boolean;
     platformPolicy: boolean;
+    payments: boolean;
+    spamProtection: boolean;
   };
 }
 

@@ -1,6 +1,8 @@
 // Provider-neutral payment interface.
 import { Prisma } from "@mirlo/prisma/client";
 
+import { SettingsType } from "../settings";
+
 export type CreatePaymentArgs = {
   amount: number;
   currency: string;
@@ -109,6 +111,8 @@ export interface PaymentProcessor {
   listReaders(args: { accountId: string }): Promise<TerminalReader[]>;
 
   refresh(): Promise<void>;
+
+  isConfigured(settings: SettingsType): boolean;
 
   listAccountStatuses(): AsyncIterable<PaymentAccountStatus>;
 }

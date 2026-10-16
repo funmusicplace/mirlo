@@ -96,7 +96,9 @@ const Index = () => {
                 />
               </SettingsSection>
 
-              <StripeSection />
+              <StripeSection
+                saveKey={() => saveSettings(methods.getValues())}
+              />
 
               <EmailProviderSection />
 

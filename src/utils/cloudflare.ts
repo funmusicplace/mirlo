@@ -1,6 +1,10 @@
 import { AppError } from "./error";
 
 const { CLOUDFLARE_TURNSTILE_API_SECRET } = process.env;
+
+export const isSpamProtectionConfigured = () =>
+  Boolean(CLOUDFLARE_TURNSTILE_API_SECRET);
+
 const isDev =
   process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
 
