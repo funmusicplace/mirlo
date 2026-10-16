@@ -190,6 +190,7 @@ app.use("/health", async (req, res) => {
     await prisma.user.findMany({ take: 1 });
     res.status(200).json({
       mirlo: "healthy chirp",
+      commit: process.env.RENDER_GIT_COMMIT ?? null,
     });
   } catch (e) {
     console.error(`health check failed ${e}`);

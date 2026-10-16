@@ -157,7 +157,9 @@ yargs
       logger.error(e);
     });
     startDataMigrations();
-    logger.info("STARTING WORKER QUEUE");
+    logger.info(
+      `STARTING WORKER QUEUE (commit ${process.env.RENDER_GIT_COMMIT ?? "unknown"})`
+    );
     audioQueue();
     // audioDurationQueue();
     verifyAudioQueue();
