@@ -19,8 +19,12 @@ const GeneralSettingsSection: React.FC = () => {
           id="input-cdn-url"
           type="text"
           className="max-w-md"
+          aria-describedby="hint-cdn-url"
           {...register("cdnUrl")}
         />
+        <small id="hint-cdn-url" className="max-w-md">
+          {t("cdnUrlHint")}
+        </small>
       </FormComponent>
 
       <FormComponent direction="row">

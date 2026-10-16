@@ -1770,6 +1770,7 @@
     "supportEmailInvalid": "Enter a valid support email",
     "platformPercent": "Platform percent",
     "cdnUrl": "CDN URL",
+    "cdnUrlHint": "Optional. Only fill this in if you subscribed to a CDN (content delivery network, a service that speeds up image loading) and it gave you an address. Leave it empty otherwise: images will still work.",
     "isClosedToPublicArtistSignup": "Is closed to public artist signup",
     "showQueueDashboard": "Show queue dashboard",
     "showHeroOnHome": "Show hero on home",
