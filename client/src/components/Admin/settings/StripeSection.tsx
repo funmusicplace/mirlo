@@ -21,8 +21,9 @@ const STRIPE_KEYS_HELP_URL =
   "https://support.stripe.com/questions/what-are-stripe-api-keys-and-how-to-find-them";
 
 const StripeSection: React.FC<{
+  hideTitle?: boolean;
   saveKey: () => Promise<void>;
-}> = ({ saveKey }) => {
+}> = ({ hideTitle, saveKey }) => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const { register, watch, setValue, getFieldState, formState } =
     useFormContext<FormSettings>();
@@ -69,7 +70,11 @@ const StripeSection: React.FC<{
   };
 
   return (
-    <SettingsSection id="settings-stripe" title={t("stripeSettings")}>
+    <SettingsSection
+      id="settings-stripe"
+      title={t("stripeSettings")}
+      hideTitle={hideTitle}
+    >
       <FormComponent>
         <label htmlFor="input-stripe-key">{t("stripeSecretKey")}</label>
         <InputEl

@@ -7,13 +7,17 @@ import { useTranslation } from "react-i18next";
 import { FormSettings } from "./settingsForm";
 import SettingsSection from "./SettingsSection";
 
-const SecuritySection: React.FC = () => {
+const SecuritySection: React.FC<{ hideTitle?: boolean }> = ({ hideTitle }) => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const { register, watch } = useFormContext<FormSettings>();
   const secretConfigured = watch("cloudflareTurnstileSecretConfigured");
 
   return (
-    <SettingsSection id="settings-security" title={t("security")}>
+    <SettingsSection
+      id="settings-security"
+      title={t("security")}
+      hideTitle={hideTitle}
+    >
       <FormComponent>
         <label htmlFor="input-cloudflare-turnstile-secret">
           {t("cloudflareTurnstileSecret")}

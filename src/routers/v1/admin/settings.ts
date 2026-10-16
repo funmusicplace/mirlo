@@ -161,6 +161,7 @@ export default function () {
           webhookConnectSigningSecret:
             incomingWebhookSecret ||
             existingStripe?.webhookConnectSigningSecret,
+          webhookEndpointId: existingStripe?.webhookEndpointId,
         },
         cloudflareTurnstileSecret:
           incomingTurnstileSecret || storedSettings.cloudflareTurnstileSecret,

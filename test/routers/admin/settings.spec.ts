@@ -361,6 +361,35 @@ describe("admin/settings", () => {
       assert.equal(stripe?.webhookConnectSigningSecret, "whsec_existing");
     });
 
+    it("should keep the stored webhook endpoint id whatever the request sends", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        stripe: { webhookEndpointId: "we_current" },
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            stripe: { webhookEndpointId: "we_stale" },
+          },
+        });
+
+      assert.equal(response.statusCode, 200);
+
+      const row = await prisma.settings.findFirst();
+      const stripe = (row?.settings as Record<string, unknown>)
+        ?.stripe as Record<string, unknown>;
+      assert.equal(stripe?.webhookEndpointId, "we_current");
+    });
+
     it("should keep the stored settings keys the request does not send", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",

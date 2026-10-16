@@ -2098,6 +2098,8 @@
       "systemCheck": "System check",
       "identity": "Identity",
       "email": "Email",
+      "payments": "Payments",
+      "spamProtection": "Spam protection",
       "platformPolicy": "Platform policy",
       "done": "Done"
     },
@@ -2195,6 +2197,12 @@
     },
     "email": {
       "description": "Where people can reach you, and how your platform sends email."
+    },
+    "payments": {
+      "description": "Artists on your instance receive money through their own payment account, connected to your platform account. Without this step, purchases won't work."
+    },
+    "spamProtection": {
+      "description": "Sign-up, contact and report forms are protected by Cloudflare Turnstile. In production, these forms will fail if it is not configured."
     },
     "platformPolicy": {
       "description": "How much of a percentage fee (if any) your platform takes, who gets to publish, and the rules everyone agrees to."

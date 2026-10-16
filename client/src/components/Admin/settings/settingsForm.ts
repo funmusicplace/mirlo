@@ -37,12 +37,13 @@ export const settingsToForm = (
   settings: Partial<SettingsFromAPI>,
   trustLevelNames: string[]
 ): FormSettings => ({
-  isClosedToPublicArtistSignup: settings.isClosedToPublicArtistSignup,
-  showQueueDashboard: settings.showQueueDashboard,
+  isClosedToPublicArtistSignup: settings.isClosedToPublicArtistSignup ?? false,
+  showQueueDashboard: settings.showQueueDashboard ?? false,
   platformPercent: settings.settings?.platformPercent,
-  cdnUrl: settings.cdnUrl,
+  cdnUrl: settings.cdnUrl ?? "",
   instanceCustomization: {
     ...settings.settings?.instanceCustomization,
+    title: settings.settings?.instanceCustomization?.title ?? "",
     colors: {
       button: "#be3455",
       buttonText: "#ffffff",
@@ -54,20 +55,23 @@ export const settingsToForm = (
   stripe: {
     ...settings.settings?.stripe,
     key: "",
+    publishableKey: settings.settings?.stripe?.publishableKey ?? "",
+    webhookConnectSigningSecret: "",
   },
   emailProvider: {
     ...settings.settings?.emailProvider,
+    fromEmail: settings.settings?.emailProvider?.fromEmail ?? "",
   },
   useConsolidatedBuckets: settings.bucketNames != null,
   bucketPrefix: settings.bucketNames?.prefix ?? "",
   cloudflareTurnstileSecret: "",
   cloudflareTurnstileSecretConfigured:
     settings.settings?.cloudflareTurnstileSecretConfigured,
-  terms: settings.terms,
-  privacyPolicy: settings.privacyPolicy,
-  cookiePolicy: settings.cookiePolicy,
-  contentPolicy: settings.contentPolicy,
-  defconLevel: settings.defconLevel,
+  terms: settings.terms ?? "",
+  privacyPolicy: settings.privacyPolicy ?? "",
+  cookiePolicy: settings.cookiePolicy ?? "",
+  contentPolicy: settings.contentPolicy ?? "",
+  defconLevel: settings.defconLevel ?? 0,
   trustLevelNames: trustLevelNames.map(
     (defaultName, level) =>
       settings.settings?.trustLevelNames?.[level]?.trim() || defaultName

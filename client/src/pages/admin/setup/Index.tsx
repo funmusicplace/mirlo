@@ -2,69 +2,37 @@ import EmailProviderSection from "components/Admin/settings/EmailProviderSection
 import IdentitySettingsSection from "components/Admin/settings/IdentitySettingsSection";
 import PlatformPolicySection from "components/Admin/settings/PlatformPolicySection";
 import PoliciesSection from "components/Admin/settings/PoliciesSection";
-import { FormSettings } from "components/Admin/settings/settingsForm";
+import SecuritySection from "components/Admin/settings/SecuritySection";
+import StripeSection from "components/Admin/settings/StripeSection";
 import useAdminSettingsForm from "components/Admin/settings/useAdminSettingsForm";
 import Box from "components/common/Box";
 import Button from "components/common/Button";
 import { SideNavLayout } from "components/common/SideNav";
 import WidthContainer from "components/common/WidthContainer";
-import SetupGuideNav, {
-  SetupStepStatus,
-} from "components/Setup/guide/SetupGuideNav";
+import {
+  GUIDE_STEPS,
+  GuideStepKey,
+  isSavedStep,
+  SUMMARY_STEPS,
+} from "components/Setup/guide/guideSteps";
+import SetupGuideNav from "components/Setup/guide/SetupGuideNav";
 import SetupGuideProgress from "components/Setup/guide/SetupGuideProgress";
 import { markSetupGuideSeen } from "components/Setup/guide/setupGuideSeen";
 import SetupGuideStep from "components/Setup/guide/SetupGuideStep";
 import SetupGuideSummary from "components/Setup/guide/SetupGuideSummary";
-import { countChecks } from "components/Setup/status/SetupChecklist";
+import useGuideStatuses from "components/Setup/guide/useGuideStatuses";
+import useStepDrafts from "components/Setup/guide/useStepDrafts";
 import SystemCheckStep from "components/Setup/status/SystemCheckStep";
-import { cloneDeep, get, has, set, unset } from "lodash";
 import { useSetupStatusQuery } from "queries/admin";
 import { useCompleteInstanceSetupMutation } from "queries/instanceSettings";
 import React from "react";
-import { FormProvider, Path } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { useConfirm } from "utils/useConfirm";
 
-const STEPS = [
-  { key: "welcome", labelKey: "steps.welcome" },
-  { key: "systemCheck", labelKey: "steps.systemCheck" },
-  { key: "identity", labelKey: "steps.identity" },
-  { key: "email", labelKey: "steps.email" },
-  { key: "platformPolicy", labelKey: "steps.platformPolicy" },
-  { key: "done", labelKey: "steps.done" },
-] as const;
-
-type StepKey = (typeof STEPS)[number]["key"];
-
-const SETTING_STEPS = STEPS.slice(1, -1);
-
 const DASHBOARD_PATH = "/admin/dashboard";
-
-const SAVED_STEP_KEYS = ["identity", "email", "platformPolicy"] as const;
-
-type SavedStepKey = (typeof SAVED_STEP_KEYS)[number];
-
-const STEP_FIELDS: Record<SavedStepKey, Path<FormSettings>[]> = {
-  identity: ["instanceCustomization.title", "instanceCustomization.colors"],
-  email: [
-    "emailProvider",
-    "instanceCustomization.contactEmail",
-    "instanceCustomization.supportEmail",
-  ],
-  platformPolicy: [
-    "platformPercent",
-    "isClosedToPublicArtistSignup",
-    "terms",
-    "privacyPolicy",
-    "cookiePolicy",
-    "contentPolicy",
-  ],
-};
-
-const isSavedStep = (key: StepKey): key is SavedStepKey =>
-  (SAVED_STEP_KEYS as readonly string[]).includes(key);
 
 const SetupGuide: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "setup" });
@@ -81,33 +49,14 @@ const SetupGuide: React.FC = () => {
     isFetching: isCheckingSystem,
     refetch: rerunChecks,
   } = useSetupStatusQuery();
-  const [activeKey, setActiveKey] = React.useState<StepKey>("welcome");
-  const [statuses, setStatuses] = React.useState<
-    Partial<Record<StepKey, SetupStepStatus>>
-  >({});
+  const [activeKey, setActiveKey] = React.useState<GuideStepKey>("welcome");
+  const { statuses, markSkipped } = useGuideStatuses(status);
   const [isSaving, setIsSaving] = React.useState(false);
 
-  const { isDirty } = methods.formState;
-
-  React.useEffect(() => {
-    if (status) {
-      setStatuses((current) => {
-        const next: Partial<Record<StepKey, SetupStepStatus>> = {
-          ...current,
-          systemCheck:
-            countChecks(status.checks, "error") === 0 ? "done" : "todo",
-        };
-        for (const key of SAVED_STEP_KEYS) {
-          next[key] = status.steps[key]
-            ? "done"
-            : current[key] === "skipped"
-              ? "skipped"
-              : "todo";
-        }
-        return next;
-      });
-    }
-  }, [status]);
+  const { saveStep, discardStep, hasUnsavedChanges } = useStepDrafts(
+    methods,
+    saveSettings
+  );
 
   React.useEffect(() => {
     if (hasLoadError) {
@@ -115,77 +64,61 @@ const SetupGuide: React.FC = () => {
     }
   }, [hasLoadError, snackbar, t]);
 
-  const activeIndex = STEPS.findIndex((step) => step.key === activeKey);
+  const activeIndex = GUIDE_STEPS.findIndex((step) => step.key === activeKey);
   const goTo = React.useCallback((index: number) => {
-    const step = STEPS[index];
+    const step = GUIDE_STEPS[index];
     if (step) {
       setActiveKey(step.key);
       window.scrollTo({ top: 0 });
     }
   }, []);
 
-  const onSubmit = React.useCallback(
-    async (data: FormSettings) => {
-      if (activeKey === "welcome" || activeKey === "systemCheck") {
-        goTo(activeIndex + 1);
-        return;
-      }
-      if (activeKey === "done") {
-        try {
-          await completeSetup();
-          navigate(DASHBOARD_PATH);
-        } catch (e) {
-          console.error(e);
-          snackbar(t("completeError"), { type: "warning" });
-        }
-        return;
-      }
-      setIsSaving(true);
+  const onSubmit = React.useCallback(async () => {
+    if (activeKey === "welcome" || activeKey === "systemCheck") {
+      goTo(activeIndex + 1);
+      return;
+    }
+    if (activeKey === "done") {
       try {
-        await saveSettings(data);
-        goTo(activeIndex + 1);
+        await completeSetup();
+        navigate(DASHBOARD_PATH);
       } catch (e) {
         console.error(e);
-        snackbar(t("saveError"), { type: "warning" });
-      } finally {
-        setIsSaving(false);
+        snackbar(t("completeError"), { type: "warning" });
       }
-    },
-    [
-      activeIndex,
-      activeKey,
-      completeSetup,
-      goTo,
-      navigate,
-      saveSettings,
-      snackbar,
-      t,
-    ]
-  );
+      return;
+    }
+    setIsSaving(true);
+    try {
+      await saveStep(activeKey);
+      goTo(activeIndex + 1);
+    } catch (e) {
+      console.error(e);
+      snackbar(t("saveError"), { type: "warning" });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [
+    activeIndex,
+    activeKey,
+    completeSetup,
+    goTo,
+    navigate,
+    saveStep,
+    snackbar,
+    t,
+  ]);
 
   const skipStep = () => {
     if (isSavedStep(activeKey)) {
-      const defaults = methods.formState.defaultValues ?? {};
-      const values = cloneDeep(methods.getValues());
-      STEP_FIELDS[activeKey].forEach((field) => {
-        if (has(defaults, field)) {
-          set(values, field, cloneDeep(get(defaults, field)));
-        } else {
-          unset(values, field);
-        }
-      });
-      methods.reset(values, { keepDefaultValues: true });
+      discardStep(activeKey);
     }
-    setStatuses((current) =>
-      current[activeKey] === "done"
-        ? current
-        : { ...current, [activeKey]: "skipped" }
-    );
+    markSkipped(activeKey);
     goTo(activeIndex + 1);
   };
 
   const finishLater = async () => {
-    if (isDirty && !(await ask(t("unsavedChangesConfirm")))) {
+    if (hasUnsavedChanges() && !(await ask(t("unsavedChangesConfirm")))) {
       return;
     }
     markSetupGuideSeen();
@@ -194,7 +127,7 @@ const SetupGuide: React.FC = () => {
 
   const stepKicker = t("stepOf", {
     current: activeIndex + 1,
-    total: STEPS.length,
+    total: GUIDE_STEPS.length,
   });
 
   return (
@@ -203,16 +136,16 @@ const SetupGuide: React.FC = () => {
         <form onSubmit={methods.handleSubmit(onSubmit)}>
           <SideNavLayout navWidth="16rem">
             <SetupGuideNav
-              steps={STEPS}
+              steps={GUIDE_STEPS}
               statuses={statuses}
               activeKey={activeKey}
               onSelect={(key) =>
-                goTo(STEPS.findIndex((step) => step.key === key))
+                goTo(GUIDE_STEPS.findIndex((step) => step.key === key))
               }
             >
               <SetupGuideProgress
                 current={activeIndex + 1}
-                total={STEPS.length}
+                total={GUIDE_STEPS.length}
               />
               <Button type="button" variant="link" onClick={finishLater}>
                 {t("finishLater")}
@@ -226,7 +159,7 @@ const SetupGuide: React.FC = () => {
                 description={t("welcome.description")}
                 submitLabel={t("start")}
               >
-                <SetupGuideSummary steps={SETTING_STEPS} statuses={statuses} />
+                <SetupGuideSummary steps={SUMMARY_STEPS} statuses={statuses} />
               </SetupGuideStep>
             )}
 
@@ -277,6 +210,36 @@ const SetupGuide: React.FC = () => {
               </SetupGuideStep>
             )}
 
+            {activeKey === "payments" && (
+              <SetupGuideStep
+                kicker={stepKicker}
+                title={t("steps.payments")}
+                description={t("payments.description")}
+                onBack={() => goTo(activeIndex - 1)}
+                onSkip={skipStep}
+                isSaving={isSaving}
+                canSubmit={isLoaded}
+                submitLabel={t("saveAndContinue")}
+              >
+                <StripeSection hideTitle saveKey={() => saveStep("payments")} />
+              </SetupGuideStep>
+            )}
+
+            {activeKey === "spamProtection" && (
+              <SetupGuideStep
+                kicker={stepKicker}
+                title={t("steps.spamProtection")}
+                description={t("spamProtection.description")}
+                onBack={() => goTo(activeIndex - 1)}
+                onSkip={skipStep}
+                isSaving={isSaving}
+                canSubmit={isLoaded}
+                submitLabel={t("saveAndContinue")}
+              >
+                <SecuritySection hideTitle />
+              </SetupGuideStep>
+            )}
+
             {activeKey === "platformPolicy" && (
               <SetupGuideStep
                 kicker={stepKicker}
@@ -303,8 +266,15 @@ const SetupGuide: React.FC = () => {
                 canSubmit={isLoaded}
                 submitLabel={t("goToDashboard")}
               >
-                {isDirty && <Box variant="warning">{t("unsavedChanges")}</Box>}
-                <SetupGuideSummary steps={SETTING_STEPS} statuses={statuses} />
+                <div className="flex flex-col gap-4">
+                  {hasUnsavedChanges() && (
+                    <Box variant="warning">{t("unsavedChanges")}</Box>
+                  )}
+                  <SetupGuideSummary
+                    steps={SUMMARY_STEPS}
+                    statuses={statuses}
+                  />
+                </div>
               </SetupGuideStep>
             )}
           </SideNavLayout>

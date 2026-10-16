@@ -1,6 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import {
+  SAVED_STEP_KEYS,
+  STEP_FIELDS,
+} from "components/Setup/guide/guideSteps";
 import { wasSetupGuideSeen } from "components/Setup/guide/setupGuideSeen";
 import {
   HEALTHY_SETUP_STATUS,
@@ -100,7 +104,13 @@ function renderGuide() {
 
 const DEFAULT_SETUP_STATUS = {
   ...HEALTHY_SETUP_STATUS,
-  steps: { identity: true, email: false, platformPolicy: false },
+  steps: {
+    identity: true,
+    email: false,
+    platformPolicy: false,
+    payments: false,
+    spamProtection: false,
+  },
 };
 
 let setupStatus = DEFAULT_SETUP_STATUS;
@@ -116,6 +126,12 @@ const startGuide = async () => {
   await userEvent.click(screen.getByRole("button", { name: "start" }));
   await screen.findByText("systemCheck.description");
   await userEvent.click(screen.getByRole("button", { name: "continue" }));
+};
+
+const skipSteps = async (count: number) => {
+  for (let i = 0; i < count; i++) {
+    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
+  }
 };
 
 describe("SetupGuide", () => {
@@ -149,7 +165,7 @@ describe("SetupGuide", () => {
       name: "guideNavLabel",
     });
     await waitFor(() =>
-      expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(4)
+      expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(6)
     );
   });
 
@@ -212,7 +228,7 @@ describe("SetupGuide", () => {
     await screen.findByText("welcome.title");
     await waitFor(() => expect(api.get).toHaveBeenCalled());
     await waitFor(() =>
-      expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(1)
+      expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(3)
     );
   });
 
@@ -242,8 +258,8 @@ describe("SetupGuide", () => {
 
   test("marks a step as to do again when it is saved empty", async () => {
     setupStatus = {
-      ...HEALTHY_SETUP_STATUS,
-      steps: { identity: true, email: true, platformPolicy: false },
+      ...DEFAULT_SETUP_STATUS,
+      steps: { ...DEFAULT_SETUP_STATUS.steps, email: true },
     };
     mockSettings(
       storedSettings({
@@ -295,9 +311,7 @@ describe("SetupGuide", () => {
       screen.getByRole("button", { name: "saveAndContinue" })
     );
 
-    expect(
-      await screen.findByText("platformPolicy.description")
-    ).toBeInTheDocument();
+    expect(await screen.findByText("payments.description")).toBeInTheDocument();
     const nav = screen.getByRole("navigation", { name: "guideNavLabel" });
     expect(nav.querySelectorAll('[aria-label="stepDone"]')).toHaveLength(2);
     expect(nav).not.toHaveTextContent("stepSkipped");
@@ -336,9 +350,7 @@ describe("SetupGuide", () => {
   test("reports no unsaved changes after skipping every step", async () => {
     renderGuide();
     await startGuide();
-    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
-    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
-    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
+    await skipSteps(SAVED_STEP_KEYS.length);
 
     expect(screen.getByText("done.description")).toBeInTheDocument();
     expect(screen.queryByText("unsavedChanges")).not.toBeInTheDocument();
@@ -364,7 +376,7 @@ describe("SetupGuide", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
 
-    expect(screen.getByText("platformPolicy.description")).toBeInTheDocument();
+    expect(screen.getByText("payments.description")).toBeInTheDocument();
     await userEvent.click(
       screen.getByRole("button", { name: "saveAndContinue" })
     );
@@ -411,11 +423,54 @@ describe("SetupGuide", () => {
   test("does not link out of the guide from the platform policy step", async () => {
     renderGuide();
     await startGuide();
-    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
-    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
+    await skipSteps(4);
 
     expect(screen.getByText("platformPolicy.description")).toBeInTheDocument();
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+
+  test("saves a typed secret key before registering the payment webhook", async () => {
+    renderGuide();
+    await startGuide();
+    await skipSteps(2);
+
+    expect(screen.getByText("payments.description")).toBeInTheDocument();
+    await userEvent.type(
+      screen.getByLabelText("stripeSecretKey"),
+      "sk_test_new"
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "stripeWebhookRegister" })
+    );
+
+    await waitFor(() =>
+      expect(vi.mocked(api.post).mock.calls.map(([url]) => url)).toEqual([
+        "admin/settings",
+        "admin/stripeWebhook",
+      ])
+    );
+    expect(vi.mocked(api.post).mock.calls[0][1]).toMatchObject({
+      settings: { stripe: { key: "sk_test_new" } },
+    });
+    expect(screen.getByText("payments.description")).toBeInTheDocument();
+  });
+
+  test("warns when the payment keys come from different modes", async () => {
+    renderGuide();
+    await startGuide();
+    await skipSteps(2);
+
+    await userEvent.type(
+      screen.getByLabelText("stripeSecretKey"),
+      "sk_live_new"
+    );
+    expect(screen.queryByText("stripeKeyModeMismatch")).not.toBeInTheDocument();
+    await userEvent.type(
+      screen.getByLabelText("stripePublishableKey"),
+      "pk_test_new"
+    );
+
+    expect(screen.getByText("stripeKeyModeMismatch")).toBeInTheDocument();
   });
 
   test("refuses to save the identity step without a name", async () => {
@@ -461,9 +516,7 @@ describe("SetupGuide", () => {
   test("completes the setup from the last step", async () => {
     renderGuide();
     await startGuide();
-    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
-    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
-    await userEvent.click(screen.getByRole("button", { name: "skipForNow" }));
+    await skipSteps(5);
 
     expect(screen.getByText("done.title")).toBeInTheDocument();
     await userEvent.click(
@@ -477,6 +530,74 @@ describe("SetupGuide", () => {
       );
     });
     expect(await screen.findByText("dashboard")).toBeInTheDocument();
+  });
+
+  test("saves only the fields of the current step and keeps the others as a draft", async () => {
+    renderGuide();
+    await startGuide();
+
+    await userEvent.type(screen.getByLabelText("instanceName"), " Records");
+    await userEvent.click(screen.getByRole("button", { name: "steps.email" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "saveAndContinue" })
+    );
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(api.post).mock.calls[0][1]).toMatchObject({
+      settings: { instanceCustomization: { title: "Nightjar" } },
+    });
+    await userEvent.click(
+      screen.getByRole("button", { name: /^steps\.identity/ })
+    );
+    expect(screen.getByLabelText("instanceName")).toHaveValue(
+      "Nightjar Records"
+    );
+  });
+
+  test("lists every field shown in a step among the fields that step saves", async () => {
+    renderGuide();
+    await startGuide();
+
+    for (const key of SAVED_STEP_KEYS) {
+      await userEvent.click(
+        screen.getByRole("button", { name: new RegExp(`^steps\.${key}`) })
+      );
+      const step = await screen.findByRole("heading", {
+        name: `steps.${key}`,
+      });
+      const names = Array.from(
+        step
+          .closest("section")!
+          .querySelectorAll<HTMLInputElement>(
+            "input[name], select[name], textarea[name]"
+          )
+      ).map((input) => input.name);
+
+      expect(names.length).toBeGreaterThan(0);
+      for (const name of names) {
+        expect(
+          STEP_FIELDS[key].some(
+            (field) => name === field || name.startsWith(`${field}.`)
+          ),
+          `${name} is shown on the ${key} step but not saved by it`
+        ).toBe(true);
+      }
+    }
+  });
+
+  test("does not report unsaved changes after visiting every step", async () => {
+    renderGuide();
+    await startGuide();
+
+    for (const key of SAVED_STEP_KEYS) {
+      await userEvent.click(
+        screen.getByRole("button", { name: new RegExp(`^steps\.${key}`) })
+      );
+    }
+    await userEvent.click(screen.getByRole("button", { name: "steps.done" }));
+
+    expect(await screen.findByText("done.title")).toBeInTheDocument();
+    expect(screen.queryByText("unsavedChanges")).not.toBeInTheDocument();
   });
 
   test("warns on the last step about changes that were not saved", async () => {
