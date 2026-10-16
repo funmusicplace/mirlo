@@ -94,6 +94,13 @@ type StoredStripeCredentials = NonNullable<StripeSettings>["stripe"];
 
 const SECRET_KEY_MODE_REGEX = /^(?:sk|rk)_(test|live)_/;
 
+export const hasStripeCredentials = (stored: StoredStripeCredentials) =>
+  Boolean(
+    (stored?.key?.trim() || envStripeKey()) &&
+    (stored?.webhookConnectSigningSecret?.trim() ||
+      envWebhookConnectSigningSecret())
+  );
+
 export const stripeKeyMode = (
   stored: StoredStripeCredentials
 ): "test" | "live" | null => {

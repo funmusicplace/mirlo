@@ -2176,6 +2176,8 @@
       "steps": {
         "identity": "Identity",
         "email": "Email",
+        "payments": "Payments",
+        "spamProtection": "Spam protection",
         "platformPolicy": "Platform policy"
       }
     },

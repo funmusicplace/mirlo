@@ -505,6 +505,8 @@ export interface SetupStatus {
     identity: boolean;
     email: boolean;
     platformPolicy: boolean;
+    payments: boolean;
+    spamProtection: boolean;
   };
 }
 

@@ -91,7 +91,7 @@ describe("SetupStatusCard", () => {
     expect(await screen.findByText("title")).toBeInTheDocument();
     expect(screen.getByRole("progressbar")).toHaveAttribute(
       "aria-valuenow",
-      "2"
+      "4"
     );
     expect(screen.getByText("steps.platformPolicy")).toBeInTheDocument();
     expect(screen.queryByText("worker.label")).not.toBeInTheDocument();

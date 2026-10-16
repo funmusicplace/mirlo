@@ -10,7 +10,9 @@ import {
 } from "../queues/scheduled-tasks-queue";
 import { sendMailQueue } from "../queues/send-mail-queue";
 
+import { isSpamProtectionConfigured } from "./cloudflare";
 import { backendStorage, bucketExists, currentBuckets } from "./minio";
+import { getPaymentProcessor } from "./payments/PaymentProcessor";
 import { hasInstanceName, SettingsType } from "./settings";
 
 export type CheckStatus = "ok" | "warning" | "error";
@@ -47,6 +49,8 @@ export type SetupStatus = {
     identity: boolean;
     email: boolean;
     platformPolicy: boolean;
+    payments: boolean;
+    spamProtection: boolean;
   };
 };
 
@@ -213,6 +217,8 @@ export const stepsFromSettings = (
   platformPolicy: Boolean(
     settings.terms?.trim() || settings.contentPolicy?.trim()
   ),
+  payments: getPaymentProcessor().isConfigured(settings),
+  spamProtection: isSpamProtectionConfigured(),
 });
 
 export const getSetupStatus = async (

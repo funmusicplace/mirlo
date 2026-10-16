@@ -36,7 +36,13 @@ export const HEALTHY_SETUP_STATUS: SetupStatus = {
     },
     storage: { status: "ok", backend: "minio", missingBuckets: 0 },
   },
-  steps: { identity: true, email: true, platformPolicy: true },
+  steps: {
+    identity: true,
+    email: true,
+    platformPolicy: true,
+    payments: true,
+    spamProtection: true,
+  },
 };
 
 export const TROUBLED_SETUP_STATUS: SetupStatus = {
@@ -54,5 +60,11 @@ export const TROUBLED_SETUP_STATUS: SetupStatus = {
     },
     storage: { status: "warning", backend: "backblaze", missingBuckets: 2 },
   },
-  steps: { identity: true, email: false, platformPolicy: false },
+  steps: {
+    identity: true,
+    email: false,
+    platformPolicy: false,
+    payments: true,
+    spamProtection: true,
+  },
 };
