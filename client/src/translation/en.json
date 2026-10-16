@@ -2221,7 +2221,14 @@
     },
     "done": {
       "title": "You're set up.",
-      "description": "Here is where your instance stands. Skipped items can be finished later from the admin settings."
+      "description": "Here is where your instance stands. Skipped items can be finished later from the admin settings.",
+      "nextStepsTitle": "Suggested next steps",
+      "instanceArtist": "Choose the instance artist",
+      "instanceArtistDescription": "This artist account will be used for the platform's newsletter, banner announcements and home page support button.",
+      "inviteArtists": "Invite your first artists",
+      "inviteArtistsDescription": "Send invitations from Admin, Content, Invites.",
+      "maintenanceGuide": "Read the maintenance guide",
+      "maintenanceGuideDescription": "Logs, restarts, updates and backups for your server."
     }
   },
   "welcome": {

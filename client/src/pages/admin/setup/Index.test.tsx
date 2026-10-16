@@ -100,6 +100,7 @@ function renderGuide() {
         <Routes>
           <Route path="/admin/setup" element={<SetupGuide />} />
           <Route path="/admin/dashboard" element={<p>dashboard</p>} />
+          <Route path="/admin/content/invites" element={<p>invites</p>} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>
@@ -534,6 +535,43 @@ describe("SetupGuide", () => {
       );
     });
     expect(await screen.findByText("dashboard")).toBeInTheDocument();
+  });
+
+  test("completes the setup before following a suggested next step", async () => {
+    renderGuide();
+    await startGuide();
+    await skipSteps(5);
+
+    await userEvent.click(screen.getByRole("link", { name: "inviteArtists" }));
+
+    await waitFor(() => {
+      expect(fetchWrapper.post).toHaveBeenCalledWith(
+        "v1/admin/setup/complete",
+        undefined
+      );
+    });
+    expect(await screen.findByText("invites")).toBeInTheDocument();
+  });
+
+  test("asks before leaving the last step with changes that were not saved", async () => {
+    ask.mockResolvedValueOnce(false);
+    renderGuide();
+    await startGuide();
+
+    await userEvent.type(screen.getByLabelText("instanceName"), " Records");
+    await userEvent.click(screen.getByRole("button", { name: "steps.done" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "goToDashboard" })
+    );
+
+    await waitFor(() =>
+      expect(ask).toHaveBeenCalledWith("unsavedChangesConfirm")
+    );
+    expect(fetchWrapper.post).not.toHaveBeenCalledWith(
+      "v1/admin/setup/complete",
+      undefined
+    );
+    expect(screen.getByText("done.title")).toBeInTheDocument();
   });
 
   test("saves only the fields of the current step and keeps the others as a draft", async () => {
