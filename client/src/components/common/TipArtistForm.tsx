@@ -30,6 +30,7 @@ const TipArtistForm: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
 
   const navigate = useNavigate();
+  const formId = React.useId();
   const { checkout, isLoading, startPurchase } = usePurchase();
 
   const tipCompletePath = buildCheckoutCompletePath(artist, {
@@ -90,10 +91,10 @@ const TipArtistForm: React.FC<{
                     className="sr-only"
                     value={gift.value}
                     {...methods.register("priceButton")}
-                    id={`${artist.id}-priceButton-${gift.value}`}
+                    id={`${formId}-priceButton-${gift.value}`}
                   />
                   <label
-                    htmlFor={`${artist.id}-priceButton-${gift.value}`}
+                    htmlFor={`${formId}-priceButton-${gift.value}`}
                     className={
                       "block p-2 mr-1 rounded-lg border text-center cursor-pointer " +
                       css`
@@ -139,9 +140,11 @@ const TipArtistForm: React.FC<{
                     margin-top: 1rem !important ;
                   `}
                 >
-                  <label htmlFor="comment">{t("leaveAComment")}</label>
+                  <label htmlFor={`${formId}-comment`}>
+                    {t("leaveAComment")}
+                  </label>
                   <TextArea
-                    id="comment"
+                    id={`${formId}-comment`}
                     {...methods.register("message")}
                     rows={2}
                   />
