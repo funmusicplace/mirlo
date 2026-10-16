@@ -19,7 +19,15 @@ describe("postContent", () => {
       const content = `<p>Hi</p><img src="https://cdn.example.com/file/post-images/${imageId}.jpg">`;
       assert.equal(
         addImageRefs(content, [imageId]),
-        `<p>Hi</p><img data-image-id="${imageId}" src="https://cdn.example.com/file/post-images/${imageId}.jpg">`
+        `<p>Hi</p><img src="https://cdn.example.com/file/post-images/${imageId}.jpg" data-image-id="${imageId}">`
+      );
+    });
+
+    it("handles a > inside another attribute", () => {
+      const content = `<img alt="before > after" src="https://cdn.example.com/post-images/${imageId}.jpg">`;
+      assert.equal(
+        addImageRefs(content, [imageId]),
+        `<img alt="before > after" src="https://cdn.example.com/post-images/${imageId}.jpg" data-image-id="${imageId}">`
       );
     });
 
@@ -27,7 +35,7 @@ describe("postContent", () => {
       const content = `<img src="https://s3.example.com/mirlo-images/post-images/${imageId}.png" alt="x">`;
       assert.equal(
         addImageRefs(content, [imageId]),
-        `<img data-image-id="${imageId}" src="https://s3.example.com/mirlo-images/post-images/${imageId}.png" alt="x">`
+        `<img src="https://s3.example.com/mirlo-images/post-images/${imageId}.png" alt="x" data-image-id="${imageId}">`
       );
     });
 
@@ -70,7 +78,20 @@ describe("postContent", () => {
       );
       assert.equal(
         resolveImageRefs(content, [{ id: imageId, extension: "png" }]),
-        `<img src="${expected}" data-image-id="${imageId}">`
+        `<img data-image-id="${imageId}" src="${expected}">`
+      );
+    });
+
+    it("replaces a src containing the other quote character", () => {
+      const content = `<img data-image-id="${imageId}" alt="a > b" src="https://old.example.com/it's/${imageId}.jpg">`;
+      const expected = generateFullStaticImageUrl(
+        imageId,
+        finalPostImageBucket,
+        "jpg"
+      );
+      assert.equal(
+        resolveImageRefs(content, [{ id: imageId, extension: "jpg" }]),
+        `<img data-image-id="${imageId}" alt="a > b" src="${expected}">`
       );
     });
 

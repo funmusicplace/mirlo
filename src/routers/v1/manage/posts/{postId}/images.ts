@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated } from "../../../../../auth/passport";
 import { processPostImage } from "../../../../../queues/processImages";
+import { AppError } from "../../../../../utils/error";
 import { generateFullStaticImageUrl } from "../../../../../utils/images";
 import { finalPostImageBucket } from "../../../../../utils/minio";
 import { doesPostBelongToUser } from "../../../../../utils/post";
@@ -66,18 +67,21 @@ export default function () {
           id: imageId as string,
         },
       });
-      if (image) {
-        res.json({
-          result: {
-            src: generateFullStaticImageUrl(
-              image.id,
-              finalPostImageBucket,
-              image.extension
-            ),
-            imageId: image.id,
-          },
-        });
+      if (!image) {
+        throw new AppError({ httpCode: 404, description: "Image not found" });
       }
+      const src = generateFullStaticImageUrl(
+        image.id,
+        finalPostImageBucket,
+        image.extension
+      );
+      res.json({
+        result: {
+          src,
+          jobId: src,
+          imageId: image.id,
+        },
+      });
     } catch (error) {
       next(error);
     }

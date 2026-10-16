@@ -485,7 +485,7 @@ describe("manage/posts/{postId}", () => {
       const stored = await prisma.post.findFirst({ where: { id: post.id } });
       assert.equal(
         stored?.content,
-        `<p>Hi</p><img data-image-id="${image.id}" src="${staleSrc}"><img src="https://example.org/cat.gif">`
+        `<p>Hi</p><img src="${staleSrc}" data-image-id="${image.id}"><img src="https://example.org/cat.gif">`
       );
       assert(!response.body.result.content.includes(staleSrc));
       assert(response.body.result.content.includes(`${image.id}.png"`));

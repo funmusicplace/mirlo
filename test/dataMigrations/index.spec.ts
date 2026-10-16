@@ -10,8 +10,15 @@ import {
   runPendingDataMigrations,
 } from "../../src/dataMigrations";
 import merchImagesToCentralImages from "../../src/dataMigrations/merchImagesToCentralImages";
+import postContentImageRefs from "../../src/dataMigrations/postContentImageRefs";
 import { uploadOptimizedImageByType } from "../../src/utils/minio";
-import { clearTables, createMerch, createProfile, createUser } from "../utils";
+import {
+  clearTables,
+  createMerch,
+  createPost,
+  createProfile,
+  createUser,
+} from "../utils";
 
 const fakeMigration = (
   name: string,
@@ -180,5 +187,55 @@ describe("dataMigrations: merchImagesToCentralImages", () => {
     assert.ok(
       await prisma.merchImage.findUnique({ where: { id: missing.id } })
     );
+  });
+});
+
+describe("dataMigrations: postContentImageRefs", () => {
+  beforeEach(async () => {
+    await clearTables();
+  });
+
+  it("adds image ids to existing posts without touching updatedAt", async () => {
+    const { user } = await createUser({ email: "artist@artist.com" });
+    const profile = await createProfile(user.id);
+    const post = await createPost(profile.id);
+    const image = await prisma.postImage.create({
+      data: { postId: post.id, mimeType: "image/jpeg", extension: "jpg" },
+    });
+    const updatedAt = new Date("2024-01-01T00:00:00.000Z");
+    const external = `<img src="https://example.org/cat.gif">`;
+    await prisma.post.update({
+      where: { id: post.id },
+      data: {
+        content: `<p>Hi</p><img src="https://cdn.example.com/post-images/${image.id}.jpg">${external}`,
+        updatedAt,
+      },
+    });
+    const untouched = await createPost(profile.id, {
+      content: `<p>No images</p>`,
+    });
+
+    assert.equal(await postContentImageRefs.run(), true);
+    const migrated = await prisma.post.findUniqueOrThrow({
+      where: { id: post.id },
+    });
+    assert.equal(
+      migrated.content,
+      `<p>Hi</p><img src="https://cdn.example.com/post-images/${image.id}.jpg" data-image-id="${image.id}">${external}`
+    );
+    assert.equal(migrated.updatedAt.toISOString(), updatedAt.toISOString());
+    const other = await prisma.post.findUniqueOrThrow({
+      where: { id: untouched.id },
+    });
+    assert.equal(
+      other.updatedAt.toISOString(),
+      untouched.updatedAt.toISOString()
+    );
+
+    assert.equal(await postContentImageRefs.run(), true);
+    const rerun = await prisma.post.findUniqueOrThrow({
+      where: { id: post.id },
+    });
+    assert.equal(rerun.content, migrated.content);
   });
 });

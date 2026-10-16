@@ -8,7 +8,7 @@ import {
 } from "../activityPub/utils";
 import logger from "../logger";
 import { getClient } from "../utils/getClient";
-import { postImagesForContent, resolvePostContent } from "../utils/postContent";
+import { postImagesForContent } from "../utils/postContent";
 
 /** * Sends published posts to ActivityPub followers' inboxes
  * This job should run periodically to deliver new posts to federated servers
@@ -91,7 +91,7 @@ const sendPostToActivityPubFollowers = async () => {
     const createActivity = buildPostCreateActivity(
       ctx,
       identifier,
-      { ...post, content: resolvePostContent(post) },
+      post,
       client.applicationUrl,
       mentions
     );

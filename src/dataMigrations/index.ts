@@ -19,6 +19,7 @@ import prisma from "@mirlo/prisma";
 import logger from "../logger";
 
 import merchImagesToCentralImages from "./merchImagesToCentralImages";
+import postContentImageRefs from "./postContentImageRefs";
 
 export type DataMigration = {
   /** Recorded in the DataMigration table. Never rename once shipped. */
@@ -27,7 +28,10 @@ export type DataMigration = {
   run: () => Promise<boolean>;
 };
 
-export const dataMigrations: DataMigration[] = [merchImagesToCentralImages];
+export const dataMigrations: DataMigration[] = [
+  merchImagesToCentralImages,
+  postContentImageRefs,
+];
 
 export const runPendingDataMigrations = async (
   migrations: DataMigration[] = dataMigrations

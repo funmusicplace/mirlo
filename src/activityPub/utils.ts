@@ -9,6 +9,8 @@ import {
 } from "@fedify/fedify/vocab";
 import { Temporal } from "@js-temporal/polyfill";
 
+import { ContentImage, resolvePostContent } from "../utils/postContent";
+
 const { API_DOMAIN } = process.env;
 
 export const root = new URL(API_DOMAIN || "http://localhost:3000").hostname;
@@ -58,12 +60,14 @@ export function buildPostCreateActivity(
     id: number;
     title: string | null;
     content?: string | null;
+    images: ContentImage[];
     urlSlug?: string | null;
     publishedAt?: Date | null;
   },
   applicationUrl: string,
   mentions: ApMention[] = []
 ): Create {
+  const content = resolvePostContent(post);
   const actorUri = ctx.getActorUri(identifier);
   const followersUri = ctx.getFollowersUri(identifier);
   const mentionUris = mentions.map((m) => new URL(m.href));
@@ -78,10 +82,8 @@ export function buildPostCreateActivity(
       id: ctx.getObjectUri(Article, { identifier, postId: String(post.id) }),
       attribution: actorUri,
       name: post.title,
-      summary: post.content
-        ? stripHtml(post.content).slice(0, 200) + "..."
-        : undefined,
-      content: post.content ?? undefined,
+      summary: content ? stripHtml(content).slice(0, 200) + "..." : undefined,
+      content: content ?? undefined,
       published: getTemporal(post.publishedAt),
       to: PUBLIC_COLLECTION,
       ccs: ccList,

@@ -198,7 +198,7 @@ federation
           return buildPostCreateActivity(
             ctx,
             identifier,
-            item,
+            { ...item, images: [] },
             client.applicationUrl,
             parseMentionsFromContent(item.content ?? "")
           );
