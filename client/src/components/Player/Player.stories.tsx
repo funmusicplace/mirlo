@@ -33,19 +33,6 @@ const meta = {
   title: "Player/Player",
   component: Player,
   render: () => {
-    console.log(
-      "DBG render",
-      performance.now(),
-      localStorage.getItem("nomadState")
-    );
-    return (
-      <GlobalStateProvider>
-        <Player />
-      </GlobalStateProvider>
-    );
-  },
-  beforeEach: () => {
-    console.log("DBG beforeEach", performance.now());
     localStorage.setItem(
       "nomadState",
       JSON.stringify({
@@ -53,8 +40,13 @@ const meta = {
         currentlyPlayingIndex: 0,
       })
     );
-    return clearPlayerQueue;
+    return (
+      <GlobalStateProvider>
+        <Player />
+      </GlobalStateProvider>
+    );
   },
+  beforeEach: () => clearPlayerQueue,
   parameters: {
     layout: "fullscreen",
     msw: {
@@ -74,7 +66,6 @@ const meta = {
           http.get("*/showcase/audio/*", () => passthrough()),
         ],
         tracks: http.get("*/v1/tracks/:id", ({ params }) => {
-          console.log("DBG tracks", performance.now(), params.id);
           const track = TRACKS.find((t) => String(t.id) === params.id);
           return track
             ? HttpResponse.json({ result: track })
@@ -100,11 +91,6 @@ type Story = StoryObj<typeof meta>;
  */
 export const AdvancesAtEndOfTrack: Story = {
   play: async () => {
-    console.log(
-      "DBG play",
-      performance.now(),
-      localStorage.getItem("nomadState")
-    );
     await within(document.body).findAllByText("Low Water", undefined, {
       timeout: 5000,
     });
