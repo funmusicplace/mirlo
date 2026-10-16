@@ -47,6 +47,10 @@ vi.mock("queries/settings", () => ({
     queryKey: ["fetchFeaturedArtists"],
     queryFn: () => Promise.resolve([]),
   }),
+  queryInstanceArtist: () => ({
+    queryKey: ["fetchInstanceArtist"],
+    queryFn: () => Promise.resolve(null),
+  }),
 }));
 
 vi.mock("queries/fetch/fetchWrapper", async (importOriginal) => ({

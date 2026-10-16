@@ -25,6 +25,10 @@ vi.mock("queries/settings", () => ({
     queryKey: ["fetchFeaturedArtists"],
     queryFn: () => Promise.resolve([]),
   }),
+  queryInstanceArtist: () => ({
+    queryKey: ["fetchInstanceArtist"],
+    queryFn: () => Promise.resolve(null),
+  }),
 }));
 
 const STORED_SETTINGS = {

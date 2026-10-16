@@ -90,6 +90,7 @@ export default function () {
           where: {
             id: Number(settings.settings.instanceCustomization?.artistId),
           },
+          include: { avatar: { where: { deletedAt: null } } },
         });
         return res.status(200).json({
           result: artist ? processSingleArtist(artist) : artist,

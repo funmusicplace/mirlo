@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryAdminSettings, querySetupStatus } from "queries/admin";
 import { queryInstanceSettings } from "queries/instanceSettings";
-import { queryFeaturedArtists } from "queries/settings";
+import { queryFeaturedArtists, queryInstanceArtist } from "queries/settings";
 import React from "react";
 import { useForm } from "react-hook-form";
 import api from "services/api";
@@ -53,6 +53,9 @@ export const useAdminSettingsForm = () => {
         }),
         queryClient.invalidateQueries({
           queryKey: querySetupStatus().queryKey,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryInstanceArtist().queryKey,
         }),
       ]);
     },
