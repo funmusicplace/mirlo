@@ -394,6 +394,64 @@ describe("send-mail job", () => {
     });
   });
 
+  describe("invite-email", () => {
+    it("encodes the email and inviter name in the signup link exactly once", async () => {
+      await createSiteSettings({
+        emailProvider: {
+          provider: "mailgun",
+          fromEmail: "noreply@mirlo.test",
+          mailgun: { apiKey: "key-test", domain: "mg.mirlo.test" },
+        },
+      });
+
+      let sentHtml = "";
+      const transport = {
+        sendMail: (mail: { html?: string }) => {
+          sentHtml = mail.html ?? "";
+          return Promise.resolve({ messageId: "test-invite" });
+        },
+      };
+      sandbox.stub(nodemailer, "createTransport").returns(transport as any);
+
+      const originalMailhog = process.env.MAILHOG_PORT;
+      process.env.MAILHOG_PORT = "1025";
+      try {
+        await sendMail({
+          data: {
+            template: "invite-email",
+            locals: {
+              email: "new@example.com",
+              token: "invite-token",
+              accountType: "ARTIST",
+              invitedBy: { name: "Ann & Bo", email: "admin@example.com" },
+              client: "http://localhost:8080",
+            },
+            message: { to: "new@example.com" },
+          },
+        } as Job);
+      } finally {
+        if (originalMailhog === undefined) {
+          delete process.env.MAILHOG_PORT;
+        } else {
+          process.env.MAILHOG_PORT = originalMailhog;
+        }
+      }
+
+      assert.ok(
+        sentHtml.includes("email=new%40example.com"),
+        `link should contain the singly-encoded email, got: ${sentHtml}`
+      );
+      assert.ok(
+        !sentHtml.includes("%2540"),
+        "email should not be double-encoded"
+      );
+      assert.ok(
+        sentHtml.includes("invitedBy=Ann%20%26%20Bo"),
+        `link should contain the encoded inviter name, got: ${sentHtml}`
+      );
+    });
+  });
+
   describe("from email address selection", () => {
     it("should use from email from settings when configured", async () => {
       await createSiteSettings({

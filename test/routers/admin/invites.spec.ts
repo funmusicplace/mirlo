@@ -2,13 +2,16 @@ import assert from "node:assert";
 
 import * as dotenv from "dotenv";
 dotenv.config();
+import { Request, Response } from "express";
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
+import sinon from "sinon";
 
 import {
   sendMailQueue,
   sendMailQueueEvents,
 } from "../../../src/queues/send-mail-queue";
+import invitesEndpoint from "../../../src/routers/v1/admin/invites";
 import { clearTables, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
@@ -19,6 +22,10 @@ describe("admin/invites", () => {
     } catch (e) {
       console.error(e);
     }
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
   after(async () => {
@@ -71,6 +78,32 @@ describe("admin/invites", () => {
         invites.map((invite) => invite.email),
         ["already@test.com", "new@test.com"]
       );
+    });
+
+    it("should pass the raw email to the invite template", async () => {
+      const { user: admin } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      const added = new Promise<any[]>((resolve) => {
+        sinon.stub(sendMailQueue, "add").callsFake(async (...args) => {
+          resolve(args);
+          return {} as any;
+        });
+      });
+
+      await invitesEndpoint().POST[2](
+        {
+          user: admin,
+          body: { users: [{ email: "new@test.com" }], inviteType: "ARTIST" },
+        } as unknown as Request,
+        { json: () => {} } as unknown as Response,
+        () => {}
+      );
+
+      const [, data] = await added;
+      assert.equal(data.template, "invite-email");
+      assert.equal(data.locals.email, "new@test.com");
     });
   });
 });

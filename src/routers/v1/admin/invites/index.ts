@@ -66,7 +66,6 @@ export default function () {
           },
           locals: {
             ...newUser,
-            email: encodeURIComponent(newUser.email),
             host: process.env.API_DOMAIN,
             client: (await getClient()).applicationUrl,
           },

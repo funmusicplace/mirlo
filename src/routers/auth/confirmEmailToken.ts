@@ -22,7 +22,7 @@ const confirmEmailToken = async (
       token: string;
       userId: number;
       client: number;
-      accountType: "artist" | "listener";
+      accountType: "artist" | "listener" | "label";
     };
 
     log.info(`auth/confirmEmailToken: confirming email for user ${userId}`);
