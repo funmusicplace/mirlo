@@ -80,31 +80,37 @@ export const AudioWrapper: React.FC<{
     }
   }, []);
 
+  const play = React.useCallback(() => {
+    playerRef.current?.play().catch((e) => {
+      console.warn("play() rejected", e?.name, e?.message);
+      if (e?.name === "AbortError") {
+        return;
+      }
+      dispatch({ type: "setPlaying", playing: false });
+    });
+  }, [dispatch]);
+
   const onHLSInstance = React.useCallback(
     (hls: Hls) => {
       hlsRef.current = hls;
       hls.once(Hls.Events.MANIFEST_PARSED, () => {
         if (playingRef.current && !showBuyModalRef.current) {
           ensureLoading();
-          playerRef.current?.play().catch(() => {
-            dispatch({ type: "setPlaying", playing: false });
-          });
+          play();
         }
       });
     },
-    [dispatch, ensureLoading]
+    [ensureLoading, play]
   );
 
   const onEnded = React.useCallback(async () => {
     if (looping === "loopTrack") {
-      playerRef.current?.play().catch(() => {
-        dispatch({ type: "setPlaying", playing: false });
-      });
+      play();
     } else {
       dispatch({ type: "incrementCurrentlyPlayingIndex" });
     }
     setMostlyListened(false);
-  }, [playerRef, dispatch, looping]);
+  }, [play, dispatch, looping]);
 
   React.useEffect(() => {
     if (currentTrack) {
@@ -164,9 +170,7 @@ export const AudioWrapper: React.FC<{
           } else {
             playerRef.current.playsInline = true;
             ensureLoading();
-            playerRef.current.play().catch(() => {
-              dispatch({ type: "setPlaying", playing: false });
-            });
+            play();
           }
         }
       } else if (playerRef?.current && playing === false) {
@@ -178,7 +182,14 @@ export const AudioWrapper: React.FC<{
     } catch (e) {
       console.error("an error happened", e);
     }
-  }, [currentTrack, currentlyPlayingIndex, playerQueueIds, playerRef, playing]);
+  }, [
+    currentTrack,
+    currentlyPlayingIndex,
+    playerQueueIds,
+    playerRef,
+    playing,
+    play,
+  ]);
 
   React.useEffect(() => {
     determineIfShouldPlay();
