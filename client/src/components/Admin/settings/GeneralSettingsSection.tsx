@@ -4,6 +4,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import InstanceArtistSelector from "./InstanceArtistSelector";
 import { FormSettings } from "./settingsForm";
 import SettingsSection from "./SettingsSection";
 
@@ -19,8 +20,12 @@ const GeneralSettingsSection: React.FC = () => {
           id="input-cdn-url"
           type="text"
           className="max-w-md"
+          aria-describedby="hint-cdn-url"
           {...register("cdnUrl")}
         />
+        <small id="hint-cdn-url" className="max-w-md">
+          {t("cdnUrlHint")}
+        </small>
       </FormComponent>
 
       <FormComponent direction="row">
@@ -43,16 +48,16 @@ const GeneralSettingsSection: React.FC = () => {
         <label htmlFor="input-show-hero-on-home">{t("showHeroOnHome")}</label>
       </FormComponent>
 
-      <FormComponent>
-        <label htmlFor="input-instance-artist-id">
-          {t("instanceArtistId")}
-        </label>
-        <InputEl
-          id="input-instance-artist-id"
-          type="number"
-          className="max-w-xs"
-          {...register("instanceCustomization.artistId")}
-        />
+      <FormComponent
+        role="group"
+        aria-labelledby="label-instance-artist"
+        aria-describedby="hint-instance-artist"
+      >
+        <span id="label-instance-artist" className="text-base font-semibold">
+          {t("instanceArtist")}
+        </span>
+        <InstanceArtistSelector />
+        <small id="hint-instance-artist">{t("instanceArtistHint")}</small>
       </FormComponent>
     </SettingsSection>
   );

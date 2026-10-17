@@ -23,12 +23,17 @@ const PlatformPolicySection: React.FC<{
     >
       <FormComponent>
         <label htmlFor="input-platform-percent">{t("platformPercent")}</label>
-        <InputEl
-          id="input-platform-percent"
-          type="number"
-          className="max-w-xs"
-          {...register("platformPercent")}
-        />
+        <div className="flex items-center gap-2">
+          <InputEl
+            id="input-platform-percent"
+            type="number"
+            min={0}
+            max={100}
+            className="max-w-xs"
+            {...register("platformPercent")}
+          />
+          <span aria-hidden="true">%</span>
+        </div>
       </FormComponent>
 
       <FormComponent direction="row">

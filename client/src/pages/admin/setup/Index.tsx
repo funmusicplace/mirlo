@@ -20,6 +20,7 @@ import SetupGuideProgress from "components/Setup/guide/SetupGuideProgress";
 import { markSetupGuideSeen } from "components/Setup/guide/setupGuideSeen";
 import SetupGuideStep from "components/Setup/guide/SetupGuideStep";
 import SetupGuideSummary from "components/Setup/guide/SetupGuideSummary";
+import SetupNextSteps from "components/Setup/guide/SetupNextSteps";
 import useGuideStatuses from "components/Setup/guide/useGuideStatuses";
 import useStepDrafts from "components/Setup/guide/useStepDrafts";
 import SystemCheckStep from "components/Setup/status/SystemCheckStep";
@@ -73,19 +74,29 @@ const SetupGuide: React.FC = () => {
     }
   }, []);
 
+  const completeAndLeave = React.useCallback(
+    async (path: string) => {
+      if (hasUnsavedChanges() && !(await ask(t("unsavedChangesConfirm")))) {
+        return;
+      }
+      try {
+        await completeSetup();
+        navigate(path);
+      } catch (e) {
+        console.error(e);
+        snackbar(t("completeError"), { type: "warning" });
+      }
+    },
+    [ask, completeSetup, hasUnsavedChanges, navigate, snackbar, t]
+  );
+
   const onSubmit = React.useCallback(async () => {
     if (activeKey === "welcome" || activeKey === "systemCheck") {
       goTo(activeIndex + 1);
       return;
     }
     if (activeKey === "done") {
-      try {
-        await completeSetup();
-        navigate(DASHBOARD_PATH);
-      } catch (e) {
-        console.error(e);
-        snackbar(t("completeError"), { type: "warning" });
-      }
+      await completeAndLeave(DASHBOARD_PATH);
       return;
     }
     setIsSaving(true);
@@ -98,16 +109,7 @@ const SetupGuide: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [
-    activeIndex,
-    activeKey,
-    completeSetup,
-    goTo,
-    navigate,
-    saveStep,
-    snackbar,
-    t,
-  ]);
+  }, [activeIndex, activeKey, completeAndLeave, goTo, saveStep, snackbar, t]);
 
   const skipStep = () => {
     if (isSavedStep(activeKey)) {
@@ -274,6 +276,7 @@ const SetupGuide: React.FC = () => {
                     steps={SUMMARY_STEPS}
                     statuses={statuses}
                   />
+                  <SetupNextSteps onLeave={completeAndLeave} />
                 </div>
               </SetupGuideStep>
             )}
