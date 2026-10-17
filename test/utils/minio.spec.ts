@@ -520,6 +520,11 @@ describe("minio bucket routing", () => {
         assert.equal(listObjectsV2Stub.firstCall.args[1], "audio-id");
       });
 
+      it("removeAudioFiles also removes the incoming upload", async () => {
+        await removeAudioFiles("audio-id");
+        assert.ok(removeObjectStub.calledWith(incomingAudioBucket, "audio-id"));
+      });
+
       it("removeCoverImages uses finalCoversBucket with coverId prefix", async () => {
         await removeCoverImages("cover-id");
         assert.equal(listObjectsV2Stub.firstCall.args[0], finalCoversBucket);
@@ -543,6 +548,13 @@ describe("minio bucket routing", () => {
         await removeAudioFiles("audio-id");
         assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-audio");
         assert.equal(listObjectsV2Stub.firstCall.args[1], "audio-id");
+      });
+
+      it("removeAudioFiles also removes the incoming upload", async () => {
+        await removeAudioFiles("audio-id");
+        assert.ok(
+          removeObjectStub.calledWith("mirlo-audio", "incoming/audio-id")
+        );
       });
 
       it("removeCoverImages uses mirlo-images with prefixed coverId", async () => {

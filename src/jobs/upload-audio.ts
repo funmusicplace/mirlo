@@ -1,5 +1,6 @@
 import { createReadStream, promises as fsPromises } from "fs";
 
+import prisma from "@mirlo/prisma";
 import { Job } from "bullmq";
 import ffmpeg from "fluent-ffmpeg";
 
@@ -7,6 +8,7 @@ import {
   downloadIncomingAudio,
   uploadAudioHlsFile,
   removeIncomingAudio,
+  removeAudioFiles,
 } from "../utils/minio";
 
 import { logger } from "./queue-worker";
@@ -105,6 +107,13 @@ export default async (job: Job) => {
     logger.info(`audioId ${audioId}: Cleaned up incoming bucket`);
     await fsPromises.rm(destinationFolder, { recursive: true });
     logger.info(`Cleaned up ${destinationFolder}`);
+
+    const audio = await prisma.trackAudio.findFirst({ where: { id: audioId } });
+    if (!audio) {
+      logger.info(`audioId ${audioId}: deleted while processing, removing it`);
+      await removeAudioFiles(audioId);
+      return { deleted: true };
+    }
     const response = { ...(data ?? {}), duration, originalFileSize };
     logger.info(`Data: ${JSON.stringify(response)}`);
     return response;
