@@ -20,7 +20,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
 import contentDisposition from "content-disposition";
-import { chunk, uniq } from "lodash";
+import { chunk } from "lodash";
 import { Client, BucketItem } from "minio";
 import * as Minio from "minio";
 import { Logger } from "winston";
@@ -689,7 +689,8 @@ export const copyObjectInStorage = async (
 
 const forEachObjectPage = async (
   bucket: string,
-  callback: (keys: string[]) => Promise<void>
+  callback: (keys: string[]) => Promise<void>,
+  options: { prefix?: string; delimiter?: string } = {}
 ) => {
   const client = storageS3Client();
   let continuationToken: string | undefined;
@@ -697,12 +698,17 @@ const forEachObjectPage = async (
     const page = await client.send(
       new ListObjectsV2Command({
         Bucket: bucket,
+        Prefix: options.prefix,
+        Delimiter: options.delimiter,
         ContinuationToken: continuationToken,
       })
     );
-    await callback(
-      (page.Contents ?? []).flatMap((c) => (c.Key ? [c.Key] : []))
-    );
+    await callback([
+      ...(page.CommonPrefixes ?? []).flatMap((p) =>
+        p.Prefix ? [p.Prefix] : []
+      ),
+      ...(page.Contents ?? []).flatMap((c) => (c.Key ? [c.Key] : [])),
+    ]);
     continuationToken = page.IsTruncated
       ? page.NextContinuationToken
       : undefined;
@@ -1036,14 +1042,23 @@ const uuidPattern =
 export const forEachStoredAudioIdPage = async (
   callback: (audioIds: string[]) => Promise<void>
 ) => {
-  const buckets = uniq([getAudioBucket(incomingAudioBucket), getAudioBucket()]);
-  for (const bucket of buckets) {
-    await forEachObjectPage(bucket, (keys) =>
-      callback(
-        uniq(
-          keys.map((key) => key.replace(/^incoming\//, "").split("/")[0])
-        ).filter((audioId) => uuidPattern.test(audioId))
-      )
+  const listings = [
+    {
+      bucket: getAudioBucket(incomingAudioBucket),
+      prefix: audioIncomingKey(""),
+    },
+    { bucket: getAudioBucket(), prefix: "" },
+  ];
+  for (const { bucket, prefix } of listings) {
+    await forEachObjectPage(
+      bucket,
+      (keys) =>
+        callback(
+          keys
+            .map((key) => key.slice(prefix.length).split("/")[0])
+            .filter((audioId) => uuidPattern.test(audioId))
+        ),
+      { prefix, delimiter: "/" }
     );
   }
 };
