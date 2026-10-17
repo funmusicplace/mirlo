@@ -32,12 +32,7 @@ const TRACKS: Track[] = RELEASE.tracks.slice(0, 2).map((track) => ({
 const meta = {
   title: "Player/Player",
   component: Player,
-  render: () => (
-    <GlobalStateProvider>
-      <Player />
-    </GlobalStateProvider>
-  ),
-  beforeEach: () => {
+  render: () => {
     localStorage.setItem(
       "nomadState",
       JSON.stringify({
@@ -45,8 +40,13 @@ const meta = {
         currentlyPlayingIndex: 0,
       })
     );
-    return clearPlayerQueue;
+    return (
+      <GlobalStateProvider>
+        <Player />
+      </GlobalStateProvider>
+    );
   },
+  beforeEach: () => clearPlayerQueue,
   parameters: {
     layout: "fullscreen",
     msw: {

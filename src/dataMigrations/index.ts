@@ -18,6 +18,7 @@ import prisma from "@mirlo/prisma";
 
 import logger from "../logger";
 
+import imageContentTypes from "./imageContentTypes";
 import merchImagesToCentralImages from "./merchImagesToCentralImages";
 import postContentImageRefs from "./postContentImageRefs";
 
@@ -31,6 +32,7 @@ export type DataMigration = {
 export const dataMigrations: DataMigration[] = [
   merchImagesToCentralImages,
   postContentImageRefs,
+  imageContentTypes,
 ];
 
 export const runPendingDataMigrations = async (
