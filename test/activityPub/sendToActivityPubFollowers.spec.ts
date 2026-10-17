@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import assert from "assert";
 
-import { Article, Audio, Create } from "@fedify/fedify/vocab";
+import { Article, Audio, Create, Person } from "@fedify/fedify/vocab";
 import prisma from "@mirlo/prisma";
 import { describe, it } from "mocha";
 import sinon from "sinon";
@@ -25,6 +25,7 @@ import {
 describe("sending to ActivityPub followers", () => {
   let sendActivityStub: sinon.SinonStub;
   let createContextStub: sinon.SinonStub;
+  let lookupObjectStub: sinon.SinonStub;
   let fetchStub: sinon.SinonStub;
   let mailQueueStub: sinon.SinonStub;
 
@@ -35,12 +36,14 @@ describe("sending to ActivityPub followers", () => {
       console.error(e);
     }
     sendActivityStub = sinon.stub().resolves();
+    lookupObjectStub = sinon.stub().resolves(null);
     const origCreateContext = federation.createContext.bind(federation);
     createContextStub = sinon
       .stub(federation as any, "createContext")
       .callsFake((...args: any[]) => {
         const ctx = (origCreateContext as any)(...args);
         ctx.sendActivity = sendActivityStub;
+        ctx.lookupObject = lookupObjectStub;
         return ctx;
       });
     fetchStub = sinon
@@ -196,10 +199,12 @@ describe("sending to ActivityPub followers", () => {
           inboxUrl: `${followerActor}/inbox`,
         },
       });
-      fetchStub.withArgs(mentionedActor, sinon.match.any).resolves({
-        ok: true,
-        json: async () => ({ inbox: mentionedInbox }),
-      });
+      lookupObjectStub.withArgs(mentionedActor, sinon.match.any).resolves(
+        new Person({
+          id: new URL(mentionedActor),
+          inbox: new URL(mentionedInbox),
+        })
+      );
 
       await publishPost(artist.id, {
         content: [mentionedActor, followerActor]
@@ -211,7 +216,7 @@ describe("sending to ActivityPub followers", () => {
       const [, recipient] = sendActivityStub.secondCall.args;
       assert.strictEqual(recipient.id.href, mentionedActor);
       assert.strictEqual(recipient.inboxId.href, mentionedInbox);
-      assert(!fetchStub.calledWith(followerActor, sinon.match.any));
+      assert(!lookupObjectStub.calledWith(followerActor, sinon.match.any));
     });
 
     it("should still finish the notification job if delivery fails", async () => {

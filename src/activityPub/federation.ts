@@ -14,6 +14,7 @@ import {
   Delete,
   Follow,
   Image,
+  isActor,
   Person,
   PUBLIC_COLLECTION,
   Undo,
@@ -303,6 +304,8 @@ const findAPPostById = async (id: number) => {
   });
 };
 
+const MENTION_LOOKUP_TIMEOUT_MS = 5000;
+
 export const sendPostToActivityPubFollowers = async (postId: number) => {
   const post = await findAPPostById(postId);
   if (!post?.profile) return false;
@@ -337,24 +340,13 @@ export const sendPostToActivityPubFollowers = async (postId: number) => {
 
   for (const mention of mentionsToDeliver) {
     try {
-      const actorRes = await fetch(mention.href, {
-        headers: { Accept: "application/activity+json" },
+      const actor = await ctx.lookupObject(mention.href, {
+        signal: AbortSignal.timeout(MENTION_LOOKUP_TIMEOUT_MS),
       });
-      if (!actorRes.ok) {
-        throw new Error(
-          `Failed to fetch mentioned actor ${mention.href}: ${actorRes.status}`
-        );
-      }
-      const actorDoc: any = await actorRes.json();
-      const inboxUrl: string | undefined = actorDoc.inbox;
-      if (!inboxUrl) {
+      if (!isActor(actor) || !actor.inboxId) {
         throw new Error(`No inbox found for mentioned actor ${mention.href}`);
       }
-      await ctx.sendActivity(
-        { identifier },
-        { id: new URL(mention.href), inboxId: new URL(inboxUrl) },
-        activity
-      );
+      await ctx.sendActivity({ identifier }, actor, activity);
     } catch (error) {
       logger.error(
         `sendPostToActivityPubFollowers: failed to send mention of post ${post.id} to ${mention.href}:`,
