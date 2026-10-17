@@ -79,6 +79,10 @@ class MockState {
   get tr(): MockTransaction {
     return new MockTransaction(this.doc);
   }
+
+  apply(tr: MockTransaction): MockState {
+    return tr.apply();
+  }
 }
 
 class MockView {
@@ -91,16 +95,6 @@ class MockView {
   ) {
     this.state = new MockState(new MockDoc(nodes));
     this.dom = document.createElement("div");
-    this.manager.view = this;
-  }
-
-  dispatch(tr: MockTransaction): void {
-    const nextState = tr.apply?.();
-    if (!nextState) {
-      return;
-    }
-
-    this.state = nextState as MockState;
     this.manager.view = this;
   }
 
