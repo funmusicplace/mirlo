@@ -22,16 +22,16 @@ export const deleteTrack = async (trackId: number) => {
     },
   });
   if (audio) {
-    try {
-      await removeAudioFiles(audio.id);
-    } catch (e) {
-      logger.error("no object found, that's all right though");
-    }
     await prisma.trackAudio.delete({
       where: {
         trackId: trackId,
       },
     });
+    try {
+      await removeAudioFiles(audio.id);
+    } catch (e) {
+      logger.error("no object found, that's all right though");
+    }
   }
 
   await prisma.trackArtist.deleteMany({
