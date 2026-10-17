@@ -3,7 +3,9 @@ import { IncomingHttpHeaders } from "http";
 import type { Context } from "@fedify/fedify";
 import {
   Article,
+  Audio,
   Create,
+  Hashtag,
   Mention,
   PUBLIC_COLLECTION,
 } from "@fedify/fedify/vocab";
@@ -95,6 +97,69 @@ export function buildPostCreateActivity(
   });
 }
 
+export const buildHashtags = (tags: string[], applicationUrl: string) =>
+  tags
+    .filter((tag) => !!tag)
+    .map(
+      (tag) =>
+        new Hashtag({
+          name: `#${tag}`,
+          href: new URL(
+            `${applicationUrl}/releases?tag=${encodeURIComponent(tag)}`
+          ),
+        })
+    );
+
+type APRelease = {
+  id: number;
+  title?: string | null;
+  about?: string | null;
+  urlSlug: string;
+  releaseDate: Date | null;
+  tags: string[];
+};
+
+export function buildReleaseAudio(
+  ctx: Context<void>,
+  identifier: string,
+  release: APRelease,
+  applicationUrl: string
+): Audio {
+  return new Audio({
+    id: ctx.getObjectUri(Audio, {
+      identifier,
+      releaseId: String(release.id),
+    }),
+    attribution: ctx.getActorUri(identifier),
+    to: PUBLIC_COLLECTION,
+    cc: ctx.getFollowersUri(identifier),
+    url: new URL(`${applicationUrl}/${identifier}/release/${release.urlSlug}`),
+    name: release.title ?? undefined,
+    content: release.about ?? undefined,
+    published: getTemporal(release.releaseDate),
+    tags: buildHashtags(release.tags, applicationUrl),
+  });
+}
+
+export function buildReleaseCreateActivity(
+  ctx: Context<void>,
+  identifier: string,
+  release: APRelease,
+  applicationUrl: string
+): Create {
+  return new Create({
+    id: ctx.getObjectUri(Create, {
+      identifier,
+      activityId: `release-${release.id}`,
+    }),
+    actor: ctx.getActorUri(identifier),
+    to: PUBLIC_COLLECTION,
+    cc: ctx.getFollowersUri(identifier),
+    published: getTemporal(release.releaseDate),
+    object: buildReleaseAudio(ctx, identifier, release, applicationUrl),
+  });
+}
+
 export function getPostUrl(
   applicationUrl: string,
   identifier: string,
@@ -134,12 +199,15 @@ const decodePathSafely = (path: string) => {
   }
 };
 
+export const NODEINFO_PATH = "/nodeinfo/2.1";
+
 const AP_ARTIST_PATH =
   /^\/v1\/ap\/artists\/[\p{L}\p{N}\p{M}_-]+(?:\/(?:outbox|followers|following|inbox|activities|posts|releases)(?:\/[\p{L}\p{N}\p{M}_-]+)?)?$/u;
 
 export const isValidActivityPubEndpoint = (path: string) => {
   return (
     AP_ARTIST_PATH.test(decodePathSafely(path)) ||
-    /^\/.well-known\/(webfinger|nodeinfo)/.test(path)
+    /^\/.well-known\/(webfinger|nodeinfo)/.test(path) ||
+    path === NODEINFO_PATH
   );
 };

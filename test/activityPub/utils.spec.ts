@@ -2,7 +2,10 @@ import assert from "assert";
 
 import { describe, it } from "mocha";
 
-import { isValidActivityPubEndpoint } from "../../src/activityPub/utils";
+import {
+  isValidActivityPubEndpoint,
+  parseMentionsFromContent,
+} from "../../src/activityPub/utils";
 
 describe("isValidActivityPubEndpoint", () => {
   it("matches a plain ASCII artist actor", () => {
@@ -49,6 +52,10 @@ describe("isValidActivityPubEndpoint", () => {
     assert.equal(isValidActivityPubEndpoint("/.well-known/nodeinfo"), true);
   });
 
+  it("matches the nodeinfo document", () => {
+    assert.equal(isValidActivityPubEndpoint("/nodeinfo/2.1"), true);
+  });
+
   it("rejects an unknown sub-collection", () => {
     assert.equal(
       isValidActivityPubEndpoint("/v1/ap/artists/simon-test/bogus"),
@@ -70,5 +77,84 @@ describe("isValidActivityPubEndpoint", () => {
 
   it("rejects non-ActivityPub routes", () => {
     assert.equal(isValidActivityPubEndpoint("/v1/trackGroups"), false);
+  });
+});
+
+describe("parseMentionsFromContent", () => {
+  it("should parse single mention from HTML content", () => {
+    const content =
+      'Check this out: <a href="https://mastodon.example/users/alice" data-mention-actor="https://mastodon.example/users/alice">@alice</a>';
+    const mentions = parseMentionsFromContent(content);
+
+    assert.strictEqual(mentions.length, 1);
+    assert.strictEqual(
+      mentions[0].href,
+      "https://mastodon.example/users/alice"
+    );
+    assert.strictEqual(mentions[0].name, "@alice");
+  });
+
+  it("should parse multiple mentions from HTML content", () => {
+    const content =
+      '<a data-mention-actor="https://mastodon.example/users/alice">@alice</a> and <a data-mention-actor="https://pixelfed.example/users/bob" href="#">@bob</a>';
+    const mentions = parseMentionsFromContent(content);
+
+    assert.strictEqual(mentions.length, 2);
+    assert.strictEqual(
+      mentions[0].href,
+      "https://mastodon.example/users/alice"
+    );
+    assert.strictEqual(mentions[0].name, "@alice");
+    assert.strictEqual(mentions[1].href, "https://pixelfed.example/users/bob");
+    assert.strictEqual(mentions[1].name, "@bob");
+  });
+
+  it("should handle mentions with complex display names", () => {
+    const content =
+      '<a data-mention-actor="https://example.com/users/alice">alice@example.com</a>';
+    const mentions = parseMentionsFromContent(content);
+
+    assert.strictEqual(mentions.length, 1);
+    assert.strictEqual(mentions[0].href, "https://example.com/users/alice");
+    assert.strictEqual(mentions[0].name, "alice@example.com");
+  });
+
+  it("should ignore mentions without data-mention-actor attribute", () => {
+    const content =
+      '<a href="https://example.com">regular link</a> and <a data-mention-actor="https://mastodon.example/users/alice">@alice</a>';
+    const mentions = parseMentionsFromContent(content);
+
+    assert.strictEqual(mentions.length, 1);
+    assert.strictEqual(mentions[0].name, "@alice");
+  });
+
+  it("should handle mentions with inner HTML tags", () => {
+    const content =
+      '<a data-mention-actor="https://mastodon.example/users/alice"><span class="mention">@alice</span></a>';
+    const mentions = parseMentionsFromContent(content);
+
+    assert.strictEqual(mentions.length, 1);
+    assert.strictEqual(mentions[0].name, "@alice");
+  });
+
+  it("should return empty array for content with no mentions", () => {
+    const content = "This is plain text with no mentions at all";
+    const mentions = parseMentionsFromContent(content);
+
+    assert.strictEqual(mentions.length, 0);
+  });
+
+  it("should return empty array for empty content", () => {
+    const mentions = parseMentionsFromContent("");
+    assert.strictEqual(mentions.length, 0);
+  });
+
+  it("should handle case-insensitive matching", () => {
+    const content =
+      '<A data-mention-actor="https://mastodon.example/users/alice">@alice</A>';
+    const mentions = parseMentionsFromContent(content);
+
+    assert.strictEqual(mentions.length, 1);
+    assert.strictEqual(mentions[0].name, "@alice");
   });
 });

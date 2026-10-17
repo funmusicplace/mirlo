@@ -125,3 +125,59 @@ describe(".well-known/webfinger", () => {
     assert.equal(response.statusCode, 404);
   });
 });
+
+describe("nodeinfo", () => {
+  beforeEach(async () => {
+    try {
+      await clearTables();
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  it("should link to the nodeinfo document from .well-known", async () => {
+    const response = await requestApp
+      .get(".well-known/nodeinfo")
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    const link = response.body.links?.find((l: { rel?: string }) =>
+      l.rel?.startsWith("http://nodeinfo.diaspora.software/ns/schema/")
+    );
+    assert(link?.href.endsWith("/nodeinfo/2.1"));
+  });
+
+  it("should describe the instance with ActivityPub artist counts", async () => {
+    const { user } = await createUser({
+      email: "test@test.com",
+    });
+
+    await prisma.profile.create({
+      data: {
+        name: "AP artist",
+        urlSlug: "ap-artist",
+        userId: user.id,
+        enabled: true,
+        activityPub: true,
+      },
+    });
+    await prisma.profile.create({
+      data: {
+        name: "Non-AP artist",
+        urlSlug: "non-ap-artist",
+        userId: user.id,
+        enabled: true,
+        activityPub: false,
+      },
+    });
+
+    const response = await requestApp
+      .get("nodeinfo/2.1")
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.software.name, "mirlo");
+    assert.deepEqual(response.body.protocols, ["activitypub"]);
+    assert.equal(response.body.usage.users.total, 1);
+  });
+});

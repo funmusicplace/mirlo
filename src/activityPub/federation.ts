@@ -14,26 +14,32 @@ import {
   Delete,
   Follow,
   Image,
+  isActor,
   Person,
   PUBLIC_COLLECTION,
   Undo,
   Audio,
-  Hashtag,
 } from "@fedify/fedify/vocab";
 import { RedisKvStore, RedisMessageQueue } from "@fedify/redis";
 import prisma from "@mirlo/prisma";
 
 import {
   buildPostCreateActivity,
+  buildReleaseAudio,
+  buildReleaseCreateActivity,
   getPostUrl,
   getTemporal,
+  NODEINFO_PATH,
   parseMentionsFromContent,
   root,
 } from "../activityPub/utils";
 import { redisClient } from "../config/redis";
 import logger from "../logger";
 import { buildFeedForArtist } from "../routers/v1/artists/{id}/feed";
-import { findArtistIdForURLSlug } from "../utils/artist";
+import {
+  findArtistIdForURLSlug,
+  whereForVisibleProfile,
+} from "../utils/artist";
 import { getClient } from "../utils/getClient";
 import { generateFullStaticImageUrl } from "../utils/images";
 import {
@@ -41,6 +47,8 @@ import {
   finalArtistBackgroundBucket,
 } from "../utils/minio";
 import { postImagesForContent, resolvePostContent } from "../utils/postContent";
+import { getSiteSettings } from "../utils/settings";
+import { whereForVisibleTrackGroup } from "../utils/trackGroup";
 import { isPost, isTrackGroup } from "../utils/typeguards";
 
 export async function ensureArtistHasApKeys(urlSlug: string) {
@@ -192,7 +200,6 @@ federation
         skip > 0 ? String(Math.max(0, skip - OUTBOX_PAGE_SIZE)) : null;
 
       const client = await getClient();
-      const followersUri = ctx.getFollowersUri(identifier);
       const creates = page.map((item) => {
         if (isPost(item)) {
           return buildPostCreateActivity(
@@ -203,31 +210,12 @@ federation
             parseMentionsFromContent(item.content ?? "")
           );
         } else if (isTrackGroup(item)) {
-          return new Create({
-            id: ctx.getObjectUri(Create, {
-              identifier,
-              activityId: `release-${item.id}`,
-            }),
-            actor: ctx.getActorUri(identifier),
-            to: PUBLIC_COLLECTION,
-            cc: followersUri,
-            published: getTemporal(item.releaseDate),
-            object: new Audio({
-              id: ctx.getObjectUri(Audio, {
-                identifier,
-                releaseId: String(item.urlSlug ?? item.id),
-              }),
-              name: item.title ?? undefined,
-              content: item.about ?? undefined,
-              published: getTemporal(item.releaseDate),
-              to: PUBLIC_COLLECTION,
-              cc: followersUri,
-              tags: buildHashtags(
-                (item as { tags?: string[] }).tags ?? [],
-                client.applicationUrl
-              ),
-            }),
-          });
+          return buildReleaseCreateActivity(
+            ctx,
+            identifier,
+            { ...item, tags: (item as { tags?: string[] }).tags ?? [] },
+            client.applicationUrl
+          );
         } else {
           throw new Error(`Unknown item type in feed: ${item}`);
         }
@@ -273,18 +261,29 @@ const findAPReleaseById = async (id: number) => {
   });
 };
 
-const buildHashtags = (tags: string[], applicationUrl: string) =>
-  tags
-    .filter((tag) => !!tag)
-    .map(
-      (tag) =>
-        new Hashtag({
-          name: `#${tag}`,
-          href: new URL(
-            `${applicationUrl}/releases?tag=${encodeURIComponent(tag)}`
-          ),
-        })
-    );
+export const sendReleaseToActivityPubFollowers = async (
+  trackGroupId: number
+) => {
+  const trackGroup = await findAPReleaseById(trackGroupId);
+  if (!trackGroup) return;
+
+  const identifier = trackGroup.profile.urlSlug;
+  const ctx = federation.createContext(
+    new Request(`https://${root}`),
+    undefined
+  );
+  const client = await getClient();
+  await ctx.sendActivity(
+    { identifier },
+    "followers",
+    buildReleaseCreateActivity(
+      ctx,
+      identifier,
+      { ...trackGroup, tags: trackGroup.tags.map((t) => t.tag.tag) },
+      client.applicationUrl
+    )
+  );
+};
 
 const findAPPostById = async (id: number) => {
   return await prisma.post.findFirst({
@@ -303,6 +302,60 @@ const findAPPostById = async (id: number) => {
       images: postImagesForContent,
     },
   });
+};
+
+const MENTION_LOOKUP_TIMEOUT_MS = 5000;
+
+export const sendPostToActivityPubFollowers = async (postId: number) => {
+  const post = await findAPPostById(postId);
+  if (!post?.profile) return false;
+
+  const identifier = post.profile.urlSlug;
+  const ctx = federation.createContext(
+    new Request(`https://${root}`),
+    undefined
+  );
+  const client = await getClient();
+  const mentions = parseMentionsFromContent(post.content ?? "");
+  const activity = buildPostCreateActivity(
+    ctx,
+    identifier,
+    post,
+    client.applicationUrl,
+    mentions
+  );
+
+  await ctx.sendActivity({ identifier }, "followers", activity);
+
+  // The followers fanout skips followers without a known inbox.
+  const followersWithInbox = await prisma.activityPubProfileFollowers.findMany({
+    where: { profileId: post.profile.id, inboxUrl: { not: null } },
+    select: { actor: true },
+  });
+  const coveredActors = followersWithInbox.map((f) => f.actor);
+  const mentionsToDeliver = mentions.filter(
+    (m) =>
+      !m.href.startsWith(`https://${root}/`) && !coveredActors.includes(m.href)
+  );
+
+  for (const mention of mentionsToDeliver) {
+    try {
+      const actor = await ctx.lookupObject(mention.href, {
+        signal: AbortSignal.timeout(MENTION_LOOKUP_TIMEOUT_MS),
+      });
+      if (!isActor(actor) || !actor.inboxId) {
+        throw new Error(`No inbox found for mentioned actor ${mention.href}`);
+      }
+      await ctx.sendActivity({ identifier }, actor, activity);
+    } catch (error) {
+      logger.error(
+        `sendPostToActivityPubFollowers: failed to send mention of post ${post.id} to ${mention.href}:`,
+        error
+      );
+    }
+  }
+
+  return true;
 };
 
 federation.setObjectDispatcher(
@@ -340,21 +393,12 @@ federation.setObjectDispatcher(
 
     const client = await getClient();
 
-    return new Audio({
-      id: ctx.getObjectUri(Audio, { identifier, releaseId }),
-      attribution: ctx.getActorUri(identifier),
-      to: PUBLIC_COLLECTION,
-      url: new URL(
-        `${client.applicationUrl}/${trackGroup.profile.urlSlug}/release/${trackGroup.urlSlug}`
-      ),
-      name: trackGroup.title ?? undefined,
-      content: trackGroup.about ?? undefined,
-      published: getTemporal(trackGroup.releaseDate),
-      tags: buildHashtags(
-        trackGroup.tags.map((t) => t.tag.tag),
-        client.applicationUrl
-      ),
-    });
+    return buildReleaseAudio(
+      ctx,
+      identifier,
+      { ...trackGroup, tags: trackGroup.tags.map((t) => t.tag.tag) },
+      client.applicationUrl
+    );
   }
 );
 
@@ -538,3 +582,43 @@ federation
       `ActivityPub Delete: removed ${del.actorId.href} from followers`
     );
   });
+
+federation.setNodeInfoDispatcher(NODEINFO_PATH, async () => {
+  const apProfile = { ...whereForVisibleProfile(), activityPub: true };
+  const [settings, users, localPosts, releases] = await Promise.all([
+    getSiteSettings(),
+    prisma.profile.count({ where: apProfile }),
+    prisma.post.count({
+      where: {
+        isDraft: false,
+        isPublic: true,
+        publishedAt: { lte: new Date() },
+        profile: apProfile,
+      },
+    }),
+    prisma.trackGroup.count({
+      where: {
+        ...whereForVisibleTrackGroup(),
+        isPublic: true,
+        isHiddenTrackGroupForSongDrafts: false,
+        publishedAt: { lte: new Date() },
+        profile: apProfile,
+      },
+    }),
+  ]);
+
+  return {
+    software: {
+      name: "mirlo",
+      version: "1.0.0",
+      repository: new URL("https://github.com/funmusicplace/mirlo"),
+    },
+    protocols: ["activitypub"],
+    openRegistrations: !settings.isClosedToPublicArtistSignup,
+    usage: {
+      users: { total: users },
+      localPosts: localPosts + releases,
+      localComments: 0,
+    },
+  };
+});

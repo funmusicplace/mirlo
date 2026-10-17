@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import * as cheerio from "cheerio";
 import { flatten, groupBy } from "lodash";
 
+import { sendPostToActivityPubFollowers } from "../activityPub/federation";
 import logger from "../logger";
 import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
 import { serializePost } from "../serializers/post";
@@ -193,6 +194,24 @@ export default async function sendPostNotification(job: {
     logger.info(
       `sendPostNotification: created ${createdNotifications.count} new notification(s) for post ${postId}`
     );
+
+    try {
+      if (await sendPostToActivityPubFollowers(postId)) {
+        await prisma.notification.updateMany({
+          where: {
+            postId,
+            notificationType: "NEW_ARTIST_POST",
+            deliveryMethod: { in: ["ACTIVITYPUB", "BOTH"] },
+          },
+          data: { isRead: true },
+        });
+      }
+    } catch (error) {
+      logger.error(
+        `sendPostNotification: failed to send post ${postId} to ActivityPub followers`,
+        { postId, ...getSafeErrorContext(error) }
+      );
+    }
 
     if (wantsEmail) {
       const notificationsToEmail = await prisma.notification.findMany({
