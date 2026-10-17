@@ -16,7 +16,6 @@ import {
 } from "../utils/minio";
 import { getSiteSettings } from "../utils/settings";
 
-import cleanUpOldFilesJob from "./clean-up-old-files";
 import generateAlbumJob from "./generate-album";
 import optimizeImage from "./optimize-image";
 import scheduledTasksJob, {
@@ -168,7 +167,6 @@ yargs
     sendMailQueue();
     sendPostNotificationQueue();
     autoPurchaseNewAlbumsQueue();
-    cleanUpFilesQueue();
     scheduledTasksQueueWorker();
   })
   .help().argv;
@@ -248,15 +246,6 @@ export async function generateAlbumQueueWorker() {
     },
     "Generate Album worker started",
     true // includeActiveEvent
-  );
-}
-
-export async function cleanUpFilesQueue() {
-  createWorkerWithLogging(
-    "clean-up-old-files",
-    cleanUpOldFilesJob,
-    workerOptions,
-    "clean up old files worker started"
   );
 }
 

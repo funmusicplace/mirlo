@@ -1,7 +1,6 @@
 import { promises as fsPromises } from "fs";
 
 import logger from "../../logger";
-import { startCleaningUpOldFiles } from "../../queues/clean-up-old-files-queue";
 import { removeAllZips, removeZips, zipRootPath } from "../../utils/minio";
 
 const cleanUpFiles = async (incomingFolder: string) => {
@@ -16,13 +15,6 @@ const cleanUpFiles = async (incomingFolder: string) => {
     } else {
       await removeAllZips("trackGroup");
     }
-    return {
-      deleted: incomingFolder,
-    };
-  }
-  if (incomingFolder === "background-worker") {
-    logger.info("starting a job to clean up files in the background worker");
-    startCleaningUpOldFiles();
     return {
       deleted: incomingFolder,
     };
