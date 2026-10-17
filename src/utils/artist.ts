@@ -16,6 +16,7 @@ import { sendMailQueue } from "../queues/send-mail-queue";
 import { serializeProfile } from "../serializers/artist";
 
 import { AppError } from "./error";
+import generateSlug from "./generateSlug";
 import { getClient } from "./getClient";
 import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
 import { deleteMerch, merchImagesInclude } from "./merch";
@@ -276,6 +277,37 @@ export const findProfileIdForURLSlug = async (id: string | number) => {
     return undefined;
   }
   return Number(id);
+};
+
+export const isProfileSlugTaken = async (
+  urlSlug: string,
+  excludeProfileId?: number
+) => {
+  const profile = await prisma.profile.findFirst({
+    where: {
+      urlSlug: { equals: urlSlug, mode: "insensitive" },
+      ...(excludeProfileId ? { id: { not: excludeProfileId } } : {}),
+    },
+    select: { id: true },
+  });
+  return !!profile;
+};
+
+export const asSlugConflictError = (e: unknown) =>
+  e instanceof PrismaClientKnownRequestError && e.code === "P2002"
+    ? new AppError({
+        httpCode: 400,
+        description: `"urlSlug" is already in use`,
+      })
+    : e;
+
+export const generateUniqueProfileSlug = async (name: string) => {
+  const base = generateSlug(name) || "artist";
+  let candidate = base;
+  for (let suffix = 2; await isProfileSlugTaken(candidate); suffix++) {
+    candidate = `${base}-${suffix}`;
+  }
+  return candidate;
 };
 
 export const createSubscriptionConfirmation = async (

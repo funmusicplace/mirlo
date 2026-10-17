@@ -183,7 +183,7 @@ describe("canimus", () => {
       await createFederatedArtistWithMusic(user.id);
       const artist = await createArtist(user.id, {
         name: "test-artist",
-        urlSlug: "test-artist",
+        urlSlug: "deleted-test-artist",
         federatedStreaming: true,
         federatedStreamingOptInDate: dateNow,
       });
