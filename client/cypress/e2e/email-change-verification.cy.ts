@@ -57,30 +57,41 @@ describe("email change verification", () => {
           .its("response.statusCode")
           .should("eq", 200);
 
-        // Wait for the async email to be sent then check MailHog
-        cy.wait(3000);
-        cy.request({
-          method: "GET",
-          url: "http://localhost:8025/api/v1/messages",
-          headers: {
-            Accept: "application/json",
-          },
-          retryOnNetworkFailure: true,
-        }).then((response) => {
-          expect(response.status).to.equal(200);
-          expect(response.body).to.be.an("array");
-          cy.log(newEmail);
+        // The email is sent from the background queue, so poll MailHog for it
+        const findConfirmationEmail = (
+          attemptsLeft: number
+        ): Cypress.Chainable<any> =>
+          cy
+            .request({
+              method: "GET",
+              url: "http://localhost:8025/api/v1/messages",
+              headers: {
+                Accept: "application/json",
+              },
+              retryOnNetworkFailure: true,
+            })
+            .then((response) => {
+              expect(response.status).to.equal(200);
+              expect(response.body).to.be.an("array");
 
-          // Find the email sent to the new email address
-          const emailMessage = response.body?.find((msg: any) => {
-            return (
-              msg.To?.some((to: any) => newEmail.includes(to.Mailbox)) &&
-              msg.Content.Headers.Subject?.some((subject: string) =>
-                subject.includes("Confirm")
-              )
-            );
-          });
+              const message = response.body.find((msg: any) => {
+                return (
+                  msg.To?.some((to: any) => newEmail.includes(to.Mailbox)) &&
+                  msg.Content.Headers.Subject?.some((subject: string) =>
+                    subject.includes("Confirm")
+                  )
+                );
+              });
 
+              if (message || attemptsLeft <= 1) {
+                return message;
+              }
+              return cy
+                .wait(500)
+                .then(() => findConfirmationEmail(attemptsLeft - 1));
+            });
+
+        findConfirmationEmail(30).then((emailMessage) => {
           expect(emailMessage).to.exist;
 
           // Get the full message to extract token

@@ -7,7 +7,7 @@ import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
 import { serializePost } from "../serializers/post";
 import { getClient } from "../utils/getClient";
 import { getSafeErrorContext } from "../utils/logging";
-import { postImagesForContent, resolvePostContent } from "../utils/postContent";
+import { postImagesForContent, resolveImageRefs } from "../utils/postContent";
 
 import { parseOutIframes } from "./parse-out-iframes";
 
@@ -215,7 +215,7 @@ export default async function sendPostNotification(job: {
       const { applicationUrl } = await getClient();
       const postUrl = `${applicationUrl}/${post.profile?.urlSlug ?? ""}/posts/${post.urlSlug ?? post.id}`;
       const htmlContent = await parseOutIframes(
-        resolvePostContent(post) || "",
+        post.content ? resolveImageRefs(post.content, post.images) : "",
         postUrl
       );
 

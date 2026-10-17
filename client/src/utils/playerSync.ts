@@ -30,8 +30,12 @@ const targetOrigin = (): string =>
 const postToIframes = (msg: Message) => {
   const origin = targetOrigin();
   document
-    .querySelectorAll<HTMLIFrameElement>(`iframe[src*="${origin}/widget/"]`)
-    .forEach((iframe) => iframe.contentWindow?.postMessage(msg, origin));
+    .querySelectorAll<HTMLIFrameElement>(`iframe[src*="/widget/"]`)
+    .forEach((iframe) => {
+      if (iframe.src.startsWith(`${origin}/widget/`)) {
+        iframe.contentWindow?.postMessage(msg, origin);
+      }
+    });
 };
 
 const postToParent = (msg: Message) => {

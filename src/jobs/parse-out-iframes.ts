@@ -39,14 +39,14 @@ export const parseOutIframes = async (
   content: string,
   fallbackUrl?: string
 ) => {
-  // Replace <iframe src="https://mirlo.space/widget/trackGroup/:id"> or <iframe src="https://mirlo.space/widget/track/:id">
+  // Replace <iframe src="/widget/trackGroup/:id"> or <iframe src="/widget/track/:id">
   // with a div containing info about the trackGroup or track, fetching live data from the database
 
   // Find all iframes to process
   let htmlContent = content;
   try {
     const iframeRegex =
-      /<iframe([^>]*)src=["']https:\/\/mirlo\.space\/widget\/(trackGroup|track)\/([^"']+)["']([^>]*)><\/iframe>/gi;
+      /<iframe([^>]*)src=["']\/widget\/(trackGroup|track)\/(\d+)[^"']*["']([^>]*)><\/iframe>/gi;
 
     // Collect all matches
     const matches: Array<{ match: string; type: string; id: string }> = [];

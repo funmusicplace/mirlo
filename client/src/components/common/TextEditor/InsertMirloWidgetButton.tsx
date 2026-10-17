@@ -14,7 +14,7 @@ import { useAuthContext } from "state/AuthContext";
 import { isTrackGroupPurchase, isTrackPurchase } from "types/typeguards";
 import { useDebounce } from "use-debounce";
 import { matchesTokens } from "utils/matchesTokens";
-import { widgetUrl } from "utils/tracks";
+import { widgetPath } from "utils/tracks";
 
 import Button from "../Button";
 import CommandSearch, {
@@ -81,7 +81,7 @@ const InsertMirloWidgetButton: React.FC<{
 
   const embedTrack = React.useCallback(
     (id: number) => {
-      addIframe({ src: widgetUrl(id, "track"), height: 137, width: 700 });
+      addIframe({ src: widgetPath(id, "track"), height: 137, width: 700 });
       setView("closed");
     },
     [addIframe]
@@ -89,7 +89,7 @@ const InsertMirloWidgetButton: React.FC<{
 
   const embedTrackGroup = React.useCallback(
     (id: number) => {
-      addIframe({ src: widgetUrl(id, "trackGroup"), height: 371, width: 700 });
+      addIframe({ src: widgetPath(id, "trackGroup"), height: 371, width: 700 });
       setView("closed");
     },
     [addIframe]

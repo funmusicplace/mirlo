@@ -1,6 +1,6 @@
 import api from "services/api";
 import { getArtistUrl } from "utils/artist";
-import { widgetUrl } from "utils/tracks";
+import { widgetPath } from "utils/tracks";
 
 import { SlashCommandConfig } from "./SlashCommands";
 
@@ -21,7 +21,7 @@ const SLASH_COMMANDS: SlashCommandConfig[] = [
     onSelect: (item, chain) => {
       chain
         .addIframe({
-          src: widgetUrl(+item.id, "track"),
+          src: widgetPath(+item.id, "track"),
           height: 137,
           width: 700,
         })
@@ -61,7 +61,7 @@ const SLASH_COMMANDS: SlashCommandConfig[] = [
     onSelect: (item, chain) => {
       chain
         .addIframe({
-          src: widgetUrl(+item.id, "trackGroup"),
+          src: widgetPath(+item.id, "trackGroup"),
           height: 137,
           width: 700,
         })

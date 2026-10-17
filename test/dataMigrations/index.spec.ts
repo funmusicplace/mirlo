@@ -12,6 +12,7 @@ import {
 import imageContentTypes from "../../src/dataMigrations/imageContentTypes";
 import merchImagesToCentralImages from "../../src/dataMigrations/merchImagesToCentralImages";
 import postContentImageRefs from "../../src/dataMigrations/postContentImageRefs";
+import postContentWidgetPaths from "../../src/dataMigrations/postContentWidgetPaths";
 import {
   finalCoversBucket,
   finalImageBucket,
@@ -298,5 +299,48 @@ describe("dataMigrations: imageContentTypes", () => {
 
     const { minioStat } = await statFile(finalCoversBucket, key);
     assert.notEqual(minioStat?.metaData?.["content-type"], "image/jpeg");
+  });
+});
+
+describe("dataMigrations: postContentWidgetPaths", () => {
+  beforeEach(async () => {
+    await clearTables();
+  });
+
+  it("makes this instance's widget urls relative without touching updatedAt", async () => {
+    await prisma.client.create({
+      data: {
+        applicationName: "frontend",
+        applicationUrl: "https://mirlo.example",
+      },
+    });
+    const { user } = await createUser({ email: "artist@artist.com" });
+    const profile = await createProfile(user.id);
+    const otherInstance = `<iframe src="https://other.example/widget/track/2"></iframe>`;
+    const post = await createPost(profile.id);
+    const updatedAt = new Date("2024-01-01T00:00:00.000Z");
+    await prisma.post.update({
+      where: { id: post.id },
+      data: {
+        content: `<p>Listen</p><iframe src="https://mirlo.example/widget/trackGroup/1" height="371"></iframe>${otherInstance}`,
+        updatedAt,
+      },
+    });
+
+    assert.equal(await postContentWidgetPaths.run(), true);
+    const migrated = await prisma.post.findUniqueOrThrow({
+      where: { id: post.id },
+    });
+    assert.equal(
+      migrated.content,
+      `<p>Listen</p><iframe src="/widget/trackGroup/1" height="371"></iframe>${otherInstance}`
+    );
+    assert.equal(migrated.updatedAt.toISOString(), updatedAt.toISOString());
+
+    assert.equal(await postContentWidgetPaths.run(), true);
+    const rerun = await prisma.post.findUniqueOrThrow({
+      where: { id: post.id },
+    });
+    assert.equal(rerun.content, migrated.content);
   });
 });

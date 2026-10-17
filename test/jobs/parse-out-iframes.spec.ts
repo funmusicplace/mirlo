@@ -30,7 +30,7 @@ describe("parse-out-iframes", () => {
     const artist = await createArtist(artistUser.id);
     const trackGroup = await createTrackGroup(artist.id);
 
-    const content = `<iframe src="https://mirlo.space/widget/trackGroup/${trackGroup.id}"></iframe>`;
+    const content = `<iframe src="/widget/trackGroup/${trackGroup.id}"></iframe>`;
     const result = await parseOutIframes(content);
     assert(
       result.includes(`<div data-type="trackGroup" data-id="${trackGroup.id}"`)
@@ -38,9 +38,21 @@ describe("parse-out-iframes", () => {
   });
 
   it("should replace iframe with track", async () => {
-    const content = `<iframe src="https://mirlo.space/widget/track/67890"></iframe>`;
+    const content = `<iframe src="/widget/track/67890"></iframe>`;
     const result = await parseOutIframes(content);
     assert(result.includes('<div data-type="track" data-id="67890">'));
+  });
+
+  it("should replace a widget iframe with a query string", async () => {
+    const content = `<iframe src="/widget/track/67890?variant=card"></iframe>`;
+    const result = await parseOutIframes(content);
+    assert(result.includes('<div data-type="track" data-id="67890">'));
+  });
+
+  it("should leave widget iframes from other hosts alone", async () => {
+    const content = `<iframe src="https://other.example/widget/track/67890"></iframe>`;
+    const result = await parseOutIframes(content);
+    assert.equal(result, content);
   });
 
   it("should not modify content without iframes", async () => {
@@ -65,7 +77,7 @@ describe("parse-out-iframes", () => {
       });
 
       const fallbackUrl = "https://example.test/an-artist/posts/post-slug";
-      const content = `<iframe src="https://mirlo.space/widget/trackGroup/${trackGroup.id}"></iframe>`;
+      const content = `<iframe src="/widget/trackGroup/${trackGroup.id}"></iframe>`;
       const result = await parseOutIframes(content, fallbackUrl);
 
       assert(
@@ -91,7 +103,7 @@ describe("parse-out-iframes", () => {
       });
 
       const fallbackUrl = "https://example.test/publisher-artist/posts/p";
-      const content = `<iframe src="https://mirlo.space/widget/trackGroup/${trackGroup.id}"></iframe>`;
+      const content = `<iframe src="/widget/trackGroup/${trackGroup.id}"></iframe>`;
       const result = await parseOutIframes(content, fallbackUrl);
 
       assert(
@@ -128,7 +140,7 @@ describe("parse-out-iframes", () => {
       });
 
       const fallbackUrl = "https://example.test/an-artist/posts/post";
-      const content = `<iframe src="https://mirlo.space/widget/track/${track.id}"></iframe>`;
+      const content = `<iframe src="/widget/track/${track.id}"></iframe>`;
       const result = await parseOutIframes(content, fallbackUrl);
 
       assert(

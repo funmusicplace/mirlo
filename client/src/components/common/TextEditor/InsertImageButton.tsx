@@ -29,6 +29,7 @@ const InsertImageButton: React.FC<{ postId?: number }> = ({ postId }) => {
   return (
     <>
       <Button
+        aria-label={t("addImage")}
         startIcon={<FaImage />}
         type="button"
         onClick={() => setIsOpen(true)}

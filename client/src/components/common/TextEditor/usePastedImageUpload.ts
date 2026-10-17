@@ -115,16 +115,9 @@ export const usePastedImageUpload = ({
       });
 
       if (hasChanges) {
-        view.dispatch(tr);
-
-        const updatedView = manager.view;
-        if (!updatedView) {
-          return;
-        }
-
-        const html = prosemirrorNodeToHtml((updatedView.state as any).doc);
-        setState(updatedView.state as any);
-        onChange(html);
+        const nextState = state.apply(tr);
+        setState(nextState);
+        onChange(prosemirrorNodeToHtml(nextState.doc));
       }
     },
     [manager, onChange, setState]

@@ -8,7 +8,11 @@ import {
 } from "../../../../../auth/passport";
 import { serializePost } from "../../../../../serializers/post";
 import { AppError } from "../../../../../utils/error";
-import { postImagesForContent } from "../../../../../utils/postContent";
+import {
+  ownWidgetOrigins,
+  postImagesForContent,
+  stripWidgetHosts,
+} from "../../../../../utils/postContent";
 
 export default function () {
   const operations = {
@@ -133,7 +137,10 @@ export default function () {
         const result = await prisma.post.create({
           data: {
             title,
-            content,
+            content:
+              typeof content === "string"
+                ? stripWidgetHosts(content, await ownWidgetOrigins())
+                : content,
             isPublic,
             publishedAt,
             shouldSendEmail: resolvedShouldSendEmail,
