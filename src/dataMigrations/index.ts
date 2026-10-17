@@ -21,6 +21,7 @@ import logger from "../logger";
 import imageContentTypes from "./imageContentTypes";
 import merchImagesToCentralImages from "./merchImagesToCentralImages";
 import postContentImageRefs from "./postContentImageRefs";
+import postContentWidgetPaths from "./postContentWidgetPaths";
 
 export type DataMigration = {
   /** Recorded in the DataMigration table. Never rename once shipped. */
@@ -33,6 +34,7 @@ export const dataMigrations: DataMigration[] = [
   merchImagesToCentralImages,
   postContentImageRefs,
   imageContentTypes,
+  postContentWidgetPaths,
 ];
 
 export const runPendingDataMigrations = async (

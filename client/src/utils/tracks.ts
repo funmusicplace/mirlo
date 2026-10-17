@@ -69,8 +69,11 @@ export const isTrackOwnedOrPreview = (
   return ownsTrack || boughtTrack;
 };
 
+export const widgetPath = (trackId: number, type: "track" | "trackGroup") =>
+  `/widget/${type}/${trackId}`;
+
 export const widgetUrl = (trackId: number, type: "track" | "trackGroup") => {
-  return import.meta.env.VITE_CLIENT_DOMAIN + `/widget/${type}/${trackId}`;
+  return import.meta.env.VITE_CLIENT_DOMAIN + widgetPath(trackId, type);
 };
 
 export const isWidgetUrl = (url: string) => {

@@ -169,8 +169,8 @@ export const InsertImageButton: Story = {
   },
 };
 
-const TRACK_WIDGET_SRC = "https://mirlo.space/widget/track/1";
-const TRACK_GROUP_WIDGET_SRC = "https://mirlo.space/widget/trackGroup/1";
+const TRACK_WIDGET_SRC = "/widget/track/1";
+const TRACK_GROUP_WIDGET_SRC = "/widget/trackGroup/1";
 
 export const WithWidgetEmbeds: Story = {
   args: {
