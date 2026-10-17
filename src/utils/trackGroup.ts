@@ -13,6 +13,7 @@ import { DefaultArgs } from "@prisma/client/runtime/client";
 import archiver from "archiver";
 import { Response } from "express";
 
+import { sendReleaseToActivityPubFollowers } from "../activityPub/federation";
 import { logger } from "../logger";
 
 import { findProfileIdForURLSlug, whereForVisibleProfile } from "./artist";
@@ -37,6 +38,14 @@ export const notifyFollowersOfNewAlbum = async (trackGroup: {
     where: { id: trackGroup.id },
     data: { notifiedFollowersAt: new Date() },
   });
+
+  try {
+    await sendReleaseToActivityPubFollowers(trackGroup.id);
+  } catch (e) {
+    logger.error(
+      `notifyFollowersOfNewAlbum: failed to send trackGroup ${trackGroup.id} to ActivityPub followers: ${e}`
+    );
+  }
 
   const artistFollowers = await prisma.profileUserSubscription.findMany({
     where: {
