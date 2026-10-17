@@ -20,7 +20,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
 import contentDisposition from "content-disposition";
-import { chunk } from "lodash";
+import { chunk, uniq } from "lodash";
 import { Client, BucketItem } from "minio";
 import * as Minio from "minio";
 import { Logger } from "winston";
@@ -1023,8 +1023,30 @@ export const uploadAudioHlsFile = async (
   return uploadWrapper(bucket, `${audioId}/${filename}`, stream);
 };
 
-export const removeAudioFiles = (audioId: string) =>
-  removeObjectsFromBucket(getAudioBucket(), audioId);
+export const removeAudioFiles = async (audioId: string) => {
+  await Promise.all([
+    removeObjectsFromBucket(getAudioBucket(), audioId),
+    removeIncomingAudio(audioId),
+  ]);
+};
+
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export const forEachStoredAudioIdPage = async (
+  callback: (audioIds: string[]) => Promise<void>
+) => {
+  const buckets = uniq([getAudioBucket(incomingAudioBucket), getAudioBucket()]);
+  for (const bucket of buckets) {
+    await forEachObjectPage(bucket, (keys) =>
+      callback(
+        uniq(
+          keys.map((key) => key.replace(/^incoming\//, "").split("/")[0])
+        ).filter((audioId) => uuidPattern.test(audioId))
+      )
+    );
+  }
+};
 
 // ── Images ────────────────────────────────────────────────────────────────────
 
