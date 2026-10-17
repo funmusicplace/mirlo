@@ -149,7 +149,7 @@ describe("send-out-monthly-receipts", () => {
     const artist2 = await prisma.profile.create({
       data: {
         name: "Test artist",
-        urlSlug: "test-artist",
+        urlSlug: "test-artist-2",
         userId: artistUser.id,
         enabled: true,
         subscriptionTiers: {

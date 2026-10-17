@@ -13,8 +13,8 @@ import {
 import { logger } from "../../../../logger";
 import { sendMailQueue } from "../../../../queues/send-mail-queue";
 import { serializeUser } from "../../../../serializers/user";
+import { generateUniqueProfileSlug } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
-import generateSlug from "../../../../utils/generateSlug";
 import { getClient } from "../../../../utils/getClient";
 import { deleteUser, updateCurrencies } from "../../../../utils/user";
 
@@ -189,9 +189,9 @@ export default function () {
               name: updatedUser.name ?? updatedUser.email,
               isLabelProfile: true,
               // other artist fields
-              urlSlug:
-                updatedUser.urlSlug ??
-                generateSlug(updatedUser.name ?? updatedUser.email),
+              urlSlug: await generateUniqueProfileSlug(
+                updatedUser.urlSlug ?? updatedUser.name ?? updatedUser.email
+              ),
             },
           });
         }

@@ -8,7 +8,11 @@ import {
 } from "../../../../auth/passport";
 import { serializeProfile } from "../../../../serializers/artist";
 import { serializeManagedProfile } from "../../../../serializers/profileManager";
-import { whereForProfilesUserOwnsOrManages } from "../../../../utils/artist";
+import {
+  generateUniqueProfileSlug,
+  isProfileSlugTaken,
+  whereForProfilesUserOwnsOrManages,
+} from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
 import { getSiteSettings } from "../../../../utils/settings";
@@ -119,7 +123,18 @@ export default function () {
         });
       }
 
-      const newSlug = generateSlug(urlSlug, name);
+      let newSlug: string;
+      if (urlSlug) {
+        newSlug = generateSlug(urlSlug);
+        if (await isProfileSlugTaken(newSlug)) {
+          throw new AppError({
+            description: `"urlSlug" is already in use`,
+            httpCode: 400,
+          });
+        }
+      } else {
+        newSlug = await generateUniqueProfileSlug(name);
+      }
 
       const result = await prisma.profile.create({
         data: {

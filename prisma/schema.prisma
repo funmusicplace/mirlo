@@ -3,7 +3,7 @@ generator client {
   output              = "./__generated__"
   moduleFormat        = "cjs"
   importFileExtension = ""
-  previewFeatures     = ["fullTextSearchPostgres"]
+  previewFeatures     = ["fullTextSearchPostgres", "partialIndexes"]
 }
 
 /// Always after the prisma-client generator
@@ -393,6 +393,8 @@ model Profile {
   contentFlags                        ContentFlag[]
   managers                            ProfileManager[]
   checkouts                           Checkout[]
+
+  @@unique([urlSlug], where: { deletedAt: null })
 }
 
 model ProfileManager {

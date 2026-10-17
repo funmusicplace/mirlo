@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { Readable } from "node:stream";
 
 import { Prisma } from "@mirlo/prisma/client";
@@ -138,7 +139,9 @@ export const createProfile = async (
   const profile = await prisma.profile.create({
     data: {
       name: data?.name ?? "Test artist",
-      urlSlug: data?.urlSlug || (data?.name ? slug(data?.name) : "test-artist"),
+      urlSlug:
+        data?.urlSlug ||
+        (data?.name ? slug(data?.name) : `test-artist-${randomUUID()}`),
       userId: userId,
       enabled: data?.enabled ?? true,
       subscriptionTiers: data?.subscriptionTiers,

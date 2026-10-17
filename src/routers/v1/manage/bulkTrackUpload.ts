@@ -5,7 +5,10 @@ import { slug } from "github-slugger";
 
 import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../auth/passport";
-import { whereForProfilesUserManages } from "../../../utils/artist";
+import {
+  generateUniqueProfileSlug,
+  whereForProfilesUserManages,
+} from "../../../utils/artist";
 import { AppError, HttpCode } from "../../../utils/error";
 
 interface TrackArtistData {
@@ -105,7 +108,7 @@ export default function () {
             artist = await prisma.profile.create({
               data: {
                 name: artistName,
-                urlSlug: slug(artistName),
+                urlSlug: await generateUniqueProfileSlug(artistName),
                 userId: loggedInUserId,
               },
               include: {
