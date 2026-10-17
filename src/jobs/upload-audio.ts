@@ -112,7 +112,7 @@ export default async (job: Job) => {
     if (!audio) {
       logger.info(`audioId ${audioId}: deleted while processing, removing it`);
       await removeAudioFiles(audioId);
-      return { error: { message: "Audio was deleted while processing" } };
+      return { deleted: true };
     }
     const response = { ...(data ?? {}), duration, originalFileSize };
     logger.info(`Data: ${JSON.stringify(response)}`);

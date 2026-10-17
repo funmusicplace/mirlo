@@ -47,6 +47,8 @@ audioQueueEvents.on(
             data: { uploadState: "ERROR" },
           });
         }
+      } else if (result.returnvalue.deleted) {
+        logger.info(`Job ${result.jobId}: audio was deleted while processing`);
       } else if (job) {
         const audio = await prisma.trackAudio.update({
           where: {
