@@ -84,7 +84,7 @@ describe("auth/signup", () => {
         mockRes,
         mockNext
       );
-      assert(mockNext.called);
+      assert(mockNext.calledOnce);
       assert.equal(
         mockNext.firstCall.firstArg.message,
         "Email and password must be supplied"
@@ -163,6 +163,127 @@ describe("auth/signup", () => {
         })
       )
     );
+  });
+
+  describe("with an invite", () => {
+    const createInvite = async (accountType: "ARTIST" | "LABEL") => {
+      const { user: admin } = await createUser({ email: "admin@test.com" });
+      return prisma.invite.create({
+        data: {
+          email: "invited@example.com",
+          invitedById: admin.id,
+          accountType,
+        },
+      });
+    };
+
+    const signupWithInvite = (invite: { email: string; token: string }) =>
+      signup(
+        {
+          body: {
+            email: invite.email,
+            password: "password",
+            name: "Invited",
+            accountType: "listener",
+            emailInvited: invite.email,
+            inviteToken: invite.token,
+          },
+        } as unknown as Request,
+        mockRes,
+        mockNext
+      );
+
+    beforeEach(async () => {
+      await prisma.client.create({
+        data: { applicationUrl: "test", applicationName: "test" },
+      });
+    });
+
+    it("creates an artist on a closed instance", async () => {
+      const stub = sinon.stub(sendMailQueue, "add").resolves();
+      await prisma.settings.create({
+        data: {
+          settings: { platformPercent: 10 },
+          isClosedToPublicArtistSignup: true,
+        },
+      });
+      const invite = await createInvite("ARTIST");
+
+      await signupWithInvite(invite);
+
+      const user = await prisma.user.findFirstOrThrow({
+        where: { email: invite.email },
+      });
+      assert.equal(user.canCreateArtists, true);
+      assert.equal(user.isLabelAccount, false);
+      assert(
+        stub.calledWithMatch("send-mail", {
+          template: "new-user",
+          locals: { accountType: "artist" },
+        })
+      );
+      const usedInvite = await prisma.invite.findUniqueOrThrow({
+        where: { id: invite.id },
+      });
+      assert.equal(usedInvite.usedById, user.id);
+    });
+
+    it("creates a label account from a label invite", async () => {
+      sinon.stub(sendMailQueue, "add").resolves();
+      await prisma.settings.create({
+        data: {
+          settings: { platformPercent: 10 },
+          isClosedToPublicArtistSignup: true,
+        },
+      });
+      const invite = await createInvite("LABEL");
+
+      await signupWithInvite(invite);
+
+      const user = await prisma.user.findFirstOrThrow({
+        where: { email: invite.email },
+      });
+      assert.equal(user.canCreateArtists, true);
+      assert.equal(user.isLabelAccount, true);
+    });
+
+    it("creates a listener on a closed instance when the invite doesn't match", async () => {
+      sinon.stub(sendMailQueue, "add").resolves();
+      await prisma.settings.create({
+        data: {
+          settings: { platformPercent: 10 },
+          isClosedToPublicArtistSignup: true,
+        },
+      });
+      const invite = await createInvite("ARTIST");
+
+      await signupWithInvite({ email: invite.email, token: "wrong-token" });
+
+      const user = await prisma.user.findFirstOrThrow({
+        where: { email: invite.email },
+      });
+      assert.equal(user.canCreateArtists, false);
+      const unusedInvite = await prisma.invite.findUniqueOrThrow({
+        where: { id: invite.id },
+      });
+      assert.equal(unusedInvite.usedAt, null);
+    });
+
+    it("marks the invite used on an open instance", async () => {
+      sinon.stub(sendMailQueue, "add").resolves();
+      const invite = await createInvite("LABEL");
+
+      await signupWithInvite(invite);
+
+      const user = await prisma.user.findFirstOrThrow({
+        where: { email: invite.email },
+      });
+      assert.equal(user.isLabelAccount, true);
+      const usedInvite = await prisma.invite.findUniqueOrThrow({
+        where: { id: invite.id },
+      });
+      assert.equal(usedInvite.usedById, user.id);
+    });
   });
 
   it("signup should flag expired confirmation tokens", async () => {

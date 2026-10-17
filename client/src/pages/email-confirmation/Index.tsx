@@ -1,10 +1,10 @@
-import React from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
-import { useTranslation } from "react-i18next";
 import Box from "components/common/Box";
 import Button from "components/common/Button";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
 
 function Index() {
   const navigate = useNavigate();
@@ -18,7 +18,11 @@ function Index() {
       token: search.get("token"),
       userId: search.get("id"),
       client: search.get("client"),
-      accountType: search.get("accountType") as "artist" | "listener" | null,
+      accountType: search.get("accountType") as
+        | "artist"
+        | "listener"
+        | "label"
+        | null,
       email: search.get("email"),
       error: search.get("error"),
     }),
@@ -52,7 +56,11 @@ function Index() {
       snackbar(t("confirmed"), { type: "success" });
       setIsConfirmed(true);
       setTimeout(() => {
-        navigate(accountType === "artist" ? "/manage/" : "/profile/collection");
+        navigate(
+          accountType === "artist" || accountType === "label"
+            ? "/manage/"
+            : "/profile/collection"
+        );
       }, 3000);
     } catch (e: unknown) {
       const errorMessage = (e as Error).message || t("confirmationFailed");

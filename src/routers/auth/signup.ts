@@ -7,7 +7,10 @@ import { checkCloudFlareTurnstile } from "../../utils/cloudflare";
 import { AppError } from "../../utils/error";
 import { getSiteSettings } from "../../utils/settings";
 
-import { sendVerificationEmail } from "./sendVerificationEmail";
+import {
+  normalizeAccountType,
+  sendVerificationEmail,
+} from "./sendVerificationEmail";
 import { hashPassword } from "./utils";
 
 const signup = async (req: Request, res: Response, next: NextFunction) => {
@@ -27,7 +30,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
   const connectingIP = req.body["CF-Connecting-IP"];
 
   if (!email || !password) {
-    next(
+    return next(
       new AppError({
         httpCode: 400,
         description: "Email and password must be supplied",
@@ -46,29 +49,30 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     let hasInvite = null;
     let canCreateArtists = true;
 
+    if (inviteToken && emailInvited) {
+      hasInvite = await prisma.invite.findFirst({
+        where: {
+          email: emailInvited.toLowerCase(),
+          token: inviteToken,
+          usedAt: null,
+        },
+      });
+    }
+
+    if (hasInvite) {
+      accountType = hasInvite.accountType.toLowerCase();
+    }
+
     if (settings.isClosedToPublicArtistSignup) {
-      canCreateArtists = false;
-      if (inviteToken && emailInvited) {
-        hasInvite = await prisma.invite.findFirst({
-          where: {
-            email: emailInvited.toLowerCase(),
-            token: inviteToken,
-            usedAt: null,
-          },
-        });
-      }
+      canCreateArtists =
+        hasInvite?.accountType === "ARTIST" ||
+        hasInvite?.accountType === "LABEL";
       if (!hasInvite) {
         accountType = "listener";
-      } else {
-        if (
-          hasInvite.accountType === "ARTIST" ||
-          hasInvite.accountType === "LABEL"
-        ) {
-          canCreateArtists = true;
-        }
-        accountType = hasInvite.accountType.toLowerCase();
       }
     }
+
+    const isLabelAccount = hasInvite?.accountType === "LABEL";
 
     email = email.toLowerCase();
 
@@ -130,6 +134,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
           password: await hashPassword(password),
           promoCodes: promoCode ? [promoCode] : [],
           canCreateArtists,
+          isLabelAccount,
         },
         select: {
           name: true,
@@ -180,7 +185,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
       await sendVerificationEmail({
         user: result,
         clientId: client.id,
-        accountType,
+        accountType: normalizeAccountType(accountType),
       });
 
       return res.json(result);
