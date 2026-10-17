@@ -13,7 +13,10 @@ import {
 import { logger } from "../../../../logger";
 import { sendMailQueue } from "../../../../queues/send-mail-queue";
 import { serializeUser } from "../../../../serializers/user";
-import { generateUniqueProfileSlug } from "../../../../utils/artist";
+import {
+  asSlugConflictError,
+  generateUniqueProfileSlug,
+} from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { getClient } from "../../../../utils/getClient";
 import { deleteUser, updateCurrencies } from "../../../../utils/user";
@@ -237,7 +240,7 @@ export default function () {
       }
       res.json({ result: refreshedUser });
     } catch (e) {
-      next(e);
+      next(asSlugConflictError(e));
     }
   }
 

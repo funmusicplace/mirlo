@@ -9,6 +9,7 @@ import {
 import { serializeProfile } from "../../../../serializers/artist";
 import { serializeManagedProfile } from "../../../../serializers/profileManager";
 import {
+  asSlugConflictError,
   generateUniqueProfileSlug,
   isProfileSlugTaken,
   whereForProfilesUserOwnsOrManages,
@@ -182,7 +183,7 @@ export default function () {
         result: serializeProfile(result as any, Number(user.id)),
       });
     } catch (e) {
-      next(e);
+      next(asSlugConflictError(e));
     }
   }
 
@@ -214,7 +215,4 @@ export default function () {
   };
 
   return operations;
-}
-function generateSlugFromString(urlSlug: any, name: any) {
-  throw new Error("Function not implemented.");
 }

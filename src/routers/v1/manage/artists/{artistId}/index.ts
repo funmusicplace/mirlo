@@ -10,6 +10,7 @@ import {
 } from "../../../../../auth/passport";
 import { serializeProfile } from "../../../../../serializers/artist";
 import {
+  asSlugConflictError,
   deleteProfile,
   findProfileIdForURLSlug,
   isProfileSlugTaken,
@@ -243,7 +244,7 @@ export default function () {
         });
       }
     } catch (error) {
-      next(error);
+      next(asSlugConflictError(error));
     }
   }
 

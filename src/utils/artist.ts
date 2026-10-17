@@ -293,6 +293,14 @@ export const isProfileSlugTaken = async (
   return !!profile;
 };
 
+export const asSlugConflictError = (e: unknown) =>
+  e instanceof PrismaClientKnownRequestError && e.code === "P2002"
+    ? new AppError({
+        httpCode: 400,
+        description: `"urlSlug" is already in use`,
+      })
+    : e;
+
 export const generateUniqueProfileSlug = async (name: string) => {
   const base = generateSlug(name) || "artist";
   let candidate = base;
