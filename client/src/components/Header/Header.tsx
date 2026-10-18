@@ -3,15 +3,13 @@ import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import PageBackground from "components/common/ArtistBackground";
 import Button, { ButtonLink } from "components/common/Button";
-import Logo from "components/common/Logo";
 import Menu from "components/Header/Menu";
-import { useInstanceSettings } from "queries/instanceSettings";
 import { queryInstanceArtist } from "queries/settings";
 import { useRef } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { FaHandHoldingHeart, FaUserAlt } from "react-icons/fa";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import { getArtistUrl } from "utils/artist";
 import usePublicArtist from "utils/usePublicObjectById";
@@ -19,6 +17,7 @@ import useShow from "utils/useShow";
 
 import { bp } from "../../constants";
 
+import HeaderLogo from "./HeaderLogo";
 import HeaderSearch from "./HeaderSearch";
 
 const HeaderWrapper = styled.header<{
@@ -95,25 +94,6 @@ const HeaderWrapper = styled.header<{
     ${(props) => (props.trackGroupId || props.postId ? "aspect-ratio: 0;" : "")}
   }
 `;
-
-const LogoWrapper = () => {
-  const { name: instanceName } = useInstanceSettings();
-
-  return (
-    <Link
-      to="/"
-      aria-label={instanceName}
-      className="mt-[-.1rem] leading-none text-[1.5rem] flex justify-start items-center"
-    >
-      <span aria-hidden className="max-md:hidden">
-        <Logo width={101} height={34} />
-      </span>
-      <span aria-hidden className="md:hidden">
-        <Logo noWordmark width={32} height={32} />
-      </span>
-    </Link>
-  );
-};
 
 const Content = styled.div<{ artistId?: string }>`
   ${(props) =>
@@ -204,7 +184,7 @@ const Header = () => {
       </div>
       <div className="absolute w-full h-full md:hidden!"></div>
       <Content artistId={artistId}>
-        <LogoWrapper />
+        <HeaderLogo />
         <div className="flex items-center gap-3">
           {instanceArtist && !artistId && (
             <ButtonLink

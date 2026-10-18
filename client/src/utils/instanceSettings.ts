@@ -14,6 +14,9 @@ export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
   trustLevelNames: DEFAULT_TRUST_LEVEL_NAMES,
   languages: null,
   setupStage: "done",
+  logo: null,
+  mobileLogo: null,
+  tintLogo: false,
 };
 
 export const applyInstanceStyles = (settings: InstanceSettings) => {
