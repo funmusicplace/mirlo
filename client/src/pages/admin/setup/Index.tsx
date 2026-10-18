@@ -193,7 +193,7 @@ const SetupGuide: React.FC = () => {
                 canSubmit={isLoaded}
                 submitLabel={t("saveAndContinue")}
               >
-                <IdentitySettingsSection hideTitle />
+                <IdentitySettingsSection hideTitle hideLogo />
               </SetupGuideStep>
             )}
 

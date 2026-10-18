@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { queryInstanceSettings } from "queries/instanceSettings";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import api from "services/api";
+import api, { APIResponseError } from "services/api";
 import { DEFAULT_INSTANCE_SETTINGS } from "utils/instanceSettings";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -37,7 +37,8 @@ vi.stubGlobal(
   }
 );
 
-vi.mock("services/api", () => ({
+vi.mock("services/api", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("services/api")>()),
   default: { get: vi.fn(), post: vi.fn() },
 }));
 
@@ -244,6 +245,26 @@ describe("Settings", () => {
       expect(mockSnackbar).toHaveBeenCalledWith("Oops something went wrong", {
         type: "warning",
       });
+    });
+  });
+
+  test("shows the reason given by the API when it refuses the save", async () => {
+    vi.mocked(api.post).mockRejectedValue(
+      new APIResponseError("The logo must be an SVG or PNG file.", 400, {})
+    );
+
+    renderSettings();
+
+    await waitFor(() => screen.getByDisplayValue("10"));
+    mockSnackbar.mockClear();
+
+    await userEvent.click(screen.getByRole("button", { name: /save/i }));
+
+    await waitFor(() => {
+      expect(mockSnackbar).toHaveBeenCalledWith(
+        "The logo must be an SVG or PNG file.",
+        { type: "warning" }
+      );
     });
   });
 
