@@ -148,6 +148,7 @@ export default function () {
         ...settings,
         ...(settings?.instanceCustomization && {
           instanceCustomization: {
+            ...storedCustomization,
             ...settings.instanceCustomization,
             ...(typeof incomingTitle === "string" && {
               title: incomingTitle.trim(),
