@@ -25,7 +25,7 @@ interface InstanceSettings {
 
 interface SettingsFromAPI {
   cdnUrl?: string;
-  bucketNames?: { prefix: string } | null;
+  bucketNames?: { prefix: string };
   settings: {
     platformPercent: number;
     instanceCustomization?: {

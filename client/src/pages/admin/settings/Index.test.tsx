@@ -87,7 +87,7 @@ function makeSettings(overrides: object = {}) {
         cloudflareTurnstileSecret: "cf-secret",
         trustLevelNames: ["Newcomer", "Member"],
       },
-      bucketNames: null,
+      bucketNames: { prefix: "" },
       ...overrides,
     },
   };
@@ -189,43 +189,28 @@ describe("Settings", () => {
           settings: expect.objectContaining({
             platformPercent: 10,
           }),
-          bucketNames: null,
+          bucketNames: { prefix: "" },
         })
       );
     });
   });
 
-  test("preserves legacy (null) bucketNames when consolidated mode isn't enabled", async () => {
+  test("sends the bucket prefix", async () => {
     renderSettings();
 
     await waitFor(() => screen.getByDisplayValue("10"));
+
+    await userEvent.type(
+      document.getElementById("input-bucket-prefix") as HTMLInputElement,
+      "staging-"
+    );
 
     await userEvent.click(screen.getByRole("button", { name: /save/i }));
 
     await waitFor(() => {
       expect(api.post).toHaveBeenCalledWith(
         "admin/settings",
-        expect.objectContaining({ bucketNames: null })
-      );
-    });
-  });
-
-  test("sends a prefix when consolidated bucket mode is enabled", async () => {
-    renderSettings();
-
-    await waitFor(() => screen.getByDisplayValue("10"));
-
-    const consolidatedCheckbox = document.querySelector(
-      'input[name="useConsolidatedBuckets"]'
-    ) as HTMLInputElement;
-    await userEvent.click(consolidatedCheckbox);
-
-    await userEvent.click(screen.getByRole("button", { name: /save/i }));
-
-    await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith(
-        "admin/settings",
-        expect.objectContaining({ bucketNames: { prefix: "" } })
+        expect.objectContaining({ bucketNames: { prefix: "staging-" } })
       );
     });
   });

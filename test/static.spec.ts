@@ -12,7 +12,11 @@ import request from "supertest";
 import { Readable } from "stream";
 
 import { serveStatic } from "../src/static";
-import { minioClient } from "../src/utils/minio";
+import {
+  DEFAULT_BUCKET_CONFIG,
+  minioClient,
+  setBucketConfig,
+} from "../src/utils/minio";
 
 const fileContents = "file-bytes";
 
@@ -49,29 +53,48 @@ describe("serveStatic", () => {
     sinon.restore();
   });
 
-  it("serves a legacy flat object key", async () => {
+  it("serves an object key containing slashes", async () => {
     const response = await request(app)
-      .get("/images/trackgroup-covers/some-image-x600.webp")
+      .get("/images/mirlo-images/trackgroup-covers/some-image-x600.webp")
       .buffer(true)
       .parse(rawBody)
-      .expect(200);
-
-    assert.deepEqual(statStub.firstCall.args, [
-      "trackgroup-covers",
-      "some-image-x600.webp",
-    ]);
-    assert.equal(response.body.toString(), fileContents);
-  });
-
-  it("serves a consolidated object key containing slashes", async () => {
-    await request(app)
-      .get("/images/mirlo-images/trackgroup-covers/some-image-x600.webp")
       .expect(200);
 
     assert.deepEqual(statStub.firstCall.args, [
       "mirlo-images",
       "trackgroup-covers/some-image-x600.webp",
     ]);
+    assert.equal(response.body.toString(), fileContents);
+  });
+
+  it("serves from a prefixed images bucket", async () => {
+    setBucketConfig({ prefix: "staging-" });
+    try {
+      await request(app)
+        .get("/images/staging-mirlo-images/some-image-x600.webp")
+        .expect(200);
+    } finally {
+      setBucketConfig(DEFAULT_BUCKET_CONFIG);
+    }
+
+    assert.deepEqual(statStub.firstCall.args, [
+      "staging-mirlo-images",
+      "some-image-x600.webp",
+    ]);
+  });
+
+  it("404s for buckets other than the images bucket", async () => {
+    await request(app)
+      .get("/images/mirlo-downloads/trackgroup/1/flac.zip")
+      .expect(404);
+    await request(app)
+      .get("/images/mirlo-audio/some-id/original.flac")
+      .expect(404);
+    await request(app)
+      .get("/images/trackgroup-covers/some-image-x600.webp")
+      .expect(404);
+
+    assert.equal(statStub.called, false);
   });
 
   it("404s when the object does not exist", async () => {

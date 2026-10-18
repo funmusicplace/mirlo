@@ -6,13 +6,12 @@ import prisma from "@mirlo/prisma";
 import archiver from "archiver";
 import * as dotenv from "dotenv";
 dotenv.config();
-import { afterEach, beforeEach, describe, it } from "mocha";
+import { beforeEach, describe, it } from "mocha";
 
 import {
   createBucketIfNotExists,
-  finalAudioBucket,
+  getAudioBucket,
   uploadZip,
-  setBucketConfig,
 } from "../../../src/utils/minio";
 import {
   clearTables,
@@ -78,7 +77,7 @@ describe("trackGroups/{id}/download", () => {
       });
       const profile = await createProfile(user.id);
       const trackGroup = await createTrackGroup(profile.id);
-      await createBucketIfNotExists(finalAudioBucket);
+      await createBucketIfNotExists(getAudioBucket());
 
       const { user: purchaser } = await createUser({
         email: "purchaser@artist.com",
@@ -222,7 +221,7 @@ describe("trackGroups/{id}/download", () => {
       const { user } = await createUser({ email: "artist@artist.com" });
       const profile = await createProfile(user.id);
       const trackGroup = await createTrackGroup(profile.id);
-      await createBucketIfNotExists(finalAudioBucket);
+      await createBucketIfNotExists(getAudioBucket());
 
       const { user: purchaser } = await createUser({
         email: "guest-purchaser@artist.com",
@@ -255,7 +254,7 @@ describe("trackGroups/{id}/download", () => {
       const { user } = await createUser({ email: "artist@artist.com" });
       const profile = await createProfile(user.id);
       const trackGroup = await createTrackGroup(profile.id);
-      await createBucketIfNotExists(finalAudioBucket);
+      await createBucketIfNotExists(getAudioBucket());
 
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",
@@ -307,65 +306,6 @@ describe("trackGroups/{id}/download", () => {
           response.body.error.includes("Purchase doesn't exist"),
         `should say the purchase/token didn't resolve, got: ${JSON.stringify(response.body.error)}`
       );
-    });
-
-    describe("consolidated mode", () => {
-      let adminToken: string;
-
-      beforeEach(async () => {
-        const { accessToken } = await createUser({
-          email: "admin@test.com",
-          isAdmin: true,
-        });
-        adminToken = accessToken;
-        await requestApp
-          .post("admin/settings")
-          .set("Cookie", [`jwt=${adminToken}`])
-          .set("Accept", "application/json")
-          .send({
-            bucketNames: { prefix: "" },
-            settings: { platformPercent: 7 },
-          });
-        setBucketConfig({ prefix: "" });
-      });
-
-      afterEach(async () => {
-        setBucketConfig(null);
-        await requestApp
-          .post("admin/settings")
-          .set("Cookie", [`jwt=${adminToken}`])
-          .set("Accept", "application/json")
-          .send({ bucketNames: null, settings: { platformPercent: 7 } });
-      });
-
-      it("serves a trackgroup zip uploaded to the consolidated bucket", async () => {
-        const { user } = await createUser({ email: "artist@artist.com" });
-        const artist = await createProfile(user.id);
-        const trackGroup = await createTrackGroup(artist.id);
-        const track = await createTrack(trackGroup.id);
-
-        const passthrough = await generateMockArchive();
-        await uploadZip("trackGroup", trackGroup.id, "320.mp3", passthrough);
-
-        const { user: purchaser, accessToken } = await createUser({
-          email: "purchaser@artist.com",
-        });
-        await prisma.userTrackGroupPurchase.create({
-          data: {
-            userId: purchaser.id,
-            trackGroupId: trackGroup.id,
-            singleDownloadToken: randomUUID(),
-          },
-        });
-
-        const response = await requestApp
-          .get(`trackGroups/${trackGroup.id}/download?format=320.mp3`)
-          .set("Accept", "application/json")
-          .set("Cookie", [`jwt=${accessToken}`]);
-
-        assert.equal(response.statusCode, 200);
-        assert.equal(response.header["content-type"], "application/zip");
-      });
     });
   });
 });

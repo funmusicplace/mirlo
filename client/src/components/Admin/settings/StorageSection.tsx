@@ -9,39 +9,20 @@ import SettingsSection from "./SettingsSection";
 
 const StorageSection: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
-  const { register, watch } = useFormContext<FormSettings>();
-  const useConsolidatedBuckets = watch("useConsolidatedBuckets");
+  const { register } = useFormContext<FormSettings>();
 
   return (
     <SettingsSection id="settings-storage" title={t("storage")}>
-      <FormComponent direction="row">
+      <FormComponent>
+        <label htmlFor="input-bucket-prefix">{t("bucketPrefix")}</label>
         <InputEl
-          id="input-use-consolidated-buckets"
-          type="checkbox"
-          aria-describedby="hint-use-consolidated-buckets"
-          {...register("useConsolidatedBuckets")}
+          id="input-bucket-prefix"
+          type="text"
+          className="max-w-xs"
+          placeholder={t("bucketPrefixPlaceholder")}
+          {...register("bucketPrefix")}
         />
-        <div className="flex flex-col">
-          <label htmlFor="input-use-consolidated-buckets">
-            {t("useConsolidatedBuckets")}
-          </label>
-          <small id="hint-use-consolidated-buckets" className="max-w-md">
-            {t("useConsolidatedBucketsHint")}
-          </small>
-        </div>
       </FormComponent>
-      {useConsolidatedBuckets && (
-        <FormComponent>
-          <label htmlFor="input-bucket-prefix">{t("bucketPrefix")}</label>
-          <InputEl
-            id="input-bucket-prefix"
-            type="text"
-            className="max-w-xs"
-            placeholder={t("bucketPrefixPlaceholder")}
-            {...register("bucketPrefix")}
-          />
-        </FormComponent>
-      )}
     </SettingsSection>
   );
 };

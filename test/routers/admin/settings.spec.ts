@@ -34,7 +34,10 @@ describe("admin/settings", () => {
         .post("admin/settings")
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json")
-        .send({ bucketNames: null, settings: { platformPercent: 7 } });
+        .send({
+          bucketNames: { prefix: "" },
+          settings: { platformPercent: 7 },
+        });
     } catch (e) {
       // best-effort reset; don't fail the test suite if this errors
     }
@@ -744,7 +747,7 @@ describe("admin/settings", () => {
       assert.deepEqual(row?.bucketNames, { prefix: "foo-" });
     });
 
-    it("should save bucketNames: null (legacy mode) to DB", async () => {
+    it("should reject bucketNames: null", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",
         isAdmin: true,
@@ -756,11 +759,7 @@ describe("admin/settings", () => {
         .set("Accept", "application/json")
         .send({ bucketNames: null, settings: { platformPercent: 7 } });
 
-      assert.equal(response.statusCode, 200);
-      assert.equal(response.body.result.bucketNames, null);
-
-      const row = await prisma.settings.findFirst();
-      assert.equal(row?.bucketNames, null);
+      assert.equal(response.statusCode, 400);
     });
 
     it("should save trust level names", async () => {

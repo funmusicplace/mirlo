@@ -15,7 +15,6 @@ export interface FormSettings {
   cloudflareTurnstileSecret?: string;
   cloudflareTurnstileSecretConfigured?: boolean;
   defconLevel?: number;
-  useConsolidatedBuckets?: boolean;
   bucketPrefix?: string;
   trustLevelNames?: string[];
 }
@@ -62,7 +61,6 @@ export const settingsToForm = (
     ...settings.settings?.emailProvider,
     fromEmail: settings.settings?.emailProvider?.fromEmail ?? "",
   },
-  useConsolidatedBuckets: settings.bucketNames != null,
   bucketPrefix: settings.bucketNames?.prefix ?? "",
   cloudflareTurnstileSecret: "",
   cloudflareTurnstileSecretConfigured:
@@ -100,9 +98,7 @@ export const formToSettingsPayload = (
     trustLevelNames: data.trustLevelNames,
   },
   cdnUrl: data.cdnUrl,
-  bucketNames: data.useConsolidatedBuckets
-    ? { prefix: data.bucketPrefix ?? "" }
-    : null,
+  bucketNames: { prefix: data.bucketPrefix ?? "" },
   terms: data.terms,
   showQueueDashboard: data.showQueueDashboard,
   isClosedToPublicArtistSignup: data.isClosedToPublicArtistSignup,

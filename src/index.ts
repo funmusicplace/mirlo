@@ -35,11 +35,7 @@ import auth from "./routers/auth";
 import { serveStatic } from "./static";
 import errorHandler from "./utils/error";
 import { setCdnUrl } from "./utils/images";
-import {
-  setBucketConfig,
-  BucketConfig,
-  ensureAllBucketsExist,
-} from "./utils/minio";
+import { setBucketConfig, ensureAllBucketsExist } from "./utils/minio";
 import { getCachedPage } from "./utils/pageCache";
 import {
   attachRequestId,
@@ -159,9 +155,9 @@ if (!isDev) {
 
 app.use(express.static("public", { maxAge: "1y", immutable: true }));
 
-// Note: only the bucket is a route param — in consolidated bucket mode the
-// object key contains slashes (e.g. trackgroup-covers/<id>-x600.webp), so
-// serveStatic reads the rest of the path itself.
+// Note: only the bucket is a route param — the object key contains slashes
+// (e.g. trackgroup-covers/<id>-x600.webp), so serveStatic reads the rest of
+// the path itself.
 app.use("/images/:bucket", serveStatic);
 
 // Bull Board can mutate queues (retry/clean/pause). Require an admin session
@@ -369,7 +365,7 @@ app.listen(process.env.PORT, async () => {
   setCdnUrl(settings.cdnUrl ?? undefined);
   await refreshStripeClient();
   syncStripeConnectWebhookOnBoot();
-  setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
+  setBucketConfig(settings.bucketNames);
   ensureAllBucketsExist().catch((e) => {
     logger.error("Failed to eagerly create storage buckets on boot");
     logger.error(e);

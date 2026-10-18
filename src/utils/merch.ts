@@ -14,11 +14,7 @@ import { deleteDownloadableContent } from "./content";
 import countryCodesCurrencies from "./country-codes-currencies";
 import { AppError } from "./error";
 import { generateFullStaticImageUrl } from "./images";
-import {
-  finalImageBucket,
-  finalMerchImageBucket,
-  removeImagesByType,
-} from "./minio";
+import { rootImagePrefix, removeImagesByType } from "./minio";
 
 export const merchImagesInclude = {
   include: { image: true },
@@ -27,33 +23,18 @@ export const merchImagesInclude = {
 
 export type MerchImageWithImage = MerchImage & { image?: Image | null };
 
-export const resolveMerchImage = (merchImage: MerchImageWithImage) =>
-  merchImage.image
-    ? {
-        image: merchImage.image,
-        imageType: "image" as const,
-        bucket: finalImageBucket,
-      }
-    : {
-        image: merchImage,
-        imageType: "merch" as const,
-        bucket: finalMerchImageBucket,
-      };
-
 export const merchImageUrl = (
   merchImage: MerchImageWithImage | undefined,
   size: number
 ) => {
-  if (!merchImage) {
-    return undefined;
-  }
-  const { image, bucket } = resolveMerchImage(merchImage);
-  const variant = image.url.find((u) => u.endsWith(`-x${size}`));
-  return variant ? generateFullStaticImageUrl(variant, bucket) : undefined;
+  const variant = merchImage?.image?.url.find((u) => u.endsWith(`-x${size}`));
+  return variant
+    ? generateFullStaticImageUrl(variant, rootImagePrefix)
+    : undefined;
 };
 
 export const deleteMerchImage = async (merchImage: MerchImageWithImage) => {
-  const { imageType } = resolveMerchImage(merchImage);
+  const imageType = merchImage.imageId ? "image" : "merch";
   const storedId = merchImage.imageId ?? merchImage.id;
 
   await prisma.merchImage.delete({ where: { id: merchImage.id } });

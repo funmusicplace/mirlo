@@ -48,7 +48,7 @@ describe("manage/merch/{merchId}/images", () => {
     }
   });
 
-  it("serializes legacy and central images in position order with sizes from their own bucket", async () => {
+  it("serializes images in position order with sizes from the images bucket root", async () => {
     const { accessToken, merch, legacy, central } = await setup();
 
     const response = await requestApp
@@ -62,7 +62,6 @@ describe("manage/merch/{merchId}/images", () => {
       images.map((i: { id: string }) => i.id),
       [legacy.id, central.id]
     );
-    assert.match(images[0].sizes["600"], /merch-images/);
     assert.doesNotMatch(images[1].sizes["600"], /merch-images/);
     assert.match(images[1].sizes["600"], /mirlo-images/);
   });

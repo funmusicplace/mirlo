@@ -26,7 +26,6 @@ import prisma, { PrismaTransactionClient } from "@mirlo/prisma";
 
 import { deleteMerchImage } from "../utils/merch";
 import {
-  BucketConfig,
   copyImagesBetweenTypes,
   ImageType,
   listImagesByType,
@@ -97,15 +96,8 @@ export const backfillImages = async (
     limit?: number;
   }
 ) => {
-  // The caller sets the in-memory bucket layout (the CLI below, or the worker
-  // on boot). Setting it here would leak into whatever process calls this.
-  const settings = await getSiteSettings();
-  const bucketConfig = (settings.bucketNames as BucketConfig | null) ?? null;
-
   console.log(
-    `${apply ? "APPLYING" : "DRY RUN"} ${source.imageType} — bucket layout: ${
-      bucketConfig ? `consolidated (prefix "${bucketConfig.prefix}")` : "legacy"
-    }${prune ? `, pruning${prune === true ? "" : ` ${prune} only`}` : ""}${limit ? `, limit ${limit}` : ""}`
+    `${apply ? "APPLYING" : "DRY RUN"} ${source.imageType}${prune ? `, pruning${prune === true ? "" : ` ${prune} only`}` : ""}${limit ? `, limit ${limit}` : ""}`
   );
 
   const legacyImages = await source.findLegacy(limit);
@@ -241,7 +233,7 @@ if (require.main === module) {
 
   getSiteSettings()
     .then((settings) => {
-      setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
+      setBucketConfig(settings.bucketNames);
       return backfillImages(source, {
         apply: args.includes("--apply"),
         prune: args.includes("--prune"),

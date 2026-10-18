@@ -8,8 +8,8 @@ import { AppError } from "../../../utils/error";
 import { setCdnUrl } from "../../../utils/images";
 import {
   setBucketConfig,
-  BucketConfig,
   ensureAllBucketsExist,
+  isBucketConfig,
 } from "../../../utils/minio";
 import { clearPageCache } from "../../../utils/pageCache";
 import {
@@ -51,6 +51,12 @@ export default function () {
       bucketNames,
     } = req.body;
     try {
+      if (bucketNames !== undefined && !isBucketConfig(bucketNames)) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Invalid bucket names",
+        });
+      }
       if (
         settings?.trustLevelNames !== undefined &&
         !isTrustLevelNames(settings.trustLevelNames)
@@ -188,7 +194,7 @@ export default function () {
       setCdnUrl(cdnUrl ?? undefined);
       await refreshStripeClient();
       if (bucketNames !== undefined) {
-        setBucketConfig((bucketNames as BucketConfig | null) ?? null);
+        setBucketConfig(bucketNames);
         ensureAllBucketsExist().catch((e) => {
           logger.error("Failed to create storage buckets after settings save");
           logger.error(e);

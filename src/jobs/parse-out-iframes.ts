@@ -3,11 +3,11 @@ import prisma from "@mirlo/prisma";
 import logger from "../logger";
 import { getClient } from "../utils/getClient";
 import { convertURLArrayToSizes } from "../utils/images";
-import { finalCoversBucket } from "../utils/minio";
+import { coversPrefix } from "../utils/minio";
 
 const coverUrl = (cover?: { url: string[] } | null): string | null => {
   if (!cover || cover.url.length === 0) return null;
-  const sizes = convertURLArrayToSizes(cover.url, finalCoversBucket) as Record<
+  const sizes = convertURLArrayToSizes(cover.url, coversPrefix) as Record<
     string,
     string
   >;

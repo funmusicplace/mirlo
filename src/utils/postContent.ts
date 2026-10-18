@@ -4,7 +4,7 @@ import { compact, uniq } from "lodash";
 import { originOf } from "./clientUrl";
 import { getClient } from "./getClient";
 import { generateFullStaticImageUrl } from "./images";
-import { finalPostImageBucket } from "./minio";
+import { postImagePrefix } from "./minio";
 
 export type ContentImage = { id: string; extension: string };
 
@@ -41,11 +41,7 @@ export const resolveImageRefs = (content: string, images: ContentImage[]) => {
     if (image) {
       $(el).attr(
         "src",
-        generateFullStaticImageUrl(
-          image.id,
-          finalPostImageBucket,
-          image.extension
-        )
+        generateFullStaticImageUrl(image.id, postImagePrefix, image.extension)
       );
     }
   });

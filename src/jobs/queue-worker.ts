@@ -9,11 +9,7 @@ import yargs from "yargs";
 import { REDIS_CONFIG } from "../config/redis";
 import { runPendingDataMigrations } from "../dataMigrations";
 import { autoPurchaseNewAlbumsProcessor } from "../queues/auto-purchase-new-albums-queue";
-import {
-  setBucketConfig,
-  BucketConfig,
-  ensureAllBucketsExist,
-} from "../utils/minio";
+import { setBucketConfig, ensureAllBucketsExist } from "../utils/minio";
 import { getSiteSettings } from "../utils/settings";
 
 import generateAlbumJob from "./generate-album";
@@ -56,7 +52,7 @@ const workerOptions = {
 const withFreshBucketConfig =
   (processor: (job: Job) => Promise<any>) => async (job: Job) => {
     const settings = await getSiteSettings();
-    setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
+    setBucketConfig(settings.bucketNames);
     return processor(job);
   };
 
@@ -150,7 +146,7 @@ yargs
       logger.error(`Unhandled promise rejection: ${reason}`);
     });
     const settings = await getSiteSettings();
-    setBucketConfig((settings.bucketNames as BucketConfig | null) ?? null);
+    setBucketConfig(settings.bucketNames);
     ensureAllBucketsExist().catch((e) => {
       logger.error("Failed to eagerly create storage buckets on boot");
       logger.error(e);

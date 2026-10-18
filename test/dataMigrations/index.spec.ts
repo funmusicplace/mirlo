@@ -4,7 +4,7 @@ import { Readable } from "node:stream";
 import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
-import { afterEach, beforeEach, describe, it } from "mocha";
+import { beforeEach, describe, it } from "mocha";
 
 import {
   DataMigration,
@@ -16,11 +16,9 @@ import orphanedAudio from "../../src/dataMigrations/orphanedAudio";
 import postContentImageRefs from "../../src/dataMigrations/postContentImageRefs";
 import postContentWidgetPaths from "../../src/dataMigrations/postContentWidgetPaths";
 import {
-  finalAudioBucket,
-  finalCoversBucket,
-  finalImageBucket,
+  DEFAULT_BUCKET_CONFIG,
+  getImagesBucket,
   getAudioBucket,
-  incomingAudioBucket,
   setBucketConfig,
   statFile,
   uploadAudioHlsFile,
@@ -259,11 +257,8 @@ describe("dataMigrations: postContentImageRefs", () => {
 });
 
 describe("dataMigrations: imageContentTypes", () => {
-  beforeEach(() => setBucketConfig({ prefix: "" }));
-  afterEach(() => setBucketConfig(null));
-
   const storedMetadata = async (key: string) => {
-    const { minioStat } = await statFile(finalImageBucket, key);
+    const { minioStat } = await statFile(getImagesBucket(), key);
     return minioStat?.metaData;
   };
 
@@ -284,7 +279,7 @@ describe("dataMigrations: imageContentTypes", () => {
 
   it("re-saves images that have no content type, keeping cache control", async () => {
     const key = "trackgroup-covers/untyped-cover-x600.jpg";
-    await uploadWrapper(finalImageBucket, key, Buffer.from("image"), {
+    await uploadWrapper(getImagesBucket(), key, Buffer.from("image"), {
       cacheControl: "public, max-age=60",
     });
     assert.notEqual(
@@ -297,17 +292,6 @@ describe("dataMigrations: imageContentTypes", () => {
     const metadata = await storedMetadata(key);
     assert.equal(metadata?.["content-type"], "image/jpeg");
     assert.equal(metadata?.["cache-control"], "public, max-age=60");
-  });
-
-  it("does nothing in the legacy layout", async () => {
-    setBucketConfig(null);
-    const key = "legacy-cover-x600.jpg";
-    await uploadWrapper(finalCoversBucket, key, Buffer.from("image"));
-
-    assert.equal(await imageContentTypes.run(), true);
-
-    const { minioStat } = await statFile(finalCoversBucket, key);
-    assert.notEqual(minioStat?.metaData?.["content-type"], "image/jpeg");
   });
 });
 
@@ -358,7 +342,7 @@ describe("dataMigrations: orphanedAudio", () => {
   beforeEach(async () => {
     await clearTables();
   });
-  afterEach(() => setBucketConfig(null));
+  afterEach(() => setBucketConfig(DEFAULT_BUCKET_CONFIG));
 
   const storeAudio = async (audioId: string) => {
     await uploadIncomingAudio(audioId, Readable.from(Buffer.from("audio")));
@@ -370,54 +354,38 @@ describe("dataMigrations: orphanedAudio", () => {
   };
 
   const incomingExists = async (incomingKey: string) =>
-    !!(await statFile(getAudioBucket(incomingAudioBucket), incomingKey))
-      .minioStat;
+    !!(await statFile(getAudioBucket(), incomingKey)).minioStat;
 
   const segmentExists = async (audioId: string) =>
-    !!(
-      await statFile(
-        getAudioBucket(finalAudioBucket),
-        `${audioId}/segment-000.ts`
-      )
-    ).minioStat;
+    !!(await statFile(getAudioBucket(), `${audioId}/segment-000.ts`)).minioStat;
 
-  const layouts = [
-    { name: "consolidated", config: { prefix: "" }, incoming: "incoming/" },
-    { name: "legacy", config: null, incoming: "" },
-  ];
-
-  for (const layout of layouts) {
-    it(`removes audio with no live TrackAudio row (${layout.name})`, async () => {
-      setBucketConfig(layout.config);
-      const { user } = await createUser({ email: "artist@artist.com" });
-      const profile = await createProfile(user.id);
-      const trackGroup = await createTrackGroup(profile.id);
-      const liveTrack = await createTrack(trackGroup.id);
-      const deletedTrack = await createTrack(trackGroup.id);
-      const live = await prisma.trackAudio.findFirstOrThrow({
-        where: { trackId: liveTrack.id },
-      });
-      const deleted = await prisma.trackAudio.findFirstOrThrow({
-        where: { trackId: deletedTrack.id },
-      });
-      await prisma.trackAudio.delete({ where: { id: deleted.id } });
-      const unknown = "00000000-0000-4000-8000-000000000000";
-
-      await Promise.all([live.id, deleted.id, unknown].map(storeAudio));
-
-      assert.equal(await orphanedAudio.run(), true);
-
-      assert.equal(await segmentExists(live.id), true);
-      assert.equal(await incomingExists(`${layout.incoming}${live.id}`), true);
-      for (const audioId of [deleted.id, unknown]) {
-        assert.equal(await segmentExists(audioId), false);
-        assert.equal(
-          await incomingExists(`${layout.incoming}${audioId}`),
-          false
-        );
-      }
+  it("removes audio with no live TrackAudio row", async () => {
+    setBucketConfig({ prefix: "" });
+    const { user } = await createUser({ email: "artist@artist.com" });
+    const profile = await createProfile(user.id);
+    const trackGroup = await createTrackGroup(profile.id);
+    const liveTrack = await createTrack(trackGroup.id);
+    const deletedTrack = await createTrack(trackGroup.id);
+    const live = await prisma.trackAudio.findFirstOrThrow({
+      where: { trackId: liveTrack.id },
     });
-  }
+    const deleted = await prisma.trackAudio.findFirstOrThrow({
+      where: { trackId: deletedTrack.id },
+    });
+    await prisma.trackAudio.delete({ where: { id: deleted.id } });
+    const unknown = "00000000-0000-4000-8000-000000000000";
+
+    await Promise.all([live.id, deleted.id, unknown].map(storeAudio));
+
+    assert.equal(await orphanedAudio.run(), true);
+
+    assert.equal(await segmentExists(live.id), true);
+    assert.equal(await incomingExists(`incoming/${live.id}`), true);
+    for (const audioId of [deleted.id, unknown]) {
+      assert.equal(await segmentExists(audioId), false);
+      assert.equal(await incomingExists(`incoming/${audioId}`), false);
+    }
+  });
 
   it("leaves keys that aren't audio ids alone", async () => {
     setBucketConfig({ prefix: "" });

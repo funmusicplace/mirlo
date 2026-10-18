@@ -40,7 +40,10 @@ const handlers = ({
   settings: [
     http.get("*/admin/settings/", () =>
       HttpResponse.json({
-        result: { settings: { platformPercent: 7 }, bucketNames: null },
+        result: {
+          settings: { platformPercent: 7 },
+          bucketNames: { prefix: "" },
+        },
       })
     ),
     http.get("*/v1/settings/featuredArtists", () =>

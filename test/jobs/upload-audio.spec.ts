@@ -9,7 +9,6 @@ import { describe, it } from "mocha";
 import uploadAudio from "../../src/jobs/upload-audio";
 import {
   getAudioBucket,
-  incomingAudioBucket,
   statFile,
   uploadIncomingAudio,
 } from "../../src/utils/minio";
@@ -60,10 +59,7 @@ describe("upload-audio", () => {
       await exists(getAudioBucket(), `${audio.id}/playlist.m3u8`),
       true
     );
-    assert.equal(
-      await exists(getAudioBucket(incomingAudioBucket), audio.id),
-      false
-    );
+    assert.equal(await exists(getAudioBucket(), `incoming/${audio.id}`), false);
   });
 
   it("removes the converted files when the audio was deleted while processing", async () => {
@@ -83,9 +79,6 @@ describe("upload-audio", () => {
       await exists(getAudioBucket(), `${audio.id}/segment-000.ts`),
       false
     );
-    assert.equal(
-      await exists(getAudioBucket(incomingAudioBucket), audio.id),
-      false
-    );
+    assert.equal(await exists(getAudioBucket(), `incoming/${audio.id}`), false);
   });
 });

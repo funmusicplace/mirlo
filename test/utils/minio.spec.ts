@@ -11,11 +11,12 @@ import { Readable } from "stream";
 import { EventEmitter } from "events";
 
 import {
+  DEFAULT_BUCKET_CONFIG,
   setBucketConfig,
   getImagesBucket,
   getAudioBucket,
   getDownloadsBucket,
-  getImageFinalBucket,
+  getImagePrefix,
   imageTypeUsesQueue,
   uploadIncomingImageByType,
   downloadIncomingImageByType,
@@ -30,20 +31,12 @@ import {
   removeDownloadableContent,
   removeAudioFiles,
   minioClient,
-  // Bucket name constants used in assertions
-  incomingArtistAvatarBucket,
-  finalArtistAvatarBucket,
-  finalArtistBackgroundBucket,
-  incomingCoversBucket,
-  finalCoversBucket,
-  finalPostImageBucket,
-  incomingImageBucket,
-  finalImageBucket,
-  incomingAudioBucket,
-  finalAudioBucket,
-  trackGroupFormatBucket,
-  trackFormatBucket,
-  downloadableContentBucket,
+  // Key prefix constants used in assertions
+  artistAvatarPrefix,
+  artistBackgroundPrefix,
+  coversPrefix,
+  postImagePrefix,
+  rootImagePrefix,
 } from "../../src/utils/minio";
 
 // Returns a Readable that ends immediately — safe to use as a fake upload stream.
@@ -62,8 +55,8 @@ describe("minio bucket routing", () => {
   let bucketExistsStub: sinon.SinonStub;
 
   beforeEach(() => {
-    // Reset to legacy mode and clear the ensured-bucket cache.
-    setBucketConfig(null);
+    // Reset to no prefix and clear the ensured-bucket cache.
+    setBucketConfig(DEFAULT_BUCKET_CONFIG);
     putObjectStub = sinon.stub(minioClient!, "putObject").resolves();
     // Each call gets a fresh stream so the 'end' event fires correctly.
     getObjectStub = sinon
@@ -74,55 +67,34 @@ describe("minio bucket routing", () => {
   });
 
   afterEach(() => {
-    setBucketConfig(null);
+    setBucketConfig(DEFAULT_BUCKET_CONFIG);
     sinon.restore();
   });
 
   // ── Bucket selection helpers ─────────────────────────────────────────────────
 
   describe("getImagesBucket / getAudioBucket / getDownloadsBucket", () => {
-    it("legacy mode: returns the legacy fallback bucket unchanged", () => {
-      assert.equal(getImagesBucket("artist-avatars"), "artist-avatars");
-      assert.equal(
-        getAudioBucket("incoming-track-audio"),
-        "incoming-track-audio"
-      );
-      assert.equal(getAudioBucket(), finalAudioBucket);
-      assert.equal(
-        getDownloadsBucket("trackgroup-format"),
-        "trackgroup-format"
-      );
-    });
-
-    describe("consolidated mode (no prefix)", () => {
-      beforeEach(() => setBucketConfig({ prefix: "" }));
-
-      it("routes all image traffic to mirlo-images regardless of fallback", () => {
-        assert.equal(getImagesBucket("artist-avatars"), "mirlo-images");
-        assert.equal(getImagesBucket("incoming-covers"), "mirlo-images");
+    describe("no prefix", () => {
+      it("routes all image traffic to mirlo-images", () => {
+        assert.equal(getImagesBucket(), "mirlo-images");
       });
 
       it("routes all audio traffic to mirlo-audio", () => {
         assert.equal(getAudioBucket(), "mirlo-audio");
-        assert.equal(getAudioBucket("incoming-track-audio"), "mirlo-audio");
       });
 
       it("routes all downloads traffic to mirlo-downloads", () => {
-        assert.equal(
-          getDownloadsBucket("trackgroup-format"),
-          "mirlo-downloads"
-        );
-        assert.equal(getDownloadsBucket("track-format"), "mirlo-downloads");
+        assert.equal(getDownloadsBucket(), "mirlo-downloads");
       });
     });
 
-    describe("consolidated mode (with prefix)", () => {
+    describe("with prefix", () => {
       beforeEach(() => setBucketConfig({ prefix: "staging-" }));
 
-      it("prepends prefix to all consolidated bucket names", () => {
-        assert.equal(getImagesBucket("anything"), "staging-mirlo-images");
+      it("prepends prefix to all bucket names", () => {
+        assert.equal(getImagesBucket(), "staging-mirlo-images");
         assert.equal(getAudioBucket(), "staging-mirlo-audio");
-        assert.equal(getDownloadsBucket("anything"), "staging-mirlo-downloads");
+        assert.equal(getDownloadsBucket(), "staging-mirlo-downloads");
       });
     });
   });
@@ -143,103 +115,19 @@ describe("minio bucket routing", () => {
     });
   });
 
-  describe("getImageFinalBucket", () => {
-    it("returns the correct final bucket name for each type", () => {
-      assert.equal(
-        getImageFinalBucket("artistAvatar"),
-        finalArtistAvatarBucket
-      );
-      assert.equal(
-        getImageFinalBucket("artistBackground"),
-        finalArtistBackgroundBucket
-      );
-      assert.equal(getImageFinalBucket("trackGroupCover"), finalCoversBucket);
-      assert.equal(getImageFinalBucket("image"), finalImageBucket);
-      assert.equal(getImageFinalBucket("postImage"), finalPostImageBucket);
+  describe("getImagePrefix", () => {
+    it("returns the key prefix for each type", () => {
+      assert.equal(getImagePrefix("artistAvatar"), artistAvatarPrefix);
+      assert.equal(getImagePrefix("artistBackground"), artistBackgroundPrefix);
+      assert.equal(getImagePrefix("trackGroupCover"), coversPrefix);
+      assert.equal(getImagePrefix("image"), rootImagePrefix);
+      assert.equal(getImagePrefix("postImage"), postImagePrefix);
     });
   });
 
-  // ── Image routing: legacy mode ───────────────────────────────────────────────
+  // ── Image routing ────────────────────────────────────────────────────────────
 
-  describe("image routing: legacy mode", () => {
-    it("uploadIncomingImageByType(artistAvatar) → incoming-artist-avatars with bare key", async () => {
-      await uploadIncomingImageByType(
-        "artistAvatar",
-        "abc123",
-        emptyReadable()
-      );
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, incomingArtistAvatarBucket);
-      assert.equal(key, "abc123");
-    });
-
-    it("downloadIncomingImageByType(artistAvatar) → incoming-artist-avatars with bare key", async () => {
-      await downloadIncomingImageByType("artistAvatar", "abc123");
-      const [bucket, key] = getObjectStub.firstCall.args;
-      assert.equal(bucket, incomingArtistAvatarBucket);
-      assert.equal(key, "abc123");
-    });
-
-    it("uploadOptimizedImageByType(artistAvatar) → artist-avatars with bare key", async () => {
-      await uploadOptimizedImageByType(
-        "artistAvatar",
-        "abc123-x500.webp",
-        Buffer.alloc(0)
-      );
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, finalArtistAvatarBucket);
-      assert.equal(key, "abc123-x500.webp");
-    });
-
-    it("removeIncomingImageByType(artistAvatar) → incoming-artist-avatars with bare key", async () => {
-      await removeIncomingImageByType("artistAvatar", "abc123");
-      const [bucket, key] = removeObjectStub.firstCall.args;
-      assert.equal(bucket, incomingArtistAvatarBucket);
-      assert.equal(key, "abc123");
-    });
-
-    it("uploadIncomingImageByType(trackGroupCover) → incoming-covers bucket", async () => {
-      await uploadIncomingImageByType(
-        "trackGroupCover",
-        "cover-id",
-        emptyReadable()
-      );
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, incomingCoversBucket);
-      assert.equal(key, "cover-id");
-    });
-
-    it("uploadOptimizedImageByType(trackGroupCover) → trackgroup-covers bucket", async () => {
-      await uploadOptimizedImageByType(
-        "trackGroupCover",
-        "cover-id-x1500.webp",
-        Buffer.alloc(0)
-      );
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, finalCoversBucket);
-      assert.equal(key, "cover-id-x1500.webp");
-    });
-
-    it("uploadIncomingImageByType(postImage) → post-images bucket (no separate incoming bucket)", async () => {
-      await uploadIncomingImageByType("postImage", "post-id", emptyReadable());
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, finalPostImageBucket);
-      assert.equal(key, "post-id");
-    });
-
-    it("uploadIncomingImageByType(image) → incoming-mirlo-images bucket", async () => {
-      await uploadIncomingImageByType("image", "img-id", emptyReadable());
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, incomingImageBucket);
-      assert.equal(key, "img-id");
-    });
-  });
-
-  // ── Image routing: consolidated mode ────────────────────────────────────────
-
-  describe("image routing: consolidated mode (no prefix)", () => {
-    beforeEach(() => setBucketConfig({ prefix: "" }));
-
+  describe("image routing (no prefix)", () => {
     it("uploadIncomingImageByType(artistAvatar) → mirlo-images / incoming/{prefix}/{id}", async () => {
       await uploadIncomingImageByType(
         "artistAvatar",
@@ -248,14 +136,14 @@ describe("minio bucket routing", () => {
       );
       const [bucket, key] = putObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `incoming/${finalArtistAvatarBucket}/abc123`);
+      assert.equal(key, `incoming/${artistAvatarPrefix}/abc123`);
     });
 
     it("downloadIncomingImageByType(artistAvatar) → mirlo-images / incoming/{prefix}/{id}", async () => {
       await downloadIncomingImageByType("artistAvatar", "abc123");
       const [bucket, key] = getObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `incoming/${finalArtistAvatarBucket}/abc123`);
+      assert.equal(key, `incoming/${artistAvatarPrefix}/abc123`);
     });
 
     it("uploadOptimizedImageByType(artistAvatar) → mirlo-images / {prefix}/{filename}", async () => {
@@ -266,14 +154,14 @@ describe("minio bucket routing", () => {
       );
       const [bucket, key] = putObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `${finalArtistAvatarBucket}/abc123-x500.webp`);
+      assert.equal(key, `${artistAvatarPrefix}/abc123-x500.webp`);
     });
 
     it("removeIncomingImageByType(artistAvatar) → mirlo-images / incoming/{prefix}/{id}", async () => {
       await removeIncomingImageByType("artistAvatar", "abc123");
       const [bucket, key] = removeObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `incoming/${finalArtistAvatarBucket}/abc123`);
+      assert.equal(key, `incoming/${artistAvatarPrefix}/abc123`);
     });
 
     it("uploadIncomingImageByType(postImage) → mirlo-images / {prefix}/{id}, where it's served from", async () => {
@@ -284,12 +172,12 @@ describe("minio bucket routing", () => {
       );
       const [bucket, key] = putObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `${finalPostImageBucket}/post-id.gif`);
+      assert.equal(key, `${postImagePrefix}/post-id.gif`);
     });
 
     it("uploadIncomingImageByType(image) → mirlo-images with NO path prefix (prefix: undefined)", async () => {
-      // The generic 'image' type has prefix: undefined — even in consolidated mode,
-      // images are stored at the bucket root without a path prefix.
+      // The generic 'image' type has prefix: undefined, so images are
+      // stored at the bucket root without a path prefix.
       await uploadIncomingImageByType("image", "img-id", emptyReadable());
       const [bucket, key] = putObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
@@ -315,7 +203,7 @@ describe("minio bucket routing", () => {
       );
       const [bucket, key] = putObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `incoming/${finalCoversBucket}/cover-id`);
+      assert.equal(key, `incoming/${coversPrefix}/cover-id`);
     });
 
     it("uploadOptimizedImageByType(trackGroupCover) → mirlo-images / {prefix}/{filename}", async () => {
@@ -326,11 +214,11 @@ describe("minio bucket routing", () => {
       );
       const [bucket, key] = putObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `${finalCoversBucket}/cover-id-x1500.webp`);
+      assert.equal(key, `${coversPrefix}/cover-id-x1500.webp`);
     });
   });
 
-  describe("image routing: consolidated mode (with prefix)", () => {
+  describe("image routing (with prefix)", () => {
     beforeEach(() => setBucketConfig({ prefix: "staging-" }));
 
     it("uploadIncomingImageByType(artistAvatar) → staging-mirlo-images with correct key", async () => {
@@ -341,7 +229,7 @@ describe("minio bucket routing", () => {
       );
       const [bucket, key] = putObjectStub.firstCall.args;
       assert.equal(bucket, "staging-mirlo-images");
-      assert.equal(key, `incoming/${finalArtistAvatarBucket}/abc123`);
+      assert.equal(key, `incoming/${artistAvatarPrefix}/abc123`);
     });
 
     it("uploadOptimizedImageByType(trackGroupCover) → staging-mirlo-images with correct key", async () => {
@@ -352,7 +240,7 @@ describe("minio bucket routing", () => {
       );
       const [bucket, key] = putObjectStub.firstCall.args;
       assert.equal(bucket, "staging-mirlo-images");
-      assert.equal(key, `${finalCoversBucket}/cover-id-x1500.webp`);
+      assert.equal(key, `${coversPrefix}/cover-id-x1500.webp`);
     });
 
     it("uploadIncomingImageByType(image) → staging-mirlo-images with NO path prefix", async () => {
@@ -365,25 +253,7 @@ describe("minio bucket routing", () => {
 
   // ── Audio routing ────────────────────────────────────────────────────────────
 
-  describe("audio routing: legacy mode", () => {
-    it("uploadIncomingAudio → incoming-track-audio with bare key", async () => {
-      await uploadIncomingAudio("audio-id", emptyReadable());
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, incomingAudioBucket);
-      assert.equal(key, "audio-id");
-    });
-
-    it("uploadAudioHlsFile → track-audio with id/filename key", async () => {
-      await uploadAudioHlsFile("audio-id", "segment.ts", emptyReadable());
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, finalAudioBucket);
-      assert.equal(key, "audio-id/segment.ts");
-    });
-  });
-
-  describe("audio routing: consolidated mode", () => {
-    beforeEach(() => setBucketConfig({ prefix: "" }));
-
+  describe("audio routing", () => {
     it("uploadIncomingAudio → mirlo-audio with incoming/ key prefix", async () => {
       await uploadIncomingAudio("audio-id", emptyReadable());
       const [bucket, key] = putObjectStub.firstCall.args;
@@ -401,25 +271,7 @@ describe("minio bucket routing", () => {
 
   // ── Zip routing ──────────────────────────────────────────────────────────────
 
-  describe("zip routing: legacy mode", () => {
-    it("uploadZip(trackGroup) → trackgroup-format / {id}/{format}.zip", async () => {
-      await uploadZip("trackGroup", 42, "mp3-320", emptyReadable());
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, trackGroupFormatBucket);
-      assert.equal(key, "42/mp3-320.zip");
-    });
-
-    it("uploadZip(track) → track-format / {id}/{format}.zip", async () => {
-      await uploadZip("track", 7, "flac", emptyReadable());
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, trackFormatBucket);
-      assert.equal(key, "7/flac.zip");
-    });
-  });
-
-  describe("zip routing: consolidated mode", () => {
-    beforeEach(() => setBucketConfig({ prefix: "" }));
-
+  describe("zip routing", () => {
     it("uploadZip(trackGroup) → mirlo-downloads / trackgroup/{id}/{format}.zip", async () => {
       await uploadZip("trackGroup", 42, "mp3-320", emptyReadable());
       const [bucket, key] = putObjectStub.firstCall.args;
@@ -437,18 +289,7 @@ describe("minio bucket routing", () => {
 
   // ── Downloadable content routing ─────────────────────────────────────────────
 
-  describe("downloadable content routing: legacy mode", () => {
-    it("getDownloadableContentBuffer → mirlo-downloadable-content with bare key", async () => {
-      await getDownloadableContentBuffer("content-id");
-      const [bucket, key] = getObjectStub.firstCall.args;
-      assert.equal(bucket, downloadableContentBucket);
-      assert.equal(key, "content-id");
-    });
-  });
-
-  describe("downloadable content routing: consolidated mode", () => {
-    beforeEach(() => setBucketConfig({ prefix: "" }));
-
+  describe("downloadable content routing", () => {
     it("getDownloadableContentBuffer → mirlo-downloads / content/{id}", async () => {
       await getDownloadableContentBuffer("content-id");
       const [bucket, key] = getObjectStub.firstCall.args;
@@ -458,39 +299,23 @@ describe("minio bucket routing", () => {
   });
 
   describe("getCoverBuffer", () => {
-    it("legacy mode: reads from finalCoversBucket with bare key", async () => {
-      await getCoverBuffer("cover-id", "webp");
-      const [bucket, key] = getObjectStub.firstCall.args;
-      assert.equal(bucket, finalCoversBucket);
-      assert.equal(key, "cover-id-x1500.webp");
-    });
-
-    it("legacy mode: reads jpg from finalCoversBucket with bare key", async () => {
-      await getCoverBuffer("cover-id", "jpg");
-      const [bucket, key] = getObjectStub.firstCall.args;
-      assert.equal(bucket, finalCoversBucket);
-      assert.equal(key, "cover-id-x1500.jpg");
-    });
-
-    describe("consolidated mode (no prefix)", () => {
-      beforeEach(() => setBucketConfig({ prefix: "" }));
-
+    describe("no prefix", () => {
       it("reads from mirlo-images with path-prefixed key", async () => {
         await getCoverBuffer("cover-id", "webp");
         const [bucket, key] = getObjectStub.firstCall.args;
         assert.equal(bucket, "mirlo-images");
-        assert.equal(key, `${finalCoversBucket}/cover-id-x1500.webp`);
+        assert.equal(key, `${coversPrefix}/cover-id-x1500.webp`);
       });
     });
 
-    describe("consolidated mode (with prefix)", () => {
+    describe("with prefix", () => {
       beforeEach(() => setBucketConfig({ prefix: "staging-" }));
 
       it("reads from staging-mirlo-images with path-prefixed key", async () => {
         await getCoverBuffer("cover-id", "webp");
         const [bucket, key] = getObjectStub.firstCall.args;
         assert.equal(bucket, "staging-mirlo-images");
-        assert.equal(key, `${finalCoversBucket}/cover-id-x1500.webp`);
+        assert.equal(key, `${coversPrefix}/cover-id-x1500.webp`);
       });
     });
   });
@@ -513,37 +338,7 @@ describe("minio bucket routing", () => {
       removeObjectsStub = sinon.stub(minioClient!, "removeObjects").resolves();
     });
 
-    describe("legacy mode", () => {
-      it("removeAudioFiles uses finalAudioBucket with audioId prefix", async () => {
-        await removeAudioFiles("audio-id");
-        assert.equal(listObjectsV2Stub.firstCall.args[0], finalAudioBucket);
-        assert.equal(listObjectsV2Stub.firstCall.args[1], "audio-id");
-      });
-
-      it("removeAudioFiles also removes the incoming upload", async () => {
-        await removeAudioFiles("audio-id");
-        assert.ok(removeObjectStub.calledWith(incomingAudioBucket, "audio-id"));
-      });
-
-      it("removeCoverImages uses finalCoversBucket with coverId prefix", async () => {
-        await removeCoverImages("cover-id");
-        assert.equal(listObjectsV2Stub.firstCall.args[0], finalCoversBucket);
-        assert.equal(listObjectsV2Stub.firstCall.args[1], "cover-id");
-      });
-
-      it("removeDownloadableContent uses downloadableContentBucket with contentId prefix", async () => {
-        await removeDownloadableContent("content-id");
-        assert.equal(
-          listObjectsV2Stub.firstCall.args[0],
-          downloadableContentBucket
-        );
-        assert.equal(listObjectsV2Stub.firstCall.args[1], "content-id");
-      });
-    });
-
-    describe("consolidated mode", () => {
-      beforeEach(() => setBucketConfig({ prefix: "" }));
-
+    describe("no prefix", () => {
       it("removeAudioFiles uses mirlo-audio with audioId prefix", async () => {
         await removeAudioFiles("audio-id");
         assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-audio");
@@ -562,7 +357,7 @@ describe("minio bucket routing", () => {
         assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-images");
         assert.equal(
           listObjectsV2Stub.firstCall.args[1],
-          `${finalCoversBucket}/cover-id`
+          `${coversPrefix}/cover-id`
         );
       });
 
@@ -573,7 +368,7 @@ describe("minio bucket routing", () => {
       });
     });
 
-    describe("consolidated mode (with prefix)", () => {
+    describe("with prefix", () => {
       beforeEach(() => setBucketConfig({ prefix: "staging-" }));
 
       it("removeAudioFiles uses staging-mirlo-audio", async () => {

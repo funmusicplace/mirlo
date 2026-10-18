@@ -1822,8 +1822,6 @@
     "smtpUser": "Username",
     "smtpPassword": "Password",
     "storage": "Storage",
-    "useConsolidatedBuckets": "Use consolidated bucket mode",
-    "useConsolidatedBucketsHint": "Off keeps legacy mode (separate per-type buckets): leave off for existing installs unless you've migrated their data. On switches to the consolidated 3-bucket layout: mirlo-audio, mirlo-images, mirlo-downloads.",
     "bucketPrefix": "Bucket prefix",
     "bucketPrefixPlaceholder": "(optional prefix)",
     "policies": "Policies",

@@ -186,8 +186,7 @@ const checkPublicAddress = async (): Promise<
 };
 
 const checkStorage = async (): Promise<SetupStatus["checks"]["storage"]> => {
-  const { imageBuckets, audioBuckets, downloadBuckets } = currentBuckets();
-  const buckets = [...imageBuckets, ...audioBuckets, ...downloadBuckets];
+  const buckets = currentBuckets();
   const results = await Promise.all(
     buckets.map((bucket) =>
       bucketExists(bucket).catch((e) => {

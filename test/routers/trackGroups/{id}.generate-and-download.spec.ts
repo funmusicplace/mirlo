@@ -9,9 +9,9 @@ import prisma from "@mirlo/prisma";
 import generateAlbumJob from "../../../src/jobs/generate-album";
 import {
   createBucketIfNotExists,
-  finalAudioBucket,
+  getAudioBucket,
   getBufferFromStorage,
-  trackGroupFormatBucket,
+  getDownloadsBucket,
 } from "../../../src/utils/minio";
 import {
   clearTables,
@@ -29,8 +29,8 @@ describe("trackGroups/{id}: generate-album job + download route", () => {
   beforeEach(async () => {
     try {
       await clearTables();
-      await createBucketIfNotExists(finalAudioBucket);
-      await createBucketIfNotExists(trackGroupFormatBucket);
+      await createBucketIfNotExists(getAudioBucket());
+      await createBucketIfNotExists(getDownloadsBucket());
     } catch (e) {
       console.error(e);
     }
@@ -57,13 +57,12 @@ describe("trackGroups/{id}: generate-album job + download route", () => {
         trackGroup: tgWithCover,
         format: "wav",
         tracks: [{ ...track, audio, trackArtists: [] }],
-        destinationBucket: trackGroupFormatBucket,
       })
     );
 
     const { buffer } = await getBufferFromStorage(
-      trackGroupFormatBucket,
-      `${tg.id}/wav.zip`
+      getDownloadsBucket(),
+      `trackgroup/${tg.id}/wav.zip`
     );
     assert(buffer, "Zip should have been written to storage");
 
@@ -105,13 +104,12 @@ describe("trackGroups/{id}: generate-album job + download route", () => {
         trackGroup: tgWithCover,
         format: "wav",
         tracks,
-        destinationBucket: trackGroupFormatBucket,
       })
     );
 
     const { buffer } = await getBufferFromStorage(
-      trackGroupFormatBucket,
-      `${tg.id}/wav.zip`
+      getDownloadsBucket(),
+      `trackgroup/${tg.id}/wav.zip`
     );
     assert(buffer, "Zip should have been written to storage");
     const zip = await JSZip.loadAsync(buffer);
@@ -143,7 +141,6 @@ describe("trackGroups/{id}: generate-album job + download route", () => {
         trackGroup: tgWithCover,
         format: "wav",
         tracks: [{ ...track, audio, trackArtists: [] }],
-        destinationBucket: trackGroupFormatBucket,
       })
     );
 

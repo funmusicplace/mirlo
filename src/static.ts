@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-import { getBufferBasedOnStat, statFile } from "./utils/minio";
+import { getBufferBasedOnStat, getImagesBucket, statFile } from "./utils/minio";
 
 export const serveStatic = async (
   req: Request,
@@ -8,8 +8,13 @@ export const serveStatic = async (
   next: NextFunction
 ) => {
   const bucket = req.params.bucket;
+  if (bucket !== getImagesBucket()) {
+    res.status(404);
+    next();
+    return;
+  }
   // The object key is everything after the bucket segment. It can't be a
-  // single route param because consolidated-mode keys contain slashes
+  // single route param because keys contain slashes
   // (e.g. trackgroup-covers/<id>-x600.webp).
   let filename: string;
   try {

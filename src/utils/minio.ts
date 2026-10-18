@@ -33,83 +33,39 @@ import logger from "../logger";
 // caller's point of view. Bucket layout is documented in
 // docs/hosting/object-storage.md.
 
-export const incomingArtistBackgroundBucket = "incoming-artist-banners";
-export const finalArtistBackgroundBucket = "artist-banners";
+export const artistBackgroundPrefix = "artist-banners";
+export const artistAvatarPrefix = "artist-avatars";
+export const coversPrefix = "trackgroup-covers";
+export const merchImagePrefix = "merch-images";
+export const postImagePrefix = "post-images";
+export const rootImagePrefix = "";
 
-export const incomingArtistAvatarBucket = "incoming-artist-avatars";
-export const finalArtistAvatarBucket = "artist-avatars";
-
-export const incomingCoversBucket = "incoming-covers";
-export const finalCoversBucket = "trackgroup-covers";
-
-export const incomingMerchImageBucket = "incoming-merch-images";
-export const finalMerchImageBucket = "merch-images";
-
-export const finalPostImageBucket = "post-images";
-
-export const incomingAudioBucket = "incoming-track-audio";
-export const finalAudioBucket = "track-audio";
-
-export const trackGroupFormatBucket = "trackgroup-format";
-export const trackFormatBucket = "track-format";
-
-export const downloadableContentBucket = "mirlo-downloadable-content";
-export const incomingImageBucket = "incoming-mirlo-images";
-export const finalImageBucket = "mirlo-images";
-
-// null = legacy mode: use per-type bucket constants above (for https://mirlo.space instance) TODO here is to remove that.
-// Set = consolidated mode: 3 buckets with path prefixes.
 export type BucketConfig = { prefix: string };
+export const DEFAULT_BUCKET_CONFIG: BucketConfig = { prefix: "" };
+
+export const isBucketConfig = (value: unknown): value is BucketConfig =>
+  typeof value === "object" &&
+  value !== null &&
+  typeof (value as BucketConfig).prefix === "string";
 
 // Per-image-type routing table.
-// incoming: legacy bucket for uploads before optimization; final: legacy bucket after.
-// prefix: path prefix within mirlo-images in consolidated mode (= final bucket name, or
-//         undefined for the generic "image" type which sits at the bucket root).
+// prefix: key prefix within the images bucket (empty for the generic
+//         "image" type, which sits at the bucket root).
 // queue: whether to add a BullMQ optimize-image job after upload.
 const imageTypeBuckets = {
-  artistAvatar: {
-    incoming: incomingArtistAvatarBucket,
-    final: finalArtistAvatarBucket,
-    prefix: finalArtistAvatarBucket as string | undefined,
-    queue: true,
-  },
-  artistBackground: {
-    incoming: incomingArtistBackgroundBucket,
-    final: finalArtistBackgroundBucket,
-    prefix: finalArtistBackgroundBucket as string | undefined,
-    queue: true,
-  },
-  trackGroupCover: {
-    incoming: incomingCoversBucket,
-    final: finalCoversBucket,
-    prefix: finalCoversBucket as string | undefined,
-    queue: true,
-  },
-  merch: {
-    incoming: incomingMerchImageBucket,
-    final: finalMerchImageBucket,
-    prefix: finalMerchImageBucket as string | undefined,
-    queue: true,
-  },
-  postImage: {
-    incoming: finalPostImageBucket,
-    final: finalPostImageBucket,
-    prefix: finalPostImageBucket as string | undefined,
-    queue: false,
-  },
-  image: {
-    incoming: incomingImageBucket,
-    final: finalImageBucket,
-    prefix: undefined as string | undefined,
-    queue: true,
-  },
+  artistAvatar: { prefix: artistAvatarPrefix, queue: true },
+  artistBackground: { prefix: artistBackgroundPrefix, queue: true },
+  trackGroupCover: { prefix: coversPrefix, queue: true },
+  merch: { prefix: merchImagePrefix, queue: true },
+  postImage: { prefix: postImagePrefix, queue: false },
+  image: { prefix: rootImagePrefix, queue: true },
 };
 export type ImageType = keyof typeof imageTypeBuckets;
 
-let _bucketConfig: BucketConfig | null = null;
+let _bucketConfig: BucketConfig = DEFAULT_BUCKET_CONFIG;
 const _ensuredBuckets = new Set<string>();
 
-export const setBucketConfig = (config: BucketConfig | null) => {
+export const setBucketConfig = (config: BucketConfig) => {
   _bucketConfig = config;
   _ensuredBuckets.clear();
 };
@@ -121,18 +77,14 @@ const ensureBucketCached = async (bucket: string, makePublic?: boolean) => {
   }
 };
 
-const isConsolidatedMode = (): boolean => _bucketConfig !== null;
+export const getImagesBucket = (): string =>
+  `${_bucketConfig.prefix}mirlo-images`;
 
-export const getImagesBucket = (legacyFallback: string): string =>
-  _bucketConfig ? `${_bucketConfig.prefix}mirlo-images` : legacyFallback;
+export const getAudioBucket = (): string =>
+  `${_bucketConfig.prefix}mirlo-audio`;
 
-export const getAudioBucket = (
-  legacyFallback: string = finalAudioBucket
-): string =>
-  _bucketConfig ? `${_bucketConfig.prefix}mirlo-audio` : legacyFallback;
-
-export const getDownloadsBucket = (legacyFallback: string): string =>
-  _bucketConfig ? `${_bucketConfig.prefix}mirlo-downloads` : legacyFallback;
+export const getDownloadsBucket = (): string =>
+  `${_bucketConfig.prefix}mirlo-downloads`;
 
 const {
   LOCAL_S3_HOST = "",
@@ -957,36 +909,25 @@ export const removeObjectsFromBucket = async (
 
 // ── Audio ─────────────────────────────────────────────────────────────────────
 
-const audioIncomingKey = (audioId: string) =>
-  isConsolidatedMode() ? `incoming/${audioId}` : audioId;
+const audioIncomingKey = (audioId: string) => `incoming/${audioId}`;
 
 export const uploadIncomingAudio = async (
   audioId: string,
   stream: Readable
 ) => {
-  const bucket = getAudioBucket(incomingAudioBucket);
+  const bucket = getAudioBucket();
   await ensureBucketCached(bucket);
   return uploadWrapper(bucket, audioIncomingKey(audioId), stream);
 };
 
 export const downloadIncomingAudio = (audioId: string, destPath: string) =>
-  getFile(
-    getAudioBucket(incomingAudioBucket),
-    audioIncomingKey(audioId),
-    destPath
-  );
+  getFile(getAudioBucket(), audioIncomingKey(audioId), destPath);
 
 export const getAudioUploadUrl = (audioId: string) =>
-  getPresignedUploadUrl(
-    getAudioBucket(incomingAudioBucket),
-    audioIncomingKey(audioId)
-  );
+  getPresignedUploadUrl(getAudioBucket(), audioIncomingKey(audioId));
 
 export const removeIncomingAudio = (audioId: string) =>
-  removeObjectFromStorage(
-    getAudioBucket(incomingAudioBucket),
-    audioIncomingKey(audioId)
-  );
+  removeObjectFromStorage(getAudioBucket(), audioIncomingKey(audioId));
 
 export const downloadOriginalAudio = (
   audioId: string,
@@ -1044,7 +985,7 @@ export const forEachStoredAudioIdPage = async (
 ) => {
   const listings = [
     {
-      bucket: getAudioBucket(incomingAudioBucket),
+      bucket: getAudioBucket(),
       prefix: audioIncomingKey(""),
     },
     { bucket: getAudioBucket(), prefix: "" },
@@ -1078,15 +1019,20 @@ const imageContentTypes: Record<string, string> = {
 const imageContentType = (key: string): string | undefined =>
   imageContentTypes[key.split(".").pop()?.toLowerCase() ?? ""];
 
-export const getImageFinalBucket = (imageType: ImageType): string =>
-  imageTypeBuckets[imageType].final;
+export const getImagePrefix = (imageType: ImageType): string =>
+  imageTypeBuckets[imageType].prefix;
 
 export const imageTypeUsesQueue = (imageType: ImageType): boolean =>
   imageTypeBuckets[imageType].queue;
 
+const imageKeyPrefix = (imageType: ImageType) => {
+  const prefix = getImagePrefix(imageType);
+  return prefix ? `${prefix}/` : "";
+};
+
 const incomingImageKey = (imageType: ImageType, fileName: string) => {
   const { prefix, queue } = imageTypeBuckets[imageType];
-  if (!isConsolidatedMode() || !prefix) return fileName;
+  if (!prefix) return fileName;
   return queue ? `incoming/${prefix}/${fileName}` : `${prefix}/${fileName}`;
 };
 
@@ -1096,7 +1042,7 @@ export const uploadIncomingImageByType = async (
   stream: Readable,
   options?: { contentType?: string }
 ) => {
-  const bucket = getImagesBucket(imageTypeBuckets[imageType].incoming);
+  const bucket = getImagesBucket();
   await ensureBucketCached(bucket, true);
   return uploadWrapper(
     bucket,
@@ -1111,7 +1057,7 @@ export const downloadIncomingImageByType = (
   imageId: string
 ) => {
   return getBufferFromStorage(
-    getImagesBucket(imageTypeBuckets[imageType].incoming),
+    getImagesBucket(),
     incomingImageKey(imageType, imageId)
   );
 };
@@ -1122,12 +1068,14 @@ export const uploadOptimizedImageByType = async (
   buffer: Buffer,
   options?: { contentType?: string; cacheControl?: string }
 ) => {
-  const { final, prefix } = imageTypeBuckets[imageType];
-  const bucket = getImagesBucket(final);
+  const bucket = getImagesBucket();
   await ensureBucketCached(bucket, true);
-  const key =
-    isConsolidatedMode() && prefix ? `${prefix}/${fileName}` : fileName;
-  return uploadWrapper(bucket, key, buffer, options);
+  return uploadWrapper(
+    bucket,
+    `${imageKeyPrefix(imageType)}${fileName}`,
+    buffer,
+    options
+  );
 };
 
 export const removeIncomingImageByType = (
@@ -1135,33 +1083,23 @@ export const removeIncomingImageByType = (
   imageId: string
 ) => {
   return removeObjectFromStorage(
-    getImagesBucket(imageTypeBuckets[imageType].incoming),
+    getImagesBucket(),
     incomingImageKey(imageType, imageId)
   );
 };
 
-export const removeImagesByType = (imageType: ImageType, imageId: string) => {
-  const { final, prefix } = imageTypeBuckets[imageType];
-  return removeObjectsFromBucket(
-    getImagesBucket(final),
-    isConsolidatedMode() && prefix ? `${prefix}/${imageId}` : imageId
+export const removeImagesByType = (imageType: ImageType, imageId: string) =>
+  removeObjectsFromBucket(
+    getImagesBucket(),
+    `${imageKeyPrefix(imageType)}${imageId}`
   );
-};
-
-const imageKeyPrefix = (imageType: ImageType) => {
-  const { prefix } = imageTypeBuckets[imageType];
-  return isConsolidatedMode() && prefix ? `${prefix}/` : "";
-};
 
 export const listImagesByType = async (
   imageType: ImageType,
   imageId: string
 ) => {
   const prefix = imageKeyPrefix(imageType);
-  const objects = await getObjectList(
-    getImagesBucket(imageTypeBuckets[imageType].final),
-    `${prefix}${imageId}`
-  );
+  const objects = await getObjectList(getImagesBucket(), `${prefix}${imageId}`);
   return objects.map((o) => o.name!.slice(prefix.length));
 };
 
@@ -1170,22 +1108,21 @@ export const copyImagesBetweenTypes = async (
   toType: ImageType,
   imageId: string
 ) => {
-  const fromBucket = getImagesBucket(imageTypeBuckets[fromType].final);
-  const toBucket = getImagesBucket(imageTypeBuckets[toType].final);
+  const bucket = getImagesBucket();
   const fromPrefix = imageKeyPrefix(fromType);
   const toPrefix = imageKeyPrefix(toType);
 
   const names = await listImagesByType(fromType, imageId);
   if (names.length > 0) {
-    await ensureBucketCached(toBucket, true);
+    await ensureBucketCached(bucket, true);
   }
 
   const copied: string[] = [];
   for (const name of names) {
     await copyObjectInStorage(
-      fromBucket,
+      bucket,
       `${fromPrefix}${name}`,
-      toBucket,
+      bucket,
       `${toPrefix}${name}`,
       { contentType: imageContentType(name) }
     );
@@ -1196,10 +1133,8 @@ export const copyImagesBetweenTypes = async (
 
 export const fixStoredImageContentTypes = async () => {
   const summary = { checked: 0, fixed: 0, failed: 0 };
-  if (!isConsolidatedMode()) return summary;
-
   const client = storageS3Client();
-  const bucket = getImagesBucket(finalImageBucket);
+  const bucket = getImagesBucket();
 
   await forEachObjectPage(bucket, async (keys) => {
     const images = keys.filter(
@@ -1235,29 +1170,22 @@ export const fixStoredImageContentTypes = async () => {
 
 export const getCoverBuffer = (coverId: string, ext: "webp" | "jpg") =>
   getBufferFromStorage(
-    getImagesBucket(finalCoversBucket),
-    `${isConsolidatedMode() ? `${finalCoversBucket}/` : ""}${coverId}-x1500.${ext}`
+    getImagesBucket(),
+    `${imageKeyPrefix("trackGroupCover")}${coverId}-x1500.${ext}`
   );
 
 export const removeCoverImages = (coverId: string) =>
-  removeObjectsFromBucket(
-    getImagesBucket(finalCoversBucket),
-    isConsolidatedMode() ? `${finalCoversBucket}/${coverId}` : coverId
-  );
+  removeImagesByType("trackGroupCover", coverId);
 
 // ── Downloadable content ──────────────────────────────────────────────────────
 
-const contentKey = (id: string) =>
-  isConsolidatedMode() ? `content/${id}` : id;
+const contentKey = (id: string) => `content/${id}`;
 
 export const getDownloadableContentUploadUrl = (id: string) =>
-  getPresignedUploadUrl(
-    getDownloadsBucket(downloadableContentBucket),
-    contentKey(id)
-  );
+  getPresignedUploadUrl(getDownloadsBucket(), contentKey(id));
 
 export const statDownloadableContent = (id: string) =>
-  statFile(getDownloadsBucket(downloadableContentBucket), contentKey(id));
+  statFile(getDownloadsBucket(), contentKey(id));
 
 export const getDownloadableContentMeta = async (
   id: string
@@ -1269,41 +1197,25 @@ export const getDownloadableContentMeta = async (
 export const getDownloadableContentBufferFromStat = (
   id: string,
   stat?: HeadObjectCommandOutput
-) =>
-  getBufferBasedOnStat(
-    getDownloadsBucket(downloadableContentBucket),
-    contentKey(id),
-    stat
-  );
+) => getBufferBasedOnStat(getDownloadsBucket(), contentKey(id), stat);
 
 export const getDownloadableContentBuffer = (id: string) =>
-  getBufferFromStorage(
-    getDownloadsBucket(downloadableContentBucket),
-    contentKey(id)
-  );
+  getBufferFromStorage(getDownloadsBucket(), contentKey(id));
 
 export const removeDownloadableContent = (id: string) =>
-  removeObjectsFromBucket(
-    getDownloadsBucket(downloadableContentBucket),
-    contentKey(id)
-  );
+  removeObjectsFromBucket(getDownloadsBucket(), contentKey(id));
 
 // ── Zips ──────────────────────────────────────────────────────────────────────
 
-const zipBucket = (type: "track" | "trackGroup") =>
-  type === "track"
-    ? getDownloadsBucket(trackFormatBucket)
-    : getDownloadsBucket(trackGroupFormatBucket);
-
 const zipTypeFolder = (type: "track" | "trackGroup") =>
-  isConsolidatedMode() ? `${type === "track" ? "track" : "trackgroup"}/` : "";
+  type === "track" ? "track/" : "trackgroup/";
 
 // The trailing slash keeps id 12 from matching 123 when used as a prefix.
 const zipFolder = (type: "track" | "trackGroup", id: number) =>
   `${zipTypeFolder(type)}${id}/`;
 
 export const zipRootPath = (type: "track" | "trackGroup") =>
-  `${zipBucket(type)}/${zipTypeFolder(type)}`.replace(/\/$/, "");
+  `${getDownloadsBucket()}/${zipTypeFolder(type)}`.replace(/\/$/, "");
 
 const zipKey = (type: "track" | "trackGroup", id: number, format: string) =>
   `${zipFolder(type, id)}${format}.zip`;
@@ -1312,7 +1224,7 @@ export const statZip = (
   type: "track" | "trackGroup",
   id: number,
   format: string
-) => statFile(zipBucket(type), zipKey(type, id, format));
+) => statFile(getDownloadsBucket(), zipKey(type, id, format));
 
 export const zipExists = async (
   type: "track" | "trackGroup",
@@ -1327,7 +1239,7 @@ export const streamZip = (
   type: "track" | "trackGroup",
   id: number,
   format: string
-) => getReadStream(zipBucket(type), zipKey(type, id, format));
+) => getReadStream(getDownloadsBucket(), zipKey(type, id, format));
 
 export const presignZip = (
   type: "track" | "trackGroup",
@@ -1335,7 +1247,11 @@ export const presignZip = (
   format: string,
   options?: Parameters<typeof getPresignedDownloadUrl>[2]
 ) =>
-  getPresignedDownloadUrl(zipBucket(type), zipKey(type, id, format), options);
+  getPresignedDownloadUrl(
+    getDownloadsBucket(),
+    zipKey(type, id, format),
+    options
+  );
 
 export const uploadZip = async (
   type: "track" | "trackGroup",
@@ -1343,57 +1259,23 @@ export const uploadZip = async (
   format: string,
   stream: Readable
 ) => {
-  const bucket = zipBucket(type);
+  const bucket = getDownloadsBucket();
   await ensureBucketCached(bucket);
   return uploadWrapper(bucket, zipKey(type, id, format), stream);
 };
 
 // Removes every cached format of a zip.
 export const removeZips = (type: "track" | "trackGroup", id: number) =>
-  removeObjectsFromBucket(zipBucket(type), zipFolder(type, id));
+  removeObjectsFromBucket(getDownloadsBucket(), zipFolder(type, id));
 
 export const removeAllZips = (type: "track" | "trackGroup") =>
-  removeObjectsFromBucket(zipBucket(type), zipTypeFolder(type));
+  removeObjectsFromBucket(getDownloadsBucket(), zipTypeFolder(type));
 
-const allLegacyBuckets = [
-  incomingArtistBackgroundBucket,
-  finalArtistBackgroundBucket,
-  incomingArtistAvatarBucket,
-  finalArtistAvatarBucket,
-  incomingCoversBucket,
-  finalCoversBucket,
-  incomingMerchImageBucket,
-  finalMerchImageBucket,
-  finalPostImageBucket,
-  incomingAudioBucket,
-  finalAudioBucket,
-  trackGroupFormatBucket,
-  trackFormatBucket,
-  downloadableContentBucket,
-  incomingImageBucket,
-  finalImageBucket,
+export const currentBuckets = () => [
+  getImagesBucket(),
+  getAudioBucket(),
+  getDownloadsBucket(),
 ];
-
-export const currentBuckets = () => {
-  const imageBuckets = new Set<string>();
-  Object.values(imageTypeBuckets).forEach(({ incoming, final }) => {
-    imageBuckets.add(getImagesBucket(incoming));
-    imageBuckets.add(getImagesBucket(final));
-  });
-
-  const audioBuckets = new Set([
-    getAudioBucket(incomingAudioBucket),
-    getAudioBucket(finalAudioBucket),
-  ]);
-
-  const downloadBuckets = new Set([
-    getDownloadsBucket(downloadableContentBucket),
-    getDownloadsBucket(trackFormatBucket),
-    getDownloadsBucket(trackGroupFormatBucket),
-  ]);
-
-  return { imageBuckets, audioBuckets, downloadBuckets };
-};
 
 export const bucketExists = async (bucket: string): Promise<boolean> => {
   if (backendStorage === "backblaze" && backblazeClient) {
@@ -1407,38 +1289,12 @@ export const bucketExists = async (bucket: string): Promise<boolean> => {
 };
 
 export const ensureAllBucketsExist = async () => {
-  const { imageBuckets, audioBuckets, downloadBuckets } = currentBuckets();
-
-  await Promise.all([
-    ...Array.from(imageBuckets).map((b) =>
-      ensureBucketCached(b, true).catch((e) => {
-        logger.error(`Failed to eagerly create image bucket ${b}`);
+  await Promise.all(
+    currentBuckets().map((b) =>
+      ensureBucketCached(b, b === getImagesBucket()).catch((e) => {
+        logger.error(`Failed to eagerly create bucket ${b}`);
         logger.error(e);
       })
-    ),
-    ...Array.from(audioBuckets).map((b) =>
-      ensureBucketCached(b).catch((e) => {
-        logger.error(`Failed to eagerly create audio bucket ${b}`);
-        logger.error(e);
-      })
-    ),
-    ...Array.from(downloadBuckets).map((b) =>
-      ensureBucketCached(b).catch((e) => {
-        logger.error(`Failed to eagerly create downloads bucket ${b}`);
-        logger.error(e);
-      })
-    ),
-    // Local only: also give the other layout's buckets a CORS policy, so a
-    // browser preflight can't land on a CORS-less bucket. Cheap and
-    // idempotent — ensureBucketCached short-circuits ones already done, and
-    // the names above overlap with the current layout's.
-    ...(backendStorage === "minio"
-      ? allLegacyBuckets.map((b) =>
-          ensureBucketCached(b).catch((e) => {
-            logger.error(`Failed to ensure CORS on local bucket ${b}`);
-            logger.error(e);
-          })
-        )
-      : []),
-  ]);
+    )
+  );
 };

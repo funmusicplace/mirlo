@@ -1,9 +1,9 @@
 import { addSizesToImage } from "../utils/artist";
 import { generateFullStaticImageUrl } from "../utils/images";
 import {
-  finalArtistAvatarBucket,
-  finalCoversBucket,
-  finalPostImageBucket,
+  artistAvatarPrefix,
+  coversPrefix,
+  postImagePrefix,
 } from "../utils/minio";
 
 import {
@@ -70,8 +70,7 @@ export const serializeNotification = <T extends object>(
 
   const remapAvatar = (
     avatar: { url: string[]; profileId?: number } | null | undefined
-  ) =>
-    renameProfileIdToArtistId(addSizesToImage(finalArtistAvatarBucket, avatar));
+  ) => renameProfileIdToArtistId(addSizesToImage(artistAvatarPrefix, avatar));
 
   return {
     ...rest,
@@ -115,7 +114,7 @@ export const serializeNotification = <T extends object>(
             artistId: tgProfileId,
             artist: tgProfile ? omitApPrivateKey(tgProfile) : tgProfile,
             currency: tgProfile?.user?.currency ?? "usd",
-            cover: addSizesToImage(finalCoversBucket, trackGroup.cover),
+            cover: addSizesToImage(coversPrefix, trackGroup.cover),
           };
         })()
       : null,
@@ -143,7 +142,7 @@ export const serializeNotification = <T extends object>(
                   ...post.featuredImage,
                   src: generateFullStaticImageUrl(
                     post.featuredImage.id,
-                    finalPostImageBucket,
+                    postImagePrefix,
                     post.featuredImage.extension
                   ),
                 }

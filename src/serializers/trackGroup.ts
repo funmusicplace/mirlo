@@ -13,7 +13,7 @@ import {
 
 import { addSizesToImage } from "../utils/artist";
 import { generateFullStaticImageUrl } from "../utils/images";
-import { finalArtistAvatarBucket, finalCoversBucket } from "../utils/minio";
+import { artistAvatarPrefix, coversPrefix } from "../utils/minio";
 import { isTrackPlayableNested } from "../utils/trackPlayability";
 
 import { serializeMerch } from "./merch";
@@ -110,7 +110,7 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
           ...omitApPrivateKey(owner),
           avatar: owner.avatar
             ? renameProfileIdToArtistId(
-                addSizesToImage(finalArtistAvatarBucket, owner.avatar)
+                addSizesToImage(artistAvatarPrefix, owner.avatar)
               )
             : undefined,
         }
@@ -139,7 +139,7 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
       })
     ),
     tags: tg.tags?.map((t) => t.tag?.tag) ?? [],
-    cover: addSizesToImage(finalCoversBucket, tg.cover),
+    cover: addSizesToImage(coversPrefix, tg.cover),
     downloadableContent: tg.downloadableContent?.map((dc) => ({
       ...dc,
       downloadableContent: {
@@ -210,7 +210,7 @@ export const serializeSingleTrackGroupIntoCanimus = (
     images: {
       cover: coverString
         ? {
-            src: generateFullStaticImageUrl(coverString, finalCoversBucket),
+            src: generateFullStaticImageUrl(coverString, coversPrefix),
             alt: trackGroup.coverImageAlt,
             width: 600,
             height: 600,

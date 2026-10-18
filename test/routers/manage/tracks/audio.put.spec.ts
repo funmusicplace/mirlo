@@ -31,9 +31,9 @@ describe("manage/tracks/{trackId}/audio PUT", () => {
   });
 
   it("should store the uploaded file as incoming audio and queue processing", async () => {
-    // Pin the API to legacy buckets, which is what this process reads by
-    // default. The API keeps its bucket layout in memory, so otherwise this
-    // test depends on which layout earlier tests (or boot) left it in.
+    // Pin the API to no bucket prefix, which is what this process reads by
+    // default. The API keeps its prefix in memory, so otherwise this test
+    // depends on which prefix earlier tests (or boot) left it in.
     const { accessToken: adminToken } = await createUser({
       email: "admin@testcom",
       isAdmin: true,
@@ -41,7 +41,7 @@ describe("manage/tracks/{trackId}/audio PUT", () => {
     await requestApp
       .post("admin/settings")
       .set("Cookie", [`jwt=${adminToken}`])
-      .send({ bucketNames: null, settings: { platformPercent: 7 } });
+      .send({ bucketNames: { prefix: "" }, settings: { platformPercent: 7 } });
 
     const { user, accessToken } = await createUser({ email: "test@testcom" });
     const artist = await createArtist(user.id);
