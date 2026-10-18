@@ -20,6 +20,7 @@ import logger from "../logger";
 
 import imageContentTypes from "./imageContentTypes";
 import merchImagesToCentralImages from "./merchImagesToCentralImages";
+import orphanedAudio from "./orphanedAudio";
 import postContentImageRefs from "./postContentImageRefs";
 import postContentWidgetPaths from "./postContentWidgetPaths";
 
@@ -35,6 +36,7 @@ export const dataMigrations: DataMigration[] = [
   postContentImageRefs,
   imageContentTypes,
   postContentWidgetPaths,
+  orphanedAudio,
 ];
 
 export const runPendingDataMigrations = async (

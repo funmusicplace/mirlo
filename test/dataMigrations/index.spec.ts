@@ -1,4 +1,5 @@
 import assert from "node:assert";
+import { Readable } from "node:stream";
 
 import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
@@ -11,13 +12,19 @@ import {
 } from "../../src/dataMigrations";
 import imageContentTypes from "../../src/dataMigrations/imageContentTypes";
 import merchImagesToCentralImages from "../../src/dataMigrations/merchImagesToCentralImages";
+import orphanedAudio from "../../src/dataMigrations/orphanedAudio";
 import postContentImageRefs from "../../src/dataMigrations/postContentImageRefs";
 import postContentWidgetPaths from "../../src/dataMigrations/postContentWidgetPaths";
 import {
+  finalAudioBucket,
   finalCoversBucket,
   finalImageBucket,
+  getAudioBucket,
+  incomingAudioBucket,
   setBucketConfig,
   statFile,
+  uploadAudioHlsFile,
+  uploadIncomingAudio,
   uploadOptimizedImageByType,
   uploadWrapper,
 } from "../../src/utils/minio";
@@ -26,6 +33,8 @@ import {
   createMerch,
   createPost,
   createProfile,
+  createTrack,
+  createTrackGroup,
   createUser,
 } from "../utils";
 
@@ -342,5 +351,81 @@ describe("dataMigrations: postContentWidgetPaths", () => {
       where: { id: post.id },
     });
     assert.equal(rerun.content, migrated.content);
+  });
+});
+
+describe("dataMigrations: orphanedAudio", () => {
+  beforeEach(async () => {
+    await clearTables();
+  });
+  afterEach(() => setBucketConfig(null));
+
+  const storeAudio = async (audioId: string) => {
+    await uploadIncomingAudio(audioId, Readable.from(Buffer.from("audio")));
+    await uploadAudioHlsFile(
+      audioId,
+      "segment-000.ts",
+      Readable.from(Buffer.from("audio"))
+    );
+  };
+
+  const incomingExists = async (incomingKey: string) =>
+    !!(await statFile(getAudioBucket(incomingAudioBucket), incomingKey))
+      .minioStat;
+
+  const segmentExists = async (audioId: string) =>
+    !!(
+      await statFile(
+        getAudioBucket(finalAudioBucket),
+        `${audioId}/segment-000.ts`
+      )
+    ).minioStat;
+
+  const layouts = [
+    { name: "consolidated", config: { prefix: "" }, incoming: "incoming/" },
+    { name: "legacy", config: null, incoming: "" },
+  ];
+
+  for (const layout of layouts) {
+    it(`removes audio with no live TrackAudio row (${layout.name})`, async () => {
+      setBucketConfig(layout.config);
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      const liveTrack = await createTrack(trackGroup.id);
+      const deletedTrack = await createTrack(trackGroup.id);
+      const live = await prisma.trackAudio.findFirstOrThrow({
+        where: { trackId: liveTrack.id },
+      });
+      const deleted = await prisma.trackAudio.findFirstOrThrow({
+        where: { trackId: deletedTrack.id },
+      });
+      await prisma.trackAudio.delete({ where: { id: deleted.id } });
+      const unknown = "00000000-0000-4000-8000-000000000000";
+
+      await Promise.all([live.id, deleted.id, unknown].map(storeAudio));
+
+      assert.equal(await orphanedAudio.run(), true);
+
+      assert.equal(await segmentExists(live.id), true);
+      assert.equal(await incomingExists(`${layout.incoming}${live.id}`), true);
+      for (const audioId of [deleted.id, unknown]) {
+        assert.equal(await segmentExists(audioId), false);
+        assert.equal(
+          await incomingExists(`${layout.incoming}${audioId}`),
+          false
+        );
+      }
+    });
+  }
+
+  it("leaves keys that aren't audio ids alone", async () => {
+    setBucketConfig({ prefix: "" });
+    await uploadWrapper(getAudioBucket(), "not-an-audio-id", Buffer.from("x"));
+
+    assert.equal(await orphanedAudio.run(), true);
+
+    const { minioStat } = await statFile(getAudioBucket(), "not-an-audio-id");
+    assert.ok(minioStat);
   });
 });
