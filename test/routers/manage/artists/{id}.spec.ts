@@ -70,6 +70,47 @@ describe("manage/artists/{artistId}", () => {
     });
   });
 
+  describe("PUT urlSlug", () => {
+    it("should reject a urlSlug used by another profile", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const { user: otherUser } = await createUser({
+        email: "other@test.com",
+      });
+      await createProfile(otherUser.id, { urlSlug: "taken" });
+      const profile = await createProfile(user.id, { urlSlug: "mine" });
+
+      const response = await requestApp
+        .put(`manage/artists/${profile.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({ urlSlug: "Taken" });
+
+      assert.equal(response.statusCode, 400);
+      const refreshed = await prisma.profile.findFirst({
+        where: { id: profile.id },
+      });
+      assert.equal(refreshed?.urlSlug, "mine");
+    });
+
+    it("should allow saving the profile's own urlSlug", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const profile = await createProfile(user.id, { urlSlug: "mine" });
+
+      const response = await requestApp
+        .put(`manage/artists/${profile.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({ urlSlug: "mine", name: "Renamed" });
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.name, "Renamed");
+    });
+  });
+
   describe("PUT paymentToUserId", () => {
     it("should set the payment receiver to a mutually approved label", async () => {
       const { user, accessToken } = await createUser({

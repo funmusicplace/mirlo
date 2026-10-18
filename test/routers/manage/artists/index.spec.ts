@@ -1,13 +1,15 @@
 import assert from "node:assert";
-import prisma from "../../../../prisma/prisma";
 
 import * as dotenv from "dotenv";
+
+import prisma from "../../../../prisma/prisma";
+
 dotenv.config();
 import { describe, it } from "mocha";
-import { clearTables, createUser } from "../../../utils";
 
-import { requestApp } from "../../utils";
 import { getSiteSettings } from "../../../../src/utils/settings";
+import { clearTables, createProfile, createUser } from "../../../utils";
+import { requestApp } from "../../utils";
 
 describe("manage/artists/{artistId}", () => {
   beforeEach(async () => {
@@ -35,6 +37,42 @@ describe("manage/artists/{artistId}", () => {
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.result.name, "hi");
     });
+
+    it("should suffix the generated urlSlug when the name is already taken", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+      });
+      await createProfile(user.id, { name: "Glo Waves" });
+
+      const response = await requestApp
+        .post(`manage/artists`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({ name: "Glo Waves" });
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.urlSlug, "glo-waves-2");
+    });
+
+    it("should reject an explicit urlSlug that is already taken", async () => {
+      const { user: otherUser } = await createUser({
+        email: "other@testcom",
+      });
+      await createProfile(otherUser.id, { urlSlug: "taken" });
+      const { accessToken } = await createUser({
+        email: "test@testcom",
+      });
+
+      const response = await requestApp
+        .post(`manage/artists`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({ name: "hi", urlSlug: "Taken" });
+
+      assert.equal(response.statusCode, 400);
+      assert.equal(await prisma.profile.count(), 1);
+    });
+
     describe("isClosedToPublicArtistSignup = true", () => {
       it("should not create an artist for logged in user", async () => {
         const settings = await getSiteSettings();

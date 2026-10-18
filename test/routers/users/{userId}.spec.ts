@@ -6,7 +6,7 @@ import prisma from "@mirlo/prisma";
 import { describe, it } from "mocha";
 
 import { hashPassword } from "../../../src/routers/auth/utils";
-import { clearTables, createUser } from "../../utils";
+import { clearTables, createProfile, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
 import { faker } from "@faker-js/faker";
@@ -133,6 +133,28 @@ describe("users/{userId}", () => {
       assert(refreshedUser?.pendingEmailToken);
       // Expiration should be set (24 hours from now)
       assert(refreshedUser?.pendingEmailExpiration);
+    });
+
+    it("should give a new label profile a unique urlSlug", async () => {
+      const { user, accessToken } = await createUser({
+        email: "user@test.com",
+        name: "Glo Waves",
+        canCreateArtists: true,
+      });
+      const artist = await createProfile(user.id, { name: "Glo Waves" });
+
+      const response = await requestApp
+        .put(`users/${user.id}`)
+        .send({ isLabelAccount: true })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const labelProfile = await prisma.profile.findFirst({
+        where: { userId: user.id, isLabelProfile: true },
+      });
+      assert.equal(artist.urlSlug, "glo-waves");
+      assert.equal(labelProfile?.urlSlug, "glo-waves-2");
     });
   });
 

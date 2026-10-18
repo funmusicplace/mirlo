@@ -10,8 +10,10 @@ import {
 } from "../../../../../auth/passport";
 import { serializeProfile } from "../../../../../serializers/artist";
 import {
+  asSlugConflictError,
   deleteProfile,
   findProfileIdForURLSlug,
+  isProfileSlugTaken,
   singleInclude,
 } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
@@ -92,6 +94,16 @@ export default function () {
         throw new AppError({
           httpCode: 403,
           description: "Only the owner of this artist can change payouts",
+        });
+      }
+
+      if (
+        urlSlug &&
+        (await isProfileSlugTaken(generateSlug(urlSlug), Number(profileId)))
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description: `"urlSlug" is already in use`,
         });
       }
 
@@ -232,7 +244,7 @@ export default function () {
         });
       }
     } catch (error) {
-      next(error);
+      next(asSlugConflictError(error));
     }
   }
 
