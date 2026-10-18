@@ -39,6 +39,7 @@ Image keys are prefixed with the media type they belong to:
 | `artist-avatars/`, `artist-banners/` | Artist profile images                                                     |
 | `merch-images/`                      | Merch photos uploaded before they moved to the bucket root                |
 | `post-images/`                       | Images embedded in posts                                                  |
+| `instance-logos/`                    | Header logos uploaded by the instance admins                              |
 | _(bucket root)_                      | Generic images (the `image` type): subscription tier images, merch photos |
 
 Optimized images are stored in multiple sizes as `<imageId>-x<width>.webp`

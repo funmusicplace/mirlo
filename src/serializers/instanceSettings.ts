@@ -9,6 +9,8 @@ import {
 import { AvailableLanguage } from "../utils/transifexLanguages";
 import { resolveTrustLevelNames } from "../utils/trustLevel";
 
+import { SerializedInstanceLogo, serializeInstanceLogo } from "./instanceLogo";
+
 export const DEFAULT_INSTANCE_COLORS = {
   button: "#be3455",
   buttonText: "#ffffff",
@@ -27,6 +29,9 @@ export type InstanceSettings = {
   stripePublishableKey: string | null;
   contactEmail: string | null;
   supportEmail: string | null;
+  logo: SerializedInstanceLogo | null;
+  mobileLogo: SerializedInstanceLogo | null;
+  tintLogo: boolean;
 };
 
 const HEX_COLOR_REGEX = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -68,5 +73,8 @@ export const serializeInstanceSettings = (
       settings.settings?.stripe?.publishableKey?.trim() || null,
     contactEmail: resolveContactEmail(settings),
     supportEmail: resolveSupportEmail(settings),
+    logo: serializeInstanceLogo(settings.logo),
+    mobileLogo: serializeInstanceLogo(settings.mobileLogo),
+    tintLogo: customization?.tintLogo === true,
   };
 };

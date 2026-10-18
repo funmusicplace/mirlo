@@ -24,11 +24,11 @@ model DataMigration {
 }
 
 model Settings {
-  id                           Int       @id @default(autoincrement())
+  id                           Int           @id @default(autoincrement())
   /// [Settings]
   settings                     Json
-  isClosedToPublicArtistSignup Boolean   @default(false)
-  showQueueDashboard           Boolean   @default(false)
+  isClosedToPublicArtistSignup Boolean       @default(false)
+  showQueueDashboard           Boolean       @default(false)
   publicKey                    String? // Used for ActivityPub
   privateKey                   String? // Used for ActivityPub
   bucketNames                  Json? // Used for S3
@@ -37,8 +37,25 @@ model Settings {
   contentPolicy                String?
   privacyPolicy                String?
   cookiePolicy                 String?
-  defconLevel                  Int?      @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
+  defconLevel                  Int?          @default(0) // 0 = normal, 1 = low, 2 = medium, 3 = high
   setupCompletedAt             DateTime?
+  logoId                       String?       @unique @db.Uuid
+  logo                         InstanceLogo? @relation("logo", fields: [logoId], references: [id], onDelete: SetNull)
+  mobileLogoId                 String?       @unique @db.Uuid
+  mobileLogo                   InstanceLogo? @relation("mobileLogo", fields: [mobileLogoId], references: [id], onDelete: SetNull)
+}
+
+model InstanceLogo {
+  id               String    @id @default(uuid()) @db.Uuid
+  mimeType         String
+  extension        String
+  width            Float
+  height           Float
+  originalFilename String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  settings         Settings? @relation("logo")
+  mobileSettings   Settings? @relation("mobileLogo")
 }
 
 enum ClientStatus {

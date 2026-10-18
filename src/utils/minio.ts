@@ -38,6 +38,7 @@ export const artistAvatarPrefix = "artist-avatars";
 export const coversPrefix = "trackgroup-covers";
 export const merchImagePrefix = "merch-images";
 export const postImagePrefix = "post-images";
+export const instanceLogoPrefix = "instance-logos";
 export const rootImagePrefix = "";
 
 export type BucketConfig = { prefix: string };
@@ -58,6 +59,7 @@ const imageTypeBuckets = {
   trackGroupCover: { prefix: coversPrefix, queue: true },
   merch: { prefix: merchImagePrefix, queue: true },
   postImage: { prefix: postImagePrefix, queue: false },
+  instanceLogo: { prefix: instanceLogoPrefix, queue: false },
   image: { prefix: rootImagePrefix, queue: true },
 };
 export type ImageType = keyof typeof imageTypeBuckets;

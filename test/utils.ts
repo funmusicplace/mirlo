@@ -29,6 +29,7 @@ const TRUNCATE_TABLES_SQL = `
     "Fundraiser",
     "FundraiserPledge",
     "Image",
+    "InstanceLogo",
     "Invite",
     "License",
     "LocationTag",

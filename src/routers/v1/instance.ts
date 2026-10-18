@@ -23,7 +23,7 @@ export default function () {
   GET.apiDoc = {
     summary: "Returns the public settings of this instance",
     description:
-      "Name, colours, hero flag, artist signup policy, trust level names, offered UI languages, how far the first setup went, the Stripe publishable key, the public contact email and the support email (the contact email when unset). Never includes secrets.",
+      "Name, colours, hero flag, artist signup policy, trust level names, offered UI languages, how far the first setup went, the Stripe publishable key, the public contact email, the support email (the contact email when unset), the header logo and the compact one for small screens with their intrinsic sizes, and whether they are tinted with the button color. Never includes secrets.",
     responses: {
       200: {
         description: "The public instance settings",
@@ -66,6 +66,23 @@ export default function () {
                 stripePublishableKey: { type: "string" },
                 contactEmail: { type: "string" },
                 supportEmail: { type: "string" },
+                logo: {
+                  type: "object",
+                  properties: {
+                    url: { type: "string" },
+                    width: { type: "number" },
+                    height: { type: "number" },
+                  },
+                },
+                mobileLogo: {
+                  type: "object",
+                  properties: {
+                    url: { type: "string" },
+                    width: { type: "number" },
+                    height: { type: "number" },
+                  },
+                },
+                tintLogo: { type: "boolean" },
               },
             },
           },

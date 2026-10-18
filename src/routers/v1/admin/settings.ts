@@ -242,6 +242,8 @@ function maskSecrets(settings: object) {
     ...s,
     stripe: undefined,
     cloudflareTurnstileSecret: undefined,
+    logo: undefined,
+    mobileLogo: undefined,
     settings: settingsJson
       ? {
           ...settingsJson,
