@@ -1,6 +1,21 @@
 import { NextFunction, Request, Response } from "express";
 
-import { getBufferBasedOnStat, getImagesBucket, statFile } from "./utils/minio";
+import {
+  getBufferBasedOnStat,
+  getImagesBucket,
+  imageContentType,
+  statFile,
+} from "./utils/minio";
+
+const SVG_CONTENT_SECURITY_POLICY =
+  "default-src 'none'; style-src 'unsafe-inline'; sandbox";
+
+const contentTypeFor = (filename: string, storedContentType?: string) =>
+  imageContentType(filename) ??
+  (storedContentType?.startsWith("image/") &&
+  storedContentType !== "image/svg+xml"
+    ? storedContentType
+    : undefined);
 
 export const serveStatic = async (
   req: Request,
@@ -45,6 +60,18 @@ export const serveStatic = async (
   );
   const etag = `"${backblazeStat?.ETag ?? minioStat?.etag}"`;
   res.setHeader("ETag", etag);
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  const contentType = contentTypeFor(
+    filename,
+    backblazeStat?.ContentType ??
+      (minioStat?.metaData?.["content-type"] as string | undefined)
+  );
+  if (contentType) {
+    res.setHeader("Content-Type", contentType);
+  }
+  if (contentType === "image/svg+xml") {
+    res.setHeader("Content-Security-Policy", SVG_CONTENT_SECURITY_POLICY);
+  }
 
   // when If-None-Match is provided, only return the object if the etag has changed
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match

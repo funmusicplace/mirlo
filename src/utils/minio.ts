@@ -1014,9 +1014,10 @@ const imageContentTypes: Record<string, string> = {
   gif: "image/gif",
   avif: "image/avif",
   ico: "image/x-icon",
+  svg: "image/svg+xml",
 };
 
-const imageContentType = (key: string): string | undefined =>
+export const imageContentType = (key: string): string | undefined =>
   imageContentTypes[key.split(".").pop()?.toLowerCase() ?? ""];
 
 export const getImagePrefix = (imageType: ImageType): string =>
