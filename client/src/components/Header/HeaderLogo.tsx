@@ -39,7 +39,7 @@ const HeaderLogo = () => {
         logo: "h-[34px] max-w-[200px]",
         text: "text-2xl",
       })}
-      {renderLogo(usable(mobileLogo) ?? usable(logo), {
+      {renderLogo(usable(logo) && (usable(mobileLogo) ?? usable(logo)), {
         visibility: "md:hidden",
         logo: "h-8 max-w-[40vw]",
         text: "text-xl",
