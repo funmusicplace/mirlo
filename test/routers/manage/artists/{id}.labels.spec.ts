@@ -10,7 +10,13 @@ import {
   sendMailQueueEvents,
 } from "../../../../src/queues/send-mail-queue";
 import labelsEndpoint from "../../../../src/routers/v1/manage/artists/{artistId}/labels/index";
-import { clearTables, createProfile, createUser } from "../../../utils";
+import {
+  clearTables,
+  createProfile,
+  createTrack,
+  createTrackGroup,
+  createUser,
+} from "../../../utils";
 import { requestApp } from "../../utils";
 
 import prisma from "@mirlo/prisma";
@@ -124,6 +130,34 @@ describe("manage/artists/{artistId}/labels", () => {
         assert.equal(createdLabel.isArtistApproved, false);
       });
 
+      it("should not give an unapproved label access to the artist's tracks", async () => {
+        const { user: labelUser, accessToken: labelAccessToken } =
+          await createUser({ email: "label@test.com" });
+        const { user: artistUser } = await createUser({
+          email: "artist@test.com",
+        });
+
+        const artist = await createProfile(artistUser.id);
+        const trackGroup = await createTrackGroup(artist.id);
+        const track = await createTrack(trackGroup.id);
+
+        const addLabel = await requestApp
+          .post(`manage/artists/${artist.id}/labels`)
+          .set("Cookie", [`jwt=${labelAccessToken}`])
+          .send({ labelUserId: labelUser.id, isLabelApproved: true });
+        assert.equal(addLabel.statusCode, 200);
+
+        const getTrack = await requestApp
+          .get(`manage/tracks/${track.id}`)
+          .set("Cookie", [`jwt=${labelAccessToken}`]);
+        assert.equal(getTrack.statusCode, 400);
+
+        const deleteTrack = await requestApp
+          .delete(`manage/tracks/${track.id}`)
+          .set("Cookie", [`jwt=${labelAccessToken}`]);
+        assert.equal(deleteTrack.statusCode, 400);
+      });
+
       it("should allow an artist to accept a label", async () => {
         const { user: labelUser } = await createUser({
           email: "label@test.com",
@@ -157,6 +191,38 @@ describe("manage/artists/{artistId}/labels", () => {
         assert.ok(createdLabel);
         assert.equal(createdLabel.isArtistApproved, true);
         assert.equal(createdLabel.isLabelApproved, false);
+      });
+
+      it("should keep permissions the artist granted when the label approves afterwards", async () => {
+        const { user: labelUser, accessToken: labelAccessToken } =
+          await createUser({ email: "label@test.com" });
+        const { user: artistUser, accessToken: artistAccessToken } =
+          await createUser({ email: "artist@test.com" });
+        const artist = await createProfile(artistUser.id);
+
+        await prisma.artistLabel.create({
+          data: { artistId: artist.id, labelUserId: labelUser.id },
+        });
+
+        const artistApproval = await requestApp
+          .put(`manage/artists/${artist.id}/labels/${labelUser.id}`)
+          .set("Cookie", [`jwt=${artistAccessToken}`])
+          .send({ isArtistApproved: true });
+        assert.equal(artistApproval.statusCode, 200);
+
+        const labelApproval = await requestApp
+          .put(`manage/label/artists/${artist.id}`)
+          .set("Cookie", [`jwt=${labelAccessToken}`])
+          .send({ labelUserId: labelUser.id, isLabelApproved: true });
+        assert.equal(labelApproval.statusCode, 200);
+
+        const row = await prisma.artistLabel.findFirstOrThrow({
+          where: { artistId: artist.id, labelUserId: labelUser.id },
+        });
+        assert.equal(row.isArtistApproved, true);
+        assert.equal(row.isLabelApproved, true);
+        assert.equal(row.canLabelAddReleases, true);
+        assert.equal(row.canLabelManageArtist, true);
       });
 
       it("should not create duplicate notification if already exists", async () => {

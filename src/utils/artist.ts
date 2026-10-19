@@ -147,6 +147,8 @@ export const whereForAllProfilesUserCanEdit = (
         some: {
           labelUserId: userId,
           canLabelManageArtist: true,
+          isArtistApproved: true,
+          isLabelApproved: true,
         },
       },
     },
@@ -196,6 +198,8 @@ export const whereForAllProfilesUserCanAddReleasesFor = (
         some: {
           labelUserId: userId,
           canLabelAddReleases: true,
+          isArtistApproved: true,
+          isLabelApproved: true,
         },
       },
     },

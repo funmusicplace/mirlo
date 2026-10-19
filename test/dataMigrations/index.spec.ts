@@ -21,6 +21,7 @@ import postContentImageRefs from "../../src/dataMigrations/migrations/2026100200
 import imageContentTypes from "../../src/dataMigrations/migrations/20261003000000_imageContentTypes";
 import postContentWidgetPaths from "../../src/dataMigrations/migrations/20261004000000_postContentWidgetPaths";
 import orphanedAudio from "../../src/dataMigrations/migrations/20261005000000_orphanedAudio";
+import approveSelfOwnedLabelRows from "../../src/dataMigrations/migrations/20261006000000_approveSelfOwnedLabelRows";
 import {
   DEFAULT_BUCKET_CONFIG,
   getImagesBucket,
@@ -165,6 +166,7 @@ describe("dataMigrations: loading", () => {
         imageContentTypes,
         postContentWidgetPaths,
         orphanedAudio,
+        approveSelfOwnedLabelRows,
       ].map((m) => m.name)
     );
     assert.equal(dataMigrations.length, files.length);
@@ -466,5 +468,37 @@ describe("dataMigrations: orphanedAudio", () => {
 
     const { minioStat } = await statFile(getAudioBucket(), "not-an-audio-id");
     assert.ok(minioStat);
+  });
+});
+
+describe("dataMigrations: approveSelfOwnedLabelRows", () => {
+  beforeEach(async () => {
+    await clearTables();
+  });
+
+  it("approves label rows on profiles the label owns and leaves the rest", async () => {
+    const { user: label } = await createUser({ email: "label@test.com" });
+    const { user: artist } = await createUser({ email: "artist@test.com" });
+    const owned = await createProfile(label.id, { urlSlug: "owned" });
+    const other = await createProfile(artist.id, { urlSlug: "other" });
+    await prisma.artistLabel.createMany({
+      data: [
+        { artistId: owned.id, labelUserId: label.id, isArtistApproved: true },
+        { artistId: other.id, labelUserId: label.id, isLabelApproved: true },
+      ],
+    });
+
+    assert.equal(await approveSelfOwnedLabelRows.run(), true);
+
+    const ownedRow = await prisma.artistLabel.findFirstOrThrow({
+      where: { artistId: owned.id },
+    });
+    assert.equal(ownedRow.isArtistApproved, true);
+    assert.equal(ownedRow.isLabelApproved, true);
+    const otherRow = await prisma.artistLabel.findFirstOrThrow({
+      where: { artistId: other.id },
+    });
+    assert.equal(otherRow.isArtistApproved, false);
+    assert.equal(otherRow.isLabelApproved, true);
   });
 });

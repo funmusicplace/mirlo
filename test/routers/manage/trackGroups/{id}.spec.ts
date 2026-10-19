@@ -186,6 +186,101 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       assert.equal(unmoved.profileId, from.id);
     });
 
+    it("should let the payment go to an approved label", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user: labelUser } = await createUser({
+        email: "label@test.com",
+      });
+      const profile = await createProfile(user.id);
+      await prisma.artistLabel.create({
+        data: {
+          artistId: profile.id,
+          labelUserId: labelUser.id,
+          isArtistApproved: true,
+          isLabelApproved: true,
+        },
+      });
+      const trackGroup = await createTrackGroup(profile.id);
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ paymentToUserId: labelUser.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const updated = await prisma.trackGroup.findFirstOrThrow({
+        where: { id: trackGroup.id },
+      });
+      assert.equal(updated.paymentToUserId, labelUser.id);
+    });
+
+    it("should refuse to send payments to an unapproved label", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user: labelUser } = await createUser({
+        email: "label@test.com",
+      });
+      const profile = await createProfile(user.id);
+      await prisma.artistLabel.create({
+        data: {
+          artistId: profile.id,
+          labelUserId: labelUser.id,
+          isLabelApproved: true,
+        },
+      });
+      const trackGroup = await createTrackGroup(profile.id);
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ paymentToUserId: labelUser.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 400);
+      const unchanged = await prisma.trackGroup.findFirstOrThrow({
+        where: { id: trackGroup.id },
+      });
+      assert.equal(unchanged.paymentToUserId, null);
+    });
+
+    it("should refuse to send payments to an unrelated user", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user: otherUser } = await createUser({
+        email: "other@test.com",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ paymentToUserId: otherUser.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 400);
+    });
+
+    it("should keep saving a release whose existing payee is no longer approved", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user: labelUser } = await createUser({
+        email: "label@test.com",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      await prisma.trackGroup.update({
+        where: { id: trackGroup.id },
+        data: { paymentToUserId: labelUser.id },
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ title: "New title", paymentToUserId: labelUser.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+    });
+
     it("should not move a release when only artistId is in the body", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const from = await createProfile(user.id, { urlSlug: "from-artist" });
