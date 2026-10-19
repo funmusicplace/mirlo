@@ -44,6 +44,7 @@ export const logger = winston.createLogger({
 });
 
 const SETTINGS_RETRY_DELAY_MS = 5000;
+const SETTINGS_MAX_ATTEMPTS = 24;
 
 const workerOptions = {
   prefix: "mirlo",
@@ -170,10 +171,17 @@ yargs
   .help().argv;
 
 async function getSiteSettingsWhenReady() {
-  for (;;) {
+  for (let attempt = 1; ; attempt += 1) {
     try {
       return await getSiteSettings();
     } catch (e) {
+      if (attempt >= SETTINGS_MAX_ATTEMPTS) {
+        logger.error(
+          `Could not read the site settings after ${SETTINGS_MAX_ATTEMPTS} attempts, exiting`,
+          e
+        );
+        process.exit(1);
+      }
       logger.warn(
         `Could not read the site settings, retrying in ${SETTINGS_RETRY_DELAY_MS / 1000}s`,
         e
