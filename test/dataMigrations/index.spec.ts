@@ -1,4 +1,7 @@
 import assert from "node:assert";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { Readable } from "node:stream";
 
 import prisma from "@mirlo/prisma";
@@ -8,13 +11,16 @@ import { beforeEach, describe, it } from "mocha";
 
 import {
   DataMigration,
+  dataMigrations,
+  loadDataMigrations,
+  migrationFilePattern,
   runPendingDataMigrations,
 } from "../../src/dataMigrations";
-import imageContentTypes from "../../src/dataMigrations/imageContentTypes";
-import merchImagesToCentralImages from "../../src/dataMigrations/merchImagesToCentralImages";
-import orphanedAudio from "../../src/dataMigrations/orphanedAudio";
-import postContentImageRefs from "../../src/dataMigrations/postContentImageRefs";
-import postContentWidgetPaths from "../../src/dataMigrations/postContentWidgetPaths";
+import merchImagesToCentralImages from "../../src/dataMigrations/migrations/20261001000000_merchImagesToCentralImages";
+import postContentImageRefs from "../../src/dataMigrations/migrations/20261002000000_postContentImageRefs";
+import imageContentTypes from "../../src/dataMigrations/migrations/20261003000000_imageContentTypes";
+import postContentWidgetPaths from "../../src/dataMigrations/migrations/20261004000000_postContentWidgetPaths";
+import orphanedAudio from "../../src/dataMigrations/migrations/20261005000000_orphanedAudio";
 import {
   DEFAULT_BUCKET_CONFIG,
   getImagesBucket,
@@ -125,6 +131,71 @@ describe("dataMigrations", () => {
 
     assert.deepEqual(result.ran, ["a-flaky"]);
     assert.deepEqual(await recordedNames(), ["a-flaky"]);
+  });
+});
+
+describe("dataMigrations: loading", () => {
+  let dir: string;
+
+  const writeMigration = (file: string, name: string) =>
+    fs.writeFileSync(
+      path.join(dir, file),
+      `exports.default = { name: ${JSON.stringify(name)}, run: async () => true };`
+    );
+
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), "data-migrations-"));
+  });
+
+  afterEach(() => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("loads every file in migrations/, in filename order", () => {
+    const files = fs
+      .readdirSync(path.join(__dirname, "../../src/dataMigrations/migrations"))
+      .filter((f) => !f.endsWith(".map"));
+
+    assert.ok(files.every((f) => migrationFilePattern.test(f)));
+    assert.deepEqual(
+      dataMigrations.map((m) => m.name),
+      [
+        merchImagesToCentralImages,
+        postContentImageRefs,
+        imageContentTypes,
+        postContentWidgetPaths,
+        orphanedAudio,
+      ].map((m) => m.name)
+    );
+    assert.equal(dataMigrations.length, files.length);
+  });
+
+  it("sorts by filename and ignores files that don't match the pattern", () => {
+    writeMigration("20260102000000_second.js", "second");
+    writeMigration("20260101000000_first.js", "first");
+    writeMigration("helper.js", "helper");
+    fs.writeFileSync(path.join(dir, "20260101000000_first.js.map"), "{}");
+
+    assert.deepEqual(
+      loadDataMigrations(dir).map((m) => m.name),
+      ["first", "second"]
+    );
+  });
+
+  it("throws on a file without a default-exported migration", () => {
+    fs.writeFileSync(path.join(dir, "20260101000000_broken.js"), "");
+
+    assert.throws(() => loadDataMigrations(dir), /20260101000000_broken\.js/);
+  });
+
+  it("throws on duplicate migration names", () => {
+    writeMigration("20260101000000_one.js", "same");
+    writeMigration("20260102000000_two.js", "same");
+
+    assert.throws(
+      () => loadDataMigrations(dir),
+      /duplicate migration name same/
+    );
   });
 });
 
