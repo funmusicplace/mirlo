@@ -80,6 +80,14 @@ describe("svgSanitizer", () => {
     assert.doesNotMatch(markup, /osb:/);
   });
 
+  it("keeps xmlns on the root only", () => {
+    const { markup } = sanitizeSvg(
+      `<svg viewBox="0 0 1 1"><g xmlns="http://evil.test/ns"><path d="M0 0"/></g></svg>`
+    );
+    assert.doesNotMatch(markup, /evil\.test/);
+    assert.match(markup, /<svg[^>]*xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
+  });
+
   it("names what it refuses", () =>
     isRejected(
       `<svg viewBox="0 0 1 1"><script>alert(1)</script></svg>`,

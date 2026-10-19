@@ -274,7 +274,7 @@ export const sanitizeSvg = (text: string) => {
       throw rejectSvg(`<${element.tagName}>`);
     }
     for (const [name, value] of Object.entries(element.attribs)) {
-      if (isEditorName(name)) {
+      if (isEditorName(name) || (name === "xmlns" && element !== root)) {
         $(element).removeAttr(name);
       } else {
         checkAttribute(name, value);
