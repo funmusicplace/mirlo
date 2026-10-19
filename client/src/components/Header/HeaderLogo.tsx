@@ -32,7 +32,7 @@ const HeaderLogo = () => {
     <Link
       to="/"
       aria-label={name}
-      className="mt-[-.1rem] flex min-w-0 items-center justify-start no-underline"
+      className="mt-[-.1rem] flex min-w-0 items-center justify-start no-underline!"
     >
       {renderLogo(usable(logo), {
         visibility: "max-md:hidden",
