@@ -10,11 +10,7 @@ import sinon from "sinon";
 import { EventEmitter } from "events";
 
 import cleanUpFiles from "../../../src/jobs/tasks/clean-up-files";
-import {
-  setBucketConfig,
-  minioClient,
-  trackGroupFormatBucket,
-} from "../../../src/utils/minio";
+import { minioClient } from "../../../src/utils/minio";
 
 describe("clean-up-files", () => {
   let listObjectsV2Stub: sinon.SinonStub;
@@ -35,52 +31,23 @@ describe("clean-up-files", () => {
   });
 
   afterEach(() => {
-    setBucketConfig(null);
     sinon.restore();
   });
 
-  describe("legacy mode", () => {
-    beforeEach(() => {
-      setBucketConfig(null);
-    });
-
-    it("matches legacy trackgroup bucket path", async () => {
-      await cleanUpFiles(`${trackGroupFormatBucket}/42`);
-      assert.equal(listObjectsV2Stub.firstCall.args[0], trackGroupFormatBucket);
-      assert.equal(listObjectsV2Stub.firstCall.args[1], "42/");
-    });
-
-    it("ignores consolidated path", async () => {
-      await cleanUpFiles("mirlo-downloads/42");
-      assert.equal(listObjectsV2Stub.callCount, 0);
-    });
+  it("matches consolidated downloads bucket path", async () => {
+    await cleanUpFiles("mirlo-downloads/trackgroup/42");
+    assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-downloads");
+    assert.equal(listObjectsV2Stub.firstCall.args[1], "trackgroup/42/");
   });
 
-  describe("consolidated mode", () => {
-    beforeEach(() => {
-      setBucketConfig({ prefix: "" });
-    });
+  it("only removes trackgroup zips when no album id is given", async () => {
+    await cleanUpFiles("mirlo-downloads/trackgroup");
+    assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-downloads");
+    assert.equal(listObjectsV2Stub.firstCall.args[1], "trackgroup/");
+  });
 
-    it("matches consolidated downloads bucket path", async () => {
-      await cleanUpFiles("mirlo-downloads/trackgroup/42");
-      assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-downloads");
-      assert.equal(listObjectsV2Stub.firstCall.args[1], "trackgroup/42/");
-    });
-
-    it("only removes trackgroup zips when no album id is given", async () => {
-      await cleanUpFiles("mirlo-downloads/trackgroup");
-      assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-downloads");
-      assert.equal(listObjectsV2Stub.firstCall.args[1], "trackgroup/");
-    });
-
-    it("ignores the bare downloads bucket", async () => {
-      await cleanUpFiles("mirlo-downloads");
-      assert.equal(listObjectsV2Stub.callCount, 0);
-    });
-
-    it("ignores legacy path", async () => {
-      await cleanUpFiles(`${trackGroupFormatBucket}/42`);
-      assert.equal(listObjectsV2Stub.callCount, 0);
-    });
+  it("ignores the bare downloads bucket", async () => {
+    await cleanUpFiles("mirlo-downloads");
+    assert.equal(listObjectsV2Stub.callCount, 0);
   });
 });

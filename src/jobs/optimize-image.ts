@@ -12,7 +12,7 @@ import {
   downloadIncomingImageByType,
   uploadOptimizedImageByType,
   removeIncomingImageByType,
-  getImageFinalBucket,
+  getImagePrefix,
 } from "../utils/minio";
 
 import { logger } from "./queue-worker";
@@ -311,7 +311,7 @@ const optimizeImage = async (job: Job) => {
       const searchParams = new URLSearchParams();
       searchParams.append(
         "url",
-        generateFullStaticImageUrl(urls[0], getImageFinalBucket(imageType))
+        generateFullStaticImageUrl(urls[0], getImagePrefix(imageType))
       );
       searchParams.append("models", "nudity-2.1");
       searchParams.append("api_user", SIGHTENGINE_USER);

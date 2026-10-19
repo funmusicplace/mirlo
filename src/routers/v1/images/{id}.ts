@@ -1,9 +1,8 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import prisma from "@mirlo/prisma";
 import { addSizesToImage } from "../../../utils/artist";
-
-import { finalImageBucket } from "../../../utils/minio";
+import { rootImagePrefix } from "../../../utils/minio";
 
 export default function () {
   const operations = {
@@ -28,7 +27,7 @@ export default function () {
       }
 
       res.json({
-        result: addSizesToImage(finalImageBucket, image),
+        result: addSizesToImage(rootImagePrefix, image),
       });
     } catch (e) {
       next(e);

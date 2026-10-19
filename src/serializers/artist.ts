@@ -16,10 +16,7 @@ import {
 
 import { addSizesToImage } from "../utils/artist";
 import { generateFullStaticImageUrl } from "../utils/images";
-import {
-  finalArtistAvatarBucket,
-  finalArtistBackgroundBucket,
-} from "../utils/minio";
+import { artistAvatarPrefix, artistBackgroundPrefix } from "../utils/minio";
 import { resolvePayee } from "../utils/payments/payee";
 import { ContentImage } from "../utils/postContent";
 
@@ -92,10 +89,10 @@ export const serializeProfile = <T extends LocalProfile>(
       })
     ),
     background: renameProfileIdToArtistId(
-      addSizesToImage(finalArtistBackgroundBucket, profile?.background)
+      addSizesToImage(artistBackgroundPrefix, profile?.background)
     ),
     avatar: renameProfileIdToArtistId(
-      addSizesToImage(finalArtistAvatarBucket, profile?.avatar)
+      addSizesToImage(artistAvatarPrefix, profile?.avatar)
     ),
     trackGroups: profile?.trackGroups?.map((tg) =>
       processSingleTrackGroup(
@@ -117,14 +114,11 @@ export const serializeProfile = <T extends LocalProfile>(
                 ? {
                     ...omitApPrivateKey(labelProfile),
                     avatar: renameProfileIdToArtistId(
-                      addSizesToImage(
-                        finalArtistAvatarBucket,
-                        labelProfile.avatar
-                      )
+                      addSizesToImage(artistAvatarPrefix, labelProfile.avatar)
                     ),
                     background: renameProfileIdToArtistId(
                       addSizesToImage(
-                        finalArtistBackgroundBucket,
+                        artistBackgroundPrefix,
                         labelProfile.background
                       )
                     ),
@@ -181,10 +175,7 @@ export const serializeSingleArtistIntoCanimus = (
     images: {
       cover: avatarString
         ? {
-            src: generateFullStaticImageUrl(
-              avatarString,
-              finalArtistAvatarBucket
-            ),
+            src: generateFullStaticImageUrl(avatarString, artistAvatarPrefix),
             alt: null,
             width: 600,
             height: 600,

@@ -8,7 +8,7 @@ import { slug } from "github-slugger";
 
 import prisma from "../prisma/prisma";
 import { buildTokens, hashPassword } from "../src/routers/auth/utils";
-import { finalAudioBucket, uploadWrapper } from "../src/utils/minio";
+import { uploadAudioHlsFile } from "../src/utils/minio";
 import {
   CompletedPayment,
   EMPTY_PLATFORM_CURRENCY_VALUE,
@@ -580,9 +580,9 @@ export const seedTrackAudio = async (trackId: number, extension = "wav") => {
     where: { id: audio.id },
     data: { fileExtension: extension },
   });
-  await uploadWrapper(
-    finalAudioBucket,
-    `${audio.id}/original.${extension}`,
+  await uploadAudioHlsFile(
+    audio.id,
+    `original.${extension}`,
     Readable.from(createSilentWavBuffer())
   );
   return updated;

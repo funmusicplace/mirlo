@@ -84,7 +84,7 @@ const storedSettings = (overrides: object = {}) => ({
       },
       emailProvider: {},
     },
-    bucketNames: null,
+    bucketNames: { prefix: "" },
     defconLevel: 0,
     ...overrides,
   },

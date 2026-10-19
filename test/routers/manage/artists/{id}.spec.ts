@@ -7,7 +7,7 @@ import prisma from "@mirlo/prisma";
 
 import {
   createBucketIfNotExists,
-  finalArtistAvatarBucket,
+  getImagesBucket,
 } from "../../../../src/utils/minio";
 import {
   clearTables,
@@ -211,7 +211,7 @@ describe("manage/artists/{artistId}", () => {
         email: "test@testcom",
       });
       const profile = await createProfile(user.id);
-      await createBucketIfNotExists(finalArtistAvatarBucket);
+      await createBucketIfNotExists(getImagesBucket());
 
       const response = await requestApp
         .delete(`manage/artists/${profile.id}`)
@@ -228,7 +228,7 @@ describe("manage/artists/{artistId}", () => {
         isAdmin: true,
       });
       const profile = await createProfile(user.id);
-      await createBucketIfNotExists(finalArtistAvatarBucket);
+      await createBucketIfNotExists(getImagesBucket());
 
       const response = await requestApp
         .delete(`manage/artists/${profile.id}`)

@@ -3,12 +3,14 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-import { clearTables, createProfile, createUser } from "../../../utils";
-import prisma from "@mirlo/prisma";
+
 import {
   createBucketIfNotExists,
-  finalArtistAvatarBucket,
+  getImagesBucket,
 } from "../../../../src/utils/minio";
+import { clearTables, createProfile, createUser } from "../../../utils";
+
+import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../../utils";
 
@@ -25,7 +27,7 @@ describe("manage/artists/{artistId}/avatar", () => {
     it("should DELETE with one artist", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const profile = await createProfile(user.id);
-      await createBucketIfNotExists(finalArtistAvatarBucket);
+      await createBucketIfNotExists(getImagesBucket());
 
       await prisma.profileAvatar.create({
         data: {

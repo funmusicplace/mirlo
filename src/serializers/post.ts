@@ -2,7 +2,7 @@ import { Prisma, Profile, ProfileAvatar, Post } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../utils/artist";
 import { generateFullStaticImageUrl } from "../utils/images";
-import { finalArtistAvatarBucket, finalPostImageBucket } from "../utils/minio";
+import { artistAvatarPrefix, postImagePrefix } from "../utils/minio";
 import {
   ContentImage,
   postImagesForContent,
@@ -124,7 +124,7 @@ export const serializePost = <T extends PostInput>(
       ? {
           ...omitApPrivateKey(profile),
           avatar: renameProfileIdToArtistId(
-            addSizesToImage(finalArtistAvatarBucket, profile.avatar)
+            addSizesToImage(artistAvatarPrefix, profile.avatar)
           ),
         }
       : undefined,
@@ -154,7 +154,7 @@ export const serializePost = <T extends PostInput>(
       ...post.featuredImage,
       src: generateFullStaticImageUrl(
         post.featuredImage.id,
-        finalPostImageBucket,
+        postImagePrefix,
         post.featuredImage.extension
       ),
     },

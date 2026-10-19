@@ -42,10 +42,7 @@ import {
 } from "../utils/artist";
 import { getClient } from "../utils/getClient";
 import { generateFullStaticImageUrl } from "../utils/images";
-import {
-  finalArtistAvatarBucket,
-  finalArtistBackgroundBucket,
-} from "../utils/minio";
+import { artistAvatarPrefix, artistBackgroundPrefix } from "../utils/minio";
 import { postImagesForContent, resolvePostContent } from "../utils/postContent";
 import { getSiteSettings } from "../utils/settings";
 import { whereForVisibleTrackGroup } from "../utils/trackGroup";
@@ -130,7 +127,7 @@ federation
               url: new URL(
                 generateFullStaticImageUrl(
                   artist.avatar.url[0],
-                  finalArtistAvatarBucket
+                  artistAvatarPrefix
                 )
               ),
             })
@@ -141,7 +138,7 @@ federation
               url: new URL(
                 generateFullStaticImageUrl(
                   artist.background.url[0],
-                  finalArtistBackgroundBucket
+                  artistBackgroundPrefix
                 )
               ),
             })

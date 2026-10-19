@@ -1,7 +1,7 @@
 import { Image, TrackGroupCover } from "@mirlo/prisma/client";
 
 import { addSizesToImage } from "../utils/artist";
-import { finalCoversBucket, finalImageBucket } from "../utils/minio";
+import { coversPrefix, rootImagePrefix } from "../utils/minio";
 import { isTrackPlayableNested } from "../utils/trackPlayability";
 
 import { isSubscriberExclusive } from "./trackGroup";
@@ -43,7 +43,7 @@ export const serializeProfileSubscriptionTier = <T extends object>(
     artistId: profileId,
     images: images?.map((img) => ({
       ...img,
-      image: addSizesToImage(finalImageBucket, img.image),
+      image: addSizesToImage(rootImagePrefix, img.image),
     })),
     releases: releases?.map((rel) => {
       const {
@@ -74,7 +74,7 @@ export const serializeProfileSubscriptionTier = <T extends object>(
             tgProf && typeof tgProf === "object"
               ? omitApPrivateKey(tgProf)
               : tgProf,
-          cover: addSizesToImage(finalCoversBucket, rel.trackGroup?.cover),
+          cover: addSizesToImage(coversPrefix, rel.trackGroup?.cover),
         },
       };
     }),

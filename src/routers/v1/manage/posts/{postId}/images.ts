@@ -6,7 +6,7 @@ import { userAuthenticated } from "../../../../../auth/passport";
 import { processPostImage } from "../../../../../queues/processImages";
 import { AppError } from "../../../../../utils/error";
 import { generateFullStaticImageUrl } from "../../../../../utils/images";
-import { finalPostImageBucket } from "../../../../../utils/minio";
+import { postImagePrefix } from "../../../../../utils/minio";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 
 type Params = {
@@ -48,7 +48,7 @@ export default function () {
           ...image,
           src: generateFullStaticImageUrl(
             image.id,
-            finalPostImageBucket,
+            postImagePrefix,
             image.extension
           ),
         })),
@@ -72,7 +72,7 @@ export default function () {
       }
       const src = generateFullStaticImageUrl(
         image.id,
-        finalPostImageBucket,
+        postImagePrefix,
         image.extension
       );
       res.json({

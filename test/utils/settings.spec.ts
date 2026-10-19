@@ -45,7 +45,7 @@ describe("getSiteSettings", () => {
     });
   });
 
-  it("exposes row fields like cdnUrl and null bucketNames", async () => {
+  it("exposes row fields like cdnUrl and defaults null bucketNames", async () => {
     const row = await createSiteSettings({ platformPercent: 8 });
     await prisma.settings.update({
       where: { id: row.id },
@@ -58,7 +58,7 @@ describe("getSiteSettings", () => {
     const settings = await getSiteSettings();
 
     assert.equal(settings.cdnUrl, "https://cdn.example.com");
-    assert.equal(settings.bucketNames, null);
+    assert.deepEqual(settings.bucketNames, { prefix: "" });
     assert.equal(settings.platformPercent, 8);
   });
 });

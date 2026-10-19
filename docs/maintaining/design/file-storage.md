@@ -6,14 +6,14 @@ Garage has no web console. Point an S3 client (`mc`, `rclone`, `aws s3`) at loca
 
 See [the design decisions and thinking that went into this](../../technical_designs/2024-12-scalable-audio-storage.md).
 
-For bandwidth reasons, we get a pre-signed upload URL when uploading a track, that uploads directly to the relevant Backblaze bucket (incoming track audio for now).
+For bandwidth reasons, we get a pre-signed upload URL when uploading a track, that uploads directly to the relevant Backblaze bucket (`incoming/` in `mirlo-audio` for now).
 
 ## Updating CORS on backblaze
 
 Using the backblaze command line tool, after authenticating (`b2 authorize`).
 
 ```
-b2 bucket update --cors-rules "$(<./b2-cors-rules.json)" incoming-track-audio
+b2 bucket update --cors-rules "$(<./b2-cors-rules.json)" mirlo-audio
 ```
 
 You'll need to wait a minute for this to take effect.
@@ -22,4 +22,4 @@ You'll need to wait a minute for this to take effect.
 
 This used to be impossible locally: setting CORS per bucket [needed the paid version of MinIO](https://github.com/minio/minio/discussions/20841), so dev uploads never used direct signed-URL uploads the way production does.
 
-Garage implements `PutBucketCors`, so that restriction is gone — a dev bucket can carry the same CORS rules as a Backblaze one. Nothing applies them yet: `applyCorsPolicyS3` in `src/utils/minio.ts` still runs only on the Backblaze path. Wiring it up for Garage would let dev exercise the same direct-upload flow as production.
+Garage implements `PutBucketCors`, so that restriction is gone. `applyCorsPolicyLocal` in `src/utils/minio.ts` applies CORS rules whenever a local bucket is ensured, so dev exercises the same direct-upload flow as production.

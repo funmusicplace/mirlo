@@ -40,7 +40,7 @@ const STORED_SETTINGS = {
       platformPercent: 10,
       instanceCustomization: { artistId: "7" },
     },
-    bucketNames: null,
+    bucketNames: { prefix: "" },
     defconLevel: 0,
   },
 };

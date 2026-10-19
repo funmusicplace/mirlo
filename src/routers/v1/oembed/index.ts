@@ -16,9 +16,9 @@ import { getClient } from "../../../utils/getClient";
 import { generateFullStaticImageUrl } from "../../../utils/images";
 import { merchImageUrl } from "../../../utils/merch";
 import {
-  finalCoversBucket,
-  finalPostImageBucket,
-  finalArtistAvatarBucket,
+  coversPrefix,
+  postImagePrefix,
+  artistAvatarPrefix,
 } from "../../../utils/minio";
 import { getInstanceName } from "../../../utils/settings";
 
@@ -107,7 +107,7 @@ export default function () {
               author_name: album.profile.name,
               author_url: `${client.applicationUrl}/${album.profile.urlSlug}`,
               thumbnail_url: coverUrl
-                ? generateFullStaticImageUrl(coverUrl, finalCoversBucket)
+                ? generateFullStaticImageUrl(coverUrl, coversPrefix)
                 : undefined,
               thumbnail_width: 300,
               thumbnail_height: 300,
@@ -135,7 +135,7 @@ export default function () {
                 author_name: album.profile.name,
                 author_url: `${client.applicationUrl}/${album.profile.urlSlug}`,
                 thumbnail_url: coverUrl
-                  ? generateFullStaticImageUrl(coverUrl, finalCoversBucket)
+                  ? generateFullStaticImageUrl(coverUrl, coversPrefix)
                   : undefined,
                 thumbnail_width: 300,
                 thumbnail_height: 300,
@@ -161,7 +161,7 @@ export default function () {
             let imageUrl = post.featuredImage
               ? generateFullStaticImageUrl(
                   post.featuredImage.id,
-                  finalPostImageBucket,
+                  postImagePrefix,
                   post.featuredImage.extension
                 )
               : undefined;
@@ -233,7 +233,7 @@ export default function () {
               author_name: artistName,
               author_url: `${client.applicationUrl}/${artist.urlSlug}`,
               thumbnail_url: avatarUrl
-                ? generateFullStaticImageUrl(avatarUrl, finalArtistAvatarBucket)
+                ? generateFullStaticImageUrl(avatarUrl, artistAvatarPrefix)
                 : undefined,
               thumbnail_width: 300,
               thumbnail_height: 300,

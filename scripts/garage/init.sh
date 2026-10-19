@@ -16,17 +16,11 @@ ADMIN="http://${GARAGE_HOST:-garage}:3903/v2"
 AUTH="Authorization: Bearer ${GARAGE_ADMIN_TOKEN}"
 KEY_ID="${LOCAL_S3_USER}"
 KEY_SECRET="${LOCAL_S3_PASSWORD}"
-# Every bucket the app can address, so a browser's CORS preflight always lands
-# on a bucket that already exists with CORS on it. The first three are the
-# consolidated layout; the rest are the legacy per-media-type buckets still
-# used by installs whose Settings.bucketNames is null. These mirror the
-# constants at the top of src/utils/minio.ts — keep them in sync.
-DEFAULT_BUCKETS="mirlo-audio mirlo-images mirlo-downloads
-artist-avatars artist-banners incoming-artist-avatars incoming-artist-banners
-incoming-covers incoming-merch-images incoming-mirlo-images incoming-track-audio
-incoming-user-avatars incoming-user-banners merch-images mirlo-downloadable-content
-mirlo-user-avatars mirlo-user-banners post-images track-audio track-format
-trackgroup-covers trackgroup-format"
+# The buckets the app addresses with the default (empty) prefix, so a
+# browser's CORS preflight always lands on a bucket that already exists with
+# CORS on it. These mirror getImagesBucket/getAudioBucket/getDownloadsBucket
+# in src/utils/minio.ts.
+DEFAULT_BUCKETS="mirlo-audio mirlo-images mirlo-downloads"
 BUCKETS="${GARAGE_BUCKETS:-$DEFAULT_BUCKETS}"
 
 api() { # method path [body]
@@ -68,7 +62,7 @@ else
   api POST ImportKey \
     "{\"accessKeyId\":\"$KEY_ID\",\"secretAccessKey\":\"$KEY_SECRET\",\"name\":\"mirlo\"}" >/dev/null
 fi
-# Mirlo creates buckets it doesn't find (legacy layout, or a prefixed one).
+# Mirlo creates buckets it doesn't find (e.g. a prefixed one).
 api POST "UpdateKey?id=$KEY_ID" '{"allow":{"createBucket":true}}' >/dev/null
 
 # Pre-create the standard buckets with *global* aliases. Buckets that Mirlo

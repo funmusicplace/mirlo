@@ -30,7 +30,7 @@ const handlers = (
             platformPercent: 7,
             instanceCustomization: { title: "Nightjar Records" },
           },
-          bucketNames: null,
+          bucketNames: { prefix: "" },
           ...settings,
         },
       })

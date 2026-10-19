@@ -10,23 +10,15 @@ to Garage) and the AWS S3 client (the filename is historical). Call sites expres
 `getCoverBuffer`, `uploadZip`, …) and that module decides which bucket and
 object key to use.
 
-## Two bucket layouts
+## Buckets
 
-There are two supported bucket layouts, controlled by the `bucketNames` value
-in the `Settings` table (editable in the admin settings UI):
-
-| `bucketNames` value        | Mode                                                                                                 |
-| -------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `null`                     | **Legacy**: one bucket per media type (~14 buckets). Existing installs stay on this — nothing moves. |
-| `{ "prefix": "<string>" }` | **Consolidated**: 3 buckets with path prefixes. New installs default to `{ "prefix": "" }`.          |
-
-The `prefix` is prepended to the three consolidated bucket names, so an
+Mirlo uses three buckets: `mirlo-audio`, `mirlo-images` and
+`mirlo-downloads`. An optional prefix, set in the admin settings UI (the
+`bucketNames` value in the `Settings` table), is prepended to each name, so an
 instance configured with `{ "prefix": "myinstance-" }` uses the buckets
 `myinstance-mirlo-audio`, `myinstance-mirlo-images` and
 `myinstance-mirlo-downloads`. This matters for providers like Backblaze where
 bucket names are globally unique.
-
-## Consolidated layout
 
 ### `mirlo-audio`
 
@@ -38,9 +30,7 @@ bucket names are globally unique.
 
 ### `mirlo-images`
 
-Image keys are prefixed with the media type they belong to. The prefixes
-deliberately reuse the **legacy final bucket names**, so migrating an existing
-install is a straight copy of each legacy bucket into a same-named folder:
+Image keys are prefixed with the media type they belong to:
 
 | Key prefix                           | Contents                                                                  |
 | ------------------------------------ | ------------------------------------------------------------------------- |
@@ -54,8 +44,8 @@ install is a straight copy of each legacy bucket into a same-named folder:
 Optimized images are stored in multiple sizes as `<imageId>-x<width>.webp`
 (plus `.jpg` for covers).
 
-The full routing table (incoming bucket, final bucket, path prefix, and
-whether the type goes through the optimize-image queue) is `imageTypeBuckets`
+The full routing table (path prefix, and whether the type goes through the
+optimize-image queue) is `imageTypeBuckets`
 in `src/utils/minio.ts` — that is the single source of truth if this document
 drifts.
 
@@ -67,29 +57,11 @@ drifts.
 | `trackgroup/<id>/<format>.zip` | Cached album download zips, per audio format                 |
 | `track/<id>/<format>.zip`      | Cached single-track download zips                            |
 
-## Legacy layout
-
-One bucket per media type, with bare object keys. Most types have a separate
-`incoming-*` bucket for uploads awaiting processing:
-
-| Media                | Incoming bucket           | Final bucket                 |
-| -------------------- | ------------------------- | ---------------------------- |
-| Track audio          | `incoming-track-audio`    | `track-audio`                |
-| Release covers       | `incoming-covers`         | `trackgroup-covers`          |
-| Artist avatars       | `incoming-artist-avatars` | `artist-avatars`             |
-| Artist banners       | `incoming-artist-banners` | `artist-banners`             |
-| Merch images         | `incoming-merch-images`   | `merch-images`               |
-| Post images          | —                         | `post-images`                |
-| Generic images       | `incoming-mirlo-images`   | `mirlo-images`               |
-| Downloadable content | —                         | `mirlo-downloadable-content` |
-| Album zips           | —                         | `trackgroup-format`          |
-| Track zips           | —                         | `track-format`               |
-
 ## How images are served
 
 In development (Garage), the API proxies images at
-`/images/<bucket>/<key>` — note that in consolidated mode the key contains
-slashes (e.g. `/images/mirlo-images/trackgroup-covers/<id>-x600.webp`).
+`/images/<bucket>/<key>` — note that the key can contain slashes (e.g.
+`/images/mirlo-images/trackgroup-covers/<id>-x600.webp`).
 
 In production (S3/Backblaze), URLs point either at a CDN (`cdnUrl` in site
 settings) or directly at the provider's public bucket URL. URL construction

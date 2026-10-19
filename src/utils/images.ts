@@ -1,9 +1,4 @@
-import {
-  backendStorage,
-  finalImageBucket,
-  getImagesBucket,
-  S3_ENDPOINT,
-} from "./minio";
+import { backendStorage, getImagesBucket, S3_ENDPOINT } from "./minio";
 
 // Module-level cache initialized from DB settings at startup (and refreshed on admin save).
 // Kept synchronous so generateFullStaticImageUrl can be used as a plain function reference.
@@ -22,18 +17,11 @@ export const busboyOptions = {
 
 export const generateFullStaticImageUrl = (
   imageName: string,
-  bucket: string,
+  prefix: string,
   extension?: string
 ) => {
-  // In consolidated mode, every legacy per-type bucket becomes a path prefix
-  // within the single images bucket — except the generic "image" type, which
-  // has no prefix in imageTypeBuckets (minio.ts) and sits at the bucket root.
-  // In legacy mode effectiveBucket === bucket, so no prefix is ever added.
-  const effectiveBucket = getImagesBucket(bucket);
-  const effectiveKey =
-    effectiveBucket !== bucket && bucket !== finalImageBucket
-      ? `${bucket}/${imageName}`
-      : imageName;
+  const effectiveBucket = getImagesBucket();
+  const effectiveKey = prefix ? `${prefix}/${imageName}` : imageName;
 
   if (backendStorage === "minio") {
     return `${process.env.STATIC_MEDIA_HOST}/images/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;
@@ -48,17 +36,17 @@ export const generateFullStaticImageUrl = (
   }
 };
 
-export const convertURLArrayToSizes = (urls: string[], bucket: string) => {
+export const convertURLArrayToSizes = (urls: string[], prefix: string) => {
   return urls.reduce((aggr, url) => {
     if (!url.includes("-x")) {
       return {
         ...aggr,
-        original: generateFullStaticImageUrl(url, bucket),
+        original: generateFullStaticImageUrl(url, prefix),
       };
     }
     return {
       ...aggr,
-      [url.split("-x")[1]]: generateFullStaticImageUrl(url, bucket),
+      [url.split("-x")[1]]: generateFullStaticImageUrl(url, prefix),
     };
   }, {});
 };

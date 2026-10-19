@@ -44,11 +44,7 @@ import { resolveProfileImageUrl, whereForVisibleProfile } from "./utils/artist";
 import { getClient } from "./utils/getClient";
 import { generateFullStaticImageUrl } from "./utils/images";
 import { merchImageUrl } from "./utils/merch";
-import {
-  finalCoversBucket,
-  finalImageBucket,
-  finalPostImageBucket,
-} from "./utils/minio";
+import { coversPrefix, rootImagePrefix, postImagePrefix } from "./utils/minio";
 import {
   getCanUserSeePostContent,
   loadPurchasesForPostTracks,
@@ -274,7 +270,7 @@ const handlePost: RouteHandler<PostParams> = async ({
       imageUrl: post.featuredImage
         ? generateFullStaticImageUrl(
             post.featuredImage.id,
-            finalPostImageBucket,
+            postImagePrefix,
             post.featuredImage.extension
           )
         : avatarUrl,
@@ -290,7 +286,7 @@ const handlePost: RouteHandler<PostParams> = async ({
       imageUrl: post.featuredImage
         ? generateFullStaticImageUrl(
             post.featuredImage.id,
-            finalPostImageBucket,
+            postImagePrefix,
             post.featuredImage.extension
           )
         : avatarUrl,
@@ -460,7 +456,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       description: `A track by ${tg.profile.name}\nReleased ${releaseDate}`,
       url: trackUrl,
       imageUrl: coverString
-        ? generateFullStaticImageUrl(coverString, finalCoversBucket)
+        ? generateFullStaticImageUrl(coverString, coversPrefix)
         : undefined,
       artistName: tg.profile.name,
       artistUrl: `${client.applicationUrl}/${tg.profile?.urlSlug}`,
@@ -473,7 +469,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       description: `A track by ${tg.profile.name}\nReleased ${releaseDate}`,
       url: trackUrl,
       imageUrl: coverString
-        ? generateFullStaticImageUrl(coverString, finalCoversBucket)
+        ? generateFullStaticImageUrl(coverString, coversPrefix)
         : undefined,
       isSong: true,
       ogVideo: {
@@ -513,7 +509,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       description: description,
       url: albumUrl,
       imageUrl: coverString
-        ? generateFullStaticImageUrl(coverString, finalCoversBucket)
+        ? generateFullStaticImageUrl(coverString, coversPrefix)
         : undefined,
       artistName: tg.profile.name,
       artistUrl: `${client.applicationUrl}/${tg.profile?.urlSlug}`,
@@ -527,7 +523,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       description: description,
       url: albumUrl,
       imageUrl: coverString
-        ? generateFullStaticImageUrl(coverString, finalCoversBucket)
+        ? generateFullStaticImageUrl(coverString, coversPrefix)
         : undefined,
       isAlbum: true,
       ogVideo: {
@@ -578,7 +574,7 @@ const handleSupport: RouteHandler<SupportParams> = async ({
       ? `${supportDescription}\n${tier.description}`
       : supportDescription;
     const imageUrl = imageString
-      ? generateFullStaticImageUrl(imageString, finalImageBucket)
+      ? generateFullStaticImageUrl(imageString, rootImagePrefix)
       : avatarUrl;
 
     const schema = buildArticleSchema({

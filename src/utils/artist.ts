@@ -21,9 +21,9 @@ import { getClient } from "./getClient";
 import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
 import { deleteMerch, merchImagesInclude } from "./merch";
 import {
-  finalArtistAvatarBucket,
-  finalArtistBackgroundBucket,
-  finalCoversBucket,
+  artistAvatarPrefix,
+  artistBackgroundPrefix,
+  coversPrefix,
   removeImagesByType,
 } from "./minio";
 import { postImagesForContent } from "./postContent";
@@ -815,14 +815,14 @@ export const singleInclude = (queryOptions?: {
 };
 
 export const addSizesToImage = (
-  bucket: string,
+  prefix: string,
   image?: { url: string[]; updatedAt?: Date | string } | null
 ) => {
   if (!image) {
     return null;
   }
 
-  const sizes = convertURLArrayToSizes(image.url, bucket) as Record<
+  const sizes = convertURLArrayToSizes(image.url, prefix) as Record<
     string,
     string
   >;
@@ -858,7 +858,7 @@ export const resolveProfileImageUrl = (artist: {
   // Try avatar first
   const avatarString = artist.avatar?.url.find((u) => u.includes("x600"));
   if (avatarString) {
-    return generateFullStaticImageUrl(avatarString, finalArtistAvatarBucket);
+    return generateFullStaticImageUrl(avatarString, artistAvatarPrefix);
   }
 
   // Fall back to background
@@ -866,10 +866,7 @@ export const resolveProfileImageUrl = (artist: {
     u.includes("x625")
   );
   if (backgroundString) {
-    return generateFullStaticImageUrl(
-      backgroundString,
-      finalArtistBackgroundBucket
-    );
+    return generateFullStaticImageUrl(backgroundString, artistBackgroundPrefix);
   }
 
   // Fall back to first album cover
@@ -881,7 +878,7 @@ export const resolveProfileImageUrl = (artist: {
       u.includes("x600")
     );
     if (coverString) {
-      return generateFullStaticImageUrl(coverString, finalCoversBucket);
+      return generateFullStaticImageUrl(coverString, coversPrefix);
     }
   }
 
