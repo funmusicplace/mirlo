@@ -1,10 +1,9 @@
 import prisma from "@mirlo/prisma";
 import { difference } from "lodash";
 
-import logger from "../logger";
-import { forEachStoredAudioIdPage, removeAudioFiles } from "../utils/minio";
-
-import type { DataMigration } from ".";
+import type { DataMigration } from "..";
+import logger from "../../logger";
+import { forEachStoredAudioIdPage, removeAudioFiles } from "../../utils/minio";
 
 const orphanedAudio: DataMigration = {
   name: "2026-10-orphaned-audio",

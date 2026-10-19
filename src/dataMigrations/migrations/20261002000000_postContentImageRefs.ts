@@ -1,9 +1,8 @@
 import prisma from "@mirlo/prisma";
 
-import logger from "../logger";
-import { addImageRefs } from "../utils/postContent";
-
-import type { DataMigration } from ".";
+import type { DataMigration } from "..";
+import logger from "../../logger";
+import { addImageRefs } from "../../utils/postContent";
 
 const batchSize = 100;
 
