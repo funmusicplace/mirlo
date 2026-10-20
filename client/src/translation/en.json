@@ -352,7 +352,12 @@
     "deleteAccountConsequenceArtists": "All of your artist pages are deleted, along with their music, posts and merch. Fans who bought your music will no longer be able to download it.",
     "deleteAccountConsequenceArtistSubscribers": "Everyone subscribed to your artist pages has their subscription cancelled.",
     "deleteAccountConsequenceCollection": "You lose access to everything in your collection, including music you've bought. Download anything you want to keep first.",
-    "deleteAccountConsequenceSubscriptions": "Your subscriptions to other artists are cancelled."
+    "deleteAccountConsequenceSubscriptions": "Your subscriptions to other artists are cancelled.",
+    "connectedApps": "Connected apps",
+    "connectedAppsDescription": "These apps can use your account. Disconnecting an app signs it out right away.",
+    "connectedAppDetails": "Access: {{scopes}} · Last used: {{lastUsed}}",
+    "never": "never",
+    "disconnectApp": "Disconnect"
   },
   "wishlist": {
     "addToWishlist": "Add to wishlist",

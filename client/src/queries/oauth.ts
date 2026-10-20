@@ -64,3 +64,37 @@ export function useRequestOAuthApprovalMutation(uid: string) {
       }),
   });
 }
+
+export type ConnectedApp = {
+  id: string;
+  clientId: string;
+  name: string;
+  url: string | null;
+  scopes: string[];
+  createdAt: string | null;
+  lastUsedAt: string | null;
+};
+
+export function queryConnectedApps(userId: number) {
+  return queryOptions({
+    queryKey: ["fetchConnectedApps", { userId }, QUERY_KEY_AUTH],
+    queryFn: ({ signal }) =>
+      api
+        .get<{
+          results: ConnectedApp[];
+        }>(`v1/users/${userId}/connectedApps`, { signal })
+        .then((r) => r.results),
+  });
+}
+
+export function useRevokeConnectedAppMutation(userId: number) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (grantId: string) =>
+      api.del(`v1/users/${userId}/connectedApps/${grantId}`, {}),
+    onSuccess: () =>
+      client.invalidateQueries({
+        queryKey: queryConnectedApps(userId).queryKey,
+      }),
+  });
+}

@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
+import { revokeAllConnectedApps } from "../../auth/oidc/grants";
 import logger from "../../logger";
 import { sendMailQueue } from "../../queues/send-mail-queue";
 import { getClient } from "../../utils/getClient";
@@ -189,6 +190,7 @@ export const passwordResetSetPassword = async (
           id: true,
         },
       });
+      await revokeAllConnectedApps(updatedUser.id);
       setTokens(res, updatedUser);
       res.status(200).json({
         message: "Success",
