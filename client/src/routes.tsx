@@ -149,6 +149,22 @@ const routes: RouteObject[] = [
         },
       },
       {
+        path: "oauth/error",
+        handle: { title: "oauthError" },
+        async lazy() {
+          const { default: Component } = await import("pages/oauth/Error");
+          return { Component };
+        },
+      },
+      {
+        path: "oauth/:uid",
+        handle: { title: "oauth" },
+        async lazy() {
+          const { default: Component } = await import("pages/oauth/Index");
+          return { Component };
+        },
+      },
+      {
         path: "checkout-error",
         handle: { title: "checkoutError" },
         async lazy() {

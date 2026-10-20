@@ -1,11 +1,12 @@
 import prisma from "@mirlo/prisma";
 import type { NextFunction, Request, Response } from "express";
-import Provider, { interactionPolicy } from "oidc-provider";
+import Provider, { type ErrorOut, interactionPolicy } from "oidc-provider";
 
 import logger from "../../logger";
 
 import { adapterFor } from "./adapter";
 import { loadKeys } from "./keys";
+import { OAUTH_SCOPES } from "./scopes";
 
 const DAY = 24 * 60 * 60;
 
@@ -13,8 +14,18 @@ export const OIDC_MOUNT_PATH = "/oidc";
 
 export const issuer = () => process.env.API_DOMAIN ?? "http://localhost:3000";
 
-export const interactionUrl = (uid: string) =>
-  `${process.env.CLIENT_DOMAIN ?? issuer()}/oauth/${uid}`;
+const clientRoot = () => process.env.CLIENT_DOMAIN ?? issuer();
+
+export const interactionUrl = (uid: string) => `${clientRoot()}/oauth/${uid}`;
+
+const errorPageUrl = (out: ErrorOut) => {
+  const url = new URL(`${clientRoot()}/oauth/error`);
+  url.searchParams.set("error", out.error);
+  if (out.error_description) {
+    url.searchParams.set("error_description", out.error_description);
+  }
+  return url.href;
+};
 
 // Always hand the request to our interaction so the Mirlo session cookie,
 // not the provider's own session, decides who is signing in.
@@ -74,7 +85,7 @@ const buildProvider = async () => {
       profile: ["name"],
       email: ["email", "email_verified"],
     },
-    scopes: ["openid", "offline_access", "profile", "email"],
+    scopes: OAUTH_SCOPES,
     responseTypes: ["code"],
     pkce: { required: () => true },
     features: {
@@ -85,6 +96,10 @@ const buildProvider = async () => {
     interactions: {
       url: (_ctx, interaction) => interactionUrl(interaction.uid),
       policy: policy(),
+    },
+    renderError: (ctx, out) => {
+      ctx.status = 303;
+      ctx.redirect(errorPageUrl(out));
     },
     ttl: {
       AccessToken: 60 * 60,

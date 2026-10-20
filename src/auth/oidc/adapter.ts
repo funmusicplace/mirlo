@@ -17,7 +17,7 @@ const accountIdOf = (payload: AdapterPayload) => {
   return Number.isInteger(id) ? id : null;
 };
 
-const notExpired = () => ({
+export const notExpired = () => ({
   OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
 });
 

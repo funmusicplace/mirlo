@@ -58,3 +58,81 @@ export const startAuthorization = async (
   const uid = location.match(/\/oauth\/([^/?#]+)$/)?.[1];
   return { response, location, uid };
 };
+
+type Agent = ReturnType<typeof request.agent>;
+
+const jarOf = (agent: Agent) =>
+  (
+    agent as unknown as {
+      jar: {
+        setCookie: (cookie: string, domain: string, path: string) => void;
+      };
+    }
+  ).jar;
+
+export const signIn = (
+  agent: ReturnType<typeof request.agent>,
+  accessToken: string
+) => {
+  jarOf(agent).setCookie(`jwt=${accessToken}`, new URL(API).hostname, "/");
+};
+
+export const signOut = (agent: ReturnType<typeof request.agent>) => {
+  jarOf(agent).setCookie(
+    "jwt=; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+    new URL(API).hostname,
+    "/"
+  );
+};
+
+export const pathOf = (url: string) => {
+  const parsed = new URL(url);
+  return parsed.pathname + parsed.search;
+};
+
+export const decide = async (
+  agent: ReturnType<typeof request.agent>,
+  uid: string,
+  action: string
+) => {
+  const response = await agent
+    .post(`/oauth/${uid}/decision`)
+    .send({ action })
+    .set("Accept", "application/json");
+  return response;
+};
+
+// Runs authorize → decision → resume and returns the redirect back to the app.
+export const authorizeAndAllow = async (
+  agent: ReturnType<typeof request.agent>,
+  clientId: string | number,
+  challenge: string,
+  extra: Record<string, string> = {}
+) => {
+  const { uid } = await startAuthorization(agent, clientId, challenge, extra);
+  if (!uid) {
+    throw new Error("authorization didn't reach the interaction");
+  }
+  const decision = await decide(agent, uid, "allow");
+  if (decision.status !== 200) {
+    throw new Error(`decision failed: ${decision.status} ${decision.text}`);
+  }
+  const resume = await agent.get(pathOf(decision.body.result.redirectTo));
+  return new URL(resume.headers.location);
+};
+
+export const exchangeCode = (
+  client: { id: number; key: string | null },
+  code: string,
+  verifier: string
+) =>
+  request(API)
+    .post("/oidc/token")
+    .auth(String(client.id), client.key ?? "")
+    .type("form")
+    .send({
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: REDIRECT_URI,
+      code_verifier: verifier,
+    });

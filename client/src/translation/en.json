@@ -90,7 +90,9 @@
     "adminSetup": "Admin: setup guide",
     "adminClients": "Admin: API clients",
     "flaggedContent": "Flagged content",
-    "adminSendEmails": "Admin: send emails"
+    "adminSendEmails": "Admin: send emails",
+    "oauth": "Connect an app",
+    "oauthError": "Couldn't connect the app"
   },
   "signUp": {
     "hasRegistered": "Cool! We've sent you an e-mail to confirm your account. Click on the link in it to proceed.",
@@ -182,6 +184,21 @@
     "password": "Password",
     "passwordReset": "Forgot your password?",
     "signUp": "Don't have an account yet? Sign up"
+  },
+  "oauth": {
+    "wantsAccess": "{{app}} wants to connect to your account",
+    "redirectsTo": "You'll be sent back to {{host}}.",
+    "allow": "Allow",
+    "deny": "Deny",
+    "expired": "This sign-in request has expired. Go back to the app and try again.",
+    "errorTitle": "Couldn't connect the app",
+    "errorExplanation": "Something went wrong while connecting the app to your account. Go back to the app and try again.",
+    "scopes": {
+      "openid": "Know who you are on this site",
+      "profile": "See your name",
+      "email": "See your email address",
+      "offline_access": "Stay connected until you disconnect it"
+    }
   },
   "passwordReset": {
     "title": "Reset your password",

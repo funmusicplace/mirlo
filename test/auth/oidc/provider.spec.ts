@@ -83,7 +83,8 @@ describe("oidc provider", () => {
         redirect_uri: "https://evil.example/callback",
       })}`
     );
-    assert.equal(response.status, 400);
+    assert.equal(response.status, 303);
+    assert.equal(new URL(response.headers.location).pathname, "/oauth/error");
   });
 
   it("refuses clients that aren't approved, are deleted, or have no redirect URIs", async () => {
@@ -97,8 +98,10 @@ describe("oidc provider", () => {
       const response = await request(API).get(
         `/oidc/auth?${authorizeParams(client.id, pkce().challenge)}`
       );
-      assert.equal(response.status, 400, String(client.id));
-      assert.match(response.text, /invalid_client/);
+      assert.equal(response.status, 303, String(client.id));
+      const location = new URL(response.headers.location);
+      assert.equal(location.pathname, "/oauth/error");
+      assert.equal(location.searchParams.get("error"), "invalid_client");
     }
   });
 });
