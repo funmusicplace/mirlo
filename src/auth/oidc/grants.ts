@@ -1,6 +1,7 @@
 import prisma from "@mirlo/prisma";
 
 import { notExpired } from "./adapter";
+import { isMetadataDocumentClientId } from "./approval";
 
 export const findGrantId = async (accountId: number, clientId: string) =>
   (
@@ -41,9 +42,16 @@ export const listConnectedApps = async (accountId: number) => {
   const clients = await prisma.client.findMany({
     where: {
       OR: [
-        { id: { in: clientIds.filter((id) => /^\d+$/.test(id)).map(Number) } },
+        {
+          id: {
+            in: clientIds
+              .filter((id) => !isMetadataDocumentClientId(id))
+              .map(Number),
+          },
+        },
         { clientIdUrl: { in: clientIds } },
       ],
+      deletedAt: {},
     },
   });
 

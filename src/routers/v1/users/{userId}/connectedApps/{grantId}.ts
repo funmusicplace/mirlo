@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 
 import { revokeConnectedApp } from "../../../../../auth/oidc/grants";
 import {
-  cookieSessionOnly,
   userAuthenticated,
   userHasPermission,
 } from "../../../../../auth/passport";
@@ -10,12 +9,7 @@ import { AppError } from "../../../../../utils/error";
 
 export default function () {
   const operations = {
-    DELETE: [
-      userAuthenticated,
-      cookieSessionOnly,
-      userHasPermission("owner"),
-      DELETE,
-    ],
+    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {

@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import {
   trackGroupBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 
@@ -13,7 +13,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, trackGroupBelongsToLoggedInUser, PUT],
+    PUT: [userOrAppAuthenticated, trackGroupBelongsToLoggedInUser, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

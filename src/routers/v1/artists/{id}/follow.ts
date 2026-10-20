@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { userOrAppLoggedInWithoutRedirect } from "../../../../auth/passport";
 import {
   confirmProfileIdExists,
   createSubscriptionConfirmation,
@@ -19,7 +19,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [confirmProfileIdExists, userLoggedInWithoutRedirect, POST],
+    POST: [confirmProfileIdExists, userOrAppLoggedInWithoutRedirect, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

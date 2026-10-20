@@ -4,10 +4,10 @@ import { merge } from "lodash";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
-  cookieSessionOnly,
   profileBelongsToLoggedInUser,
   profileOwnedByLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeProfile } from "../../../../../serializers/artist";
 import {
@@ -27,14 +27,9 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, profileBelongsToLoggedInUser, PUT],
+    PUT: [userOrAppAuthenticated, profileBelongsToLoggedInUser, PUT],
     GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
-    DELETE: [
-      userAuthenticated,
-      cookieSessionOnly,
-      profileOwnedByLoggedInUser,
-      DELETE,
-    ],
+    DELETE: [userAuthenticated, profileOwnedByLoggedInUser, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

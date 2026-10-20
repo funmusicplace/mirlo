@@ -17,18 +17,8 @@ export const findClientRow = (clientId: string) =>
 
 export const approvalStatusOf = async (
   clientId: string
-): Promise<ApprovalStatus> => {
-  if (!isMetadataDocumentClientId(clientId)) {
-    return (await findClientRow(clientId))?.status ?? "unknown";
-  }
-  const row = await prisma.client.findFirst({
-    where: { clientIdUrl: clientId, deletedAt: {} },
-  });
-  if (row?.status === "revoked") {
-    return "revoked";
-  }
-  return row && !row.deletedAt ? row.status : "unknown";
-};
+): Promise<ApprovalStatus> =>
+  (await findClientRow(clientId))?.status ?? "unknown";
 
 const PENDING_ROUTES = new Set(["authorization", "resume"]);
 

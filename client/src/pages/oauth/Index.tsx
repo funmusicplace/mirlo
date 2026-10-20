@@ -84,8 +84,8 @@ function Index() {
         </h1>
       </div>
       <p className="mb-4 text-(--mi-lighten-foreground-color)">
-        {t("redirectsTo", { host: data.redirectHost })}{" "}
-        {t("appDomain", { domain: data.client.domain })}
+        {data.redirectHost && t("redirectsTo", { host: data.redirectHost })}{" "}
+        {data.client.domain && t("appDomain", { domain: data.client.domain })}
       </p>
       <ConsentScopes scopes={data.scopes} />
       <div className="flex gap-4 mt-6">

@@ -2,13 +2,16 @@ import prisma from "@mirlo/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { NextFunction, Request, Response } from "express";
 
-import { userAuthenticated } from "../../../auth/passport";
+import {
+  userAuthenticated,
+  userOrAppAuthenticated,
+} from "../../../auth/passport";
 import { AppError, HttpCode } from "../../../utils/error";
 
 export default function () {
   const operations = {
     GET: [userAuthenticated, GET],
-    POST: [userAuthenticated, POST],
+    POST: [userOrAppAuthenticated, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

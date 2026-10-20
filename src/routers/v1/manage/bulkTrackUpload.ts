@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { slug } from "github-slugger";
 
 import { assertLoggedIn } from "../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../auth/passport";
 import {
   generateUniqueProfileSlug,
   whereForProfilesUserManages,
@@ -43,7 +43,7 @@ interface BulkUploadRequest {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    POST: [userOrAppAuthenticated, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

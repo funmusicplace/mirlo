@@ -58,11 +58,7 @@ const requestApproval = async (
     skipDuplicates: true,
   });
   await prisma.client.updateMany({
-    where: {
-      clientIdUrl: clientId,
-      deletedAt: { not: null },
-      status: { not: "revoked" },
-    },
+    where: { clientIdUrl: clientId, deletedAt: { not: null } },
     data: { ...data, deletedAt: null },
   });
 };
@@ -85,8 +81,15 @@ router.get(
       const { provider, interaction, client, clientId, approval, scopes } =
         await loadInteraction(req, res);
       const metadata = client.metadata();
-      const redirectHost = new URL(String(interaction.params.redirect_uri))
-        .host;
+      const redirectUri = new URL(String(interaction.params.redirect_uri));
+      const redirectHost = ["http:", "https:"].includes(redirectUri.protocol)
+        ? redirectUri.host
+        : null;
+      const domain = isMetadataDocumentClientId(clientId)
+        ? new URL(clientId).host
+        : metadata.client_uri
+          ? new URL(metadata.client_uri).host
+          : redirectHost;
 
       const promptsConsent = String(interaction.params.prompt ?? "")
         .split(" ")
@@ -100,12 +103,10 @@ router.get(
       res.json({
         result: {
           client: {
-            name: metadata.client_name ?? redirectHost,
+            name: metadata.client_name ?? domain ?? clientId,
             uri: metadata.client_uri ?? null,
             logoUri: metadata.logo_uri ?? null,
-            domain: isMetadataDocumentClientId(clientId)
-              ? new URL(clientId).host
-              : redirectHost,
+            domain,
           },
           approval,
           redirectHost,

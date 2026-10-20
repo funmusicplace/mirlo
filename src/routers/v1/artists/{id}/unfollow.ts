@@ -1,7 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { userOrAppLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 
 type Params = {
@@ -10,7 +10,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userLoggedInWithoutRedirect, POST],
+    POST: [userOrAppLoggedInWithoutRedirect, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

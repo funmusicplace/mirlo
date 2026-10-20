@@ -112,6 +112,12 @@ describe("oauth bearer tokens", () => {
       .send({ isArtistApproved: true });
     assert.equal(approveLabel.status, 403);
 
+    const addLabel = await request(API)
+      .post(`/v1/manage/artists/${artist.id}/labels`)
+      .set(headers)
+      .send({ labelUserId: label.id });
+    assert.equal(addLabel.status, 403);
+
     const addManager = await request(API)
       .post(`/v1/manage/artists/${artist.id}/managers`)
       .set(headers)
@@ -145,21 +151,45 @@ describe("oauth bearer tokens", () => {
 
   it("stands in for the API key on cross-origin writes", async () => {
     const { user, tokens } = await setup();
+    await prisma.notification.create({
+      data: { userId: user.id, notificationType: "USER_FOLLOWED_YOU" },
+    });
 
-    const withoutAnything = await request(API)
-      .put(`/v1/users/${user.id}`)
-      .send({ name: "New name" });
+    const withoutAnything = await request(API).put(
+      `/v1/users/${user.id}/notifications/markAllRead`
+    );
     assert.equal(withoutAnything.status, 401);
 
+    const response = await request(API)
+      .put(`/v1/users/${user.id}/notifications/markAllRead`)
+      .set(bearer(tokens.access_token));
+    assert.equal(response.status, 200, response.text);
+    const notification = await prisma.notification.findFirstOrThrow({
+      where: { userId: user.id },
+    });
+    assert.equal(notification.isRead, true);
+  });
+
+  it("refuses writes that aren't open to apps", async () => {
+    const { user, tokens } = await setup();
     const response = await request(API)
       .put(`/v1/users/${user.id}`)
       .set(bearer(tokens.access_token))
       .send({ name: "New name" });
-    assert.equal(response.status, 200, response.text);
-    const updated = await prisma.user.findFirstOrThrow({
+    assert.equal(response.status, 403);
+    const unchanged = await prisma.user.findFirstOrThrow({
       where: { id: user.id },
     });
-    assert.equal(updated.name, "New name");
+    assert.notEqual(unchanged.name, "New name");
+  });
+
+  it("refuses an expired token on a write with the RFC 6750 header", async () => {
+    const { user } = await setup();
+    const response = await request(API)
+      .put(`/v1/users/${user.id}/notifications/markAllRead`)
+      .set(bearer("not-a-token"));
+    assert.equal(response.status, 401);
+    assert.match(response.headers["www-authenticate"], /invalid_token/);
   });
 
   it("stops working when the app is revoked or the user is disabled", async () => {

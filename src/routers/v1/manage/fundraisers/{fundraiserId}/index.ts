@@ -5,6 +5,7 @@ import { pick } from "lodash";
 import {
   fundraiserBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeFundraiser } from "../../../../../serializers/fundraiser";
 import { AppError } from "../../../../../utils/error";
@@ -15,8 +16,8 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, fundraiserBelongsToLoggedInUser, PUT],
-    DELETE: [userAuthenticated, fundraiserBelongsToLoggedInUser, DELETE],
+    PUT: [userOrAppAuthenticated, fundraiserBelongsToLoggedInUser, PUT],
+    DELETE: [userOrAppAuthenticated, fundraiserBelongsToLoggedInUser, DELETE],
     GET: [userAuthenticated, fundraiserBelongsToLoggedInUser, GET],
   };
 

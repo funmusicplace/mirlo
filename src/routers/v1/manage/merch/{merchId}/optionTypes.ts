@@ -3,8 +3,8 @@ import { NextFunction, Request, Response } from "express";
 import { isNumber } from "lodash";
 
 import {
-  userAuthenticated,
   merchBelongsToLoggedInUser,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeMerch } from "../../../../../serializers/merch";
 
@@ -15,7 +15,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, merchBelongsToLoggedInUser, PUT],
+    PUT: [userOrAppAuthenticated, merchBelongsToLoggedInUser, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

@@ -1,14 +1,14 @@
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
-import { userAuthenticated } from "../../../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../../../auth/passport";
 import { serializePost } from "../../../../../serializers/post";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 import { postImagesForContent } from "../../../../../utils/postContent";
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, doesPostBelongToUser, PUT],
+    PUT: [userOrAppAuthenticated, doesPostBelongToUser, PUT],
   };
 
   async function PUT(req: Request, res: Response) {

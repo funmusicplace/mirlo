@@ -5,6 +5,7 @@ import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { serializePost } from "../../../../../serializers/post";
 import { AppError } from "../../../../../utils/error";
@@ -17,7 +18,7 @@ import {
 export default function () {
   const operations = {
     GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
+    POST: [userOrAppAuthenticated, artistBelongsToLoggedInUser, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

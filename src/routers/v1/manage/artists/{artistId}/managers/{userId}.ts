@@ -2,7 +2,6 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import {
-  cookieSessionOnly,
   profileOwnedByLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
@@ -11,12 +10,7 @@ import { findProfileManagers } from "../../../../../../utils/profileManagers";
 
 export default function () {
   const operations = {
-    DELETE: [
-      userAuthenticated,
-      cookieSessionOnly,
-      profileOwnedByLoggedInUser,
-      DELETE,
-    ],
+    DELETE: [userAuthenticated, profileOwnedByLoggedInUser, DELETE],
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {

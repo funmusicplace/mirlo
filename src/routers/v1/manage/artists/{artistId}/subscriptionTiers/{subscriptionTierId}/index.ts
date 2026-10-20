@@ -5,6 +5,7 @@ import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../../../auth/passport";
 import { serializeProfileSubscriptionTier } from "../../../../../../../serializers/profileSubscriptionTier";
 import { AppError } from "../../../../../../../utils/error";
@@ -27,8 +28,8 @@ const normalizeDiscountPercent = (value: unknown): number | undefined => {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, artistBelongsToLoggedInUser, PUT],
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    PUT: [userOrAppAuthenticated, artistBelongsToLoggedInUser, PUT],
+    DELETE: [userOrAppAuthenticated, artistBelongsToLoggedInUser, DELETE],
     GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
   };
 

@@ -6,6 +6,7 @@ import {
   artistBelongsToLoggedInUser,
   canUserCreateArtistContent,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import {
@@ -17,7 +18,7 @@ export default function () {
   const operations = {
     GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
     POST: [
-      userAuthenticated,
+      userOrAppAuthenticated,
       artistBelongsToLoggedInUser,
       canUserCreateArtistContent,
       POST,

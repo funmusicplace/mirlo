@@ -63,6 +63,17 @@ describe("connected apps", () => {
     assert.equal(other.status, 401);
   });
 
+  it("keeps the name of an app an admin has deleted", async () => {
+    const { user, accessToken, client } = await setup();
+    await prisma.client.delete({ where: { id: client.id } });
+
+    const list = await request(API)
+      .get(`/v1/users/${user.id}/connectedApps`)
+      .set("Cookie", [`jwt=${accessToken}`]);
+    assert.equal(list.status, 200, list.text);
+    assert.equal(list.body.results[0].name, "Radiccio");
+  });
+
   it("disconnecting an app revokes its tokens", async () => {
     const { user, accessToken, client, tokens } = await setup();
     assert.equal((await profileWith(tokens.access_token)).status, 200);

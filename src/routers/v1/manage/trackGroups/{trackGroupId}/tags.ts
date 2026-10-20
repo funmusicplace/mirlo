@@ -1,12 +1,13 @@
-import { NextFunction, Request, Response } from "express";
-import {
-  userAuthenticated,
-  trackGroupBelongsToLoggedInUser,
-} from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
 import { flatten, uniq } from "lodash";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
+import {
+  trackGroupBelongsToLoggedInUser,
+  userOrAppAuthenticated,
+} from "../../../../../auth/passport";
+import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 
 type Params = {
   trackGroupId: number;
@@ -15,7 +16,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, trackGroupBelongsToLoggedInUser, PUT],
+    PUT: [userOrAppAuthenticated, trackGroupBelongsToLoggedInUser, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

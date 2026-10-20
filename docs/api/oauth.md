@@ -88,14 +88,14 @@ The response has an `access_token` (valid for an hour), an `id_token` if you ask
 
 ## Scopes
 
-| Scope              | Gives your app                                                                                                                                                                                            |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `openid`           | An ID token, and the user's ID (`sub`) from `/oidc/me`                                                                                                                                                    |
-| `profile`          | The user's name                                                                                                                                                                                           |
-| `email`            | The user's email address and `email_verified`                                                                                                                                                             |
-| `api`              | Use the REST API as the user. Excludes admin actions, deleting the account or an artist, payout settings, adding or removing an artist's managers and labels, and connecting or disconnecting other apps. |
-| `subscribers:read` | `GET /v1/manage/artists/{artistId}/subscribers/active` for artists the user can edit. Add `?paid=true` to leave out people who only follow the artist                                                     |
-| `offline_access`   | A refresh token. OpenID Connect only honours it together with `prompt=consent`.                                                                                                                           |
+| Scope              | Gives your app                                                                                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openid`           | An ID token, and the user's ID (`sub`) from `/oidc/me`                                                                                                |
+| `profile`          | The user's name                                                                                                                                       |
+| `email`            | The user's email address and `email_verified`                                                                                                         |
+| `api`              | Use the REST API as the user. See [What `api` tokens can do](#what-api-tokens-can-do).                                                                |
+| `subscribers:read` | `GET /v1/manage/artists/{artistId}/subscribers/active` for artists the user can edit. Add `?paid=true` to leave out people who only follow the artist |
+| `offline_access`   | A refresh token. OpenID Connect only honours it together with `prompt=consent`.                                                                       |
 
 Ask for the fewest scopes your app needs. The consent screen warns people strongly about `api`.
 
@@ -117,7 +117,18 @@ Errors follow RFC 6750:
 - `401` with `WWW-Authenticate: Bearer error="invalid_token"`: the token expired, was revoked, the app was blocked on the instance, or the user's account was disabled. Refresh it, or start the flow again.
 - `403` with `error="insufficient_scope", scope="…"`: the route needs a scope your token doesn't have.
 
-To stream audio as the user, send the same `Authorization` header on the HLS manifest request (`/v1/tracks/{id}/stream/playlist.m3u8`). Segment URLs don't need it.
+To stream audio as the user, send the same `Authorization` header on the HLS manifest (`/v1/tracks/{id}/stream/playlist.m3u8`) and on every segment request. Without it, segments of tracks that aren't previews return `404`.
+
+### What `api` tokens can do
+
+An `api` token can read anything the user can, except the list of connected apps and the Stripe onboarding link. It can make most of the changes the user can, such as following artists, buying things, and managing releases, posts and merch. Changes that aren't open to apps return `403` and have to be done while signed in on the site. Apps can't:
+
+- change account settings, or delete the account or an artist
+- change payouts or connect Stripe
+- charge a fundraiser's pledges
+- add or remove an artist's managers or labels, or accept manager invites
+- connect or disconnect other apps
+- use admin endpoints
 
 ## Refreshing and revoking
 

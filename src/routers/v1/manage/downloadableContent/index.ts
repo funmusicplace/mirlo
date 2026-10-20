@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../../auth/passport";
 import { isAllowedDownloadableContentMimeType } from "../../../../utils/content";
 import { clearTrackGroupDownloads } from "../../../../utils/downloadCache";
 import { AppError } from "../../../../utils/error";
@@ -18,7 +18,7 @@ const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    POST: [userOrAppAuthenticated, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

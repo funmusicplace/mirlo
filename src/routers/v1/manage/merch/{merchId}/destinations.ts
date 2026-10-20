@@ -3,8 +3,8 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
-  userAuthenticated,
   merchBelongsToLoggedInUser,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeMerch } from "../../../../../serializers/merch";
 import { getUserCountry } from "../../../../../utils/user";
@@ -16,7 +16,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, merchBelongsToLoggedInUser, PUT],
+    PUT: [userOrAppAuthenticated, merchBelongsToLoggedInUser, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

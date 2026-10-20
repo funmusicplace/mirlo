@@ -3,7 +3,10 @@ import { NextFunction, Request, Response } from "express";
 import { uniq } from "lodash";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../../auth/passport";
+import {
+  userAuthenticated,
+  userOrAppAuthenticated,
+} from "../../../../../auth/passport";
 import { serializePost } from "../../../../../serializers/post";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
@@ -111,8 +114,8 @@ async function syncPostTracks(postId: number, content: string) {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, doesPostBelongToUser, PUT],
-    DELETE: [userAuthenticated, doesPostBelongToUser, DELETE],
+    PUT: [userOrAppAuthenticated, doesPostBelongToUser, PUT],
+    DELETE: [userOrAppAuthenticated, doesPostBelongToUser, DELETE],
     GET: [userAuthenticated, doesPostBelongToUser, GET],
   };
 

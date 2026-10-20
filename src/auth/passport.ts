@@ -120,7 +120,11 @@ const cookieUserAuthenticated = (
 const withBearer =
   (
     cookieMiddleware: (req: Request, res: Response, next: NextFunction) => void,
-    { required }: { required: boolean }
+    {
+      required,
+      apps,
+      scope = "api",
+    }: { required: boolean; apps: "reads" | "all" | "none"; scope?: string }
   ) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -129,12 +133,19 @@ const withBearer =
         return cookieMiddleware(req, res, next);
       }
       if (bearer.status === "invalid") {
-        return rejectBearer(res, "invalid_token");
+        return rejectBearer(res, next, "invalid_token");
       }
       req.oauth = bearer.oauth;
-      if (!bearer.oauth.scopes.includes("api")) {
+      const isRead = ["GET", "HEAD"].includes(req.method);
+      if (apps === "none" || (apps === "reads" && !isRead)) {
+        throw new AppError({
+          httpCode: 403,
+          description: "This can only be done while signed in on the site",
+        });
+      }
+      if (!hasScope(req, scope)) {
         return required
-          ? rejectBearer(res, "insufficient_scope", "api")
+          ? rejectBearer(res, next, "insufficient_scope", scope)
           : next();
       }
       req.user = bearer.user;
@@ -146,47 +157,31 @@ const withBearer =
 
 export const userLoggedInWithoutRedirect = withBearer(
   cookieUserLoggedInWithoutRedirect,
-  { required: false }
+  { required: false, apps: "reads" }
+);
+
+export const userOrAppLoggedInWithoutRedirect = withBearer(
+  cookieUserLoggedInWithoutRedirect,
+  { required: false, apps: "all" }
 );
 
 export const userAuthenticated = withBearer(cookieUserAuthenticated, {
   required: true,
+  apps: "reads",
 });
 
-export const userAuthenticatedWithScope =
-  (scope: string) =>
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const bearer = await resolveBearer(req);
-      if (bearer.status === "none") {
-        return cookieUserAuthenticated(req, res, next);
-      }
-      if (bearer.status === "invalid") {
-        return rejectBearer(res, "invalid_token");
-      }
-      req.oauth = bearer.oauth;
-      if (!hasScope(req, scope)) {
-        return rejectBearer(res, "insufficient_scope", scope);
-      }
-      req.user = bearer.user;
-      return next();
-    } catch (e) {
-      next(e);
-    }
-  };
+export const userOrAppAuthenticated = withBearer(cookieUserAuthenticated, {
+  required: true,
+  apps: "all",
+});
 
-export const cookieSessionOnly = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if (req.oauth) {
-    return res
-      .status(403)
-      .json({ error: "This can only be done while signed in on the site" });
-  }
-  return next();
-};
+export const siteUserAuthenticated = withBearer(cookieUserAuthenticated, {
+  required: true,
+  apps: "none",
+});
+
+export const userAuthenticatedWithScope = (scope: string) =>
+  withBearer(cookieUserAuthenticated, { required: true, apps: "all", scope });
 
 export const userHasPermission = (role: "admin" | "owner") => {
   return (req: Request, res: Response, next: NextFunction) => {

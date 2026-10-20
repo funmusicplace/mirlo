@@ -4,6 +4,8 @@ import type { ClientMetadata } from "oidc-provider";
 
 import { AppError } from "../../utils/error";
 
+import { isMetadataDocumentClientId } from "./approval";
+
 const isWebUri = (uri: string) => /^https?:\/\//i.test(uri);
 
 const validUrlOrUndefined = (url: string) =>
@@ -56,7 +58,7 @@ export const metadataForClientRow = (
 export const clientMetadataFor = async (
   id: string
 ): Promise<ClientMetadata | undefined> => {
-  if (!/^\d+$/.test(id)) {
+  if (isMetadataDocumentClientId(id)) {
     return undefined;
   }
   const client = await prisma.client.findFirst({

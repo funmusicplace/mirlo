@@ -1,15 +1,17 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
 import {
   userAuthenticated,
   profileBelongsToLoggedInUser,
+  userOrAppAuthenticated,
 } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
 
 export default function () {
   const operations = {
     GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, profileBelongsToLoggedInUser, POST],
+    POST: [userOrAppAuthenticated, profileBelongsToLoggedInUser, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

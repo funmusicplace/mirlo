@@ -1,7 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
-import { userAuthenticated } from "../../../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../../../auth/passport";
 import { sendMailQueue } from "../../../../../queues/send-mail-queue";
 import { serializeMerchPurchase } from "../../../../../serializers/merchPurchase";
 import { omitApPrivateKey } from "../../../../../serializers/utils";
@@ -9,7 +9,7 @@ import { getClient } from "../../../../../utils/getClient";
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    POST: [userOrAppAuthenticated, POST],
   };
 
   async function POST(req: Request, res: Response) {

@@ -199,7 +199,7 @@
       "email": "See your email address",
       "offline_access": "Stay connected until you disconnect it",
       "api": "Act as you on this site.",
-      "apiWarning": "The app can do almost anything you can: see your purchases and messages, buy things, follow artists, and manage your artists. Only allow apps you trust. It can't delete your account or your artists, change payouts, add managers or labels, or connect other apps.",
+      "apiWarning": "The app can do almost anything you can: see your purchases and messages, buy things, follow artists, and manage your artists. Only allow apps you trust. It can't change your account settings, delete your account or your artists, change payouts, charge fundraiser pledges, add managers or labels, or connect other apps.",
       "subscribersRead": "See the names and email addresses of the supporters of the artists you manage"
     },
     "appDomain": "The app is published by {{domain}}.",

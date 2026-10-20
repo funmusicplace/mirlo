@@ -3,19 +3,13 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { listConnectedApps } from "../../../../auth/oidc/grants";
 import {
-  cookieSessionOnly,
-  userAuthenticated,
+  siteUserAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
 
 export default function () {
   const operations = {
-    GET: [
-      userAuthenticated,
-      cookieSessionOnly,
-      userHasPermission("owner"),
-      GET,
-    ],
+    GET: [siteUserAuthenticated, userHasPermission("owner"), GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

@@ -3,10 +3,10 @@ import { NextFunction, Request, Response } from "express";
 
 import {
   trackGroupBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
-import { AppError } from "../../../../../utils/error";
 import { serializeFundraiser } from "../../../../../serializers/fundraiser";
+import { AppError } from "../../../../../utils/error";
 
 type Params = {
   trackGroupId: number;
@@ -15,8 +15,8 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, trackGroupBelongsToLoggedInUser, POST],
-    DELETE: [userAuthenticated, trackGroupBelongsToLoggedInUser, DELETE],
+    POST: [userOrAppAuthenticated, trackGroupBelongsToLoggedInUser, POST],
+    DELETE: [userOrAppAuthenticated, trackGroupBelongsToLoggedInUser, DELETE],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

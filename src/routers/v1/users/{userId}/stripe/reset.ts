@@ -3,10 +3,7 @@ import bcrypt from "bcryptjs";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import {
-  cookieSessionOnly,
-  userAuthenticated,
-} from "../../../../../auth/passport";
+import { userAuthenticated } from "../../../../../auth/passport";
 import logger from "../../../../../logger";
 import { AppError, HttpCode } from "../../../../../utils/error";
 
@@ -35,7 +32,7 @@ type Params = {
  */
 export default function () {
   const operations = {
-    POST: [userAuthenticated, cookieSessionOnly, POST],
+    POST: [userAuthenticated, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

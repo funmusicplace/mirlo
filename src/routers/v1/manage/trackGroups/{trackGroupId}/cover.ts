@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   trackGroupBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { clearTrackGroupDownloads } from "../../../../../utils/downloadCache";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
@@ -19,7 +19,7 @@ type Params = {
 export default function () {
   const operations = {
     PUT: [
-      userAuthenticated,
+      userOrAppAuthenticated,
       trackGroupBelongsToLoggedInUser,
       busboy({
         highWaterMark: 2 * 1024 * 1024,
@@ -29,7 +29,7 @@ export default function () {
       }),
       PUT,
     ],
-    DELETE: [userAuthenticated, trackGroupBelongsToLoggedInUser, DELETE],
+    DELETE: [userOrAppAuthenticated, trackGroupBelongsToLoggedInUser, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

@@ -6,6 +6,7 @@ import {
   artistBelongsToLoggedInUser,
   canUserCreateArtistContent,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeMerch } from "../../../../../serializers/merch";
 import { getPlatformFeeForArtist } from "../../../../../utils/artist";
@@ -16,7 +17,7 @@ export default function () {
   const operations = {
     GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
     POST: [
-      userAuthenticated,
+      userOrAppAuthenticated,
       artistBelongsToLoggedInUser,
       canUserCreateArtistContent,
       POST,

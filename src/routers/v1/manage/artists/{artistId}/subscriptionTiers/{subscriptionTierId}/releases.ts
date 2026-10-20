@@ -5,6 +5,7 @@ import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../../../serializers/trackGroup";
 import { AppError } from "../../../../../../../utils/error";
@@ -24,8 +25,8 @@ type QueryParams = {
 export default function () {
   const operations = {
     GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    POST: [userOrAppAuthenticated, artistBelongsToLoggedInUser, POST],
+    DELETE: [userOrAppAuthenticated, artistBelongsToLoggedInUser, DELETE],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

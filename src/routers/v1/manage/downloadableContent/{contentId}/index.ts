@@ -1,12 +1,13 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
 import {
   contentBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
-import prisma from "@mirlo/prisma";
-
-import { AppError } from "../../../../../utils/error";
 import { deleteDownloadableContent } from "../../../../../utils/content";
+import { AppError } from "../../../../../utils/error";
 
 type Params = {
   contentId: string;
@@ -32,7 +33,7 @@ const findNewSlug = async (
 
 export default function () {
   const operations = {
-    DELETE: [userAuthenticated, contentBelongsToLoggedInUser, DELETE],
+    DELETE: [userOrAppAuthenticated, contentBelongsToLoggedInUser, DELETE],
     GET: [userAuthenticated, contentBelongsToLoggedInUser, GET],
   };
 

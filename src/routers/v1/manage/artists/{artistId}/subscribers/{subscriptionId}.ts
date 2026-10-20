@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import {
   artistBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
@@ -16,7 +16,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    DELETE: [userOrAppAuthenticated, artistBelongsToLoggedInUser, DELETE],
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {

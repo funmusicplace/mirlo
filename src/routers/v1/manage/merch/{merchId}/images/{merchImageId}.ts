@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import {
   merchBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
 import { deleteMerchImage } from "../../../../../../utils/merch";
@@ -15,7 +15,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    DELETE: [userAuthenticated, merchBelongsToLoggedInUser, DELETE],
+    DELETE: [userOrAppAuthenticated, merchBelongsToLoggedInUser, DELETE],
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {

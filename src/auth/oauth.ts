@@ -1,6 +1,8 @@
 import prisma from "@mirlo/prisma";
 import { Client } from "@mirlo/prisma/client";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+
+import { AppError } from "../utils/error";
 
 import { findClientRow } from "./oidc/approval";
 import { getProvider } from "./oidc/provider";
@@ -62,6 +64,7 @@ export const hasScope = (req: Request, scope: string) =>
 
 export const rejectBearer = (
   res: Response,
+  next: NextFunction,
   error: "invalid_token" | "insufficient_scope",
   scope?: string
 ) => {
@@ -69,9 +72,15 @@ export const rejectBearer = (
     "WWW-Authenticate",
     `Bearer error="${error}"${scope ? `, scope="${scope}"` : ""}`
   );
-  if (error === "invalid_token") {
-    res.status(401).json({ error: "Invalid or expired access token" });
-  } else {
-    res.status(403).json({ error: `This needs the ${scope} scope` });
-  }
+  next(
+    error === "invalid_token"
+      ? new AppError({
+          httpCode: 401,
+          description: "Invalid or expired access token",
+        })
+      : new AppError({
+          httpCode: 403,
+          description: `This needs the ${scope} scope`,
+        })
+  );
 };

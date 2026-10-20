@@ -14,10 +14,10 @@ export type OAuthInteraction = {
     name: string;
     uri: string | null;
     logoUri: string | null;
-    domain: string;
+    domain: string | null;
   };
   approval: OAuthApproval;
-  redirectHost: string;
+  redirectHost: string | null;
   scopes: string[];
   loggedIn: boolean;
   needsConsent: boolean;

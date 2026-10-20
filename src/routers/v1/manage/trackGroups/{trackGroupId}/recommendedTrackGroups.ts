@@ -5,6 +5,7 @@ import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   userAuthenticated,
   trackGroupBelongsToLoggedInUser,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { AppError } from "../../../../../utils/error";
@@ -18,8 +19,8 @@ type Params = {
 export default function () {
   const operations = {
     GET: [userAuthenticated, trackGroupBelongsToLoggedInUser, GET],
-    PUT: [userAuthenticated, trackGroupBelongsToLoggedInUser, PUT],
-    DELETE: [userAuthenticated, trackGroupBelongsToLoggedInUser, DELETE],
+    PUT: [userOrAppAuthenticated, trackGroupBelongsToLoggedInUser, PUT],
+    DELETE: [userOrAppAuthenticated, trackGroupBelongsToLoggedInUser, DELETE],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

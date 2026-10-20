@@ -6,6 +6,7 @@ import { uniqBy } from "lodash";
 import {
   artistBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import logger from "../../../../../logger";
 import { serializeProfileUserSubscription } from "../../../../../serializers/profileUserSubscription";
@@ -90,7 +91,7 @@ const csvColumns = [
 export default function () {
   const operations = {
     GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
+    POST: [userOrAppAuthenticated, artistBelongsToLoggedInUser, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

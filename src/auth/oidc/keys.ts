@@ -5,6 +5,10 @@ import { Prisma } from "@mirlo/prisma/client";
 import type { JWKS } from "oidc-provider";
 
 const loadOrCreate = async <T>(kind: string, create: () => T): Promise<T> => {
+  const existing = await prisma.oAuthKey.findUnique({ where: { kind } });
+  if (existing) {
+    return existing.value as T;
+  }
   await prisma.oAuthKey.createMany({
     data: [{ kind, value: create() as Prisma.InputJsonValue }],
     skipDuplicates: true,

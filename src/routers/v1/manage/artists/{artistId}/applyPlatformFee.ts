@@ -1,8 +1,9 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
 import {
   profileBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { AppError } from "../../../../../utils/error";
 
@@ -12,7 +13,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, profileBelongsToLoggedInUser, POST],
+    POST: [userOrAppAuthenticated, profileBelongsToLoggedInUser, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

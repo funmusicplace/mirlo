@@ -177,8 +177,16 @@ describe("oauth client ID metadata documents", () => {
       },
     });
 
-  it("keeps a revoked app blocked after an admin deletes it", async () => {
-    await createRow({ status: "revoked", deletedAt: new Date() });
+  it("blocks a revoked app", async () => {
+    await prisma.client.create({
+      data: {
+        applicationName: "Radiccio",
+        applicationUrl: "https://radiccio.app",
+        allowedCorsOrigins: [],
+        clientIdUrl: CLIENT_ID,
+        status: "revoked",
+      },
+    });
     const agent = loggedInAgent();
     const { location } = await startAuthorization(
       agent,
@@ -188,8 +196,8 @@ describe("oauth client ID metadata documents", () => {
     assert.equal(new URL(location).pathname, "/oauth/error");
   });
 
-  it("lets a deleted app that wasn't revoked be requested again", async () => {
-    const row = await createRow({ status: "pending", deletedAt: new Date() });
+  it("lets a deleted app be requested again, even a revoked one", async () => {
+    const row = await createRow({ status: "revoked", deletedAt: new Date() });
     const agent = loggedInAgent();
     const { uid } = await startAuthorization(
       agent,

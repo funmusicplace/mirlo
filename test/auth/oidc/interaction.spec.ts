@@ -59,6 +59,25 @@ describe("oidc interaction", () => {
     });
   });
 
+  it("doesn't name a host for a native app's custom-scheme redirect", async () => {
+    const client = await createOAuthClient({
+      redirectUris: ["myapp://oauth/callback"],
+      confidential: false,
+    });
+    const agent = request.agent(API);
+    const { uid } = await startAuthorization(
+      agent,
+      client.id,
+      pkce().challenge,
+      { redirect_uri: "myapp://oauth/callback" }
+    );
+
+    const response = await agent.get(`/oauth/${uid}/details`);
+    assert.equal(response.status, 200, response.text);
+    assert.equal(response.body.result.redirectHost, null);
+    assert.equal(response.body.result.client.domain, "app.example");
+  });
+
   it("refuses to allow without a Mirlo session", async () => {
     const client = await createOAuthClient();
     const agent = request.agent(API);

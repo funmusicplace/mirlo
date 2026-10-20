@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
-import { userAuthenticated } from "../../../../auth/passport";
-import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-
 import prisma from "@mirlo/prisma";
+import { Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
+import { userOrAppAuthenticated } from "../../../../auth/passport";
 
 type Params = {
   id: string;
@@ -10,7 +10,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    POST: [userOrAppAuthenticated, POST],
   };
 
   async function POST(req: Request, res: Response) {

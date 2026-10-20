@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
 import {
   artistBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../../../serializers/trackGroup";
 import { AppError } from "../../../../../../../utils/error";
@@ -17,7 +17,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, artistBelongsToLoggedInUser, PUT],
+    PUT: [userOrAppAuthenticated, artistBelongsToLoggedInUser, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

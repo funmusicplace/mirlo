@@ -5,6 +5,7 @@ import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   trackBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { clearTrackDownloads } from "../../../../../utils/downloadCache";
 import { AppError } from "../../../../../utils/error";
@@ -33,8 +34,8 @@ interface TrackBody {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, trackBelongsToLoggedInUser, PUT],
-    DELETE: [userAuthenticated, trackBelongsToLoggedInUser, DELETE],
+    PUT: [userOrAppAuthenticated, trackBelongsToLoggedInUser, PUT],
+    DELETE: [userOrAppAuthenticated, trackBelongsToLoggedInUser, DELETE],
     GET: [userAuthenticated, trackBelongsToLoggedInUser, GET],
   };
 

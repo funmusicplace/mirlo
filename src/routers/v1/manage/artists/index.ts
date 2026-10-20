@@ -5,6 +5,7 @@ import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import {
   canUserCreateProfiles,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../auth/passport";
 import { serializeProfile } from "../../../../serializers/artist";
 import { serializeManagedProfile } from "../../../../serializers/profileManager";
@@ -53,7 +54,7 @@ const forbiddenNames = [
 export default function () {
   const operations = {
     GET: [userAuthenticated, GET],
-    POST: [userAuthenticated, canUserCreateProfiles, POST],
+    POST: [userOrAppAuthenticated, canUserCreateProfiles, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

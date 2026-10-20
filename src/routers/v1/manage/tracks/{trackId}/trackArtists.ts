@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import {
   trackBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { clearTrackDownloads } from "../../../../../utils/downloadCache";
 import { updateTrackArtists } from "../../../../../utils/tracks";
@@ -22,7 +22,7 @@ interface TrackBody {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, trackBelongsToLoggedInUser, PUT],
+    PUT: [userOrAppAuthenticated, trackBelongsToLoggedInUser, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

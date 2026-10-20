@@ -2,11 +2,11 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../../auth/passport";
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, PUT],
+    PUT: [userOrAppAuthenticated, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
