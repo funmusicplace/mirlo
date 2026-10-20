@@ -136,3 +136,31 @@ export const exchangeCode = (
       redirect_uri: REDIRECT_URI,
       code_verifier: verifier,
     });
+
+export const tokensFor = async (
+  accessToken: string,
+  client: { id: number; key: string | null },
+  scope: string,
+  extra: Record<string, string> = {}
+) => {
+  const agent = request.agent(API);
+  signIn(agent, accessToken);
+  const { verifier, challenge } = pkce();
+  const callback = await authorizeAndAllow(agent, client.id, challenge, {
+    scope,
+    ...extra,
+  });
+  const response = await exchangeCode(
+    client,
+    callback.searchParams.get("code")!,
+    verifier
+  );
+  if (response.status !== 200) {
+    throw new Error(`token request failed: ${response.text}`);
+  }
+  return response.body as {
+    access_token: string;
+    refresh_token?: string;
+    scope: string;
+  };
+};

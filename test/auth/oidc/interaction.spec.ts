@@ -144,6 +144,18 @@ describe("oidc interaction", () => {
     const details = await agent.get(`/oauth/${again.uid}/details`);
     assert.equal(details.body.result.needsConsent, false);
 
+    const forced = await startAuthorization(
+      agent,
+      client.id,
+      pkce().challenge,
+      {
+        scope: "openid profile",
+        prompt: "consent",
+      }
+    );
+    const forcedDetails = await agent.get(`/oauth/${forced.uid}/details`);
+    assert.equal(forcedDetails.body.result.needsConsent, true);
+
     const more = await startAuthorization(agent, client.id, pkce().challenge);
     const moreDetails = await agent.get(`/oauth/${more.uid}/details`);
     assert.equal(moreDetails.body.result.needsConsent, true);

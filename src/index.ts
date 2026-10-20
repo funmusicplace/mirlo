@@ -102,6 +102,7 @@ const authLimiter = isDev
       windowMs: 60 * 1000, // 1 minute
       limit: 50, // Limit each IP to 100 requests per `window`
       standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers,
+      skip: () => process.env.NODE_ENV === "test",
     });
 
 // The provider parses its own bodies and answers its own CORS requests, so it

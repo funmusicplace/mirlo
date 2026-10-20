@@ -197,7 +197,9 @@
       "openid": "Know who you are on this site",
       "profile": "See your name",
       "email": "See your email address",
-      "offline_access": "Stay connected until you disconnect it"
+      "offline_access": "Stay connected until you disconnect it",
+      "account": "Act as you on this site.",
+      "accountWarning": "The app can do almost anything you can: see your purchases and messages, buy things, follow artists, and manage your artists. Only allow apps you trust. It can't delete your account, change payouts or connect other apps."
     }
   },
   "passwordReset": {

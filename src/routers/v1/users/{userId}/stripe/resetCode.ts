@@ -4,7 +4,10 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../../auth/passport";
+import {
+  cookieSessionOnly,
+  userAuthenticated,
+} from "../../../../../auth/passport";
 import logger from "../../../../../logger";
 import { sendMailQueue } from "../../../../../queues/send-mail-queue";
 import { AppError, HttpCode } from "../../../../../utils/error";
@@ -27,7 +30,7 @@ const generateCode = () => randomInt(0, 1_000_000).toString().padStart(6, "0");
  */
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    POST: [userAuthenticated, cookieSessionOnly, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

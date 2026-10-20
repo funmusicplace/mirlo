@@ -2,7 +2,10 @@ import prisma from "@mirlo/prisma";
 import { Request, Response, NextFunction } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../../auth/passport";
+import {
+  cookieSessionOnly,
+  userAuthenticated,
+} from "../../../../../auth/passport";
 import logger from "../../../../../logger";
 import { AppError, HttpCode } from "../../../../../utils/error";
 import stripe from "../../../../../utils/stripe";
@@ -14,7 +17,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, GET],
+    GET: [userAuthenticated, cookieSessionOnly, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

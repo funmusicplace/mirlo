@@ -5,7 +5,7 @@ import type { InteractionResults } from "oidc-provider";
 import { findGrantId } from "../../auth/oidc/grants";
 import { getProvider } from "../../auth/oidc/provider";
 import { requestedScopes } from "../../auth/oidc/scopes";
-import { userLoggedInWithoutRedirect } from "../../auth/passport";
+import { cookieUserLoggedInWithoutRedirect } from "../../auth/passport";
 import { AppError } from "../../utils/error";
 
 const router = express.Router();
@@ -47,7 +47,7 @@ const grantedScopes = async (
 
 router.get(
   "/:uid/details",
-  userLoggedInWithoutRedirect,
+  cookieUserLoggedInWithoutRedirect,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { provider, interaction, client, clientId, scopes } =
@@ -56,8 +56,11 @@ router.get(
       const redirectHost = new URL(String(interaction.params.redirect_uri))
         .host;
 
+      const promptsConsent = String(interaction.params.prompt ?? "")
+        .split(" ")
+        .includes("consent");
       let needsConsent = true;
-      if (req.user) {
+      if (req.user && !promptsConsent) {
         const granted = await grantedScopes(provider, req.user.id, clientId);
         needsConsent = scopes.some((scope) => !granted.has(scope));
       }
@@ -83,7 +86,7 @@ router.get(
 
 router.post(
   "/:uid/decision",
-  userLoggedInWithoutRedirect,
+  cookieUserLoggedInWithoutRedirect,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { action } = req.body as { action?: string };

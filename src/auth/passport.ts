@@ -19,6 +19,8 @@ import {
 } from "../utils/ownership";
 import { getSiteSettings } from "../utils/settings";
 
+import { rejectBearer, resolveBearer } from "./oauth";
+
 const JWTStrategy = passportJWT.Strategy;
 
 const secret = process.env.JWT_SECRET;
@@ -67,7 +69,7 @@ passport.use(
   )
 );
 
-export const userLoggedInWithoutRedirect = (
+export const cookieUserLoggedInWithoutRedirect = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -90,7 +92,7 @@ export const userLoggedInWithoutRedirect = (
   )(req, res, next);
 };
 
-export const userAuthenticated = (
+const cookieUserAuthenticated = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -113,6 +115,57 @@ export const userAuthenticated = (
       return next();
     }
   )(req, res, next);
+};
+
+// A bearer token acts as the user only with the `account` scope. Without it
+// the token is ignored here and only routes that ask for its scope accept it.
+const withBearer =
+  (
+    cookieMiddleware: (req: Request, res: Response, next: NextFunction) => void,
+    { required }: { required: boolean }
+  ) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const bearer = await resolveBearer(req);
+      if (bearer.status === "none") {
+        return cookieMiddleware(req, res, next);
+      }
+      if (bearer.status === "invalid") {
+        return rejectBearer(res, "invalid_token");
+      }
+      req.oauth = bearer.oauth;
+      if (!bearer.oauth.scopes.includes("account")) {
+        return required
+          ? rejectBearer(res, "insufficient_scope", "account")
+          : next();
+      }
+      req.user = bearer.user;
+      return next();
+    } catch (e) {
+      next(e);
+    }
+  };
+
+export const userLoggedInWithoutRedirect = withBearer(
+  cookieUserLoggedInWithoutRedirect,
+  { required: false }
+);
+
+export const userAuthenticated = withBearer(cookieUserAuthenticated, {
+  required: true,
+});
+
+export const cookieSessionOnly = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.oauth) {
+    return res
+      .status(403)
+      .json({ error: "This can only be done while signed in on the site" });
+  }
+  return next();
 };
 
 export const userHasPermission = (role: "admin" | "owner") => {

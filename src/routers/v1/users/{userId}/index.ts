@@ -7,6 +7,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import {
+  cookieSessionOnly,
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
@@ -25,7 +26,12 @@ export default function () {
   const operations = {
     GET: [userAuthenticated, userHasPermission("owner")],
     PUT: [userAuthenticated, userHasPermission("owner"), PUT],
-    DELETE: [userAuthenticated, userHasPermission("owner"), DELETE],
+    DELETE: [
+      userAuthenticated,
+      cookieSessionOnly,
+      userHasPermission("owner"),
+      DELETE,
+    ],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

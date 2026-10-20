@@ -1,4 +1,10 @@
-export const OAUTH_SCOPES = ["openid", "offline_access", "profile", "email"];
+export const OAUTH_SCOPES = [
+  "openid",
+  "offline_access",
+  "profile",
+  "email",
+  "account",
+];
 
 export const requestedScopes = (scope: unknown) =>
   String(scope ?? "")

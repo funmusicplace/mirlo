@@ -5,6 +5,8 @@ import { isValidActivityPubEndpoint } from "../activityPub/utils";
 import logger from "../logger";
 import { AppError } from "../utils/error";
 
+import { bearerTokenOf, resolveBearer } from "./oauth";
+
 export const MIRLO_API_KEY_HEADER = "mirlo-api-key";
 
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS"];
@@ -68,11 +70,28 @@ export const apiKeyCheck = async (
         if (clients.length === 1) {
           req.client = clients[0];
         }
+      } else if (bearerTokenOf(req)) {
+        const bearer = await resolveBearer(req);
+        if (bearer.status === "valid") {
+          req.client = bearer.client;
+        }
       }
       return next();
     }
 
     const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
+    if ((typeof apiHeader !== "string" || !apiHeader) && bearerTokenOf(req)) {
+      // An approved app's access token stands in for its key.
+      const bearer = await resolveBearer(req);
+      if (bearer.status !== "valid") {
+        throw new AppError({
+          httpCode: 401,
+          description: "Invalid or expired access token",
+        });
+      }
+      req.client = bearer.client;
+      return next();
+    }
     if (typeof apiHeader !== "string" || !apiHeader) {
       throw new AppError({
         httpCode: 401,
