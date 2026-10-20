@@ -5,6 +5,12 @@ interface Paginated<T> {
   pages: number;
 }
 
+interface InstanceLogo {
+  url: string;
+  width: number;
+  height: number;
+}
+
 interface InstanceSettings {
   name: string;
   colors: {
@@ -21,6 +27,9 @@ interface InstanceSettings {
   stripePublishableKey?: string | null;
   contactEmail?: string | null;
   supportEmail?: string | null;
+  logo?: InstanceLogo | null;
+  mobileLogo?: InstanceLogo | null;
+  tintLogo?: boolean;
 }
 
 interface SettingsFromAPI {
@@ -41,6 +50,7 @@ interface SettingsFromAPI {
       supportEmail?: string;
       purchaseEmail?: string;
       showHeroOnHome?: boolean;
+      tintLogo?: boolean;
     };
     stripe?: {
       key?: string;

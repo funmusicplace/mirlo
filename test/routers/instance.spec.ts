@@ -41,6 +41,9 @@ describe("instance", () => {
         stripePublishableKey: null,
         contactEmail: null,
         supportEmail: null,
+        logo: null,
+        mobileLogo: null,
+        tintLogo: false,
       });
     });
 
@@ -90,11 +93,14 @@ describe("instance", () => {
         "contactEmail",
         "isClosedToPublicArtistSignup",
         "languages",
+        "logo",
+        "mobileLogo",
         "name",
         "setupStage",
         "showHeroOnHome",
         "stripePublishableKey",
         "supportEmail",
+        "tintLogo",
         "trustLevelNames",
       ]);
       assert.equal(result.stripePublishableKey, "pk_live_public");
@@ -157,6 +163,34 @@ describe("instance", () => {
 
       assert.equal(response.body.result.colors.button, "#be3455");
       assert.equal(response.body.result.colors.text, "#ABCDEF");
+    });
+
+    it("returns the logo with its size and the tint flag", async () => {
+      const row = await createSiteSettings({
+        instanceCustomization: { tintLogo: true },
+      });
+      const logo = await prisma.instanceLogo.create({
+        data: {
+          mimeType: "image/svg+xml",
+          extension: "svg",
+          width: 119,
+          height: 40,
+        },
+      });
+      await prisma.settings.update({
+        where: { id: row.id },
+        data: { logoId: logo.id },
+      });
+
+      const response = await requestApp
+        .get("instance")
+        .set("Accept", "application/json");
+
+      const { result } = response.body;
+      assert.equal(result.tintLogo, true);
+      assert.equal(result.logo.width, 119);
+      assert.equal(result.logo.height, 40);
+      assert.match(result.logo.url, new RegExp(`${logo.id}\\.svg$`));
     });
 
     it("hides the hero when the setting was never saved", async () => {

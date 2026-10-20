@@ -109,6 +109,57 @@ describe("serveStatic", () => {
     assert.equal(statStub.called, false);
   });
 
+  it("sends the type from the extension and nosniff", async () => {
+    const response = await request(app)
+      .get("/images/mirlo-images/trackgroup-covers/foo-x600.webp")
+      .expect(200);
+
+    assert.equal(response.headers["content-type"], "image/webp");
+    assert.equal(response.headers["x-content-type-options"], "nosniff");
+    assert.equal(response.headers["content-security-policy"], undefined);
+  });
+
+  it("sandboxes SVG files", async () => {
+    const response = await request(app)
+      .get("/images/mirlo-images/logo.svg")
+      .expect(200);
+
+    assert.equal(response.headers["content-type"], "image/svg+xml");
+    assert.match(response.headers["content-security-policy"], /sandbox/);
+  });
+
+  it("falls back to a stored image type for unknown extensions", async () => {
+    statStub.resolves({
+      size: fileContents.length,
+      etag: "test-etag",
+      lastModified: new Date(),
+      metaData: { "content-type": "image/heic" },
+    } as any);
+
+    const response = await request(app)
+      .get("/images/mirlo-images/photo.heic")
+      .expect(200);
+
+    assert.equal(response.headers["content-type"], "image/heic");
+  });
+
+  it("never forwards a stored non-image type", async () => {
+    statStub.resolves({
+      size: fileContents.length,
+      etag: "test-etag",
+      lastModified: new Date(),
+      metaData: { "content-type": "text/html" },
+    } as any);
+
+    const response = await request(app)
+      .get("/images/mirlo-images/page.html")
+      .buffer(true)
+      .parse(rawBody)
+      .expect(200);
+
+    assert.doesNotMatch(response.headers["content-type"] ?? "", /text\/html/);
+  });
+
   it("returns 304 without a body when If-None-Match matches", async () => {
     await request(app)
       .get("/images/mirlo-images/trackgroup-covers/foo.webp")

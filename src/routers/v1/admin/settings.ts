@@ -148,6 +148,7 @@ export default function () {
         ...settings,
         ...(settings?.instanceCustomization && {
           instanceCustomization: {
+            ...storedCustomization,
             ...settings.instanceCustomization,
             ...(typeof incomingTitle === "string" && {
               title: incomingTitle.trim(),
@@ -241,6 +242,8 @@ function maskSecrets(settings: object) {
     ...s,
     stripe: undefined,
     cloudflareTurnstileSecret: undefined,
+    logo: undefined,
+    mobileLogo: undefined,
     settings: settingsJson
       ? {
           ...settingsJson,

@@ -424,6 +424,36 @@ describe("admin/settings", () => {
       assert.deepEqual(stored.someFutureKey, { nested: true });
     });
 
+    it("should keep the stored instance customization keys a stale form does not send", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        instanceCustomization: { title: "Nightjar Records", tintLogo: true },
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            instanceCustomization: { title: "Nightjar" },
+          },
+        });
+
+      assert.equal(response.statusCode, 200);
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, any>;
+      assert.deepEqual(stored.instanceCustomization, {
+        title: "Nightjar",
+        tintLogo: true,
+      });
+    });
+
     it("should keep the stripe keys, featured artists and defcon level a partial request does not send", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",

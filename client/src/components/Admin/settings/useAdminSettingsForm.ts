@@ -9,6 +9,7 @@ import { DEFAULT_TRUST_LEVEL_NAMES } from "utils/trustLevel";
 
 import {
   FormSettings,
+  LOGO_FIELDS,
   formToSettingsPayload,
   settingsToForm,
 } from "./settingsForm";
@@ -16,7 +17,7 @@ import {
 export const useAdminSettingsForm = () => {
   const queryClient = useQueryClient();
   const methods = useForm<FormSettings>();
-  const { reset } = methods;
+  const { reset, setValue } = methods;
   const settingsQuery = useQuery(queryAdminSettings());
   const featuredArtistsQuery = useQuery(queryFeaturedArtists());
   const [isLoaded, setIsLoaded] = React.useState(false);
@@ -43,23 +44,38 @@ export const useAdminSettingsForm = () => {
         typeof payload,
         { result: Partial<SettingsFromAPI> }
       >("admin/settings", payload);
+      try {
+        for (const [kind, field] of Object.entries(LOGO_FIELDS)) {
+          const pending = data[field.name];
+          if (pending === undefined) {
+            continue;
+          }
+          const endpoint = `admin/settings/logo/${kind}`;
+          const { result } = pending
+            ? await api.uploadFile<InstanceSettings>(endpoint, [pending])
+            : await api.delete<{ result: InstanceSettings }>(endpoint);
+          queryClient.setQueryData(queryInstanceSettings().queryKey, result);
+          setValue(field.name, undefined);
+        }
+      } finally {
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: queryInstanceSettings().queryKey,
+          }),
+          queryClient.invalidateQueries({
+            queryKey: queryAdminSettings().queryKey,
+          }),
+          queryClient.invalidateQueries({
+            queryKey: querySetupStatus().queryKey,
+          }),
+          queryClient.invalidateQueries({
+            queryKey: queryInstanceArtist().queryKey,
+          }),
+        ]);
+      }
       reset(settingsToForm(response.result, DEFAULT_TRUST_LEVEL_NAMES));
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: queryInstanceSettings().queryKey,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: queryAdminSettings().queryKey,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: querySetupStatus().queryKey,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: queryInstanceArtist().queryKey,
-        }),
-      ]);
     },
-    [featuredArtists, queryClient, reset]
+    [featuredArtists, queryClient, reset, setValue]
   );
 
   return {

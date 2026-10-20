@@ -53,6 +53,7 @@ declare global {
         artistId?: string;
         purchaseEmail?: string;
         showHeroOnHome?: boolean;
+        tintLogo?: boolean;
         colors?: {
           button?: string;
           buttonText?: string;

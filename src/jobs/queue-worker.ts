@@ -43,6 +43,9 @@ export const logger = winston.createLogger({
   ],
 });
 
+const SETTINGS_RETRY_DELAY_MS = 5000;
+const SETTINGS_MAX_ATTEMPTS = 24;
+
 const workerOptions = {
   prefix: "mirlo",
   connection: REDIS_CONFIG,
@@ -145,7 +148,7 @@ yargs
     process.on("unhandledRejection", (reason) => {
       logger.error(`Unhandled promise rejection: ${reason}`);
     });
-    const settings = await getSiteSettings();
+    const settings = await getSiteSettingsWhenReady();
     setBucketConfig(settings.bucketNames);
     ensureAllBucketsExist().catch((e) => {
       logger.error("Failed to eagerly create storage buckets on boot");
@@ -166,6 +169,29 @@ yargs
     scheduledTasksQueueWorker();
   })
   .help().argv;
+
+async function getSiteSettingsWhenReady() {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await getSiteSettings();
+    } catch (e) {
+      if (attempt >= SETTINGS_MAX_ATTEMPTS) {
+        logger.error(
+          `Could not read the site settings after ${SETTINGS_MAX_ATTEMPTS} attempts, exiting`,
+          e
+        );
+        process.exit(1);
+      }
+      logger.warn(
+        `Could not read the site settings, retrying in ${SETTINGS_RETRY_DELAY_MS / 1000}s`,
+        e
+      );
+      await new Promise((resolve) =>
+        setTimeout(resolve, SETTINGS_RETRY_DELAY_MS)
+      );
+    }
+  }
+}
 
 function startDataMigrations() {
   if (process.env.DATA_MIGRATIONS_ENABLED === "false") {

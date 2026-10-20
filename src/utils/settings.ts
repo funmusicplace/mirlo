@@ -1,5 +1,5 @@
 import prisma from "@mirlo/prisma";
-import { Settings } from "@mirlo/prisma/client";
+import { InstanceLogo, Settings } from "@mirlo/prisma/client";
 
 import { BucketConfig, DEFAULT_BUCKET_CONFIG } from "./minio";
 
@@ -7,6 +7,8 @@ export interface SettingsType extends Partial<Settings> {
   platformPercent: number;
   cdnUrl?: string;
   bucketNames: BucketConfig;
+  logo?: InstanceLogo | null;
+  mobileLogo?: InstanceLogo | null;
 }
 
 const defaultSettings = {
@@ -53,7 +55,9 @@ export const resolveSetupStage = (settings: SettingsType): SetupStage => {
 };
 
 export const getSiteSettings = async (): Promise<SettingsType> => {
-  let [result] = await prisma.settings.findMany();
+  let [result] = await prisma.settings.findMany({
+    include: { logo: true, mobileLogo: true },
+  });
   if (!result) {
     result = await prisma.settings.create({
       data: {
@@ -65,6 +69,7 @@ export const getSiteSettings = async (): Promise<SettingsType> => {
         },
         bucketNames: DEFAULT_BUCKET_CONFIG,
       },
+      include: { logo: true, mobileLogo: true },
     });
   }
   const { settings } = result;

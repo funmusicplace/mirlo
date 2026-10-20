@@ -5,6 +5,8 @@
   --breakpoint-lg: 992px;
   --breakpoint-xl: 1200px;
   --breakpoint-xxl: 1400px;
+
+  --font-cubano: "Cubano", var(--mi-font-family-stack);
 }
 
 html {

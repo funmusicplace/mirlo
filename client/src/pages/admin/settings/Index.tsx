@@ -21,6 +21,7 @@ import React from "react";
 import { FormProvider } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { APIResponseError } from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 
 const Index = () => {
@@ -58,7 +59,12 @@ const Index = () => {
         snackbar("Settings updated", { type: "success" });
       } catch (e) {
         console.error(e);
-        snackbar("Oops something went wrong", { type: "warning" });
+        snackbar(
+          e instanceof APIResponseError && e.status < 500
+            ? e.message
+            : "Oops something went wrong",
+          { type: "warning" }
+        );
       } finally {
         setIsSaving(false);
       }

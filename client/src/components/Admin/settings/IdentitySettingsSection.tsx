@@ -4,6 +4,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import InstanceLogoSettings from "./InstanceLogoSettings";
 import { FormSettings } from "./settingsForm";
 import SettingsSection from "./SettingsSection";
 
@@ -14,9 +15,10 @@ const COLOR_FIELDS = [
   { key: "background", labelKey: "colorBackground" },
 ] as const;
 
-const IdentitySettingsSection: React.FC<{ hideTitle?: boolean }> = ({
-  hideTitle,
-}) => {
+const IdentitySettingsSection: React.FC<{
+  hideTitle?: boolean;
+  hideLogo?: boolean;
+}> = ({ hideTitle, hideLogo }) => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
   const {
     register,
@@ -52,6 +54,8 @@ const IdentitySettingsSection: React.FC<{ hideTitle?: boolean }> = ({
           </small>
         )}
       </FormComponent>
+
+      {!hideLogo && <InstanceLogoSettings />}
 
       <fieldset>
         <legend className="mb-2 text-lg font-bold">{t("colors")}</legend>

@@ -36,6 +36,7 @@ import {
   artistBackgroundPrefix,
   coversPrefix,
   postImagePrefix,
+  instanceLogoPrefix,
   rootImagePrefix,
 } from "../../src/utils/minio";
 
@@ -112,6 +113,7 @@ describe("minio bucket routing", () => {
 
     it("returns false for postImage which goes straight to final storage", () => {
       assert.equal(imageTypeUsesQueue("postImage"), false);
+      assert.equal(imageTypeUsesQueue("instanceLogo"), false);
     });
   });
 
@@ -122,6 +124,7 @@ describe("minio bucket routing", () => {
       assert.equal(getImagePrefix("trackGroupCover"), coversPrefix);
       assert.equal(getImagePrefix("image"), rootImagePrefix);
       assert.equal(getImagePrefix("postImage"), postImagePrefix);
+      assert.equal(getImagePrefix("instanceLogo"), instanceLogoPrefix);
     });
   });
 
@@ -162,6 +165,17 @@ describe("minio bucket routing", () => {
       const [bucket, key] = removeObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
       assert.equal(key, `incoming/${artistAvatarPrefix}/abc123`);
+    });
+
+    it("uploadOptimizedImageByType(instanceLogo) → mirlo-images / instance-logos/{filename}", async () => {
+      await uploadOptimizedImageByType(
+        "instanceLogo",
+        "logo-id.svg",
+        Buffer.alloc(0)
+      );
+      const [bucket, key] = putObjectStub.firstCall.args;
+      assert.equal(bucket, "mirlo-images");
+      assert.equal(key, `${instanceLogoPrefix}/logo-id.svg`);
     });
 
     it("uploadIncomingImageByType(postImage) → mirlo-images / {prefix}/{id}, where it's served from", async () => {

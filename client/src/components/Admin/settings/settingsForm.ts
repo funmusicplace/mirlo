@@ -17,7 +17,38 @@ export interface FormSettings {
   defconLevel?: number;
   bucketPrefix?: string;
   trustLevelNames?: string[];
+  pendingLogo?: File | null;
+  pendingMobileLogo?: File | null;
 }
+
+export const LOGO_FIELDS = {
+  main: {
+    name: "pendingLogo",
+    savedKey: "logo",
+    id: "instance-logo",
+    labelKey: "instanceLogo",
+    hintKey: "instanceLogoHint",
+    uploadKey: "uploadInstanceLogo",
+    replaceKey: "replaceInstanceLogo",
+    removeKey: "removeInstanceLogo",
+    savedCaptionKey: "instanceLogoSavedCaption",
+    pendingCaptionKey: "instanceLogoPendingCaption",
+  },
+  mobile: {
+    name: "pendingMobileLogo",
+    savedKey: "mobileLogo",
+    id: "instance-mobile-logo",
+    labelKey: "instanceMobileLogo",
+    hintKey: "instanceMobileLogoHint",
+    uploadKey: "uploadInstanceMobileLogo",
+    replaceKey: "replaceInstanceMobileLogo",
+    removeKey: undefined,
+    savedCaptionKey: "instanceMobileLogoSavedCaption",
+    pendingCaptionKey: "instanceMobileLogoPendingCaption",
+  },
+} as const;
+
+export type LogoKind = keyof typeof LOGO_FIELDS;
 
 export const SETTINGS_SECTIONS = [
   { id: "settings-identity", labelKey: "sectionIdentity" },

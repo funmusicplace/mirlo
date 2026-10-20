@@ -22,6 +22,7 @@ import imageContentTypes from "../../src/dataMigrations/migrations/2026100300000
 import postContentWidgetPaths from "../../src/dataMigrations/migrations/20261004000000_postContentWidgetPaths";
 import orphanedAudio from "../../src/dataMigrations/migrations/20261005000000_orphanedAudio";
 import approveSelfOwnedLabelRows from "../../src/dataMigrations/migrations/20261006000000_approveSelfOwnedLabelRows";
+import defaultInstanceLogo from "../../src/dataMigrations/migrations/20261018120000_defaultInstanceLogo";
 import {
   DEFAULT_BUCKET_CONFIG,
   getImagesBucket,
@@ -38,6 +39,7 @@ import {
   createMerch,
   createPost,
   createProfile,
+  createSiteSettings,
   createTrack,
   createTrackGroup,
   createUser,
@@ -167,6 +169,7 @@ describe("dataMigrations: loading", () => {
         postContentWidgetPaths,
         orphanedAudio,
         approveSelfOwnedLabelRows,
+        defaultInstanceLogo,
       ].map((m) => m.name)
     );
     assert.equal(dataMigrations.length, files.length);
@@ -326,6 +329,101 @@ describe("dataMigrations: postContentImageRefs", () => {
       where: { id: post.id },
     });
     assert.equal(rerun.content, migrated.content);
+  });
+});
+
+describe("dataMigrations: defaultInstanceLogo", () => {
+  beforeEach(async () => {
+    await clearTables();
+  });
+
+  const createInstance = async (setupCompletedAt: Date | null) => {
+    const row = await createSiteSettings({
+      instanceCustomization: { title: "Mirlo", showHeroOnHome: true },
+    });
+    return prisma.settings.update({
+      where: { id: row.id },
+      data: { setupCompletedAt },
+    });
+  };
+
+  it("gives an instance already in use the Mirlo logos, tinted", async () => {
+    await createInstance(new Date());
+
+    assert.equal(await defaultInstanceLogo.run(), true);
+
+    const settings = await prisma.settings.findFirstOrThrow({
+      include: { logo: true, mobileLogo: true },
+    });
+    assert.equal(settings.logo?.mimeType, "image/svg+xml");
+    assert.equal(settings.logo?.originalFilename, "Logo-With-Wordmark.svg");
+    assert.equal(
+      settings.mobileLogo?.originalFilename,
+      "Logo_Mirlo_Transparent_RedCircle.svg"
+    );
+    assert.equal(settings.settings?.instanceCustomization?.tintLogo, true);
+    assert.equal(settings.settings?.instanceCustomization?.title, "Mirlo");
+    assert.equal(
+      settings.settings?.instanceCustomization?.showHeroOnHome,
+      true
+    );
+  });
+
+  it("leaves a fresh install without a logo", async () => {
+    await createInstance(null);
+
+    assert.equal(await defaultInstanceLogo.run(), true);
+
+    const settings = await prisma.settings.findFirstOrThrow();
+    assert.equal(settings.logoId, null);
+    assert.equal(settings.mobileLogoId, null);
+    assert.equal(settings.settings?.instanceCustomization?.tintLogo, undefined);
+  });
+
+  it("keeps a logo the admin already uploaded", async () => {
+    const row = await createInstance(new Date());
+    const logo = await prisma.instanceLogo.create({
+      data: { mimeType: "image/png", extension: "png", width: 10, height: 4 },
+    });
+    await prisma.settings.update({
+      where: { id: row.id },
+      data: { logoId: logo.id },
+    });
+
+    assert.equal(await defaultInstanceLogo.run(), true);
+
+    const settings = await prisma.settings.findFirstOrThrow();
+    assert.equal(settings.logoId, logo.id);
+    assert.equal(settings.mobileLogoId, null);
+    assert.equal(await prisma.instanceLogo.count(), 1);
+  });
+
+  it("leaves an instance that already has a mobile logo alone", async () => {
+    const row = await createInstance(new Date());
+    const icon = await prisma.instanceLogo.create({
+      data: {
+        mimeType: "image/svg+xml",
+        extension: "svg",
+        width: 1,
+        height: 1,
+      },
+    });
+    await prisma.settings.update({
+      where: { id: row.id },
+      data: { mobileLogoId: icon.id },
+    });
+
+    assert.equal(await defaultInstanceLogo.run(), true);
+
+    const settings = await prisma.settings.findFirstOrThrow();
+    assert.equal(settings.mobileLogoId, icon.id);
+    assert.equal(settings.logoId, null);
+    assert.equal(settings.settings?.instanceCustomization?.tintLogo, undefined);
+  });
+
+  it("does nothing when the instance has no settings yet", async () => {
+    assert.equal(await defaultInstanceLogo.run(), true);
+    assert.equal(await prisma.instanceLogo.count(), 0);
   });
 });
 
