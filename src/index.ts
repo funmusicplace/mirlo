@@ -34,6 +34,7 @@ import { sendMailQueue } from "./queues/send-mail-queue";
 import auth from "./routers/auth";
 import { serveStatic } from "./static";
 import errorHandler from "./utils/error";
+import { denyFramingExceptWidgets } from "./utils/framing";
 import { setCdnUrl } from "./utils/images";
 import { setBucketConfig, ensureAllBucketsExist } from "./utils/minio";
 import { getCachedPage } from "./utils/pageCache";
@@ -85,6 +86,7 @@ app.set("trust proxy", 2);
 
 app.use(attachRequestId);
 app.use(securityHeaders);
+app.use(denyFramingExceptWidgets);
 app.use(logHeavyRequests);
 app.use(corsMiddleware);
 app.use(cookieParser());
