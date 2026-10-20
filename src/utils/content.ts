@@ -1,5 +1,7 @@
+import { Readable } from "stream";
+
 import prisma from "@mirlo/prisma";
-import { fromStream } from "file-type";
+import { fromBuffer } from "file-type";
 
 import logger from "../logger";
 import { clearTrackGroupDownloads } from "../utils/downloadCache";
@@ -21,6 +23,7 @@ export const DOWNLOADABLE_CONTENT_MIME_TYPES = [
 ];
 
 const TEXT_MIME_TYPES = ["text/plain", "text/markdown"];
+const SNIFF_BYTES = 4100;
 
 export const isAllowedDownloadableContentMimeType = (
   mimeType?: string | null
@@ -35,15 +38,32 @@ export const doesDownloadableContentMatchType = async (
   if (!stream) {
     return false;
   }
+  const start = await readStart(stream);
+  if (TEXT_MIME_TYPES.includes(mimeType)) {
+    return !start.includes(0);
+  }
+  const detected = await fromBuffer(start);
+  if (mimeType === "application/pdf" && detected?.ext === "ai") {
+    return true;
+  }
+  return detected?.mime === mimeType;
+};
+
+const readStart = async (stream: Readable) => {
+  const chunks: Buffer[] = [];
+  let length = 0;
   try {
-    const detected = await fromStream(stream);
-    if (TEXT_MIME_TYPES.includes(mimeType)) {
-      return !detected;
+    for await (const chunk of stream) {
+      chunks.push(chunk);
+      length += chunk.length;
+      if (length >= SNIFF_BYTES) {
+        break;
+      }
     }
-    return detected?.mime === mimeType;
   } finally {
     stream.destroy();
   }
+  return Buffer.concat(chunks).subarray(0, SNIFF_BYTES);
 };
 
 export const deleteDownloadableContent = async (contentId: string) => {

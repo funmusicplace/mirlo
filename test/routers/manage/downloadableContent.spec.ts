@@ -94,6 +94,42 @@ describe("manage/downloadableContent", () => {
     assert.equal(response.body.result.uploadState, "SUCCESS");
   });
 
+  it("verify accepts PDFs saved by Illustrator", async () => {
+    const { content, accessToken } = await setup(
+      "application/pdf",
+      Buffer.concat([
+        Buffer.from("%PDF-1.7\n"),
+        Buffer.alloc(1500, " "),
+        Buffer.from("AIPrivateData1"),
+      ])
+    );
+
+    const response = await requestApp
+      .put(`manage/downloadableContent/${content.id}/verify`)
+      .send({})
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.result.uploadState, "SUCCESS");
+  });
+
+  it("verify accepts text that starts like a binary signature", async () => {
+    const { content, accessToken } = await setup(
+      "text/plain",
+      Buffer.from("BMX results\nID3 tags explained\n")
+    );
+
+    const response = await requestApp
+      .put(`manage/downloadableContent/${content.id}/verify`)
+      .send({})
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.result.uploadState, "SUCCESS");
+  });
+
   it("verify deletes content that doesn't match its declared type", async () => {
     const { content, accessToken } = await setup("text/plain", PNG);
 
