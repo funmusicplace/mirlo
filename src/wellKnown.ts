@@ -42,6 +42,8 @@ const sheetBreaksRoots = [
   "fulfillment",
   "login",
   "manage",
+  "oauth",
+  "oidc",
   "password-reset",
   "profile",
   "sales",

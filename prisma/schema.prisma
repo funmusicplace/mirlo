@@ -69,8 +69,10 @@ model Client {
   applicationName    String
   applicationUrl     String
   allowedCorsOrigins String[]
-  secret             String?
   key                String?
+  clientIdUrl        String?      @unique
+  redirectUris       String[]     @default([])
+  confidential       Boolean      @default(false)
   status             ClientStatus @default(approved)
   userId             Int?
   user               User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -79,6 +81,29 @@ model Client {
   deletedAt          DateTime?
   trackPlays         TrackPlay[]
   checkouts          Checkout[]
+}
+
+model OAuthPayload {
+  id         String
+  model      String
+  payload    Json
+  grantId    String?
+  uid        String?
+  accountId  Int?
+  expiresAt  DateTime?
+  consumedAt DateTime?
+
+  @@id([model, id])
+  @@index([grantId])
+  @@index([uid])
+  @@index([accountId, model])
+  @@index([expiresAt])
+}
+
+model OAuthKey {
+  kind      String   @id
+  value     Json
+  createdAt DateTime @default(now())
 }
 
 model User {

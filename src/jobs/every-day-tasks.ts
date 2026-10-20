@@ -5,6 +5,7 @@ import logger from "../logger";
 import sendOnboardingEmail from "./send-onboarding-email";
 import sendSubscriptionRenewalReminders from "./send-subscription-renewal-reminders";
 import cleanUpCheckouts from "./tasks/clean-up-checkouts";
+import cleanUpOAuthPayloads from "./tasks/clean-up-oauth-payloads";
 import syncPaymentAccountStatuses from "./tasks/sync-payment-account-statuses";
 
 export const dailyTasks = async () => {
@@ -12,6 +13,7 @@ export const dailyTasks = async () => {
   await sendSubscriptionRenewalReminders();
   await syncPaymentAccountStatuses();
   await cleanUpCheckouts();
+  await cleanUpOAuthPayloads();
 };
 
 if (require.main === module) {
