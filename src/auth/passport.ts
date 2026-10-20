@@ -19,7 +19,7 @@ import {
 } from "../utils/ownership";
 import { getSiteSettings } from "../utils/settings";
 
-import { rejectBearer, resolveBearer } from "./oauth";
+import { hasScope, rejectBearer, resolveBearer } from "./oauth";
 
 const JWTStrategy = passportJWT.Strategy;
 
@@ -154,6 +154,28 @@ export const userLoggedInWithoutRedirect = withBearer(
 export const userAuthenticated = withBearer(cookieUserAuthenticated, {
   required: true,
 });
+
+export const userAuthenticatedWithScope =
+  (scope: string) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const bearer = await resolveBearer(req);
+      if (bearer.status === "none") {
+        return cookieUserAuthenticated(req, res, next);
+      }
+      if (bearer.status === "invalid") {
+        return rejectBearer(res, "invalid_token");
+      }
+      req.oauth = bearer.oauth;
+      if (!hasScope(req, scope)) {
+        return rejectBearer(res, "insufficient_scope", scope);
+      }
+      req.user = bearer.user;
+      return next();
+    } catch (e) {
+      next(e);
+    }
+  };
 
 export const cookieSessionOnly = (
   req: Request,

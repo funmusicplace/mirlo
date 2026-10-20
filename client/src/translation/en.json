@@ -199,7 +199,8 @@
       "email": "See your email address",
       "offline_access": "Stay connected until you disconnect it",
       "account": "Act as you on this site.",
-      "accountWarning": "The app can do almost anything you can: see your purchases and messages, buy things, follow artists, and manage your artists. Only allow apps you trust. It can't delete your account, change payouts or connect other apps."
+      "accountWarning": "The app can do almost anything you can: see your purchases and messages, buy things, follow artists, and manage your artists. Only allow apps you trust. It can't delete your account, change payouts or connect other apps.",
+      "subscribers:read": "See the names and email addresses of the supporters of the artists you manage"
     },
     "appDomain": "The app is published by {{domain}}.",
     "notApproved": "{{app}} ({{domain}}) isn't approved on {{site}} yet",

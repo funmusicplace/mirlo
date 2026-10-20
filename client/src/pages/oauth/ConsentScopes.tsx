@@ -1,6 +1,12 @@
 import { useTranslation } from "react-i18next";
 
-const DESCRIBED_SCOPES = ["openid", "profile", "email", "offline_access"];
+const DESCRIBED_SCOPES = [
+  "openid",
+  "profile",
+  "email",
+  "subscribers:read",
+  "offline_access",
+];
 
 function ConsentScopes({ scopes }: { scopes: string[] }) {
   const { t } = useTranslation("translation", { keyPrefix: "oauth.scopes" });

@@ -105,6 +105,7 @@ const routes = [
   "manage/artistInvites/{artistId}",
   "manage/artists/{artistId}/codes",
   "manage/artists/{artistId}/subscribers",
+  "manage/artists/{artistId}/subscribers/active",
   "manage/artists/{artistId}/subscribers/{subscriptionId}",
   "manage/artists/{artistId}/background",
   "manage/artists/{artistId}/avatar",

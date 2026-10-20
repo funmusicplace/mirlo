@@ -4,6 +4,7 @@ export const OAUTH_SCOPES = [
   "profile",
   "email",
   "account",
+  "subscribers:read",
 ];
 
 export const requestedScopes = (scope: unknown) =>

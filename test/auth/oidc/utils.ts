@@ -32,18 +32,22 @@ export const authorizeParams = (
   clientId: string | number,
   challenge: string,
   extra: Record<string, string> = {}
-) =>
-  new URLSearchParams({
+) => {
+  const params = new URLSearchParams({
     client_id: String(clientId),
     response_type: "code",
     redirect_uri: REDIRECT_URI,
     scope: "openid profile email",
     state: "some-state",
-    nonce: "some-nonce",
     code_challenge: challenge,
     code_challenge_method: "S256",
     ...extra,
   });
+  if (params.get("scope")?.split(" ").includes("openid")) {
+    params.set("nonce", "some-nonce");
+  }
+  return params;
+};
 
 export const startAuthorization = async (
   agent: ReturnType<typeof request.agent>,

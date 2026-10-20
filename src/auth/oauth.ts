@@ -58,6 +58,9 @@ export const resolveBearer = (req: Request) => {
   return result;
 };
 
+export const hasScope = (req: Request, scope: string) =>
+  !!req.oauth?.scopes.some((s) => s === scope || s === "account");
+
 export const rejectBearer = (
   res: Response,
   error: "invalid_token" | "insufficient_scope",
