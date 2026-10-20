@@ -63,6 +63,7 @@ export default defineConfig({
       {
         text: "Developers: using the API",
         link: "/api",
+        items: [{ text: "Sign in with Mirlo", link: "/api/oauth" }],
       },
       {
         text: "Payouts",

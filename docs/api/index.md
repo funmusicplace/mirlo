@@ -149,6 +149,10 @@ API keys are scoped to a registered client application.
 - **On mirlo.space:** Email [hi@mirlo.space](mailto:hi@mirlo.space) to request a key. Include a brief description of what you're building.
 - **Self-hosted instances:** You can issue a key directly by editing the `client` table in the database.
 
+### Acting on behalf of a user
+
+To read or change a user's data, don't ask for their password. Use [Sign in with Mirlo](./oauth.md), a standard OAuth 2.1 / OpenID Connect flow. Apps that identify themselves with a Client ID Metadata Document can connect to any Mirlo instance once that instance's admins approve them, with no key needed.
+
 ::: info Self-service API keys
 We're working on a way for developers to generate and manage API keys from within Mirlo itself, without needing to contact us. If you're interested in this or have thoughts on how it should work, [open an issue on GitHub](https://github.com/funmusicplace/mirlo/issues).
 :::
