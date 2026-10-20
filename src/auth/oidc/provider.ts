@@ -3,12 +3,14 @@ import type { NextFunction, Request, Response } from "express";
 import Provider, { type ErrorOut, interactionPolicy } from "oidc-provider";
 
 import logger from "../../logger";
+import { AppError } from "../../utils/error";
 
 import { adapterFor } from "./adapter";
 import {
   allowMetadataDocumentClient,
   allowMetadataDocumentFetch,
 } from "./approval";
+import { metadataForClientRow } from "./clients";
 import { loadKeys } from "./keys";
 import { OAUTH_SCOPES } from "./scopes";
 
@@ -31,8 +33,6 @@ const errorPageUrl = (out: ErrorOut) => {
   return url.href;
 };
 
-// Always hand the request to our interaction so the Mirlo session cookie,
-// not the provider's own session, decides who is signing in.
 const policy = () => {
   const base = interactionPolicy.base();
   base
@@ -161,4 +161,31 @@ export const discoveryAlias = (
   req.url = "/.well-known/openid-configuration";
   req.originalUrl = `${OIDC_MOUNT_PATH}${req.url}`;
   return oidcHandler(req, res, next);
+};
+
+export const validateClientSettings = async (
+  client: Parameters<typeof metadataForClientRow>[0] & {
+    clientIdUrl: string | null;
+  }
+) => {
+  if (client.clientIdUrl || client.redirectUris.length === 0) {
+    return;
+  }
+  const metadata = metadataForClientRow(client);
+  if (!metadata) {
+    throw new AppError({
+      httpCode: 400,
+      description: "A client that keeps its key on a server needs a key",
+    });
+  }
+  try {
+    await (await getProvider()).Client.validate(metadata);
+  } catch (e) {
+    throw new AppError({
+      httpCode: 400,
+      description:
+        (e as { error_description?: string }).error_description ??
+        "Invalid OAuth settings",
+    });
+  }
 };

@@ -6,6 +6,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { invalidateClientCache } from "../../../../auth/cors";
 import { parseRedirectUris } from "../../../../auth/oidc/clients";
+import { validateClientSettings } from "../../../../auth/oidc/provider";
 import {
   userAuthenticated,
   userHasPermission,
@@ -68,16 +69,18 @@ export default function () {
 
       const userId = await findUserByEmail(userEmail);
 
+      const data = {
+        applicationName,
+        applicationUrl,
+        allowedCorsOrigins: allowedCorsOrigins ?? [],
+        redirectUris: parseRedirectUris(redirectUris) ?? [],
+        confidential: !!confidential,
+        key: randomBytes(24).toString("hex"),
+        userId,
+      };
+      await validateClientSettings({ ...data, id: 0, clientIdUrl: null });
       const client = await prisma.client.create({
-        data: {
-          applicationName,
-          applicationUrl,
-          allowedCorsOrigins: allowedCorsOrigins ?? [],
-          redirectUris: parseRedirectUris(redirectUris) ?? [],
-          confidential: !!confidential,
-          key: randomBytes(24).toString("hex"),
-          userId,
-        },
+        data,
         include: { user: { select: { id: true, email: true } } },
       });
 

@@ -57,7 +57,7 @@ describe("manage/artists/{artistId}/subscribers/active", () => {
       .get(`manage/artists/${artistId}/subscribers/active`)
       .set("Authorization", `Bearer ${token}`);
 
-  it("lists active and cancelling supporters for a subscribers:read token", async () => {
+  it("lists active and cancelling subscribers for a subscribers:read token", async () => {
     const { ownerSession, artist, tier, active, cancelling, client } =
       await setup();
     const tokens = await tokensFor(ownerSession, client, "subscribers:read");
@@ -82,9 +82,55 @@ describe("manage/artists/{artistId}/subscribers/active", () => {
     assert.equal(byEmail["active@example.com"].shippingAddress, undefined);
   });
 
-  it("accepts the account scope and the owner's own session", async () => {
+  it("marks followers as unpaid and filters on paid", async () => {
     const { ownerSession, artist, client } = await setup();
-    const tokens = await tokensFor(ownerSession, client, "account");
+    const followTier = await createTier(artist.id, {
+      name: "follow",
+      isDefaultTier: true,
+    });
+    const { user: follower } = await createUser({
+      email: "follower@example.com",
+    });
+    await prisma.profileUserSubscription.create({
+      data: {
+        userId: follower.id,
+        profileSubscriptionTierId: followTier.id,
+        amount: 0,
+      },
+    });
+    const tokens = await tokensFor(ownerSession, client, "subscribers:read");
+    const emails = async (query: string) => {
+      const response = await requestApp
+        .get(`manage/artists/${artist.id}/subscribers/active${query}`)
+        .set("Authorization", `Bearer ${tokens.access_token}`);
+      assert.equal(response.status, 200, response.text);
+      return response.body.results
+        .map((r: { email: string; paid: boolean }) => `${r.email}:${r.paid}`)
+        .sort();
+    };
+
+    assert.deepEqual(await emails(""), [
+      "active@example.com:true",
+      "cancelling@example.com:true",
+      "follower@example.com:false",
+    ]);
+    assert.deepEqual(await emails("?paid=true"), [
+      "active@example.com:true",
+      "cancelling@example.com:true",
+    ]);
+    assert.deepEqual(await emails("?paid=false"), [
+      "follower@example.com:false",
+    ]);
+
+    const invalid = await requestApp
+      .get(`manage/artists/${artist.id}/subscribers/active?paid=yes`)
+      .set("Authorization", `Bearer ${tokens.access_token}`);
+    assert.equal(invalid.status, 400);
+  });
+
+  it("accepts the api scope and the owner's own session", async () => {
+    const { ownerSession, artist, client } = await setup();
+    const tokens = await tokensFor(ownerSession, client, "api");
     assert.equal((await get(artist.id, tokens.access_token)).status, 200);
 
     const viaCookie = await requestApp

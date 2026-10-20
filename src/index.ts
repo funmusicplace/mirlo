@@ -105,8 +105,6 @@ const authLimiter = isDev
       skip: () => process.env.NODE_ENV === "test",
     });
 
-// The provider parses its own bodies and answers its own CORS requests, so it
-// goes before the body parsers and corsMiddleware.
 if (authLimiter) {
   app.use([`${OIDC_MOUNT_PATH}/auth`, `${OIDC_MOUNT_PATH}/token`], authLimiter);
 }

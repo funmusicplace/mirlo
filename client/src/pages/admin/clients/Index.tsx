@@ -15,6 +15,7 @@ import {
   AdminClient,
   AdminClientStatus,
 } from "queries/admin";
+import { MirloFetchError } from "queries/fetch/MirloFetchError";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -71,7 +72,12 @@ const Index: React.FC = () => {
         });
       } catch (e) {
         console.error(e);
-        snackbar("Oops something went wrong", { type: "warning" });
+        snackbar(
+          e instanceof MirloFetchError
+            ? e.message
+            : "Oops something went wrong",
+          { type: "warning" }
+        );
       }
     },
     [createClient, reset, snackbar, t]

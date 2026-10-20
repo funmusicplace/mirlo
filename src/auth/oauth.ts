@@ -48,7 +48,6 @@ const resolve = async (req: Request): Promise<BearerResult> => {
   };
 };
 
-// Memoized per request so apiKeyCheck and the auth middlewares share a lookup.
 export const resolveBearer = (req: Request) => {
   let result = results.get(req);
   if (!result) {
@@ -59,7 +58,7 @@ export const resolveBearer = (req: Request) => {
 };
 
 export const hasScope = (req: Request, scope: string) =>
-  !!req.oauth?.scopes.some((s) => s === scope || s === "account");
+  !!req.oauth?.scopes.some((s) => s === scope || s === "api");
 
 export const rejectBearer = (
   res: Response,

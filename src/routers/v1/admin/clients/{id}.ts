@@ -3,9 +3,11 @@ import { randomBytes } from "crypto";
 import prisma from "@mirlo/prisma";
 import { ClientStatus } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
+import { isUndefined, omitBy } from "lodash";
 
 import { invalidateClientCache } from "../../../../auth/cors";
 import { parseRedirectUris } from "../../../../auth/oidc/clients";
+import { validateClientSettings } from "../../../../auth/oidc/provider";
 import {
   userAuthenticated,
   userHasPermission,
@@ -79,20 +81,25 @@ export default function () {
       confidential?: boolean;
     };
     try {
-      await findClientOr404(Number(req.params.id));
+      const existing = await findClientOr404(Number(req.params.id));
       const userId = await findUserByEmail(userEmail);
+      const data = {
+        applicationName,
+        applicationUrl,
+        allowedCorsOrigins,
+        status,
+        userId,
+        redirectUris: parseRedirectUris(redirectUris),
+        confidential,
+        key: rotateKey ? randomBytes(24).toString("hex") : undefined,
+      };
+      await validateClientSettings({
+        ...existing,
+        ...omitBy(data, isUndefined),
+      });
       const client = await prisma.client.update({
         where: { id: Number(req.params.id) },
-        data: {
-          applicationName,
-          applicationUrl,
-          allowedCorsOrigins,
-          status,
-          userId,
-          redirectUris: parseRedirectUris(redirectUris),
-          confidential,
-          key: rotateKey ? randomBytes(24).toString("hex") : undefined,
-        },
+        data,
         include: { user: { select: { id: true, email: true } } },
       });
 

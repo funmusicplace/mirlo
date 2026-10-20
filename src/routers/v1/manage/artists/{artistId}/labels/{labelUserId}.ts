@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import {
+  cookieSessionOnly,
   profileOwnedByLoggedInUser,
   userAuthenticated,
 } from "../../../../../../auth/passport";
@@ -9,8 +10,18 @@ import { AppError } from "../../../../../../utils/error";
 
 export default function () {
   const operations = {
-    DELETE: [userAuthenticated, profileOwnedByLoggedInUser, DELETE],
-    PUT: [userAuthenticated, profileOwnedByLoggedInUser, PUT],
+    DELETE: [
+      userAuthenticated,
+      cookieSessionOnly,
+      profileOwnedByLoggedInUser,
+      DELETE,
+    ],
+    PUT: [
+      userAuthenticated,
+      cookieSessionOnly,
+      profileOwnedByLoggedInUser,
+      PUT,
+    ],
   };
   async function PUT(req: Request, res: Response, next: NextFunction) {
     let { artistId, labelUserId }: { artistId?: string; labelUserId?: string } =

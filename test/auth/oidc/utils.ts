@@ -107,7 +107,6 @@ export const decide = async (
   return response;
 };
 
-// Runs authorize → decision → resume and returns the redirect back to the app.
 export const authorizeAndAllow = async (
   agent: ReturnType<typeof request.agent>,
   clientId: string | number,
@@ -126,25 +125,32 @@ export const authorizeAndAllow = async (
   return new URL(resume.headers.location);
 };
 
+export const tokenRequest = (
+  client: { id: number; key: string | null; confidential?: boolean },
+  body: Record<string, string>,
+  endpoint = "/oidc/token"
+) => {
+  const call = request(API).post(endpoint).type("form");
+  return client.confidential === false
+    ? call.send({ ...body, client_id: String(client.id) })
+    : call.auth(String(client.id), client.key ?? "").send(body);
+};
+
 export const exchangeCode = (
-  client: { id: number; key: string | null },
+  client: { id: number; key: string | null; confidential?: boolean },
   code: string,
   verifier: string
 ) =>
-  request(API)
-    .post("/oidc/token")
-    .auth(String(client.id), client.key ?? "")
-    .type("form")
-    .send({
-      grant_type: "authorization_code",
-      code,
-      redirect_uri: REDIRECT_URI,
-      code_verifier: verifier,
-    });
+  tokenRequest(client, {
+    grant_type: "authorization_code",
+    code,
+    redirect_uri: REDIRECT_URI,
+    code_verifier: verifier,
+  });
 
 export const tokensFor = async (
   accessToken: string,
-  client: { id: number; key: string | null },
+  client: { id: number; key: string | null; confidential?: boolean },
   scope: string,
   extra: Record<string, string> = {}
 ) => {

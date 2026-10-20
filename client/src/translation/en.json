@@ -198,9 +198,9 @@
       "profile": "See your name",
       "email": "See your email address",
       "offline_access": "Stay connected until you disconnect it",
-      "account": "Act as you on this site.",
-      "accountWarning": "The app can do almost anything you can: see your purchases and messages, buy things, follow artists, and manage your artists. Only allow apps you trust. It can't delete your account, change payouts or connect other apps.",
-      "subscribers:read": "See the names and email addresses of the supporters of the artists you manage"
+      "api": "Act as you on this site.",
+      "apiWarning": "The app can do almost anything you can: see your purchases and messages, buy things, follow artists, and manage your artists. Only allow apps you trust. It can't delete your account or your artists, change payouts, add managers or labels, or connect other apps.",
+      "subscribersRead": "See the names and email addresses of the supporters of the artists you manage"
     },
     "appDomain": "The app is published by {{domain}}.",
     "notApproved": "{{app}} ({{domain}}) isn't approved on {{site}} yet",
@@ -1917,7 +1917,7 @@
     "confidentialClient": "Keeps its key on a server (uses it as the OAuth client secret)",
     "oauth": "OAuth",
     "oauthClientId": "Client ID: {{id}}",
-    "invalidRedirectUris": "Couldn't save: redirect URIs must be full URLs without a #fragment",
+    "oauthSettingsNotSaved": "Couldn't save the OAuth settings.",
     "metadataDocument": "Connects with its own metadata document (redirect URIs come from it):"
   },
   "adminDashboard": {

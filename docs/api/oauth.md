@@ -62,7 +62,7 @@ All clients use the authorization code flow with PKCE (`S256`). Other response t
      ?client_id=…
      &response_type=code
      &redirect_uri=myapp://oauth/callback
-     &scope=openid profile account offline_access
+     &scope=openid profile api offline_access
      &prompt=consent
      &state=…
      &code_challenge=…
@@ -88,16 +88,16 @@ The response has an `access_token` (valid for an hour), an `id_token` if you ask
 
 ## Scopes
 
-| Scope              | Gives your app                                                                                                                          |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `openid`           | An ID token, and the user's ID (`sub`) from `/oidc/me`                                                                                  |
-| `profile`          | The user's name                                                                                                                         |
-| `email`            | The user's email address and `email_verified`                                                                                           |
-| `account`          | Use the REST API as the user. Excludes admin actions, deleting the account, payout settings and connecting or disconnecting other apps. |
-| `subscribers:read` | `GET /v1/manage/artists/{artistId}/subscribers/active` for artists the user can edit                                                    |
-| `offline_access`   | A refresh token. OpenID Connect only honours it together with `prompt=consent`.                                                         |
+| Scope              | Gives your app                                                                                                                                                                                            |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openid`           | An ID token, and the user's ID (`sub`) from `/oidc/me`                                                                                                                                                    |
+| `profile`          | The user's name                                                                                                                                                                                           |
+| `email`            | The user's email address and `email_verified`                                                                                                                                                             |
+| `api`              | Use the REST API as the user. Excludes admin actions, deleting the account or an artist, payout settings, adding or removing an artist's managers and labels, and connecting or disconnecting other apps. |
+| `subscribers:read` | `GET /v1/manage/artists/{artistId}/subscribers/active` for artists the user can edit. Add `?paid=true` to leave out people who only follow the artist                                                     |
+| `offline_access`   | A refresh token. OpenID Connect only honours it together with `prompt=consent`.                                                                                                                           |
 
-Ask for the fewest scopes your app needs. The consent screen warns people strongly about `account`.
+Ask for the fewest scopes your app needs. The consent screen warns people strongly about `api`.
 
 Users whose email address isn't verified can't connect apps: the flow ends with `error=access_denied`.
 

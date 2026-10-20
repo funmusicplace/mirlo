@@ -1,5 +1,6 @@
 import { InputEl } from "components/common/Input";
 import { AdminClient, useUpdateAdminClientMutation } from "queries/admin";
+import { MirloFetchError } from "queries/fetch/MirloFetchError";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useSnackbar } from "state/SnackbarContext";
@@ -24,7 +25,10 @@ const ClientOAuthSettings: React.FC<{ client: AdminClient }> = ({ client }) => {
         await updateClient({ clientId: client.id, ...data });
       } catch (e) {
         console.error(e);
-        snackbar(t("invalidRedirectUris"), { type: "warning" });
+        snackbar(
+          `${t("oauthSettingsNotSaved")} ${e instanceof MirloFetchError ? e.message : ""}`,
+          { type: "warning" }
+        );
       }
     },
     [client.id, updateClient, snackbar, t]

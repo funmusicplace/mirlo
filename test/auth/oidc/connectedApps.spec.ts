@@ -24,7 +24,7 @@ describe("connected apps", () => {
     const tokens = await tokensFor(
       accessToken,
       client,
-      "openid account offline_access",
+      "openid api offline_access",
       { prompt: "consent" }
     );
     return { user, accessToken, client, tokens };
@@ -43,7 +43,7 @@ describe("connected apps", () => {
     assert.equal(list.body.results.length, 1);
     assert.equal(list.body.results[0].name, "Radiccio");
     assert.deepEqual(list.body.results[0].scopes.sort(), [
-      "account",
+      "api",
       "offline_access",
       "openid",
     ]);

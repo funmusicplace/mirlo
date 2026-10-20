@@ -33,8 +33,8 @@ function NotApproved({
   };
 
   return (
-    <WidthWrapper variant="small" className="mt-8 mb-12">
-      <h1 className="text-xl mb-4">
+    <WidthWrapper variant="small" className="mt-8! mb-12!">
+      <h1 className="text-xl! mb-4!">
         {t("notApproved", {
           app: client.name,
           domain: client.domain,

@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import {
+  cookieSessionOnly,
   profileBelongsToLoggedInUser,
   profileOwnedByLoggedInUser,
   canUserCreateProfiles,
@@ -96,7 +97,12 @@ export default function () {
   const operations = {
     GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
     POST: [userAuthenticated, canUserCreateProfiles, POST],
-    DELETE: [userAuthenticated, profileOwnedByLoggedInUser, DELETE],
+    DELETE: [
+      userAuthenticated,
+      cookieSessionOnly,
+      profileOwnedByLoggedInUser,
+      DELETE,
+    ],
   };
 
   async function GET(req: Request, res: Response) {

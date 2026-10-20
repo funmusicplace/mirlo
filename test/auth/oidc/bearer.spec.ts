@@ -6,9 +6,14 @@ import { beforeEach, describe, it } from "mocha";
 import request from "supertest";
 dotenv.config();
 
-import { clearTables, createUser } from "../../utils";
+import {
+  clearTables,
+  createArtist,
+  createArtistLabel,
+  createUser,
+} from "../../utils";
 
-import { API, createOAuthClient, tokensFor } from "./utils";
+import { API, createOAuthClient, tokenRequest, tokensFor } from "./utils";
 
 describe("oauth bearer tokens", () => {
   beforeEach(async () => {
@@ -16,7 +21,7 @@ describe("oauth bearer tokens", () => {
   });
 
   const setup = async (
-    scope = "openid account",
+    scope = "openid api",
     isAdmin = false,
     extra: Record<string, string> = {}
   ) => {
@@ -32,7 +37,7 @@ describe("oauth bearer tokens", () => {
 
   const bearer = (token: string) => ({ Authorization: `Bearer ${token}` });
 
-  it("acts as the user with the account scope", async () => {
+  it("acts as the user with the api scope", async () => {
     const { user, tokens } = await setup();
     const response = await request(API)
       .get("/auth/profile")
@@ -41,7 +46,7 @@ describe("oauth bearer tokens", () => {
     assert.equal(response.body.result.id, user.id);
   });
 
-  it("refuses a token without the account scope on account routes", async () => {
+  it("refuses a token without the api scope on routes that act as the user", async () => {
     const { user, tokens } = await setup("openid profile");
     const response = await request(API)
       .get(`/v1/users/${user.id}/purchases`)
@@ -49,7 +54,7 @@ describe("oauth bearer tokens", () => {
     assert.equal(response.status, 403);
     assert.match(
       response.headers["www-authenticate"],
-      /error="insufficient_scope", scope="account"/
+      /error="insufficient_scope", scope="api"/
     );
   });
 
@@ -69,7 +74,7 @@ describe("oauth bearer tokens", () => {
   });
 
   it("never makes the token an admin, and keeps account deletion and payouts cookie-only", async () => {
-    const { user, tokens } = await setup("openid account", true);
+    const { user, tokens } = await setup("openid api", true);
     const headers = bearer(tokens.access_token);
 
     const admin = await request(API).get("/v1/admin/clients").set(headers);
@@ -85,6 +90,57 @@ describe("oauth bearer tokens", () => {
       .get(`/v1/users/${user.id}/stripe/connect`)
       .set(headers);
     assert.equal(connect.status, 403);
+  });
+
+  it("keeps managers, labels, payouts and artist deletion cookie-only", async () => {
+    const { user, tokens } = await setup();
+    const headers = bearer(tokens.access_token);
+    const { user: label } = await createUser({
+      email: "label@example.com",
+      isLabelAccount: true,
+    });
+    const artist = await createArtist(user.id);
+    await createArtistLabel({
+      artistId: artist.id,
+      labelUserId: label.id,
+      isArtistApproved: false,
+    });
+
+    const approveLabel = await request(API)
+      .put(`/v1/manage/artists/${artist.id}/labels/${label.id}`)
+      .set(headers)
+      .send({ isArtistApproved: true });
+    assert.equal(approveLabel.status, 403);
+
+    const addManager = await request(API)
+      .post(`/v1/manage/artists/${artist.id}/managers`)
+      .set(headers)
+      .send({ email: "label@example.com" });
+    assert.equal(addManager.status, 403);
+
+    const payouts = await request(API)
+      .put(`/v1/manage/artists/${artist.id}`)
+      .set(headers)
+      .send({ paymentToUserId: label.id });
+    assert.equal(payouts.status, 403);
+
+    const rename = await request(API)
+      .put(`/v1/manage/artists/${artist.id}`)
+      .set(headers)
+      .send({ name: "Renamed" });
+    assert.equal(rename.status, 200, rename.text);
+
+    const remove = await request(API)
+      .delete(`/v1/manage/artists/${artist.id}`)
+      .set(headers);
+    assert.equal(remove.status, 403);
+
+    const unchanged = await prisma.profile.findFirstOrThrow({
+      where: { id: artist.id },
+      include: { artistLabels: true },
+    });
+    assert.equal(unchanged.paymentToUserId, null);
+    assert.equal(unchanged.artistLabels[0].isArtistApproved, false);
   });
 
   it("stands in for the API key on cross-origin writes", async () => {
@@ -131,15 +187,13 @@ describe("oauth bearer tokens", () => {
   });
 
   it("issues refresh tokens only for offline_access with prompt=consent", async () => {
-    const withoutPrompt = await setup("openid account offline_access");
+    const withoutPrompt = await setup("openid api offline_access");
     assert.equal(withoutPrompt.tokens.refresh_token, undefined);
 
     await clearTables();
-    const { client, tokens } = await setup(
-      "openid account offline_access",
-      false,
-      { prompt: "consent" }
-    );
+    const { client, tokens } = await setup("openid api offline_access", false, {
+      prompt: "consent",
+    });
     assert.ok(tokens.refresh_token);
 
     const refreshed = await request(API)
@@ -159,6 +213,63 @@ describe("oauth bearer tokens", () => {
     assert.equal(profile.status, 200);
   });
 
+  it("rotates a public client's refresh token and revokes the grant when an old one is reused", async () => {
+    const { accessToken } = await createUser({
+      email: "fan@example.com",
+      emailConfirmationToken: null,
+    });
+    const client = await createOAuthClient({ confidential: false });
+    const tokens = await tokensFor(
+      accessToken,
+      client,
+      "openid api offline_access",
+      { prompt: "consent" }
+    );
+    const refresh = (refreshToken: string) =>
+      tokenRequest(client, {
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+      });
+
+    const rotated = await refresh(tokens.refresh_token!);
+    assert.equal(rotated.status, 200, rotated.text);
+    assert.notEqual(rotated.body.refresh_token, tokens.refresh_token);
+
+    const reused = await refresh(tokens.refresh_token!);
+    assert.equal(reused.body.error, "invalid_grant");
+
+    const afterReuse = await refresh(rotated.body.refresh_token);
+    assert.equal(afterReuse.body.error, "invalid_grant");
+    const profile = await request(API)
+      .get("/auth/profile")
+      .set(bearer(rotated.body.access_token));
+    assert.equal(profile.status, 401);
+  });
+
+  it("stops a revoked refresh token and access token", async () => {
+    const { client, tokens } = await setup("openid api offline_access", false, {
+      prompt: "consent",
+    });
+    for (const token of [tokens.refresh_token!, tokens.access_token]) {
+      const revoked = await tokenRequest(
+        client,
+        { token },
+        "/oidc/token/revocation"
+      );
+      assert.equal(revoked.status, 200, revoked.text);
+    }
+
+    const refreshed = await tokenRequest(client, {
+      grant_type: "refresh_token",
+      refresh_token: tokens.refresh_token!,
+    });
+    assert.equal(refreshed.body.error, "invalid_grant");
+    const profile = await request(API)
+      .get("/auth/profile")
+      .set(bearer(tokens.access_token));
+    assert.equal(profile.status, 401);
+  });
+
   it("can't be used to approve another app", async () => {
     const { tokens } = await setup();
     const other = await createOAuthClient({ applicationName: "Other" });
@@ -168,7 +279,7 @@ describe("oauth bearer tokens", () => {
         client_id: String(other.id),
         response_type: "code",
         redirect_uri: "https://app.example/callback",
-        scope: "openid account",
+        scope: "openid api",
         code_challenge: "x".repeat(43),
         code_challenge_method: "S256",
         state: "s",

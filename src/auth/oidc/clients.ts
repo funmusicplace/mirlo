@@ -1,4 +1,5 @@
 import prisma from "@mirlo/prisma";
+import type { Client } from "@mirlo/prisma/client";
 import type { ClientMetadata } from "oidc-provider";
 
 import { AppError } from "../../utils/error";
@@ -8,26 +9,25 @@ const isWebUri = (uri: string) => /^https?:\/\//i.test(uri);
 const validUrlOrUndefined = (url: string) =>
   URL.canParse(url) && isWebUri(url) ? url : undefined;
 
-export const clientMetadataFor = async (
-  id: string
-): Promise<ClientMetadata | undefined> => {
-  if (!/^\d+$/.test(id)) {
-    return undefined;
-  }
-  const client = await prisma.client.findFirst({
-    where: {
-      id: Number(id),
-      deletedAt: null,
-      status: "approved",
-      clientIdUrl: null,
-    },
-  });
-  if (!client || client.redirectUris.length === 0) {
+type OAuthClientRow = Pick<
+  Client,
+  | "id"
+  | "applicationName"
+  | "applicationUrl"
+  | "redirectUris"
+  | "confidential"
+  | "key"
+>;
+
+export const metadataForClientRow = (
+  client: OAuthClientRow
+): ClientMetadata | undefined => {
+  if (client.redirectUris.length === 0) {
     return undefined;
   }
 
   const base: ClientMetadata = {
-    client_id: id,
+    client_id: String(client.id),
     client_name: client.applicationName,
     client_uri: validUrlOrUndefined(client.applicationUrl),
     redirect_uris: client.redirectUris,
@@ -51,6 +51,23 @@ export const clientMetadataFor = async (
     token_endpoint_auth_method: "none",
     application_type: client.redirectUris.every(isWebUri) ? "web" : "native",
   };
+};
+
+export const clientMetadataFor = async (
+  id: string
+): Promise<ClientMetadata | undefined> => {
+  if (!/^\d+$/.test(id)) {
+    return undefined;
+  }
+  const client = await prisma.client.findFirst({
+    where: {
+      id: Number(id),
+      deletedAt: null,
+      status: "approved",
+      clientIdUrl: null,
+    },
+  });
+  return client ? metadataForClientRow(client) : undefined;
 };
 
 export const parseRedirectUris = (value: unknown): string[] | undefined => {

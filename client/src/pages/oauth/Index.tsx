@@ -31,7 +31,7 @@ function Index() {
 
   if (isError || decisionFailed) {
     return (
-      <WidthWrapper variant="small" className="mt-8">
+      <WidthWrapper variant="small" className="mt-8!">
         <Box>{t("expired")}</Box>
       </WidthWrapper>
     );
@@ -43,7 +43,7 @@ function Index() {
 
   if (!data) {
     return (
-      <WidthWrapper variant="small" className="mt-8">
+      <WidthWrapper variant="small" className="mt-8!">
         <Box>{t("expired")}</Box>
       </WidthWrapper>
     );
@@ -70,7 +70,7 @@ function Index() {
   }
 
   return (
-    <WidthWrapper variant="small" className="mt-8 mb-12">
+    <WidthWrapper variant="small" className="mt-8! mb-12!">
       <div className="flex items-center gap-4 mb-4">
         {data.client.logoUri && (
           <img
@@ -79,7 +79,7 @@ function Index() {
             className="w-12 h-12 rounded object-contain"
           />
         )}
-        <h1 className="text-xl">
+        <h1 className="text-xl!">
           {t("wantsAccess", { app: data.client.name })}
         </h1>
       </div>

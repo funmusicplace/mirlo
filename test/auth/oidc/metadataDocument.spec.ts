@@ -23,8 +23,6 @@ import {
   startAuthorization,
 } from "./utils";
 
-// The provider runs in-process here so the metadata document can be served by
-// stubbing fetch, without relaxing the provider's private-address checks.
 const app = express();
 app.use("/oidc", oidcHandler);
 app.use(cookieParser());
@@ -165,6 +163,55 @@ describe("oauth client ID metadata documents", () => {
     assert.equal(rows[0].key, null);
   });
 
+  const createRow = (data: {
+    status: "pending" | "revoked";
+    deletedAt: Date;
+  }) =>
+    prisma.client.create({
+      data: {
+        applicationName: "Radiccio",
+        applicationUrl: "https://radiccio.app",
+        allowedCorsOrigins: [],
+        clientIdUrl: CLIENT_ID,
+        ...data,
+      },
+    });
+
+  it("keeps a revoked app blocked after an admin deletes it", async () => {
+    await createRow({ status: "revoked", deletedAt: new Date() });
+    const agent = loggedInAgent();
+    const { location } = await startAuthorization(
+      agent,
+      CLIENT_ID,
+      pkce().challenge
+    );
+    assert.equal(new URL(location).pathname, "/oauth/error");
+  });
+
+  it("lets a deleted app that wasn't revoked be requested again", async () => {
+    const row = await createRow({ status: "pending", deletedAt: new Date() });
+    const agent = loggedInAgent();
+    const { uid } = await startAuthorization(
+      agent,
+      CLIENT_ID,
+      pkce().challenge
+    );
+    const details = await agent.get(`/oauth/${uid}/details`);
+    assert.equal(details.body.result.approval, "unknown");
+
+    const requested = await agent
+      .post(`/oauth/${uid}/decision`)
+      .send({ action: "requestApproval" });
+    assert.equal(requested.status, 200, requested.text);
+
+    const restored = await prisma.client.findFirstOrThrow({
+      where: { id: row.id },
+    });
+    assert.equal(restored.status, "pending");
+    assert.equal(restored.deletedAt, null);
+    assert.equal(restored.userId, userId);
+  });
+
   it("issues tokens once approved, and stops when revoked", async () => {
     const row = await prisma.client.create({
       data: {
@@ -178,7 +225,7 @@ describe("oauth client ID metadata documents", () => {
     const agent = loggedInAgent();
     const { verifier, challenge } = pkce();
     const { uid } = await startAuthorization(agent, CLIENT_ID, challenge, {
-      scope: "openid account",
+      scope: "openid api",
     });
     const decision = await agent
       .post(`/oauth/${uid}/decision`)

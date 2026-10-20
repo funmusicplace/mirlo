@@ -117,8 +117,6 @@ const cookieUserAuthenticated = (
   )(req, res, next);
 };
 
-// A bearer token acts as the user only with the `account` scope. Without it
-// the token is ignored here and only routes that ask for its scope accept it.
 const withBearer =
   (
     cookieMiddleware: (req: Request, res: Response, next: NextFunction) => void,
@@ -134,9 +132,9 @@ const withBearer =
         return rejectBearer(res, "invalid_token");
       }
       req.oauth = bearer.oauth;
-      if (!bearer.oauth.scopes.includes("account")) {
+      if (!bearer.oauth.scopes.includes("api")) {
         return required
-          ? rejectBearer(res, "insufficient_scope", "account")
+          ? rejectBearer(res, "insufficient_scope", "api")
           : next();
       }
       req.user = bearer.user;

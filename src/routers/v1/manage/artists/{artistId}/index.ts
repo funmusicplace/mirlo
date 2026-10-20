@@ -4,6 +4,7 @@ import { merge } from "lodash";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
+  cookieSessionOnly,
   profileBelongsToLoggedInUser,
   profileOwnedByLoggedInUser,
   userAuthenticated,
@@ -28,7 +29,12 @@ export default function () {
   const operations = {
     PUT: [userAuthenticated, profileBelongsToLoggedInUser, PUT],
     GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
-    DELETE: [userAuthenticated, profileOwnedByLoggedInUser, DELETE],
+    DELETE: [
+      userAuthenticated,
+      cookieSessionOnly,
+      profileOwnedByLoggedInUser,
+      DELETE,
+    ],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
@@ -94,6 +100,13 @@ export default function () {
         throw new AppError({
           httpCode: 403,
           description: "Only the owner of this artist can change payouts",
+        });
+      }
+      if (isChangingPaymentTo && req.oauth) {
+        throw new AppError({
+          httpCode: 403,
+          description:
+            "Payouts can only be changed while signed in on the site",
         });
       }
 

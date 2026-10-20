@@ -3,7 +3,7 @@ export const OAUTH_SCOPES = [
   "offline_access",
   "profile",
   "email",
-  "account",
+  "api",
   "subscribers:read",
 ];
 

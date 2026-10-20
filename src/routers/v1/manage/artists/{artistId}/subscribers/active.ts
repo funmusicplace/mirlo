@@ -15,8 +15,15 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
+    const { paid } = req.query as { paid?: string };
     try {
       assertLoggedIn(req);
+      if (paid !== undefined && paid !== "true" && paid !== "false") {
+        throw new AppError({
+          httpCode: 400,
+          description: "paid must be true or false",
+        });
+      }
       const profileId = await findArtistIdForURLSlug(req.params.artistId);
       if (
         !(await canUserEditProfile(profileId, req.user, { allowAdmin: false }))
@@ -36,7 +43,11 @@ export default function () {
 
       const subscriptions = await prisma.profileUserSubscription.findMany({
         where: {
-          profileSubscriptionTier: { profileId, deletedAt: null },
+          profileSubscriptionTier: {
+            profileId,
+            deletedAt: null,
+            ...(paid === undefined ? {} : { isDefaultTier: paid === "false" }),
+          },
           deletedAt: null,
         },
         select: {
@@ -47,7 +58,9 @@ export default function () {
           createdAt: true,
           updatedAt: true,
           user: { select: { email: true, name: true } },
-          profileSubscriptionTier: { select: { id: true, name: true } },
+          profileSubscriptionTier: {
+            select: { id: true, name: true, isDefaultTier: true },
+          },
         },
         orderBy: { createdAt: "asc" },
       });
@@ -59,6 +72,7 @@ export default function () {
           name: sub.user.name,
           tierId: sub.profileSubscriptionTier.id,
           tierName: sub.profileSubscriptionTier.name,
+          paid: !sub.profileSubscriptionTier.isDefaultTier,
           amount: sub.amount,
           currency,
           status: sub.deleteReason ? "cancelling" : "active",
@@ -73,11 +87,20 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Lists an artist's current supporters",
+    summary: "Lists an artist's current subscribers",
     description:
-      "The complete current membership, for syncing to another site. Anyone missing from the list is no longer a supporter. A `cancelling` subscription is still active until `currentPeriodEnd`. Accepts the signed-in session or an OAuth token with the `subscribers:read` scope, for users who can edit the artist.",
+      "The complete current membership, for syncing to another site. Anyone missing from the list is no longer a subscriber. A `cancelling` subscription is still active until `currentPeriodEnd`. People who only follow the artist are on the free follow tier and have `paid: false`; filter with `?paid=true` or `?paid=false`. Accepts the signed-in session or an OAuth token with the `subscribers:read` scope, for users who can edit the artist.",
     parameters: [
       { in: "path", name: "artistId", required: true, type: "string" },
+      {
+        in: "query",
+        name: "paid",
+        required: false,
+        type: "string",
+        enum: ["true", "false"],
+        description:
+          "Only paying subscribers (`true`) or only followers (`false`). Leave out for both.",
+      },
     ],
     responses: {
       200: {
@@ -95,6 +118,7 @@ export default function () {
                   name: { type: "string" },
                   tierId: { type: "number" },
                   tierName: { type: "string" },
+                  paid: { type: "boolean" },
                   amount: { type: "number" },
                   currency: { type: "string" },
                   status: { type: "string", enum: ["active", "cancelling"] },
@@ -107,6 +131,7 @@ export default function () {
           },
         },
       },
+      400: { description: "paid isn't true or false" },
       404: { description: "Artist not found or not editable by the user" },
     },
   };

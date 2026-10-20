@@ -2,7 +2,10 @@ import prisma from "@mirlo/prisma";
 import express, { NextFunction, Request, Response } from "express";
 import type { Client, InteractionResults } from "oidc-provider";
 
-import { findClientRow } from "../../auth/oidc/approval";
+import {
+  approvalStatusOf,
+  isMetadataDocumentClientId,
+} from "../../auth/oidc/approval";
 import { findGrantId } from "../../auth/oidc/grants";
 import { getProvider } from "../../auth/oidc/provider";
 import { requestedScopes } from "../../auth/oidc/scopes";
@@ -27,41 +30,40 @@ const loadInteraction = async (req: Request, res: Response) => {
   if (!client) {
     throw new AppError({ httpCode: 404, description: "App not found" });
   }
-  const row = await findClientRow(clientId);
   return {
     provider,
     interaction,
     client,
     clientId,
-    approval: row?.status ?? "unknown",
+    approval: await approvalStatusOf(clientId),
     scopes: requestedScopes(interaction.params.scope),
   };
 };
-
-const isMetadataDocumentClient = (clientId: string) => !/^\d+$/.test(clientId);
 
 const requestApproval = async (
   clientId: string,
   metadata: ReturnType<Client["metadata"]>,
   userId: number
 ) => {
-  if (await findClientRow(clientId)) {
-    return;
-  }
   const url = new URL(clientId);
+  const data = {
+    applicationName: metadata.client_name ?? url.host,
+    applicationUrl: metadata.client_uri ?? url.origin,
+    redirectUris: [...(metadata.redirect_uris ?? [])],
+    status: "pending" as const,
+    userId,
+  };
   await prisma.client.createMany({
-    data: [
-      {
-        applicationName: metadata.client_name ?? url.host,
-        applicationUrl: metadata.client_uri ?? url.origin,
-        allowedCorsOrigins: [],
-        clientIdUrl: clientId,
-        redirectUris: [...(metadata.redirect_uris ?? [])],
-        status: "pending",
-        userId,
-      },
-    ],
+    data: [{ ...data, allowedCorsOrigins: [], clientIdUrl: clientId }],
     skipDuplicates: true,
+  });
+  await prisma.client.updateMany({
+    where: {
+      clientIdUrl: clientId,
+      deletedAt: { not: null },
+      status: { not: "revoked" },
+    },
+    data: { ...data, deletedAt: null },
   });
 };
 
@@ -101,7 +103,7 @@ router.get(
             name: metadata.client_name ?? redirectHost,
             uri: metadata.client_uri ?? null,
             logoUri: metadata.logo_uri ?? null,
-            domain: isMetadataDocumentClient(clientId)
+            domain: isMetadataDocumentClientId(clientId)
               ? new URL(clientId).host
               : redirectHost,
           },
@@ -131,7 +133,7 @@ router.post(
         if (!req.user) {
           throw new AppError({ httpCode: 401, description: "Unauthorized" });
         }
-        if (isMetadataDocumentClient(clientId) && approval === "unknown") {
+        if (isMetadataDocumentClientId(clientId) && approval === "unknown") {
           await requestApproval(clientId, client.metadata(), req.user.id);
         }
         res.json({
