@@ -481,10 +481,13 @@ export const uploadFilesToBackblaze = async (
 export const getPresignedUploadUrl = async (
   bucket: string,
   fileName: string,
-  expiresInSeconds = 3600,
-
-  contentLength?: number
+  options?: {
+    expiresInSeconds?: number;
+    contentType?: string;
+    contentLength?: number;
+  }
 ): Promise<string | null> => {
+  const { expiresInSeconds = 3600, contentType, contentLength } = options ?? {};
   await createBucketIfNotExists(bucket);
 
   const client =
@@ -500,15 +503,19 @@ export const getPresignedUploadUrl = async (
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: fileName,
+    ...(contentType !== undefined ? { ContentType: contentType } : {}),
     ...(contentLength !== undefined ? { ContentLength: contentLength } : {}),
   });
 
+  // Force content-type and content-length into the signature so the declared
+  // values are enforced.
+  const signableHeaders = new Set(["host"]);
+  if (contentType !== undefined) signableHeaders.add("content-type");
+  if (contentLength !== undefined) signableHeaders.add("content-length");
+
   return getSignedUrl(client, command, {
     expiresIn: expiresInSeconds,
-    // Force content-length into the signature so the size pin is enforced.
-    ...(contentLength !== undefined
-      ? { signableHeaders: new Set(["host", "content-length"]) }
-      : {}),
+    signableHeaders,
   });
 };
 
@@ -1184,8 +1191,10 @@ export const removeCoverImages = (coverId: string) =>
 
 const contentKey = (id: string) => `content/${id}`;
 
-export const getDownloadableContentUploadUrl = (id: string) =>
-  getPresignedUploadUrl(getDownloadsBucket(), contentKey(id));
+export const getDownloadableContentUploadUrl = (
+  id: string,
+  options: { contentType: string; contentLength: number }
+) => getPresignedUploadUrl(getDownloadsBucket(), contentKey(id), options);
 
 export const statDownloadableContent = (id: string) =>
   statFile(getDownloadsBucket(), contentKey(id));
@@ -1204,6 +1213,9 @@ export const getDownloadableContentBufferFromStat = (
 
 export const getDownloadableContentBuffer = (id: string) =>
   getBufferFromStorage(getDownloadsBucket(), contentKey(id));
+
+export const getDownloadableContentReadStream = (id: string) =>
+  getReadStream(getDownloadsBucket(), contentKey(id));
 
 export const removeDownloadableContent = (id: string) =>
   removeObjectsFromBucket(getDownloadsBucket(), contentKey(id));

@@ -1,8 +1,10 @@
 import prisma from "@mirlo/prisma";
+import contentDisposition from "content-disposition";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../auth/passport";
+import { isAllowedDownloadableContentMimeType } from "../../../utils/content";
 import { AppError } from "../../../utils/error";
 import {
   getDownloadableContentMeta,
@@ -43,9 +45,12 @@ export default function () {
           description: "You do not have access to this content",
         });
       }
-      const meta = await getDownloadableContentMeta(contentId);
+      const content = await prisma.downloadableContent.findFirst({
+        where: { id: contentId },
+      });
+      const meta = content && (await getDownloadableContentMeta(contentId));
 
-      if (!meta) {
+      if (!content || !meta) {
         throw new AppError({
           httpCode: 404,
           description: "Content not found",
@@ -54,8 +59,17 @@ export default function () {
 
       res.setHeader(
         "Content-Type",
-        meta.contentType || "application/octet-stream"
+        isAllowedDownloadableContentMimeType(content.mimeType)
+          ? content.mimeType
+          : "application/octet-stream"
       );
+      res.setHeader(
+        "Content-Disposition",
+        contentDisposition(content.originalFilename ?? content.id, {
+          type: "attachment",
+        })
+      );
+      res.setHeader("X-Content-Type-Options", "nosniff");
       res.setHeader("Content-Length", meta.contentLength || 0);
       res.setHeader(
         "Last-Modified",

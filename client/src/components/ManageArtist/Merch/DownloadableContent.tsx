@@ -14,12 +14,16 @@ import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 
+// Keep in sync with DOWNLOADABLE_CONTENT_MIME_TYPES on the server.
 export const DOWNLOADABLE_CONTENT_MIME_TYPES = [
   "application/pdf",
-  "image/*",
   "text/plain",
   "text/markdown",
   "application/epub+zip",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
 ];
 
 // Some browsers don't report a MIME type for .md/.epub files, so we also
@@ -67,6 +71,8 @@ export const uploadDownloadableContentFile = async (
     console.error("Error uploading to remote server", e);
     throw e;
   }
+
+  await api.put(`manage/downloadableContent/${response.result.id}/verify`, {});
 };
 
 const DownloadableContent: React.FC<{
