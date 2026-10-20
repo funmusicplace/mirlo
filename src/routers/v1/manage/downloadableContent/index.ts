@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
+import { isAllowedDownloadableContentMimeType } from "../../../../utils/content";
 import { clearTrackGroupDownloads } from "../../../../utils/downloadCache";
 import { AppError } from "../../../../utils/error";
 import { getDownloadableContentUploadUrl } from "../../../../utils/minio";
@@ -10,18 +11,6 @@ import {
   doesMerchBelongToUser,
   doesTrackGroupBelongToUser,
 } from "../../../../utils/ownership";
-
-// Keep in sync with DOWNLOADABLE_CONTENT_MIME_TYPES on the client.
-const ALLOWED_MIME_TYPES = [
-  "application/pdf",
-  "text/plain",
-  "text/markdown",
-  "application/epub+zip",
-];
-
-const isAllowedMimeType = (mimeType?: string): boolean =>
-  !!mimeType &&
-  (ALLOWED_MIME_TYPES.includes(mimeType) || mimeType.startsWith("image/"));
 
 // Keep in sync with MAX_DOWNLOADABLE_CONTENT_SIZE on the client.
 const MAX_SIZE_MB = 100;
@@ -38,7 +27,7 @@ export default function () {
 
     const { filename, trackGroupId, merchId, mimeType, size } = req.body;
     try {
-      if (!isAllowedMimeType(mimeType)) {
+      if (!isAllowedDownloadableContentMimeType(mimeType)) {
         throw new AppError({
           httpCode: 400,
           description: `File type "${mimeType}" is not allowed for downloadable content`,
@@ -103,7 +92,8 @@ export default function () {
       let uploadUrl = null;
       if (downloadableContent) {
         uploadUrl = await getDownloadableContentUploadUrl(
-          downloadableContent.id
+          downloadableContent.id,
+          { contentType: mimeType, contentLength: size }
         );
       }
       res.json({ result: refreshedContent, uploadUrl });

@@ -120,6 +120,7 @@ const routes = [
   "manage/artists/{artistId}/posts",
   "manage/downloadableContent",
   "manage/downloadableContent/{contentId}",
+  "manage/downloadableContent/{contentId}/verify",
   "manage/trackGroups/{trackGroupId}",
   "manage/trackGroups/{trackGroupId}/tracks",
   "manage/trackGroups/{trackGroupId}/trackOrder",
