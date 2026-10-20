@@ -1,6 +1,8 @@
 import prisma from "@mirlo/prisma";
 import type { ClientMetadata } from "oidc-provider";
 
+import { AppError } from "../../utils/error";
+
 const isWebUri = (uri: string) => /^https?:\/\//i.test(uri);
 
 const validUrlOrUndefined = (url: string) =>
@@ -49,4 +51,23 @@ export const clientMetadataFor = async (
     token_endpoint_auth_method: "none",
     application_type: client.redirectUris.every(isWebUri) ? "web" : "native",
   };
+};
+
+export const parseRedirectUris = (value: unknown): string[] | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (
+    !Array.isArray(value) ||
+    value.some(
+      (uri) =>
+        typeof uri !== "string" || !URL.canParse(uri) || uri.includes("#")
+    )
+  ) {
+    throw new AppError({
+      httpCode: 400,
+      description: "redirectUris must be a list of URLs without fragments",
+    });
+  }
+  return value;
 };

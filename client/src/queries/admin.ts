@@ -166,6 +166,8 @@ export interface AdminClient {
   allowedCorsOrigins: string[];
   key: string | null;
   status: AdminClientStatus;
+  redirectUris: string[];
+  confidential: boolean;
   user: { id: number; email: string } | null;
   createdAt: string;
 }
@@ -182,6 +184,8 @@ async function createAdminClient(data: {
   applicationUrl: string;
   allowedCorsOrigins: string[];
   userEmail?: string;
+  redirectUris: string[];
+  confidential: boolean;
 }) {
   return api.post<typeof data, { result: AdminClient }>("admin/clients", data);
 }
@@ -217,6 +221,8 @@ async function updateAdminClient(opts: {
   clientId: number;
   status?: AdminClientStatus;
   userEmail?: string | null;
+  redirectUris?: string[];
+  confidential?: boolean;
 }) {
   const { clientId, ...data } = opts;
   return api.put<typeof data, { result: AdminClient }>(

@@ -1898,7 +1898,12 @@
     "deleteUserConsequenceArtistSubscribers": "Everyone subscribed to their artist pages has their subscription cancelled.",
     "deleteUserConsequenceCollection": "They lose access to everything in their collection, including music they've bought.",
     "deleteUserConsequenceSubscriptions": "Their subscriptions to other artists are cancelled.",
-    "userDeleteSuccess": "User {{email}} deleted"
+    "userDeleteSuccess": "User {{email}} deleted",
+    "redirectUris": "OAuth redirect URIs (comma separated)",
+    "confidentialClient": "Keeps its key on a server (uses it as the OAuth client secret)",
+    "oauth": "OAuth",
+    "oauthClientId": "Client ID: {{id}}",
+    "invalidRedirectUris": "Couldn't save: redirect URIs must be full URLs without a #fragment"
   },
   "adminDashboard": {
     "title": "Admin Dashboard",

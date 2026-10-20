@@ -5,6 +5,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { invalidateClientCache } from "../../../../auth/cors";
+import { parseRedirectUris } from "../../../../auth/oidc/clients";
 import {
   userAuthenticated,
   userHasPermission,
@@ -42,13 +43,21 @@ export default function () {
   }
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { applicationName, applicationUrl, allowedCorsOrigins, userEmail } =
-      req.body as {
-        applicationName: string;
-        applicationUrl: string;
-        allowedCorsOrigins?: string[];
-        userEmail?: string;
-      };
+    const {
+      applicationName,
+      applicationUrl,
+      allowedCorsOrigins,
+      userEmail,
+      redirectUris,
+      confidential,
+    } = req.body as {
+      applicationName: string;
+      applicationUrl: string;
+      allowedCorsOrigins?: string[];
+      userEmail?: string;
+      redirectUris?: string[];
+      confidential?: boolean;
+    };
     try {
       if (!applicationName || !applicationUrl) {
         throw new AppError({
@@ -64,6 +73,8 @@ export default function () {
           applicationName,
           applicationUrl,
           allowedCorsOrigins: allowedCorsOrigins ?? [],
+          redirectUris: parseRedirectUris(redirectUris) ?? [],
+          confidential: !!confidential,
           key: randomBytes(24).toString("hex"),
           userId,
         },

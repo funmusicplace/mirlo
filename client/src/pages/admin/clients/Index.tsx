@@ -21,11 +21,15 @@ import { useTranslation } from "react-i18next";
 import { FaSyncAlt, FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 
+import ClientOAuthSettings, { splitList } from "./ClientOAuthSettings";
+
 interface ClientForm {
   applicationName: string;
   applicationUrl: string;
   allowedCorsOrigins: string;
   userEmail: string;
+  redirectUris: string;
+  confidential: boolean;
 }
 
 const CLIENT_STATUSES: AdminClientStatus[] = ["pending", "approved", "revoked"];
@@ -49,16 +53,18 @@ const Index: React.FC = () => {
         const { result } = await createClient({
           applicationName: formData.applicationName,
           applicationUrl: formData.applicationUrl,
-          allowedCorsOrigins: formData.allowedCorsOrigins
-            ? formData.allowedCorsOrigins.split(",").map((o) => o.trim())
-            : [],
+          allowedCorsOrigins: splitList(formData.allowedCorsOrigins),
           userEmail: formData.userEmail || undefined,
+          redirectUris: splitList(formData.redirectUris),
+          confidential: formData.confidential,
         });
         reset({
           applicationName: "",
           applicationUrl: "",
           allowedCorsOrigins: "",
           userEmail: "",
+          redirectUris: "",
+          confidential: false,
         });
         snackbar(`${t("clientCreatedKeyWarning")} ${result.key}`, {
           type: "success",
@@ -135,6 +141,16 @@ const Index: React.FC = () => {
           <label>{t("clientUserEmail")}</label>
           <InputEl type="email" {...register("userEmail")} />
         </FormComponent>
+        <FormComponent>
+          <label>{t("redirectUris")}</label>
+          <InputEl {...register("redirectUris")} />
+        </FormComponent>
+        <FormComponent>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" {...register("confidential")} />
+            {t("confidentialClient")}
+          </label>
+        </FormComponent>
         <Button type="submit">{t("createClient")}</Button>
       </form>
 
@@ -151,6 +167,7 @@ const Index: React.FC = () => {
               <th>{t("allowedCorsOrigins")}</th>
               <th>{t("clientUserEmail")}</th>
               <th>{t("clientStatus")}</th>
+              <th>{t("oauth")}</th>
               <th>{t("key")}</th>
               <th />
             </tr>
@@ -176,6 +193,9 @@ const Index: React.FC = () => {
                       value: status,
                     }))}
                   />
+                </td>
+                <td>
+                  <ClientOAuthSettings client={client} />
                 </td>
                 <td>
                   {client.key ? `${client.key.slice(0, 8)}…` : ""}

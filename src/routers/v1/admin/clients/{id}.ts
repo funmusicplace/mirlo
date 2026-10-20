@@ -5,6 +5,7 @@ import { ClientStatus } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { invalidateClientCache } from "../../../../auth/cors";
+import { parseRedirectUris } from "../../../../auth/oidc/clients";
 import {
   userAuthenticated,
   userHasPermission,
@@ -65,6 +66,8 @@ export default function () {
       rotateKey,
       status,
       userEmail,
+      redirectUris,
+      confidential,
     } = req.body as {
       applicationName?: string;
       applicationUrl?: string;
@@ -72,6 +75,8 @@ export default function () {
       rotateKey?: boolean;
       status?: ClientStatus;
       userEmail?: string | null;
+      redirectUris?: string[];
+      confidential?: boolean;
     };
     try {
       await findClientOr404(Number(req.params.id));
@@ -84,6 +89,8 @@ export default function () {
           allowedCorsOrigins,
           status,
           userId,
+          redirectUris: parseRedirectUris(redirectUris),
+          confidential,
           key: rotateKey ? randomBytes(24).toString("hex") : undefined,
         },
         include: { user: { select: { id: true, email: true } } },
