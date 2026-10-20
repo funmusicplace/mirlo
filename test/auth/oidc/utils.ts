@@ -72,9 +72,10 @@ const jarOf = (agent: Agent) =>
 
 export const signIn = (
   agent: ReturnType<typeof request.agent>,
-  accessToken: string
+  accessToken: string,
+  hostname = new URL(API).hostname
 ) => {
-  jarOf(agent).setCookie(`jwt=${accessToken}`, new URL(API).hostname, "/");
+  jarOf(agent).setCookie(`jwt=${accessToken}`, hostname, "/");
 };
 
 export const signOut = (agent: ReturnType<typeof request.agent>) => {

@@ -30,6 +30,18 @@ const ClientOAuthSettings: React.FC<{ client: AdminClient }> = ({ client }) => {
     [client.id, updateClient, snackbar, t]
   );
 
+  if (client.clientIdUrl) {
+    return (
+      <div className="flex flex-col gap-1 min-w-64">
+        <span>{t("metadataDocument")}</span>
+        <a href={client.clientIdUrl} target="_blank" rel="noreferrer">
+          {client.clientIdUrl}
+        </a>
+        <span>{client.redirectUris.join(", ")}</span>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-1 min-w-64">
       <span>{t("oauthClientId", { id: client.id })}</span>

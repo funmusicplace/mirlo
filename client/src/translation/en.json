@@ -200,7 +200,13 @@
       "offline_access": "Stay connected until you disconnect it",
       "account": "Act as you on this site.",
       "accountWarning": "The app can do almost anything you can: see your purchases and messages, buy things, follow artists, and manage your artists. Only allow apps you trust. It can't delete your account, change payouts or connect other apps."
-    }
+    },
+    "appDomain": "The app is published by {{domain}}.",
+    "notApproved": "{{app}} ({{domain}}) isn't approved on {{site}} yet",
+    "notApprovedExplanation": "The people who run this site decide which apps can connect to it. You can ask them to approve this one.",
+    "approvalRequested": "The admins have been asked to approve this app. Try again once they have.",
+    "requestApproval": "Ask the admins to approve it",
+    "backToApp": "Back to {{app}}"
   },
   "passwordReset": {
     "title": "Reset your password",
@@ -1905,7 +1911,8 @@
     "confidentialClient": "Keeps its key on a server (uses it as the OAuth client secret)",
     "oauth": "OAuth",
     "oauthClientId": "Client ID: {{id}}",
-    "invalidRedirectUris": "Couldn't save: redirect URIs must be full URLs without a #fragment"
+    "invalidRedirectUris": "Couldn't save: redirect URIs must be full URLs without a #fragment",
+    "metadataDocument": "Connects with its own metadata document (redirect URIs come from it):"
   },
   "adminDashboard": {
     "title": "Admin Dashboard",

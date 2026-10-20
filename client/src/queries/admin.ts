@@ -168,6 +168,7 @@ export interface AdminClient {
   status: AdminClientStatus;
   redirectUris: string[];
   confidential: boolean;
+  clientIdUrl: string | null;
   user: { id: number; email: string } | null;
   createdAt: string;
 }

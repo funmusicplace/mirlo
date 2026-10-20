@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { Navigate, useParams } from "react-router-dom";
 
 import ConsentScopes from "./ConsentScopes";
+import NotApproved from "./NotApproved";
 
 function Index() {
   const { t } = useTranslation("translation", { keyPrefix: "oauth" });
@@ -20,7 +21,8 @@ function Index() {
     isError: decisionFailed,
   } = useOAuthDecisionMutation(uid);
 
-  const autoAllow = !!data?.loggedIn && !data.needsConsent;
+  const autoAllow =
+    !!data?.loggedIn && data.approval === "approved" && !data.needsConsent;
   React.useEffect(() => {
     if (autoAllow) {
       decide("allow");
@@ -44,6 +46,17 @@ function Index() {
       <WidthWrapper variant="small" className="mt-8">
         <Box>{t("expired")}</Box>
       </WidthWrapper>
+    );
+  }
+
+  if (data.approval !== "approved") {
+    return (
+      <NotApproved
+        uid={uid}
+        interaction={data}
+        onBack={() => decide("deny")}
+        isLeaving={isDeciding}
+      />
     );
   }
 
@@ -71,7 +84,8 @@ function Index() {
         </h1>
       </div>
       <p className="mb-4 text-(--mi-lighten-foreground-color)">
-        {t("redirectsTo", { host: data.redirectHost })}
+        {t("redirectsTo", { host: data.redirectHost })}{" "}
+        {t("appDomain", { domain: data.client.domain })}
       </p>
       <ConsentScopes scopes={data.scopes} />
       <div className="flex gap-4 mt-6">

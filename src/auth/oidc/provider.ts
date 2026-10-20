@@ -5,6 +5,10 @@ import Provider, { type ErrorOut, interactionPolicy } from "oidc-provider";
 import logger from "../../logger";
 
 import { adapterFor } from "./adapter";
+import {
+  allowMetadataDocumentClient,
+  allowMetadataDocumentFetch,
+} from "./approval";
 import { loadKeys } from "./keys";
 import { OAUTH_SCOPES } from "./scopes";
 
@@ -92,6 +96,12 @@ const buildProvider = async () => {
       devInteractions: { enabled: false },
       revocation: { enabled: true },
       rpInitiatedLogout: { enabled: false },
+      clientIdMetadataDocument: {
+        enabled: true,
+        ack: "draft-02",
+        allowFetch: allowMetadataDocumentFetch,
+        allowClient: allowMetadataDocumentClient,
+      },
     },
     interactions: {
       url: (_ctx, interaction) => interactionUrl(interaction.uid),

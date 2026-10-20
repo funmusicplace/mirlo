@@ -1,10 +1,22 @@
-import { queryOptions, useMutation } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import * as api from "./fetch/fetchWrapper";
 import { QUERY_KEY_AUTH } from "./queryKeys";
 
+export type OAuthApproval = "approved" | "pending" | "revoked" | "unknown";
+
 export type OAuthInteraction = {
-  client: { name: string; uri: string | null; logoUri: string | null };
+  client: {
+    name: string;
+    uri: string | null;
+    logoUri: string | null;
+    domain: string;
+  };
+  approval: OAuthApproval;
   redirectHost: string;
   scopes: string[];
   loggedIn: boolean;
@@ -35,5 +47,20 @@ export function useOAuthDecisionMutation(uid: string) {
         >(`oauth/${uid}/decision`, { action })
         .then((r) => r.result.redirectTo),
     onSuccess: (redirectTo) => window.location.assign(redirectTo),
+  });
+}
+
+export function useRequestOAuthApprovalMutation(uid: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      api.post<{ action: "requestApproval" }, unknown>(
+        `oauth/${uid}/decision`,
+        { action: "requestApproval" }
+      ),
+    onSuccess: () =>
+      client.invalidateQueries({
+        queryKey: queryOAuthInteraction(uid).queryKey,
+      }),
   });
 }

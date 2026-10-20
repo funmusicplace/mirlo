@@ -1,7 +1,8 @@
 import prisma from "@mirlo/prisma";
 import express, { NextFunction, Request, Response } from "express";
-import type { InteractionResults } from "oidc-provider";
+import type { Client, InteractionResults } from "oidc-provider";
 
+import { findClientRow } from "../../auth/oidc/approval";
 import { findGrantId } from "../../auth/oidc/grants";
 import { getProvider } from "../../auth/oidc/provider";
 import { requestedScopes } from "../../auth/oidc/scopes";
@@ -26,13 +27,42 @@ const loadInteraction = async (req: Request, res: Response) => {
   if (!client) {
     throw new AppError({ httpCode: 404, description: "App not found" });
   }
+  const row = await findClientRow(clientId);
   return {
     provider,
     interaction,
     client,
     clientId,
+    approval: row?.status ?? "unknown",
     scopes: requestedScopes(interaction.params.scope),
   };
+};
+
+const isMetadataDocumentClient = (clientId: string) => !/^\d+$/.test(clientId);
+
+const requestApproval = async (
+  clientId: string,
+  metadata: ReturnType<Client["metadata"]>,
+  userId: number
+) => {
+  if (await findClientRow(clientId)) {
+    return;
+  }
+  const url = new URL(clientId);
+  await prisma.client.createMany({
+    data: [
+      {
+        applicationName: metadata.client_name ?? url.host,
+        applicationUrl: metadata.client_uri ?? url.origin,
+        allowedCorsOrigins: [],
+        clientIdUrl: clientId,
+        redirectUris: [...(metadata.redirect_uris ?? [])],
+        status: "pending",
+        userId,
+      },
+    ],
+    skipDuplicates: true,
+  });
 };
 
 const grantedScopes = async (
@@ -50,7 +80,7 @@ router.get(
   cookieUserLoggedInWithoutRedirect,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { provider, interaction, client, clientId, scopes } =
+      const { provider, interaction, client, clientId, approval, scopes } =
         await loadInteraction(req, res);
       const metadata = client.metadata();
       const redirectHost = new URL(String(interaction.params.redirect_uri))
@@ -71,7 +101,11 @@ router.get(
             name: metadata.client_name ?? redirectHost,
             uri: metadata.client_uri ?? null,
             logoUri: metadata.logo_uri ?? null,
+            domain: isMetadataDocumentClient(clientId)
+              ? new URL(clientId).host
+              : redirectHost,
           },
+          approval,
           redirectHost,
           scopes,
           loggedIn: !!req.user,
@@ -90,10 +124,21 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { action } = req.body as { action?: string };
-      const { provider, interaction, clientId, scopes } = await loadInteraction(
-        req,
-        res
-      );
+      const { provider, interaction, client, clientId, approval, scopes } =
+        await loadInteraction(req, res);
+
+      if (action === "requestApproval") {
+        if (!req.user) {
+          throw new AppError({ httpCode: 401, description: "Unauthorized" });
+        }
+        if (isMetadataDocumentClient(clientId) && approval === "unknown") {
+          await requestApproval(clientId, client.metadata(), req.user.id);
+        }
+        res.json({
+          result: { approval: approval === "unknown" ? "pending" : approval },
+        });
+        return;
+      }
 
       let result: InteractionResults;
       if (action === "deny") {
@@ -104,6 +149,12 @@ router.post(
       } else if (action === "allow") {
         if (!req.user) {
           throw new AppError({ httpCode: 401, description: "Unauthorized" });
+        }
+        if (approval !== "approved") {
+          throw new AppError({
+            httpCode: 403,
+            description: "This app isn't approved on this instance",
+          });
         }
         const user = await prisma.user.findFirst({
           where: { id: req.user.id, disabledAt: null },

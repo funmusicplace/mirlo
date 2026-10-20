@@ -45,7 +45,13 @@ describe("oidc interaction", () => {
     const response = await agent.get(`/oauth/${uid}/details`);
     assert.equal(response.status, 200);
     assert.deepEqual(response.body.result, {
-      client: { name: "Fider", uri: "https://app.example", logoUri: null },
+      client: {
+        name: "Fider",
+        uri: "https://app.example",
+        logoUri: null,
+        domain: "app.example",
+      },
+      approval: "approved",
       redirectHost: "app.example",
       scopes: ["openid", "profile", "email"],
       loggedIn: false,
