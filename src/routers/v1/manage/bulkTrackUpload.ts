@@ -155,7 +155,9 @@ export default function () {
                 artist?.artistLabels?.some(
                   (label: ArtistLabel) =>
                     label.labelUserId === loggedInUserId &&
-                    label.canLabelAddReleases
+                    label.canLabelAddReleases &&
+                    label.isArtistApproved &&
+                    label.isLabelApproved
                 )
               ) {
                 paymentToUserId = loggedInUserId;

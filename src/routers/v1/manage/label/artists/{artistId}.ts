@@ -1,8 +1,8 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import prisma from "@mirlo/prisma";
-import { userAuthenticated } from "../../../../../auth/passport";
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../../../auth/passport";
 import { AppError } from "../../../../../utils/error";
 
 export default function () {
@@ -32,6 +32,8 @@ export default function () {
         },
       });
 
+      const ownsArtist = loggedInUser.id === artist?.userId;
+
       await prisma.artistLabel.updateMany({
         where: {
           labelUserId: Number(labelUserId),
@@ -39,12 +41,10 @@ export default function () {
         },
         data: {
           isLabelApproved,
-          canLabelAddReleases:
-            Number(labelUserId) === loggedInUser.id &&
-            loggedInUser.id === artist?.userId,
-          canLabelManageArtist:
-            Number(labelUserId) === loggedInUser.id &&
-            loggedInUser.id === artist?.userId,
+          ...(ownsArtist && {
+            canLabelAddReleases: true,
+            canLabelManageArtist: true,
+          }),
         },
       });
 

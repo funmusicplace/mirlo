@@ -8,7 +8,10 @@ import {
   userAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeMerch } from "../../../../../serializers/merch";
-import { whereForAllProfilesUserCanEdit } from "../../../../../utils/artist";
+import {
+  whereForAllProfilesUserCanAddReleasesFor,
+  whereForAllProfilesUserCanEdit,
+} from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
 import { deleteMerch, merchImagesInclude } from "../../../../../utils/merch";
@@ -99,6 +102,7 @@ export default function () {
               { profileId: merch?.profileId },
               { paymentToUserId: user.id },
               { profile: whereForAllProfilesUserCanEdit(user.id) },
+              { profile: whereForAllProfilesUserCanAddReleasesFor(user.id) },
             ],
           },
         });

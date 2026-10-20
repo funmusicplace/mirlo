@@ -155,6 +155,8 @@ describe("manage/artists/{artistId}/trackGroups", () => {
           artistId: managedArtist.id,
           canLabelAddReleases: true,
           canLabelManageArtist: true,
+          isLabelApproved: true,
+          isArtistApproved: true,
         },
       });
 
@@ -227,6 +229,8 @@ describe("manage/artists/{artistId}/trackGroups", () => {
           artistId: managedArtist.id,
           canLabelAddReleases: true,
           canLabelManageArtist: true,
+          isLabelApproved: true,
+          isArtistApproved: true,
         },
       });
 
@@ -274,6 +278,8 @@ describe("manage/artists/{artistId}/trackGroups", () => {
           artistId: managedArtist.id,
           canLabelAddReleases: true,
           canLabelManageArtist: true,
+          isLabelApproved: true,
+          isArtistApproved: true,
         },
       });
 
@@ -408,6 +414,8 @@ describe("manage/artists/{artistId}/trackGroups", () => {
           artistId: artist.id,
           canLabelAddReleases: true,
           canLabelManageArtist: true,
+          isLabelApproved: true,
+          isArtistApproved: true,
         },
       });
       const response = await requestApp

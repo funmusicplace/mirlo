@@ -227,6 +227,53 @@ export default function () {
       const movingToNewProfile =
         targetProfileId !== existingTrackGroup.profileId;
 
+      if (newValues.paymentToUserId !== undefined) {
+        newValues.paymentToUserId =
+          newValues.paymentToUserId === null
+            ? null
+            : Number(newValues.paymentToUserId);
+        if (
+          newValues.paymentToUserId !== null &&
+          !Number.isInteger(newValues.paymentToUserId)
+        ) {
+          throw new AppError({
+            httpCode: 400,
+            description: "paymentToUserId must be a user id",
+          });
+        }
+        if (
+          newValues.paymentToUserId !== null &&
+          newValues.paymentToUserId !== existingTrackGroup.paymentToUserId
+        ) {
+          const validPayee = await prisma.profile.findFirst({
+            where: {
+              id: targetProfileId,
+              OR: [
+                { userId: newValues.paymentToUserId },
+                {
+                  artistLabels: {
+                    some: {
+                      labelUserId: newValues.paymentToUserId,
+                      canLabelAddReleases: true,
+                      isArtistApproved: true,
+                      isLabelApproved: true,
+                    },
+                  },
+                },
+              ],
+            },
+            select: { id: true },
+          });
+          if (!validPayee) {
+            throw new AppError({
+              httpCode: 400,
+              description:
+                "Payments can only be sent to the artist or a label you've both approved.",
+            });
+          }
+        }
+      }
+
       if (newValues.urlSlug) {
         newValues.urlSlug =
           generateSlug(newValues.urlSlug) || newValues.urlSlug;

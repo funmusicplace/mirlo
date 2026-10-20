@@ -161,7 +161,7 @@ export const resolveDigitalPurchaseItem = async <
       kind: "free",
       redirectUrl: `/${profile.urlSlug ?? profile.id}/release/${
         releaseUrlSlug ?? releaseId
-      }/download?email=${loggedInUser.email}`,
+      }/download?email=${encodeURIComponent(loggedInUser.email)}`,
     };
   }
 
