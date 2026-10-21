@@ -94,6 +94,30 @@ describe("manage/artists/{artistId}/background", () => {
       });
       assert.notEqual(oldImage.deletedAt, null);
     });
+
+    it("keeps the old background when the upload fails", async () => {
+      const { accessToken, profile } = await setup();
+      const old = await linkBackground(profile.id, {
+        url: ["old-x625"],
+        keyPrefix: "artist-banners",
+      });
+
+      const response = await requestApp
+        .put(`manage/artists/${profile.id}/background`)
+        .attach("file", Buffer.from("not an image"), "background.png")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 406);
+      const updated = await prisma.profile.findUniqueOrThrow({
+        where: { id: profile.id },
+      });
+      assert.equal(updated.backgroundImageId, old.id);
+      const oldImage = await prisma.image.findUniqueOrThrow({
+        where: { id: old.id },
+      });
+      assert.equal(oldImage.deletedAt, null);
+    });
   });
 
   describe("DELETE", () => {

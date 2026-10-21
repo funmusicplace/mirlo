@@ -272,27 +272,26 @@ export const processProfileAvatar = (ctx: APIContext) => {
 
 export const processProfileBackground = (ctx: APIContext) => {
   return async (profileId: number) => {
-    return uploadAndSendToImageQueue(
+    const result = await uploadAndSendToImageQueue(
       ctx,
       "image",
       "image",
       "background",
-      async (fileInfo: { filename: string }) => {
-        const image = await prisma.image.create({
+      async (fileInfo: { filename: string }) =>
+        prisma.image.create({
           data: {
             originalFilename: fileInfo.filename,
             dimensions: "background",
             profileId,
           },
-        });
-        await deleteProfileBackground(profileId);
-        await prisma.profile.update({
-          where: { id: profileId },
-          data: { backgroundImageId: image.id },
-        });
-        return image;
-      }
+        })
     );
+    await deleteProfileBackground(profileId);
+    await prisma.profile.update({
+      where: { id: profileId },
+      data: { backgroundImageId: result.imageId },
+    });
+    return result;
   };
 };
 

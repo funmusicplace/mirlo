@@ -7,7 +7,7 @@ import {
 } from "../../../../../../auth/passport";
 import { logger } from "../../../../../../logger";
 import { AppError } from "../../../../../../utils/error";
-import { removeImagesByType } from "../../../../../../utils/minio";
+import { removeStoredImage } from "../../../../../../utils/minio";
 
 type Params = {
   artistId: string;
@@ -36,10 +36,14 @@ export default function () {
       }
 
       await prisma.subscriptionTierImage.deleteMany({ where: { imageId } });
+      await prisma.profile.updateMany({
+        where: { backgroundImageId: imageId },
+        data: { backgroundImageId: null },
+      });
       await prisma.image.delete({ where: { id: imageId } });
 
       try {
-        await removeImagesByType("image", imageId);
+        await removeStoredImage(image);
       } catch (e) {
         log.info(`No stored objects for image ${imageId}, that's okay`);
       }

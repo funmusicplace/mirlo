@@ -570,11 +570,21 @@ export const uploadWrapper = async (
   if (backendStorage === "backblaze") {
     await uploadFilesToBackblaze(bucket, fileName, fileStream, options);
   } else if (backendStorage === "minio" && minioClient) {
-    await minioClient.putObject(bucket, fileName, fileStream, undefined, {
-      ...(options?.contentType ? { "Content-Type": options.contentType } : {}),
-      ...(options?.cacheControl
-        ? { "Cache-Control": options.cacheControl }
-        : {}),
+    const client = minioClient;
+    await new Promise((resolve, reject) => {
+      if (fileStream instanceof Readable) {
+        fileStream.once("error", reject);
+      }
+      client
+        .putObject(bucket, fileName, fileStream, undefined, {
+          ...(options?.contentType
+            ? { "Content-Type": options.contentType }
+            : {}),
+          ...(options?.cacheControl
+            ? { "Cache-Control": options.cacheControl }
+            : {}),
+        })
+        .then(resolve, reject);
     });
   }
 };
@@ -1033,10 +1043,13 @@ export const getImagePrefix = (imageType: ImageType): string =>
 export const imageTypeUsesQueue = (imageType: ImageType): boolean =>
   imageTypeBuckets[imageType].queue;
 
-const imageKeyPrefix = (imageType: ImageType) => {
-  const prefix = getImagePrefix(imageType);
-  return prefix ? `${prefix}/` : "";
-};
+const keyPrefixPath = (prefix: string) => (prefix ? `${prefix}/` : "");
+
+const imageKeyPrefix = (imageType: ImageType) =>
+  keyPrefixPath(getImagePrefix(imageType));
+
+export const storedImagePrefix = (image: { keyPrefix: string | null }) =>
+  image.keyPrefix ?? rootImagePrefix;
 
 const incomingImageKey = (imageType: ImageType, fileName: string) => {
   const { prefix, queue } = imageTypeBuckets[imageType];
@@ -1108,7 +1121,7 @@ export const removeStoredImage = (image: {
 }) =>
   removeObjectsFromBucket(
     getImagesBucket(),
-    `${image.keyPrefix ? `${image.keyPrefix}/` : ""}${image.id}`
+    `${keyPrefixPath(storedImagePrefix(image))}${image.id}`
   );
 
 export const fixStoredImageContentTypes = async () => {

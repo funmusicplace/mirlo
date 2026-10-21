@@ -25,7 +25,7 @@ import {
   coversPrefix,
   removeImagesByType,
   removeStoredImage,
-  rootImagePrefix,
+  storedImagePrefix,
 } from "./minio";
 import { postImagesForContent } from "./postContent";
 import { getSiteSettings } from "./settings";
@@ -857,7 +857,7 @@ export const addSizesToStoredImage = <
   },
 >(
   image?: T | null
-) => addSizesToImage(image?.keyPrefix ?? rootImagePrefix, image);
+) => (image ? addSizesToImage(storedImagePrefix(image), image) : null);
 
 export const resolveProfileImageUrl = (artist: {
   avatar?: { url: string[] } | null;
@@ -871,13 +871,12 @@ export const resolveProfileImageUrl = (artist: {
   }
 
   // Fall back to background
-  const backgroundString = artist.background?.url.find((u) =>
-    u.includes("x625")
-  );
-  if (backgroundString) {
+  const background = artist.background;
+  const backgroundString = background?.url.find((u) => u.includes("x625"));
+  if (background && backgroundString) {
     return generateFullStaticImageUrl(
       backgroundString,
-      artist.background?.keyPrefix ?? rootImagePrefix
+      storedImagePrefix(background)
     );
   }
 

@@ -14,31 +14,32 @@ import { deleteDownloadableContent } from "./content";
 import countryCodesCurrencies from "./country-codes-currencies";
 import { AppError } from "./error";
 import { generateFullStaticImageUrl } from "./images";
-import { rootImagePrefix, removeImagesByType } from "./minio";
+import { removeStoredImage, storedImagePrefix } from "./minio";
 
 export const merchImagesInclude = {
   include: { image: true },
   orderBy: { position: "asc" },
 } satisfies Prisma.Merch$imagesArgs;
 
-export type MerchImageWithImage = MerchImage & { image?: Image | null };
+export type MerchImageWithImage = MerchImage & { image: Image };
 
 export const merchImageUrl = (
   merchImage: MerchImageWithImage | undefined,
   size: number
 ) => {
-  const variant = merchImage?.image?.url.find((u) => u.endsWith(`-x${size}`));
-  return variant
-    ? generateFullStaticImageUrl(variant, rootImagePrefix)
+  const image = merchImage?.image;
+  const variant = image?.url.find((u) => u.endsWith(`-x${size}`));
+  return image && variant
+    ? generateFullStaticImageUrl(variant, storedImagePrefix(image))
     : undefined;
 };
 
-export const deleteMerchImage = async (merchImage: MerchImage) => {
+export const deleteMerchImage = async (merchImage: MerchImageWithImage) => {
   await prisma.merchImage.delete({ where: { id: merchImage.id } });
   await prisma.image.delete({ where: { id: merchImage.imageId } });
 
   try {
-    await removeImagesByType("image", merchImage.imageId);
+    await removeStoredImage(merchImage.image);
   } catch (e) {
     logger.info(
       `No stored objects for merch image ${merchImage.imageId}, that's okay`
