@@ -56,7 +56,7 @@ export const startAuthorization = async (
   extra: Record<string, string> = {}
 ) => {
   const response = await agent.get(
-    `/oidc/auth?${authorizeParams(clientId, challenge, extra)}`
+    `/auth/oidc/auth?${authorizeParams(clientId, challenge, extra)}`
   );
   const location = response.headers.location ?? "";
   const uid = location.match(/\/oauth\/([^/?#]+)$/)?.[1];
@@ -101,7 +101,7 @@ export const decide = async (
   action: string
 ) => {
   const response = await agent
-    .post(`/oauth/${uid}/decision`)
+    .post(`/auth/oauth/${uid}/decision`)
     .send({ action })
     .set("Accept", "application/json");
   return response;
@@ -128,7 +128,7 @@ export const authorizeAndAllow = async (
 export const tokenRequest = (
   client: { id: number; key: string | null; confidential?: boolean },
   body: Record<string, string>,
-  endpoint = "/oidc/token"
+  endpoint = "/auth/oidc/token"
 ) => {
   const call = request(API).post(endpoint).type("form");
   return client.confidential === false

@@ -11,7 +11,7 @@ dotenv.config();
 
 import { resolveBearer } from "../../../src/auth/oauth";
 import { oidcHandler } from "../../../src/auth/oidc/provider";
-import oauth from "../../../src/routers/oauth";
+import oauth from "../../../src/routers/auth/oauth";
 import errorHandler from "../../../src/utils/error";
 import { clearTables, createUser } from "../../utils";
 
@@ -24,10 +24,10 @@ import {
 } from "./utils";
 
 const app = express();
-app.use("/oidc", oidcHandler);
+app.use("/auth/oidc", oidcHandler);
 app.use(cookieParser());
 app.use(express.json());
-app.use("/oauth", oauth);
+app.use("/auth/oauth", oauth);
 app.use(errorHandler);
 
 const CLIENT_ID = "https://radiccio.app/oauth/client.json";
@@ -77,7 +77,7 @@ describe("oauth client ID metadata documents", () => {
   };
 
   const tokenRequest = (code: string, verifier: string) =>
-    request(app).post("/oidc/token").type("form").send({
+    request(app).post("/auth/oidc/token").type("form").send({
       grant_type: "authorization_code",
       client_id: CLIENT_ID,
       code,
@@ -94,14 +94,14 @@ describe("oauth client ID metadata documents", () => {
     );
     assert.ok(uid);
 
-    const details = await agent.get(`/oauth/${uid}/details`);
+    const details = await agent.get(`/auth/oauth/${uid}/details`);
     assert.equal(details.status, 200, details.text);
     assert.equal(details.body.result.approval, "unknown");
     assert.equal(details.body.result.client.name, "Radiccio");
     assert.equal(details.body.result.client.domain, "radiccio.app");
 
     const allow = await agent
-      .post(`/oauth/${uid}/decision`)
+      .post(`/auth/oauth/${uid}/decision`)
       .send({ action: "allow" });
     assert.equal(allow.status, 403);
 
@@ -118,7 +118,7 @@ describe("oauth client ID metadata documents", () => {
     );
 
     const back = await agent
-      .post(`/oauth/${uid}/decision`)
+      .post(`/auth/oauth/${uid}/decision`)
       .send({ action: "deny" });
     const resume = await agent.get(pathOf(back.body.result.redirectTo));
     const callback = new URL(resume.headers.location);
@@ -134,7 +134,7 @@ describe("oauth client ID metadata documents", () => {
       pkce().challenge
     );
     const refused = await anonymous
-      .post(`/oauth/${first.uid}/decision`)
+      .post(`/auth/oauth/${first.uid}/decision`)
       .send({ action: "requestApproval" });
     assert.equal(refused.status, 401);
     assert.equal(await prisma.client.count(), 0);
@@ -147,7 +147,7 @@ describe("oauth client ID metadata documents", () => {
         pkce().challenge
       );
       const requested = await agent
-        .post(`/oauth/${uid}/decision`)
+        .post(`/auth/oauth/${uid}/decision`)
         .send({ action: "requestApproval" });
       assert.equal(requested.status, 200, requested.text);
       assert.equal(requested.body.result.approval, "pending");
@@ -193,7 +193,7 @@ describe("oauth client ID metadata documents", () => {
       CLIENT_ID,
       pkce().challenge
     );
-    assert.equal(new URL(location).pathname, "/oauth/error");
+    assert.equal(new URL(location).pathname, "/auth/oauth/error");
   });
 
   it("lets a deleted app be requested again, even a revoked one", async () => {
@@ -204,11 +204,11 @@ describe("oauth client ID metadata documents", () => {
       CLIENT_ID,
       pkce().challenge
     );
-    const details = await agent.get(`/oauth/${uid}/details`);
+    const details = await agent.get(`/auth/oauth/${uid}/details`);
     assert.equal(details.body.result.approval, "unknown");
 
     const requested = await agent
-      .post(`/oauth/${uid}/decision`)
+      .post(`/auth/oauth/${uid}/decision`)
       .send({ action: "requestApproval" });
     assert.equal(requested.status, 200, requested.text);
 
@@ -236,7 +236,7 @@ describe("oauth client ID metadata documents", () => {
       scope: "openid api",
     });
     const decision = await agent
-      .post(`/oauth/${uid}/decision`)
+      .post(`/auth/oauth/${uid}/decision`)
       .send({ action: "allow" });
     assert.equal(decision.status, 200, decision.text);
     const resume = await agent.get(pathOf(decision.body.result.redirectTo));
@@ -265,6 +265,6 @@ describe("oauth client ID metadata documents", () => {
       CLIENT_ID,
       pkce().challenge
     );
-    assert.equal(new URL(again.location).pathname, "/oauth/error");
+    assert.equal(new URL(again.location).pathname, "/auth/oauth/error");
   });
 });

@@ -42,7 +42,7 @@ describe("oidc interaction", () => {
       pkce().challenge
     );
 
-    const response = await agent.get(`/oauth/${uid}/details`);
+    const response = await agent.get(`/auth/oauth/${uid}/details`);
     assert.equal(response.status, 200);
     assert.deepEqual(response.body.result, {
       client: {
@@ -72,7 +72,7 @@ describe("oidc interaction", () => {
       { redirect_uri: "myapp://oauth/callback" }
     );
 
-    const response = await agent.get(`/oauth/${uid}/details`);
+    const response = await agent.get(`/auth/oauth/${uid}/details`);
     assert.equal(response.status, 200, response.text);
     assert.equal(response.body.result.redirectHost, null);
     assert.equal(response.body.result.client.domain, "app.example");
@@ -92,7 +92,7 @@ describe("oidc interaction", () => {
   });
 
   it("404s on an unknown interaction", async () => {
-    const response = await request(API).get("/oauth/nope/details");
+    const response = await request(API).get("/auth/oauth/nope/details");
     assert.equal(response.status, 404);
   });
 
@@ -116,7 +116,7 @@ describe("oidc interaction", () => {
     assert.equal(token.body.refresh_token, undefined);
 
     const me = await request(API)
-      .get("/oidc/me")
+      .get("/auth/oidc/me")
       .set("Authorization", `Bearer ${token.body.access_token}`);
     assert.deepEqual(me.body, {
       sub: String(user.id),
@@ -166,7 +166,7 @@ describe("oidc interaction", () => {
     const again = await startAuthorization(agent, client.id, pkce().challenge, {
       scope: "openid profile",
     });
-    const details = await agent.get(`/oauth/${again.uid}/details`);
+    const details = await agent.get(`/auth/oauth/${again.uid}/details`);
     assert.equal(details.body.result.needsConsent, false);
 
     const forced = await startAuthorization(
@@ -178,11 +178,11 @@ describe("oidc interaction", () => {
         prompt: "consent",
       }
     );
-    const forcedDetails = await agent.get(`/oauth/${forced.uid}/details`);
+    const forcedDetails = await agent.get(`/auth/oauth/${forced.uid}/details`);
     assert.equal(forcedDetails.body.result.needsConsent, true);
 
     const more = await startAuthorization(agent, client.id, pkce().challenge);
-    const moreDetails = await agent.get(`/oauth/${more.uid}/details`);
+    const moreDetails = await agent.get(`/auth/oauth/${more.uid}/details`);
     assert.equal(moreDetails.body.result.needsConsent, true);
   });
 
@@ -201,7 +201,7 @@ describe("oidc interaction", () => {
     );
     assert.equal(response.status, 303);
     assert.ok(uid, "went to the interaction instead of issuing a code");
-    const details = await agent.get(`/oauth/${uid}/details`);
+    const details = await agent.get(`/auth/oauth/${uid}/details`);
     assert.equal(details.body.result.loggedIn, false);
   });
 

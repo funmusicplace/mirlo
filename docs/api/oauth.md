@@ -13,7 +13,7 @@ GET https://{instance}/.well-known/openid-configuration
 GET https://{instance}/.well-known/oauth-authorization-server
 ```
 
-Both return the same document: the issuer (the instance root), the authorization, token, revocation, userinfo and JWKS endpoints (all under `/oidc/`), and the supported scopes.
+Both return the same document: the issuer (the instance root), the authorization, token, revocation, userinfo and JWKS endpoints (all under `/auth/oidc/`), and the supported scopes.
 
 ## Identifying your app
 
@@ -58,7 +58,7 @@ All clients use the authorization code flow with PKCE (`S256`). Other response t
 2. Send the user's browser to the authorization endpoint:
 
    ```
-   https://{instance}/oidc/auth
+   https://{instance}/auth/oidc/auth
      ?client_id=…
      &response_type=code
      &redirect_uri=myapp://oauth/callback
@@ -76,7 +76,7 @@ All clients use the authorization code flow with PKCE (`S256`). Other response t
 5. Exchange the code at the token endpoint:
 
    ```
-   POST https://{instance}/oidc/token
+   POST https://{instance}/auth/oidc/token
    Content-Type: application/x-www-form-urlencoded
 
    grant_type=authorization_code&code=…&redirect_uri=…&code_verifier=…&client_id=…
@@ -90,7 +90,7 @@ The response has an `access_token` (valid for an hour), an `id_token` if you ask
 
 | Scope              | Gives your app                                                                                                                                        |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `openid`           | An ID token, and the user's ID (`sub`) from `/oidc/me`                                                                                                |
+| `openid`           | An ID token, and the user's ID (`sub`) from `/auth/oidc/me`                                                                                           |
 | `profile`          | The user's name                                                                                                                                       |
 | `email`            | The user's email address and `email_verified`                                                                                                         |
 | `api`              | Use the REST API as the user. See [What `api` tokens can do](#what-api-tokens-can-do).                                                                |
@@ -134,6 +134,6 @@ An `api` token can read anything the user can, except the list of connected apps
 
 Refresh with `grant_type=refresh_token`. Public clients get a new refresh token each time, and the old one stops working; using an old one again revokes the whole grant.
 
-When the user signs out of your app, revoke the refresh token at `POST /oidc/token/revocation`.
+When the user signs out of your app, revoke the refresh token at `POST /auth/oidc/token/revocation`.
 
 Users see and disconnect connected apps under **Account settings → Connected apps**. Disconnecting an app, or resetting the password, revokes its tokens immediately.

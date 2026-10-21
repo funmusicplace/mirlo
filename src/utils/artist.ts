@@ -28,6 +28,7 @@ import {
   storedImagePrefix,
 } from "./minio";
 import { postImagesForContent } from "./postContent";
+import reservedProfileSlugs from "./reservedProfileSlugs";
 import { getSiteSettings } from "./settings";
 import stripe from "./stripe";
 import {
@@ -295,7 +296,22 @@ export const isProfileSlugTaken = async (
     },
     select: { id: true },
   });
-  return !!profile;
+  if (profile) {
+    return true;
+  }
+  if (!reservedProfileSlugs.includes(urlSlug.toLowerCase())) {
+    return false;
+  }
+  const keepsOwnSlug =
+    !!excludeProfileId &&
+    !!(await prisma.profile.findFirst({
+      where: {
+        id: excludeProfileId,
+        urlSlug: { equals: urlSlug, mode: "insensitive" },
+      },
+      select: { id: true },
+    }));
+  return !keepsOwnSlug;
 };
 
 export const asSlugConflictError = (e: unknown) =>

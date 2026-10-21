@@ -17,7 +17,7 @@ const meta = {
             "redirect_uri did not match any of the client's registered redirect_uris",
         },
       },
-      routing: { path: "/oauth/error" },
+      routing: { path: "/auth/oauth/error" },
     }),
   },
 } satisfies Meta<typeof OAuthError>;

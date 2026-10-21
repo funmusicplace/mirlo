@@ -88,7 +88,7 @@ describe("connected apps", () => {
 
     assert.equal((await profileWith(tokens.access_token)).status, 401);
     const refresh = await request(API)
-      .post("/oidc/token")
+      .post("/auth/oidc/token")
       .auth(String(client.id), client.key!)
       .type("form")
       .send({

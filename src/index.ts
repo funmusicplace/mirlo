@@ -37,7 +37,6 @@ import { audioQueue } from "./queues/processTrackAudio";
 import { scheduledTasksQueue } from "./queues/scheduled-tasks-queue";
 import { sendMailQueue } from "./queues/send-mail-queue";
 import auth from "./routers/auth";
-import oauth from "./routers/oauth";
 import { serveStatic } from "./static";
 import errorHandler from "./utils/error";
 import { denyFramingExceptWidgets } from "./utils/framing";
@@ -171,10 +170,8 @@ app.use(
 
 if (authLimiter) {
   app.use("/auth", authLimiter, auth);
-  app.use("/oauth", authLimiter, oauth);
 } else {
   app.use("/auth", auth);
-  app.use("/oauth", oauth);
 }
 
 app.use(express.static("public", { maxAge: "1y", immutable: true }));

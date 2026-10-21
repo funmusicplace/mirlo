@@ -19,38 +19,6 @@ import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
 import { getSiteSettings } from "../../../../utils/settings";
 
-const forbiddenNames = [
-  "mirlo",
-  "admin",
-  "manage",
-  "profile",
-  "account",
-  "signup",
-  "verify-email",
-  "about",
-  "pages",
-  "widget",
-  "post",
-  "label",
-  "track",
-  "login",
-  "password-reset",
-  "artists",
-  "releases",
-  "user",
-  "username",
-  "you",
-  "guest",
-  "fulfillment",
-  "sales",
-  "account",
-  "administrator",
-  "system",
-  "help",
-  "error",
-  "docs",
-];
-
 export default function () {
   const operations = {
     GET: [userAuthenticated, GET],
@@ -118,13 +86,6 @@ export default function () {
           httpCode: 400,
         });
       }
-      if (forbiddenNames.includes(urlSlug)) {
-        throw new AppError({
-          description: `"urlSlug" can't be one of: ${forbiddenNames.join(", ")}`,
-          httpCode: 400,
-        });
-      }
-
       let newSlug: string;
       if (urlSlug) {
         newSlug = generateSlug(urlSlug);

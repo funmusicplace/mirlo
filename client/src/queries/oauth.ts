@@ -28,7 +28,9 @@ export function queryOAuthInteraction(uid: string) {
     queryKey: ["fetchOAuthInteraction", { uid }, QUERY_KEY_AUTH],
     queryFn: ({ signal }) =>
       api
-        .get<{ result: OAuthInteraction }>(`oauth/${uid}/details`, { signal })
+        .get<{
+          result: OAuthInteraction;
+        }>(`auth/oauth/${uid}/details`, { signal })
         .then((r) => r.result),
     retry: false,
     staleTime: Infinity,
@@ -44,7 +46,7 @@ export function useOAuthDecisionMutation(uid: string) {
         .post<
           { action: OAuthDecision },
           { result: { redirectTo: string } }
-        >(`oauth/${uid}/decision`, { action })
+        >(`auth/oauth/${uid}/decision`, { action })
         .then((r) => r.result.redirectTo),
     onSuccess: (redirectTo) => window.location.assign(redirectTo),
   });
@@ -55,7 +57,7 @@ export function useRequestOAuthApprovalMutation(uid: string) {
   return useMutation({
     mutationFn: () =>
       api.post<{ action: "requestApproval" }, unknown>(
-        `oauth/${uid}/decision`,
+        `auth/oauth/${uid}/decision`,
         { action: "requestApproval" }
       ),
     onSuccess: () =>

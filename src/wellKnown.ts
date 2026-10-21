@@ -35,6 +35,7 @@ const assetLinks = [
 const sheetBreaksRoots = [
   "account",
   "admin",
+  "auth",
   "checkout",
   "checkout-error",
   "confirm-email-change",
@@ -42,8 +43,6 @@ const sheetBreaksRoots = [
   "fulfillment",
   "login",
   "manage",
-  "oauth",
-  "oidc",
   "password-reset",
   "profile",
   "sales",

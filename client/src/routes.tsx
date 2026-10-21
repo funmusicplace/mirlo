@@ -149,7 +149,7 @@ const routes: RouteObject[] = [
         },
       },
       {
-        path: "oauth/error",
+        path: "auth/oauth/error",
         handle: { title: "oauthError" },
         async lazy() {
           const { default: Component } = await import("pages/oauth/Error");
@@ -157,7 +157,7 @@ const routes: RouteObject[] = [
         },
       },
       {
-        path: "oauth/:uid",
+        path: "auth/oauth/:uid",
         handle: { title: "oauth" },
         async lazy() {
           const { default: Component } = await import("pages/oauth/Index");

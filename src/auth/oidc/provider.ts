@@ -16,16 +16,17 @@ import { OAUTH_SCOPES } from "./scopes";
 
 const DAY = 24 * 60 * 60;
 
-export const OIDC_MOUNT_PATH = "/oidc";
+export const OIDC_MOUNT_PATH = "/auth/oidc";
 
 export const issuer = () => process.env.API_DOMAIN ?? "http://localhost:3000";
 
 const clientRoot = () => process.env.CLIENT_DOMAIN ?? issuer();
 
-export const interactionUrl = (uid: string) => `${clientRoot()}/oauth/${uid}`;
+export const interactionUrl = (uid: string) =>
+  `${clientRoot()}/auth/oauth/${uid}`;
 
 const errorPageUrl = (out: ErrorOut) => {
-  const url = new URL(`${clientRoot()}/oauth/error`);
+  const url = new URL(`${clientRoot()}/auth/oauth/error`);
   url.searchParams.set("error", out.error);
   if (out.error_description) {
     url.searchParams.set("error_description", out.error_description);

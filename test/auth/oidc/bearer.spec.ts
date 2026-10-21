@@ -227,7 +227,7 @@ describe("oauth bearer tokens", () => {
     assert.ok(tokens.refresh_token);
 
     const refreshed = await request(API)
-      .post("/oidc/token")
+      .post("/auth/oidc/token")
       .auth(String(client.id), client.key!)
       .type("form")
       .send({
@@ -284,7 +284,7 @@ describe("oauth bearer tokens", () => {
       const revoked = await tokenRequest(
         client,
         { token },
-        "/oidc/token/revocation"
+        "/auth/oidc/token/revocation"
       );
       assert.equal(revoked.status, 200, revoked.text);
     }
@@ -305,7 +305,7 @@ describe("oauth bearer tokens", () => {
     const other = await createOAuthClient({ applicationName: "Other" });
     const agent = request.agent(API);
     const start = await agent.get(
-      `/oidc/auth?${new URLSearchParams({
+      `/auth/oidc/auth?${new URLSearchParams({
         client_id: String(other.id),
         response_type: "code",
         redirect_uri: "https://app.example/callback",
@@ -318,7 +318,7 @@ describe("oauth bearer tokens", () => {
     const uid = start.headers.location.match(/\/oauth\/([^/?#]+)$/)?.[1];
 
     const decision = await agent
-      .post(`/oauth/${uid}/decision`)
+      .post(`/auth/oauth/${uid}/decision`)
       .set(bearer(tokens.access_token))
       .send({ action: "allow" });
     assert.equal(decision.status, 401);

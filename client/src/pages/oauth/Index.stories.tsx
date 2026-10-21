@@ -45,7 +45,7 @@ const handlers = (details: OAuthInteraction | null) => {
       http.post("*/auth/refresh", () => HttpResponse.json({})),
     ],
     oauth: [
-      http.get("*/oauth/:uid/details", () =>
+      http.get("*/auth/oauth/:uid/details", () =>
         details
           ? HttpResponse.json({ result: { ...details, approval } })
           : HttpResponse.json(
@@ -53,7 +53,7 @@ const handlers = (details: OAuthInteraction | null) => {
               { status: 404 }
             )
       ),
-      http.post("*/oauth/:uid/decision", async ({ request }) => {
+      http.post("*/auth/oauth/:uid/decision", async ({ request }) => {
         const { action } = (await request.json()) as { action: string };
         if (action === "requestApproval") {
           approval = "pending";
@@ -73,7 +73,7 @@ const meta = {
     msw: { handlers: handlers(interaction()) },
     reactRouter: reactRouterParameters({
       location: { pathParams: { uid: UID } },
-      routing: { path: "/oauth/:uid" },
+      routing: { path: "/auth/oauth/:uid" },
     }),
   },
 } satisfies Meta<typeof OAuth>;

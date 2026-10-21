@@ -1,6 +1,5 @@
 -- AlterTable
-ALTER TABLE "Client" DROP COLUMN "secret",
-ADD COLUMN     "clientIdUrl" TEXT,
+ALTER TABLE "Client" ADD COLUMN     "clientIdUrl" TEXT,
 ADD COLUMN     "confidential" BOOLEAN NOT NULL DEFAULT false,
 ADD COLUMN     "redirectUris" TEXT[] DEFAULT ARRAY[]::TEXT[];
 

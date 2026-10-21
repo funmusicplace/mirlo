@@ -5,6 +5,7 @@ import { userAuthenticated } from "../../auth/passport";
 
 import confirmEmailToken from "./confirmEmailToken";
 import login from "./login";
+import oauth from "./oauth";
 import {
   passwordResetConfirmation,
   passwordResetInitiate,
@@ -86,5 +87,7 @@ router.get("/logout", (req, res) => {
 router.get("/profile", userAuthenticated, profile);
 
 router.post("/refresh", refresh);
+
+router.use("/oauth", oauth);
 
 export default router;

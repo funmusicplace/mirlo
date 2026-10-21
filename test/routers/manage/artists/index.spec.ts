@@ -73,6 +73,36 @@ describe("manage/artists/{artistId}", () => {
       assert.equal(await prisma.profile.count(), 1);
     });
 
+    it("should reject a reserved urlSlug in any case", async () => {
+      const { accessToken } = await createUser({
+        email: "test@testcom",
+      });
+
+      const response = await requestApp
+        .post(`manage/artists`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({ name: "hi", urlSlug: "OAuth" });
+
+      assert.equal(response.statusCode, 400);
+      assert.equal(await prisma.profile.count(), 0);
+    });
+
+    it("should suffix a generated urlSlug that is reserved", async () => {
+      const { accessToken } = await createUser({
+        email: "test@testcom",
+      });
+
+      const response = await requestApp
+        .post(`manage/artists`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({ name: "Login" });
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.urlSlug, "login-2");
+    });
+
     describe("isClosedToPublicArtistSignup = true", () => {
       it("should not create an artist for logged in user", async () => {
         const settings = await getSiteSettings();

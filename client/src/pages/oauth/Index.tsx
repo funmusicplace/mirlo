@@ -63,7 +63,7 @@ function Index() {
   if (!data.loggedIn) {
     return (
       <Navigate
-        to={`/login?redirect=${encodeURIComponent(`/oauth/${uid}`)}`}
+        to={`/login?redirect=${encodeURIComponent(`/auth/oauth/${uid}`)}`}
         replace
       />
     );

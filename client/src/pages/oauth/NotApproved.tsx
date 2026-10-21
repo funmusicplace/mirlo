@@ -26,7 +26,7 @@ function NotApproved({
 
   const onRequest = () => {
     if (!loggedIn) {
-      navigate(`/login?redirect=${encodeURIComponent(`/oauth/${uid}`)}`);
+      navigate(`/login?redirect=${encodeURIComponent(`/auth/oauth/${uid}`)}`);
       return;
     }
     requestApproval();
