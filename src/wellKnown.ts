@@ -59,7 +59,10 @@ const appleAppSiteAssociation = {
   applinks: {
     details: [
       {
-        appIDs: ["VZCHHV7VNW.space.mirlo.mobile"],
+        appIDs: [
+          "VZCHHV7VNW.space.mirlo.mobile",
+          "36XBM6EF7W.space.mirlo.mobile",
+        ],
         components: [
           ...sheetBreaksRoots.flatMap((root) => [
             { "/": `/${root}`, exclude: true },
