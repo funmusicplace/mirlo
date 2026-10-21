@@ -107,7 +107,6 @@ describe("minio bucket routing", () => {
       assert.equal(imageTypeUsesQueue("artistAvatar"), true);
       assert.equal(imageTypeUsesQueue("artistBackground"), true);
       assert.equal(imageTypeUsesQueue("trackGroupCover"), true);
-      assert.equal(imageTypeUsesQueue("merch"), true);
       assert.equal(imageTypeUsesQueue("image"), true);
     });
 

@@ -282,11 +282,6 @@ const optimizeImage = async (job: Job) => {
         where: { id: destinationId },
         data: { url: urls },
       });
-    } else if (model === "merchImage") {
-      await prisma.merchImage.update({
-        where: { id: destinationId },
-        data: { url: urls },
-      });
     }
 
     profiler.done({ message: "Done optimizing image" });

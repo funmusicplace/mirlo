@@ -16,7 +16,6 @@ import {
   migrationFilePattern,
   runPendingDataMigrations,
 } from "../../src/dataMigrations";
-import merchImagesToCentralImages from "../../src/dataMigrations/migrations/20261001000000_merchImagesToCentralImages";
 import postContentImageRefs from "../../src/dataMigrations/migrations/20261002000000_postContentImageRefs";
 import imageContentTypes from "../../src/dataMigrations/migrations/20261003000000_imageContentTypes";
 import postContentWidgetPaths from "../../src/dataMigrations/migrations/20261004000000_postContentWidgetPaths";
@@ -36,7 +35,6 @@ import {
 } from "../../src/utils/minio";
 import {
   clearTables,
-  createMerch,
   createPost,
   createProfile,
   createSiteSettings,
@@ -163,7 +161,6 @@ describe("dataMigrations: loading", () => {
     assert.deepEqual(
       dataMigrations.map((m) => m.name),
       [
-        merchImagesToCentralImages,
         postContentImageRefs,
         imageContentTypes,
         postContentWidgetPaths,
@@ -200,84 +197,6 @@ describe("dataMigrations: loading", () => {
     assert.throws(
       () => loadDataMigrations(dir),
       /duplicate migration name same/
-    );
-  });
-});
-
-describe("dataMigrations: merchImagesToCentralImages", () => {
-  beforeEach(async () => {
-    await clearTables();
-  });
-
-  it("finishes when there's nothing left to migrate", async () => {
-    assert.equal(await merchImagesToCentralImages.run(), true);
-  });
-
-  it("stays pending while a recent upload may still be processing", async () => {
-    const { user } = await createUser({ email: "artist@artist.com" });
-    const profile = await createProfile(user.id);
-    const merch = await createMerch(profile.id, {});
-    const upload = await prisma.merchImage.create({
-      data: { merchId: merch.id },
-    });
-
-    assert.equal(await merchImagesToCentralImages.run(), false);
-    assert.ok(await prisma.merchImage.findUnique({ where: { id: upload.id } }));
-  });
-
-  it("prunes stale unprocessed images and skips ones whose files are missing", async () => {
-    const { user } = await createUser({ email: "artist@artist.com" });
-    const profile = await createProfile(user.id);
-    const merch = await createMerch(profile.id, {});
-    const stored = await prisma.merchImage.create({
-      data: { merchId: merch.id },
-    });
-    await prisma.merchImage.update({
-      where: { id: stored.id },
-      data: { url: [`${stored.id}-x600`] },
-    });
-    await uploadOptimizedImageByType(
-      "merch",
-      `${stored.id}-x600.webp`,
-      Buffer.from("image"),
-      { contentType: "image/webp" }
-    );
-    const missing = await prisma.merchImage.create({
-      data: { merchId: merch.id, url: ["gone-x600"] },
-    });
-    const unprocessed = await prisma.merchImage.create({
-      data: {
-        merchId: merch.id,
-        createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
-      },
-    });
-
-    assert.equal(await merchImagesToCentralImages.run(), true);
-    const migrated = await prisma.merchImage.findUniqueOrThrow({
-      where: { id: stored.id },
-    });
-    assert.equal(migrated.imageId, stored.id);
-    const skipped = await prisma.merchImage.findUniqueOrThrow({
-      where: { id: missing.id },
-    });
-    assert.equal(skipped.imageId, null);
-    assert.equal(
-      await prisma.merchImage.findUnique({ where: { id: unprocessed.id } }),
-      null
-    );
-  });
-
-  it("stays pending when no image's files can be found at all", async () => {
-    const { user } = await createUser({ email: "artist@artist.com" });
-    const profile = await createProfile(user.id);
-    const merch = await createMerch(profile.id, {});
-    const missing = await prisma.merchImage.create({
-      data: { merchId: merch.id, url: ["gone-x600"] },
-    });
-
-    assert.equal(await merchImagesToCentralImages.run(), false);
-    assert.ok(
-      await prisma.merchImage.findUnique({ where: { id: missing.id } })
     );
   });
 });

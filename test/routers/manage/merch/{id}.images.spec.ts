@@ -22,21 +22,26 @@ const setup = async () => {
   const profile = await createProfile(user.id);
   const merch = await createMerch(profile.id, {});
 
-  const legacy = await prisma.merchImage.create({
-    data: {
-      merchId: merch.id,
-      url: ["legacy-x600", "legacy-x120"],
-      position: 0,
-    },
-  });
-  const image = await prisma.image.create({
-    data: { url: ["central-x600", "central-x120"], dimensions: "square" },
-  });
-  const central = await prisma.merchImage.create({
-    data: { merchId: merch.id, imageId: image.id, position: 1 },
-  });
+  const createMerchImage = async (name: string, position: number) => {
+    const image = await prisma.image.create({
+      data: { url: [`${name}-x600`, `${name}-x120`], dimensions: "square" },
+    });
+    const merchImage = await prisma.merchImage.create({
+      data: { merchId: merch.id, imageId: image.id, position },
+    });
+    return { merchImage, image };
+  };
+  const first = await createMerchImage("first", 0);
+  const second = await createMerchImage("second", 1);
 
-  return { accessToken, profile, merch, legacy, central, image };
+  return {
+    accessToken,
+    profile,
+    merch,
+    first: first.merchImage,
+    second: second.merchImage,
+    image: second.image,
+  };
 };
 
 describe("manage/merch/{merchId}/images", () => {
@@ -49,7 +54,7 @@ describe("manage/merch/{merchId}/images", () => {
   });
 
   it("serializes images in position order with sizes from the images bucket root", async () => {
-    const { accessToken, merch, legacy, central } = await setup();
+    const { accessToken, merch, first, second } = await setup();
 
     const response = await requestApp
       .get(`manage/merch/${merch.id}`)
@@ -60,7 +65,7 @@ describe("manage/merch/{merchId}/images", () => {
     const images = response.body.result.images;
     assert.deepEqual(
       images.map((i: { id: string }) => i.id),
-      [legacy.id, central.id]
+      [first.id, second.id]
     );
     assert.doesNotMatch(images[1].sizes["600"], /merch-images/);
     assert.match(images[1].sizes["600"], /mirlo-images/);
@@ -88,70 +93,58 @@ describe("manage/merch/{merchId}/images", () => {
   });
 
   it("reorders images", async () => {
-    const { accessToken, merch, legacy, central } = await setup();
+    const { accessToken, merch, first, second } = await setup();
 
     const response = await requestApp
       .put(`manage/merch/${merch.id}/images`)
-      .send({ merchImageIds: [central.id, legacy.id] })
+      .send({ merchImageIds: [second.id, first.id] })
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
 
     assert.equal(response.status, 200);
     assert.deepEqual(
       response.body.results.map((i: { id: string }) => i.id),
-      [central.id, legacy.id]
+      [second.id, first.id]
     );
   });
 
   it("rejects a reorder that doesn't list every image", async () => {
-    const { accessToken, merch, central } = await setup();
+    const { accessToken, merch, second } = await setup();
 
     const response = await requestApp
       .put(`manage/merch/${merch.id}/images`)
-      .send({ merchImageIds: [central.id] })
+      .send({ merchImageIds: [second.id] })
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
 
     assert.equal(response.status, 400);
   });
 
-  it("deletes a central image and soft-deletes its Image", async () => {
-    const { accessToken, merch, central, image } = await setup();
+  it("deletes an image and soft-deletes its Image", async () => {
+    const { accessToken, merch, second, image } = await setup();
 
     const response = await requestApp
-      .delete(`manage/merch/${merch.id}/images/${central.id}`)
+      .delete(`manage/merch/${merch.id}/images/${second.id}`)
       .set("Cookie", [`jwt=${accessToken}`])
       .set("Accept", "application/json");
 
     assert.equal(response.status, 200);
     assert.equal(
-      await prisma.merchImage.findUnique({ where: { id: central.id } }),
+      await prisma.merchImage.findUnique({ where: { id: second.id } }),
       null
     );
     const deleted = await prisma.image.findUnique({ where: { id: image.id } });
     assert.ok(deleted?.deletedAt);
   });
 
-  it("deletes a legacy image", async () => {
-    const { accessToken, merch, legacy } = await setup();
-
-    const response = await requestApp
-      .delete(`manage/merch/${merch.id}/images/${legacy.id}`)
-      .set("Cookie", [`jwt=${accessToken}`])
-      .set("Accept", "application/json");
-
-    assert.equal(response.status, 200);
-    assert.equal(
-      await prisma.merchImage.findUnique({ where: { id: legacy.id } }),
-      null
-    );
-  });
-
   it("404s for an image belonging to other merch", async () => {
     const { accessToken, profile, merch } = await setup();
     const other = await createMerch(profile.id, {});
+    const image = await prisma.image.create({
+      data: { url: [], dimensions: "square" },
+    });
     const otherImage = await prisma.merchImage.create({
-      data: { merchId: other.id, url: [] },
+      data: { merchId: other.id, imageId: image.id },
     });
 
     const response = await requestApp

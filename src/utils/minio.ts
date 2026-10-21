@@ -36,7 +36,6 @@ import logger from "../logger";
 export const artistBackgroundPrefix = "artist-banners";
 export const artistAvatarPrefix = "artist-avatars";
 export const coversPrefix = "trackgroup-covers";
-export const merchImagePrefix = "merch-images";
 export const postImagePrefix = "post-images";
 export const instanceLogoPrefix = "instance-logos";
 export const rootImagePrefix = "";
@@ -57,7 +56,6 @@ const imageTypeBuckets = {
   artistAvatar: { prefix: artistAvatarPrefix, queue: true },
   artistBackground: { prefix: artistBackgroundPrefix, queue: true },
   trackGroupCover: { prefix: coversPrefix, queue: true },
-  merch: { prefix: merchImagePrefix, queue: true },
   postImage: { prefix: postImagePrefix, queue: false },
   instanceLogo: { prefix: instanceLogoPrefix, queue: false },
   image: { prefix: rootImagePrefix, queue: true },
@@ -1112,43 +1110,6 @@ export const removeStoredImage = (image: {
     getImagesBucket(),
     `${image.keyPrefix ? `${image.keyPrefix}/` : ""}${image.id}`
   );
-
-export const listImagesByType = async (
-  imageType: ImageType,
-  imageId: string
-) => {
-  const prefix = imageKeyPrefix(imageType);
-  const objects = await getObjectList(getImagesBucket(), `${prefix}${imageId}`);
-  return objects.map((o) => o.name!.slice(prefix.length));
-};
-
-export const copyImagesBetweenTypes = async (
-  fromType: ImageType,
-  toType: ImageType,
-  imageId: string
-) => {
-  const bucket = getImagesBucket();
-  const fromPrefix = imageKeyPrefix(fromType);
-  const toPrefix = imageKeyPrefix(toType);
-
-  const names = await listImagesByType(fromType, imageId);
-  if (names.length > 0) {
-    await ensureBucketCached(bucket, true);
-  }
-
-  const copied: string[] = [];
-  for (const name of names) {
-    await copyObjectInStorage(
-      bucket,
-      `${fromPrefix}${name}`,
-      bucket,
-      `${toPrefix}${name}`,
-      { contentType: imageContentType(name) }
-    );
-    copied.push(name);
-  }
-  return copied;
-};
 
 export const fixStoredImageContentTypes = async () => {
   const summary = { checked: 0, fixed: 0, failed: 0 };

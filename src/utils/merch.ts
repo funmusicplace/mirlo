@@ -33,19 +33,16 @@ export const merchImageUrl = (
     : undefined;
 };
 
-export const deleteMerchImage = async (merchImage: MerchImageWithImage) => {
-  const imageType = merchImage.imageId ? "image" : "merch";
-  const storedId = merchImage.imageId ?? merchImage.id;
-
+export const deleteMerchImage = async (merchImage: MerchImage) => {
   await prisma.merchImage.delete({ where: { id: merchImage.id } });
-  if (merchImage.imageId) {
-    await prisma.image.delete({ where: { id: merchImage.imageId } });
-  }
+  await prisma.image.delete({ where: { id: merchImage.imageId } });
 
   try {
-    await removeImagesByType(imageType, storedId);
+    await removeImagesByType("image", merchImage.imageId);
   } catch (e) {
-    logger.info(`No stored objects for merch image ${storedId}, that's okay`);
+    logger.info(
+      `No stored objects for merch image ${merchImage.imageId}, that's okay`
+    );
   }
 };
 
