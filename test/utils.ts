@@ -72,8 +72,6 @@ const TRUNCATE_TABLES_SQL = `
     "TrackGroupTag",
     "TrackPlay",
     "User",
-    "UserAvatar",
-    "UserBanner",
     "UserProfileNotificationSetting",
     "UserProfileTip",
     "UserTrackFavorite",
