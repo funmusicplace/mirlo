@@ -369,8 +369,10 @@ model Profile {
   updatedAt                           DateTime                              @default(now()) @updatedAt
   deletedAt                           DateTime?
   subscriptionTiers                   ProfileSubscriptionTier[]
-  background                          ProfileBackground?
-  images                              Image[]
+  legacyBackground                    ProfileBackground?
+  backgroundImageId                   String?                               @unique @db.Uuid
+  background                          Image?                                @relation("ProfileBackgroundImage", fields: [backgroundImageId], references: [id])
+  images                              Image[]                               @relation("ProfileImages")
   avatar                              ProfileAvatar?
   urlSlug                             String
   /// [Properties]                              @unique
@@ -539,7 +541,9 @@ model Image {
   merchImage       MerchImage?
   dimensions       String // e.g. "square", "banner"
   profileId        Int?
-  profile          Profile?                @relation(fields: [profileId], references: [id])
+  profile          Profile?                @relation("ProfileImages", fields: [profileId], references: [id])
+  keyPrefix        String?
+  backgroundOf     Profile?                @relation("ProfileBackgroundImage")
 
   @@index([profileId])
 }

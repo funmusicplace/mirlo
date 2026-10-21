@@ -687,7 +687,7 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
     where: { id: track.trackGroup.profileId },
     include: {
       avatar: { where: { deletedAt: null } },
-      background: { where: { deletedAt: null } },
+      background: true,
     },
   });
 
@@ -728,7 +728,7 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
     where: { id: trackGroup.profileId },
     include: {
       avatar: { where: { deletedAt: null } },
-      background: { where: { deletedAt: null } },
+      background: true,
     },
   });
   registerTrackGroupHydration(hydrations, trackGroup);

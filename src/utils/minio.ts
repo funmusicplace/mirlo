@@ -1104,6 +1104,15 @@ export const removeImagesByType = (imageType: ImageType, imageId: string) =>
     `${imageKeyPrefix(imageType)}${imageId}`
   );
 
+export const removeStoredImage = (image: {
+  id: string;
+  keyPrefix: string | null;
+}) =>
+  removeObjectsFromBucket(
+    getImagesBucket(),
+    `${image.keyPrefix ? `${image.keyPrefix}/` : ""}${image.id}`
+  );
+
 export const listImagesByType = async (
   imageType: ImageType,
   imageId: string

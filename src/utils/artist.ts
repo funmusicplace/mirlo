@@ -22,9 +22,10 @@ import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
 import { deleteMerch, merchImagesInclude } from "./merch";
 import {
   artistAvatarPrefix,
-  artistBackgroundPrefix,
   coversPrefix,
   removeImagesByType,
+  removeStoredImage,
+  rootImagePrefix,
 } from "./minio";
 import { postImagesForContent } from "./postContent";
 import { getSiteSettings } from "./settings";
@@ -522,21 +523,21 @@ export const deleteProfileAvatar = async (profileId: number) => {
 };
 
 export const deleteProfileBackground = async (profileId: number) => {
-  const background = await prisma.profileBackground.findFirst({
-    where: {
-      profileId,
-    },
+  const profile = await prisma.profile.findUnique({
+    where: { id: profileId },
+    select: { background: true },
   });
+  const background = profile?.background;
 
   if (background) {
-    await prisma.profileBackground.delete({
-      where: {
-        profileId,
-      },
+    await prisma.profile.update({
+      where: { id: profileId },
+      data: { backgroundImageId: null },
     });
+    await prisma.image.delete({ where: { id: background.id } });
 
     try {
-      await removeImagesByType("artistBackground", background.id);
+      await removeStoredImage(background);
     } catch (e) {
       console.error("Found no files, that's okay");
     }
@@ -646,11 +647,7 @@ export const singleInclude = (queryOptions?: {
       },
     },
     tourDates: true,
-    background: {
-      where: {
-        deletedAt: null,
-      },
-    },
+    background: true,
     avatar: {
       where: {
         deletedAt: null,
@@ -797,9 +794,7 @@ export const singleInclude = (queryOptions?: {
                 avatar: {
                   where: { deletedAt: null },
                 },
-                background: {
-                  where: { deletedAt: null },
-                },
+                background: true,
                 trackGroups: {
                   where: whereForPublishedTrackGroups(),
                   include: {
@@ -854,9 +849,19 @@ export const addSizesToImage = (
   return { ...image, sizes: versionedSizes };
 };
 
+export const addSizesToStoredImage = <
+  T extends {
+    url: string[];
+    updatedAt?: Date | string;
+    keyPrefix: string | null;
+  },
+>(
+  image?: T | null
+) => addSizesToImage(image?.keyPrefix ?? rootImagePrefix, image);
+
 export const resolveProfileImageUrl = (artist: {
   avatar?: { url: string[] } | null;
-  background?: { url: string[] } | null;
+  background?: { url: string[]; keyPrefix: string | null } | null;
   trackGroups?: Array<{ cover?: { url: string[] } | null }>;
 }): string | undefined => {
   // Try avatar first
@@ -870,7 +875,10 @@ export const resolveProfileImageUrl = (artist: {
     u.includes("x625")
   );
   if (backgroundString) {
-    return generateFullStaticImageUrl(backgroundString, artistBackgroundPrefix);
+    return generateFullStaticImageUrl(
+      backgroundString,
+      artist.background?.keyPrefix ?? rootImagePrefix
+    );
   }
 
   // Fall back to first album cover

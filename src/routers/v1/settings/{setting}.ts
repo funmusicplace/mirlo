@@ -73,7 +73,7 @@ export default function () {
           where: { id: { in: featuredArtistIds }, deletedAt: null },
           include: {
             avatar: { where: { deletedAt: null } },
-            background: { where: { deletedAt: null } },
+            background: true,
           },
         });
         return res.status(200).json({
