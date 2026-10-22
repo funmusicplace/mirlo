@@ -2453,7 +2453,9 @@
   },
   "billing": {
     "noPaymentFound": "No payment found",
-    "completePayment": "Complete Your Payment"
+    "completePayment": "Complete Your Payment",
+    "payNow": "Pay now",
+    "paymentSubmitted": "Thanks! Your payment has been submitted."
   },
   "dateRangeFilter": {
     "filterByDate": "Filter by date",

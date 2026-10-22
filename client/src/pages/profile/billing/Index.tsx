@@ -1,52 +1,38 @@
-import React, { useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import Box from "components/common/Box";
+import PurchaseElements from "components/common/Purchase/PurchaseElements";
+import { WidthWrapper } from "components/common/WidthContainer";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import { css } from "@emotion/css";
-import EmbeddedStripe from "components/common/stripe/EmbeddedStripe";
-import WidthContainer from "components/common/WidthContainer";
+import { useSearchParams } from "react-router-dom";
 
 const Index: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "billing" });
   const [searchParams] = useSearchParams();
+  const [isPaid, setIsPaid] = React.useState(
+    searchParams.get("redirect_status") === "succeeded"
+  );
 
-  const clientSecret = searchParams.get("clientSecret") || undefined;
-  const stripeAccountId = searchParams.get("stripeAccountId") || undefined;
+  const clientSecret = searchParams.get("clientSecret");
+  const stripeAccountId = searchParams.get("stripeAccountId");
 
-  if (!clientSecret || !stripeAccountId) {
+  if (isPaid || !clientSecret || !stripeAccountId) {
     return (
-      <WidthContainer variant="small">
-        <div
-          className={css`
-            text-align: center;
-            padding: 2rem;
-          `}
-        >
-          <p>{t("noPaymentFound")}</p>
-        </div>
-      </WidthContainer>
+      <WidthWrapper variant="small" className="mt-8">
+        <Box>{t(isPaid ? "paymentSubmitted" : "noPaymentFound")}</Box>
+      </WidthWrapper>
     );
   }
 
   return (
-    <WidthContainer variant="small">
-      <div
-        className={css`
-          padding: 2rem 0;
-        `}
-      >
-        <h2>{t("completePayment")}</h2>
-        <div
-          className={css`
-            margin-top: 2rem;
-          `}
-        >
-          <EmbeddedStripe
-            clientSecret={clientSecret}
-            stripeAccountId={stripeAccountId}
-          />
-        </div>
-      </div>
-    </WidthContainer>
+    <WidthWrapper variant="small" className="mt-8 mb-12">
+      <h1 className="text-xl mb-4">{t("completePayment")}</h1>
+      <PurchaseElements
+        checkout={{ kind: "intent", clientSecret, stripeAccountId }}
+        returnUrl={window.location.href}
+        buttonLabel={t("payNow")}
+        onSuccess={() => setIsPaid(true)}
+      />
+    </WidthWrapper>
   );
 };
 

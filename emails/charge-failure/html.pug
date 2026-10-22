@@ -3,9 +3,8 @@ extends ../layout.pug
 block content
   p We're sorry to inform you that there was an issue charging your card #{amount} #{currency } for #{cardChargeContext}.
 
-  p To fix this, please update your payment information by visiting your 
-    a(href!=`${client}/profile/billing?${urlParams}`) billing settings
-    |  on #{instanceName}.
-  p Once your payment information is updated, we will automatically attempt to charge your card again.
+  p To fix this, please
+    a(href!=`${client}/profile/billing?${urlParams}`) complete your payment
+    |  on #{instanceName} with a different card or payment method.
   hr
   p Thank you for supporting artists on #{instanceName}!
