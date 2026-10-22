@@ -42,6 +42,7 @@ import {
   logHeavyRequests,
   sanitizeHeadersForLogs,
 } from "./utils/requestLogging";
+import { securityHeaders } from "./utils/securityHeaders";
 import { getSiteSettings } from "./utils/settings";
 import { refreshStripeClient } from "./utils/stripe";
 import { syncStripeConnectWebhookOnBoot } from "./utils/stripe/webhooks";
@@ -77,16 +78,13 @@ setInterval(() => {
   );
 }, 30_000).unref();
 
+app.disable("x-powered-by");
 app.set("query parser", (str: string) => qs.parse(str));
 // See https://github.com/express-rate-limit/express-rate-limit/wiki/Troubleshooting-Proxy-Issues
 app.set("trust proxy", 2);
 
-app.get("/ip", (request, response) => response.send(request.ip));
-app.get("/x-forwarded-for", (request, response) =>
-  response.send(request.headers["x-forwarded-for"])
-);
-
 app.use(attachRequestId);
+app.use(securityHeaders);
 app.use(logHeavyRequests);
 app.use(corsMiddleware);
 app.use(cookieParser());
