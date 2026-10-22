@@ -3,12 +3,16 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+
 import {
   clearTables,
   createArtist,
+  createFundraiser,
+  createFundraiserPledge,
   createTrackGroup,
   createUser,
 } from "../../../utils";
+
 import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../../utils";
@@ -58,13 +62,9 @@ describe("manage/trackGroups/{trackGroupId}/fundraiser", () => {
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Existing Fundraiser",
-          trackGroups: {
-            connect: { id: trackGroup.id },
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        name: "Existing Fundraiser",
       });
 
       const response = await requestApp
@@ -86,13 +86,8 @@ describe("manage/trackGroups/{trackGroupId}/fundraiser", () => {
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Test Fundraiser",
-          trackGroups: {
-            connect: { id: trackGroup.id },
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
       });
 
       // Verify fundraiser exists
@@ -129,39 +124,33 @@ describe("manage/trackGroups/{trackGroupId}/fundraiser", () => {
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Test Fundraiser",
-          goalAmount: 50000,
-          trackGroups: {
-            connect: { id: trackGroup.id },
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
       });
 
       // Create some pledges
       const pledger1 = await createUser({ email: "pledger1@test.com" });
       const pledger2 = await createUser({ email: "pledger2@test.com" });
 
-      const pledge1 = await prisma.fundraiserPledge.create({
-        data: {
-          fundraiserId: fundraiser.id,
-          userId: pledger1.user.id,
+      const pledge1 = await createFundraiserPledge(
+        fundraiser.id,
+        pledger1.user.id,
+        {
           amount: 5000,
           stripeSetupIntentId: "seti_test1",
           trackGroupId: trackGroup.id,
-        },
-      });
+        }
+      );
 
-      const pledge2 = await prisma.fundraiserPledge.create({
-        data: {
-          fundraiserId: fundraiser.id,
-          userId: pledger2.user.id,
+      const pledge2 = await createFundraiserPledge(
+        fundraiser.id,
+        pledger2.user.id,
+        {
           amount: 3000,
           stripeSetupIntentId: "seti_test2",
           trackGroupId: trackGroup.id,
-        },
-      });
+        }
+      );
 
       // Verify pledges exist
       let pledgesCount = await prisma.fundraiserPledge.count({
@@ -234,13 +223,8 @@ describe("manage/trackGroups/{trackGroupId}/fundraiser", () => {
       const artist = await createArtist(owner.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Test Fundraiser",
-          trackGroups: {
-            connect: { id: trackGroup.id },
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
       });
 
       const response = await requestApp
@@ -264,13 +248,8 @@ describe("manage/trackGroups/{trackGroupId}/fundraiser", () => {
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Test Fundraiser",
-          trackGroups: {
-            connect: { id: trackGroup.id },
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
       });
 
       // Verify trackgroup has fundraiser

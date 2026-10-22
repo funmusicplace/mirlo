@@ -24,6 +24,46 @@ describe("manage/fundraisers/{fundraiserId}", () => {
     }
   });
 
+  describe("GET", () => {
+    it("lets the profile's owner see a fundraiser without a release", async () => {
+      const { user, accessToken } = await createUser({
+        email: "fundraiser-owner@example.com",
+      });
+      const artist = await createArtist(user.id);
+      const fundraiser = await createFundraiser(artist.id, {
+        name: "Standalone",
+      });
+
+      const response = await requestApp
+        .get(`manage/fundraisers/${fundraiser.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.id, fundraiser.id);
+    });
+
+    it("hides a fundraiser from other users", async () => {
+      const { user } = await createUser({
+        email: "fundraiser-owner@example.com",
+      });
+      const { accessToken: otherToken } = await createUser({
+        email: "other@example.com",
+      });
+      const artist = await createArtist(user.id);
+      const fundraiser = await createFundraiser(artist.id, {
+        name: "Standalone",
+      });
+
+      const response = await requestApp
+        .get(`manage/fundraisers/${fundraiser.id}`)
+        .set("Cookie", [`jwt=${otherToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+    });
+  });
+
   describe("PUT", () => {
     const setUp = async () => {
       const { user, accessToken } = await createUser({
@@ -34,7 +74,8 @@ describe("manage/fundraisers/{fundraiserId}", () => {
       });
       const artist = await createArtist(user.id);
       const trackGroup = await createTrackGroup(artist.id);
-      const fundraiser = await createFundraiser(trackGroup.id, {
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
         isAllOrNothing: true,
       });
       return { accessToken, backer, fundraiser };

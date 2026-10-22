@@ -318,6 +318,13 @@ export default function () {
         },
       });
 
+      if (movingToNewProfile && existingTrackGroup.fundraiserId) {
+        await prisma.fundraiser.update({
+          where: { id: existingTrackGroup.fundraiserId },
+          data: { profileId: targetProfileId },
+        });
+      }
+
       let trackGroup = await prisma.trackGroup.findFirst({
         where: { id: Number(trackGroupId) },
       });

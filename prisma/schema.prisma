@@ -368,6 +368,7 @@ model Profile {
   userId                              Int
   posts                               Post[]
   trackGroups                         TrackGroup[]
+  fundraisers                         Fundraiser[]
   enabled                             Boolean                               @default(true)
   createdAt                           DateTime                              @default(now())
   updatedAt                           DateTime                              @default(now()) @updatedAt
@@ -966,8 +967,12 @@ model Fundraiser {
   // Is the fundraiser all or nothing
   isAllOrNothing Boolean            @default(false)
   status         FundraiserStatus   @default(ACTIVE)
+  profileId      Int
+  profile        Profile            @relation(fields: [profileId], references: [id])
   trackGroups    TrackGroup[]
   pledges        FundraiserPledge[]
+
+  @@index([profileId])
 }
 
 enum FundraiserStatus {

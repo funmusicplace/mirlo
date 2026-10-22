@@ -1,10 +1,5 @@
-import prisma, { SafeUser } from "@mirlo/prisma";
-import {
-  Prisma,
-  FundraiserPledge,
-  Fundraiser,
-  TrackGroup,
-} from "@mirlo/prisma/client";
+import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
 import { compact, uniq } from "lodash";
 import Stripe from "stripe";
@@ -22,6 +17,7 @@ import {
 import { merchImageUrl } from "../merch";
 import { recordPaymentAccountStatus } from "../paymentAccountStatus";
 import { completeCheckout } from "../payments/checkout";
+import { resolvePayee } from "../payments/payee";
 import {
   calculateAppFee,
   calculatePlatformPercent,
@@ -476,14 +472,10 @@ export const handleSetupIntentSucceeded = async (
         id: Number(fundraiserId),
       },
       include: {
-        trackGroups: {
+        profile: {
           include: {
-            profile: {
-              include: {
-                user: true,
-                subscriptionTiers: true,
-              },
-            },
+            user: true,
+            subscriptionTiers: true,
           },
         },
       },
@@ -497,7 +489,7 @@ export const handleSetupIntentSucceeded = async (
         amount: Number(intent.metadata?.paymentIntentAmount),
         stripeSetupIntentId: intent.id,
       });
-      await subscribeUserToProfile(fundraiser.trackGroups[0].profile, user);
+      await subscribeUserToProfile(fundraiser.profile, user);
     }
   } else if (metadata.tierId) {
     const {
@@ -730,26 +722,41 @@ export const finalizeSubscriptionSetup = async ({
   );
 };
 
+export const pledgeChargeInclude = {
+  user: { select: { email: true } },
+  fundraiser: {
+    include: {
+      profile: {
+        include: {
+          user: { select: { stripeAccountId: true } },
+          paymentToUser: { select: { stripeAccountId: true } },
+        },
+      },
+      trackGroups: {
+        // Nested includes aren't covered by the soft-delete extension
+        where: { deletedAt: null },
+      },
+    },
+  },
+} satisfies Prisma.FundraiserPledgeInclude;
+
 export const chargePledgePayments = async (
-  pledge: FundraiserPledge & { user: SafeUser } & {
-    fundraiser: Fundraiser & {
-      trackGroups: (TrackGroup & {
-        profile: { urlSlug: string; user: { stripeAccountId: string | null } };
-      })[];
-    };
-  }
+  pledge: Prisma.FundraiserPledgeGetPayload<{
+    include: typeof pledgeChargeInclude;
+  }>
 ) => {
   const client = await getClient();
+  const { profile } = pledge.fundraiser;
+  const trackGroup = pledge.fundraiser.trackGroups[0];
 
-  if (!pledge.fundraiser.trackGroups[0].profile.user.stripeAccountId) {
+  const { stripeAccountId } = resolvePayee({ profile });
+
+  if (!stripeAccountId) {
     throw new AppError({
       description: "Artist does not have a connected stripe account",
       httpCode: 400,
     });
   }
-
-  const stripeAccountId =
-    pledge.fundraiser.trackGroups[0].profile.user.stripeAccountId;
 
   const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
   let transactionId: string | undefined;
@@ -798,14 +805,16 @@ export const chargePledgePayments = async (
             customer: customerId,
             payment_method: paymentMethods.data[0]?.id,
             return_url: encodeURI(
-              `${client.applicationUrl}/${pledge.fundraiser.trackGroups[0].profile.urlSlug}/release/${pledge.fundraiser.trackGroups[0].urlSlug}`
+              trackGroup
+                ? `${client.applicationUrl}/${profile.urlSlug}/release/${trackGroup.urlSlug}`
+                : `${client.applicationUrl}/${profile.urlSlug}`
             ),
             off_session: true,
             confirm: true,
             application_fee_amount: await calculateAppFee(
               pledge.amount,
               currency,
-              pledge.fundraiser.trackGroups[0].platformPercent,
+              trackGroup?.platformPercent ?? profile.defaultPlatformFee,
               stripeAccount.country
             ),
             metadata: {

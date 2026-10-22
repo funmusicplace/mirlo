@@ -46,6 +46,7 @@ export default function () {
       const newFundraiser = await prisma.fundraiser.create({
         data: {
           name: `${trackGroup.title} Fundraiser`,
+          profileId: trackGroup.profileId,
           trackGroups: {
             connect: {
               id: trackGroup.id,

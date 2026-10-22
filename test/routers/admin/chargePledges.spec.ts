@@ -29,7 +29,8 @@ describe("admin/chargePledges", () => {
     const { user: backer } = await createUser({ email: "backer@example.com" });
     const artist = await createArtist(owner.id);
     const trackGroup = await createTrackGroup(artist.id);
-    const fundraiser = await createFundraiser(trackGroup.id, {
+    const fundraiser = await createFundraiser(trackGroup.profileId, {
+      trackGroupId: trackGroup.id,
       isAllOrNothing: true,
       goalAmount: 1000,
     });

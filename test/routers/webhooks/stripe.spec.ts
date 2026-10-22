@@ -16,10 +16,12 @@ import { handleInvoicePaid } from "../../../src/utils/stripe";
 import * as subscriptionModule from "../../../src/utils/subscription";
 import {
   clearTables,
+  createFundraiser,
+  createFundraiserPledge,
   createProfile,
+  createTier,
   createTrackGroup,
   createUser,
-  createTier,
 } from "../../utils";
 
 import prisma from "@mirlo/prisma";
@@ -173,14 +175,9 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const trackGroup = await createTrackGroup(profile.id);
 
       // Create a fundraiser
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Help Us Record",
-          goalAmount: 50000,
-          trackGroups: {
-            connect: [{ id: trackGroup.id }],
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        name: "Help Us Record",
       });
 
       // Create a transaction
@@ -194,14 +191,10 @@ describe("Stripe Webhooks - Failed Payments", () => {
       });
 
       // Create a fundraiser pledge
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: user.id,
-          fundraiserId: fundraiser.id,
-          amount: 5000,
-          associatedTransactionId: transaction.id,
-          stripeSetupIntentId: "seti_test_123",
-        },
+      await createFundraiserPledge(fundraiser.id, user.id, {
+        amount: 5000,
+        associatedTransactionId: transaction.id,
+        stripeSetupIntentId: "seti_test_123",
       });
 
       // Mock handleFundraiserPledgePaymentFailure
@@ -954,14 +947,9 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const profile = await createProfile(user.id);
       const trackGroup = await createTrackGroup(profile.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Help Record",
-          goalAmount: 50000,
-          trackGroups: {
-            connect: [{ id: trackGroup.id }],
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        name: "Help Record",
       });
 
       const transaction = await prisma.userTransaction.create({
@@ -973,14 +961,10 @@ describe("Stripe Webhooks - Failed Payments", () => {
         },
       });
 
-      const pledge = await prisma.fundraiserPledge.create({
-        data: {
-          userId: user.id,
-          fundraiserId: fundraiser.id,
-          amount: 5000,
-          associatedTransactionId: transaction.id,
-          stripeSetupIntentId: "seti_test_123",
-        },
+      const pledge = await createFundraiserPledge(fundraiser.id, user.id, {
+        amount: 5000,
+        associatedTransactionId: transaction.id,
+        stripeSetupIntentId: "seti_test_123",
       });
 
       // Mock sendMailQueue.add
@@ -1059,14 +1043,9 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const profile = await createProfile(user.id);
       const trackGroup = await createTrackGroup(profile.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Help Record",
-          goalAmount: 50000,
-          trackGroups: {
-            connect: [{ id: trackGroup.id }],
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        name: "Help Record",
       });
 
       const transaction = await prisma.userTransaction.create({
@@ -1078,14 +1057,10 @@ describe("Stripe Webhooks - Failed Payments", () => {
         },
       });
 
-      const pledge = await prisma.fundraiserPledge.create({
-        data: {
-          userId: user.id,
-          fundraiserId: fundraiser.id,
-          amount: 5000,
-          stripeSetupIntentId: "seti_test_123",
-          associatedTransactionId: transaction.id,
-        },
+      const pledge = await createFundraiserPledge(fundraiser.id, user.id, {
+        amount: 5000,
+        stripeSetupIntentId: "seti_test_123",
+        associatedTransactionId: transaction.id,
       });
 
       // Mock sendMailQueue.add
@@ -1176,7 +1151,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
   });
 
   describe("chargePledgePayments", () => {
-    const setUpPledge = async () => {
+    const setUpPledge = async ({ withRelease = true } = {}) => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_pledge",
@@ -1184,33 +1159,19 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const { user: backer } = await createUser({ email: "backer@test.com" });
       const profile = await createProfile(artistUser.id);
       const trackGroup = await createTrackGroup(profile.id);
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Help Record",
-          goalAmount: 5000,
-          trackGroups: { connect: [{ id: trackGroup.id }] },
-        },
+      const fundraiser = await createFundraiser(profile.id, {
+        name: "Help Record",
+        goalAmount: 5000,
+        trackGroupId: withRelease ? trackGroup.id : undefined,
       });
-      const { id: pledgeId } = await prisma.fundraiserPledge.create({
-        data: {
-          userId: backer.id,
-          fundraiserId: fundraiser.id,
-          amount: 5000,
-          stripeSetupIntentId: "seti_pledge",
-        },
-      });
+      const { id: pledgeId } = await createFundraiserPledge(
+        fundraiser.id,
+        backer.id,
+        { amount: 5000, stripeSetupIntentId: "seti_pledge" }
+      );
       const pledge = await prisma.fundraiserPledge.findUniqueOrThrow({
         where: { id: pledgeId },
-        include: {
-          user: true,
-          fundraiser: {
-            include: {
-              trackGroups: {
-                include: { profile: { include: { user: true } } },
-              },
-            },
-          },
-        },
+        include: stripeUtils.pledgeChargeInclude,
       });
 
       sinon.stub(stripeUtils.stripe.accounts, "retrieve").resolves({
@@ -1224,9 +1185,69 @@ describe("Stripe Webhooks - Failed Payments", () => {
       sinon.stub(stripeUtils.stripe.paymentMethods, "list").resolves({
         data: [{ id: "pm_backer" }],
       } as unknown as Stripe.Response<Stripe.ApiList<Stripe.PaymentMethod>>);
-      sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
-      return { pledge, backer, trackGroup };
+      const mailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
+      return { pledge, backer, trackGroup, profile, mailStub };
     };
+
+    const chargeAndComplete = async (
+      pledge: Awaited<ReturnType<typeof setUpPledge>>["pledge"]
+    ) => {
+      const createStub = sinon
+        .stub(stripeUtils.stripe.paymentIntents, "create")
+        .resolves({
+          id: "pi_pledge_charge",
+          status: "succeeded",
+        } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+      await stripeUtils.chargePledgePayments(pledge);
+      const metadata = (
+        createStub.firstCall.args[0] as Stripe.PaymentIntentCreateParams
+      ).metadata as Record<string, string>;
+      await stripeUtils.handlePaymentIntentSucceeded(
+        {
+          id: "pi_pledge_charge",
+          status: "succeeded",
+          metadata,
+        } as unknown as Stripe.PaymentIntent,
+        "acct_pledge"
+      );
+    };
+
+    it("completes a pledge on a fundraiser without a release", async () => {
+      const { pledge, backer, profile, mailStub } = await setUpPledge({
+        withRelease: false,
+      });
+
+      await chargeAndComplete(pledge);
+
+      const paidPledge = await prisma.fundraiserPledge.findFirstOrThrow({
+        where: { id: pledge.id },
+      });
+      assert.ok(paidPledge.paidAt, "pledge marked paid");
+      const notification = await prisma.notification.findFirstOrThrow({
+        where: {
+          userId: backer.id,
+          notificationType: "FUNDRAISER_PLEDGE_CHARGED",
+        },
+      });
+      assert.equal(notification.trackGroupId, null);
+      assert.equal(
+        await prisma.userTrackGroupPurchase.count({
+          where: { userId: backer.id },
+        }),
+        0
+      );
+      const { locals } = mailStub.firstCall.args[1] as {
+        locals: Record<string, unknown>;
+      };
+      assert.equal(locals.fundraiserName, "Help Record");
+      assert.equal(locals.trackGroup, undefined);
+      assert.deepEqual(locals.artist, {
+        name: profile.name,
+        urlSlug: profile.urlSlug,
+      });
+    });
 
     it("records the charge so payment_intent.succeeded completes the pledge", async () => {
       const { pledge, backer, trackGroup } = await setUpPledge();

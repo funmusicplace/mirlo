@@ -1,16 +1,18 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
+
 import {
   clearTables,
   createArtist,
+  createFundraiser,
+  createFundraiserPledge,
   createTrackGroup,
   createUser,
 } from "../../utils";
-import prisma from "@mirlo/prisma";
-import { faker } from "@faker-js/faker";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
@@ -77,25 +79,16 @@ describe("admin/fundraiserPledges", () => {
       const artist = await createArtist(adminUser.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Test Fundraiser",
-          description: "A test fundraiser",
-          goalAmount: 10000,
-          trackGroups: {
-            connect: [{ id: trackGroup.id }],
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        description: "A test fundraiser",
+        goalAmount: 10000,
       });
 
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser.id,
-          fundraiserId: fundraiser.id,
-          amount: 5000,
-          stripeSetupIntentId: "test-intent-id",
-          paidAt: new Date(),
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser.id, {
+        amount: 5000,
+        stripeSetupIntentId: "test-intent-id",
+        paidAt: new Date(),
       });
 
       const response = await requestApp
@@ -139,36 +132,23 @@ describe("admin/fundraiserPledges", () => {
       const artist = await createArtist(adminUser.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Test Fundraiser",
-          description: "A test fundraiser",
-          goalAmount: 10000,
-          trackGroups: {
-            connect: [{ id: trackGroup.id }],
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        description: "A test fundraiser",
+        goalAmount: 10000,
       });
 
       // Create paid pledge
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser1.id,
-          fundraiserId: fundraiser.id,
-          amount: 5000,
-          stripeSetupIntentId: "test-intent-1",
-          paidAt: new Date(),
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser1.id, {
+        amount: 5000,
+        stripeSetupIntentId: "test-intent-1",
+        paidAt: new Date(),
       });
 
       // Create pending pledge
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser2.id,
-          fundraiserId: fundraiser.id,
-          amount: 3000,
-          stripeSetupIntentId: "test-intent-2",
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser2.id, {
+        amount: 3000,
+        stripeSetupIntentId: "test-intent-2",
       });
 
       const response = await requestApp
@@ -203,36 +183,23 @@ describe("admin/fundraiserPledges", () => {
       const artist = await createArtist(adminUser.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Test Fundraiser",
-          description: "A test fundraiser",
-          goalAmount: 10000,
-          trackGroups: {
-            connect: [{ id: trackGroup.id }],
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        description: "A test fundraiser",
+        goalAmount: 10000,
       });
 
       // Create paid pledge
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser1.id,
-          fundraiserId: fundraiser.id,
-          amount: 5000,
-          stripeSetupIntentId: "test-intent-1",
-          paidAt: new Date(),
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser1.id, {
+        amount: 5000,
+        stripeSetupIntentId: "test-intent-1",
+        paidAt: new Date(),
       });
 
       // Create pending pledge
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser2.id,
-          fundraiserId: fundraiser.id,
-          amount: 3000,
-          stripeSetupIntentId: "test-intent-2",
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser2.id, {
+        amount: 3000,
+        stripeSetupIntentId: "test-intent-2",
       });
 
       const response = await requestApp
@@ -267,37 +234,24 @@ describe("admin/fundraiserPledges", () => {
       const artist = await createArtist(adminUser.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Test Fundraiser",
-          description: "A test fundraiser",
-          goalAmount: 10000,
-          trackGroups: {
-            connect: [{ id: trackGroup.id }],
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        description: "A test fundraiser",
+        goalAmount: 10000,
       });
 
       // Create paid pledge
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser1.id,
-          fundraiserId: fundraiser.id,
-          amount: 5000,
-          stripeSetupIntentId: "test-intent-1",
-          paidAt: new Date(),
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser1.id, {
+        amount: 5000,
+        stripeSetupIntentId: "test-intent-1",
+        paidAt: new Date(),
       });
 
       // Create cancelled pledge
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser2.id,
-          fundraiserId: fundraiser.id,
-          amount: 3000,
-          stripeSetupIntentId: "test-intent-2",
-          cancelledAt: new Date(),
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser2.id, {
+        amount: 3000,
+        stripeSetupIntentId: "test-intent-2",
+        cancelledAt: new Date(),
       });
 
       const response = await requestApp
@@ -334,33 +288,20 @@ describe("admin/fundraiserPledges", () => {
       const artist = await createArtist(adminUser.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Test Fundraiser",
-          description: "A test fundraiser",
-          goalAmount: 10000,
-          trackGroups: {
-            connect: [{ id: trackGroup.id }],
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        description: "A test fundraiser",
+        goalAmount: 10000,
       });
 
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser1.id,
-          fundraiserId: fundraiser.id,
-          amount: 5000,
-          stripeSetupIntentId: "test-intent-1",
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser1.id, {
+        amount: 5000,
+        stripeSetupIntentId: "test-intent-1",
       });
 
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser2.id,
-          fundraiserId: fundraiser.id,
-          amount: 3000,
-          stripeSetupIntentId: "test-intent-2",
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser2.id, {
+        amount: 3000,
+        stripeSetupIntentId: "test-intent-2",
       });
 
       const response = await requestApp
@@ -394,33 +335,20 @@ describe("admin/fundraiserPledges", () => {
       const artist = await createArtist(adminUser.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Test Fundraiser",
-          description: "A test fundraiser",
-          goalAmount: 10000,
-          trackGroups: {
-            connect: [{ id: trackGroup.id }],
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        description: "A test fundraiser",
+        goalAmount: 10000,
       });
 
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser1.id,
-          fundraiserId: fundraiser.id,
-          amount: 5000,
-          stripeSetupIntentId: "test-intent-1",
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser1.id, {
+        amount: 5000,
+        stripeSetupIntentId: "test-intent-1",
       });
 
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser2.id,
-          fundraiserId: fundraiser.id,
-          amount: 3000,
-          stripeSetupIntentId: "test-intent-2",
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser2.id, {
+        amount: 3000,
+        stripeSetupIntentId: "test-intent-2",
       });
 
       const response = await requestApp
@@ -455,44 +383,28 @@ describe("admin/fundraiserPledges", () => {
       const trackGroup1 = await createTrackGroup(artist1.id);
       const trackGroup2 = await createTrackGroup(artist2.id);
 
-      const fundraiser1 = await prisma.fundraiser.create({
-        data: {
-          name: "Beatles Fundraiser",
-          description: "A Beatles fundraiser",
-          goalAmount: 10000,
-          trackGroups: {
-            connect: [{ id: trackGroup1.id }],
-          },
-        },
+      const fundraiser1 = await createFundraiser(trackGroup1.profileId, {
+        trackGroupId: trackGroup1.id,
+        name: "Beatles Fundraiser",
+        description: "A Beatles fundraiser",
+        goalAmount: 10000,
       });
 
-      const fundraiser2 = await prisma.fundraiser.create({
-        data: {
-          name: "Floyd Fundraiser",
-          description: "A Floyd fundraiser",
-          goalAmount: 10000,
-          trackGroups: {
-            connect: [{ id: trackGroup2.id }],
-          },
-        },
+      const fundraiser2 = await createFundraiser(trackGroup2.profileId, {
+        trackGroupId: trackGroup2.id,
+        name: "Floyd Fundraiser",
+        description: "A Floyd fundraiser",
+        goalAmount: 10000,
       });
 
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser.id,
-          fundraiserId: fundraiser1.id,
-          amount: 5000,
-          stripeSetupIntentId: "test-intent-1",
-        },
+      await createFundraiserPledge(fundraiser1.id, pledgerUser.id, {
+        amount: 5000,
+        stripeSetupIntentId: "test-intent-1",
       });
 
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser.id,
-          fundraiserId: fundraiser2.id,
-          amount: 3000,
-          stripeSetupIntentId: "test-intent-2",
-        },
+      await createFundraiserPledge(fundraiser2.id, pledgerUser.id, {
+        amount: 3000,
+        stripeSetupIntentId: "test-intent-2",
       });
 
       const response = await requestApp
@@ -529,44 +441,28 @@ describe("admin/fundraiserPledges", () => {
         title: "Sgt. Pepper",
       });
 
-      const fundraiser1 = await prisma.fundraiser.create({
-        data: {
-          name: "Fundraiser 1",
-          description: "A fundraiser",
-          goalAmount: 10000,
-          trackGroups: {
-            connect: [{ id: trackGroup1.id }],
-          },
-        },
+      const fundraiser1 = await createFundraiser(trackGroup1.profileId, {
+        trackGroupId: trackGroup1.id,
+        name: "Fundraiser 1",
+        description: "A fundraiser",
+        goalAmount: 10000,
       });
 
-      const fundraiser2 = await prisma.fundraiser.create({
-        data: {
-          name: "Fundraiser 2",
-          description: "Another fundraiser",
-          goalAmount: 10000,
-          trackGroups: {
-            connect: [{ id: trackGroup2.id }],
-          },
-        },
+      const fundraiser2 = await createFundraiser(trackGroup2.profileId, {
+        trackGroupId: trackGroup2.id,
+        name: "Fundraiser 2",
+        description: "Another fundraiser",
+        goalAmount: 10000,
       });
 
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser.id,
-          fundraiserId: fundraiser1.id,
-          amount: 5000,
-          stripeSetupIntentId: "test-intent-1",
-        },
+      await createFundraiserPledge(fundraiser1.id, pledgerUser.id, {
+        amount: 5000,
+        stripeSetupIntentId: "test-intent-1",
       });
 
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser.id,
-          fundraiserId: fundraiser2.id,
-          amount: 3000,
-          stripeSetupIntentId: "test-intent-2",
-        },
+      await createFundraiserPledge(fundraiser2.id, pledgerUser.id, {
+        amount: 3000,
+        stripeSetupIntentId: "test-intent-2",
       });
 
       const response = await requestApp
@@ -591,15 +487,10 @@ describe("admin/fundraiserPledges", () => {
       const artist = await createArtist(adminUser.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Test Fundraiser",
-          description: "A test fundraiser",
-          goalAmount: 10000,
-          trackGroups: {
-            connect: [{ id: trackGroup.id }],
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        description: "A test fundraiser",
+        goalAmount: 10000,
       });
 
       // Create 25 pledges
@@ -610,13 +501,9 @@ describe("admin/fundraiserPledges", () => {
           })
         ).user;
 
-        await prisma.fundraiserPledge.create({
-          data: {
-            userId: user.id,
-            fundraiserId: fundraiser.id,
-            amount: 1000 + i,
-            stripeSetupIntentId: `test-intent-${i}`,
-          },
+        await createFundraiserPledge(fundraiser.id, user.id, {
+          amount: 1000 + i,
+          stripeSetupIntentId: `test-intent-${i}`,
         });
       }
 
@@ -672,36 +559,23 @@ describe("admin/fundraiserPledges", () => {
       const artist = await createArtist(adminUser.id);
       const trackGroup = await createTrackGroup(artist.id);
 
-      const fundraiser = await prisma.fundraiser.create({
-        data: {
-          name: "Test Fundraiser",
-          description: "A test fundraiser",
-          goalAmount: 10000,
-          trackGroups: {
-            connect: [{ id: trackGroup.id }],
-          },
-        },
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        description: "A test fundraiser",
+        goalAmount: 10000,
       });
 
       // John Smith - paid
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser1.id,
-          fundraiserId: fundraiser.id,
-          amount: 5000,
-          stripeSetupIntentId: "test-intent-1",
-          paidAt: new Date(),
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser1.id, {
+        amount: 5000,
+        stripeSetupIntentId: "test-intent-1",
+        paidAt: new Date(),
       });
 
       // John Doe - pending
-      await prisma.fundraiserPledge.create({
-        data: {
-          userId: pledgerUser2.id,
-          fundraiserId: fundraiser.id,
-          amount: 3000,
-          stripeSetupIntentId: "test-intent-2",
-        },
+      await createFundraiserPledge(fundraiser.id, pledgerUser2.id, {
+        amount: 3000,
+        stripeSetupIntentId: "test-intent-2",
       });
 
       const response = await requestApp
