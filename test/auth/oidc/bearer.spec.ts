@@ -181,6 +181,12 @@ describe("oauth bearer tokens", () => {
       where: { id: user.id },
     });
     assert.notEqual(unchanged.name, "New name");
+
+    const pledge = await request(API)
+      .put("/v1/fundraisers/1/changePledge")
+      .set(bearer(tokens.access_token))
+      .send({ amount: 100000 });
+    assert.equal(pledge.status, 403);
   });
 
   it("refuses an expired token on a write with the RFC 6750 header", async () => {
@@ -214,6 +220,78 @@ describe("oauth bearer tokens", () => {
       data: { disabledAt: new Date() },
     });
     assert.equal((await call()).status, 401);
+  });
+
+  it("stops working once its grant is gone", async () => {
+    const { tokens } = await setup();
+    await prisma.oAuthPayload.deleteMany({ where: { model: "Grant" } });
+    const response = await request(API)
+      .get("/auth/profile")
+      .set(bearer(tokens.access_token));
+    assert.equal(response.status, 401);
+  });
+
+  it("stays revoked when an admin revokes the app and then approves it again", async () => {
+    const { client, tokens } = await setup();
+    const { accessToken: adminToken } = await createUser({
+      email: "admin@example.com",
+      isAdmin: true,
+    });
+    const revoked = await request(API)
+      .put(`/v1/admin/clients/${client.id}`)
+      .set("Cookie", [`jwt=${adminToken}`])
+      .send({ status: "revoked" });
+    assert.equal(revoked.status, 200, revoked.text);
+    const approved = await request(API)
+      .put(`/v1/admin/clients/${client.id}`)
+      .set("Cookie", [`jwt=${adminToken}`])
+      .send({ status: "approved" });
+    assert.equal(approved.status, 200, approved.text);
+
+    const response = await request(API)
+      .get("/auth/profile")
+      .set(bearer(tokens.access_token));
+    assert.equal(response.status, 401);
+  });
+
+  it("drops the app's tokens when an admin deletes it", async () => {
+    const { client } = await setup();
+    const { accessToken: adminToken } = await createUser({
+      email: "admin@example.com",
+      isAdmin: true,
+    });
+    const deleted = await request(API)
+      .delete(`/v1/admin/clients/${client.id}`)
+      .set("Cookie", [`jwt=${adminToken}`]);
+    assert.equal(deleted.status, 200, deleted.text);
+    assert.equal(
+      await prisma.oAuthPayload.count({ where: { grantId: { not: null } } }),
+      0
+    );
+    assert.equal(
+      await prisma.oAuthPayload.count({ where: { model: "Grant" } }),
+      0
+    );
+  });
+
+  it("stays revoked when an admin disables the user and then enables them again", async () => {
+    const { user, tokens } = await setup();
+    const { accessToken: adminToken } = await createUser({
+      email: "admin@example.com",
+      isAdmin: true,
+    });
+    for (const disabled of [true, false]) {
+      const response = await request(API)
+        .put(`/v1/admin/users/${user.id}`)
+        .set("Cookie", [`jwt=${adminToken}`])
+        .send({ disabled });
+      assert.equal(response.status, 200, response.text);
+    }
+
+    const response = await request(API)
+      .get("/auth/profile")
+      .set(bearer(tokens.access_token));
+    assert.equal(response.status, 401);
   });
 
   it("issues refresh tokens only for offline_access with prompt=consent", async () => {

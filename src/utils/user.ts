@@ -2,6 +2,7 @@ import prisma, { SafeUser } from "@mirlo/prisma";
 import { Prisma, User } from "@mirlo/prisma/client";
 import { v4 as uuid } from "uuid";
 
+import { revokeAllConnectedApps } from "../auth/oidc/grants";
 import logger from "../logger";
 import { serializeUser } from "../serializers/user";
 
@@ -142,6 +143,7 @@ export const deleteUser = async (userId: number) => {
 
   await prisma.profileManager.deleteMany({ where: { userId } });
 
+  await revokeAllConnectedApps(userId);
   await anonymiseDeletedUser(userId);
   await prisma.user.delete({ where: { id: userId } });
 };

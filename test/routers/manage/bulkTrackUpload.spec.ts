@@ -1,10 +1,12 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 
 import { beforeEach, describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 import request from "supertest";
+
 import { clearTables, createArtist, createUser } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
@@ -500,6 +502,51 @@ describe("manage/bulkTrackUpload", () => {
 
       assert(createdArtist);
       assert.equal(createdArtist.userId, user.id);
+      const tiers = await prisma.profileSubscriptionTier.findMany({
+        where: { profileId: createdArtist.id },
+      });
+      assert.equal(tiers.length, 1);
+      assert.equal(tiers[0].isDefaultTier, true);
+    });
+
+    it("won't create artists for a user who can't create them, but adds to their own", async () => {
+      await prisma.settings.create({
+        data: {
+          settings: { platformPercent: 10 },
+          isClosedToPublicArtistSignup: true,
+        },
+      });
+      const { accessToken, user } = await createUser({
+        email: "artist@example.com",
+        canCreateArtists: false,
+      });
+      await createArtist(user.id, { name: "Existing Band" });
+      const trackGroups = [
+        {
+          title: "My Album",
+          tracks: [{ title: "My Track", order: 1, artists: [], metadata: {} }],
+        },
+      ];
+
+      const response = await requestApp
+        .post("manage/bulkTrackUpload")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .send({
+          artists: [
+            { name: "New Band", trackGroups },
+            { name: "Existing Band", trackGroups },
+          ],
+        })
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200, response.text);
+      assert.equal(response.body.result.artistsCreated, 0);
+      assert.equal(response.body.result.trackGroupsCreated, 1);
+      assert.equal(response.body.result.partialErrors.length, 1);
+      assert.equal(
+        await prisma.profile.count({ where: { name: "New Band" } }),
+        0
+      );
     });
 
     it("should preserve catalogNumber and about fields in track groups", async () => {

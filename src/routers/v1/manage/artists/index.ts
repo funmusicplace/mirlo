@@ -11,13 +11,13 @@ import { serializeProfile } from "../../../../serializers/artist";
 import { serializeManagedProfile } from "../../../../serializers/profileManager";
 import {
   asSlugConflictError,
+  createProfileForUser,
   generateUniqueProfileSlug,
   isProfileSlugTaken,
   whereForProfilesUserOwnsOrManages,
 } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
-import { getSiteSettings } from "../../../../utils/settings";
 
 export default function () {
   const operations = {
@@ -74,7 +74,6 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     let { name, bio, urlSlug } = req.body;
-    const settings = await getSiteSettings();
     assertLoggedIn(req);
     const user = req.user;
     try {
@@ -99,48 +98,11 @@ export default function () {
         newSlug = await generateUniqueProfileSlug(name);
       }
 
-      const result = await prisma.profile.create({
-        data: {
-          name,
-          bio,
-          urlSlug: newSlug,
-          user: {
-            connect: {
-              id: Number(user.id),
-            },
-          },
-          properties: {
-            colors: settings.settings?.instanceCustomization?.colors ?? {
-              button: "#be3455",
-              buttonText: "#ffc0cb",
-              background: "#f5f0f0",
-              text: "#111",
-            },
-          },
-          subscriptionTiers: {
-            create: {
-              name: "follow",
-              description: "follow an artist",
-              minAmount: 0,
-              isDefaultTier: true,
-            },
-          },
-        },
+      const result = await createProfileForUser(user, {
+        name,
+        bio,
+        urlSlug: newSlug,
       });
-
-      if (user.isLabelAccount) {
-        await prisma.artistLabel.create({
-          data: {
-            artistId: result.id,
-            labelUserId: user.id,
-            isLabelApproved: true,
-            canLabelManageArtist: true,
-            canLabelAddReleases: true,
-            isArtistApproved: true,
-            isDisplayedOnArtistPage: true,
-          },
-        });
-      }
       res.json({
         result: serializeProfile(result as any, Number(user.id)),
       });

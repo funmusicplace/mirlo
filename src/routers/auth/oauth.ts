@@ -10,7 +10,10 @@ import { findGrantId } from "../../auth/oidc/grants";
 import { getProvider } from "../../auth/oidc/provider";
 import { requestedScopes } from "../../auth/oidc/scopes";
 import { cookieUserLoggedInWithoutRedirect } from "../../auth/passport";
+import { sendMailQueue } from "../../queues/send-mail-queue";
 import { AppError } from "../../utils/error";
+import { getClient } from "../../utils/getClient";
+import { getSiteSettings, resolveContactEmail } from "../../utils/settings";
 
 const router = express.Router();
 
@@ -43,7 +46,7 @@ const loadInteraction = async (req: Request, res: Response) => {
 const requestApproval = async (
   clientId: string,
   metadata: ReturnType<Client["metadata"]>,
-  userId: number
+  user: Pick<Express.User, "id" | "email">
 ) => {
   const url = new URL(clientId);
   const data = {
@@ -51,16 +54,31 @@ const requestApproval = async (
     applicationUrl: metadata.client_uri ?? url.origin,
     redirectUris: [...(metadata.redirect_uris ?? [])],
     status: "pending" as const,
-    userId,
+    userId: user.id,
   };
-  await prisma.client.createMany({
+  const created = await prisma.client.createMany({
     data: [{ ...data, allowedCorsOrigins: [], clientIdUrl: clientId }],
     skipDuplicates: true,
   });
-  await prisma.client.updateMany({
+  const restored = await prisma.client.updateMany({
     where: { clientIdUrl: clientId, deletedAt: { not: null } },
     data: { ...data, deletedAt: null },
   });
+
+  const contactEmail = resolveContactEmail(await getSiteSettings());
+  if (contactEmail && created.count + restored.count > 0) {
+    await sendMailQueue.add("send-mail", {
+      template: "oauth-approval-requested",
+      message: { to: contactEmail },
+      locals: {
+        applicationName: data.applicationName,
+        applicationUrl: data.applicationUrl,
+        clientId,
+        requestedBy: user.email,
+        adminUrl: `${(await getClient()).applicationUrl}/admin/clients`,
+      },
+    });
+  }
 };
 
 const grantedScopes = async (
@@ -135,7 +153,7 @@ router.post(
           throw new AppError({ httpCode: 401, description: "Unauthorized" });
         }
         if (isMetadataDocumentClientId(clientId) && approval === "unknown") {
-          await requestApproval(clientId, client.metadata(), req.user.id);
+          await requestApproval(clientId, client.metadata(), req.user);
         }
         res.json({
           result: { approval: approval === "unknown" ? "pending" : approval },

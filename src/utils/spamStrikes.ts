@@ -1,5 +1,7 @@
 import prisma from "@mirlo/prisma";
 
+import { revokeAllConnectedApps } from "../auth/oidc/grants";
+
 import {
   applyTrustPenalty,
   setUserTrustLevel,
@@ -12,7 +14,7 @@ export const SPAM_STRIKES_TO_DISABLE = 5;
 
 type SpamStrikesDb = Pick<
   typeof prisma,
-  "user" | "contentFlag" | "userTrustLevelChange"
+  "user" | "contentFlag" | "userTrustLevelChange" | "oAuthPayload"
 >;
 
 export const applySpamStrike = async (
@@ -34,6 +36,7 @@ export const applySpamStrike = async (
       where: { id: userId, disabledAt: null },
       data: { disabledAt: new Date() },
     });
+    await revokeAllConnectedApps(userId, db);
     await setUserTrustLevel(userId, TRUST_LEVELS.NEW, "SPAM_REPORTED", {
       contentFlagId,
       tx: db,

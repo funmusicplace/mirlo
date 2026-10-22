@@ -11,9 +11,10 @@ dotenv.config();
 
 import { resolveBearer } from "../../../src/auth/oauth";
 import { oidcHandler } from "../../../src/auth/oidc/provider";
+import { sendMailQueue } from "../../../src/queues/send-mail-queue";
 import oauth from "../../../src/routers/auth/oauth";
 import errorHandler from "../../../src/utils/error";
-import { clearTables, createUser } from "../../utils";
+import { clearTables, createSiteSettings, createUser } from "../../utils";
 
 import {
   REDIRECT_URI,
@@ -161,6 +162,37 @@ describe("oauth client ID metadata documents", () => {
     assert.equal(rows[0].userId, userId);
     assert.deepEqual(rows[0].redirectUris, [REDIRECT_URI]);
     assert.equal(rows[0].key, null);
+  });
+
+  it("emails the instance's contact address when approval is first requested", async () => {
+    await createSiteSettings({
+      instanceCustomization: { contactEmail: "admin@mirlo.example" },
+    });
+    const mail = sinon.stub(sendMailQueue, "add").resolves();
+    const agent = loggedInAgent();
+    for (let i = 0; i < 2; i++) {
+      const { uid } = await startAuthorization(
+        agent,
+        CLIENT_ID,
+        pkce().challenge
+      );
+      await agent
+        .post(`/auth/oauth/${uid}/decision`)
+        .send({ action: "requestApproval" });
+    }
+
+    assert.equal(mail.callCount, 1);
+    assert(
+      mail.calledWithMatch("send-mail", {
+        template: "oauth-approval-requested",
+        message: { to: "admin@mirlo.example" },
+        locals: {
+          applicationName: "Radiccio",
+          clientId: CLIENT_ID,
+          requestedBy: "fan@example.com",
+        },
+      })
+    );
   });
 
   const createRow = (data: {

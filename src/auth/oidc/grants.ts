@@ -92,5 +92,20 @@ export const revokeConnectedApp = async (
   return count > 0;
 };
 
-export const revokeAllConnectedApps = (accountId: number) =>
-  prisma.oAuthPayload.deleteMany({ where: { accountId } });
+export const revokeAllConnectedApps = (
+  accountId: number,
+  db: Pick<typeof prisma, "oAuthPayload"> = prisma
+) => db.oAuthPayload.deleteMany({ where: { accountId } });
+
+export const revokeClientTokens = (client: {
+  id: number;
+  clientIdUrl: string | null;
+}) =>
+  prisma.oAuthPayload.deleteMany({
+    where: {
+      payload: {
+        path: ["clientId"],
+        equals: client.clientIdUrl ?? String(client.id),
+      },
+    },
+  });

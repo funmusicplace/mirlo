@@ -214,7 +214,7 @@ type CreationRights = Pick<
   "canCreateArtists" | "isAdmin" | "isLabelAccount"
 >;
 
-const creationBlockedReason = async (
+export const creationBlockedReason = async (
   user: CreationRights
 ): Promise<string | null> => {
   if (user.canCreateArtists || user.isAdmin || user.isLabelAccount) {

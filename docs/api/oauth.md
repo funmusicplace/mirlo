@@ -125,7 +125,7 @@ An `api` token can read anything the user can, except the list of connected apps
 
 - change account settings, or delete the account or an artist
 - change payouts or connect Stripe
-- charge a fundraiser's pledges
+- charge a fundraiser's pledges, or change the amount of a pledge
 - add or remove an artist's managers or labels, or accept manager invites
 - connect or disconnect other apps
 - use admin endpoints

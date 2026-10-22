@@ -7,6 +7,7 @@ import { isUndefined, omitBy } from "lodash";
 
 import { invalidateClientCache } from "../../../../auth/cors";
 import { parseRedirectUris } from "../../../../auth/oidc/clients";
+import { revokeClientTokens } from "../../../../auth/oidc/grants";
 import { validateClientSettings } from "../../../../auth/oidc/provider";
 import {
   userAuthenticated,
@@ -102,6 +103,9 @@ export default function () {
         data,
         include: { user: { select: { id: true, email: true } } },
       });
+      if (client.status !== "approved") {
+        await revokeClientTokens(client);
+      }
 
       invalidateClientCache();
 
@@ -113,12 +117,13 @@ export default function () {
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
     try {
-      await findClientOr404(Number(req.params.id));
+      const client = await findClientOr404(Number(req.params.id));
 
       await prisma.client.update({
         where: { id: Number(req.params.id) },
         data: { deletedAt: new Date() },
       });
+      await revokeClientTokens(client);
 
       invalidateClientCache();
 

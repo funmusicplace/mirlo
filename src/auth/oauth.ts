@@ -29,7 +29,10 @@ const resolve = async (req: Request): Promise<BearerResult> => {
   }
   const provider = await getProvider();
   const token = await provider.AccessToken.find(value);
-  if (!token?.accountId || !token.clientId) {
+  if (!token?.accountId || !token.clientId || !token.grantId) {
+    return { status: "invalid" };
+  }
+  if (!(await provider.Grant.find(token.grantId))) {
     return { status: "invalid" };
   }
   const client = await findClientRow(token.clientId);
