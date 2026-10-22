@@ -8,7 +8,7 @@ dotenv.config();
 import { createOAuthClient, tokensFor } from "../../../auth/oidc/utils";
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTier,
   createUser,
 } from "../../../utils";
@@ -25,8 +25,8 @@ describe("manage/artists/{artistId}/subscribers/active", () => {
       emailConfirmationToken: null,
       currency: "eur",
     });
-    const artist = await createArtist(owner.id);
-    const tier = await createTier(artist.id, { name: "Supporter" });
+    const profile = await createProfile(owner.id);
+    const tier = await createTier(profile.id, { name: "Supporter" });
     const fans = await Promise.all(
       ["active", "cancelling", "gone"].map((name) =>
         createUser({ email: `${name}@example.com`, name })
@@ -49,20 +49,20 @@ describe("manage/artists/{artistId}/subscribers/active", () => {
     });
     await prisma.profileUserSubscription.delete({ where: { id: gone.id } });
     const client = await createOAuthClient({ applicationName: "WP site" });
-    return { owner, ownerSession, artist, tier, active, cancelling, client };
+    return { owner, ownerSession, profile, tier, active, cancelling, client };
   };
 
-  const get = (artistId: number, token: string) =>
+  const get = (profileId: number, token: string) =>
     requestApp
-      .get(`manage/artists/${artistId}/subscribers/active`)
+      .get(`manage/artists/${profileId}/subscribers/active`)
       .set("Authorization", `Bearer ${token}`);
 
   it("lists active and cancelling subscribers for a subscribers:read token", async () => {
-    const { ownerSession, artist, tier, active, cancelling, client } =
+    const { ownerSession, profile, tier, active, cancelling, client } =
       await setup();
     const tokens = await tokensFor(ownerSession, client, "subscribers:read");
 
-    const response = await get(artist.id, tokens.access_token);
+    const response = await get(profile.id, tokens.access_token);
     assert.equal(response.status, 200, response.text);
     const byEmail = Object.fromEntries(
       response.body.results.map((r: { email: string }) => [r.email, r])
@@ -83,8 +83,8 @@ describe("manage/artists/{artistId}/subscribers/active", () => {
   });
 
   it("marks followers as unpaid and filters on paid", async () => {
-    const { ownerSession, artist, client } = await setup();
-    const followTier = await createTier(artist.id, {
+    const { ownerSession, profile, client } = await setup();
+    const followTier = await createTier(profile.id, {
       name: "follow",
       isDefaultTier: true,
     });
@@ -101,7 +101,7 @@ describe("manage/artists/{artistId}/subscribers/active", () => {
     const tokens = await tokensFor(ownerSession, client, "subscribers:read");
     const emails = async (query: string) => {
       const response = await requestApp
-        .get(`manage/artists/${artist.id}/subscribers/active${query}`)
+        .get(`manage/artists/${profile.id}/subscribers/active${query}`)
         .set("Authorization", `Bearer ${tokens.access_token}`);
       assert.equal(response.status, 200, response.text);
       return response.body.results
@@ -123,32 +123,32 @@ describe("manage/artists/{artistId}/subscribers/active", () => {
     ]);
 
     const invalid = await requestApp
-      .get(`manage/artists/${artist.id}/subscribers/active?paid=yes`)
+      .get(`manage/artists/${profile.id}/subscribers/active?paid=yes`)
       .set("Authorization", `Bearer ${tokens.access_token}`);
     assert.equal(invalid.status, 400);
   });
 
   it("accepts the api scope and the owner's own session", async () => {
-    const { ownerSession, artist, client } = await setup();
+    const { ownerSession, profile, client } = await setup();
     const tokens = await tokensFor(ownerSession, client, "api");
-    assert.equal((await get(artist.id, tokens.access_token)).status, 200);
+    assert.equal((await get(profile.id, tokens.access_token)).status, 200);
 
     const viaCookie = await requestApp
-      .get(`manage/artists/${artist.id}/subscribers/active`)
+      .get(`manage/artists/${profile.id}/subscribers/active`)
       .set("Cookie", [`jwt=${ownerSession}`]);
     assert.equal(viaCookie.status, 200);
   });
 
   it("refuses a token without the scope", async () => {
-    const { ownerSession, artist, client } = await setup();
+    const { ownerSession, profile, client } = await setup();
     const tokens = await tokensFor(ownerSession, client, "openid profile");
-    const response = await get(artist.id, tokens.access_token);
+    const response = await get(profile.id, tokens.access_token);
     assert.equal(response.status, 403);
     assert.match(response.headers["www-authenticate"], /subscribers:read/);
   });
 
   it("404s for users who can't edit the artist, admins included", async () => {
-    const { artist, client } = await setup();
+    const { profile, client } = await setup();
     for (const isAdmin of [false, true]) {
       const { accessToken } = await createUser({
         email: `someone-${isAdmin}@example.com`,
@@ -156,7 +156,7 @@ describe("manage/artists/{artistId}/subscribers/active", () => {
         isAdmin,
       });
       const tokens = await tokensFor(accessToken, client, "subscribers:read");
-      const response = await get(artist.id, tokens.access_token);
+      const response = await get(profile.id, tokens.access_token);
       assert.equal(response.status, 404, `isAdmin: ${isAdmin}`);
     }
   });

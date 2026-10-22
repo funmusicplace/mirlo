@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userOrAppAuthenticated,
 } from "../../../../../../auth/passport";
 import { findArtistIdForURLSlug } from "../../../../../../utils/artist";
@@ -16,7 +16,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    DELETE: [userOrAppAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    DELETE: [userOrAppAuthenticated, profileBelongsToLoggedInUser, DELETE],
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {

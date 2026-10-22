@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { uniqBy } from "lodash";
 
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
   userOrAppAuthenticated,
 } from "../../../../../auth/passport";
@@ -90,8 +90,8 @@ const csvColumns = [
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userOrAppAuthenticated, artistBelongsToLoggedInUser, POST],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
+    POST: [userOrAppAuthenticated, profileBelongsToLoggedInUser, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

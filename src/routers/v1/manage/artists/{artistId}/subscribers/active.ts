@@ -5,7 +5,7 @@ import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
 import { userAuthenticatedWithScope } from "../../../../../../auth/passport";
 import {
   canUserEditProfile,
-  findArtistIdForURLSlug,
+  findProfileIdForURLSlug,
 } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
 
@@ -24,7 +24,7 @@ export default function () {
           description: "paid must be true or false",
         });
       }
-      const profileId = await findArtistIdForURLSlug(req.params.artistId);
+      const profileId = await findProfileIdForURLSlug(req.params.artistId);
       if (
         !(await canUserEditProfile(profileId, req.user, { allowAdmin: false }))
       ) {

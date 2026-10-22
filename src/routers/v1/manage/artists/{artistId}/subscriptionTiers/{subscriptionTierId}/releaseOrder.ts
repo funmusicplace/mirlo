@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userOrAppAuthenticated,
 } from "../../../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../../../serializers/trackGroup";
@@ -17,7 +17,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userOrAppAuthenticated, artistBelongsToLoggedInUser, PUT],
+    PUT: [userOrAppAuthenticated, profileBelongsToLoggedInUser, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

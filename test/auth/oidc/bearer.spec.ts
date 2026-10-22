@@ -8,7 +8,7 @@ dotenv.config();
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createArtistLabel,
   createUser,
 } from "../../utils";
@@ -99,50 +99,50 @@ describe("oauth bearer tokens", () => {
       email: "label@example.com",
       isLabelAccount: true,
     });
-    const artist = await createArtist(user.id);
+    const profile = await createProfile(user.id);
     await createArtistLabel({
-      artistId: artist.id,
+      artistId: profile.id,
       labelUserId: label.id,
       isArtistApproved: false,
     });
 
     const approveLabel = await request(API)
-      .put(`/v1/manage/artists/${artist.id}/labels/${label.id}`)
+      .put(`/v1/manage/artists/${profile.id}/labels/${label.id}`)
       .set(headers)
       .send({ isArtistApproved: true });
     assert.equal(approveLabel.status, 403);
 
     const addLabel = await request(API)
-      .post(`/v1/manage/artists/${artist.id}/labels`)
+      .post(`/v1/manage/artists/${profile.id}/labels`)
       .set(headers)
       .send({ labelUserId: label.id });
     assert.equal(addLabel.status, 403);
 
     const addManager = await request(API)
-      .post(`/v1/manage/artists/${artist.id}/managers`)
+      .post(`/v1/manage/artists/${profile.id}/managers`)
       .set(headers)
       .send({ email: "label@example.com" });
     assert.equal(addManager.status, 403);
 
     const payouts = await request(API)
-      .put(`/v1/manage/artists/${artist.id}`)
+      .put(`/v1/manage/artists/${profile.id}`)
       .set(headers)
       .send({ paymentToUserId: label.id });
     assert.equal(payouts.status, 403);
 
     const rename = await request(API)
-      .put(`/v1/manage/artists/${artist.id}`)
+      .put(`/v1/manage/artists/${profile.id}`)
       .set(headers)
       .send({ name: "Renamed" });
     assert.equal(rename.status, 200, rename.text);
 
     const remove = await request(API)
-      .delete(`/v1/manage/artists/${artist.id}`)
+      .delete(`/v1/manage/artists/${profile.id}`)
       .set(headers);
     assert.equal(remove.status, 403);
 
     const unchanged = await prisma.profile.findFirstOrThrow({
-      where: { id: artist.id },
+      where: { id: profile.id },
       include: { artistLabels: true },
     });
     assert.equal(unchanged.paymentToUserId, null);
