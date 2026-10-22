@@ -4,6 +4,8 @@ Apps can ask a Mirlo user for access to their account instead of asking for thei
 
 Every Mirlo instance is its own authorization server. A token from one instance only works on that instance.
 
+To get an app connected to a local instance step by step, see [Setting up Sign in with Mirlo](./oauth-setup.md).
+
 ## Discovery
 
 Given an instance's address, fetch its metadata:
