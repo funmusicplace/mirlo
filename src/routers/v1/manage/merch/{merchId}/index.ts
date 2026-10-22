@@ -6,6 +6,7 @@ import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   merchBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeMerch } from "../../../../../serializers/merch";
 import {
@@ -22,8 +23,8 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, merchBelongsToLoggedInUser, PUT],
-    DELETE: [userAuthenticated, merchBelongsToLoggedInUser, DELETE],
+    PUT: [userOrAppAuthenticated, merchBelongsToLoggedInUser, PUT],
+    DELETE: [userOrAppAuthenticated, merchBelongsToLoggedInUser, DELETE],
     GET: [userAuthenticated, merchBelongsToLoggedInUser, GET],
   };
 

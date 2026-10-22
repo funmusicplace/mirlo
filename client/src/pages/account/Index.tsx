@@ -6,6 +6,7 @@ import { InputEl } from "components/common/Input";
 import { Toggle } from "components/common/Toggle";
 import WidthContainer from "components/common/WidthContainer";
 import CurrencySelect from "components/ManageArtist/CountrySelectForm";
+import ConnectedApps from "components/Profile/ConnectedApps";
 import DeleteAccount from "components/Profile/DeleteAccount";
 import { useProfileMutation } from "queries";
 import React from "react";
@@ -214,6 +215,7 @@ const Index: React.FC = () => {
           {t("resetPasswordLink")}
         </Link>
 
+        <ConnectedApps />
         <DeleteAccount />
       </FormProvider>
     </WidthContainer>

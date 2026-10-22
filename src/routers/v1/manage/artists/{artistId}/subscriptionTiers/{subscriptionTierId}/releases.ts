@@ -3,8 +3,9 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../../../serializers/trackGroup";
 import { AppError } from "../../../../../../../utils/error";
@@ -23,9 +24,9 @@ type QueryParams = {
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
+    POST: [userOrAppAuthenticated, profileBelongsToLoggedInUser, POST],
+    DELETE: [userOrAppAuthenticated, profileBelongsToLoggedInUser, DELETE],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

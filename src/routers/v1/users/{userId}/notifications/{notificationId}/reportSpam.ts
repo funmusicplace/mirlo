@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
 import {
   applySpamStrike,
@@ -16,7 +16,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    POST: [userOrAppAuthenticated, POST],
   };
 
   async function POST(req: Request, res: Response) {

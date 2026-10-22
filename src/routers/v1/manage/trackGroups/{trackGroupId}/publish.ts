@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { AppError, HttpCode } from "../../../../../utils/error";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
@@ -11,7 +11,7 @@ import { finalizeTrackGroupPublication } from "../../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, PUT],
+    PUT: [userOrAppAuthenticated, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

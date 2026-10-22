@@ -4,7 +4,7 @@ import { uniq } from "lodash";
 
 import {
   profileEditableByUser,
-  userLoggedInWithoutRedirect,
+  userOrAppLoggedInWithoutRedirect,
 } from "../../../auth/passport";
 import { subscribeUserToProfile } from "../../../utils/artist";
 import { calculateCatalogueFloorPrice } from "../../../utils/catalogue";
@@ -291,7 +291,7 @@ export const cancelPreviousAttempt = async (checkout: {
 
 export default function () {
   const operations = {
-    POST: [userLoggedInWithoutRedirect, POST],
+    POST: [userOrAppLoggedInWithoutRedirect, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

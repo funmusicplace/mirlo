@@ -1,8 +1,10 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
+
 import { clearTables, createProfile, createUser } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
@@ -57,6 +59,36 @@ describe("artists", () => {
         .get(
           `artists/testExistence?urlSlug=${profile.urlSlug}&forArtistId=${profile.id}`
         )
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.exists, false);
+    });
+
+    it("should GET and return true for a reserved urlSlug", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const profile = await createProfile(user.id);
+
+      const response = await request(baseURL)
+        .get(`artists/testExistence?urlSlug=oauth&forArtistId=${profile.id}`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.result.exists, true);
+    });
+
+    it("should GET and return false for a reserved urlSlug the artist already has", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const profile = await createProfile(user.id, { urlSlug: "search" });
+
+      const response = await request(baseURL)
+        .get(`artists/testExistence?urlSlug=search&forArtistId=${profile.id}`)
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
 

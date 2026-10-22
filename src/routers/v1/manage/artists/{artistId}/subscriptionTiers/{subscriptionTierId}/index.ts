@@ -3,8 +3,9 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../../../auth/getLoggedInUser";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../../../auth/passport";
 import { serializeProfileSubscriptionTier } from "../../../../../../../serializers/profileSubscriptionTier";
 import { AppError } from "../../../../../../../utils/error";
@@ -27,9 +28,9 @@ const normalizeDiscountPercent = (value: unknown): number | undefined => {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, artistBelongsToLoggedInUser, PUT],
-    DELETE: [userAuthenticated, artistBelongsToLoggedInUser, DELETE],
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
+    PUT: [userOrAppAuthenticated, profileBelongsToLoggedInUser, PUT],
+    DELETE: [userOrAppAuthenticated, profileBelongsToLoggedInUser, DELETE],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

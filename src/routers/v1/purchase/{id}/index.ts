@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import {
   profileEditableByUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 import { getPaymentProcessor } from "../../../../utils/payments/PaymentProcessor";
@@ -71,7 +72,7 @@ const intentStatusSchema = {
 export default function () {
   const operations = {
     GET: [userAuthenticated, GET],
-    DELETE: [userAuthenticated, DELETE],
+    DELETE: [userOrAppAuthenticated, DELETE],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

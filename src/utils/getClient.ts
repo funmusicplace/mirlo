@@ -2,7 +2,8 @@ import prisma from "@mirlo/prisma";
 
 export const getClient = async () => {
   let client = await prisma.client.findFirst({
-    where: { applicationName: "frontend" },
+    where: { applicationName: "frontend", clientIdUrl: null },
+    orderBy: { id: "asc" },
   });
 
   if (!client) {

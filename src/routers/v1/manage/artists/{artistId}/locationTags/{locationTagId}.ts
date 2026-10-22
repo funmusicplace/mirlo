@@ -1,13 +1,14 @@
-import { NextFunction, Request, Response } from "express";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
 import {
-  userAuthenticated,
   profileBelongsToLoggedInUser,
+  userOrAppAuthenticated,
 } from "../../../../../../auth/passport";
 
 export default function () {
   const operations = {
-    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
+    DELETE: [userOrAppAuthenticated, profileBelongsToLoggedInUser, DELETE],
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {

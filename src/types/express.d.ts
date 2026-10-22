@@ -9,6 +9,7 @@ declare global {
     interface User extends PrismaUser {}
     interface Request {
       client?: PrismaClient;
+      oauth?: { clientId: string; scopes: string[] };
       logger?: Logger;
     }
   }

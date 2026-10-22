@@ -1,7 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
-import { userAuthenticated } from "../../../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../../../auth/passport";
 import logger from "../../../../../logger";
 import { sendPostNotificationQueue } from "../../../../../queues/send-post-notification-queue";
 import { serializePost } from "../../../../../serializers/post";
@@ -11,7 +11,7 @@ import { postImagesForContent } from "../../../../../utils/postContent";
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, doesPostBelongToUser, PUT],
+    PUT: [userOrAppAuthenticated, doesPostBelongToUser, PUT],
   };
 
   async function PUT(req: Request, res: Response) {

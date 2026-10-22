@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 import { cancelUserSubscription } from "../../../../utils/payments/subscription";
 
@@ -12,7 +12,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    DELETE: [userAuthenticated, DELETE],
+    DELETE: [userOrAppAuthenticated, DELETE],
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {

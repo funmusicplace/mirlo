@@ -1,14 +1,14 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
-import { userAuthenticated } from "../../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../../auth/passport";
 import { sendMailQueue } from "../../../../queues/send-mail-queue";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import { getClient } from "../../../../utils/getClient";
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    POST: [userOrAppAuthenticated, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

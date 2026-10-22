@@ -1,12 +1,13 @@
+import busboy from "connect-busboy";
 import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   trackBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
-import { doesTrackBelongToUser } from "../../../../../utils/ownership";
 import { processTrackAudio } from "../../../../../queues/processTrackAudio";
-import busboy from "connect-busboy";
+import { doesTrackBelongToUser } from "../../../../../utils/ownership";
 
 type Params = {
   trackId: string;
@@ -16,7 +17,7 @@ type Params = {
 export default function () {
   const operations = {
     PUT: [
-      userAuthenticated,
+      userOrAppAuthenticated,
       trackBelongsToLoggedInUser,
       busboy({
         highWaterMark: 2 * 1024 * 1024,

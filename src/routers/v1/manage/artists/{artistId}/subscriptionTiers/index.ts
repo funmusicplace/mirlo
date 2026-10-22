@@ -6,6 +6,7 @@ import {
   artistBelongsToLoggedInUser,
   canUserCreateArtistContent,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../../auth/passport";
 import { serializeProfileSubscriptionTier } from "../../../../../../serializers/profileSubscriptionTier";
 import { getPlatformFeeForArtist } from "../../../../../../utils/artist";
@@ -26,7 +27,7 @@ export default function () {
       GET,
     ],
     POST: [
-      userAuthenticated,
+      userOrAppAuthenticated,
       canUserCreateArtistContent,
       artistBelongsToLoggedInUser,
       POST,

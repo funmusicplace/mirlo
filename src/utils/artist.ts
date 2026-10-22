@@ -28,6 +28,7 @@ import {
   storedImagePrefix,
 } from "./minio";
 import { postImagesForContent } from "./postContent";
+import reservedProfileSlugs from "./reservedProfileSlugs";
 import { getSiteSettings } from "./settings";
 import stripe from "./stripe";
 import {
@@ -295,7 +296,22 @@ export const isProfileSlugTaken = async (
     },
     select: { id: true },
   });
-  return !!profile;
+  if (profile) {
+    return true;
+  }
+  if (!reservedProfileSlugs.includes(urlSlug.toLowerCase())) {
+    return false;
+  }
+  const keepsOwnSlug =
+    !!excludeProfileId &&
+    !!(await prisma.profile.findFirst({
+      where: {
+        id: excludeProfileId,
+        urlSlug: { equals: urlSlug, mode: "insensitive" },
+      },
+      select: { id: true },
+    }));
+  return !keepsOwnSlug;
 };
 
 export const asSlugConflictError = (e: unknown) =>
@@ -313,6 +329,50 @@ export const generateUniqueProfileSlug = async (name: string) => {
     candidate = `${base}-${suffix}`;
   }
   return candidate;
+};
+
+export const createProfileForUser = async (
+  user: Pick<Express.User, "id" | "isLabelAccount">,
+  { name, bio, urlSlug }: { name: string; bio?: string; urlSlug: string }
+) => {
+  const settings = await getSiteSettings();
+  return prisma.profile.create({
+    data: {
+      name,
+      bio,
+      urlSlug,
+      user: { connect: { id: user.id } },
+      properties: {
+        colors: settings.settings?.instanceCustomization?.colors ?? {
+          button: "#be3455",
+          buttonText: "#ffc0cb",
+          background: "#f5f0f0",
+          text: "#111",
+        },
+      },
+      subscriptionTiers: {
+        create: {
+          name: "follow",
+          description: "follow an artist",
+          minAmount: 0,
+          isDefaultTier: true,
+        },
+      },
+      ...(user.isLabelAccount && {
+        artistLabels: {
+          create: {
+            labelUserId: user.id,
+            isLabelApproved: true,
+            canLabelManageArtist: true,
+            canLabelAddReleases: true,
+            isArtistApproved: true,
+            isDisplayedOnArtistPage: true,
+          },
+        },
+      }),
+    },
+    include: { artistLabels: true },
+  });
 };
 
 export const createSubscriptionConfirmation = async (

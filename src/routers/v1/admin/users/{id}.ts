@@ -1,6 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
+import { revokeAllConnectedApps } from "../../../../auth/oidc/grants";
 import {
   userAuthenticated,
   userHasPermission,
@@ -67,6 +68,9 @@ export default function () {
           }),
         },
       });
+      if (disabled) {
+        await revokeAllConnectedApps(Number(req.params.id));
+      }
       if (trustLevel !== undefined && req.user) {
         await setUserTrustLevel(Number(req.params.id), trustLevel, "ADMIN", {
           changedByUserId: req.user.id,

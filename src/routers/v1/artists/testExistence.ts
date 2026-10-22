@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
+
 import { userAuthenticated } from "../../../auth/passport";
-import prisma from "@mirlo/prisma";
+import { isProfileSlugTaken } from "../../../utils/artist";
 import { AppError } from "../../../utils/error";
 
 type Query = {
@@ -17,23 +18,16 @@ export default function () {
     const { urlSlug, forArtistId: forProfileId } =
       req.query as unknown as Query;
     try {
-      let exists = false;
-      if (urlSlug) {
-        const profile = await prisma.profile.findFirst({
-          where: {
-            AND: {
-              urlSlug: { equals: urlSlug, mode: "insensitive" },
-              ...(forProfileId ? { id: { not: Number(forProfileId) } } : {}),
-            },
-          },
-        });
-        exists = !!profile;
-      } else {
+      if (!urlSlug) {
         throw new AppError({
           httpCode: 400,
           description: "Need to provide a urlSlug",
         });
       }
+      const exists = await isProfileSlugTaken(
+        urlSlug,
+        forProfileId ? Number(forProfileId) : undefined
+      );
       res.status(200);
       res.json({ result: { exists } });
     } catch (e) {

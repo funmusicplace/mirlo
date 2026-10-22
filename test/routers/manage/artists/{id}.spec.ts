@@ -109,6 +109,37 @@ describe("manage/artists/{artistId}", () => {
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.result.name, "Renamed");
     });
+
+    it("should reject changing to a reserved urlSlug", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const profile = await createProfile(user.id, { urlSlug: "mine" });
+
+      const response = await requestApp
+        .put(`manage/artists/${profile.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({ urlSlug: "oidc" });
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should allow saving a profile that already has a reserved urlSlug", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const profile = await createProfile(user.id, { urlSlug: "search" });
+
+      const response = await requestApp
+        .put(`manage/artists/${profile.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({ urlSlug: "search", name: "Renamed" });
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.name, "Renamed");
+    });
   });
 
   describe("PUT paymentToUserId", () => {

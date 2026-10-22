@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
 
 type Params = {
@@ -12,7 +12,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, PUT],
+    PUT: [userOrAppAuthenticated, PUT],
   };
 
   async function PUT(req: Request, res: Response) {

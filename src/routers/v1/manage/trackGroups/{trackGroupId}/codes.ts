@@ -1,13 +1,15 @@
+import { randomBytes } from "crypto";
+
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+import { range } from "lodash";
+
+import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   trackGroupBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
-import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
-import prisma from "@mirlo/prisma";
-import { randomBytes } from "crypto";
-import { range } from "lodash";
 
 type Params = {
   trackGroupId: number;
@@ -16,7 +18,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, trackGroupBelongsToLoggedInUser, POST],
+    POST: [userOrAppAuthenticated, trackGroupBelongsToLoggedInUser, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

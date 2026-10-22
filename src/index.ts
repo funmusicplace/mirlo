@@ -21,6 +21,11 @@ import apiApp from "./api";
 import "./auth/passport";
 import { corsMiddleware } from "./auth/cors";
 import {
+  discoveryAlias,
+  OIDC_MOUNT_PATH,
+  oidcHandler,
+} from "./auth/oidc/provider";
+import {
   userAuthenticated,
   userHasPermission,
   userLoggedInWithoutRedirect,
@@ -34,6 +39,7 @@ import { sendMailQueue } from "./queues/send-mail-queue";
 import auth from "./routers/auth";
 import { serveStatic } from "./static";
 import errorHandler from "./utils/error";
+import { denyFramingExceptWidgets } from "./utils/framing";
 import { setCdnUrl } from "./utils/images";
 import { setBucketConfig, ensureAllBucketsExist } from "./utils/minio";
 import { getCachedPage } from "./utils/pageCache";
@@ -85,7 +91,31 @@ app.set("trust proxy", 2);
 
 app.use(attachRequestId);
 app.use(securityHeaders);
+app.use(denyFramingExceptWidgets);
 app.use(logHeavyRequests);
+
+// Set a rate limiter on all auth endpoints to be only 50 requests a minute
+const authLimiter = isDev
+  ? undefined
+  : rateLimit({
+      windowMs: 60 * 1000, // 1 minute
+      limit: 50, // Limit each IP to 50 requests per `window`
+      standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers,
+      skip: () => process.env.NODE_ENV === "test",
+    });
+
+if (authLimiter) {
+  app.use(`${OIDC_MOUNT_PATH}/auth`, authLimiter);
+}
+app.use(OIDC_MOUNT_PATH, oidcHandler);
+app.get(
+  [
+    "/.well-known/openid-configuration",
+    "/.well-known/oauth-authorization-server",
+  ],
+  discoveryAlias
+);
+
 app.use(corsMiddleware);
 app.use(cookieParser());
 // @fedify/express's fromERequest builds the request URL using req.host, which
@@ -138,14 +168,7 @@ app.use(
   })
 );
 
-if (!isDev) {
-  // Set a rate limiter on all auth endpoints to be only 5 requests a minute
-  const authLimiter = rateLimit({
-    windowMs: 60 * 1000, // 1 minute
-    limit: 50, // Limit each IP to 100 requests per `window`
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers,
-  });
-
+if (authLimiter) {
   app.use("/auth", authLimiter, auth);
 } else {
   app.use("/auth", auth);

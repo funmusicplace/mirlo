@@ -1,7 +1,11 @@
-import { Request, Response } from "express";
 import prisma from "@mirlo/prisma";
-import { userAuthenticated } from "../../../../auth/passport";
+import { Request, Response } from "express";
+
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
+import {
+  siteUserAuthenticated,
+  userOrAppAuthenticated,
+} from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 
 type Query = {
@@ -10,8 +14,8 @@ type Query = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, PUT],
-    DELETE: [userAuthenticated, DELETE],
+    PUT: [siteUserAuthenticated, PUT],
+    DELETE: [userOrAppAuthenticated, DELETE],
   };
 
   async function DELETE(req: Request, res: Response) {

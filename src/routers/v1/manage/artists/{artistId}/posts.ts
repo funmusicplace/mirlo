@@ -3,8 +3,9 @@ import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
-  artistBelongsToLoggedInUser,
+  profileBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { serializePost } from "../../../../../serializers/post";
 import { AppError } from "../../../../../utils/error";
@@ -16,8 +17,8 @@ import {
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
-    POST: [userAuthenticated, artistBelongsToLoggedInUser, POST],
+    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
+    POST: [userOrAppAuthenticated, profileBelongsToLoggedInUser, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

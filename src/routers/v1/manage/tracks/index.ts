@@ -2,7 +2,10 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../auth/passport";
+import {
+  userAuthenticated,
+  userOrAppAuthenticated,
+} from "../../../../auth/passport";
 import { buildTrackStreamURL } from "../../../../queues/processTrackAudio";
 import { processSingleTrack } from "../../../../serializers/track";
 import { whereForProfilesUserOwnsOrManages } from "../../../../utils/artist";
@@ -13,7 +16,7 @@ import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
 export default function () {
   const operations = {
     GET: [userAuthenticated, GET],
-    POST: [userAuthenticated, POST],
+    POST: [userOrAppAuthenticated, POST],
   };
 
   async function GET(req: Request, res: Response) {

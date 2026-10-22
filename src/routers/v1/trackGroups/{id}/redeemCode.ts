@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 
-import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
+import { userOrAppLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { redeemDownloadCode } from "../../../../utils/redeemCode";
 
 export default function () {
   const operations = {
-    POST: [userLoggedInWithoutRedirect, POST],
+    POST: [userOrAppLoggedInWithoutRedirect, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

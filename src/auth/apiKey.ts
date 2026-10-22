@@ -5,6 +5,8 @@ import { isValidActivityPubEndpoint } from "../activityPub/utils";
 import logger from "../logger";
 import { AppError } from "../utils/error";
 
+import { rejectBearer, resolveBearer } from "./oauth";
+
 export const MIRLO_API_KEY_HEADER = "mirlo-api-key";
 
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS"];
@@ -25,7 +27,7 @@ const isExcludedFromKeyCheck = (path: string, query?: { format?: string }) => {
 
 export const apiKeyCheck = async (
   req: Request,
-  _res: Response,
+  res: Response,
   next: NextFunction
 ) => {
   const log = req.logger || logger;
@@ -37,6 +39,9 @@ export const apiKeyCheck = async (
       req.method === "OPTIONS" &&
       req.headers["access-control-request-method"] &&
       req.headers["access-control-request-headers"];
+    const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
+    const apiKey =
+      typeof apiHeader === "string" && apiHeader ? apiHeader : undefined;
     const isMutatingRequest =
       req.path.startsWith("/v1") && !SAFE_METHODS.includes(req.method);
     const isActivityPub = isValidActivityPubEndpoint(req.path);
@@ -60,29 +65,40 @@ export const apiKeyCheck = async (
       log.debug("API check considered a safe method", req.path, req.query);
       // For safe methods, still try to identify the client for attribution
       // but don't require a key
-      const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
-      if (typeof apiHeader === "string" && apiHeader) {
+      if (apiKey) {
         const clients = await prisma.client.findMany({
-          where: { key: apiHeader, deletedAt: null, status: "approved" },
+          where: { key: apiKey, deletedAt: null, status: "approved" },
         });
         if (clients.length === 1) {
           req.client = clients[0];
+        }
+      } else {
+        const bearer = await resolveBearer(req);
+        if (bearer.status === "valid") {
+          req.client = bearer.client;
         }
       }
       return next();
     }
 
-    const apiHeader = req.headers[MIRLO_API_KEY_HEADER];
-    if (typeof apiHeader !== "string" || !apiHeader) {
-      throw new AppError({
-        httpCode: 401,
-        description: "Missing API key",
-      });
+    if (!apiKey) {
+      const bearer = await resolveBearer(req);
+      if (bearer.status === "invalid") {
+        return rejectBearer(res, next, "invalid_token");
+      }
+      if (bearer.status === "none") {
+        throw new AppError({
+          httpCode: 401,
+          description: "Missing API key",
+        });
+      }
+      req.client = bearer.client;
+      return next();
     }
 
-    log.info(`apiKeyCheck: Looking for client with API key: ${apiHeader}`);
+    log.info(`apiKeyCheck: Looking for client with API key: ${apiKey}`);
     const clients = await prisma.client.findMany({
-      where: { key: apiHeader, deletedAt: null },
+      where: { key: apiKey, deletedAt: null },
     });
     log.info(
       `apiKeyCheck: Found ${clients.length} clients with that API key: ${clients

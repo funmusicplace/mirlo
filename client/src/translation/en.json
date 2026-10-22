@@ -90,7 +90,9 @@
     "adminSetup": "Admin: setup guide",
     "adminClients": "Admin: API clients",
     "flaggedContent": "Flagged content",
-    "adminSendEmails": "Admin: send emails"
+    "adminSendEmails": "Admin: send emails",
+    "oauth": "Connect an app",
+    "oauthError": "Couldn't connect the app"
   },
   "signUp": {
     "hasRegistered": "Cool! We've sent you an e-mail to confirm your account. Click on the link in it to proceed.",
@@ -182,6 +184,30 @@
     "password": "Password",
     "passwordReset": "Forgot your password?",
     "signUp": "Don't have an account yet? Sign up"
+  },
+  "oauth": {
+    "wantsAccess": "{{app}} wants to connect to your account",
+    "redirectsTo": "You'll be sent back to {{host}}.",
+    "allow": "Allow",
+    "deny": "Deny",
+    "expired": "This sign-in request has expired. Go back to the app and try again.",
+    "errorTitle": "Couldn't connect the app",
+    "errorExplanation": "Something went wrong while connecting the app to your account. Go back to the app and try again.",
+    "scopes": {
+      "openid": "Know who you are on this site",
+      "profile": "See your name",
+      "email": "See your email address",
+      "offline_access": "Stay connected until you disconnect it",
+      "api": "Act as you on this site.",
+      "apiWarning": "The app can do almost anything you can: see your purchases and messages, buy things, follow artists, and manage your artists. Only allow apps you trust. It can't change your account settings, delete your account or your artists, change payouts, charge or change fundraiser pledges, add managers or labels, or connect other apps.",
+      "subscribersRead": "See the names and email addresses of the supporters of the artists you manage"
+    },
+    "appDomain": "The app is published by {{domain}}.",
+    "notApproved": "{{app}} ({{domain}}) isn't approved on {{site}} yet",
+    "notApprovedExplanation": "The people who run this site decide which apps can connect to it. You can ask them to approve this one.",
+    "approvalRequested": "The admins have been asked to approve this app. Try again once they have.",
+    "requestApproval": "Ask the admins to approve it",
+    "backToApp": "Back to {{app}}"
   },
   "passwordReset": {
     "title": "Reset your password",
@@ -327,7 +353,12 @@
     "deleteAccountConsequenceArtists": "All of your artist pages are deleted, along with their music, posts and merch. Fans who bought your music will no longer be able to download it.",
     "deleteAccountConsequenceArtistSubscribers": "Everyone subscribed to your artist pages has their subscription cancelled.",
     "deleteAccountConsequenceCollection": "You lose access to everything in your collection, including music you've bought. Download anything you want to keep first.",
-    "deleteAccountConsequenceSubscriptions": "Your subscriptions to other artists are cancelled."
+    "deleteAccountConsequenceSubscriptions": "Your subscriptions to other artists are cancelled.",
+    "connectedApps": "Connected apps",
+    "connectedAppsDescription": "These apps can use your account. Disconnecting an app signs it out right away.",
+    "connectedAppDetails": "Access: {{scopes}} · Last used: {{lastUsed}}",
+    "never": "never",
+    "disconnectApp": "Disconnect"
   },
   "wishlist": {
     "addToWishlist": "Add to wishlist",
@@ -1881,7 +1912,13 @@
     "deleteUserConsequenceArtistSubscribers": "Everyone subscribed to their artist pages has their subscription cancelled.",
     "deleteUserConsequenceCollection": "They lose access to everything in their collection, including music they've bought.",
     "deleteUserConsequenceSubscriptions": "Their subscriptions to other artists are cancelled.",
-    "userDeleteSuccess": "User {{email}} deleted"
+    "userDeleteSuccess": "User {{email}} deleted",
+    "redirectUris": "OAuth redirect URIs (comma separated)",
+    "confidentialClient": "Keeps its key on a server (uses it as the OAuth client secret)",
+    "oauth": "OAuth",
+    "oauthClientId": "Client ID: {{id}}",
+    "oauthSettingsNotSaved": "Couldn't save the OAuth settings.",
+    "metadataDocument": "Connects with its own metadata document (redirect URIs come from it):"
   },
   "adminDashboard": {
     "title": "Admin Dashboard",

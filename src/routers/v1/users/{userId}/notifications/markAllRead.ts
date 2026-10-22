@@ -2,8 +2,8 @@ import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
 import {
-  userAuthenticated,
   userHasPermission,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 
 type Params = {
@@ -12,7 +12,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, userHasPermission("owner"), PUT],
+    PUT: [userOrAppAuthenticated, userHasPermission("owner"), PUT],
   };
 
   async function PUT(req: Request, res: Response) {

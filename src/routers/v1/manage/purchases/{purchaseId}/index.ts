@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import {
   merchPurchaseBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import logger from "../../../../../logger";
 import { serializeMerchPurchase } from "../../../../../serializers/merchPurchase";
@@ -21,7 +22,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, merchPurchaseBelongsToLoggedInUser, PUT],
+    PUT: [userOrAppAuthenticated, merchPurchaseBelongsToLoggedInUser, PUT],
     GET: [userAuthenticated, merchPurchaseBelongsToLoggedInUser, GET],
   };
 

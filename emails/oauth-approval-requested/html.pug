@@ -1,0 +1,16 @@
+extends ../layout.pug
+
+block content
+  p Hi!
+  p
+    | #{requestedBy} asked for an app to be approved on #{instanceName}, so it can connect to people's accounts:
+  p
+    strong #{applicationName}
+    br
+    a(href=applicationUrl)= applicationUrl
+  p
+    | Its client ID is #{clientId}.
+  p
+    | You can approve or block it here:
+  p
+    a(href=adminUrl)= adminUrl

@@ -7,6 +7,7 @@ import {
   profileBelongsToLoggedInUser,
   profileOwnedByLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeProfile } from "../../../../../serializers/artist";
 import {
@@ -26,7 +27,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, profileBelongsToLoggedInUser, PUT],
+    PUT: [userOrAppAuthenticated, profileBelongsToLoggedInUser, PUT],
     GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
     DELETE: [userAuthenticated, profileOwnedByLoggedInUser, DELETE],
   };
@@ -94,6 +95,13 @@ export default function () {
         throw new AppError({
           httpCode: 403,
           description: "Only the owner of this artist can change payouts",
+        });
+      }
+      if (isChangingPaymentTo && req.oauth) {
+        throw new AppError({
+          httpCode: 403,
+          description:
+            "Payouts can only be changed while signed in on the site",
         });
       }
 

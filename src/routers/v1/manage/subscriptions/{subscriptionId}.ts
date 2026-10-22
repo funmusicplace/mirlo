@@ -2,13 +2,13 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 import { initiateSubscriptionPaymentMethodUpdate } from "../../../../utils/payments/subscription";
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, PUT],
+    PUT: [userOrAppAuthenticated, PUT],
   };
 
   /**

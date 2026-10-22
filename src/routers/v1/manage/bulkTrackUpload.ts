@@ -4,8 +4,12 @@ import { NextFunction, Request, Response } from "express";
 import { slug } from "github-slugger";
 
 import { assertLoggedIn } from "../../../auth/getLoggedInUser";
-import { userAuthenticated } from "../../../auth/passport";
 import {
+  creationBlockedReason,
+  userOrAppAuthenticated,
+} from "../../../auth/passport";
+import {
+  createProfileForUser,
   generateUniqueProfileSlug,
   whereForProfilesUserManages,
 } from "../../../utils/artist";
@@ -43,7 +47,7 @@ interface BulkUploadRequest {
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    POST: [userOrAppAuthenticated, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
@@ -105,15 +109,14 @@ export default function () {
           });
 
           if (!artist) {
-            artist = await prisma.profile.create({
-              data: {
-                name: artistName,
-                urlSlug: await generateUniqueProfileSlug(artistName),
-                userId: loggedInUserId,
-              },
-              include: {
-                artistLabels: true,
-              },
+            const blocked = await creationBlockedReason(loggedInUser);
+            if (blocked) {
+              result.partialErrors.push(`Artist "${artistName}": ${blocked}`);
+              continue;
+            }
+            artist = await createProfileForUser(loggedInUser, {
+              name: artistName,
+              urlSlug: await generateUniqueProfileSlug(artistName),
             });
             result.artistsCreated++;
           }

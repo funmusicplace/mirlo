@@ -19,6 +19,8 @@ import {
 } from "../utils/ownership";
 import { getSiteSettings } from "../utils/settings";
 
+import { hasScope, rejectBearer, resolveBearer } from "./oauth";
+
 const JWTStrategy = passportJWT.Strategy;
 
 const secret = process.env.JWT_SECRET;
@@ -67,7 +69,7 @@ passport.use(
   )
 );
 
-export const userLoggedInWithoutRedirect = (
+export const cookieUserLoggedInWithoutRedirect = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -90,7 +92,7 @@ export const userLoggedInWithoutRedirect = (
   )(req, res, next);
 };
 
-export const userAuthenticated = (
+const cookieUserAuthenticated = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -114,6 +116,72 @@ export const userAuthenticated = (
     }
   )(req, res, next);
 };
+
+const withBearer =
+  (
+    cookieMiddleware: (req: Request, res: Response, next: NextFunction) => void,
+    {
+      required,
+      apps,
+      scope = "api",
+    }: { required: boolean; apps: "reads" | "all" | "none"; scope?: string }
+  ) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const bearer = await resolveBearer(req);
+      if (bearer.status === "none") {
+        return cookieMiddleware(req, res, next);
+      }
+      if (bearer.status === "invalid") {
+        return rejectBearer(res, next, "invalid_token");
+      }
+      req.oauth = bearer.oauth;
+      const isRead = ["GET", "HEAD"].includes(req.method);
+      if (apps === "none" || (apps === "reads" && !isRead)) {
+        throw new AppError({
+          httpCode: 403,
+          description: "This can only be done while signed in on the site",
+        });
+      }
+      if (!hasScope(req, scope)) {
+        return required
+          ? rejectBearer(res, next, "insufficient_scope", scope)
+          : next();
+      }
+      req.user = bearer.user;
+      return next();
+    } catch (e) {
+      next(e);
+    }
+  };
+
+export const userLoggedInWithoutRedirect = withBearer(
+  cookieUserLoggedInWithoutRedirect,
+  { required: false, apps: "reads" }
+);
+
+export const userOrAppLoggedInWithoutRedirect = withBearer(
+  cookieUserLoggedInWithoutRedirect,
+  { required: false, apps: "all" }
+);
+
+export const userAuthenticated = withBearer(cookieUserAuthenticated, {
+  required: true,
+  apps: "reads",
+});
+
+export const userOrAppAuthenticated = withBearer(cookieUserAuthenticated, {
+  required: true,
+  apps: "all",
+});
+
+export const siteUserAuthenticated = withBearer(cookieUserAuthenticated, {
+  required: true,
+  apps: "none",
+});
+
+export const userAuthenticatedWithScope = (scope: string) =>
+  withBearer(cookieUserAuthenticated, { required: true, apps: "all", scope });
 
 export const userHasPermission = (role: "admin" | "owner") => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -146,7 +214,7 @@ type CreationRights = Pick<
   "canCreateArtists" | "isAdmin" | "isLabelAccount"
 >;
 
-const creationBlockedReason = async (
+export const creationBlockedReason = async (
   user: CreationRights
 ): Promise<string | null> => {
   if (user.canCreateArtists || user.isAdmin || user.isLabelAccount) {

@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
+
 import {
   trackBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { startAudioQueueForTrack } from "../../../../../queues/processTrackAudio";
 
@@ -12,7 +13,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, trackBelongsToLoggedInUser, PUT],
+    PUT: [userOrAppAuthenticated, trackBelongsToLoggedInUser, PUT],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

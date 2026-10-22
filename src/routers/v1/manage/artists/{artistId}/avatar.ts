@@ -5,7 +5,7 @@ import { NextFunction, Request, Response } from "express";
 import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   profileBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { processProfileAvatar } from "../../../../../queues/processImages";
 import { deleteProfileAvatar } from "../../../../../utils/artist";
@@ -19,12 +19,12 @@ type Params = {
 export default function () {
   const operations = {
     PUT: [
-      userAuthenticated,
+      userOrAppAuthenticated,
       profileBelongsToLoggedInUser,
       busboy(busboyOptions),
       PUT,
     ],
-    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
+    DELETE: [userOrAppAuthenticated, profileBelongsToLoggedInUser, DELETE],
   };
 
   async function PUT(req: Request, res: Response, next: NextFunction) {

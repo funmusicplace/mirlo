@@ -7,6 +7,7 @@ import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import {
   trackGroupBelongsToLoggedInUser,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { clearTrackGroupDownloads } from "../../../../../utils/downloadCache";
@@ -98,8 +99,8 @@ const findNewSlug = async (
 
 export default function () {
   const operations = {
-    PUT: [userAuthenticated, trackGroupBelongsToLoggedInUser, PUT],
-    DELETE: [userAuthenticated, trackGroupBelongsToLoggedInUser, DELETE],
+    PUT: [userOrAppAuthenticated, trackGroupBelongsToLoggedInUser, PUT],
+    DELETE: [userOrAppAuthenticated, trackGroupBelongsToLoggedInUser, DELETE],
     GET: [userAuthenticated, trackGroupBelongsToLoggedInUser, GET],
   };
 

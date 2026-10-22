@@ -35,6 +35,7 @@ const assetLinks = [
 const sheetBreaksRoots = [
   "account",
   "admin",
+  "auth",
   "checkout",
   "checkout-error",
   "confirm-email-change",

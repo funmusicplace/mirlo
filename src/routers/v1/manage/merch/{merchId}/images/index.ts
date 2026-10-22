@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 
 import {
   merchBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../../auth/passport";
 import { processMerchImage } from "../../../../../../queues/processImages";
 import { serializeMerchImage } from "../../../../../../serializers/merch";
@@ -19,12 +19,12 @@ type Params = {
 export default function () {
   const operations = {
     POST: [
-      userAuthenticated,
+      userOrAppAuthenticated,
       merchBelongsToLoggedInUser,
       busboy(busboyOptions),
       POST,
     ],
-    PUT: [userAuthenticated, merchBelongsToLoggedInUser, PUT],
+    PUT: [userOrAppAuthenticated, merchBelongsToLoggedInUser, PUT],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

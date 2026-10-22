@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import {
   profileBelongsToLoggedInUser,
-  userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../../../auth/passport";
 import { logger } from "../../../../../../logger";
 import { AppError } from "../../../../../../utils/error";
@@ -16,7 +16,7 @@ type Params = {
 
 export default function () {
   const operations = {
-    DELETE: [userAuthenticated, profileBelongsToLoggedInUser, DELETE],
+    DELETE: [userOrAppAuthenticated, profileBelongsToLoggedInUser, DELETE],
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {

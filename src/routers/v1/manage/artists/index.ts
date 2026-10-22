@@ -5,55 +5,24 @@ import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import {
   canUserCreateProfiles,
   userAuthenticated,
+  userOrAppAuthenticated,
 } from "../../../../auth/passport";
 import { serializeProfile } from "../../../../serializers/artist";
 import { serializeManagedProfile } from "../../../../serializers/profileManager";
 import {
   asSlugConflictError,
+  createProfileForUser,
   generateUniqueProfileSlug,
   isProfileSlugTaken,
   whereForProfilesUserOwnsOrManages,
 } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import generateSlug from "../../../../utils/generateSlug";
-import { getSiteSettings } from "../../../../utils/settings";
-
-const forbiddenNames = [
-  "mirlo",
-  "admin",
-  "manage",
-  "profile",
-  "account",
-  "signup",
-  "verify-email",
-  "about",
-  "pages",
-  "widget",
-  "post",
-  "label",
-  "track",
-  "login",
-  "password-reset",
-  "artists",
-  "releases",
-  "user",
-  "username",
-  "you",
-  "guest",
-  "fulfillment",
-  "sales",
-  "account",
-  "administrator",
-  "system",
-  "help",
-  "error",
-  "docs",
-];
 
 export default function () {
   const operations = {
     GET: [userAuthenticated, GET],
-    POST: [userAuthenticated, canUserCreateProfiles, POST],
+    POST: [userOrAppAuthenticated, canUserCreateProfiles, POST],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
@@ -105,7 +74,6 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     let { name, bio, urlSlug } = req.body;
-    const settings = await getSiteSettings();
     assertLoggedIn(req);
     const user = req.user;
     try {
@@ -117,13 +85,6 @@ export default function () {
           httpCode: 400,
         });
       }
-      if (forbiddenNames.includes(urlSlug)) {
-        throw new AppError({
-          description: `"urlSlug" can't be one of: ${forbiddenNames.join(", ")}`,
-          httpCode: 400,
-        });
-      }
-
       let newSlug: string;
       if (urlSlug) {
         newSlug = generateSlug(urlSlug);
@@ -137,48 +98,11 @@ export default function () {
         newSlug = await generateUniqueProfileSlug(name);
       }
 
-      const result = await prisma.profile.create({
-        data: {
-          name,
-          bio,
-          urlSlug: newSlug,
-          user: {
-            connect: {
-              id: Number(user.id),
-            },
-          },
-          properties: {
-            colors: settings.settings?.instanceCustomization?.colors ?? {
-              button: "#be3455",
-              buttonText: "#ffc0cb",
-              background: "#f5f0f0",
-              text: "#111",
-            },
-          },
-          subscriptionTiers: {
-            create: {
-              name: "follow",
-              description: "follow an artist",
-              minAmount: 0,
-              isDefaultTier: true,
-            },
-          },
-        },
+      const result = await createProfileForUser(user, {
+        name,
+        bio,
+        urlSlug: newSlug,
       });
-
-      if (user.isLabelAccount) {
-        await prisma.artistLabel.create({
-          data: {
-            artistId: result.id,
-            labelUserId: user.id,
-            isLabelApproved: true,
-            canLabelManageArtist: true,
-            canLabelAddReleases: true,
-            isArtistApproved: true,
-            isDisplayedOnArtistPage: true,
-          },
-        });
-      }
       res.json({
         result: serializeProfile(result as any, Number(user.id)),
       });

@@ -1,15 +1,15 @@
 import { User } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
-import { userAuthenticated } from "../../../../../auth/passport";
+import { userOrAppAuthenticated } from "../../../../../auth/passport";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { endPreorderForTrackGroup } from "../../../../../utils/endPreorder";
 import { AppError, HttpCode } from "../../../../../utils/error";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
-import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 
 export default function () {
   const operations = {
-    POST: [userAuthenticated, POST],
+    POST: [userOrAppAuthenticated, POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

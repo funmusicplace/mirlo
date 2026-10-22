@@ -2,7 +2,10 @@ import prisma from "@mirlo/prisma";
 import busboy from "connect-busboy";
 import { NextFunction, Request, Response } from "express";
 
-import { userAuthenticated } from "../../../../../auth/passport";
+import {
+  userAuthenticated,
+  userOrAppAuthenticated,
+} from "../../../../../auth/passport";
 import { processPostImage } from "../../../../../queues/processImages";
 import { AppError } from "../../../../../utils/error";
 import { generateFullStaticImageUrl } from "../../../../../utils/images";
@@ -17,7 +20,7 @@ export default function () {
   const operations = {
     GET: [userAuthenticated, doesPostBelongToUser, GET],
     PUT: [
-      userAuthenticated,
+      userOrAppAuthenticated,
       doesPostBelongToUser,
       busboy({
         highWaterMark: 2 * 1024 * 1024,
