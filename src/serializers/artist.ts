@@ -3,7 +3,6 @@ import { join } from "path";
 import {
   Profile,
   ProfileAvatar,
-  ProfileBackground,
   ProfileSubscriptionTier,
   Image,
   Merch,
@@ -14,9 +13,9 @@ import {
   TrackGroupCover,
 } from "@mirlo/prisma/client";
 
-import { addSizesToImage } from "../utils/artist";
+import { addSizesToImage, addSizesToStoredImage } from "../utils/artist";
 import { generateFullStaticImageUrl } from "../utils/images";
-import { artistAvatarPrefix, artistBackgroundPrefix } from "../utils/minio";
+import { artistAvatarPrefix } from "../utils/minio";
 import { resolvePayee } from "../utils/payments/payee";
 import { ContentImage } from "../utils/postContent";
 
@@ -38,7 +37,7 @@ import {
 export interface LocalProfile extends Profile {
   artistLabels?: LocalArtistLabel[];
   posts?: (Post & { images: ContentImage[] })[];
-  background?: ProfileBackground | null;
+  background?: Image | null;
   avatar?: ProfileAvatar | null;
   trackGroups?: LocalTrackGroup[] | null;
   merch?: (Merch & { images?: MerchImage[] })[];
@@ -55,7 +54,7 @@ export interface LocalProfile extends Profile {
     artistLabels?: {
       artist: Profile & {
         avatar?: ProfileAvatar | null;
-        background?: ProfileBackground | null;
+        background?: Image | null;
         trackGroups?: (TrackGroup & {
           cover?: TrackGroupCover | null;
           tracks?: Track[];
@@ -89,7 +88,7 @@ export const serializeProfile = <T extends LocalProfile>(
       })
     ),
     background: renameProfileIdToArtistId(
-      addSizesToImage(artistBackgroundPrefix, profile?.background)
+      addSizesToStoredImage(profile?.background)
     ),
     avatar: renameProfileIdToArtistId(
       addSizesToImage(artistAvatarPrefix, profile?.avatar)
@@ -117,10 +116,7 @@ export const serializeProfile = <T extends LocalProfile>(
                       addSizesToImage(artistAvatarPrefix, labelProfile.avatar)
                     ),
                     background: renameProfileIdToArtistId(
-                      addSizesToImage(
-                        artistBackgroundPrefix,
-                        labelProfile.background
-                      )
+                      addSizesToStoredImage(labelProfile.background)
                     ),
                     trackGroups: labelProfile.trackGroups?.map((tg) =>
                       processSingleTrackGroup(

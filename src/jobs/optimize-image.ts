@@ -245,7 +245,7 @@ const optimizeImage = async (job: Job) => {
     ) as string[];
     logger.info(`Saving URLs [${urls.join(", ")}]`);
 
-    if (model === "image") {
+    if (model === "image" || model === "artistBackground") {
       await prisma.image.update({
         where: { id: destinationId },
         data: { url: urls },
@@ -254,11 +254,6 @@ const optimizeImage = async (job: Job) => {
 
     if (model === "trackGroupCover") {
       await prisma.trackGroupCover.update({
-        where: { id: destinationId },
-        data: { url: urls },
-      });
-    } else if (model === "artistBackground") {
-      await prisma.profileBackground.update({
         where: { id: destinationId },
         data: { url: urls },
       });
@@ -284,11 +279,6 @@ const optimizeImage = async (job: Job) => {
       }
 
       await prisma.profileAvatar.update({
-        where: { id: destinationId },
-        data: { url: urls },
-      });
-    } else if (model === "merchImage") {
-      await prisma.merchImage.update({
         where: { id: destinationId },
         data: { url: urls },
       });

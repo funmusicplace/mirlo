@@ -36,7 +36,6 @@ import logger from "../logger";
 export const artistBackgroundPrefix = "artist-banners";
 export const artistAvatarPrefix = "artist-avatars";
 export const coversPrefix = "trackgroup-covers";
-export const merchImagePrefix = "merch-images";
 export const postImagePrefix = "post-images";
 export const instanceLogoPrefix = "instance-logos";
 export const rootImagePrefix = "";
@@ -57,7 +56,6 @@ const imageTypeBuckets = {
   artistAvatar: { prefix: artistAvatarPrefix, queue: true },
   artistBackground: { prefix: artistBackgroundPrefix, queue: true },
   trackGroupCover: { prefix: coversPrefix, queue: true },
-  merch: { prefix: merchImagePrefix, queue: true },
   postImage: { prefix: postImagePrefix, queue: false },
   instanceLogo: { prefix: instanceLogoPrefix, queue: false },
   image: { prefix: rootImagePrefix, queue: true },
@@ -572,11 +570,21 @@ export const uploadWrapper = async (
   if (backendStorage === "backblaze") {
     await uploadFilesToBackblaze(bucket, fileName, fileStream, options);
   } else if (backendStorage === "minio" && minioClient) {
-    await minioClient.putObject(bucket, fileName, fileStream, undefined, {
-      ...(options?.contentType ? { "Content-Type": options.contentType } : {}),
-      ...(options?.cacheControl
-        ? { "Cache-Control": options.cacheControl }
-        : {}),
+    const client = minioClient;
+    await new Promise((resolve, reject) => {
+      if (fileStream instanceof Readable) {
+        fileStream.once("error", reject);
+      }
+      client
+        .putObject(bucket, fileName, fileStream, undefined, {
+          ...(options?.contentType
+            ? { "Content-Type": options.contentType }
+            : {}),
+          ...(options?.cacheControl
+            ? { "Cache-Control": options.cacheControl }
+            : {}),
+        })
+        .then(resolve, reject);
     });
   }
 };
@@ -1035,10 +1043,13 @@ export const getImagePrefix = (imageType: ImageType): string =>
 export const imageTypeUsesQueue = (imageType: ImageType): boolean =>
   imageTypeBuckets[imageType].queue;
 
-const imageKeyPrefix = (imageType: ImageType) => {
-  const prefix = getImagePrefix(imageType);
-  return prefix ? `${prefix}/` : "";
-};
+const keyPrefixPath = (prefix: string) => (prefix ? `${prefix}/` : "");
+
+const imageKeyPrefix = (imageType: ImageType) =>
+  keyPrefixPath(getImagePrefix(imageType));
+
+export const storedImagePrefix = (image: { keyPrefix: string | null }) =>
+  image.keyPrefix ?? rootImagePrefix;
 
 const incomingImageKey = (imageType: ImageType, fileName: string) => {
   const { prefix, queue } = imageTypeBuckets[imageType];
@@ -1104,42 +1115,14 @@ export const removeImagesByType = (imageType: ImageType, imageId: string) =>
     `${imageKeyPrefix(imageType)}${imageId}`
   );
 
-export const listImagesByType = async (
-  imageType: ImageType,
-  imageId: string
-) => {
-  const prefix = imageKeyPrefix(imageType);
-  const objects = await getObjectList(getImagesBucket(), `${prefix}${imageId}`);
-  return objects.map((o) => o.name!.slice(prefix.length));
-};
-
-export const copyImagesBetweenTypes = async (
-  fromType: ImageType,
-  toType: ImageType,
-  imageId: string
-) => {
-  const bucket = getImagesBucket();
-  const fromPrefix = imageKeyPrefix(fromType);
-  const toPrefix = imageKeyPrefix(toType);
-
-  const names = await listImagesByType(fromType, imageId);
-  if (names.length > 0) {
-    await ensureBucketCached(bucket, true);
-  }
-
-  const copied: string[] = [];
-  for (const name of names) {
-    await copyObjectInStorage(
-      bucket,
-      `${fromPrefix}${name}`,
-      bucket,
-      `${toPrefix}${name}`,
-      { contentType: imageContentType(name) }
-    );
-    copied.push(name);
-  }
-  return copied;
-};
+export const removeStoredImage = (image: {
+  id: string;
+  keyPrefix: string | null;
+}) =>
+  removeObjectsFromBucket(
+    getImagesBucket(),
+    `${keyPrefixPath(storedImagePrefix(image))}${image.id}`
+  );
 
 export const fixStoredImageContentTypes = async () => {
   const summary = { checked: 0, fixed: 0, failed: 0 };

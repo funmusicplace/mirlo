@@ -97,6 +97,29 @@ describe("manage/artists/{artistId}/images", () => {
       assert.notEqual(deleted.deletedAt, null);
     });
 
+    it("unlinks the image when it's the artist's background", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const profile = await createProfile(user.id);
+      const image = await prisma.image.create({
+        data: { dimensions: "background", profileId: profile.id },
+      });
+      await prisma.profile.update({
+        where: { id: profile.id },
+        data: { backgroundImageId: image.id },
+      });
+
+      const response = await requestApp
+        .delete(`manage/artists/${profile.id}/images/${image.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const updated = await prisma.profile.findUniqueOrThrow({
+        where: { id: profile.id },
+      });
+      assert.equal(updated.backgroundImageId, null);
+    });
+
     it("doesn't delete another artist's image linked to the artist's tier", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const profile = await createProfile(user.id);

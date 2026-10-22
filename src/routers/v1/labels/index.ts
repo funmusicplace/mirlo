@@ -72,11 +72,7 @@ export default function () {
               deletedAt: null,
             },
           },
-          background: {
-            where: {
-              deletedAt: null,
-            },
-          },
+          background: true,
           user: {
             select: {
               currency: true,

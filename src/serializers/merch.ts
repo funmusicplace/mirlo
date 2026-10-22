@@ -1,14 +1,13 @@
 import { Merch } from "@mirlo/prisma/client";
 
-import { addSizesToImage } from "../utils/artist";
+import { addSizesToStoredImage } from "../utils/artist";
 import { MerchImageWithImage } from "../utils/merch";
-import { rootImagePrefix } from "../utils/minio";
 
 import { omitApPrivateKey, Serialized } from "./utils";
 
 export const serializeMerchImage = (merchImage: MerchImageWithImage) => {
   return {
-    ...addSizesToImage(rootImagePrefix, merchImage.image),
+    ...addSizesToStoredImage(merchImage.image),
     id: merchImage.id,
     merchId: merchImage.merchId,
     imageId: merchImage.imageId,

@@ -5,6 +5,7 @@ import sharp from "sharp";
 import { REDIS_CONFIG } from "../config/redis";
 import sharpConfig from "../config/sharp";
 import logger from "../logger";
+import { deleteProfileBackground } from "../utils/artist";
 import { clearTrackGroupDownloads } from "../utils/downloadCache";
 import { AppError, HttpCode } from "../utils/error";
 import { APIContext } from "../utils/file";
@@ -271,27 +272,26 @@ export const processProfileAvatar = (ctx: APIContext) => {
 
 export const processProfileBackground = (ctx: APIContext) => {
   return async (profileId: number) => {
-    return uploadAndSendToImageQueue(
+    const result = await uploadAndSendToImageQueue(
       ctx,
-      "artistBackground",
-      "artistBackground",
+      "image",
+      "image",
       "background",
-      async (fileInfo: { filename: string }) => {
-        return prisma.profileBackground.upsert({
-          create: {
+      async (fileInfo: { filename: string }) =>
+        prisma.image.create({
+          data: {
             originalFilename: fileInfo.filename,
-            profileId: profileId,
+            dimensions: "background",
+            profileId,
           },
-          update: {
-            originalFilename: fileInfo.filename,
-            deletedAt: null,
-          },
-          where: {
-            profileId: profileId,
-          },
-        });
-      }
+        })
     );
+    await deleteProfileBackground(profileId);
+    await prisma.profile.update({
+      where: { id: profileId },
+      data: { backgroundImageId: result.imageId },
+    });
+    return result;
   };
 };
 

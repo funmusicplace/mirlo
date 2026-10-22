@@ -139,8 +139,6 @@ model User {
   paymentTrackGroups                  TrackGroup[]
   artistLabels                        ArtistLabel[]
   userTrackPurchases                  UserTrackPurchase[]
-  userAvatar                          UserAvatar?
-  userBanner                          UserBanner?
   trackFavorites                      UserTrackFavorite[]
   receivesPaymentsFor                 Profile[]                        @relation("paymentToUser")
   pledges                             FundraiserPledge[]
@@ -208,28 +206,6 @@ model EmailVerification {
   tokenExpiration DateTime? @default(dbgenerated("(NOW() + '06:00:00'::interval)"))
 
   @@unique([email])
-}
-
-model UserAvatar {
-  id               String    @id @default(uuid()) @db.Uuid
-  url              String[]
-  user             User      @relation(fields: [userId], references: [id])
-  userId           Int       @unique
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  deletedAt        DateTime?
-  originalFilename String?
-}
-
-model UserBanner {
-  id               String    @id @default(uuid()) @db.Uuid
-  url              String[]
-  user             User      @relation(fields: [userId], references: [id])
-  userId           Int       @unique
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  deletedAt        DateTime?
-  originalFilename String?
 }
 
 model UserProfileNotificationSetting {
@@ -369,8 +345,10 @@ model Profile {
   updatedAt                           DateTime                              @default(now()) @updatedAt
   deletedAt                           DateTime?
   subscriptionTiers                   ProfileSubscriptionTier[]
-  background                          ProfileBackground?
-  images                              Image[]
+  legacyBackground                    ProfileBackground?
+  backgroundImageId                   String?                               @unique @db.Uuid
+  background                          Image?                                @relation("ProfileBackgroundImage", fields: [backgroundImageId], references: [id])
+  images                              Image[]                               @relation("ProfileImages")
   avatar                              ProfileAvatar?
   urlSlug                             String
   /// [Properties]                              @unique
@@ -539,7 +517,9 @@ model Image {
   merchImage       MerchImage?
   dimensions       String // e.g. "square", "banner"
   profileId        Int?
-  profile          Profile?                @relation(fields: [profileId], references: [id])
+  profile          Profile?                @relation("ProfileImages", fields: [profileId], references: [id])
+  keyPrefix        String?
+  backgroundOf     Profile?                @relation("ProfileBackgroundImage")
 
   @@index([profileId])
 }
@@ -665,9 +645,8 @@ model MerchImage {
   id        String   @id @default(uuid()) @db.Uuid
   merch     Merch    @relation(fields: [merchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   merchId   String   @db.Uuid
-  url       String[]
-  image     Image?   @relation(fields: [imageId], references: [id])
-  imageId   String?  @unique @db.Uuid
+  image     Image    @relation(fields: [imageId], references: [id])
+  imageId   String   @unique @db.Uuid
   position  Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
