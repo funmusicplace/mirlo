@@ -893,10 +893,6 @@ model TrackGroup {
   merch                           Merch[]
   paymentToUserId                 Int?
   paymentToUser                   User?                           @relation(fields: [paymentToUserId], references: [id])
-  fundraisingGoal                 Int? // in cents
-  fundraisingEndDate              DateTime?
-  isAllOrNothing                  Boolean                         @default(false)
-  pledges                         FundraiserPledge[]
   downloadableContent             TrackGroupDownloadableContent[]
   isPreorder                      Boolean                         @default(false)
   scheduleEndOnReleaseDate        Boolean                         @default(false)
@@ -967,6 +963,7 @@ model Fundraiser {
   // Is the fundraiser all or nothing
   isAllOrNothing Boolean            @default(false)
   status         FundraiserStatus   @default(ACTIVE)
+  deletedAt      DateTime?
   profileId      Int
   profile        Profile            @relation(fields: [profileId], references: [id])
   trackGroups    TrackGroup[]
@@ -996,8 +993,6 @@ model FundraiserPledge {
   id                      Int              @id @default(autoincrement())
   fundraiserId            Int
   fundraiser              Fundraiser       @relation(fields: [fundraiserId], references: [id])
-  trackGroup              TrackGroup?      @relation(fields: [trackGroupId], references: [id])
-  trackGroupId            Int?
   userId                  Int
   user                    User             @relation(fields: [userId], references: [id])
   amount                  Int

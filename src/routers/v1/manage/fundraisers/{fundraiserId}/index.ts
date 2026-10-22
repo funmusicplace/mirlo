@@ -156,7 +156,21 @@ export default function () {
       fundraiserId: string;
     };
     try {
-      await prisma.fundraiser.deleteMany({
+      await prisma.fundraiserPledge.updateMany({
+        where: {
+          fundraiserId: Number(fundraiserId),
+          paidAt: null,
+          cancelledAt: null,
+        },
+        data: { cancelledAt: new Date() },
+      });
+
+      await prisma.fundraiser.update({
+        where: { id: Number(fundraiserId) },
+        data: { trackGroups: { set: [] } },
+      });
+
+      await prisma.fundraiser.delete({
         where: { id: Number(fundraiserId) },
       });
 

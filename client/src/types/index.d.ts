@@ -235,8 +235,6 @@ interface TrackGroup {
   userTrackGroupWishlist?: { userId: number }[];
   platformPercent: number;
   isPriceFixed: boolean;
-  fundraisingGoal?: number;
-  fundraisingEndDate?: string;
   downloadableContent?: TrackGroupDownloadableContent[];
   defaultAllowMirloPromo: boolean;
   defaultTrackAllowIndividualSale: boolean;

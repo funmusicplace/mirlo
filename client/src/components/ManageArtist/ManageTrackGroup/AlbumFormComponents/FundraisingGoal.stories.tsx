@@ -59,6 +59,7 @@ const WithAlbumForm: React.FC<{ fundraiser?: Fundraiser }> = ({
   return (
     <FormProvider {...methods}>
       <FundraisingGoal
+        artistId={TRACK_GROUP_EXAMPLE.artistId ?? 1}
         trackGroupId={TRACK_GROUP_EXAMPLE.id}
         fundraiser={fundraiser}
       />

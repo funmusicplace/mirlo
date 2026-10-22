@@ -1,9 +1,8 @@
+import SectionNav from "components/common/SectionNav";
+import WidthContainer from "components/common/WidthContainer";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router-dom";
-
-import SectionNav from "components/common/SectionNav";
-import WidthContainer from "components/common/WidthContainer";
 
 export const Index: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
@@ -12,9 +11,6 @@ export const Index: React.FC = () => {
     <div className="w-full flex flex-col">
       <div className="mb-4">
         <SectionNav uppercase={false} transparent>
-          <li>
-            <NavLink to="fundraising">{t("fundraising")}</NavLink>
-          </li>
           <li>
             <NavLink to="server-tasks">{t("serverTasks")}</NavLink>
           </li>

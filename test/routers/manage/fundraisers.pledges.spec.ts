@@ -47,13 +47,11 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
       await createFundraiserPledge(fundraiser.id, pledger1.user.id, {
         amount: 5000,
         stripeSetupIntentId: "seti_test1",
-        trackGroupId: trackGroup.id,
       });
 
       await createFundraiserPledge(fundraiser.id, pledger2.user.id, {
         amount: 3000,
         stripeSetupIntentId: "seti_test2",
-        trackGroupId: trackGroup.id,
         cancelledAt: new Date(),
       });
 
@@ -87,13 +85,11 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
       await createFundraiserPledge(fundraiser.id, pledger1.user.id, {
         amount: 5000,
         stripeSetupIntentId: "seti_test1",
-        trackGroupId: trackGroup.id,
       });
 
       await createFundraiserPledge(fundraiser.id, pledger2.user.id, {
         amount: 3000,
         stripeSetupIntentId: "seti_test2",
-        trackGroupId: trackGroup.id,
         cancelledAt: new Date(),
       });
 
@@ -151,7 +147,6 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
       await createFundraiserPledge(fundraiser.id, pledger.user.id, {
         amount: 5000,
         stripeSetupIntentId: "seti_test1",
-        trackGroupId: trackGroup.id,
       });
 
       const response = await requestApp
@@ -227,21 +222,18 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
       await createFundraiserPledge(fundraiser.id, pledger1.user.id, {
         amount: 5000,
         stripeSetupIntentId: "seti_test1",
-        trackGroupId: trackGroup.id,
         createdAt: new Date(now.getTime() - 2000),
       });
 
       await createFundraiserPledge(fundraiser.id, pledger2.user.id, {
         amount: 3000,
         stripeSetupIntentId: "seti_test2",
-        trackGroupId: trackGroup.id,
         createdAt: new Date(now.getTime() - 1000),
       });
 
       await createFundraiserPledge(fundraiser.id, pledger3.user.id, {
         amount: 2000,
         stripeSetupIntentId: "seti_test3",
-        trackGroupId: trackGroup.id,
         createdAt: now,
       });
 
@@ -285,13 +277,11 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
       await createFundraiserPledge(fundraiser1.id, pledger.user.id, {
         amount: 5000,
         stripeSetupIntentId: "seti_test1",
-        trackGroupId: trackGroup1.id,
       });
 
       await createFundraiserPledge(fundraiser2.id, pledger.user.id, {
         amount: 3000,
         stripeSetupIntentId: "seti_test2",
-        trackGroupId: trackGroup2.id,
       });
 
       const response1 = await requestApp

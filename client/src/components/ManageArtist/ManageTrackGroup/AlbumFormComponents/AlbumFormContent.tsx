@@ -241,6 +241,7 @@ const AlbumFormContent: React.FC<{
       </FormSection>
       <FormSection>
         <FundraisingGoal
+          artistId={existingObject.artistId ?? existingObject.artist.id}
           trackGroupId={existingObject.id}
           fundraiser={existingObject.fundraiser}
         />

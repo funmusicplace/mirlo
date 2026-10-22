@@ -133,4 +133,74 @@ describe("manage/fundraisers/{fundraiserId}", () => {
       assert.equal(refreshed?.isAllOrNothing, false);
     });
   });
+
+  describe("DELETE", () => {
+    it("cancels open pledges, keeps paid ones and unlinks the release", async () => {
+      const { user, accessToken } = await createUser({
+        email: "fundraiser-owner@example.com",
+      });
+      const { user: backer } = await createUser({ email: "a@example.com" });
+      const { user: paidBacker } = await createUser({
+        email: "b@example.com",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+      const fundraiser = await createFundraiser(artist.id, {
+        trackGroupId: trackGroup.id,
+      });
+      const openPledge = await createFundraiserPledge(fundraiser.id, backer.id);
+      const paidAt = new Date();
+      const paidPledge = await createFundraiserPledge(
+        fundraiser.id,
+        paidBacker.id,
+        { paidAt }
+      );
+
+      const response = await requestApp
+        .delete(`manage/fundraisers/${fundraiser.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(
+        await prisma.fundraiser.findFirst({ where: { id: fundraiser.id } }),
+        null
+      );
+
+      const pledges = await prisma.fundraiserPledge.findMany({
+        where: { fundraiserId: fundraiser.id },
+      });
+      const open = pledges.find((p) => p.id === openPledge.id);
+      const paid = pledges.find((p) => p.id === paidPledge.id);
+      assert.ok(open?.cancelledAt);
+      assert.equal(paid?.cancelledAt, null);
+      assert.deepEqual(paid?.paidAt, paidAt);
+
+      const release = await prisma.trackGroup.findFirst({
+        where: { id: trackGroup.id },
+      });
+      assert.equal(release?.fundraiserId, null);
+    });
+
+    it("doesn't let other users delete a fundraiser", async () => {
+      const { user } = await createUser({
+        email: "fundraiser-owner@example.com",
+      });
+      const { accessToken: otherToken } = await createUser({
+        email: "other@example.com",
+      });
+      const artist = await createArtist(user.id);
+      const fundraiser = await createFundraiser(artist.id);
+
+      const response = await requestApp
+        .delete(`manage/fundraisers/${fundraiser.id}`)
+        .set("Cookie", [`jwt=${otherToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+      assert.ok(
+        await prisma.fundraiser.findFirst({ where: { id: fundraiser.id } })
+      );
+    });
+  });
 });
