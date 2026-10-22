@@ -1065,4 +1065,44 @@ describe("analyzePathAndGenerateHTML instance settings", () => {
     assert.match($("style").text(), /--mi-instance-button-color: #123456;/);
     assert.match($("style").text(), /--mi-instance-show-hero-on-home: none;/);
   });
+
+  it("escapes artist-controlled text in the head", async () => {
+    const name = `Evil" /><script>alert(1)</script>`;
+    const bio = `</script><script>alert(2)</script>`;
+    const { user } = await createUser({ email: "artist@example.com" });
+    const artist = await createArtist(user.id, {
+      name,
+      urlSlug: "test-artist",
+    });
+    await prisma.profile.update({ where: { id: artist.id }, data: { bio } });
+
+    const $ = cheerio.load("<html><head><title></title></head></html>");
+    await analyzePathAndGenerateHTML("/test-artist", $);
+
+    assert.equal($("script:not([type])").length, 0);
+    assert.equal($('meta[property="og:title"]').attr("content"), name);
+    assert.equal($('meta[property="og:description"]').attr("content"), bio);
+    const schema = JSON.parse($('script[type="application/ld+json"]').html()!);
+    assert.equal(schema.name, name);
+    assert.equal(schema.description, bio);
+  });
+
+  it("escapes the post slug in the hydration script", async () => {
+    const urlSlug = `x"></script><img src=x onerror=alert(1)><script x="`;
+    const { user } = await createUser({ email: "artist@example.com" });
+    const artist = await createArtist(user.id, {
+      name: "My Artist",
+      urlSlug: "test-artist",
+    });
+    await createPost(artist.id, { title: "My Post", urlSlug, isDraft: false });
+
+    const $ = cheerio.load("<html><head></head></html>");
+    await analyzePathAndGenerateHTML(
+      `/test-artist/posts/${encodeURIComponent(urlSlug)}`,
+      $
+    );
+
+    assert.equal($("img").length, 0);
+    assert.equal($("#__MIRLO_POST__").attr("data-object-id"), urlSlug);
+  });
 });

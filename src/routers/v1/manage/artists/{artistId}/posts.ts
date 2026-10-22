@@ -9,9 +9,8 @@ import {
 import { serializePost } from "../../../../../serializers/post";
 import { AppError } from "../../../../../utils/error";
 import {
-  ownWidgetOrigins,
   postImagesForContent,
-  stripWidgetHosts,
+  preparePostContent,
 } from "../../../../../utils/postContent";
 
 export default function () {
@@ -139,7 +138,7 @@ export default function () {
             title,
             content:
               typeof content === "string"
-                ? stripWidgetHosts(content, await ownWidgetOrigins())
+                ? await preparePostContent(content)
                 : content,
             isPublic,
             publishedAt,

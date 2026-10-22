@@ -1,14 +1,9 @@
 import { PageMetadata } from "../parseIndex";
 
-// Helper function to safely escape strings for JSON
-const escapeJsonString = (str: string): string => {
-  return str
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, "\\n")
-    .replace(/\r/g, "\\r")
-    .replace(/\t/g, "\\t");
-};
+import { serializeForScript } from "./hydrations";
+
+const datePublished = (releaseDate?: string) =>
+  releaseDate || new Date().toISOString().split("T")[0];
 
 // Build MusicAlbum schema for albums
 export const buildMusicAlbumSchema = (metadata: PageMetadata): string => {
@@ -24,34 +19,28 @@ export const buildMusicAlbumSchema = (metadata: PageMetadata): string => {
     tracks = [],
   } = metadata;
 
-  const trackListItems = tracks
-    .map(
-      (track, index) => `{
-      "@type": "MusicRecording",
-      "position": ${index + 1},
-      "name": "${escapeJsonString(track.title)}",
-      "url": "${track.url}"
-      ${track.duration ? `,"duration": "PT${track.duration}S"` : ""}
-    }`
-    )
-    .join(",");
-
-  return `{
+  return serializeForScript({
     "@context": "https://schema.org",
     "@type": "MusicAlbum",
-    "name": "${escapeJsonString(title)}",
-    "description": "${escapeJsonString(description)}",
-    "url": "${url}",
-    "image": "${imageUrl || ""}",
-    "byArtist": {
+    name: title,
+    description,
+    url,
+    image: imageUrl || "",
+    byArtist: {
       "@type": "MusicGroup",
-      "name": "${escapeJsonString(artistName || "")}",
-      "url": "${artistUrl || ""}"
+      name: artistName || "",
+      url: artistUrl || "",
     },
-    "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}",
-    "numberOfTracks": ${trackCount},
-    "track": [${trackListItems}]
-  }`;
+    datePublished: datePublished(releaseDate),
+    numberOfTracks: trackCount,
+    track: tracks.map((track, index) => ({
+      "@type": "MusicRecording",
+      position: index + 1,
+      name: track.title,
+      url: track.url,
+      ...(track.duration && { duration: `PT${track.duration}S` }),
+    })),
+  });
 };
 
 // Build MusicRecording schema for individual tracks
@@ -67,37 +56,35 @@ export const buildMusicRecordingSchema = (metadata: PageMetadata): string => {
     duration,
   } = metadata;
 
-  const durationString = duration ? `"duration": "PT${duration}S",` : "";
-
-  return `{
+  return serializeForScript({
     "@context": "https://schema.org",
     "@type": "MusicRecording",
-    "name": "${escapeJsonString(title)}",
-    "description": "${escapeJsonString(description)}",
-    "url": "${url}",
-    "image": "${imageUrl || ""}",
-    ${durationString}
-    "byArtist": {
+    name: title,
+    description,
+    url,
+    image: imageUrl || "",
+    ...(duration && { duration: `PT${duration}S` }),
+    byArtist: {
       "@type": "MusicGroup",
-      "name": "${escapeJsonString(artistName || "")}",
-      "url": "${artistUrl || ""}"
+      name: artistName || "",
+      url: artistUrl || "",
     },
-    "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}"
-  }`;
+    datePublished: datePublished(releaseDate),
+  });
 };
 
 // Build MusicGroup schema for artist profiles
 export const buildMusicGroupSchema = (metadata: PageMetadata): string => {
   const { title, description, url, imageUrl, artistUrl } = metadata;
 
-  return `{
+  return serializeForScript({
     "@context": "https://schema.org",
     "@type": "MusicGroup",
-    "name": "${escapeJsonString(title)}",
-    "description": "${escapeJsonString(description)}",
-    "url": "${artistUrl || url}",
-    "image": "${imageUrl || ""}"
-  }`;
+    name: title,
+    description,
+    url: artistUrl || url,
+    image: imageUrl || "",
+  });
 };
 
 // Build BlogPosting schema for posts and general articles
@@ -105,17 +92,17 @@ export const buildArticleSchema = (metadata: PageMetadata): string => {
   const { title, description, url, imageUrl, artistName, releaseDate } =
     metadata;
 
-  return `{
+  return serializeForScript({
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "headline": "${escapeJsonString(title)}",
-    "description": "${escapeJsonString(description)}",
-    "url": "${url}",
-    "image": "${imageUrl || ""}",
-    "author": {
+    headline: title,
+    description,
+    url,
+    image: imageUrl || "",
+    author: {
       "@type": "Person",
-      "name": "${escapeJsonString(artistName || "Mirlo Artist")}"
+      name: artistName || "Mirlo Artist",
     },
-    "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}"
-  }`;
+    datePublished: datePublished(releaseDate),
+  });
 };

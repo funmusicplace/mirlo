@@ -37,6 +37,24 @@ describe("parse-out-iframes", () => {
     );
   });
 
+  it("should escape titles and names in the replacement", async () => {
+    const { user: artistUser } = await createUser({
+      email: "artist@artist.com",
+    });
+    const artist = await createArtist(artistUser.id, {
+      name: `<img src=x onerror="alert(1)">`,
+    });
+    const trackGroup = await createTrackGroup(artist.id, {
+      title: `<script>alert(2)</script>`,
+    });
+
+    const content = `<iframe src="/widget/trackGroup/${trackGroup.id}"></iframe>`;
+    const result = await parseOutIframes(content);
+    assert(!result.includes("<script>"));
+    assert(!result.includes("<img src=x"));
+    assert(result.includes("&lt;script&gt;alert(2)&lt;/script&gt;"));
+  });
+
   it("should replace iframe with track", async () => {
     const content = `<iframe src="/widget/track/67890"></iframe>`;
     const result = await parseOutIframes(content);
