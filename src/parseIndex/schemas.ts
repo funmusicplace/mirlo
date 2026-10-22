@@ -17,8 +17,8 @@ export const buildMusicAlbumSchema = (metadata: PageMetadata): string => {
     description,
     url,
     imageUrl,
-    artistName,
-    artistUrl,
+    profileName,
+    profileUrl,
     releaseDate,
     trackCount = 0,
     tracks = [],
@@ -45,8 +45,8 @@ export const buildMusicAlbumSchema = (metadata: PageMetadata): string => {
     "image": "${imageUrl || ""}",
     "byArtist": {
       "@type": "MusicGroup",
-      "name": "${escapeJsonString(artistName || "")}",
-      "url": "${artistUrl || ""}"
+      "name": "${escapeJsonString(profileName || "")}",
+      "url": "${profileUrl || ""}"
     },
     "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}",
     "numberOfTracks": ${trackCount},
@@ -61,8 +61,8 @@ export const buildMusicRecordingSchema = (metadata: PageMetadata): string => {
     description,
     url,
     imageUrl,
-    artistName,
-    artistUrl,
+    profileName,
+    profileUrl,
     releaseDate,
     duration,
   } = metadata;
@@ -79,8 +79,8 @@ export const buildMusicRecordingSchema = (metadata: PageMetadata): string => {
     ${durationString}
     "byArtist": {
       "@type": "MusicGroup",
-      "name": "${escapeJsonString(artistName || "")}",
-      "url": "${artistUrl || ""}"
+      "name": "${escapeJsonString(profileName || "")}",
+      "url": "${profileUrl || ""}"
     },
     "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}"
   }`;
@@ -88,21 +88,21 @@ export const buildMusicRecordingSchema = (metadata: PageMetadata): string => {
 
 // Build MusicGroup schema for artist profiles
 export const buildMusicGroupSchema = (metadata: PageMetadata): string => {
-  const { title, description, url, imageUrl, artistUrl } = metadata;
+  const { title, description, url, imageUrl, profileUrl } = metadata;
 
   return `{
     "@context": "https://schema.org",
     "@type": "MusicGroup",
     "name": "${escapeJsonString(title)}",
     "description": "${escapeJsonString(description)}",
-    "url": "${artistUrl || url}",
+    "url": "${profileUrl || url}",
     "image": "${imageUrl || ""}"
   }`;
 };
 
 // Build BlogPosting schema for posts and general articles
 export const buildArticleSchema = (metadata: PageMetadata): string => {
-  const { title, description, url, imageUrl, artistName, releaseDate } =
+  const { title, description, url, imageUrl, profileName, releaseDate } =
     metadata;
 
   return `{
@@ -114,7 +114,7 @@ export const buildArticleSchema = (metadata: PageMetadata): string => {
     "image": "${imageUrl || ""}",
     "author": {
       "@type": "Person",
-      "name": "${escapeJsonString(artistName || "Mirlo Artist")}"
+      "name": "${escapeJsonString(profileName || "Mirlo Artist")}"
     },
     "datePublished": "${releaseDate || new Date().toISOString().split("T")[0]}"
   }`;

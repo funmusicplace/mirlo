@@ -9,7 +9,7 @@ import request from "supertest";
 
 import {
   clearTables,
-  createArtist,
+  createProfile,
   createTrack,
   createUser,
   createTrackGroup,
@@ -21,7 +21,7 @@ export const createFederatedArtistWithMusic = async (
   userId: number,
   data?: Partial<Prisma.ProfileCreateArgs["data"]>
 ) => {
-  const artist = await createArtist(userId, {
+  const artist = await createProfile(userId, {
     name: "test-artist",
     urlSlug: "test-artist",
     federatedStreaming: true,
@@ -75,7 +75,7 @@ describe("canimus", () => {
       const { user } = await createUser({
         email: "test@testcom",
       });
-      const artist = await createArtist(user.id, {
+      const artist = await createProfile(user.id, {
         name: "buy-only-artist",
         urlSlug: "buy-only-artist",
         federatedStreaming: true,
@@ -109,21 +109,21 @@ describe("canimus", () => {
       const { user } = await createUser({
         email: "test@testcom",
       });
-      await createArtist(user.id, {
+      await createProfile(user.id, {
         name: "test-artist",
         urlSlug: "test-artist",
         federatedStreaming: false,
         federatedStreamingOptInDate: new Date(Date.now()),
         federatedStreamingOptOutDate: new Date(Date.now()),
       });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "deleted-artist",
         urlSlug: "deleted-artist",
         federatedStreaming: true,
         federatedStreamingOptInDate: new Date(Date.now()),
       });
       await prisma.profile.update({
-        where: { id: artist.id },
+        where: { id: profile.id },
         data: { deletedAt: new Date() },
       });
 
@@ -138,7 +138,7 @@ describe("canimus", () => {
       const { user } = await createUser({
         email: "test@testcom",
       });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "test-artist",
         urlSlug: "test-artist",
         federatedStreaming: true,
@@ -156,13 +156,13 @@ describe("canimus", () => {
       const { user } = await createUser({
         email: "test@testcom",
       });
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "test-artist",
         urlSlug: "test-artist",
         federatedStreaming: true,
         federatedStreamingOptInDate: new Date(Date.now()),
       });
-      const trackGroup = await createTrackGroup(artist.id);
+      const trackGroup = await createTrackGroup(profile.id);
       await prisma.trackGroup.update({
         where: { id: trackGroup.id },
         data: { deletedAt: new Date() },
@@ -181,14 +181,14 @@ describe("canimus", () => {
       });
       const dateNow = new Date(Date.now());
       await createFederatedArtistWithMusic(user.id);
-      const artist = await createArtist(user.id, {
+      const profile = await createProfile(user.id, {
         name: "test-artist",
         urlSlug: "deleted-test-artist",
         federatedStreaming: true,
         federatedStreamingOptInDate: dateNow,
       });
       await prisma.profile.update({
-        where: { id: artist.id },
+        where: { id: profile.id },
         data: { deletedAt: new Date() },
       });
 
