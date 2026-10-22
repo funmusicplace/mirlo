@@ -22,6 +22,7 @@ import postContentWidgetPaths from "../../src/dataMigrations/migrations/20261004
 import orphanedAudio from "../../src/dataMigrations/migrations/20261005000000_orphanedAudio";
 import approveSelfOwnedLabelRows from "../../src/dataMigrations/migrations/20261006000000_approveSelfOwnedLabelRows";
 import defaultInstanceLogo from "../../src/dataMigrations/migrations/20261018120000_defaultInstanceLogo";
+import sanitizePostContent from "../../src/dataMigrations/migrations/20261022000000_sanitizePostContent";
 import {
   DEFAULT_BUCKET_CONFIG,
   getImagesBucket,
@@ -167,6 +168,7 @@ describe("dataMigrations: loading", () => {
         orphanedAudio,
         approveSelfOwnedLabelRows,
         defaultInstanceLogo,
+        sanitizePostContent,
       ].map((m) => m.name)
     );
     assert.equal(dataMigrations.length, files.length);
@@ -421,6 +423,48 @@ describe("dataMigrations: postContentWidgetPaths", () => {
     assert.equal(migrated.updatedAt.toISOString(), updatedAt.toISOString());
 
     assert.equal(await postContentWidgetPaths.run(), true);
+    const rerun = await prisma.post.findUniqueOrThrow({
+      where: { id: post.id },
+    });
+    assert.equal(rerun.content, migrated.content);
+  });
+});
+
+describe("dataMigrations: sanitizePostContent", () => {
+  beforeEach(async () => {
+    await clearTables();
+  });
+
+  it("strips scripts from existing posts without touching updatedAt", async () => {
+    const { user } = await createUser({ email: "artist@artist.com" });
+    const profile = await createProfile(user.id);
+    const post = await createPost(profile.id);
+    const updatedAt = new Date("2024-01-01T00:00:00.000Z");
+    const embed = `<iframe src="/widget/trackGroup/1" data-embed-type="custom" allow="autoplay; fullscreen"></iframe>`;
+    await prisma.post.update({
+      where: { id: post.id },
+      data: {
+        content: `<p onclick="alert(1)">Hi</p><iframe srcdoc="<script>alert(2)</script>"></iframe>${embed}`,
+        updatedAt,
+      },
+    });
+    const clean = await createPost(profile.id, { content: `<p>Clean</p>` });
+
+    assert.equal(await sanitizePostContent.run(), true);
+    const migrated = await prisma.post.findUniqueOrThrow({
+      where: { id: post.id },
+    });
+    assert.equal(
+      migrated.content,
+      `<p>Hi</p><iframe allow="autoplay; fullscreen"></iframe>${embed}`
+    );
+    assert.equal(migrated.updatedAt.toISOString(), updatedAt.toISOString());
+    const other = await prisma.post.findUniqueOrThrow({
+      where: { id: clean.id },
+    });
+    assert.equal(other.updatedAt.toISOString(), clean.updatedAt.toISOString());
+
+    assert.equal(await sanitizePostContent.run(), true);
     const rerun = await prisma.post.findUniqueOrThrow({
       where: { id: post.id },
     });

@@ -1,9 +1,23 @@
+import path from "node:path";
+
 import prisma from "@mirlo/prisma";
+import { Profile } from "@mirlo/prisma/client";
+import pug from "pug";
 
 import logger from "../logger";
 import { getClient } from "../utils/getClient";
 import { convertURLArrayToSizes } from "../utils/images";
 import { coversPrefix } from "../utils/minio";
+
+const renderWidgetCard = pug.compileFile(
+  path.resolve("emails", "widget-card.pug")
+);
+
+const cardColors = (properties: Profile["properties"]) => ({
+  button: properties?.colors?.button || "#be3455",
+  background: properties?.colors?.background || "#f5f0f0",
+  text: properties?.colors?.text || "#111",
+});
 
 const coverUrl = (cover?: { url: string[] } | null): string | null => {
   if (!cover || cover.url.length === 0) return null;
@@ -97,117 +111,41 @@ export const parseOutIframes = async (
       (_match, _before, type, id, _after) => {
         if (type === "trackGroup" && trackGroupMap[id]) {
           const tg = trackGroupMap[id];
-          const button = tg.profile.properties?.colors?.button || "#be3455";
-          const background =
-            tg.profile.properties?.colors?.background || "#f5f0f0";
-          const text = tg.profile.properties?.colors?.text || "#111";
-          // If the trackGroup is unreachable (draft/private/deleted/unreleased),
-          // fall back to the post URL so the recipient lands somewhere that
-          // actually plays the track. See #1703.
-          const trackGroupUrl =
-            fallbackUrl && isTrackGroupUnreachable(tg)
-              ? fallbackUrl
-              : `${applicationUrl}/${tg.profile.urlSlug}/release/${tg.urlSlug}`;
-          const cover = coverUrl(tg.cover);
-          return `<div data-type="trackGroup" data-id="${id}" style="
-                    display: flex;
-                    flex-direction: row;
-                    gap: 16px;
-                    align-items: center;
-                    background-color: ${background};
-                    color: ${text};
-                    border-radius: 8px;
-                    padding: 16px;
-                  ">
-                    ${cover ? `<img src="${cover}" alt="" width="60" height="60" style="display:block;width:60px;height:60px;border-radius:4px;object-fit:cover;flex-shrink:0;"/>` : ""}
-                    <div style="flex: 1; min-width: 0; overflow: hidden;">
-                      <strong style="
-                        display: block;
-                        color: ${button};
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                      ">${tg.title}</strong>
-                      <span style="
-                        display: block;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                      ">by <a href="${applicationUrl}/${tg.profile.urlSlug}" target="_blank" rel="noopener noreferrer" style="color: ${button}; text-decoration: none;">${tg.profile?.name || "Unknown"}</a> &middot; ${tg.tracks.length} track${tg.tracks.length === 1 ? "" : "s"} album</span>
-                    </div>
-                    <div style="flex-shrink: 0;">
-                      <a href="${trackGroupUrl}" target="_blank" rel="noopener noreferrer" style="
-                        display: inline-block;
-                        text-decoration: none;
-                        background: ${text};
-                        color: ${background};
-                        width: 48px;
-                        height: 48px;
-                        line-height: 48px;
-                        text-align: center;
-                        border-radius: 50%;
-                        font-size: 18px;
-                        font-weight: bold;
-                      ">&#9654;</a>
-                    </div>
-                  </div>`;
+          return renderWidgetCard({
+            type,
+            id,
+            ...cardColors(tg.profile.properties),
+            cover: coverUrl(tg.cover),
+            title: tg.title,
+            artistName: tg.profile?.name || "Unknown",
+            artistUrl: `${applicationUrl}/${tg.profile.urlSlug}`,
+            trackCount: tg.tracks.length,
+            // If the trackGroup is unreachable (draft/private/deleted/unreleased),
+            // fall back to the post URL so the recipient lands somewhere that
+            // actually plays the track. See #1703.
+            url:
+              fallbackUrl && isTrackGroupUnreachable(tg)
+                ? fallbackUrl
+                : `${applicationUrl}/${tg.profile.urlSlug}/release/${tg.urlSlug}`,
+          });
         } else if (type === "track" && trackMap[id]) {
           const t = trackMap[id];
-          const button =
-            t.trackGroup.profile.properties?.colors?.button || "#be3455";
-          const background =
-            t.trackGroup.profile.properties?.colors?.background || "#f5f0f0";
-          const text = t.trackGroup.profile.properties?.colors?.text || "#111";
-          // Same fallback as the trackGroup branch: when a track's parent
-          // album is unreachable to the public, link to the post that embeds
-          // the track instead of an unreachable URL.
-          const trackUrl =
-            fallbackUrl && isTrackGroupUnreachable(t.trackGroup)
-              ? fallbackUrl
-              : `${applicationUrl}/${t.trackGroup.profile.urlSlug}/release/${t.trackGroup.urlSlug}/track/${t.urlSlug}`;
-          const cover = coverUrl(t.trackGroup.cover);
-          return `<div data-type="track" data-id="${id}" style="
-                    display: flex;
-                    flex-direction: row;
-                    gap: 16px;
-                    align-items: center;
-                    background-color: ${background};
-                    color: ${text};
-                    border-radius: 8px;
-                    padding: 16px;
-                  ">
-                    ${cover ? `<img src="${cover}" alt="" width="60" height="60" style="display:block;width:60px;height:60px;border-radius:4px;object-fit:cover;flex-shrink:0;"/>` : ""}
-                    <div style="flex: 1; min-width: 0; overflow: hidden;">
-                      <strong style="
-                        display: block;
-                        color: ${button};
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                      ">${t.title}</strong>
-                      <span style="
-                        display: block;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                      ">by <a href="${applicationUrl}/${t.trackGroup.profile.urlSlug}" target="_blank" rel="noopener noreferrer" style="color: ${button}; text-decoration: none;">${t.trackGroup.profile?.name || "Unknown"}</a></span>
-                    </div>
-                    <div style="flex-shrink: 0;">
-                      <a href="${trackUrl}" target="_blank" rel="noopener noreferrer" style="
-                        display: inline-block;
-                        text-decoration: none;
-                        background: ${text};
-                        color: ${background};
-                        width: 48px;
-                        height: 48px;
-                        line-height: 48px;
-                        text-align: center;
-                        border-radius: 50%;
-                        font-size: 18px;
-                        font-weight: bold;
-                      ">&#9654;</a>
-                    </div>
-                  </div>`;
+          return renderWidgetCard({
+            type,
+            id,
+            ...cardColors(t.trackGroup.profile.properties),
+            cover: coverUrl(t.trackGroup.cover),
+            title: t.title,
+            artistName: t.trackGroup.profile?.name || "Unknown",
+            artistUrl: `${applicationUrl}/${t.trackGroup.profile.urlSlug}`,
+            // Same fallback as the trackGroup branch: when a track's parent
+            // album is unreachable to the public, link to the post that embeds
+            // the track instead of an unreachable URL.
+            url:
+              fallbackUrl && isTrackGroupUnreachable(t.trackGroup)
+                ? fallbackUrl
+                : `${applicationUrl}/${t.trackGroup.profile.urlSlug}/release/${t.trackGroup.urlSlug}/track/${t.urlSlug}`,
+          });
         }
         // If not found, fallback to a placeholder
         return `<div data-type="${type}" data-id="${id}"></div>`;

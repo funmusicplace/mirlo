@@ -13,10 +13,8 @@ import generateSlug from "../../../../../utils/generateSlug";
 import { clearPageCache } from "../../../../../utils/pageCache";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 import {
-  addImageRefs,
-  ownWidgetOrigins,
   postImagesForContent,
-  stripWidgetHosts,
+  preparePostContent,
 } from "../../../../../utils/postContent";
 
 async function syncPostImages(
@@ -222,12 +220,9 @@ export default function () {
       });
       const contentWithRefs =
         typeof content === "string"
-          ? stripWidgetHosts(
-              addImageRefs(
-                content,
-                postImages.map((image) => image.id)
-              ),
-              await ownWidgetOrigins()
+          ? await preparePostContent(
+              content,
+              postImages.map((image) => image.id)
             )
           : content;
 

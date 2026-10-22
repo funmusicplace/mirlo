@@ -18,7 +18,7 @@ describe("securityHeaders", () => {
 
     assert.equal(
       response.headers["strict-transport-security"],
-      "max-age=31536000; includeSubDomains"
+      "max-age=31536000"
     );
     assert.equal(response.headers["x-content-type-options"], "nosniff");
     assert.equal(

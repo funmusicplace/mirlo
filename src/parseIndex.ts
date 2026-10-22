@@ -136,51 +136,84 @@ const buildOpenGraphTags = (
       ? description.substring(0, 160) + "..."
       : description;
 
-  $("head").append(`
-    <link rel="canonical" href="${url}" />
-    <meta property="og:type" content="${determineType(metadata)}">
-    <meta property="og:title" content="${title}">
-    <meta property="og:description" content="${description}">
-    <meta name="description" content="${metaDescription}">
-    <meta property="og:site_name" content="${artistName || instanceName}">
-    <meta property="og:url" content="${url}">
-    <meta name="twitter:title" content="${title}" />
-    <meta name="twitter:description" content="${description}" />
-    <meta name="twitter:card" content="${isAlbum || twitterPlayer ? "player" : "summary"}" />
+  const image = imageUrl ? imageUrl : "/" + mirloDefaultImagePath;
+  const tags: [string, Record<string, string | null>][] = [
+    ["link", { rel: "canonical", href: url }],
+    ["meta", { property: "og:type", content: determineType(metadata) }],
+    ["meta", { property: "og:title", content: title }],
+    ["meta", { property: "og:description", content: description }],
+    ["meta", { name: "description", content: metaDescription }],
+    ["meta", { property: "og:site_name", content: artistName || instanceName }],
+    ["meta", { property: "og:url", content: url }],
+    ["meta", { name: "twitter:title", content: title }],
+    ["meta", { name: "twitter:description", content: description }],
+    [
+      "meta",
+      {
+        name: "twitter:card",
+        content: isAlbum || twitterPlayer ? "player" : "summary",
+      },
+    ],
+    ["meta", { property: "og:image", content: image }],
+    ["meta", { name: "twitter:image", content: image }],
+    ["meta", { name: "theme-color", content: metadata.color ?? null }],
+    [
+      "meta",
+      { name: "msapplication-TileColor", content: metadata.color ?? null },
+    ],
+  ];
+  if (rss) {
+    tags.push([
+      "link",
+      { rel: "alternate", type: "application/rss+xml", href: rss },
+    ]);
+  }
+  tags.push([
+    "link",
+    {
+      rel: "alternate",
+      type: "application/json+oembed",
+      href: `${process.env.API_DOMAIN}/v1/oembed?url=${encodeURIComponent(url)}`,
+      title: "oEmbed",
+    },
+  ]);
+  if (ogVideo) {
+    tags.push(
+      ["meta", { name: "medium", content: "video" }],
+      ["meta", { name: "video_height", content: `${ogVideo.height}` }],
+      ["meta", { name: "video_width", content: `${ogVideo.width}` }],
+      ["meta", { name: "generator", content: "Mirlo" }],
+      ["meta", { property: "og:video:height", content: `${ogVideo.height}` }],
+      ["meta", { property: "og:video:width", content: `${ogVideo.width}` }],
+      ["meta", { property: "og:video", content: ogVideo.url }],
+      ["meta", { property: "og:video:type", content: "text/html" }],
+      ["meta", { property: "og:video:secure_url", content: ogVideo.url }]
+    );
+  }
+  if (twitterPlayer) {
+    tags.push(
+      ["meta", { property: "twitter:player", content: twitterPlayer.url }],
+      [
+        "meta",
+        {
+          property: "twitter:player:height",
+          content: `${twitterPlayer.height}`,
+        },
+      ],
+      [
+        "meta",
+        { property: "twitter:player:width", content: `${twitterPlayer.width}` },
+      ]
+    );
+  }
 
-    <meta property="og:image" content="${imageUrl ? imageUrl : "/" + mirloDefaultImagePath}" />
-    <meta name="twitter:image" content="${imageUrl ? imageUrl : "/" + mirloDefaultImagePath}" />
-    <meta name="theme-color" content="${metadata.color}" />
-    <meta name="msapplication-TileColor" content="${metadata.color}" />
-
-    ${rss ? `<link rel="alternate" type="application/rss+xml" href="${rss}" />` : ""}
-    <link rel="alternate" type="application/json+oembed" href="${process.env.API_DOMAIN}/v1/oembed?url=${encodeURIComponent(url)}" title="oEmbed" />
-    ${
-      ogVideo
-        ? `
-        <meta name="medium" content="video" />
-        <meta name="video_height" content="${ogVideo.height}" />
-        <meta name="video_width" content="${ogVideo.width}" />
-        <meta name="generator" content="Mirlo" />
-        <meta property="og:video:height" content="${ogVideo.height}" />
-        <meta property="og:video:width" content="${ogVideo.width}" />
-        <meta property="og:video" content="${ogVideo.url}" />
-        <meta property="og:video:type" content="text/html" />
-        <meta property="og:video:secure_url" content="${ogVideo.url}" />
-    `
-        : ""
-    }
-    ${
-      twitterPlayer
-        ? `
-        <meta property="twitter:player" content="${twitterPlayer.url}" />
-        <meta property="twitter:player:height" content="${twitterPlayer.height}" />
-        <meta property="twitter:player:width" content="${twitterPlayer.width}" />
-    `
-        : ""
-    }
-    ${schemas.map((schema) => `<script type="application/ld+json">${schema}</script>`).join("\n    ")}
-  `);
+  const head = $("head");
+  tags.forEach(([tag, attrs]) => {
+    head.append($(`<${tag}>`).attr(attrs));
+  });
+  schemas.forEach((schema) => {
+    head.append($('<script type="application/ld+json">').text(schema));
+  });
 };
 
 const handleReleasesPage: RouteHandler<{}> = async ({
@@ -924,7 +957,11 @@ export const analyzePathAndGenerateHTML = async (
     const activityPubUrl = await findActivityPubAlternate(pathname);
     if (activityPubUrl) {
       $("head").append(
-        `<link rel="alternate" type="application/activity+json" href="${activityPubUrl}" />`
+        $("<link>").attr({
+          rel: "alternate",
+          type: "application/activity+json",
+          href: activityPubUrl,
+        })
       );
     }
   } catch (error) {

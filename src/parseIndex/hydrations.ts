@@ -32,7 +32,15 @@ export const appendHydrationScript = (
   try {
     const injectedAt = new Date().toISOString();
     $("head").append(
-      `<script id="${scriptId}" type="application/json" data-object-id="${objectId}" data-injected-at="${injectedAt}"${artistId ? ` data-artist-id="${artistId}"` : ""}>${serializeForScript(data)}</script>`
+      $("<script>")
+        .attr({
+          id: scriptId,
+          type: "application/json",
+          "data-object-id": `${objectId}`,
+          "data-injected-at": injectedAt,
+          "data-artist-id": artistId ? `${artistId}` : null,
+        })
+        .text(serializeForScript(data))
     );
   } catch (err) {
     console.error(

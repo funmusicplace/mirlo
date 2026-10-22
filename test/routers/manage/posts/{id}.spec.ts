@@ -92,6 +92,29 @@ describe("manage/posts/{postId}", () => {
       assert(response.statusCode === 200);
     });
 
+    it("should PUT / strip scripts from the content but keep embeds", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id);
+
+      const response = await requestApp
+        .put(`manage/posts/${post.id}`)
+        .send({
+          content: `<p onmouseover="alert(1)">Hi</p><iframe srcdoc="<script>alert(2)</script>"></iframe><iframe src="https://www.youtube-nocookie.com/embed/abc" data-embed-type="youtube"></iframe>`,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const stored = await prisma.post.findFirst({ where: { id: post.id } });
+      assert.equal(
+        stored?.content,
+        `<p>Hi</p><iframe allow="autoplay; fullscreen"></iframe><iframe src="https://www.youtube-nocookie.com/embed/abc" data-embed-type="youtube" allow="autoplay; fullscreen"></iframe>`
+      );
+    });
+
     it("should PUT / save featuredImageCredit and return it from the public GET", async () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",

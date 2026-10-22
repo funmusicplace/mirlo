@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import { compact, uniq } from "lodash";
+import sanitizeHtml from "sanitize-html";
 
 import { originOf } from "./clientUrl";
 import { getClient } from "./getClient";
@@ -47,6 +48,73 @@ export const resolveImageRefs = (content: string, images: ContentImage[]) => {
   });
   return $.html();
 };
+
+const cssColor =
+  /^(#[0-9a-f]{3,8}|(rgb|rgba|hsl|hsla)\([\d\s.,%deg/]+\)|[a-z]+)$/i;
+
+const postContentSanitizeOptions: sanitizeHtml.IOptions = {
+  allowedTags: [
+    ...sanitizeHtml.defaults.allowedTags,
+    "img",
+    "iframe",
+    "del",
+    "ins",
+    "strike",
+  ],
+  allowedAttributes: {
+    "*": ["class", "style", "dir", "title", "data-*"],
+    a: ["href", "name", "target", "rel"],
+    img: ["src", "srcset", "alt", "width", "height", "loading"],
+    iframe: [
+      "src",
+      "width",
+      "height",
+      "frameborder",
+      "allowfullscreen",
+      "allow",
+      "loading",
+      "referrerpolicy",
+    ],
+    ol: ["start", "type", "reversed"],
+    li: ["value"],
+    td: ["colspan", "rowspan"],
+    th: ["colspan", "rowspan"],
+    col: ["span", "width"],
+  },
+  allowedStyles: {
+    "*": {
+      color: [cssColor],
+      "background-color": [cssColor],
+      "text-align": [/^(left|right|center|justify|start|end)$/],
+      "font-weight": [/^(normal|bold|bolder|lighter|\d{3})$/],
+      "font-style": [/^(normal|italic|oblique)$/],
+      "text-decoration": [/^(none|underline|line-through|overline)$/],
+    },
+  },
+  allowedSchemes: ["http", "https", "mailto", "tel"],
+  allowedSchemesByTag: {
+    img: ["http", "https", "data"],
+    iframe: ["http", "https"],
+  },
+  transformTags: {
+    iframe: (tagName, attribs) => ({
+      tagName,
+      attribs: { ...attribs, allow: "autoplay; fullscreen" },
+    }),
+  },
+};
+
+export const sanitizePostContent = (content: string) =>
+  sanitizeHtml(content, postContentSanitizeOptions);
+
+export const preparePostContent = async (
+  content: string,
+  imageIds: string[] = []
+) =>
+  stripWidgetHosts(
+    addImageRefs(sanitizePostContent(content), imageIds),
+    await ownWidgetOrigins()
+  );
 
 const widgetPathRegex = /^\/widget\/(track|trackGroup)\/\d+/;
 
