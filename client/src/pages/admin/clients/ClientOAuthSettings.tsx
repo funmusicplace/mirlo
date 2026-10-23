@@ -1,8 +1,10 @@
+import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
 import { AdminClient, useUpdateAdminClientMutation } from "queries/admin";
 import { MirloFetchError } from "queries/fetch/MirloFetchError";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { FaSave } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 
 export const splitList = (value: string) =>
@@ -49,17 +51,29 @@ const ClientOAuthSettings: React.FC<{ client: AdminClient }> = ({ client }) => {
   return (
     <div className="flex flex-col gap-1 min-w-64">
       <span>{t("oauthClientId", { id: client.id })}</span>
-      <InputEl
-        aria-label={t("redirectUris")}
-        value={redirectUris}
-        onChange={(e) => setRedirectUris(e.target.value)}
-        onBlur={() => {
-          if (redirectUris !== client.redirectUris.join(", ")) {
-            save({ redirectUris: splitList(redirectUris) });
-          }
+      <form
+        className="flex items-center gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          save({ redirectUris: splitList(redirectUris) });
         }}
-      />
-      <label className="flex items-center gap-2">
+      >
+        <InputEl
+          aria-label={t("redirectUris")}
+          value={redirectUris}
+          onChange={(e) => setRedirectUris(e.target.value)}
+        />
+        <Button
+          type="submit"
+          size="compact"
+          onlyIcon
+          startIcon={<FaSave />}
+          disabled={redirectUris === client.redirectUris.join(", ")}
+        >
+          {t("save")}
+        </Button>
+      </form>
+      <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
           checked={client.confidential}
