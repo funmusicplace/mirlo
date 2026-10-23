@@ -21,11 +21,10 @@ import { getClient } from "./getClient";
 import {
   convertURLArrayToSizes,
   deleteStoredImage,
-  generateFullStaticImageUrl,
   storedImageVariantUrl,
 } from "./images";
 import { deleteMerch, merchImagesInclude } from "./merch";
-import { coversPrefix, storedImagePrefix } from "./minio";
+import { storedImagePrefix } from "./minio";
 import { postImagesForContent } from "./postContent";
 import reservedProfileSlugs from "./reservedProfileSlugs";
 import { getSiteSettings } from "./settings";
@@ -664,11 +663,7 @@ export const singleInclude = (queryOptions?: {
           where: { deletedAt: null },
           orderBy: { order: "asc" },
         },
-        cover: {
-          where: {
-            deletedAt: null,
-          },
-        },
+        cover: true,
         fundraiser: true,
         paymentToUser: {
           select: { currency: true },
@@ -886,30 +881,13 @@ export const addSizesToStoredImage = <
 export const resolveProfileImageUrl = (artist: {
   avatar?: { url: string[]; keyPrefix: string | null } | null;
   background?: { url: string[]; keyPrefix: string | null } | null;
-  trackGroups?: Array<{ cover?: { url: string[] } | null }>;
-}): string | undefined => {
-  const profileImageUrl =
-    storedImageVariantUrl(artist.avatar, 600) ??
-    storedImageVariantUrl(artist.background, 625);
-  if (profileImageUrl) {
-    return profileImageUrl;
-  }
-
-  // Fall back to first album cover
-  if (
-    artist.trackGroups?.[0]?.cover?.url &&
-    artist.trackGroups[0].cover.url.length > 0
-  ) {
-    const coverString = artist.trackGroups[0].cover.url.find((u) =>
-      u.includes("x600")
-    );
-    if (coverString) {
-      return generateFullStaticImageUrl(coverString, coversPrefix);
-    }
-  }
-
-  return undefined;
-};
+  trackGroups?: Array<{
+    cover?: { url: string[]; keyPrefix: string | null } | null;
+  }>;
+}): string | undefined =>
+  storedImageVariantUrl(artist.avatar, 600) ??
+  storedImageVariantUrl(artist.background, 625) ??
+  storedImageVariantUrl(artist.trackGroups?.[0]?.cover, 600);
 
 /**
  * Artist-named aliases kept so callers can migrate to the profile naming a

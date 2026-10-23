@@ -109,6 +109,10 @@ export const deleteStoredImage = async (
     where: { backgroundImageId: imageId },
     data: { backgroundImageId: null },
   });
+  await prisma.trackGroup.updateMany({
+    where: { coverImageId: imageId },
+    data: { coverImageId: null },
+  });
   await prisma.image.delete({ where: { id: imageId } });
 
   try {

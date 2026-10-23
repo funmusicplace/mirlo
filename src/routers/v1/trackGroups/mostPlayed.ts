@@ -26,7 +26,7 @@ export default function () {
       FROM "TrackGroup" AS tg
       INNER JOIN "Track" AS tr ON tg.id = tr."trackGroupId"
       INNER JOIN "TrackPlay" AS tp ON tr.id = tp."trackId"
-      INNER JOIN "TrackGroupCover" AS tgc ON tg.id = tgc."trackGroupId"
+      INNER JOIN "Image" AS tgc ON tgc.id = tg."coverImageId"
       WHERE tg."publishedAt" <= NOW() 
       AND tg."isHiddenTrackGroupForSongDrafts" = false 
       AND tg."deletedAt" IS NULL 

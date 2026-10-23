@@ -14,7 +14,6 @@ import prisma from "../prisma";
 // Fresh installs use the consolidated 3-bucket layout (see docs/hosting/object-storage.md).
 const IMAGES_BUCKET = "mirlo-images";
 const AUDIO_BUCKET = "mirlo-audio";
-const COVER_PREFIX = "trackgroup-covers";
 
 const COVER_SIZES = [1500, 1200, 960, 600, 300, 120, 60];
 const AVATAR_SIZES = [1500, 1200, 960, 600, 300, 120, 60];
@@ -387,15 +386,17 @@ async function seedPublishedTrackGroupsInner(
           try {
             const { id: coverId, urls } = await generateAndUploadImage(
               minioClient,
-              COVER_PREFIX,
+              "",
               COVER_SIZES
             );
-            await prisma.trackGroupCover.create({
+            await prisma.image.create({
               data: {
                 id: coverId,
                 url: urls,
                 originalFilename: `seed-cover-${coverId}.webp`,
-                trackGroupId: trackGroup.id,
+                dimensions: "artwork",
+                profileId: artist.id,
+                coverOf: { connect: { id: trackGroup.id } },
               },
             });
             console.log(`  → Cover uploaded (${urls.length} sizes)`);

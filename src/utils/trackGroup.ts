@@ -21,8 +21,9 @@ import { FormatOptions } from "./audioFormats";
 import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
+import { deleteStoredImage } from "./images";
 import { merchImagesInclude } from "./merch";
-import { streamOriginalAudio, removeCoverImages } from "./minio";
+import { streamOriginalAudio } from "./minio";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { deleteTrack } from "./tracks";
 
@@ -132,24 +133,13 @@ export const whereForVisibleTrackGroup = (): Prisma.TrackGroupWhereInput => ({
 });
 
 export const deleteTrackGroupCover = async (trackGroupId: number) => {
-  const cover = await prisma.trackGroupCover.findFirst({
-    where: {
-      trackGroupId: trackGroupId,
-    },
+  const trackGroup = await prisma.trackGroup.findUnique({
+    where: { id: trackGroupId },
+    select: { cover: true },
   });
 
-  if (cover) {
-    await prisma.trackGroupCover.delete({
-      where: {
-        trackGroupId: trackGroupId,
-      },
-    });
-
-    try {
-      await removeCoverImages(cover.id);
-    } catch (e) {
-      console.error("Found no files, that's okay");
-    }
+  if (trackGroup?.cover) {
+    await deleteStoredImage(trackGroup.cover);
   }
 };
 
@@ -355,7 +345,7 @@ export const trackGroupSingleInclude = (options: {
     tags: {
       include: { tag: true },
     },
-    cover: { where: { deletedAt: null } },
+    cover: true,
     ...(options.loggedInUserId
       ? {
           userTrackGroupPurchases: {
@@ -648,11 +638,7 @@ export const basicTrackGroupInclude = {
         trackArtists: true,
       },
     },
-    cover: {
-      include: {
-        trackGroup: false,
-      },
-    },
+    cover: true,
     profile: {
       include: {
         user: false,

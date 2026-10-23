@@ -62,11 +62,7 @@ export default function () {
             },
           },
           profile: { include: { user: { select: { currency: true } } } },
-          cover: {
-            where: {
-              deletedAt: null,
-            },
-          },
+          cover: true,
         },
       });
 

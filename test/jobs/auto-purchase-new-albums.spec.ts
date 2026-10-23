@@ -864,7 +864,7 @@ describe("auto-purchase-new-albums", () => {
     await createTrackGroup(artist.id, {
       publishedAt: new Date(),
       title: "",
-      cover: { create: { url: [] } },
+      cover: { create: { url: [], dimensions: "artwork" } },
     });
 
     await triggerAutoPurchaseNewAlbums();

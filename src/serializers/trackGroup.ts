@@ -7,13 +7,11 @@ import {
   MerchImage,
   Track,
   TrackGroup,
-  TrackGroupCover,
   TrackGroupTag,
 } from "@mirlo/prisma/client";
 
-import { addSizesToImage, addSizesToStoredImage } from "../utils/artist";
-import { generateFullStaticImageUrl } from "../utils/images";
-import { coversPrefix } from "../utils/minio";
+import { addSizesToStoredImage } from "../utils/artist";
+import { storedImageVariantUrl } from "../utils/images";
 import { isTrackPlayableNested } from "../utils/trackPlayability";
 
 import { serializeMerch } from "./merch";
@@ -31,14 +29,14 @@ type TrackGroupOwner = Partial<Profile> & {
 };
 
 export interface LocalTrackGroup extends TrackGroup {
-  cover?: TrackGroupCover | null;
+  cover?: Image | null;
   artist?: Partial<Profile>;
   profile?: Partial<Profile>;
   tracks?: CanimusTrack[];
 }
 
 type TrackGroupInput = TrackGroup & {
-  cover?: TrackGroupCover | null;
+  cover?: Image | null;
   artist?: TrackGroupOwner;
   profile?: TrackGroupOwner;
   paymentToUser?: { currency?: string | null } | null;
@@ -137,7 +135,7 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
       })
     ),
     tags: tg.tags?.map((t) => t.tag?.tag) ?? [],
-    cover: addSizesToImage(coversPrefix, tg.cover),
+    cover: addSizesToStoredImage(tg.cover),
     downloadableContent: tg.downloadableContent?.map((dc) => ({
       ...dc,
       downloadableContent: {
@@ -181,7 +179,7 @@ export const serializeSingleTrackGroupIntoCanimus = (
   instanceName: string
 ) => {
   const releaseUrl = `${artistUrl}/release/${trackGroup.urlSlug}`;
-  const coverString = trackGroup.cover?.url.find((u) => u.includes("x600"));
+  const coverUrl = storedImageVariantUrl(trackGroup.cover, 600);
   let links;
   if (canBePurchased) {
     // TODO: replace with a standalone buy page once that exists
@@ -206,9 +204,9 @@ export const serializeSingleTrackGroupIntoCanimus = (
     license: trackGroup.credits,
     artist: artistName,
     images: {
-      cover: coverString
+      cover: coverUrl
         ? {
-            src: generateFullStaticImageUrl(coverString, coversPrefix),
+            src: coverUrl,
             alt: trackGroup.coverImageAlt,
             width: 600,
             height: 600,
