@@ -25,7 +25,7 @@ const Layout: React.FC = () => {
           <NavLink to="send-emails">{t("sendEmails")}</NavLink>
         </li>
         <li>
-          <NavLink to="tasks/fundraising">{t("tasks")}</NavLink>
+          <NavLink to="tasks">{t("tasks")}</NavLink>
         </li>
         <li>
           <NavLink to="clients">{t("clients")}</NavLink>

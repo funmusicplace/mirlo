@@ -9,6 +9,7 @@ export const fundraisers: Prisma.FundraiserCreateInput[] = [
     endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
     isAllOrNothing: true,
     status: "ACTIVE",
+    profile: { connect: { id: 1 } },
     trackGroups: {
       connect: [
         {
@@ -41,5 +42,6 @@ export const fundraisers: Prisma.FundraiserCreateInput[] = [
     endDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 days from now
     isAllOrNothing: false,
     status: "ACTIVE",
+    profile: { connect: { id: 1 } },
   },
 ];

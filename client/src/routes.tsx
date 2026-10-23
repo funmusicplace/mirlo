@@ -602,7 +602,7 @@ const routes: RouteObject[] = [
             children: [
               {
                 index: true,
-                Component: () => <Navigate to="fundraising" replace />,
+                Component: () => <Navigate to="server-tasks" replace />,
               },
               {
                 path: "server-tasks",
@@ -610,15 +610,6 @@ const routes: RouteObject[] = [
                 async lazy() {
                   const { default: Component } =
                     await import("pages/admin/tasks/server-tasks/Index");
-                  return { Component };
-                },
-              },
-              {
-                path: "fundraising",
-                handle: { title: "adminFundraising" },
-                async lazy() {
-                  const { default: Component } =
-                    await import("pages/admin/tasks/fundraising/Index");
                   return { Component };
                 },
               },

@@ -137,6 +137,28 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       assert.equal(moved.profileId, to.id);
     });
 
+    it("should move a release's fundraiser along with it", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const from = await createProfile(user.id, { urlSlug: "from-artist" });
+      const to = await createProfile(user.id, { urlSlug: "to-artist" });
+      const trackGroup = await createTrackGroup(from.id);
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ moveToArtistId: to.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const moved = await prisma.fundraiser.findFirstOrThrow({
+        where: { id: fundraiser.id },
+      });
+      assert.equal(moved.profileId, to.id);
+    });
+
     it("should give a moved release a free slug when the destination already uses it", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const from = await createProfile(user.id, { urlSlug: "from-artist" });
@@ -630,7 +652,8 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       const trackGroup = await createTrackGroup(profile.id, {
         urlSlug: "a-title",
       });
-      const fundraiser = await createFundraiser(trackGroup.id, {
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
         isAllOrNothing: true,
       });
       const unpaidPledge = await createFundraiserPledge(

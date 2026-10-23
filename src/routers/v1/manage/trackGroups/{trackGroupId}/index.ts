@@ -189,9 +189,6 @@ export default function () {
         "platformPercent",
         "isGettable",
         "paymentToUserId",
-        "fundraisingEndDate",
-        "fundraisingGoal",
-        "isAllOrNothing",
         "publishedAt",
         "defaultAllowMirloPromo",
         "defaultTrackAllowIndividualSale",
@@ -317,6 +314,13 @@ export default function () {
           ...(movingToNewProfile ? { profileId: targetProfileId } : {}),
         },
       });
+
+      if (movingToNewProfile && existingTrackGroup.fundraiserId) {
+        await prisma.fundraiser.update({
+          where: { id: existingTrackGroup.fundraiserId },
+          data: { profileId: targetProfileId },
+        });
+      }
 
       let trackGroup = await prisma.trackGroup.findFirst({
         where: { id: Number(trackGroupId) },

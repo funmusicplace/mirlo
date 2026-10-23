@@ -9,6 +9,8 @@ import request from "supertest";
 import {
   clearTables,
   createArtist,
+  createFundraiser,
+  createFundraiserPledge,
   createMerch,
   createTrack,
   createTrackGroup,
@@ -163,6 +165,41 @@ describe("admin/topAccounts", () => {
       ]
     );
     assert.equal(year.body.result.purchasers[0].email, "small@buyer.com");
+  });
+
+  it("should credit a charged pledge to the fundraiser's profile", async () => {
+    const { accessToken } = await createUser({
+      email: "admin@admin.com",
+      isAdmin: true,
+    });
+    const { user: artistUser } = await createUser({ email: "a@a.com" });
+    const { user: backer } = await createUser({ email: "backer@buyer.com" });
+    const artist = await createArtist(artistUser.id, { name: "Fundraiser" });
+    const fundraiser = await createFundraiser(artist.id, {
+      name: "Standalone",
+    });
+    const pledgeTx = await prisma.userTransaction.create({
+      data: { userId: backer.id, amount: 4000, currency: "usd" },
+    });
+    await createFundraiserPledge(fundraiser.id, backer.id, {
+      amount: 4000,
+      stripeSetupIntentId: "seti_pledge",
+      paidAt: new Date(),
+      associatedTransactionId: pledgeTx.id,
+    });
+
+    const response = await requestApp
+      .get("admin/topAccounts?period=month")
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(
+      response.body.result.sellers.map(
+        (s: { name: string; usdCents: number }) => [s.name, s.usdCents]
+      ),
+      [["Fundraiser", 4000]]
+    );
   });
 
   it("should rank artists by free downloads and by uploads within the period", async () => {

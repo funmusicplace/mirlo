@@ -3,8 +3,13 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+import sinon from "sinon";
+import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
 
+import * as sendMailQueueModule from "../../../../src/queues/send-mail-queue";
+import { chargeFundraiserPledges } from "../../../../src/utils/fundraiser";
+import * as stripeUtils from "../../../../src/utils/stripe";
 import {
   clearTables,
   createArtist,
@@ -24,13 +29,85 @@ describe("manage/fundraisers/{fundraiserId}/chargePledges", () => {
     }
   });
 
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  const stubStripeForCharge = () => {
+    sinon.stub(stripeUtils.stripe.accounts, "retrieve").resolves({
+      default_currency: "usd",
+      country: "US",
+    } as unknown as Stripe.Response<Stripe.Account>);
+    sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+      data: [{ id: "cus_backer" }],
+    } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+    sinon.stub(stripeUtils.stripe.paymentMethods, "list").resolves({
+      data: [{ id: "pm_backer" }],
+    } as unknown as Stripe.Response<Stripe.ApiList<Stripe.PaymentMethod>>);
+    sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
+    return sinon.stub(stripeUtils.stripe.paymentIntents, "create").resolves({
+      id: "pi_pledge_charge",
+      status: "succeeded",
+    } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+  };
+
+  it("charges pledges on a fundraiser without a release", async () => {
+    const { user } = await createUser({
+      email: "fundraiser-owner@example.com",
+      stripeAccountId: "acct_owner",
+    });
+    const { user: backer } = await createUser({ email: "backer@example.com" });
+    const artist = await createArtist(user.id);
+    const fundraiser = await createFundraiser(artist.id, {
+      name: "Standalone",
+      goalAmount: 1000,
+    });
+    await createFundraiserPledge(fundraiser.id, backer.id, { amount: 5000 });
+    const createStub = stubStripeForCharge();
+
+    await chargeFundraiserPledges(fundraiser.id);
+
+    assert.equal(createStub.callCount, 1);
+    assert.equal(createStub.firstCall.args[0].amount, 5000);
+    assert.deepEqual(createStub.firstCall.args[1], {
+      stripeAccount: "acct_owner",
+    });
+  });
+
+  it("charges pledges on the profile's payee account, where they were saved", async () => {
+    const { user } = await createUser({
+      email: "fundraiser-owner@example.com",
+      stripeAccountId: "acct_owner",
+    });
+    const { user: payee } = await createUser({
+      email: "payee@example.com",
+      stripeAccountId: "acct_payee",
+    });
+    const { user: backer } = await createUser({ email: "backer@example.com" });
+    const artist = await createArtist(user.id, { paymentToUserId: payee.id });
+    const trackGroup = await createTrackGroup(artist.id);
+    const fundraiser = await createFundraiser(trackGroup.profileId, {
+      trackGroupId: trackGroup.id,
+      goalAmount: 1000,
+    });
+    await createFundraiserPledge(fundraiser.id, backer.id, { amount: 5000 });
+    const createStub = stubStripeForCharge();
+
+    await chargeFundraiserPledges(fundraiser.id);
+
+    assert.deepEqual(createStub.firstCall.args[1], {
+      stripeAccount: "acct_payee",
+    });
+  });
+
   it("marks the fundraiser SUCCESSFUL even when there are no pledges to charge (#1681)", async () => {
     const { user, accessToken } = await createUser({
       email: "fundraiser-owner@example.com",
     });
     const artist = await createArtist(user.id);
     const trackGroup = await createTrackGroup(artist.id);
-    const fundraiser = await createFundraiser(trackGroup.id, {
+    const fundraiser = await createFundraiser(trackGroup.profileId, {
+      trackGroupId: trackGroup.id,
       isAllOrNothing: false,
     });
 
@@ -57,7 +134,8 @@ describe("manage/fundraisers/{fundraiserId}/chargePledges", () => {
     const { user: backer } = await createUser({ email: "backer@example.com" });
     const artist = await createArtist(user.id);
     const trackGroup = await createTrackGroup(artist.id);
-    const fundraiser = await createFundraiser(trackGroup.id, {
+    const fundraiser = await createFundraiser(trackGroup.profileId, {
+      trackGroupId: trackGroup.id,
       isAllOrNothing: true,
       goalAmount: 50000,
     });
@@ -89,7 +167,8 @@ describe("manage/fundraisers/{fundraiserId}/chargePledges", () => {
     });
     const artist = await createArtist(user.id);
     const trackGroup = await createTrackGroup(artist.id);
-    const fundraiser = await createFundraiser(trackGroup.id, {
+    const fundraiser = await createFundraiser(trackGroup.profileId, {
+      trackGroupId: trackGroup.id,
       status: "SUCCESSFUL",
     });
 
@@ -111,7 +190,9 @@ describe("manage/fundraisers/{fundraiserId}/chargePledges", () => {
     });
     const artist = await createArtist(owner.id);
     const trackGroup = await createTrackGroup(artist.id);
-    const fundraiser = await createFundraiser(trackGroup.id);
+    const fundraiser = await createFundraiser(trackGroup.profileId, {
+      trackGroupId: trackGroup.id,
+    });
 
     const response = await requestApp
       .post(`manage/fundraisers/${fundraiser.id}/chargePledges`)

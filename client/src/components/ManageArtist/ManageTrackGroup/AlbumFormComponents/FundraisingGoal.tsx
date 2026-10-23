@@ -19,6 +19,7 @@ import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
 const FundraisingGoal: React.FC<{
+  artistId: number;
   trackGroupId: number;
   fundraiser?: {
     id: number;
@@ -28,7 +29,7 @@ const FundraisingGoal: React.FC<{
     description?: string | null;
     status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   } | null;
-}> = ({ trackGroupId, fundraiser }) => {
+}> = ({ artistId, trackGroupId, fundraiser }) => {
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { register } = useFormContext<TrackGroupFormData>();
@@ -84,7 +85,9 @@ const FundraisingGoal: React.FC<{
     try {
       setIsLoading(true);
       setDidAddFundraiser(true);
-      await api.post(`manage/trackGroups/${trackGroupId}/fundraiser`, {});
+      await api.post(`manage/artists/${artistId}/fundraisers`, {
+        trackGroupId,
+      });
       refetch();
     } catch (e) {
       console.error(e);
@@ -111,7 +114,7 @@ const FundraisingGoal: React.FC<{
           return;
         }
       }
-      await api.delete(`manage/trackGroups/${trackGroupId}/fundraiser`);
+      await api.delete(`manage/fundraisers/${fundraiser.id}`);
       snackbar(t("fundraiserRemoved"), {
         type: "success",
       });
@@ -209,16 +212,6 @@ const FundraisingGoal: React.FC<{
           gap: 0.5rem;
         `}
       >
-        {/* <FormComponent>
-          <label>{t("fundraisingEndDate")}</label>
-          <SavingInput
-            formKey="fundraisingEndDate"
-            type="date"
-            required
-            url={`manage/trackGroups/${trackGroupId}`}
-            extraData={{ artistId: Number(artistId) }}
-          />
-        </FormComponent> */}
         <FormComponent>
           <label htmlFor="input-fundraiser-name">{t("fundraiserName")}</label>
           <InputEl

@@ -413,22 +413,23 @@ export const createTrackPlay = async (
 };
 
 export const createFundraiser = async (
-  trackGroupId: number,
-  data?: Partial<Prisma.FundraiserCreateArgs["data"]>
+  profileId: number,
+  {
+    trackGroupId,
+    ...data
+  }: Partial<Prisma.FundraiserUncheckedCreateInput> & {
+    trackGroupId?: number;
+  } = {}
 ) => {
   const fundraiser = await prisma.fundraiser.create({
     data: {
-      name: data?.name ?? "Test Fundraiser",
-      goalAmount: data?.goalAmount ?? 50000,
-      description: data?.description,
-      isAllOrNothing: data?.isAllOrNothing ?? false,
-      status: data?.status ?? "ACTIVE",
-      endDate: data?.endDate,
-      trackGroups: {
-        connect: {
-          id: trackGroupId,
-        },
-      },
+      name: "Test Fundraiser",
+      goalAmount: 50000,
+      ...data,
+      profileId,
+      ...(trackGroupId && {
+        trackGroups: { connect: { id: trackGroupId } },
+      }),
     },
   });
   return fundraiser;
@@ -437,19 +438,15 @@ export const createFundraiser = async (
 export const createFundraiserPledge = async (
   fundraiserId: number,
   userId: number,
-  data?: Partial<Prisma.FundraiserPledgeCreateArgs["data"]>
+  data?: Partial<Prisma.FundraiserPledgeUncheckedCreateInput>
 ) => {
   const pledge = await prisma.fundraiserPledge.create({
     data: {
+      amount: 5000,
+      stripeSetupIntentId: `seti_test_${Math.random()}`,
+      ...data,
       fundraiserId,
       userId,
-      amount: data?.amount ?? 5000,
-      stripeSetupIntentId:
-        data?.stripeSetupIntentId ?? `seti_test_${Math.random()}`,
-      trackGroupId: data?.trackGroupId,
-      message: data?.message,
-      paidAt: data?.paidAt,
-      cancelledAt: data?.cancelledAt,
     },
   });
   return pledge;

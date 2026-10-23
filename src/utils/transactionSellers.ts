@@ -27,7 +27,7 @@ export const transactionSellerLinks = Prisma.sql`
   JOIN "ProfileUserSubscription" s ON s.id = x."profileUserSubscriptionId"
   JOIN "ProfileSubscriptionTier" st ON st.id = s."profileSubscriptionTierId"
   UNION ALL
-  SELECT x."associatedTransactionId", tg."profileId"
+  SELECT x."associatedTransactionId", f."profileId"
   FROM "FundraiserPledge" x
-  JOIN "TrackGroup" tg ON tg.id = x."trackGroupId"
+  JOIN "Fundraiser" f ON f.id = x."fundraiserId"
 `;

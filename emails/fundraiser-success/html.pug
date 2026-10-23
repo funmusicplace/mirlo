@@ -1,10 +1,16 @@
 extends ../layout.pug
 
 block content
-  p The fundraiser for #{artist.name}'s #{trackGroup.title} has been successfully funded! 
-  
+  if trackGroup
+    p The fundraiser for #{artist.name}'s #{trackGroup.title} has been successfully funded!
+  else
+    p #{artist.name}'s fundraiser "#{fundraiserName}" has been successfully funded!
+
   p You contributed #{currency} #{pledgedAmountFormatted} towards the goal of #{currency} #{fundraisingGoalFormatted}, and your card has been charged!
-  p 
-    a(href!=`${client}/${artist.urlSlug}/releases/${trackGroup.urlSlug}`) View it on #{instanceName}.
+  p
+    if trackGroup
+      a(href!=`${client}/${artist.urlSlug}/release/${trackGroup.urlSlug}`) View it on #{instanceName}.
+    else
+      a(href!=`${client}/${artist.urlSlug}`) View it on #{instanceName}.
   hr
   p Thank you for supporting independent artists on #{instanceName}!

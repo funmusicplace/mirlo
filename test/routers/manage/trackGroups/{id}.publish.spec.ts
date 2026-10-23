@@ -6,6 +6,7 @@ import { beforeEach, describe, it } from "mocha";
 
 import {
   clearTables,
+  createFundraiser,
   createProfile,
   createTrackGroup,
   createUser,
@@ -82,8 +83,8 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
       const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: null,
         tracks: [],
-        fundraisingGoal: 1000,
       });
+      await createFundraiser(profile.id, { trackGroupId: trackGroup.id });
 
       const response = await requestApp
         .put(`manage/trackGroups/${trackGroup.id}/publish`)

@@ -1,4 +1,5 @@
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import { useSaveAlbumFormMutation } from "queries/trackGroups";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -9,8 +10,6 @@ import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 import { isTrackGroupPublished } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
-
-import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 
 const PublishButton: React.FC<{
   trackGroup: TrackGroup;
@@ -161,7 +160,7 @@ const PublishButton: React.FC<{
   }
 
   const nothingToPublish =
-    trackGroup.tracks?.length === 0 && !trackGroup.fundraisingGoal;
+    trackGroup.tracks?.length === 0 && !trackGroup.fundraiser;
 
   return (
     <div className="flex flex-wrap gap-3">

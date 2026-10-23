@@ -582,6 +582,78 @@ describe("send-mail job", () => {
       );
     });
 
+    it("renders fundraiser-success with and without a release", async () => {
+      await createSiteSettings({
+        emailProvider: {
+          provider: "mailgun",
+          fromEmail: "noreply@mirlo.test",
+          mailgun: { apiKey: "key-test", domain: "mg.mirlo.test" },
+        },
+      });
+
+      let sent: { html?: string; subject?: string } = {};
+      const transport = {
+        sendMail: (mail: typeof sent) => {
+          sent = mail;
+          return Promise.resolve({ messageId: "test-fundraiser-success" });
+        },
+      };
+      sandbox.stub(nodemailer, "createTransport").returns(transport as any);
+
+      const render = async (trackGroup?: {
+        title: string;
+        urlSlug: string;
+      }) => {
+        await sendMail({
+          data: {
+            template: "fundraiser-success",
+            locals: {
+              artist: { name: "Test Artist", urlSlug: "test-artist" },
+              fundraiserName: "New Van",
+              trackGroup,
+              currency: "usd",
+              pledgedAmountFormatted: 20,
+              fundraisingGoalFormatted: 1000,
+              client: "http://localhost:3000",
+            },
+            message: { to: "backer@example.com" },
+          },
+        } as Job);
+        return sent;
+      };
+
+      const originalMailhog = process.env.MAILHOG_PORT;
+      process.env.MAILHOG_PORT = "1025";
+      try {
+        const standalone = await render();
+        assert.equal(
+          standalone.subject,
+          "Fundraiser successful: New Van has been funded!"
+        );
+        assert.ok(
+          standalone.html?.includes('href="http://localhost:3000/test-artist"')
+        );
+        assert.ok(!standalone.html?.includes("undefined"));
+
+        const withRelease = await render({
+          title: "Test Album",
+          urlSlug: "test-album",
+        });
+        assert.ok(withRelease.html?.includes("Test Album"));
+        assert.ok(
+          withRelease.html?.includes(
+            'href="http://localhost:3000/test-artist/release/test-album"'
+          )
+        );
+      } finally {
+        if (originalMailhog === undefined) {
+          delete process.env.MAILHOG_PORT;
+        } else {
+          process.env.MAILHOG_PORT = originalMailhog;
+        }
+      }
+    });
+
     it("renders the instance title in the sender, subject and body", async () => {
       await createSiteSettings({
         instanceCustomization: { title: "Nightjar" },

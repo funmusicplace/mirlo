@@ -1,16 +1,10 @@
 import prisma, { SafeUser } from "@mirlo/prisma";
-import {
-  Profile,
-  TrackGroup,
-  FundraiserPledge,
-  Fundraiser,
-} from "@mirlo/prisma/client";
+import { Profile, TrackGroup, FundraiserPledge } from "@mirlo/prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 
 import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
 import { serializeProfile } from "../serializers/artist";
-import { serializeFundraiserPledge } from "../serializers/fundraiser";
 import { processSingleTrackGroup } from "../serializers/trackGroup";
 import { serializeUserTransaction } from "../serializers/userTransaction";
 
@@ -888,9 +882,7 @@ export type ArtistNewSubscriberAnnounceEmailType = {
 };
 
 export const handleFundraiserPledge = async (
-  pledge: FundraiserPledge & {
-    fundraiser: Fundraiser & { trackGroups: TrackGroup[] };
-  },
+  pledge: FundraiserPledge,
   currency: string
 ) => {
   const transaction = await prisma.userTransaction.create({
@@ -920,7 +912,15 @@ export const handleFundraiserPledgePaymentSuccess = async (
     },
     include: {
       associatedPledge: {
-        include: { fundraiser: { include: { trackGroups: true } } },
+        include: {
+          user: { select: { email: true } },
+          fundraiser: {
+            include: {
+              profile: { select: { name: true, urlSlug: true } },
+              trackGroups: { where: { deletedAt: null } },
+            },
+          },
+        },
       },
     },
   });
@@ -930,7 +930,9 @@ export const handleFundraiserPledgePaymentSuccess = async (
     return;
   }
 
-  if (transaction.associatedPledge === null) {
+  const pledge = transaction.associatedPledge;
+
+  if (pledge === null) {
     console.error(`Transaction ${transactionId} has no associated pledge`);
     return;
   }
@@ -951,75 +953,44 @@ export const handleFundraiserPledgePaymentSuccess = async (
     },
   });
 
-  const pledge = await prisma.fundraiserPledge.update({
+  await prisma.fundraiserPledge.update({
     where: {
-      id: transaction.associatedPledge.id,
+      id: pledge.id,
     },
     data: {
       paidAt: new Date(),
       associatedTransactionId: transaction.id,
     },
-    select: {
-      amount: true,
-      user: {
-        select: { email: true },
-      },
-      fundraiser: {
-        select: {
-          goalAmount: true,
-          trackGroups: {
-            select: {
-              title: true,
-              urlSlug: true,
-              profile: {
-                select: {
-                  name: true,
-                  urlSlug: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
   });
+
+  const { fundraiser } = pledge;
 
   await prisma.notification.create({
     data: {
-      userId: transaction.associatedPledge.userId,
+      userId: pledge.userId,
       notificationType: "FUNDRAISER_PLEDGE_CHARGED",
       content: `Your pledge of ${(transaction.amount / 100).toFixed(
         2
       )} ${transaction.currency.toUpperCase()} to the fundraiser "${
-        transaction.associatedPledge.fundraiser.name
+        fundraiser.name
       }" has been successfully processed.`,
       createdAt: new Date(),
-      trackGroupId: transaction.associatedPledge.fundraiser.trackGroups[0].id,
+      trackGroupId: fundraiser.trackGroups[0]?.id,
     },
   });
 
   await Promise.all(
-    transaction.associatedPledge.fundraiser.trackGroups.map(async (tg) => {
-      if (transaction.associatedPledge === null) {
-        return;
-      }
-      await prisma.userTrackGroupPurchase.create({
+    fundraiser.trackGroups.map((tg) =>
+      prisma.userTrackGroupPurchase.create({
         data: {
-          userId: transaction.associatedPledge.userId,
+          userId: pledge.userId,
           trackGroupId: tg.id,
           createdAt: new Date(),
           userTransactionId: transaction.id,
         },
-      });
-    })
+      })
+    )
   );
-
-  const serializedPledge = serializeFundraiserPledge(pledge);
-  const serializedTrackGroup = serializedPledge.fundraiser
-    ?.trackGroups?.[0] as {
-    artist: { name: string };
-    [key: string]: unknown;
-  };
 
   await sendMailQueue.add("send-mail", {
     template: "fundraiser-success",
@@ -1027,13 +998,14 @@ export const handleFundraiserPledgePaymentSuccess = async (
       to: pledge.user.email,
     },
     locals: {
-      artist: serializedTrackGroup.artist,
+      artist: fundraiser.profile,
+      fundraiserName: fundraiser.name,
       email: encodeURIComponent(pledge.user.email),
       host: process.env.API_DOMAIN,
-      trackGroup: serializedTrackGroup,
+      trackGroup: fundraiser.trackGroups[0],
       currency: transaction.currency,
       pledgedAmountFormatted: pledge.amount / 100,
-      fundraisingGoalFormatted: (pledge.fundraiser.goalAmount ?? 0) / 100,
+      fundraisingGoalFormatted: fundraiser.goalAmount / 100,
       client: applicationUrl,
     },
   });
@@ -1052,9 +1024,7 @@ export const handleFundraiserPledgePaymentFailure = async (
       associatedPledge: {
         include: {
           user: true,
-          fundraiser: {
-            include: { trackGroups: { include: { profile: true } } },
-          },
+          fundraiser: { include: { profile: true } },
         },
       },
     },
@@ -1083,14 +1053,7 @@ export const handleFundraiserPledgePaymentFailure = async (
     },
   });
 
-  const serializedPledge = serializeFundraiserPledge(
-    transaction.associatedPledge
-  );
-  const serializedTrackGroup = serializedPledge.fundraiser
-    ?.trackGroups?.[0] as {
-    artist: { name: string };
-    title: string;
-  };
+  const { fundraiser } = transaction.associatedPledge;
 
   await sendMailQueue.add("send-mail", {
     template: "charge-failure",
@@ -1098,10 +1061,9 @@ export const handleFundraiserPledgePaymentFailure = async (
       to: transaction.associatedPledge.user.email,
     },
     locals: {
-      artist: serializedTrackGroup.artist,
       email: encodeURIComponent(transaction.associatedPledge?.user.email),
       host: process.env.API_DOMAIN,
-      cardChargeContext: `your pledge to "${serializedTrackGroup.artist.name}'s ${serializedTrackGroup.title}" fundraiser`,
+      cardChargeContext: `your pledge to ${fundraiser.profile.name}'s "${fundraiser.name}" fundraiser`,
       currency: transaction.currency,
       pledgedAmountFormatted: transaction.associatedPledge.amount / 100,
       client: applicationUrl,

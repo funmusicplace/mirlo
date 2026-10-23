@@ -1014,7 +1014,8 @@ describe("purchase", () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
       const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
-      const fundraiser = await createFundraiser(trackGroup.id, {
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
         isAllOrNothing: true,
       });
 
@@ -1049,7 +1050,8 @@ describe("purchase", () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
       const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
-      const fundraiser = await createFundraiser(trackGroup.id, {
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
         isAllOrNothing: true,
         status: "SUCCESSFUL",
       });
@@ -1079,7 +1081,8 @@ describe("purchase", () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
       const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
-      const fundraiser = await createFundraiser(trackGroup.id, {
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
         isAllOrNothing: true,
       });
 
@@ -1187,7 +1190,8 @@ describe("purchase", () => {
       });
       const profile = await createProfile(artistUser.id);
       const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
-      const fundraiser = await createFundraiser(trackGroup.id, {
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
         isAllOrNothing: true,
       });
 
@@ -1581,7 +1585,8 @@ describe("purchase", () => {
       });
       const profile = await createProfile(artistUser.id);
       const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
-      const fundraiser = await createFundraiser(trackGroup.id, {
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
         isAllOrNothing: true,
       });
       const list = sinon.stub(stripeUtils.stripe.customers, "list");
@@ -1609,7 +1614,8 @@ describe("purchase", () => {
       });
       const profile = await createProfile(artistUser.id);
       const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
-      const fundraiser = await createFundraiser(trackGroup.id, {
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
         isAllOrNothing: true,
       });
       const list = sinon.stub(stripeUtils.stripe.customers, "list");
@@ -1734,7 +1740,8 @@ describe("purchase", () => {
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
       const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
-      const fundraiser = await createFundraiser(trackGroup.id, {
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
         isAllOrNothing: true,
       });
 

@@ -415,20 +415,17 @@ export const fundraiserBelongsToLoggedInUser = async (
         where: {
           id: Number(fundraiserId),
         },
-        include: {
-          trackGroups: true,
-        },
+        select: { profileId: true },
       });
-      if (!fundraiser) {
+      if (
+        !fundraiser ||
+        !(await canUserEditProfile(fundraiser.profileId, loggedInUser))
+      ) {
         throw new AppError({
           description: "Fundraiser does not exist",
           httpCode: 404,
         });
       }
-      await doesTrackGroupBelongToUser(
-        Number(fundraiser?.trackGroups[0].id),
-        loggedInUser
-      );
     }
   } catch (e) {
     return next(e);

@@ -105,11 +105,7 @@ const SavingInput = React.forwardRef<
         setIsSaving(true);
         let value = getValues(formKey);
 
-        if (
-          formKey === "releaseDate" ||
-          formKey === "publishedAt" ||
-          formKey === "fundraisingEndDate"
-        ) {
+        if (formKey === "releaseDate" || formKey === "publishedAt") {
           if (!value) {
             value = null;
           } else {
