@@ -99,11 +99,9 @@ function generateGlitchNoiseBuffer(width: number, height: number): Buffer {
 
 export async function generateAndUploadImage(
   minioClient: Minio.Client,
-  prefix: string,
   sizes: number[]
 ): Promise<{ id: string; urls: string[] }> {
   const id = randomUUID();
-  const keyPrefix = prefix ? `${prefix}/` : "";
   // Seed covers don't need full 1500px; smaller base cuts sharp peak memory hard.
   const baseSize = 600;
   const seedSizes = sizes.filter((s) => s <= baseSize);
@@ -115,11 +113,7 @@ export async function generateAndUploadImage(
     .webp({ quality: 70 })
     .toBuffer();
 
-  await minioClient.putObject(
-    IMAGES_BUCKET,
-    `${keyPrefix}${id}-original.webp`,
-    baseWebp
-  );
+  await minioClient.putObject(IMAGES_BUCKET, `${id}-original.webp`, baseWebp);
 
   // Sequential resizes — parallel sharp pipelines spike memory enough to
   // get the seed process SIGKILL'd under Docker/cgroup limits.
@@ -129,11 +123,7 @@ export async function generateAndUploadImage(
       .resize(size, size, { fit: "inside", withoutEnlargement: true })
       .webp({ quality: 70 })
       .toBuffer();
-    await minioClient.putObject(
-      IMAGES_BUCKET,
-      `${keyPrefix}${id}-x${size}.webp`,
-      resized
-    );
+    await minioClient.putObject(IMAGES_BUCKET, `${id}-x${size}.webp`, resized);
     sizeUrls.push(`${id}-x${size}`);
   }
 
@@ -303,7 +293,6 @@ async function seedPublishedTrackGroupsInner(
       try {
         const { id, urls } = await generateAndUploadImage(
           minioClient,
-          "",
           AVATAR_SIZES
         );
         await prisma.image.create({
@@ -386,7 +375,6 @@ async function seedPublishedTrackGroupsInner(
           try {
             const { id: coverId, urls } = await generateAndUploadImage(
               minioClient,
-              "",
               COVER_SIZES
             );
             await prisma.image.create({

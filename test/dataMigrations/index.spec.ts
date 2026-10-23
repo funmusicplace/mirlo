@@ -355,15 +355,13 @@ describe("dataMigrations: imageContentTypes", () => {
 
   it("stores the content type and cache control on local uploads", async () => {
     await uploadOptimizedImageByType(
-      "trackGroupCover",
+      "image",
       "typed-cover-x600.webp",
       Buffer.from("image"),
       { contentType: "image/webp", cacheControl: "public, max-age=60" }
     );
 
-    const metadata = await storedMetadata(
-      "trackgroup-covers/typed-cover-x600.webp"
-    );
+    const metadata = await storedMetadata("typed-cover-x600.webp");
     assert.equal(metadata?.["content-type"], "image/webp");
     assert.equal(metadata?.["cache-control"], "public, max-age=60");
   });

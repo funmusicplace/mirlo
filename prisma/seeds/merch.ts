@@ -119,7 +119,6 @@ export async function seedMerch() {
           try {
             const { id: imageId, urls } = await generateAndUploadImage(
               minioClient,
-              "",
               MERCH_SIZES
             );
             // Merch images are central Image rows at the bucket root.
