@@ -18,18 +18,17 @@ import {
 } from "../../../../../utils/postContent";
 
 async function syncPostImages(
-  postImages: { id: string }[],
+  imageIds: string[],
   content: string,
   featuredImageId: string | null
 ) {
-  const imagesToDelete = postImages
-    .filter((image) => {
-      const inContent = content.includes(image.id);
-      const isFeatured = featuredImageId === image.id;
-      return !(inContent || isFeatured);
-    })
-    .map((image) => image.id);
+  const imagesToDelete = imageIds.filter(
+    (imageId) => !(content.includes(imageId) || featuredImageId === imageId)
+  );
   await prisma.postImage.deleteMany({
+    where: { imageId: { in: imagesToDelete } },
+  });
+  await prisma.image.deleteMany({
     where: { id: { in: imagesToDelete } },
   });
 }
@@ -216,14 +215,12 @@ export default function () {
 
       const postImages = await prisma.postImage.findMany({
         where: { postId: Number(postId) },
-        select: { id: true },
+        select: { imageId: true },
       });
+      const imageIds = postImages.map((image) => image.imageId);
       const contentWithRefs =
         typeof content === "string"
-          ? await preparePostContent(
-              content,
-              postImages.map((image) => image.id)
-            )
+          ? await preparePostContent(content, imageIds)
           : content;
 
       const updatedPost = await prisma.post.update({
@@ -262,7 +259,7 @@ export default function () {
 
       if (contentWithRefs) {
         await syncPostImages(
-          postImages,
+          imageIds,
           contentWithRefs,
           updatedPost.featuredImageId
         );

@@ -35,7 +35,6 @@ import {
   artistAvatarPrefix,
   artistBackgroundPrefix,
   coversPrefix,
-  postImagePrefix,
   instanceLogoPrefix,
   rootImagePrefix,
 } from "../../src/utils/minio";
@@ -122,7 +121,7 @@ describe("minio bucket routing", () => {
       assert.equal(getImagePrefix("artistBackground"), artistBackgroundPrefix);
       assert.equal(getImagePrefix("trackGroupCover"), coversPrefix);
       assert.equal(getImagePrefix("image"), rootImagePrefix);
-      assert.equal(getImagePrefix("postImage"), postImagePrefix);
+      assert.equal(getImagePrefix("postImage"), rootImagePrefix);
       assert.equal(getImagePrefix("instanceLogo"), instanceLogoPrefix);
     });
   });
@@ -177,7 +176,7 @@ describe("minio bucket routing", () => {
       assert.equal(key, `${instanceLogoPrefix}/logo-id.svg`);
     });
 
-    it("uploadIncomingImageByType(postImage) → mirlo-images / {prefix}/{id}, where it's served from", async () => {
+    it("uploadIncomingImageByType(postImage) → mirlo-images / {id} at the root, where it's served from", async () => {
       await uploadIncomingImageByType(
         "postImage",
         "post-id.gif",
@@ -185,7 +184,7 @@ describe("minio bucket routing", () => {
       );
       const [bucket, key] = putObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `${postImagePrefix}/post-id.gif`);
+      assert.equal(key, "post-id.gif");
     });
 
     it("uploadIncomingImageByType(image) → mirlo-images with NO path prefix (prefix: undefined)", async () => {

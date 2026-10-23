@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import prisma from "@mirlo/prisma";
 import { Queue, QueueEvents } from "bullmq";
 import sharp from "sharp";
@@ -98,6 +100,8 @@ const isUnsupportedImageCodecError = (error: unknown) => {
   );
 };
 
+const fileExtension = (filename: string) => filename.split(".").pop();
+
 export const uploadAndSendToImageQueue = async (
   ctx: APIContext,
   imageType: ImageType,
@@ -172,7 +176,6 @@ export const uploadAndSendToImageQueue = async (
         }
 
         try {
-          const filenameArray = fileInfo.filename.split(".");
           const transform = sharp().rotate();
 
           if (largestVariant.width || largestVariant.height) {
@@ -186,7 +189,7 @@ export const uploadAndSendToImageQueue = async (
 
           const optimizedStream = fileStream.pipe(transform);
           const fileName = storeWithExtension
-            ? `${image.id}.${[filenameArray[filenameArray.length - 1]]}`
+            ? `${image.id}.${fileExtension(fileInfo.filename)}`
             : image.id;
           await uploadIncomingImageByType(
             imageType,
@@ -320,14 +323,20 @@ export const processPostImage = (ctx: APIContext) => {
       "postImage",
       "postImage",
       "artwork",
-      async (fileInfo: { filename: string; mimeType: string }) => {
-        const filenameArray = fileInfo.filename.split(".");
-
-        return prisma.postImage.create({
+      async (fileInfo: { filename: string }) => {
+        const post = await prisma.post.findUniqueOrThrow({
+          where: { id: postId },
+          select: { profileId: true },
+        });
+        const id = randomUUID();
+        return prisma.image.create({
           data: {
-            postId,
-            mimeType: fileInfo.mimeType,
-            extension: filenameArray[filenameArray.length - 1],
+            id,
+            url: [`${id}.${fileExtension(fileInfo.filename)}`],
+            originalFilename: fileInfo.filename,
+            dimensions: "artwork",
+            profileId: post.profileId,
+            postImage: { create: { postId } },
           },
         });
       },

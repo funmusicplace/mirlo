@@ -56,7 +56,7 @@ const imageTypeBuckets = {
   artistAvatar: { prefix: artistAvatarPrefix, queue: true },
   artistBackground: { prefix: artistBackgroundPrefix, queue: true },
   trackGroupCover: { prefix: coversPrefix, queue: true },
-  postImage: { prefix: postImagePrefix, queue: false },
+  postImage: { prefix: rootImagePrefix, queue: false },
   instanceLogo: { prefix: instanceLogoPrefix, queue: false },
   image: { prefix: rootImagePrefix, queue: true },
 };

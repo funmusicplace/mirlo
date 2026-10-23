@@ -1,15 +1,18 @@
 import assert from "node:assert";
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+
 import {
   clearTables,
   createProfile,
   createPost,
+  createPostImage,
   createUser,
 } from "../../../utils";
-
 import { requestApp } from "../../utils";
+
 import prisma from "@mirlo/prisma";
 
 describe("manage/posts/{postId}/featuredImage", () => {
@@ -28,13 +31,7 @@ describe("manage/posts/{postId}/featuredImage", () => {
       });
       const profile = await createProfile(user.id);
       const post = await createPost(profile.id);
-      const image = await prisma.postImage.create({
-        data: {
-          postId: post.id,
-          mimeType: "image/jpeg",
-          extension: "jpg",
-        },
-      });
+      const image = await createPostImage(post);
 
       await requestApp
         .put(`manage/posts/${post.id}/featuredImage`)

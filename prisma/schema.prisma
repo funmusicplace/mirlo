@@ -331,23 +331,24 @@ model Post {
   notifications             Notification[]
   shouldSendEmail           Boolean                  @default(true)
   images                    PostImage[]              @relation("images")
-  featuredImage             PostImage?               @relation(fields: [featuredImageId], references: [id])
+  featuredImage             Image?                   @relation("PostFeaturedImage", fields: [featuredImageId], references: [id])
   featuredImageId           String?                  @db.Uuid
   featuredImageCredit       String?
   tracks                    PostTrack[]
 }
 
 model PostImage {
-  id              String    @id @default(uuid()) @db.Uuid
-  mimeType        String
-  extension       String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime?
-  isHero          Boolean   @default(false)
-  postId          Int
-  post            Post      @relation(name: "images", fields: [postId], references: [id])
-  featuredForPost Post[]
+  id        String    @id @default(uuid()) @db.Uuid
+  mimeType  String?
+  extension String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  isHero    Boolean   @default(false)
+  postId    Int
+  post      Post      @relation(name: "images", fields: [postId], references: [id])
+  imageId   String    @unique @db.Uuid
+  image     Image     @relation(fields: [imageId], references: [id])
 }
 
 model PostSubscriptionTier {
@@ -551,6 +552,8 @@ model Image {
   keyPrefix        String?
   backgroundOf     Profile?                @relation("ProfileBackgroundImage")
   avatarOf         Profile?                @relation("ProfileAvatarImage")
+  postImage        PostImage?
+  featuredForPost  Post[]                  @relation("PostFeaturedImage")
 
   @@index([profileId])
 }

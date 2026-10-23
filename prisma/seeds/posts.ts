@@ -187,17 +187,15 @@ export async function seedPosts() {
   });
   if (longPost && !longPost.featuredImageId) {
     const imageId = randomUUID();
-    await prisma.postImage.create({
+    await prisma.image.create({
       data: {
         id: imageId,
-        mimeType: "image/jpeg",
-        extension: "jpg",
-        postId: longPost.id,
+        url: [`${imageId}.jpg`],
+        dimensions: "artwork",
+        profileId: longPost.profileId,
+        postImage: { create: { postId: longPost.id } },
+        featuredForPost: { connect: { id: longPost.id } },
       },
-    });
-    await prisma.post.update({
-      where: { id: longPost.id },
-      data: { featuredImageId: imageId },
     });
     console.log(`Added featured image to post "${longPost.title}"`);
   }

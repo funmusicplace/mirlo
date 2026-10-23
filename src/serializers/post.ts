@@ -1,8 +1,7 @@
 import { Image, Prisma, Profile, Post } from "@mirlo/prisma/client";
 
 import { addSizesToStoredImage } from "../utils/artist";
-import { generateFullStaticImageUrl } from "../utils/images";
-import { postImagePrefix } from "../utils/minio";
+import { storedImageFileUrl } from "../utils/images";
 import {
   ContentImage,
   postImagesForContent,
@@ -86,7 +85,13 @@ type PostInput = Partial<Post> & {
   isPublic: boolean;
   profileId?: number | null;
   profile?: (Partial<Profile> & { avatar?: Image | null }) | null;
-} & { featuredImage?: { extension: string; id: string } | null } & {
+} & {
+  featuredImage?: {
+    id: string;
+    url: string[];
+    keyPrefix: string | null;
+  } | null;
+} & {
   images: ContentImage[];
 } & {
   tracks?: {
@@ -152,11 +157,7 @@ export const serializePost = <T extends PostInput>(
       : undefined,
     featuredImage: post.featuredImage && {
       ...post.featuredImage,
-      src: generateFullStaticImageUrl(
-        post.featuredImage.id,
-        postImagePrefix,
-        post.featuredImage.extension
-      ),
+      src: storedImageFileUrl(post.featuredImage),
     },
     isContentHidden: !contentVisible,
     content: !contentVisible ? extractFirstParagraph(content ?? "") : content,
