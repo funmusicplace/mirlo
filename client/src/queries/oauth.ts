@@ -34,6 +34,7 @@ export function queryOAuthInteraction(uid: string) {
         .then((r) => r.result),
     retry: false,
     staleTime: Infinity,
+    gcTime: 0,
   });
 }
 

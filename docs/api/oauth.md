@@ -50,7 +50,7 @@ Host a JSON document over HTTPS and use its URL as your `client_id`. Any instanc
 
 An instance admin can register your app in **Admin → API clients** with its redirect URIs. Use this for server-side apps (a WordPress plugin, a forum or feedback board using single sign-on). Your `client_id` is the client's numeric ID.
 
-If "Keeps its key on a server" is ticked, the client is confidential. It authenticates at the token endpoint with HTTP Basic auth (`client_secret_basic`): `client_id` as the username, and the client's API key as the password. Otherwise the client is public, with no secret.
+If "Server-side app" is ticked, the client is confidential. It authenticates at the token endpoint with HTTP Basic auth (`client_secret_basic`): `client_id` as the username, and the client's API key as the password. Otherwise the client is public, with no secret.
 
 ## The authorization code flow
 

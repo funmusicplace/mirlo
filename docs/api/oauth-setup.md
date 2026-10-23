@@ -21,7 +21,7 @@ On a local instance, the quickest way is to register your app as a client:
 
 1. Sign in as an admin and go to **Admin → API clients** (`/admin/clients`).
 2. Create a client with your app's name and URL. Leave the CORS origins empty unless your app calls the API from a browser.
-3. In the client's **OAuth** column, add your redirect URIs, comma separated. Leave **Keeps its key on a server** unticked unless your app has a backend that can keep a secret.
+3. In the client's **OAuth** column, add your redirect URIs, comma separated. Leave **Server-side app** unticked unless your app has a backend that can keep a secret.
 4. Note the **Client ID** shown there. It's a number, and it's your `client_id`.
 
 New clients are approved straight away. A client whose status is `pending` or `revoked` can't get tokens.

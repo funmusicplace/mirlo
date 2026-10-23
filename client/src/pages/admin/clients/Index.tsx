@@ -217,6 +217,8 @@ const Index: React.FC = () => {
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outlined"
+                      size="compact"
+                      onlyIcon
                       startIcon={<FaSyncAlt />}
                       onClick={() => onRotateKey(client)}
                     >
@@ -224,6 +226,8 @@ const Index: React.FC = () => {
                     </Button>
                     <Button
                       buttonRole="warning"
+                      size="compact"
+                      onlyIcon
                       startIcon={<FaTrash />}
                       onClick={() => onDelete(client)}
                     >

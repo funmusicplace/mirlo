@@ -5,6 +5,7 @@ import type { OAuthApproval, OAuthInteraction } from "queries/oauth";
 import { reactRouterParameters } from "storybook-addon-remix-react-router";
 
 import { USER_EXAMPLE } from "../../../test/mocks";
+import Login from "../login/Index";
 
 import OAuth from "./Index";
 
@@ -137,6 +138,52 @@ export const Allowing: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(await canvas.findByRole("button", { name: "Allow" }));
     await expect(canvas.getByRole("button", { name: "Deny" })).toBeDisabled();
+  },
+};
+
+const loginHandlers = () => {
+  let loggedIn = false;
+  return {
+    auth: [
+      http.get("*/auth/profile", () =>
+        loggedIn
+          ? HttpResponse.json({ result: USER_EXAMPLE })
+          : HttpResponse.json({ error: "Unauthorized" }, { status: 401 })
+      ),
+      http.post("*/auth/refresh", () => HttpResponse.json({})),
+      http.post("*/auth/login", () => {
+        loggedIn = true;
+        return HttpResponse.json({});
+      }),
+    ],
+    oauth: [
+      http.get("*/auth/oauth/:uid/details", () =>
+        HttpResponse.json({ result: interaction({ loggedIn }) })
+      ),
+    ],
+  };
+};
+
+export const LogInFirst: Story = {
+  parameters: {
+    msw: { handlers: loginHandlers() },
+    reactRouter: reactRouterParameters({
+      location: { path: `/auth/oauth/${UID}` },
+      routing: [
+        { path: "/auth/oauth/:uid", useStoryElement: true },
+        { path: "/login", element: <Login /> },
+      ],
+    }),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const [email] = await canvas.findAllByLabelText("Email");
+    await userEvent.type(email, "listener@example.com");
+    await userEvent.type(canvas.getByLabelText("Password"), "test1234");
+    await userEvent.click(canvas.getByRole("button", { name: "Log in" }));
+    await expect(
+      await canvas.findByRole("button", { name: "Allow" })
+    ).toBeEnabled();
   },
 };
 
