@@ -164,6 +164,22 @@ export const createProfile = async (
   return profile;
 };
 
+export const createProfileImage = async (
+  profileId: number,
+  field: "avatar" | "background",
+  data?: { url?: string[]; keyPrefix?: string }
+) =>
+  prisma.image.create({
+    data: {
+      ...data,
+      dimensions: field,
+      profileId,
+      ...(field === "avatar"
+        ? { avatarOf: { connect: { id: profileId } } }
+        : { backgroundOf: { connect: { id: profileId } } }),
+    },
+  });
+
 export const createArtistLabel = async (data: {
   artistId: number;
   labelUserId: number;
@@ -206,6 +222,23 @@ export const createPost = async (
   return post;
 };
 
+export const createPostImage = async (
+  post: { id: number; profileId: number | null },
+  data?: { extension?: string; keyPrefix?: string }
+) => {
+  const id = randomUUID();
+  return prisma.image.create({
+    data: {
+      id,
+      url: [`${id}.${data?.extension ?? "jpg"}`],
+      keyPrefix: data?.keyPrefix,
+      dimensions: "artwork",
+      profileId: post.profileId,
+      postImage: { create: { postId: post.id } },
+    },
+  });
+};
+
 export const createTier = async (
   profileId: number,
   data?: Partial<Prisma.ProfileSubscriptionTierCreateArgs["data"]>
@@ -243,12 +276,14 @@ export const createTrackGroup = async (
       title: data?.title ?? "Test trackGroup",
       urlSlug:
         data?.urlSlug || (data?.title ? slug(data?.title) : "test-trackgroup"),
-      profileId: profileId,
+      profile: { connect: { id: profileId } },
       publishedAt:
         data?.publishedAt === null ? null : (data?.publishedAt ?? new Date()),
       isGettable: data?.isGettable ?? true,
       stripeProductKey: data?.stripeProductKey ?? null,
-      paymentToUserId: data?.paymentToUserId,
+      ...(data?.paymentToUserId && {
+        paymentToUser: { connect: { id: data.paymentToUserId } },
+      }),
       releaseDate:
         data?.releaseDate === null ? null : (data?.releaseDate ?? new Date()),
       isPreorder: data?.isPreorder ?? false,
@@ -267,6 +302,8 @@ export const createTrackGroup = async (
           : {
               create: {
                 url: ["test-url"],
+                dimensions: "artwork",
+                profileId,
               },
             },
       tracks: {

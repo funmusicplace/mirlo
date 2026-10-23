@@ -37,6 +37,7 @@ import {
 import {
   clearTables,
   createPost,
+  createPostImage,
   createProfile,
   createSiteSettings,
   createTrack,
@@ -212,9 +213,7 @@ describe("dataMigrations: postContentImageRefs", () => {
     const { user } = await createUser({ email: "artist@artist.com" });
     const profile = await createProfile(user.id);
     const post = await createPost(profile.id);
-    const image = await prisma.postImage.create({
-      data: { postId: post.id, mimeType: "image/jpeg", extension: "jpg" },
-    });
+    const image = await createPostImage(post);
     const updatedAt = new Date("2024-01-01T00:00:00.000Z");
     const external = `<img src="https://example.org/cat.gif">`;
     await prisma.post.update({
@@ -356,15 +355,13 @@ describe("dataMigrations: imageContentTypes", () => {
 
   it("stores the content type and cache control on local uploads", async () => {
     await uploadOptimizedImageByType(
-      "trackGroupCover",
+      "image",
       "typed-cover-x600.webp",
       Buffer.from("image"),
       { contentType: "image/webp", cacheControl: "public, max-age=60" }
     );
 
-    const metadata = await storedMetadata(
-      "trackgroup-covers/typed-cover-x600.webp"
-    );
+    const metadata = await storedMetadata("typed-cover-x600.webp");
     assert.equal(metadata?.["content-type"], "image/webp");
     assert.equal(metadata?.["cache-control"], "public, max-age=60");
   });

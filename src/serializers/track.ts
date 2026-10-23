@@ -1,13 +1,12 @@
 import { join } from "path";
 
 import {
+  Image,
   Profile,
-  ProfileAvatar,
   Track,
   TrackAudio,
   TrackArtist,
   TrackGroup,
-  TrackGroupCover,
 } from "@mirlo/prisma/client";
 
 import { isTrackPlayableNested } from "../utils/trackPlayability";
@@ -17,9 +16,9 @@ import { Serialized } from "./utils";
 
 type TrackInput = Track & {
   trackGroup?: TrackGroup & {
-    profile?: Partial<Profile> & { avatar?: ProfileAvatar | null };
-    artist?: Partial<Profile> & { avatar?: ProfileAvatar | null };
-    cover?: TrackGroupCover | null;
+    profile?: Partial<Profile> & { avatar?: Image | null };
+    artist?: Partial<Profile> & { avatar?: Image | null };
+    cover?: Image | null;
     userTrackGroupPurchases?: { userId: number }[];
   };
   trackArtists?: TrackArtist[];

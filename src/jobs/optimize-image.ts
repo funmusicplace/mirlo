@@ -245,19 +245,12 @@ const optimizeImage = async (job: Job) => {
     ) as string[];
     logger.info(`Saving URLs [${urls.join(", ")}]`);
 
-    if (model === "image" || model === "artistBackground") {
-      await prisma.image.update({
-        where: { id: destinationId },
-        data: { url: urls },
-      });
-    }
+    await prisma.image.update({
+      where: { id: destinationId },
+      data: { url: urls },
+    });
 
-    if (model === "trackGroupCover") {
-      await prisma.trackGroupCover.update({
-        where: { id: destinationId },
-        data: { url: urls },
-      });
-    } else if (model === "artistAvatar") {
+    if (model === "artistAvatar") {
       try {
         const sharpBuffer = await sharp(buffer).png().toBuffer();
         const faviconBuffer = ico.encode([sharpBuffer]);
@@ -277,11 +270,6 @@ const optimizeImage = async (job: Job) => {
         const errorMessage = e instanceof Error ? e.message : String(e);
         logger.error(`Error creating artist avatar favicon: ${errorMessage}`);
       }
-
-      await prisma.profileAvatar.update({
-        where: { id: destinationId },
-        data: { url: urls },
-      });
     }
 
     profiler.done({ message: "Done optimizing image" });

@@ -2,7 +2,6 @@ import { join } from "path";
 
 import {
   Profile,
-  ProfileAvatar,
   ProfileSubscriptionTier,
   Image,
   Merch,
@@ -10,12 +9,10 @@ import {
   Post,
   Track,
   TrackGroup,
-  TrackGroupCover,
 } from "@mirlo/prisma/client";
 
-import { addSizesToImage, addSizesToStoredImage } from "../utils/artist";
-import { generateFullStaticImageUrl } from "../utils/images";
-import { artistAvatarPrefix } from "../utils/minio";
+import { addSizesToStoredImage } from "../utils/artist";
+import { storedImageVariantUrl } from "../utils/images";
 import { resolvePayee } from "../utils/payments/payee";
 import { ContentImage } from "../utils/postContent";
 
@@ -38,12 +35,12 @@ export interface LocalProfile extends Profile {
   artistLabels?: LocalArtistLabel[];
   posts?: (Post & { images: ContentImage[] })[];
   background?: Image | null;
-  avatar?: ProfileAvatar | null;
+  avatar?: Image | null;
   trackGroups?: LocalTrackGroup[] | null;
   merch?: (Merch & { images?: MerchImage[] })[];
   subscriptionTiers?: (ProfileSubscriptionTier & {
     images?: { image: Image }[];
-    releases?: { trackGroup: { cover?: TrackGroupCover | null } }[];
+    releases?: { trackGroup: { cover?: Image | null } }[];
   })[];
   paymentToUser?: {
     stripeAccountId?: string | null;
@@ -53,10 +50,10 @@ export interface LocalProfile extends Profile {
     currency?: string | null;
     artistLabels?: {
       artist: Profile & {
-        avatar?: ProfileAvatar | null;
+        avatar?: Image | null;
         background?: Image | null;
         trackGroups?: (TrackGroup & {
-          cover?: TrackGroupCover | null;
+          cover?: Image | null;
           tracks?: Track[];
         })[];
       };
@@ -90,9 +87,7 @@ export const serializeProfile = <T extends LocalProfile>(
     background: renameProfileIdToArtistId(
       addSizesToStoredImage(profile?.background)
     ),
-    avatar: renameProfileIdToArtistId(
-      addSizesToImage(artistAvatarPrefix, profile?.avatar)
-    ),
+    avatar: renameProfileIdToArtistId(addSizesToStoredImage(profile?.avatar)),
     trackGroups: profile?.trackGroups?.map((tg) =>
       processSingleTrackGroup(
         { ...tg, profile: { ...tg.profile, user: profile.user } },
@@ -113,7 +108,7 @@ export const serializeProfile = <T extends LocalProfile>(
                 ? {
                     ...omitApPrivateKey(labelProfile),
                     avatar: renameProfileIdToArtistId(
-                      addSizesToImage(artistAvatarPrefix, labelProfile.avatar)
+                      addSizesToStoredImage(labelProfile.avatar)
                     ),
                     background: renameProfileIdToArtistId(
                       addSizesToStoredImage(labelProfile.background)
@@ -142,7 +137,7 @@ export const serializeSingleArtistIntoCanimus = (
 ) => {
   const artistUrl = new URL(artist.urlSlug, String(process.env.API_DOMAIN))
     .href;
-  const avatarString = artist.avatar?.url.find((u) => u.includes("x600"));
+  const avatarUrl = storedImageVariantUrl(artist.avatar, 600);
   const artistLinks = artist.linksJson.map((link: any) => ({
     name: link.linkLabel,
     href: link.url,
@@ -169,9 +164,9 @@ export const serializeSingleArtistIntoCanimus = (
     url: artistUrl,
     uid: String(artist.id),
     images: {
-      cover: avatarString
+      cover: avatarUrl
         ? {
-            src: generateFullStaticImageUrl(avatarString, artistAvatarPrefix),
+            src: avatarUrl,
             alt: null,
             width: 600,
             height: 600,

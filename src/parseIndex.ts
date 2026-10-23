@@ -42,9 +42,8 @@ import { serializeInstanceSettings } from "./serializers/instanceSettings";
 import { postIncludeForUser } from "./serializers/post";
 import { resolveProfileImageUrl, whereForVisibleProfile } from "./utils/artist";
 import { getClient } from "./utils/getClient";
-import { generateFullStaticImageUrl } from "./utils/images";
+import { storedImageFileUrl, storedImageVariantUrl } from "./utils/images";
 import { merchImageUrl } from "./utils/merch";
-import { coversPrefix, rootImagePrefix, postImagePrefix } from "./utils/minio";
 import {
   getCanUserSeePostContent,
   loadPurchasesForPostTracks,
@@ -301,11 +300,7 @@ const handlePost: RouteHandler<PostParams> = async ({
       description: postDescription,
       url: postUrl,
       imageUrl: post.featuredImage
-        ? generateFullStaticImageUrl(
-            post.featuredImage.id,
-            postImagePrefix,
-            post.featuredImage.extension
-          )
+        ? storedImageFileUrl(post.featuredImage)
         : avatarUrl,
       artistName: artistName,
       releaseDate: postCreatedDate,
@@ -317,11 +312,7 @@ const handlePost: RouteHandler<PostParams> = async ({
       description: postDescription,
       url: postUrl,
       imageUrl: post.featuredImage
-        ? generateFullStaticImageUrl(
-            post.featuredImage.id,
-            postImagePrefix,
-            post.featuredImage.extension
-          )
+        ? storedImageFileUrl(post.featuredImage)
         : avatarUrl,
       ogVideo: hasTracks
         ? {
@@ -480,7 +471,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
 
     registerTrackHydration(hydrations, track);
 
-    const coverString = tg.cover?.url.find((u) => u.includes("x600"));
+    const coverUrl = storedImageVariantUrl(tg.cover, 600);
     const trackUrl = `${client.applicationUrl}/${tg.profile?.urlSlug}/release/${tg.urlSlug}/tracks/${track.id}`;
     const releaseDate = tg.releaseDate?.toISOString().split("T")[0] || "";
 
@@ -488,9 +479,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       title: track.title ?? `A track on ${instanceName}`,
       description: `A track by ${tg.profile.name}\nReleased ${releaseDate}`,
       url: trackUrl,
-      imageUrl: coverString
-        ? generateFullStaticImageUrl(coverString, coversPrefix)
-        : undefined,
+      imageUrl: coverUrl,
       artistName: tg.profile.name,
       artistUrl: `${client.applicationUrl}/${tg.profile?.urlSlug}`,
       releaseDate: releaseDate,
@@ -501,9 +490,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       title: track.title ?? `A track on ${instanceName}`,
       description: `A track by ${tg.profile.name}\nReleased ${releaseDate}`,
       url: trackUrl,
-      imageUrl: coverString
-        ? generateFullStaticImageUrl(coverString, coversPrefix)
-        : undefined,
+      imageUrl: coverUrl,
       isSong: true,
       ogVideo: {
         url: getTrackWidget(client, track.id),
@@ -521,7 +508,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
     });
   } else {
     // Album page
-    const coverString = tg.cover?.url.find((u) => u.includes("x600"));
+    const coverUrl = storedImageVariantUrl(tg.cover, 600);
     const releaseDate = tg.releaseDate?.toISOString().split("T")[0] || "";
     const albumUrl = `${client.applicationUrl}/${tg.profile?.urlSlug}/release/${tg.urlSlug}`;
 
@@ -541,9 +528,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       title: tg.title ?? `${instanceName} Album`,
       description: description,
       url: albumUrl,
-      imageUrl: coverString
-        ? generateFullStaticImageUrl(coverString, coversPrefix)
-        : undefined,
+      imageUrl: coverUrl,
       artistName: tg.profile.name,
       artistUrl: `${client.applicationUrl}/${tg.profile?.urlSlug}`,
       releaseDate: releaseDate,
@@ -555,9 +540,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       title: tg.title ?? `${instanceName} Album`,
       description: description,
       url: albumUrl,
-      imageUrl: coverString
-        ? generateFullStaticImageUrl(coverString, coversPrefix)
-        : undefined,
+      imageUrl: coverUrl,
       isAlbum: true,
       ogVideo: {
         url: getTrackGroupWidget(client, tg.id),
@@ -600,15 +583,12 @@ const handleSupport: RouteHandler<SupportParams> = async ({
     : null;
 
   if (tier) {
-    const tierImage = tier.images[0]?.image;
-    const imageString = tierImage?.url.find((u) => u.includes("x1200"));
     const tierUrl = `${supportUrl}/${tier.urlSlug ?? tier.id}`;
     const tierDescription = tier.description
       ? `${supportDescription}\n${tier.description}`
       : supportDescription;
-    const imageUrl = imageString
-      ? generateFullStaticImageUrl(imageString, rootImagePrefix)
-      : avatarUrl;
+    const imageUrl =
+      storedImageVariantUrl(tier.images[0]?.image, 1200) ?? avatarUrl;
 
     const schema = buildArticleSchema({
       title: tier.name,
@@ -706,8 +686,8 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
     include: {
       trackGroup: {
         include: {
-          profile: { include: { avatar: { where: { deletedAt: null } } } },
-          cover: { where: { deletedAt: null } },
+          profile: { include: { avatar: true } },
+          cover: true,
         },
       },
       trackArtists: true,
@@ -719,7 +699,7 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
   const artist = await prisma.profile.findFirst({
     where: { id: track.trackGroup.profileId },
     include: {
-      avatar: { where: { deletedAt: null } },
+      avatar: true,
       background: true,
     },
   });
@@ -747,10 +727,10 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
       },
       profile: {
         include: {
-          avatar: { where: { deletedAt: null } },
+          avatar: true,
         },
       },
-      cover: { where: { deletedAt: null } },
+      cover: true,
       tags: { include: { tag: true } },
       fundraiser: true,
     },
@@ -760,7 +740,7 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
   const artist = await prisma.profile.findFirst({
     where: { id: trackGroup.profileId },
     include: {
-      avatar: { where: { deletedAt: null } },
+      avatar: true,
       background: true,
     },
   });

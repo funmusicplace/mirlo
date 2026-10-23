@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import prisma from "@mirlo/prisma";
 import { Queue, QueueEvents } from "bullmq";
 import sharp from "sharp";
@@ -5,7 +7,7 @@ import sharp from "sharp";
 import { REDIS_CONFIG } from "../config/redis";
 import sharpConfig from "../config/sharp";
 import logger from "../logger";
-import { deleteProfileBackground } from "../utils/artist";
+import { deleteProfileImage } from "../utils/artist";
 import { clearTrackGroupDownloads } from "../utils/downloadCache";
 import { AppError, HttpCode } from "../utils/error";
 import { APIContext } from "../utils/file";
@@ -14,6 +16,7 @@ import {
   imageTypeUsesQueue,
   uploadIncomingImageByType,
 } from "../utils/minio";
+import { deleteTrackGroupCover } from "../utils/trackGroup";
 
 const queueOptions = {
   prefix: "mirlo",
@@ -42,12 +45,12 @@ imageQueueEvents.on("completed", async (result: { jobId: string }) => {
   try {
     const job = await imageQueue.getJob(result.jobId);
     if (job?.data.model === "trackGroupCover") {
-      const cover = await prisma.trackGroupCover.findFirst({
-        where: { id: job.data.destinationId },
-        select: { trackGroupId: true },
+      const trackGroup = await prisma.trackGroup.findFirst({
+        where: { coverImageId: job.data.destinationId },
+        select: { id: true },
       });
-      if (cover) {
-        await clearTrackGroupDownloads(cover.trackGroupId);
+      if (trackGroup) {
+        await clearTrackGroupDownloads(trackGroup.id);
       }
     }
     if (job) {
@@ -97,6 +100,8 @@ const isUnsupportedImageCodecError = (error: unknown) => {
     normalized.includes("unsupported image format")
   );
 };
+
+const fileExtension = (filename: string) => filename.split(".").pop();
 
 export const uploadAndSendToImageQueue = async (
   ctx: APIContext,
@@ -172,7 +177,6 @@ export const uploadAndSendToImageQueue = async (
         }
 
         try {
-          const filenameArray = fileInfo.filename.split(".");
           const transform = sharp().rotate();
 
           if (largestVariant.width || largestVariant.height) {
@@ -186,7 +190,7 @@ export const uploadAndSendToImageQueue = async (
 
           const optimizedStream = fileStream.pipe(transform);
           const fileName = storeWithExtension
-            ? `${image.id}.${[filenameArray[filenameArray.length - 1]]}`
+            ? `${image.id}.${fileExtension(fileInfo.filename)}`
             : image.id;
           await uploadIncomingImageByType(
             imageType,
@@ -243,56 +247,61 @@ export const uploadAndSendToImageQueue = async (
   return details as { jobId?: string; imageId: string };
 };
 
-export const processProfileAvatar = (ctx: APIContext) => {
-  return async (profileId: number) => {
-    return uploadAndSendToImageQueue(
-      ctx,
-      "artistAvatar",
-      "artistAvatar",
-      "avatar",
-      async (fileInfo: { filename: string }) => {
-        logger.info(`Upserting artist avatar`);
-        return prisma.profileAvatar.upsert({
-          create: {
-            originalFilename: fileInfo.filename,
-            profileId: profileId,
-          },
-          update: {
-            originalFilename: fileInfo.filename,
-            deletedAt: null,
-          },
-          where: {
-            profileId: profileId,
-          },
-        });
-      }
-    );
-  };
+const uploadImage = (
+  ctx: APIContext,
+  model: string,
+  dimensions: "artwork" | "avatar" | "background",
+  profileId: number
+) =>
+  uploadAndSendToImageQueue(
+    ctx,
+    "image",
+    model,
+    dimensions,
+    async (fileInfo: { filename: string }) =>
+      prisma.image.create({
+        data: { originalFilename: fileInfo.filename, dimensions, profileId },
+      })
+  );
+
+export const processProfileImage = async (
+  ctx: APIContext,
+  profileId: number,
+  field: "avatar" | "background"
+) => {
+  const result = await uploadImage(
+    ctx,
+    field === "avatar" ? "artistAvatar" : "image",
+    field,
+    profileId
+  );
+  await deleteProfileImage(profileId, field);
+  await prisma.profile.update({
+    where: { id: profileId },
+    data:
+      field === "avatar"
+        ? { avatarImageId: result.imageId }
+        : { backgroundImageId: result.imageId },
+  });
+  return result;
 };
 
-export const processProfileBackground = (ctx: APIContext) => {
-  return async (profileId: number) => {
-    const result = await uploadAndSendToImageQueue(
-      ctx,
-      "image",
-      "image",
-      "background",
-      async (fileInfo: { filename: string }) =>
-        prisma.image.create({
-          data: {
-            originalFilename: fileInfo.filename,
-            dimensions: "background",
-            profileId,
-          },
-        })
-    );
-    await deleteProfileBackground(profileId);
-    await prisma.profile.update({
-      where: { id: profileId },
-      data: { backgroundImageId: result.imageId },
-    });
-    return result;
-  };
+export const processTrackGroupCover = async (
+  ctx: APIContext,
+  trackGroup: { id: number; profileId: number }
+) => {
+  const result = await uploadImage(
+    ctx,
+    "trackGroupCover",
+    "artwork",
+    trackGroup.profileId
+  );
+  await deleteTrackGroupCover(trackGroup.id);
+  await prisma.trackGroup.update({
+    where: { id: trackGroup.id },
+    data: { coverImageId: result.imageId },
+  });
+  return result;
 };
 
 export const processMerchImage = (ctx: APIContext) => {
@@ -333,14 +342,20 @@ export const processPostImage = (ctx: APIContext) => {
       "postImage",
       "postImage",
       "artwork",
-      async (fileInfo: { filename: string; mimeType: string }) => {
-        const filenameArray = fileInfo.filename.split(".");
-
-        return prisma.postImage.create({
+      async (fileInfo: { filename: string }) => {
+        const post = await prisma.post.findUniqueOrThrow({
+          where: { id: postId },
+          select: { profileId: true },
+        });
+        const id = randomUUID();
+        return prisma.image.create({
           data: {
-            postId,
-            mimeType: fileInfo.mimeType,
-            extension: filenameArray[filenameArray.length - 1],
+            id,
+            url: [`${id}.${fileExtension(fileInfo.filename)}`],
+            originalFilename: fileInfo.filename,
+            dimensions: "artwork",
+            profileId: post.profileId,
+            postImage: { create: { postId } },
           },
         });
       },

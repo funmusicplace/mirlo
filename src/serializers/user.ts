@@ -1,5 +1,4 @@
-import { addSizesToImage } from "../utils/artist";
-import { artistAvatarPrefix, coversPrefix } from "../utils/minio";
+import { addSizesToStoredImage } from "../utils/artist";
 import { UserSelectPayload } from "../utils/user";
 
 import { serializeProfileUserSubscription } from "./profileUserSubscription";
@@ -39,10 +38,7 @@ export const serializeUser = <T extends object>(user: T): Serialized<T> => {
                   ...tgRest,
                   artistId: profileId,
                   artist: profile ? omitApPrivateKey(profile) : profile,
-                  cover: addSizesToImage(
-                    coversPrefix,
-                    tf.track.trackGroup.cover
-                  ),
+                  cover: addSizesToStoredImage(tf.track.trackGroup.cover),
                 },
               },
             };
@@ -59,8 +55,7 @@ export const serializeUser = <T extends object>(user: T): Serialized<T> => {
                 ...remapped.artistSubscriptionTier,
                 artist: {
                   ...remapped.artistSubscriptionTier.artist,
-                  avatar: addSizesToImage(
-                    artistAvatarPrefix,
+                  avatar: addSizesToStoredImage(
                     remapped.artistSubscriptionTier.artist.avatar
                   ),
                 },

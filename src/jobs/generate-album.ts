@@ -8,7 +8,7 @@ import {
   TrackArtist,
   TrackAudio,
   TrackGroup,
-  TrackGroupCover,
+  Image,
 } from "@mirlo/prisma/client";
 import archiver from "archiver";
 import { Job } from "bullmq";
@@ -293,19 +293,20 @@ const downloadTrackGroupContent = async ({
 };
 
 const downloadCover = async ({
-  coverId,
+  cover,
   coverDestination,
 }: {
-  coverId?: string;
+  cover?: Image | null;
   coverDestination: string;
 }) => {
   let chosenCoverLocation: string | undefined;
 
-  if (coverId) {
+  if (cover) {
+    const coverId = cover.id;
     logger.info(`downloadCover: ${coverId}: Adding cover`);
 
     try {
-      const { buffer } = await getCoverBuffer(coverId, "webp");
+      const { buffer } = await getCoverBuffer(cover, "webp");
       if (buffer) {
         await fsPromises.writeFile(coverDestination, buffer);
         chosenCoverLocation = coverDestination;
@@ -317,7 +318,7 @@ const downloadCover = async ({
     }
 
     try {
-      const { buffer: buffer2 } = await getCoverBuffer(coverId, "jpg");
+      const { buffer: buffer2 } = await getCoverBuffer(cover, "jpg");
       if (buffer2) {
         const jpgDestination = coverDestination.replace(".webp", ".jpg");
         await fsPromises.writeFile(jpgDestination, buffer2);
@@ -349,7 +350,7 @@ const downloadAndZipTracks = async ({
   trackGroup: {
     title: string | null;
     id: number;
-    cover?: TrackGroupCover | null;
+    cover?: Image | null;
     releaseDate?: Date | null;
   };
   job: Job;
@@ -372,7 +373,7 @@ const downloadAndZipTracks = async ({
     logger.info(`Have folder locally ${tempFolder}`);
 
     const coverLocation = await downloadCover({
-      coverId: trackGroup.cover?.id,
+      cover: trackGroup.cover,
       coverDestination,
     });
 
@@ -480,7 +481,7 @@ export default async (job: Job) => {
       trackArtists: TrackArtist[];
     })[];
     trackGroup: TrackGroup & {
-      cover: TrackGroupCover;
+      cover: Image;
     };
     format: string;
     destinationType: "track" | "trackGroup";

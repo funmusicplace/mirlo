@@ -51,11 +51,7 @@ export default function () {
             include: {
               artist: {
                 include: {
-                  avatar: {
-                    where: {
-                      deletedAt: null,
-                    },
-                  },
+                  avatar: true,
                   background: true,
                   trackGroups: {
                     where: whereForPublishedTrackGroups(),

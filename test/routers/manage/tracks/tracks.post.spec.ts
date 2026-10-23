@@ -5,6 +5,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
 import prisma from "@mirlo/prisma";
+
 import {
   clearTables,
   createArtist,
@@ -50,11 +51,11 @@ describe("manage/tracks POST", () => {
       data: {
         title: "Test TrackGroup",
         urlSlug: "test-trackgroup",
-        profileId: artist.id,
+        profile: { connect: { id: artist.id } },
         publishedAt: new Date(),
         isGettable: true,
         defaultIsPreview: false,
-        cover: { create: { url: ["test-url"] } },
+        cover: { create: { url: ["test-url"], dimensions: "artwork" } },
       },
     });
 
@@ -76,11 +77,11 @@ describe("manage/tracks POST", () => {
       data: {
         title: "Test TrackGroup",
         urlSlug: "test-trackgroup",
-        profileId: artist.id,
+        profile: { connect: { id: artist.id } },
         publishedAt: new Date(),
         isGettable: true,
         defaultIsPreview: false,
-        cover: { create: { url: ["test-url"] } },
+        cover: { create: { url: ["test-url"], dimensions: "artwork" } },
       },
     });
 

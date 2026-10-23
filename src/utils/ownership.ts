@@ -57,11 +57,7 @@ export const doesTrackGroupBelongToUser = async (
         id: Number(trackGroupId),
       },
       include: {
-        cover: {
-          where: {
-            deletedAt: null,
-          },
-        },
+        cover: true,
       },
     });
   } else {
@@ -78,11 +74,7 @@ export const doesTrackGroupBelongToUser = async (
         id: Number(trackGroupId),
       },
       include: {
-        cover: {
-          where: {
-            deletedAt: null,
-          },
-        },
+        cover: true,
       },
     });
   }
