@@ -558,7 +558,7 @@ export const isSetupIntentId = (id: string) => id.startsWith("seti_");
  * Update the payment method of a subscription
  */
 export const handleSubscriptionPaymentMethodUpdateSucceeded = async (
-  intent: Stripe.SetupIntent,
+  intent: Stripe.SetupIntent | Stripe.PaymentIntent,
   subscriptionKey: string,
   stripeAccountId: string
 ) => {
@@ -569,7 +569,7 @@ export const handleSubscriptionPaymentMethodUpdateSucceeded = async (
 
   if (!paymentMethodId) {
     logger.error(
-      `handleSubscriptionPaymentMethodUpdateSucceeded: no payment_method on setup intent ${intent.id}`
+      `handleSubscriptionPaymentMethodUpdateSucceeded: no payment_method on intent ${intent.id}`
     );
     return;
   }
@@ -914,6 +914,8 @@ export const handleInvoicePaid = async (
 
     // Fetch subscription to get next billing date
     let nextBillingDate: Date | undefined;
+    let defaultPaymentMethod: Stripe.Subscription["default_payment_method"] =
+      null;
     try {
       const stripeSubscription = await stripe.subscriptions.retrieve(
         subscription,
@@ -924,10 +926,33 @@ export const handleInvoicePaid = async (
           stripeSubscription.current_period_end * 1000
         );
       }
+      defaultPaymentMethod = stripeSubscription.default_payment_method;
     } catch (error) {
       logger.error(
         `invoice.paid: Failed to fetch subscription ${subscription}: ${error}`
       );
+    }
+
+    const paidWith =
+      typeof intent.payment_method === "string"
+        ? intent.payment_method
+        : intent.payment_method?.id;
+    const defaultId =
+      typeof defaultPaymentMethod === "string"
+        ? defaultPaymentMethod
+        : defaultPaymentMethod?.id;
+    if (paidWith && defaultId && paidWith !== defaultId) {
+      try {
+        await handleSubscriptionPaymentMethodUpdateSucceeded(
+          intent,
+          subscription,
+          accountId
+        );
+      } catch (error) {
+        logger.error(
+          `invoice.paid: Failed to switch subscription ${subscription} to ${paidWith}: ${error}`
+        );
+      }
     }
 
     await manageSubscriptionReceipt({

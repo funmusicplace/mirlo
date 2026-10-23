@@ -10,11 +10,19 @@ export const stripeMock: {
   outcome: "succeeded" | "declined";
   /** Each confirm call, in order. */
   confirmed: { method: "payment" | "setup"; clientSecret: string }[];
-} = { outcome: "succeeded", confirmed: [] };
+  /** What retrievePaymentIntent reports the intent's status as. */
+  intentStatus: string;
+} = {
+  outcome: "succeeded",
+  confirmed: [],
+  intentStatus: "requires_payment_method",
+};
 
 export const resetStripeMock = (
-  outcome: typeof stripeMock.outcome = "succeeded"
+  outcome: typeof stripeMock.outcome = "succeeded",
+  intentStatus = "requires_payment_method"
 ) => {
   stripeMock.outcome = outcome;
   stripeMock.confirmed = [];
+  stripeMock.intentStatus = intentStatus;
 };

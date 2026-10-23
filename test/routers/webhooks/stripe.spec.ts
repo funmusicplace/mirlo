@@ -584,6 +584,53 @@ describe("Stripe Webhooks - Failed Payments", () => {
 
       paymentIntentsStub.restore();
     });
+
+    const payInvoiceWith = async (paymentMethod: string) => {
+      sinon.stub(subscriptionModule, "manageSubscriptionReceipt");
+      sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
+        current_period_end: Math.floor(Date.now() / 1000),
+        default_payment_method: "pm_old_card",
+      } as any);
+      sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
+        id: "pi_retry",
+        payment_method: paymentMethod,
+        latest_charge: {
+          balance_transaction: { fee_details: [] },
+        },
+      } as any);
+      const updateStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "update")
+        .resolves({} as any);
+
+      await handleInvoicePaid(
+        {
+          id: "in_retry",
+          subscription: "sub_retry",
+          amount_paid: 500,
+          currency: "usd",
+          payment_intent: "pi_retry",
+        } as any,
+        "acct_test_account"
+      );
+      return updateStub;
+    };
+
+    it("makes the card that paid a failed renewal the subscription's default", async () => {
+      const updateStub = await payInvoiceWith("pm_new_card");
+
+      assert.equal(updateStub.calledOnce, true);
+      assert.deepEqual(updateStub.getCall(0).args, [
+        "sub_retry",
+        { default_payment_method: "pm_new_card" },
+        { stripeAccount: "acct_test_account" },
+      ]);
+    });
+
+    it("leaves the subscription alone when paid with its default card", async () => {
+      const updateStub = await payInvoiceWith("pm_old_card");
+
+      assert.equal(updateStub.called, false);
+    });
   });
 
   describe("customer.subscription.deleted webhook", () => {
