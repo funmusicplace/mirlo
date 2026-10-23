@@ -555,6 +555,7 @@ model Image {
   avatarOf         Profile?                @relation("ProfileAvatarImage")
   postImage        PostImage?
   featuredForPost  Post[]                  @relation("PostFeaturedImage")
+  coverOf          TrackGroup?             @relation("TrackGroupCoverImage")
 
   @@index([profileId])
 }
@@ -867,7 +868,9 @@ model TrackGroup {
   title                           String?
   isHiddenTrackGroupForSongDrafts Boolean                         @default(false)
   tracks                          Track[]
-  cover                           TrackGroupCover?
+  legacyCover                     TrackGroupCover?
+  coverImageId                    String?                         @unique @db.Uuid
+  cover                           Image?                          @relation("TrackGroupCoverImage", fields: [coverImageId], references: [id])
   publishedAt                     DateTime?
   type                            String?
   isGettable                      Boolean                         @default(true)

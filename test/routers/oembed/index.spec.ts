@@ -113,7 +113,8 @@ describe("oembed", () => {
         const trackGroup = await createTrackGroup(artist.id, {
           cover: {
             create: {
-              url: ["https://example.com/cover.jpgx600"],
+              url: ["cover-x600"],
+              dimensions: "artwork",
             },
           },
         });
@@ -167,7 +168,8 @@ describe("oembed", () => {
         const trackGroup = await createTrackGroup(artist.id, {
           cover: {
             create: {
-              url: ["https://example.com/cover.jpgx600"],
+              url: ["cover-x600"],
+              dimensions: "artwork",
             },
           },
         });

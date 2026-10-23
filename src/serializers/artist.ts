@@ -9,7 +9,6 @@ import {
   Post,
   Track,
   TrackGroup,
-  TrackGroupCover,
 } from "@mirlo/prisma/client";
 
 import { addSizesToStoredImage } from "../utils/artist";
@@ -41,7 +40,7 @@ export interface LocalProfile extends Profile {
   merch?: (Merch & { images?: MerchImage[] })[];
   subscriptionTiers?: (ProfileSubscriptionTier & {
     images?: { image: Image }[];
-    releases?: { trackGroup: { cover?: TrackGroupCover | null } }[];
+    releases?: { trackGroup: { cover?: Image | null } }[];
   })[];
   paymentToUser?: {
     stripeAccountId?: string | null;
@@ -54,7 +53,7 @@ export interface LocalProfile extends Profile {
         avatar?: Image | null;
         background?: Image | null;
         trackGroups?: (TrackGroup & {
-          cover?: TrackGroupCover | null;
+          cover?: Image | null;
           tracks?: Track[];
         })[];
       };

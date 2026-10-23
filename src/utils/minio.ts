@@ -1051,6 +1051,11 @@ const imageKeyPrefix = (imageType: ImageType) =>
 export const storedImagePrefix = (image: { keyPrefix: string | null }) =>
   image.keyPrefix ?? rootImagePrefix;
 
+const storedImageKey = (
+  image: { keyPrefix: string | null },
+  fileName: string
+) => `${keyPrefixPath(storedImagePrefix(image))}${fileName}`;
+
 const incomingImageKey = (imageType: ImageType, fileName: string) => {
   const { prefix, queue } = imageTypeBuckets[imageType];
   if (!prefix) return fileName;
@@ -1119,10 +1124,7 @@ export const removeStoredImage = (image: {
   id: string;
   keyPrefix: string | null;
 }) =>
-  removeObjectsFromBucket(
-    getImagesBucket(),
-    `${keyPrefixPath(storedImagePrefix(image))}${image.id}`
-  );
+  removeObjectsFromBucket(getImagesBucket(), storedImageKey(image, image.id));
 
 export const fixStoredImageContentTypes = async () => {
   const summary = { checked: 0, fixed: 0, failed: 0 };
@@ -1161,14 +1163,14 @@ export const fixStoredImageContentTypes = async () => {
   return summary;
 };
 
-export const getCoverBuffer = (coverId: string, ext: "webp" | "jpg") =>
+export const getCoverBuffer = (
+  cover: { id: string; keyPrefix: string | null },
+  ext: "webp" | "jpg"
+) =>
   getBufferFromStorage(
     getImagesBucket(),
-    `${imageKeyPrefix("trackGroupCover")}${coverId}-x1500.${ext}`
+    storedImageKey(cover, `${cover.id}-x1500.${ext}`)
   );
-
-export const removeCoverImages = (coverId: string) =>
-  removeImagesByType("trackGroupCover", coverId);
 
 // ── Downloadable content ──────────────────────────────────────────────────────
 

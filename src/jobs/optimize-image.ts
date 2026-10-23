@@ -245,23 +245,12 @@ const optimizeImage = async (job: Job) => {
     ) as string[];
     logger.info(`Saving URLs [${urls.join(", ")}]`);
 
-    if (
-      model === "image" ||
-      model === "artistBackground" ||
-      model === "artistAvatar"
-    ) {
-      await prisma.image.update({
-        where: { id: destinationId },
-        data: { url: urls },
-      });
-    }
+    await prisma.image.update({
+      where: { id: destinationId },
+      data: { url: urls },
+    });
 
-    if (model === "trackGroupCover") {
-      await prisma.trackGroupCover.update({
-        where: { id: destinationId },
-        data: { url: urls },
-      });
-    } else if (model === "artistAvatar") {
+    if (model === "artistAvatar") {
       try {
         const sharpBuffer = await sharp(buffer).png().toBuffer();
         const faviconBuffer = ico.encode([sharpBuffer]);

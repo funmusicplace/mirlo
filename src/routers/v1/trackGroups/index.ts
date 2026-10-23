@@ -199,8 +199,8 @@ export default function () {
                   )
                 )
                 AND exists (
-                  select 1 from "TrackGroupCover" c
-                  where c."trackGroupId" = "TrackGroup".id
+                  select 1 from "Image" c
+                  where c.id = "TrackGroup"."coverImageId"
                   and cardinality(c.url) > 0
                 )
               ORDER BY "profileId", "releaseDate" DESC

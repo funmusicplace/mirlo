@@ -276,12 +276,14 @@ export const createTrackGroup = async (
       title: data?.title ?? "Test trackGroup",
       urlSlug:
         data?.urlSlug || (data?.title ? slug(data?.title) : "test-trackgroup"),
-      profileId: profileId,
+      profile: { connect: { id: profileId } },
       publishedAt:
         data?.publishedAt === null ? null : (data?.publishedAt ?? new Date()),
       isGettable: data?.isGettable ?? true,
       stripeProductKey: data?.stripeProductKey ?? null,
-      paymentToUserId: data?.paymentToUserId,
+      ...(data?.paymentToUserId && {
+        paymentToUser: { connect: { id: data.paymentToUserId } },
+      }),
       releaseDate:
         data?.releaseDate === null ? null : (data?.releaseDate ?? new Date()),
       isPreorder: data?.isPreorder ?? false,
@@ -300,6 +302,8 @@ export const createTrackGroup = async (
           : {
               create: {
                 url: ["test-url"],
+                dimensions: "artwork",
+                profileId,
               },
             },
       tracks: {

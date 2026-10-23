@@ -27,7 +27,7 @@ import {
   uploadZip,
   getDownloadableContentBuffer,
   getCoverBuffer,
-  removeCoverImages,
+  removeStoredImage,
   removeDownloadableContent,
   removeAudioFiles,
   minioClient,
@@ -312,11 +312,21 @@ describe("minio bucket routing", () => {
 
   describe("getCoverBuffer", () => {
     describe("no prefix", () => {
-      it("reads from mirlo-images with path-prefixed key", async () => {
-        await getCoverBuffer("cover-id", "webp");
+      it("reads a migrated cover from under its key prefix", async () => {
+        await getCoverBuffer(
+          { id: "cover-id", keyPrefix: coversPrefix },
+          "webp"
+        );
         const [bucket, key] = getObjectStub.firstCall.args;
         assert.equal(bucket, "mirlo-images");
         assert.equal(key, `${coversPrefix}/cover-id-x1500.webp`);
+      });
+
+      it("reads a new cover from the bucket root", async () => {
+        await getCoverBuffer({ id: "cover-id", keyPrefix: null }, "jpg");
+        const [bucket, key] = getObjectStub.firstCall.args;
+        assert.equal(bucket, "mirlo-images");
+        assert.equal(key, "cover-id-x1500.jpg");
       });
     });
 
@@ -324,7 +334,10 @@ describe("minio bucket routing", () => {
       beforeEach(() => setBucketConfig({ prefix: "staging-" }));
 
       it("reads from staging-mirlo-images with path-prefixed key", async () => {
-        await getCoverBuffer("cover-id", "webp");
+        await getCoverBuffer(
+          { id: "cover-id", keyPrefix: coversPrefix },
+          "webp"
+        );
         const [bucket, key] = getObjectStub.firstCall.args;
         assert.equal(bucket, "staging-mirlo-images");
         assert.equal(key, `${coversPrefix}/cover-id-x1500.webp`);
@@ -364,13 +377,19 @@ describe("minio bucket routing", () => {
         );
       });
 
-      it("removeCoverImages uses mirlo-images with prefixed coverId", async () => {
-        await removeCoverImages("cover-id");
+      it("removeStoredImage removes a migrated image under its key prefix", async () => {
+        await removeStoredImage({ id: "cover-id", keyPrefix: coversPrefix });
         assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-images");
         assert.equal(
           listObjectsV2Stub.firstCall.args[1],
           `${coversPrefix}/cover-id`
         );
+      });
+
+      it("removeStoredImage removes a new image from the bucket root", async () => {
+        await removeStoredImage({ id: "image-id", keyPrefix: null });
+        assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-images");
+        assert.equal(listObjectsV2Stub.firstCall.args[1], "image-id");
       });
 
       it("removeDownloadableContent uses mirlo-downloads with content/ prefix", async () => {
@@ -391,8 +410,8 @@ describe("minio bucket routing", () => {
         );
       });
 
-      it("removeCoverImages uses staging-mirlo-images", async () => {
-        await removeCoverImages("cover-id");
+      it("removeStoredImage uses staging-mirlo-images", async () => {
+        await removeStoredImage({ id: "cover-id", keyPrefix: coversPrefix });
         assert.equal(
           listObjectsV2Stub.firstCall.args[0],
           "staging-mirlo-images"

@@ -6,9 +6,9 @@ import {
   trackGroupBelongsToLoggedInUser,
   userOrAppAuthenticated,
 } from "../../../../../auth/passport";
+import { processTrackGroupCover } from "../../../../../queues/processImages";
 import { clearTrackGroupDownloads } from "../../../../../utils/downloadCache";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
-import processTrackGroupCover from "../../../../../utils/processTrackGroupCover";
 import { deleteTrackGroupCover } from "../../../../../utils/trackGroup";
 
 type Params = {
@@ -37,10 +37,14 @@ export default function () {
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
-      await doesTrackGroupBelongToUser(Number(trackGroupId), loggedInUser);
+      const trackGroup = await doesTrackGroupBelongToUser(
+        Number(trackGroupId),
+        loggedInUser
+      );
 
-      const { jobId, imageId } = await processTrackGroupCover({ req, res })(
-        Number(trackGroupId)
+      const { jobId, imageId } = await processTrackGroupCover(
+        { req, res },
+        trackGroup
       );
 
       res.json({ result: { jobId, imageId } });

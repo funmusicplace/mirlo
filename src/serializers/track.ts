@@ -7,7 +7,6 @@ import {
   TrackAudio,
   TrackArtist,
   TrackGroup,
-  TrackGroupCover,
 } from "@mirlo/prisma/client";
 
 import { isTrackPlayableNested } from "../utils/trackPlayability";
@@ -19,7 +18,7 @@ type TrackInput = Track & {
   trackGroup?: TrackGroup & {
     profile?: Partial<Profile> & { avatar?: Image | null };
     artist?: Partial<Profile> & { avatar?: Image | null };
-    cover?: TrackGroupCover | null;
+    cover?: Image | null;
     userTrackGroupPurchases?: { userId: number }[];
   };
   trackArtists?: TrackArtist[];

@@ -16,6 +16,7 @@ import {
   imageTypeUsesQueue,
   uploadIncomingImageByType,
 } from "../utils/minio";
+import { deleteTrackGroupCover } from "../utils/trackGroup";
 
 const queueOptions = {
   prefix: "mirlo",
@@ -44,12 +45,12 @@ imageQueueEvents.on("completed", async (result: { jobId: string }) => {
   try {
     const job = await imageQueue.getJob(result.jobId);
     if (job?.data.model === "trackGroupCover") {
-      const cover = await prisma.trackGroupCover.findFirst({
-        where: { id: job.data.destinationId },
-        select: { trackGroupId: true },
+      const trackGroup = await prisma.trackGroup.findFirst({
+        where: { coverImageId: job.data.destinationId },
+        select: { id: true },
       });
-      if (cover) {
-        await clearTrackGroupDownloads(cover.trackGroupId);
+      if (trackGroup) {
+        await clearTrackGroupDownloads(trackGroup.id);
       }
     }
     if (job) {
@@ -281,6 +282,24 @@ export const processProfileImage = async (
       field === "avatar"
         ? { avatarImageId: result.imageId }
         : { backgroundImageId: result.imageId },
+  });
+  return result;
+};
+
+export const processTrackGroupCover = async (
+  ctx: APIContext,
+  trackGroup: { id: number; profileId: number }
+) => {
+  const result = await uploadImage(
+    ctx,
+    "trackGroupCover",
+    "artwork",
+    trackGroup.profileId
+  );
+  await deleteTrackGroupCover(trackGroup.id);
+  await prisma.trackGroup.update({
+    where: { id: trackGroup.id },
+    data: { coverImageId: result.imageId },
   });
   return result;
 };

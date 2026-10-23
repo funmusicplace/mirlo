@@ -14,12 +14,10 @@ import {
 import { AppError } from "../../../utils/error";
 import { getClient } from "../../../utils/getClient";
 import {
-  generateFullStaticImageUrl,
   storedImageFileUrl,
   storedImageVariantUrl,
 } from "../../../utils/images";
 import { merchImageUrl } from "../../../utils/merch";
-import { coversPrefix } from "../../../utils/minio";
 import { getInstanceName } from "../../../utils/settings";
 
 interface oEmbedResponse {
@@ -95,7 +93,7 @@ export default function () {
         if (artistSlug && albumSlug) {
           const album = await fetchAlbumMetadata(artistSlug, albumSlug);
           if (album) {
-            const coverUrl = album.cover?.url.find((u) => u.includes("x600"));
+            const coverUrl = storedImageVariantUrl(album.cover, 600);
             const releaseDate =
               album.releaseDate?.toISOString().split("T")[0] || "";
             oembedData = {
@@ -106,9 +104,7 @@ export default function () {
               title: `${album.title} by ${album.profile.name}`,
               author_name: album.profile.name,
               author_url: `${client.applicationUrl}/${album.profile.urlSlug}`,
-              thumbnail_url: coverUrl
-                ? generateFullStaticImageUrl(coverUrl, coversPrefix)
-                : undefined,
+              thumbnail_url: coverUrl,
               thumbnail_width: 300,
               thumbnail_height: 300,
               cache_age: 86400,
@@ -125,7 +121,7 @@ export default function () {
           if (album) {
             const track = album.tracks.find((t) => t.id === trackId);
             if (track) {
-              const coverUrl = album.cover?.url.find((u) => u.includes("x600"));
+              const coverUrl = storedImageVariantUrl(album.cover, 600);
               oembedData = {
                 type: "rich",
                 html: `<iframe src="${client.applicationUrl}/widget/track/${track.id}?variant=card" width="560" height="315" frameborder="0" allow="autoplay"></iframe>`,
@@ -134,9 +130,7 @@ export default function () {
                 title: `${track.title} by ${album.profile.name}`,
                 author_name: album.profile.name,
                 author_url: `${client.applicationUrl}/${album.profile.urlSlug}`,
-                thumbnail_url: coverUrl
-                  ? generateFullStaticImageUrl(coverUrl, coversPrefix)
-                  : undefined,
+                thumbnail_url: coverUrl,
                 thumbnail_width: 300,
                 thumbnail_height: 300,
                 cache_age: 86400,

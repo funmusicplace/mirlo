@@ -1,6 +1,5 @@
-import { addSizesToImage, addSizesToStoredImage } from "../utils/artist";
+import { addSizesToStoredImage } from "../utils/artist";
 import { storedImageFileUrl } from "../utils/images";
-import { coversPrefix } from "../utils/minio";
 
 import {
   omitApPrivateKey,
@@ -55,7 +54,7 @@ export const serializeNotification = <T extends object>(
       profile?: {
         user?: { currency?: string | null } | null;
       } | null;
-      cover?: { url: string[] } | null;
+      cover?: { url: string[]; keyPrefix: string | null } | null;
       purchase?: unknown;
     } | null;
     relatedUser?: {
@@ -116,7 +115,7 @@ export const serializeNotification = <T extends object>(
             artistId: tgProfileId,
             artist: tgProfile ? omitApPrivateKey(tgProfile) : tgProfile,
             currency: tgProfile?.user?.currency ?? "usd",
-            cover: addSizesToImage(coversPrefix, trackGroup.cover),
+            cover: addSizesToStoredImage(trackGroup.cover),
           };
         })()
       : null,
