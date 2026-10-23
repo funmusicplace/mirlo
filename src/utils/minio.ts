@@ -33,10 +33,6 @@ import logger from "../logger";
 // caller's point of view. Bucket layout is documented in
 // docs/hosting/object-storage.md.
 
-export const artistBackgroundPrefix = "artist-banners";
-export const artistAvatarPrefix = "artist-avatars";
-export const coversPrefix = "trackgroup-covers";
-export const postImagePrefix = "post-images";
 export const instanceLogoPrefix = "instance-logos";
 export const rootImagePrefix = "";
 
@@ -53,9 +49,6 @@ export const isBucketConfig = (value: unknown): value is BucketConfig =>
 //         "image" type, which sits at the bucket root).
 // queue: whether to add a BullMQ optimize-image job after upload.
 const imageTypeBuckets = {
-  artistAvatar: { prefix: artistAvatarPrefix, queue: true },
-  artistBackground: { prefix: artistBackgroundPrefix, queue: true },
-  trackGroupCover: { prefix: coversPrefix, queue: true },
   postImage: { prefix: rootImagePrefix, queue: false },
   instanceLogo: { prefix: instanceLogoPrefix, queue: false },
   image: { prefix: rootImagePrefix, queue: true },
@@ -1056,11 +1049,8 @@ const storedImageKey = (
   fileName: string
 ) => `${keyPrefixPath(storedImagePrefix(image))}${fileName}`;
 
-const incomingImageKey = (imageType: ImageType, fileName: string) => {
-  const { prefix, queue } = imageTypeBuckets[imageType];
-  if (!prefix) return fileName;
-  return queue ? `incoming/${prefix}/${fileName}` : `${prefix}/${fileName}`;
-};
+const incomingImageKey = (imageType: ImageType, fileName: string) =>
+  `${imageKeyPrefix(imageType)}${fileName}`;
 
 export const uploadIncomingImageByType = async (
   imageType: ImageType,

@@ -25,9 +25,6 @@ const cleanUpTrackGroups = async () => {
 
     logger.info(`Cleaning up ${ids.length} trackGroups: ${ids.join(", ")}`);
     if (ids.length) {
-      await prisma.$executeRaw`DELETE FROM "TrackGroupCover" where "trackGroupId" IN (${Prisma.join(
-        ids
-      )})`;
       await prisma.$executeRaw`DELETE FROM "UserTrackGroupWishlist" where "trackGroupId" IN (${Prisma.join(
         ids
       )})`;

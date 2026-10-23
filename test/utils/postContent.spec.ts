@@ -3,7 +3,6 @@ import assert from "assert";
 import { afterEach, beforeEach, describe, it } from "mocha";
 
 import { generateFullStaticImageUrl } from "../../src/utils/images";
-import { postImagePrefix } from "../../src/utils/minio";
 import {
   addImageRefs,
   resolveImageRefs,
@@ -63,7 +62,7 @@ describe("postContent", () => {
       const content = `<p>a</p><img data-image-id="${imageId}" src="https://old.example.com/post-images/${imageId}.jpg" alt="x"><p>b</p>`;
       const expected = generateFullStaticImageUrl(
         imageId,
-        postImagePrefix,
+        "post-images",
         "jpg"
       );
       assert.equal(
@@ -72,7 +71,7 @@ describe("postContent", () => {
             image: {
               id: imageId,
               url: [`${imageId}.jpg`],
-              keyPrefix: postImagePrefix,
+              keyPrefix: "post-images",
             },
           },
         ]),
@@ -95,7 +94,7 @@ describe("postContent", () => {
       const content = `<img data-image-id="${imageId}" alt="a > b" src="https://old.example.com/it's/${imageId}.jpg">`;
       const expected = generateFullStaticImageUrl(
         imageId,
-        postImagePrefix,
+        "post-images",
         "jpg"
       );
       assert.equal(
@@ -104,7 +103,7 @@ describe("postContent", () => {
             image: {
               id: imageId,
               url: [`${imageId}.jpg`],
-              keyPrefix: postImagePrefix,
+              keyPrefix: "post-images",
             },
           },
         ]),
