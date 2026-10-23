@@ -2455,7 +2455,10 @@
     "noPaymentFound": "No payment found",
     "completePayment": "Complete Your Payment",
     "payNow": "Pay now",
-    "paymentSubmitted": "Thanks! Your payment has been submitted."
+    "paymentSubmitted": "Thanks! Your payment has been submitted.",
+    "alreadyPaid": "This payment has already been made. There's nothing more to do.",
+    "paymentProcessing": "Your payment is being processed. We'll email you if anything goes wrong.",
+    "noLongerDue": "This payment is no longer due."
   },
   "dateRangeFilter": {
     "filterByDate": "Filter by date",

@@ -74,8 +74,11 @@ export const Declined: Story = {
   },
 };
 
-/** Back from a 3D Secure check, which Stripe reports in the URL */
+/** Back from a 3D Secure check that went through */
 export const BackFromBankCheck: Story = {
+  beforeEach: () => {
+    resetStripeMock("succeeded", "succeeded");
+  },
   parameters: {
     reactRouter: at({ ...PAYMENT_LINK, redirect_status: "succeeded" }),
   },
@@ -84,6 +87,53 @@ export const BackFromBankCheck: Story = {
       await within(canvasElement).findByText(
         "Thanks! Your payment has been submitted."
       )
+    ).toBeInTheDocument();
+  },
+};
+
+/** Opening the email link again after the payment went through */
+export const AlreadyPaid: Story = {
+  beforeEach: () => {
+    resetStripeMock("succeeded", "succeeded");
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(
+      await canvas.findByText(
+        "This payment has already been made. There's nothing more to do."
+      )
+    ).toBeInTheDocument();
+    await expect(
+      canvas.queryByRole("button", { name: "Pay now" })
+    ).not.toBeInTheDocument();
+  },
+};
+
+/** A bank payment still settling, whatever the URL says */
+export const Processing: Story = {
+  beforeEach: () => {
+    resetStripeMock("succeeded", "processing");
+  },
+  parameters: {
+    reactRouter: at({ ...PAYMENT_LINK, redirect_status: "processing" }),
+  },
+  play: async ({ canvasElement }) => {
+    await expect(
+      await within(canvasElement).findByText(
+        "Your payment is being processed. We'll email you if anything goes wrong."
+      )
+    ).toBeInTheDocument();
+  },
+};
+
+/** The invoice was voided, e.g. after Stripe gave up retrying */
+export const NoLongerDue: Story = {
+  beforeEach: () => {
+    resetStripeMock("succeeded", "canceled");
+  },
+  play: async ({ canvasElement }) => {
+    await expect(
+      await within(canvasElement).findByText("This payment is no longer due.")
     ).toBeInTheDocument();
   },
 };

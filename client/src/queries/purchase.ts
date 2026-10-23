@@ -1,3 +1,4 @@
+import { loadStripe } from "@stripe/stripe-js";
 import { queryOptions } from "@tanstack/react-query";
 import type { PurchaseResponse } from "components/common/Purchase/usePurchase";
 
@@ -21,6 +22,32 @@ export function queryHostedCheckout(checkoutId: string) {
     // The quote backs a payment form the buyer may already be filling in:
     // don't re-quote underneath them.
     staleTime: Infinity,
+    retry: false,
+  });
+}
+
+export function queryPaymentIntentStatus({
+  clientSecret,
+  stripeAccountId,
+  stripeKey,
+}: {
+  clientSecret: string;
+  stripeAccountId: string;
+  stripeKey?: string;
+}) {
+  return queryOptions({
+    queryKey: ["paymentIntentStatus", { clientSecret, stripeAccountId }],
+    queryFn: async () => {
+      const stripe = await loadStripe(stripeKey ?? "", {
+        stripeAccount: stripeAccountId,
+      });
+      const result = await stripe?.retrievePaymentIntent(clientSecret);
+      if (!result?.paymentIntent) {
+        throw new Error(result?.error?.message ?? "Payment not found");
+      }
+      return result.paymentIntent.status;
+    },
+    enabled: !!clientSecret && !!stripeAccountId && !!stripeKey,
     retry: false,
   });
 }
