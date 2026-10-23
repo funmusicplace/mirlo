@@ -41,8 +41,7 @@ import {
   whereForVisibleProfile,
 } from "../utils/artist";
 import { getClient } from "../utils/getClient";
-import { generateFullStaticImageUrl } from "../utils/images";
-import { artistAvatarPrefix, storedImagePrefix } from "../utils/minio";
+import { storedImageUrl } from "../utils/images";
 import { postImagesForContent, resolvePostContent } from "../utils/postContent";
 import { getSiteSettings } from "../utils/settings";
 import { whereForVisibleTrackGroup } from "../utils/trackGroup";
@@ -124,22 +123,14 @@ federation
         icon: artist.avatar
           ? new Image({
               mediaType: "image/webp",
-              url: new URL(
-                generateFullStaticImageUrl(
-                  artist.avatar.url[0],
-                  artistAvatarPrefix
-                )
-              ),
+              url: new URL(storedImageUrl(artist.avatar, artist.avatar.url[0])),
             })
           : undefined,
         image: artist.background
           ? new Image({
               mediaType: "image/webp",
               url: new URL(
-                generateFullStaticImageUrl(
-                  artist.background.url[0],
-                  storedImagePrefix(artist.background)
-                )
+                storedImageUrl(artist.background, artist.background.url[0])
               ),
             })
           : undefined,

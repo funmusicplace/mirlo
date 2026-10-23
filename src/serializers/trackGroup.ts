@@ -1,8 +1,8 @@
 import { join } from "path";
 
 import {
+  Image,
   Profile,
-  ProfileAvatar,
   Merch,
   MerchImage,
   Track,
@@ -11,9 +11,9 @@ import {
   TrackGroupTag,
 } from "@mirlo/prisma/client";
 
-import { addSizesToImage } from "../utils/artist";
+import { addSizesToImage, addSizesToStoredImage } from "../utils/artist";
 import { generateFullStaticImageUrl } from "../utils/images";
-import { artistAvatarPrefix, coversPrefix } from "../utils/minio";
+import { coversPrefix } from "../utils/minio";
 import { isTrackPlayableNested } from "../utils/trackPlayability";
 
 import { serializeMerch } from "./merch";
@@ -25,7 +25,7 @@ import {
 } from "./utils";
 
 type TrackGroupOwner = Partial<Profile> & {
-  avatar?: ProfileAvatar | null;
+  avatar?: Image | null;
   user?: { currency?: string | null } | null;
   [key: string]: unknown;
 };
@@ -109,9 +109,7 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
       ? {
           ...omitApPrivateKey(owner),
           avatar: owner.avatar
-            ? renameProfileIdToArtistId(
-                addSizesToImage(artistAvatarPrefix, owner.avatar)
-              )
+            ? renameProfileIdToArtistId(addSizesToStoredImage(owner.avatar))
             : undefined,
         }
       : undefined,

@@ -1,5 +1,5 @@
-import { addSizesToImage } from "../utils/artist";
-import { artistAvatarPrefix, coversPrefix } from "../utils/minio";
+import { addSizesToImage, addSizesToStoredImage } from "../utils/artist";
+import { coversPrefix } from "../utils/minio";
 import { UserSelectPayload } from "../utils/user";
 
 import { serializeProfileUserSubscription } from "./profileUserSubscription";
@@ -59,8 +59,7 @@ export const serializeUser = <T extends object>(user: T): Serialized<T> => {
                 ...remapped.artistSubscriptionTier,
                 artist: {
                   ...remapped.artistSubscriptionTier.artist,
-                  avatar: addSizesToImage(
-                    artistAvatarPrefix,
+                  avatar: addSizesToStoredImage(
                     remapped.artistSubscriptionTier.artist.avatar
                   ),
                 },

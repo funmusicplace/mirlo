@@ -7,8 +7,8 @@ import {
   profileBelongsToLoggedInUser,
   userOrAppAuthenticated,
 } from "../../../../../auth/passport";
-import { processProfileBackground } from "../../../../../queues/processImages";
-import { deleteProfileBackground } from "../../../../../utils/artist";
+import { processProfileImage } from "../../../../../queues/processImages";
+import { deleteProfileImage } from "../../../../../utils/artist";
 import { AppError } from "../../../../../utils/error";
 import { busboyOptions } from "../../../../../utils/images";
 
@@ -32,8 +32,10 @@ export default function () {
     const { artistId: profileId } = req.params as unknown as Params;
 
     try {
-      const { jobId, imageId } = await processProfileBackground({ req, res })(
-        Number(profileId)
+      const { jobId, imageId } = await processProfileImage(
+        { req, res },
+        Number(profileId),
+        "background"
       );
 
       res.json({ result: { jobId, imageId } });
@@ -89,7 +91,7 @@ export default function () {
         throw new AppError({ description: "Artist not found", httpCode: 404 });
       }
 
-      await deleteProfileBackground(profile.id);
+      await deleteProfileImage(profile.id, "background");
 
       res.json({ message: "Success" });
     } catch (error) {

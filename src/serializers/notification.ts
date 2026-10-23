@@ -1,16 +1,18 @@
-import { addSizesToImage } from "../utils/artist";
+import { addSizesToImage, addSizesToStoredImage } from "../utils/artist";
 import { generateFullStaticImageUrl } from "../utils/images";
-import {
-  artistAvatarPrefix,
-  coversPrefix,
-  postImagePrefix,
-} from "../utils/minio";
+import { coversPrefix, postImagePrefix } from "../utils/minio";
 
 import {
   omitApPrivateKey,
   renameProfileIdToArtistId,
   Serialized,
 } from "./utils";
+
+type AvatarImage = {
+  url: string[];
+  keyPrefix: string | null;
+  profileId?: number | null;
+};
 
 /**
  * Emit artist* wire shape for a notification row (with nested relations).
@@ -40,7 +42,7 @@ export const serializeNotification = <T extends object>(
     post?: {
       profileId?: number | null;
       profile?: {
-        avatar?: { url: string[]; profileId?: number } | null;
+        avatar?: AvatarImage | null;
       } | null;
       featuredImage?: {
         id: string;
@@ -57,7 +59,7 @@ export const serializeNotification = <T extends object>(
     } | null;
     relatedUser?: {
       profiles?: {
-        avatar?: { url: string[]; profileId?: number } | null;
+        avatar?: AvatarImage | null;
       }[];
     } | null;
   };
@@ -68,9 +70,8 @@ export const serializeNotification = <T extends object>(
     ...subscriptionRest
   } = subscription ?? {};
 
-  const remapAvatar = (
-    avatar: { url: string[]; profileId?: number } | null | undefined
-  ) => renameProfileIdToArtistId(addSizesToImage(artistAvatarPrefix, avatar));
+  const remapAvatar = (avatar: AvatarImage | null | undefined) =>
+    renameProfileIdToArtistId(addSizesToStoredImage(avatar));
 
   return {
     ...rest,

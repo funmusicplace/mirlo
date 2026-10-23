@@ -1,8 +1,8 @@
 import { join } from "path";
 
 import {
+  Image,
   Profile,
-  ProfileAvatar,
   Track,
   TrackAudio,
   TrackArtist,
@@ -17,8 +17,8 @@ import { Serialized } from "./utils";
 
 type TrackInput = Track & {
   trackGroup?: TrackGroup & {
-    profile?: Partial<Profile> & { avatar?: ProfileAvatar | null };
-    artist?: Partial<Profile> & { avatar?: ProfileAvatar | null };
+    profile?: Partial<Profile> & { avatar?: Image | null };
+    artist?: Partial<Profile> & { avatar?: Image | null };
     cover?: TrackGroupCover | null;
     userTrackGroupPurchases?: { userId: number }[];
   };

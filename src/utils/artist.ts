@@ -18,15 +18,14 @@ import { serializeProfile } from "../serializers/artist";
 import { AppError } from "./error";
 import generateSlug from "./generateSlug";
 import { getClient } from "./getClient";
-import { convertURLArrayToSizes, generateFullStaticImageUrl } from "./images";
-import { deleteMerch, merchImagesInclude } from "./merch";
 import {
-  artistAvatarPrefix,
-  coversPrefix,
-  removeImagesByType,
-  removeStoredImage,
-  storedImagePrefix,
-} from "./minio";
+  convertURLArrayToSizes,
+  deleteStoredImage,
+  generateFullStaticImageUrl,
+  storedImageVariantUrl,
+} from "./images";
+import { deleteMerch, merchImagesInclude } from "./merch";
+import { coversPrefix, storedImagePrefix } from "./minio";
 import { postImagesForContent } from "./postContent";
 import reservedProfileSlugs from "./reservedProfileSlugs";
 import { getSiteSettings } from "./settings";
@@ -560,47 +559,18 @@ export const deleteProfile = async (userId: number, profileId: number) => {
   });
 };
 
-export const deleteProfileAvatar = async (profileId: number) => {
-  const avatar = await prisma.profileAvatar.findFirst({
-    where: {
-      profileId,
-    },
-  });
-
-  if (avatar) {
-    await prisma.profileAvatar.delete({
-      where: {
-        profileId,
-      },
-    });
-
-    try {
-      await removeImagesByType("artistAvatar", avatar.id);
-    } catch (e) {
-      console.error("Found no files, that's okay");
-    }
-  }
-};
-
-export const deleteProfileBackground = async (profileId: number) => {
+export const deleteProfileImage = async (
+  profileId: number,
+  field: "avatar" | "background"
+) => {
   const profile = await prisma.profile.findUnique({
     where: { id: profileId },
-    select: { background: true },
+    select: { avatar: true, background: true },
   });
-  const background = profile?.background;
+  const image = profile?.[field];
 
-  if (background) {
-    await prisma.profile.update({
-      where: { id: profileId },
-      data: { backgroundImageId: null },
-    });
-    await prisma.image.delete({ where: { id: background.id } });
-
-    try {
-      await removeStoredImage(background);
-    } catch (e) {
-      console.error("Found no files, that's okay");
-    }
+  if (image) {
+    await deleteStoredImage(image);
   }
 };
 
@@ -708,11 +678,7 @@ export const singleInclude = (queryOptions?: {
     },
     tourDates: true,
     background: true,
-    avatar: {
-      where: {
-        deletedAt: null,
-      },
-    },
+    avatar: true,
     merch: {
       where: {
         isPublic: true,
@@ -851,9 +817,7 @@ export const singleInclude = (queryOptions?: {
           include: {
             artist: {
               include: {
-                avatar: {
-                  where: { deletedAt: null },
-                },
+                avatar: true,
                 background: true,
                 trackGroups: {
                   where: whereForPublishedTrackGroups(),
@@ -920,24 +884,15 @@ export const addSizesToStoredImage = <
 ) => (image ? addSizesToImage(storedImagePrefix(image), image) : null);
 
 export const resolveProfileImageUrl = (artist: {
-  avatar?: { url: string[] } | null;
+  avatar?: { url: string[]; keyPrefix: string | null } | null;
   background?: { url: string[]; keyPrefix: string | null } | null;
   trackGroups?: Array<{ cover?: { url: string[] } | null }>;
 }): string | undefined => {
-  // Try avatar first
-  const avatarString = artist.avatar?.url.find((u) => u.includes("x600"));
-  if (avatarString) {
-    return generateFullStaticImageUrl(avatarString, artistAvatarPrefix);
-  }
-
-  // Fall back to background
-  const background = artist.background;
-  const backgroundString = background?.url.find((u) => u.includes("x625"));
-  if (background && backgroundString) {
-    return generateFullStaticImageUrl(
-      backgroundString,
-      storedImagePrefix(background)
-    );
+  const profileImageUrl =
+    storedImageVariantUrl(artist.avatar, 600) ??
+    storedImageVariantUrl(artist.background, 625);
+  if (profileImageUrl) {
+    return profileImageUrl;
   }
 
   // Fall back to first album cover
@@ -971,6 +926,4 @@ export const artistOptedOutOrDeleted = profileOptedOutOrDeleted;
 export const findArtistIdForURLSlug = findProfileIdForURLSlug;
 export const subscribeUserToArtist = subscribeUserToProfile;
 export const deleteArtist = deleteProfile;
-export const deleteArtistAvatar = deleteProfileAvatar;
-export const deleteArtistBackground = deleteProfileBackground;
 export { processSingleArtist } from "../serializers/artist";
