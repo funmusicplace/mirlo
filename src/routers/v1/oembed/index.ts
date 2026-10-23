@@ -13,13 +13,12 @@ import {
 } from "../../../parseIndex/routeMatcher";
 import { AppError } from "../../../utils/error";
 import { getClient } from "../../../utils/getClient";
-import { generateFullStaticImageUrl } from "../../../utils/images";
-import { merchImageUrl } from "../../../utils/merch";
 import {
-  coversPrefix,
-  postImagePrefix,
-  artistAvatarPrefix,
-} from "../../../utils/minio";
+  generateFullStaticImageUrl,
+  storedImageVariantUrl,
+} from "../../../utils/images";
+import { merchImageUrl } from "../../../utils/merch";
+import { coversPrefix, postImagePrefix } from "../../../utils/minio";
 import { getInstanceName } from "../../../utils/settings";
 
 interface oEmbedResponse {
@@ -221,9 +220,7 @@ export default function () {
         if (artistSlug) {
           const artist = await fetchArtistMetadata(artistSlug);
           if (artist) {
-            const avatarUrl = artist.avatar?.url.find((u: string) =>
-              u.includes("x600")
-            );
+            const avatarUrl = storedImageVariantUrl(artist.avatar, 600);
             const artistName = artist.name || (await getFallbackAuthorName());
             oembedData = {
               type: "link",
@@ -232,9 +229,7 @@ export default function () {
               title: artistName,
               author_name: artistName,
               author_url: `${client.applicationUrl}/${artist.urlSlug}`,
-              thumbnail_url: avatarUrl
-                ? generateFullStaticImageUrl(avatarUrl, artistAvatarPrefix)
-                : undefined,
+              thumbnail_url: avatarUrl,
               thumbnail_width: 300,
               thumbnail_height: 300,
               cache_age: 86400,

@@ -245,7 +245,11 @@ const optimizeImage = async (job: Job) => {
     ) as string[];
     logger.info(`Saving URLs [${urls.join(", ")}]`);
 
-    if (model === "image" || model === "artistBackground") {
+    if (
+      model === "image" ||
+      model === "artistBackground" ||
+      model === "artistAvatar"
+    ) {
       await prisma.image.update({
         where: { id: destinationId },
         data: { url: urls },
@@ -277,11 +281,6 @@ const optimizeImage = async (job: Job) => {
         const errorMessage = e instanceof Error ? e.message : String(e);
         logger.error(`Error creating artist avatar favicon: ${errorMessage}`);
       }
-
-      await prisma.profileAvatar.update({
-        where: { id: destinationId },
-        data: { url: urls },
-      });
     }
 
     profiler.done({ message: "Done optimizing image" });

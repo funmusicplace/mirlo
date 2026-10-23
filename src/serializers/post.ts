@@ -1,8 +1,8 @@
-import { Prisma, Profile, ProfileAvatar, Post } from "@mirlo/prisma/client";
+import { Image, Prisma, Profile, Post } from "@mirlo/prisma/client";
 
-import { addSizesToImage } from "../utils/artist";
+import { addSizesToStoredImage } from "../utils/artist";
 import { generateFullStaticImageUrl } from "../utils/images";
-import { artistAvatarPrefix, postImagePrefix } from "../utils/minio";
+import { postImagePrefix } from "../utils/minio";
 import {
   ContentImage,
   postImagesForContent,
@@ -76,7 +76,7 @@ export const postIncludeForUser = (userId?: number) => ({
   postSubscriptionTiers: true,
   profile: {
     include: {
-      avatar: { where: { deletedAt: null } },
+      avatar: true,
     },
   },
 });
@@ -85,7 +85,7 @@ type PostInput = Partial<Post> & {
   id: number;
   isPublic: boolean;
   profileId?: number | null;
-  profile?: (Partial<Profile> & { avatar?: ProfileAvatar | null }) | null;
+  profile?: (Partial<Profile> & { avatar?: Image | null }) | null;
 } & { featuredImage?: { extension: string; id: string } | null } & {
   images: ContentImage[];
 } & {
@@ -124,7 +124,7 @@ export const serializePost = <T extends PostInput>(
       ? {
           ...omitApPrivateKey(profile),
           avatar: renameProfileIdToArtistId(
-            addSizesToImage(artistAvatarPrefix, profile.avatar)
+            addSizesToStoredImage(profile.avatar)
           ),
         }
       : undefined,

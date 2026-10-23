@@ -9,6 +9,7 @@ import { getClient } from "../../../src/utils/getClient";
 import {
   clearTables,
   createArtist,
+  createProfileImage,
   createTrack,
   createTrackGroup,
   createPost,
@@ -329,11 +330,8 @@ describe("oembed", () => {
         const user = await createUser({ email: "test@test.com" });
         const artist = await createArtist(user.user.id);
 
-        await prisma.profileAvatar.create({
-          data: {
-            profileId: artist.id,
-            url: ["https://example.com/avatar.jpgx600"],
-          },
+        await createProfileImage(artist.id, "avatar", {
+          url: ["avatar-x600"],
         });
 
         const url = encodeURIComponent(`${applicationUrl}/${artist.urlSlug}`);

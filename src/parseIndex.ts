@@ -706,7 +706,7 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
     include: {
       trackGroup: {
         include: {
-          profile: { include: { avatar: { where: { deletedAt: null } } } },
+          profile: { include: { avatar: true } },
           cover: { where: { deletedAt: null } },
         },
       },
@@ -719,7 +719,7 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
   const artist = await prisma.profile.findFirst({
     where: { id: track.trackGroup.profileId },
     include: {
-      avatar: { where: { deletedAt: null } },
+      avatar: true,
       background: true,
     },
   });
@@ -747,7 +747,7 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
       },
       profile: {
         include: {
-          avatar: { where: { deletedAt: null } },
+          avatar: true,
         },
       },
       cover: { where: { deletedAt: null } },
@@ -760,7 +760,7 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
   const artist = await prisma.profile.findFirst({
     where: { id: trackGroup.profileId },
     include: {
-      avatar: { where: { deletedAt: null } },
+      avatar: true,
       background: true,
     },
   });

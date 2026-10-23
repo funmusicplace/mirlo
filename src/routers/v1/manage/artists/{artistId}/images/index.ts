@@ -9,7 +9,7 @@ import {
 } from "../../../../../../auth/passport";
 import { logger } from "../../../../../../logger";
 import { uploadAndSendToImageQueue } from "../../../../../../queues/processImages";
-import { deleteProfileAvatar } from "../../../../../../utils/artist";
+import { deleteProfileImage } from "../../../../../../utils/artist";
 import { busboyOptions } from "../../../../../../utils/images";
 
 type Params = {
@@ -130,7 +130,7 @@ export default function () {
         return next();
       }
 
-      await deleteProfileAvatar(profile.id);
+      await deleteProfileImage(profile.id, "avatar");
 
       res.json({ message: "Success" });
     } catch (error) {

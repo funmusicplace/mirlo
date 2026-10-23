@@ -164,6 +164,22 @@ export const createProfile = async (
   return profile;
 };
 
+export const createProfileImage = async (
+  profileId: number,
+  field: "avatar" | "background",
+  data?: { url?: string[]; keyPrefix?: string }
+) =>
+  prisma.image.create({
+    data: {
+      ...data,
+      dimensions: field,
+      profileId,
+      ...(field === "avatar"
+        ? { avatarOf: { connect: { id: profileId } } }
+        : { backgroundOf: { connect: { id: profileId } } }),
+    },
+  });
+
 export const createArtistLabel = async (data: {
   artistId: number;
   labelUserId: number;

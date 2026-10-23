@@ -15,7 +15,6 @@ import prisma from "../prisma";
 const IMAGES_BUCKET = "mirlo-images";
 const AUDIO_BUCKET = "mirlo-audio";
 const COVER_PREFIX = "trackgroup-covers";
-const AVATAR_PREFIX = "artist-avatars";
 
 const COVER_SIZES = [1500, 1200, 960, 600, 300, 120, 60];
 const AVATAR_SIZES = [1500, 1200, 960, 600, 300, 120, 60];
@@ -294,25 +293,28 @@ async function seedPublishedTrackGroupsInner(
     await ensureBuckets(minioClient);
 
     for (const artist of artists) {
-      const existing = await prisma.profileAvatar.findFirst({
-        where: { profileId: artist.id },
+      const existing = await prisma.profile.findUnique({
+        where: { id: artist.id },
+        select: { avatarImageId: true },
       });
-      if (existing) {
+      if (existing?.avatarImageId) {
         console.log(`Avatar already exists for ${artist.name}, skipping`);
         continue;
       }
       try {
         const { id, urls } = await generateAndUploadImage(
           minioClient,
-          AVATAR_PREFIX,
+          "",
           AVATAR_SIZES
         );
-        await prisma.profileAvatar.create({
+        await prisma.image.create({
           data: {
             id,
             url: urls,
             originalFilename: `seed-avatar-${id}.webp`,
+            dimensions: "avatar",
             profileId: artist.id,
+            avatarOf: { connect: { id: artist.id } },
           },
         });
         console.log(

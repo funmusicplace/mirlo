@@ -5,7 +5,7 @@ import sharp from "sharp";
 import { REDIS_CONFIG } from "../config/redis";
 import sharpConfig from "../config/sharp";
 import logger from "../logger";
-import { deleteProfileBackground } from "../utils/artist";
+import { deleteProfileImage } from "../utils/artist";
 import { clearTrackGroupDownloads } from "../utils/downloadCache";
 import { AppError, HttpCode } from "../utils/error";
 import { APIContext } from "../utils/file";
@@ -243,56 +243,43 @@ export const uploadAndSendToImageQueue = async (
   return details as { jobId?: string; imageId: string };
 };
 
-export const processProfileAvatar = (ctx: APIContext) => {
-  return async (profileId: number) => {
-    return uploadAndSendToImageQueue(
-      ctx,
-      "artistAvatar",
-      "artistAvatar",
-      "avatar",
-      async (fileInfo: { filename: string }) => {
-        logger.info(`Upserting artist avatar`);
-        return prisma.profileAvatar.upsert({
-          create: {
-            originalFilename: fileInfo.filename,
-            profileId: profileId,
-          },
-          update: {
-            originalFilename: fileInfo.filename,
-            deletedAt: null,
-          },
-          where: {
-            profileId: profileId,
-          },
-        });
-      }
-    );
-  };
-};
+const uploadImage = (
+  ctx: APIContext,
+  model: string,
+  dimensions: "artwork" | "avatar" | "background",
+  profileId: number
+) =>
+  uploadAndSendToImageQueue(
+    ctx,
+    "image",
+    model,
+    dimensions,
+    async (fileInfo: { filename: string }) =>
+      prisma.image.create({
+        data: { originalFilename: fileInfo.filename, dimensions, profileId },
+      })
+  );
 
-export const processProfileBackground = (ctx: APIContext) => {
-  return async (profileId: number) => {
-    const result = await uploadAndSendToImageQueue(
-      ctx,
-      "image",
-      "image",
-      "background",
-      async (fileInfo: { filename: string }) =>
-        prisma.image.create({
-          data: {
-            originalFilename: fileInfo.filename,
-            dimensions: "background",
-            profileId,
-          },
-        })
-    );
-    await deleteProfileBackground(profileId);
-    await prisma.profile.update({
-      where: { id: profileId },
-      data: { backgroundImageId: result.imageId },
-    });
-    return result;
-  };
+export const processProfileImage = async (
+  ctx: APIContext,
+  profileId: number,
+  field: "avatar" | "background"
+) => {
+  const result = await uploadImage(
+    ctx,
+    field === "avatar" ? "artistAvatar" : "image",
+    field,
+    profileId
+  );
+  await deleteProfileImage(profileId, field);
+  await prisma.profile.update({
+    where: { id: profileId },
+    data:
+      field === "avatar"
+        ? { avatarImageId: result.imageId }
+        : { backgroundImageId: result.imageId },
+  });
+  return result;
 };
 
 export const processMerchImage = (ctx: APIContext) => {

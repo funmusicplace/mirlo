@@ -49,13 +49,6 @@ export const findFlaggedImageOwner = async (
         profileId: cover?.trackGroup.profileId,
       };
     }
-    case "artistAvatar": {
-      const avatar = await prisma.profileAvatar.findUnique({
-        where: { id: imageId },
-        select: { profileId: true },
-      });
-      return { profileId: avatar?.profileId };
-    }
     case "postImage": {
       const image = await prisma.postImage.findUnique({
         where: { id: imageId },
@@ -63,6 +56,7 @@ export const findFlaggedImageOwner = async (
       });
       return { profileId: image?.post.profileId ?? undefined };
     }
+    case "artistAvatar":
     case "artistBackground":
     case "image": {
       const image = await prisma.image.findUnique({

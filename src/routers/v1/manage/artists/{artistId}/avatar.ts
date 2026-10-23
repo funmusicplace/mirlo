@@ -7,8 +7,8 @@ import {
   profileBelongsToLoggedInUser,
   userOrAppAuthenticated,
 } from "../../../../../auth/passport";
-import { processProfileAvatar } from "../../../../../queues/processImages";
-import { deleteProfileAvatar } from "../../../../../utils/artist";
+import { processProfileImage } from "../../../../../queues/processImages";
+import { deleteProfileImage } from "../../../../../utils/artist";
 import { busboyOptions } from "../../../../../utils/images";
 
 type Params = {
@@ -31,8 +31,10 @@ export default function () {
     const { artistId: profileId } = req.params as unknown as Params;
 
     try {
-      const { jobId, imageId } = await processProfileAvatar({ req, res })(
-        Number(profileId)
+      const { jobId, imageId } = await processProfileImage(
+        { req, res },
+        Number(profileId),
+        "avatar"
       );
 
       res.json({ result: { jobId, imageId } });
@@ -91,7 +93,7 @@ export default function () {
         return next();
       }
 
-      await deleteProfileAvatar(profile.id);
+      await deleteProfileImage(profile.id, "avatar");
 
       res.json({ message: "Success" });
     } catch (error) {

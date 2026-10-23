@@ -1,4 +1,14 @@
-import { backendStorage, getImagesBucket, S3_ENDPOINT } from "./minio";
+import prisma from "@mirlo/prisma";
+
+import logger from "../logger";
+
+import {
+  backendStorage,
+  getImagesBucket,
+  removeStoredImage,
+  S3_ENDPOINT,
+  storedImagePrefix,
+} from "./minio";
 
 // Module-level cache initialized from DB settings at startup (and refreshed on admin save).
 // Kept synchronous so generateFullStaticImageUrl can be used as a plain function reference.
@@ -49,4 +59,43 @@ export const convertURLArrayToSizes = (urls: string[], prefix: string) => {
       [url.split("-x")[1]]: generateFullStaticImageUrl(url, prefix),
     };
   }, {});
+};
+
+type StoredImage = { id: string; url: string[]; keyPrefix: string | null };
+
+export const storedImageUrl = (
+  image: Pick<StoredImage, "keyPrefix">,
+  fileName: string,
+  extension?: string
+) => generateFullStaticImageUrl(fileName, storedImagePrefix(image), extension);
+
+export const storedImageVariantUrl = (
+  image: Pick<StoredImage, "url" | "keyPrefix"> | null | undefined,
+  size: number
+) => {
+  const variant = image?.url.find((u) => u.endsWith(`-x${size}`));
+  return image && variant ? storedImageUrl(image, variant) : undefined;
+};
+
+export const deleteStoredImage = async (
+  image: Pick<StoredImage, "id" | "keyPrefix">
+) => {
+  const imageId = image.id;
+  await prisma.subscriptionTierImage.deleteMany({ where: { imageId } });
+  await prisma.merchImage.deleteMany({ where: { imageId } });
+  await prisma.profile.updateMany({
+    where: { avatarImageId: imageId },
+    data: { avatarImageId: null },
+  });
+  await prisma.profile.updateMany({
+    where: { backgroundImageId: imageId },
+    data: { backgroundImageId: null },
+  });
+  await prisma.image.delete({ where: { id: imageId } });
+
+  try {
+    await removeStoredImage(image);
+  } catch (e) {
+    logger.info(`No stored objects for image ${imageId}, that's okay`);
+  }
 };
