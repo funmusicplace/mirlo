@@ -15,10 +15,11 @@ import { AppError } from "../../../utils/error";
 import { getClient } from "../../../utils/getClient";
 import {
   generateFullStaticImageUrl,
+  storedImageFileUrl,
   storedImageVariantUrl,
 } from "../../../utils/images";
 import { merchImageUrl } from "../../../utils/merch";
-import { coversPrefix, postImagePrefix } from "../../../utils/minio";
+import { coversPrefix } from "../../../utils/minio";
 import { getInstanceName } from "../../../utils/settings";
 
 interface oEmbedResponse {
@@ -158,11 +159,7 @@ export default function () {
 
           if (post) {
             let imageUrl = post.featuredImage
-              ? generateFullStaticImageUrl(
-                  post.featuredImage.id,
-                  postImagePrefix,
-                  post.featuredImage.extension
-                )
+              ? storedImageFileUrl(post.featuredImage)
               : undefined;
 
             oembedData = {

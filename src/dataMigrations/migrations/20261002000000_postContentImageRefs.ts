@@ -18,7 +18,7 @@ const postContentImageRefs: DataMigration = {
           id: true,
           content: true,
           updatedAt: true,
-          images: { select: { id: true } },
+          images: { select: { imageId: true } },
         },
         orderBy: { id: "asc" },
         take: batchSize,
@@ -29,7 +29,7 @@ const postContentImageRefs: DataMigration = {
       for (const post of posts) {
         const content = addImageRefs(
           post.content ?? "",
-          post.images.map((image) => image.id)
+          post.images.map((image) => image.imageId)
         );
         if (content !== post.content) {
           const { count } = await prisma.post.updateMany({

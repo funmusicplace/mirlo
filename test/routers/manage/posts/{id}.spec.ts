@@ -10,6 +10,7 @@ import {
   clearTables,
   createProfile,
   createPost,
+  createPostImage,
   createUser,
 } from "../../../utils";
 
@@ -430,21 +431,9 @@ describe("manage/posts/{postId}", () => {
         shouldSendEmail: true,
       });
 
-      const image1 = await prisma.postImage.create({
-        data: {
-          postId: post.id,
-          mimeType: "image/jpeg",
-          extension: "jpg",
-        },
-      });
+      const image1 = await createPostImage(post);
 
-      const image2 = await prisma.postImage.create({
-        data: {
-          postId: post.id,
-          mimeType: "image/jpeg",
-          extension: "jpg",
-        },
-      });
+      const image2 = await createPostImage(post);
       await prisma.post.update({
         where: {
           id: post.id,
@@ -454,13 +443,7 @@ describe("manage/posts/{postId}", () => {
         },
       });
 
-      await prisma.postImage.create({
-        data: {
-          postId: post.id,
-          mimeType: "image/jpeg",
-          extension: "jpg",
-        },
-      });
+      await createPostImage(post);
 
       const firstConfirmation = await prisma.postImage.findMany({
         where: {
@@ -472,7 +455,7 @@ describe("manage/posts/{postId}", () => {
       await requestApp
         .put(`manage/posts/${post.id}`)
         .send({
-          content: `<html><img src="${image1.id}.${image1.extension}"/></html>`,
+          content: `<html><img src="${image1.url[0]}"/></html>`,
         })
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
@@ -491,9 +474,7 @@ describe("manage/posts/{postId}", () => {
       });
       const profile = await createProfile(user.id);
       const post = await createPost(profile.id);
-      const image = await prisma.postImage.create({
-        data: { postId: post.id, mimeType: "image/png", extension: "png" },
-      });
+      const image = await createPostImage(post, { extension: "png" });
       const staleSrc = `https://old-cdn.example.com/file/post-images/${image.id}.png`;
 
       const response = await requestApp
@@ -546,13 +527,7 @@ describe("manage/posts/{postId}", () => {
       const profile = await createProfile(user.id);
       const post = await createPost(profile.id);
 
-      const image = await prisma.postImage.create({
-        data: {
-          postId: post.id,
-          mimeType: "image/jpeg",
-          extension: "jpg",
-        },
-      });
+      const image = await createPostImage(post);
 
       const response = await requestApp
         .delete(`manage/posts/${post.id}`)
@@ -562,7 +537,7 @@ describe("manage/posts/{postId}", () => {
       assert(response.statusCode === 200);
       const fetchedImage = await prisma.postImage.findFirst({
         where: {
-          id: image.id,
+          imageId: image.id,
         },
       });
 

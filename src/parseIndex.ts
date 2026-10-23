@@ -42,9 +42,9 @@ import { serializeInstanceSettings } from "./serializers/instanceSettings";
 import { postIncludeForUser } from "./serializers/post";
 import { resolveProfileImageUrl, whereForVisibleProfile } from "./utils/artist";
 import { getClient } from "./utils/getClient";
-import { generateFullStaticImageUrl } from "./utils/images";
+import { generateFullStaticImageUrl, storedImageFileUrl } from "./utils/images";
 import { merchImageUrl } from "./utils/merch";
-import { coversPrefix, rootImagePrefix, postImagePrefix } from "./utils/minio";
+import { coversPrefix, rootImagePrefix } from "./utils/minio";
 import {
   getCanUserSeePostContent,
   loadPurchasesForPostTracks,
@@ -301,11 +301,7 @@ const handlePost: RouteHandler<PostParams> = async ({
       description: postDescription,
       url: postUrl,
       imageUrl: post.featuredImage
-        ? generateFullStaticImageUrl(
-            post.featuredImage.id,
-            postImagePrefix,
-            post.featuredImage.extension
-          )
+        ? storedImageFileUrl(post.featuredImage)
         : avatarUrl,
       artistName: artistName,
       releaseDate: postCreatedDate,
@@ -317,11 +313,7 @@ const handlePost: RouteHandler<PostParams> = async ({
       description: postDescription,
       url: postUrl,
       imageUrl: post.featuredImage
-        ? generateFullStaticImageUrl(
-            post.featuredImage.id,
-            postImagePrefix,
-            post.featuredImage.extension
-          )
+        ? storedImageFileUrl(post.featuredImage)
         : avatarUrl,
       ogVideo: hasTracks
         ? {

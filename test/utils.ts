@@ -222,6 +222,23 @@ export const createPost = async (
   return post;
 };
 
+export const createPostImage = async (
+  post: { id: number; profileId: number | null },
+  data?: { extension?: string; keyPrefix?: string }
+) => {
+  const id = randomUUID();
+  return prisma.image.create({
+    data: {
+      id,
+      url: [`${id}.${data?.extension ?? "jpg"}`],
+      keyPrefix: data?.keyPrefix,
+      dimensions: "artwork",
+      profileId: post.profileId,
+      postImage: { create: { postId: post.id } },
+    },
+  });
+};
+
 export const createTier = async (
   profileId: number,
   data?: Partial<Prisma.ProfileSubscriptionTierCreateArgs["data"]>

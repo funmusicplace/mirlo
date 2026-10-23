@@ -1,3 +1,5 @@
+import { basename, extname } from "path";
+
 import prisma from "@mirlo/prisma";
 
 import logger from "../logger";
@@ -77,12 +79,28 @@ export const storedImageVariantUrl = (
   return image && variant ? storedImageUrl(image, variant) : undefined;
 };
 
+export const storedImageFileUrl = (
+  image: Pick<StoredImage, "url" | "keyPrefix">
+) => {
+  const extension = extname(image.url[0] ?? "");
+  return storedImageUrl(
+    image,
+    basename(image.url[0] ?? "", extension),
+    extension.slice(1) || undefined
+  );
+};
+
 export const deleteStoredImage = async (
   image: Pick<StoredImage, "id" | "keyPrefix">
 ) => {
   const imageId = image.id;
   await prisma.subscriptionTierImage.deleteMany({ where: { imageId } });
   await prisma.merchImage.deleteMany({ where: { imageId } });
+  await prisma.postImage.deleteMany({ where: { imageId } });
+  await prisma.post.updateMany({
+    where: { featuredImageId: imageId },
+    data: { featuredImageId: null },
+  });
   await prisma.profile.updateMany({
     where: { avatarImageId: imageId },
     data: { avatarImageId: null },

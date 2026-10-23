@@ -67,20 +67,26 @@ describe("postContent", () => {
         "jpg"
       );
       assert.equal(
-        resolveImageRefs(content, [{ id: imageId, extension: "jpg" }]),
+        resolveImageRefs(content, [
+          {
+            image: {
+              id: imageId,
+              url: [`${imageId}.jpg`],
+              keyPrefix: postImagePrefix,
+            },
+          },
+        ]),
         `<p>a</p><img data-image-id="${imageId}" src="${expected}" alt="x"><p>b</p>`
       );
     });
 
-    it("adds a src when the tag has none", () => {
+    it("adds a src when the tag has none, from the bucket root for new images", () => {
       const content = `<img data-image-id="${imageId}">`;
-      const expected = generateFullStaticImageUrl(
-        imageId,
-        postImagePrefix,
-        "png"
-      );
+      const expected = generateFullStaticImageUrl(imageId, "", "png");
       assert.equal(
-        resolveImageRefs(content, [{ id: imageId, extension: "png" }]),
+        resolveImageRefs(content, [
+          { image: { id: imageId, url: [`${imageId}.png`], keyPrefix: null } },
+        ]),
         `<img data-image-id="${imageId}" src="${expected}">`
       );
     });
@@ -93,7 +99,15 @@ describe("postContent", () => {
         "jpg"
       );
       assert.equal(
-        resolveImageRefs(content, [{ id: imageId, extension: "jpg" }]),
+        resolveImageRefs(content, [
+          {
+            image: {
+              id: imageId,
+              url: [`${imageId}.jpg`],
+              keyPrefix: postImagePrefix,
+            },
+          },
+        ]),
         `<img data-image-id="${imageId}" alt="a > b" src="${expected}">`
       );
     });
@@ -101,7 +115,9 @@ describe("postContent", () => {
     it("leaves tags with an unknown or missing id alone", () => {
       const content = `<img data-image-id="${otherId}" src="a.jpg"><img src="b.jpg">`;
       assert.equal(
-        resolveImageRefs(content, [{ id: imageId, extension: "jpg" }]),
+        resolveImageRefs(content, [
+          { image: { id: imageId, url: [`${imageId}.jpg`], keyPrefix: null } },
+        ]),
         content
       );
     });

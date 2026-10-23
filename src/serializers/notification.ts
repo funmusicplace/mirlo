@@ -1,6 +1,6 @@
 import { addSizesToImage, addSizesToStoredImage } from "../utils/artist";
-import { generateFullStaticImageUrl } from "../utils/images";
-import { coversPrefix, postImagePrefix } from "../utils/minio";
+import { storedImageFileUrl } from "../utils/images";
+import { coversPrefix } from "../utils/minio";
 
 import {
   omitApPrivateKey,
@@ -46,7 +46,8 @@ export const serializeNotification = <T extends object>(
       } | null;
       featuredImage?: {
         id: string;
-        extension: string;
+        url: string[];
+        keyPrefix: string | null;
       } | null;
     } | null;
     trackGroup?: {
@@ -141,11 +142,7 @@ export const serializeNotification = <T extends object>(
             featuredImage: post.featuredImage
               ? {
                   ...post.featuredImage,
-                  src: generateFullStaticImageUrl(
-                    post.featuredImage.id,
-                    postImagePrefix,
-                    post.featuredImage.extension
-                  ),
+                  src: storedImageFileUrl(post.featuredImage),
                 }
               : null,
           };
