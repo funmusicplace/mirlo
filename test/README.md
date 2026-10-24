@@ -32,6 +32,16 @@ If you need to skip them temporarily:
 SKIP_FFMPEG_INTEGRATION_TESTS=1 yarn api:test
 ```
 
+## Mobile endpoint guard
+
+[test/contracts/mirloMobile.spec.ts](contracts/mirloMobile.spec.ts) fails when the API stops serving a route that the [Mirlo mobile app](https://github.com/funmusicplace/mirlo-mobile) calls. It downloads the app's route list (`api-endpoints.json` on its `main` branch) from raw.githubusercontent.com and checks each `/v1` route against `/v1/api-docs`. It probes the other routes directly.
+
+To check a different copy of the list, such as the one on an app pull request, set `MIRLO_MOBILE_ENDPOINTS` to an http(s) URL or to a file path inside the test container:
+
+```bash
+docker compose --profile=test run -e MIRLO_MOBILE_ENDPOINTS=https://raw.githubusercontent.com/funmusicplace/mirlo-mobile/BRANCH/api-endpoints.json test yarn api:test --grep "mirlo-mobile"
+```
+
 ## Cypress tests
 
 See the `client/cypress` folder.
