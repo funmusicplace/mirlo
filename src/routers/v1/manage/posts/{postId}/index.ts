@@ -10,6 +10,7 @@ import {
 import { serializePost } from "../../../../../serializers/post";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
+import { deleteStoredImage } from "../../../../../utils/images";
 import { clearPageCache } from "../../../../../utils/pageCache";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 import {
@@ -22,15 +23,18 @@ async function syncPostImages(
   content: string,
   featuredImageId: string | null
 ) {
-  const imagesToDelete = imageIds.filter(
-    (imageId) => !(content.includes(imageId) || featuredImageId === imageId)
-  );
-  await prisma.postImage.deleteMany({
-    where: { imageId: { in: imagesToDelete } },
+  const imagesToDelete = await prisma.image.findMany({
+    where: {
+      id: {
+        in: imageIds.filter(
+          (imageId) =>
+            !(content.includes(imageId) || featuredImageId === imageId)
+        ),
+      },
+    },
+    select: { id: true, keyPrefix: true },
   });
-  await prisma.image.deleteMany({
-    where: { id: { in: imagesToDelete } },
-  });
+  await Promise.all(imagesToDelete.map((image) => deleteStoredImage(image)));
 }
 
 async function syncPostTracks(postId: number, content: string) {
