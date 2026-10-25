@@ -48,7 +48,8 @@ const resolve = async (req: Request): Promise<BearerResult> => {
   return {
     status: "valid",
     user: { ...user, isAdmin: false } as Express.User,
-    oauth: { clientId: token.clientId, scopes: [...token.scopes] },
+    // ts-node compiles to ES5, where spreading a Set yields []
+    oauth: { clientId: token.clientId, scopes: Array.from(token.scopes) },
     client,
   };
 };
