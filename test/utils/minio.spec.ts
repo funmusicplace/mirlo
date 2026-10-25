@@ -27,15 +27,11 @@ import {
   uploadZip,
   getDownloadableContentBuffer,
   getCoverBuffer,
-  removeCoverImages,
+  removeStoredImage,
   removeDownloadableContent,
   removeAudioFiles,
   minioClient,
   // Key prefix constants used in assertions
-  artistAvatarPrefix,
-  artistBackgroundPrefix,
-  coversPrefix,
-  postImagePrefix,
   instanceLogoPrefix,
   rootImagePrefix,
 } from "../../src/utils/minio";
@@ -103,10 +99,7 @@ describe("minio bucket routing", () => {
   // ── Image type helpers ───────────────────────────────────────────────────────
 
   describe("imageTypeUsesQueue", () => {
-    it("returns true for all standard image types that need optimization", () => {
-      assert.equal(imageTypeUsesQueue("artistAvatar"), true);
-      assert.equal(imageTypeUsesQueue("artistBackground"), true);
-      assert.equal(imageTypeUsesQueue("trackGroupCover"), true);
+    it("returns true for images that need optimization", () => {
       assert.equal(imageTypeUsesQueue("image"), true);
     });
 
@@ -118,11 +111,8 @@ describe("minio bucket routing", () => {
 
   describe("getImagePrefix", () => {
     it("returns the key prefix for each type", () => {
-      assert.equal(getImagePrefix("artistAvatar"), artistAvatarPrefix);
-      assert.equal(getImagePrefix("artistBackground"), artistBackgroundPrefix);
-      assert.equal(getImagePrefix("trackGroupCover"), coversPrefix);
       assert.equal(getImagePrefix("image"), rootImagePrefix);
-      assert.equal(getImagePrefix("postImage"), postImagePrefix);
+      assert.equal(getImagePrefix("postImage"), rootImagePrefix);
       assert.equal(getImagePrefix("instanceLogo"), instanceLogoPrefix);
     });
   });
@@ -130,40 +120,18 @@ describe("minio bucket routing", () => {
   // ── Image routing ────────────────────────────────────────────────────────────
 
   describe("image routing (no prefix)", () => {
-    it("uploadIncomingImageByType(artistAvatar) → mirlo-images / incoming/{prefix}/{id}", async () => {
-      await uploadIncomingImageByType(
-        "artistAvatar",
-        "abc123",
-        emptyReadable()
-      );
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `incoming/${artistAvatarPrefix}/abc123`);
-    });
-
-    it("downloadIncomingImageByType(artistAvatar) → mirlo-images / incoming/{prefix}/{id}", async () => {
-      await downloadIncomingImageByType("artistAvatar", "abc123");
+    it("downloadIncomingImageByType(image) → mirlo-images / {id}", async () => {
+      await downloadIncomingImageByType("image", "abc123");
       const [bucket, key] = getObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `incoming/${artistAvatarPrefix}/abc123`);
+      assert.equal(key, "abc123");
     });
 
-    it("uploadOptimizedImageByType(artistAvatar) → mirlo-images / {prefix}/{filename}", async () => {
-      await uploadOptimizedImageByType(
-        "artistAvatar",
-        "abc123-x500.webp",
-        Buffer.alloc(0)
-      );
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `${artistAvatarPrefix}/abc123-x500.webp`);
-    });
-
-    it("removeIncomingImageByType(artistAvatar) → mirlo-images / incoming/{prefix}/{id}", async () => {
-      await removeIncomingImageByType("artistAvatar", "abc123");
+    it("removeIncomingImageByType(image) → mirlo-images / {id}", async () => {
+      await removeIncomingImageByType("image", "abc123");
       const [bucket, key] = removeObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `incoming/${artistAvatarPrefix}/abc123`);
+      assert.equal(key, "abc123");
     });
 
     it("uploadOptimizedImageByType(instanceLogo) → mirlo-images / instance-logos/{filename}", async () => {
@@ -177,7 +145,7 @@ describe("minio bucket routing", () => {
       assert.equal(key, `${instanceLogoPrefix}/logo-id.svg`);
     });
 
-    it("uploadIncomingImageByType(postImage) → mirlo-images / {prefix}/{id}, where it's served from", async () => {
+    it("uploadIncomingImageByType(postImage) → mirlo-images / {id} at the root, where it's served from", async () => {
       await uploadIncomingImageByType(
         "postImage",
         "post-id.gif",
@@ -185,7 +153,7 @@ describe("minio bucket routing", () => {
       );
       const [bucket, key] = putObjectStub.firstCall.args;
       assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `${postImagePrefix}/post-id.gif`);
+      assert.equal(key, "post-id.gif");
     });
 
     it("uploadIncomingImageByType(image) → mirlo-images with NO path prefix (prefix: undefined)", async () => {
@@ -207,53 +175,20 @@ describe("minio bucket routing", () => {
       assert.equal(bucket, "mirlo-images");
       assert.equal(key, "img-id-original.webp");
     });
-
-    it("uploadIncomingImageByType(trackGroupCover) → mirlo-images / incoming/{prefix}/{id}", async () => {
-      await uploadIncomingImageByType(
-        "trackGroupCover",
-        "cover-id",
-        emptyReadable()
-      );
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `incoming/${coversPrefix}/cover-id`);
-    });
-
-    it("uploadOptimizedImageByType(trackGroupCover) → mirlo-images / {prefix}/{filename}", async () => {
-      await uploadOptimizedImageByType(
-        "trackGroupCover",
-        "cover-id-x1500.webp",
-        Buffer.alloc(0)
-      );
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, "mirlo-images");
-      assert.equal(key, `${coversPrefix}/cover-id-x1500.webp`);
-    });
   });
 
   describe("image routing (with prefix)", () => {
     beforeEach(() => setBucketConfig({ prefix: "staging-" }));
 
-    it("uploadIncomingImageByType(artistAvatar) → staging-mirlo-images with correct key", async () => {
-      await uploadIncomingImageByType(
-        "artistAvatar",
-        "abc123",
-        emptyReadable()
-      );
-      const [bucket, key] = putObjectStub.firstCall.args;
-      assert.equal(bucket, "staging-mirlo-images");
-      assert.equal(key, `incoming/${artistAvatarPrefix}/abc123`);
-    });
-
-    it("uploadOptimizedImageByType(trackGroupCover) → staging-mirlo-images with correct key", async () => {
+    it("uploadOptimizedImageByType(instanceLogo) → staging-mirlo-images with correct key", async () => {
       await uploadOptimizedImageByType(
-        "trackGroupCover",
-        "cover-id-x1500.webp",
+        "instanceLogo",
+        "logo-id.svg",
         Buffer.alloc(0)
       );
       const [bucket, key] = putObjectStub.firstCall.args;
       assert.equal(bucket, "staging-mirlo-images");
-      assert.equal(key, `${coversPrefix}/cover-id-x1500.webp`);
+      assert.equal(key, `${instanceLogoPrefix}/logo-id.svg`);
     });
 
     it("uploadIncomingImageByType(image) → staging-mirlo-images with NO path prefix", async () => {
@@ -313,11 +248,21 @@ describe("minio bucket routing", () => {
 
   describe("getCoverBuffer", () => {
     describe("no prefix", () => {
-      it("reads from mirlo-images with path-prefixed key", async () => {
-        await getCoverBuffer("cover-id", "webp");
+      it("reads a migrated cover from under its key prefix", async () => {
+        await getCoverBuffer(
+          { id: "cover-id", keyPrefix: "trackgroup-covers" },
+          "webp"
+        );
         const [bucket, key] = getObjectStub.firstCall.args;
         assert.equal(bucket, "mirlo-images");
-        assert.equal(key, `${coversPrefix}/cover-id-x1500.webp`);
+        assert.equal(key, `trackgroup-covers/cover-id-x1500.webp`);
+      });
+
+      it("reads a new cover from the bucket root", async () => {
+        await getCoverBuffer({ id: "cover-id", keyPrefix: null }, "jpg");
+        const [bucket, key] = getObjectStub.firstCall.args;
+        assert.equal(bucket, "mirlo-images");
+        assert.equal(key, "cover-id-x1500.jpg");
       });
     });
 
@@ -325,10 +270,13 @@ describe("minio bucket routing", () => {
       beforeEach(() => setBucketConfig({ prefix: "staging-" }));
 
       it("reads from staging-mirlo-images with path-prefixed key", async () => {
-        await getCoverBuffer("cover-id", "webp");
+        await getCoverBuffer(
+          { id: "cover-id", keyPrefix: "trackgroup-covers" },
+          "webp"
+        );
         const [bucket, key] = getObjectStub.firstCall.args;
         assert.equal(bucket, "staging-mirlo-images");
-        assert.equal(key, `${coversPrefix}/cover-id-x1500.webp`);
+        assert.equal(key, `trackgroup-covers/cover-id-x1500.webp`);
       });
     });
   });
@@ -365,13 +313,22 @@ describe("minio bucket routing", () => {
         );
       });
 
-      it("removeCoverImages uses mirlo-images with prefixed coverId", async () => {
-        await removeCoverImages("cover-id");
+      it("removeStoredImage removes a migrated image under its key prefix", async () => {
+        await removeStoredImage({
+          id: "cover-id",
+          keyPrefix: "trackgroup-covers",
+        });
         assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-images");
         assert.equal(
           listObjectsV2Stub.firstCall.args[1],
-          `${coversPrefix}/cover-id`
+          `trackgroup-covers/cover-id`
         );
+      });
+
+      it("removeStoredImage removes a new image from the bucket root", async () => {
+        await removeStoredImage({ id: "image-id", keyPrefix: null });
+        assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-images");
+        assert.equal(listObjectsV2Stub.firstCall.args[1], "image-id");
       });
 
       it("removeDownloadableContent uses mirlo-downloads with content/ prefix", async () => {
@@ -392,8 +349,11 @@ describe("minio bucket routing", () => {
         );
       });
 
-      it("removeCoverImages uses staging-mirlo-images", async () => {
-        await removeCoverImages("cover-id");
+      it("removeStoredImage uses staging-mirlo-images", async () => {
+        await removeStoredImage({
+          id: "cover-id",
+          keyPrefix: "trackgroup-covers",
+        });
         assert.equal(
           listObjectsV2Stub.firstCall.args[0],
           "staging-mirlo-images"

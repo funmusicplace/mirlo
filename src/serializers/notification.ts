@@ -1,16 +1,17 @@
-import { addSizesToImage } from "../utils/artist";
-import { generateFullStaticImageUrl } from "../utils/images";
-import {
-  artistAvatarPrefix,
-  coversPrefix,
-  postImagePrefix,
-} from "../utils/minio";
+import { addSizesToStoredImage } from "../utils/artist";
+import { storedImageFileUrl } from "../utils/images";
 
 import {
   omitApPrivateKey,
   renameProfileIdToArtistId,
   Serialized,
 } from "./utils";
+
+type AvatarImage = {
+  url: string[];
+  keyPrefix: string | null;
+  profileId?: number | null;
+};
 
 /**
  * Emit artist* wire shape for a notification row (with nested relations).
@@ -40,11 +41,12 @@ export const serializeNotification = <T extends object>(
     post?: {
       profileId?: number | null;
       profile?: {
-        avatar?: { url: string[]; profileId?: number } | null;
+        avatar?: AvatarImage | null;
       } | null;
       featuredImage?: {
         id: string;
-        extension: string;
+        url: string[];
+        keyPrefix: string | null;
       } | null;
     } | null;
     trackGroup?: {
@@ -52,12 +54,12 @@ export const serializeNotification = <T extends object>(
       profile?: {
         user?: { currency?: string | null } | null;
       } | null;
-      cover?: { url: string[] } | null;
+      cover?: { url: string[]; keyPrefix: string | null } | null;
       purchase?: unknown;
     } | null;
     relatedUser?: {
       profiles?: {
-        avatar?: { url: string[]; profileId?: number } | null;
+        avatar?: AvatarImage | null;
       }[];
     } | null;
   };
@@ -68,9 +70,8 @@ export const serializeNotification = <T extends object>(
     ...subscriptionRest
   } = subscription ?? {};
 
-  const remapAvatar = (
-    avatar: { url: string[]; profileId?: number } | null | undefined
-  ) => renameProfileIdToArtistId(addSizesToImage(artistAvatarPrefix, avatar));
+  const remapAvatar = (avatar: AvatarImage | null | undefined) =>
+    renameProfileIdToArtistId(addSizesToStoredImage(avatar));
 
   return {
     ...rest,
@@ -114,7 +115,7 @@ export const serializeNotification = <T extends object>(
             artistId: tgProfileId,
             artist: tgProfile ? omitApPrivateKey(tgProfile) : tgProfile,
             currency: tgProfile?.user?.currency ?? "usd",
-            cover: addSizesToImage(coversPrefix, trackGroup.cover),
+            cover: addSizesToStoredImage(trackGroup.cover),
           };
         })()
       : null,
@@ -140,11 +141,7 @@ export const serializeNotification = <T extends object>(
             featuredImage: post.featuredImage
               ? {
                   ...post.featuredImage,
-                  src: generateFullStaticImageUrl(
-                    post.featuredImage.id,
-                    postImagePrefix,
-                    post.featuredImage.extension
-                  ),
+                  src: storedImageFileUrl(post.featuredImage),
                 }
               : null,
           };

@@ -10,7 +10,12 @@ import {
   createBucketIfNotExists,
   getImagesBucket,
 } from "../../../../src/utils/minio";
-import { clearTables, createProfile, createUser } from "../../../utils";
+import {
+  clearTables,
+  createProfile,
+  createProfileImage,
+  createUser,
+} from "../../../utils";
 import { requestApp } from "../../utils";
 
 const setup = async () => {
@@ -18,20 +23,6 @@ const setup = async () => {
   const profile = await createProfile(user.id);
   await createBucketIfNotExists(getImagesBucket());
   return { accessToken, profile };
-};
-
-const linkBackground = async (
-  profileId: number,
-  data: { url: string[]; keyPrefix?: string }
-) => {
-  const image = await prisma.image.create({
-    data: { ...data, dimensions: "background", profileId },
-  });
-  await prisma.profile.update({
-    where: { id: profileId },
-    data: { backgroundImageId: image.id },
-  });
-  return image;
 };
 
 const png = () =>
@@ -76,7 +67,7 @@ describe("manage/artists/{artistId}/background", () => {
 
     it("replaces the old background with a new Image", async () => {
       const { accessToken, profile } = await setup();
-      const old = await linkBackground(profile.id, {
+      const old = await createProfileImage(profile.id, "background", {
         url: ["old-x625"],
         keyPrefix: "artist-banners",
       });
@@ -97,7 +88,7 @@ describe("manage/artists/{artistId}/background", () => {
 
     it("keeps the old background when the upload fails", async () => {
       const { accessToken, profile } = await setup();
-      const old = await linkBackground(profile.id, {
+      const old = await createProfileImage(profile.id, "background", {
         url: ["old-x625"],
         keyPrefix: "artist-banners",
       });
@@ -123,7 +114,9 @@ describe("manage/artists/{artistId}/background", () => {
   describe("DELETE", () => {
     it("unlinks and soft-deletes the background", async () => {
       const { accessToken, profile } = await setup();
-      const image = await linkBackground(profile.id, { url: [] });
+      const image = await createProfileImage(profile.id, "background", {
+        url: [],
+      });
 
       const response = await requestApp
         .delete(`manage/artists/${profile.id}/background`)
@@ -145,7 +138,7 @@ describe("manage/artists/{artistId}/background", () => {
   describe("serializing", () => {
     it("serves a migrated background from its key prefix", async () => {
       const { profile } = await setup();
-      await linkBackground(profile.id, {
+      await createProfileImage(profile.id, "background", {
         url: ["legacy-x625"],
         keyPrefix: "artist-banners",
       });
@@ -163,7 +156,7 @@ describe("manage/artists/{artistId}/background", () => {
 
     it("serves a new background from the bucket root", async () => {
       const { profile } = await setup();
-      await linkBackground(profile.id, { url: ["new-x625"] });
+      await createProfileImage(profile.id, "background", { url: ["new-x625"] });
 
       const response = await requestApp
         .get(`artists/${profile.id}`)

@@ -10,6 +10,7 @@ import {
   clearTables,
   createProfile,
   createPost,
+  createPostImage,
   createTrack,
   createTrackGroup,
   createUser,
@@ -130,9 +131,7 @@ describe("posts/{id}", () => {
       });
       const profile = await createProfile(user.id);
       const post = await createPost(profile.id, { isDraft: false });
-      const image = await prisma.postImage.create({
-        data: { postId: post.id, mimeType: "image/jpeg", extension: "jpg" },
-      });
+      const image = await createPostImage(post);
       const staleSrc = `https://old-cdn.example.com/post-images/${image.id}.jpg`;
       await prisma.post.update({
         where: { id: post.id },
@@ -150,6 +149,31 @@ describe("posts/{id}", () => {
       assert(content.includes(`${image.id}.jpg"`));
       assert(!content.includes(staleSrc));
       assert.equal(images, undefined);
+    });
+
+    it("should GET / serve a migrated featured image from its key prefix", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const profile = await createProfile(user.id);
+      const post = await createPost(profile.id, { isDraft: false });
+      const image = await createPostImage(post, {
+        extension: "gif",
+        keyPrefix: "post-images",
+      });
+      await prisma.post.update({
+        where: { id: post.id },
+        data: { featuredImageId: image.id },
+      });
+
+      const response = await requestApp
+        .get(`posts/${post.id}`)
+        .set("Accept", "application/json");
+
+      assert.match(
+        response.body.result.featuredImage.src,
+        new RegExp(`/post-images/${image.id}\\.gif$`)
+      );
     });
 
     it("should GET / send hide content boolean if not public", async () => {

@@ -43,7 +43,7 @@ export const getPostsVisibleToUser = async (
     prisma.post.findMany({
       where,
       include: {
-        profile: { include: { avatar: { where: { deletedAt: null } } } },
+        profile: { include: { avatar: true } },
         minimumSubscriptionTier: true,
         postSubscriptionTiers: true,
         featuredImage: true,

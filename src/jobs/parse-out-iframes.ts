@@ -7,7 +7,7 @@ import pug from "pug";
 import logger from "../logger";
 import { getClient } from "../utils/getClient";
 import { convertURLArrayToSizes } from "../utils/images";
-import { coversPrefix } from "../utils/minio";
+import { storedImagePrefix } from "../utils/minio";
 
 const renderWidgetCard = pug.compileFile(
   path.resolve("emails", "widget-card.pug")
@@ -19,12 +19,14 @@ const cardColors = (properties: Profile["properties"]) => ({
   text: properties?.colors?.text || "#111",
 });
 
-const coverUrl = (cover?: { url: string[] } | null): string | null => {
+const coverUrl = (
+  cover?: { url: string[]; keyPrefix: string | null } | null
+): string | null => {
   if (!cover || cover.url.length === 0) return null;
-  const sizes = convertURLArrayToSizes(cover.url, coversPrefix) as Record<
-    string,
-    string
-  >;
+  const sizes = convertURLArrayToSizes(
+    cover.url,
+    storedImagePrefix(cover)
+  ) as Record<string, string>;
   return sizes["120"] || sizes["60"] || sizes["original"] || null;
 };
 

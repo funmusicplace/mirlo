@@ -3,7 +3,6 @@ import assert from "assert";
 import { afterEach, beforeEach, describe, it } from "mocha";
 
 import { generateFullStaticImageUrl } from "../../src/utils/images";
-import { postImagePrefix } from "../../src/utils/minio";
 import {
   addImageRefs,
   resolveImageRefs,
@@ -63,24 +62,30 @@ describe("postContent", () => {
       const content = `<p>a</p><img data-image-id="${imageId}" src="https://old.example.com/post-images/${imageId}.jpg" alt="x"><p>b</p>`;
       const expected = generateFullStaticImageUrl(
         imageId,
-        postImagePrefix,
+        "post-images",
         "jpg"
       );
       assert.equal(
-        resolveImageRefs(content, [{ id: imageId, extension: "jpg" }]),
+        resolveImageRefs(content, [
+          {
+            image: {
+              id: imageId,
+              url: [`${imageId}.jpg`],
+              keyPrefix: "post-images",
+            },
+          },
+        ]),
         `<p>a</p><img data-image-id="${imageId}" src="${expected}" alt="x"><p>b</p>`
       );
     });
 
-    it("adds a src when the tag has none", () => {
+    it("adds a src when the tag has none, from the bucket root for new images", () => {
       const content = `<img data-image-id="${imageId}">`;
-      const expected = generateFullStaticImageUrl(
-        imageId,
-        postImagePrefix,
-        "png"
-      );
+      const expected = generateFullStaticImageUrl(imageId, "", "png");
       assert.equal(
-        resolveImageRefs(content, [{ id: imageId, extension: "png" }]),
+        resolveImageRefs(content, [
+          { image: { id: imageId, url: [`${imageId}.png`], keyPrefix: null } },
+        ]),
         `<img data-image-id="${imageId}" src="${expected}">`
       );
     });
@@ -89,11 +94,19 @@ describe("postContent", () => {
       const content = `<img data-image-id="${imageId}" alt="a > b" src="https://old.example.com/it's/${imageId}.jpg">`;
       const expected = generateFullStaticImageUrl(
         imageId,
-        postImagePrefix,
+        "post-images",
         "jpg"
       );
       assert.equal(
-        resolveImageRefs(content, [{ id: imageId, extension: "jpg" }]),
+        resolveImageRefs(content, [
+          {
+            image: {
+              id: imageId,
+              url: [`${imageId}.jpg`],
+              keyPrefix: "post-images",
+            },
+          },
+        ]),
         `<img data-image-id="${imageId}" alt="a > b" src="${expected}">`
       );
     });
@@ -101,7 +114,9 @@ describe("postContent", () => {
     it("leaves tags with an unknown or missing id alone", () => {
       const content = `<img data-image-id="${otherId}" src="a.jpg"><img src="b.jpg">`;
       assert.equal(
-        resolveImageRefs(content, [{ id: imageId, extension: "jpg" }]),
+        resolveImageRefs(content, [
+          { image: { id: imageId, url: [`${imageId}.jpg`], keyPrefix: null } },
+        ]),
         content
       );
     });

@@ -1,8 +1,7 @@
-import { Prisma, Profile, ProfileAvatar, Post } from "@mirlo/prisma/client";
+import { Image, Prisma, Profile, Post } from "@mirlo/prisma/client";
 
-import { addSizesToImage } from "../utils/artist";
-import { generateFullStaticImageUrl } from "../utils/images";
-import { artistAvatarPrefix, postImagePrefix } from "../utils/minio";
+import { addSizesToStoredImage } from "../utils/artist";
+import { storedImageFileUrl } from "../utils/images";
 import {
   ContentImage,
   postImagesForContent,
@@ -76,7 +75,7 @@ export const postIncludeForUser = (userId?: number) => ({
   postSubscriptionTiers: true,
   profile: {
     include: {
-      avatar: { where: { deletedAt: null } },
+      avatar: true,
     },
   },
 });
@@ -85,8 +84,14 @@ type PostInput = Partial<Post> & {
   id: number;
   isPublic: boolean;
   profileId?: number | null;
-  profile?: (Partial<Profile> & { avatar?: ProfileAvatar | null }) | null;
-} & { featuredImage?: { extension: string; id: string } | null } & {
+  profile?: (Partial<Profile> & { avatar?: Image | null }) | null;
+} & {
+  featuredImage?: {
+    id: string;
+    url: string[];
+    keyPrefix: string | null;
+  } | null;
+} & {
   images: ContentImage[];
 } & {
   tracks?: {
@@ -124,7 +129,7 @@ export const serializePost = <T extends PostInput>(
       ? {
           ...omitApPrivateKey(profile),
           avatar: renameProfileIdToArtistId(
-            addSizesToImage(artistAvatarPrefix, profile.avatar)
+            addSizesToStoredImage(profile.avatar)
           ),
         }
       : undefined,
@@ -152,11 +157,7 @@ export const serializePost = <T extends PostInput>(
       : undefined,
     featuredImage: post.featuredImage && {
       ...post.featuredImage,
-      src: generateFullStaticImageUrl(
-        post.featuredImage.id,
-        postImagePrefix,
-        post.featuredImage.extension
-      ),
+      src: storedImageFileUrl(post.featuredImage),
     },
     isContentHidden: !contentVisible,
     content: !contentVisible ? extractFirstParagraph(content ?? "") : content,

@@ -72,7 +72,7 @@ export default function () {
         const artists = await prisma.profile.findMany({
           where: { id: { in: featuredArtistIds }, deletedAt: null },
           include: {
-            avatar: { where: { deletedAt: null } },
+            avatar: true,
             background: true,
           },
         });
@@ -90,7 +90,7 @@ export default function () {
           where: {
             id: Number(settings.settings.instanceCustomization?.artistId),
           },
-          include: { avatar: { where: { deletedAt: null } } },
+          include: { avatar: true },
         });
         return res.status(200).json({
           result: artist ? processSingleArtist(artist) : artist,

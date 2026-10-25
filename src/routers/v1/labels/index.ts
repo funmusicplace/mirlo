@@ -67,11 +67,7 @@ export default function () {
             },
             orderBy: { orderIndex: "asc" },
           },
-          avatar: {
-            where: {
-              deletedAt: null,
-            },
-          },
+          avatar: true,
           background: true,
           user: {
             select: {

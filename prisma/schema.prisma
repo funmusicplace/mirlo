@@ -331,23 +331,24 @@ model Post {
   notifications             Notification[]
   shouldSendEmail           Boolean                  @default(true)
   images                    PostImage[]              @relation("images")
-  featuredImage             PostImage?               @relation(fields: [featuredImageId], references: [id])
+  featuredImage             Image?                   @relation("PostFeaturedImage", fields: [featuredImageId], references: [id])
   featuredImageId           String?                  @db.Uuid
   featuredImageCredit       String?
   tracks                    PostTrack[]
 }
 
 model PostImage {
-  id              String    @id @default(uuid()) @db.Uuid
-  mimeType        String
-  extension       String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime?
-  isHero          Boolean   @default(false)
-  postId          Int
-  post            Post      @relation(name: "images", fields: [postId], references: [id])
-  featuredForPost Post[]
+  id        String    @id @default(uuid()) @db.Uuid
+  mimeType  String?
+  extension String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  isHero    Boolean   @default(false)
+  postId    Int
+  post      Post      @relation(name: "images", fields: [postId], references: [id])
+  imageId   String    @unique @db.Uuid
+  image     Image     @relation(fields: [imageId], references: [id])
 }
 
 model PostSubscriptionTier {
@@ -378,7 +379,9 @@ model Profile {
   backgroundImageId                   String?                               @unique @db.Uuid
   background                          Image?                                @relation("ProfileBackgroundImage", fields: [backgroundImageId], references: [id])
   images                              Image[]                               @relation("ProfileImages")
-  avatar                              ProfileAvatar?
+  legacyAvatar                        ProfileAvatar?
+  avatarImageId                       String?                               @unique @db.Uuid
+  avatar                              Image?                                @relation("ProfileAvatarImage", fields: [avatarImageId], references: [id])
   urlSlug                             String
   /// [Properties]                              @unique
   properties                          Json?
@@ -549,6 +552,10 @@ model Image {
   profile          Profile?                @relation("ProfileImages", fields: [profileId], references: [id])
   keyPrefix        String?
   backgroundOf     Profile?                @relation("ProfileBackgroundImage")
+  avatarOf         Profile?                @relation("ProfileAvatarImage")
+  postImage        PostImage?
+  featuredForPost  Post[]                  @relation("PostFeaturedImage")
+  coverOf          TrackGroup?             @relation("TrackGroupCoverImage")
 
   @@index([profileId])
 }
@@ -861,7 +868,9 @@ model TrackGroup {
   title                           String?
   isHiddenTrackGroupForSongDrafts Boolean                         @default(false)
   tracks                          Track[]
-  cover                           TrackGroupCover?
+  legacyCover                     TrackGroupCover?
+  coverImageId                    String?                         @unique @db.Uuid
+  cover                           Image?                          @relation("TrackGroupCoverImage", fields: [coverImageId], references: [id])
   publishedAt                     DateTime?
   type                            String?
   isGettable                      Boolean                         @default(true)

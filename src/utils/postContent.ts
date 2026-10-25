@@ -4,13 +4,14 @@ import sanitizeHtml from "sanitize-html";
 
 import { originOf } from "./clientUrl";
 import { getClient } from "./getClient";
-import { generateFullStaticImageUrl } from "./images";
-import { postImagePrefix } from "./minio";
+import { storedImageFileUrl } from "./images";
 
-export type ContentImage = { id: string; extension: string };
+export type ContentImage = {
+  image: { id: string; url: string[]; keyPrefix: string | null };
+};
 
 export const postImagesForContent = {
-  select: { id: true, extension: true },
+  select: { image: { select: { id: true, url: true, keyPrefix: true } } },
 } as const;
 
 const imageIdInUrlRegex =
@@ -38,12 +39,11 @@ export const resolveImageRefs = (content: string, images: ContentImage[]) => {
   }
   const $ = cheerio.load(content, null, false);
   $("img[data-image-id]").each((_, el) => {
-    const image = images.find((i) => i.id === $(el).attr("data-image-id"));
+    const image = images.find(
+      (i) => i.image.id === $(el).attr("data-image-id")
+    )?.image;
     if (image) {
-      $(el).attr(
-        "src",
-        generateFullStaticImageUrl(image.id, postImagePrefix, image.extension)
-      );
+      $(el).attr("src", storedImageFileUrl(image));
     }
   });
   return $.html();

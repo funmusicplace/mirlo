@@ -33,10 +33,6 @@ import logger from "../logger";
 // caller's point of view. Bucket layout is documented in
 // docs/hosting/object-storage.md.
 
-export const artistBackgroundPrefix = "artist-banners";
-export const artistAvatarPrefix = "artist-avatars";
-export const coversPrefix = "trackgroup-covers";
-export const postImagePrefix = "post-images";
 export const instanceLogoPrefix = "instance-logos";
 export const rootImagePrefix = "";
 
@@ -53,10 +49,7 @@ export const isBucketConfig = (value: unknown): value is BucketConfig =>
 //         "image" type, which sits at the bucket root).
 // queue: whether to add a BullMQ optimize-image job after upload.
 const imageTypeBuckets = {
-  artistAvatar: { prefix: artistAvatarPrefix, queue: true },
-  artistBackground: { prefix: artistBackgroundPrefix, queue: true },
-  trackGroupCover: { prefix: coversPrefix, queue: true },
-  postImage: { prefix: postImagePrefix, queue: false },
+  postImage: { prefix: rootImagePrefix, queue: false },
   instanceLogo: { prefix: instanceLogoPrefix, queue: false },
   image: { prefix: rootImagePrefix, queue: true },
 };
@@ -1051,11 +1044,13 @@ const imageKeyPrefix = (imageType: ImageType) =>
 export const storedImagePrefix = (image: { keyPrefix: string | null }) =>
   image.keyPrefix ?? rootImagePrefix;
 
-const incomingImageKey = (imageType: ImageType, fileName: string) => {
-  const { prefix, queue } = imageTypeBuckets[imageType];
-  if (!prefix) return fileName;
-  return queue ? `incoming/${prefix}/${fileName}` : `${prefix}/${fileName}`;
-};
+const storedImageKey = (
+  image: { keyPrefix: string | null },
+  fileName: string
+) => `${keyPrefixPath(storedImagePrefix(image))}${fileName}`;
+
+const incomingImageKey = (imageType: ImageType, fileName: string) =>
+  `${imageKeyPrefix(imageType)}${fileName}`;
 
 export const uploadIncomingImageByType = async (
   imageType: ImageType,
@@ -1119,10 +1114,7 @@ export const removeStoredImage = (image: {
   id: string;
   keyPrefix: string | null;
 }) =>
-  removeObjectsFromBucket(
-    getImagesBucket(),
-    `${keyPrefixPath(storedImagePrefix(image))}${image.id}`
-  );
+  removeObjectsFromBucket(getImagesBucket(), storedImageKey(image, image.id));
 
 export const fixStoredImageContentTypes = async () => {
   const summary = { checked: 0, fixed: 0, failed: 0 };
@@ -1161,14 +1153,14 @@ export const fixStoredImageContentTypes = async () => {
   return summary;
 };
 
-export const getCoverBuffer = (coverId: string, ext: "webp" | "jpg") =>
+export const getCoverBuffer = (
+  cover: { id: string; keyPrefix: string | null },
+  ext: "webp" | "jpg"
+) =>
   getBufferFromStorage(
     getImagesBucket(),
-    `${imageKeyPrefix("trackGroupCover")}${coverId}-x1500.${ext}`
+    storedImageKey(cover, `${cover.id}-x1500.${ext}`)
   );
-
-export const removeCoverImages = (coverId: string) =>
-  removeImagesByType("trackGroupCover", coverId);
 
 // ── Downloadable content ──────────────────────────────────────────────────────
 

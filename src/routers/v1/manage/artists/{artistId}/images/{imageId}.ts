@@ -5,9 +5,8 @@ import {
   profileBelongsToLoggedInUser,
   userOrAppAuthenticated,
 } from "../../../../../../auth/passport";
-import { logger } from "../../../../../../logger";
 import { AppError } from "../../../../../../utils/error";
-import { removeStoredImage } from "../../../../../../utils/minio";
+import { deleteStoredImage } from "../../../../../../utils/images";
 
 type Params = {
   artistId: string;
@@ -20,7 +19,6 @@ export default function () {
   };
 
   async function DELETE(req: Request, res: Response, next: NextFunction) {
-    const log = req.logger ?? logger;
     const { artistId: profileId, imageId } = req.params as unknown as Params;
 
     try {
@@ -35,18 +33,7 @@ export default function () {
         });
       }
 
-      await prisma.subscriptionTierImage.deleteMany({ where: { imageId } });
-      await prisma.profile.updateMany({
-        where: { backgroundImageId: imageId },
-        data: { backgroundImageId: null },
-      });
-      await prisma.image.delete({ where: { id: imageId } });
-
-      try {
-        await removeStoredImage(image);
-      } catch (e) {
-        log.info(`No stored objects for image ${imageId}, that's okay`);
-      }
+      await deleteStoredImage(image);
 
       res.json({ message: "Success" });
     } catch (error) {

@@ -3,8 +3,8 @@ import { Request, Response } from "express";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
-import { processSingleArtist } from "../../../../utils/artist";
 import { serializeProfileUserSubscriptionCharge } from "../../../../serializers/profileUserSubscription";
+import { processSingleArtist } from "../../../../utils/artist";
 
 type Params = {
   userId: string;
@@ -35,7 +35,7 @@ export default function () {
                 include: {
                   profile: {
                     include: {
-                      avatar: { where: { deletedAt: null } },
+                      avatar: true,
                     },
                   },
                 },

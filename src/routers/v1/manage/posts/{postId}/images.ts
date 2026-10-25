@@ -8,8 +8,7 @@ import {
 } from "../../../../../auth/passport";
 import { processPostImage } from "../../../../../queues/processImages";
 import { AppError } from "../../../../../utils/error";
-import { generateFullStaticImageUrl } from "../../../../../utils/images";
-import { postImagePrefix } from "../../../../../utils/minio";
+import { storedImageFileUrl } from "../../../../../utils/images";
 import { doesPostBelongToUser } from "../../../../../utils/post";
 
 type Params = {
@@ -36,24 +35,21 @@ export default function () {
     let { postId }: { postId?: string } = req.params;
 
     try {
-      const images = await prisma.postImage.findMany({
+      const postImages = await prisma.postImage.findMany({
         where: {
           postId: Number(postId),
           deletedAt: null,
         },
         include: {
-          featuredForPost: true,
+          image: { include: { featuredForPost: true } },
         },
       });
 
       res.json({
-        results: images.map((image) => ({
+        results: postImages.map(({ image, postId }) => ({
           ...image,
-          src: generateFullStaticImageUrl(
-            image.id,
-            postImagePrefix,
-            image.extension
-          ),
+          postId,
+          src: storedImageFileUrl(image),
         })),
       });
     } catch (e) {
@@ -65,19 +61,15 @@ export default function () {
     const { postId } = req.params as unknown as Params;
     try {
       const { imageId } = await processPostImage({ req, res })(Number(postId));
-      const image = await prisma.postImage.findFirst({
+      const image = await prisma.image.findFirst({
         where: {
-          id: imageId as string,
+          id: imageId,
         },
       });
       if (!image) {
         throw new AppError({ httpCode: 404, description: "Image not found" });
       }
-      const src = generateFullStaticImageUrl(
-        image.id,
-        postImagePrefix,
-        image.extension
-      );
+      const src = storedImageFileUrl(image);
       res.json({
         result: {
           src,

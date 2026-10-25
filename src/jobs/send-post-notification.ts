@@ -56,12 +56,7 @@ export default async function sendPostNotification(job: {
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: {
-        featuredImage: {
-          select: {
-            id: true,
-            extension: true,
-          },
-        },
+        featuredImage: true,
         images: postImagesForContent,
         minimumSubscriptionTier: {
           select: { minAmount: true },

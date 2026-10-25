@@ -153,11 +153,7 @@ export default function () {
             },
             orderBy: { orderIndex: "asc" },
           },
-          avatar: {
-            where: {
-              deletedAt: null,
-            },
-          },
+          avatar: true,
           user: { select: { stripeAccountId: true } },
           paymentToUser: { select: { stripeAccountId: true } },
         },

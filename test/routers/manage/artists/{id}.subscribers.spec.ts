@@ -7,6 +7,7 @@ import { describe, it } from "mocha";
 import {
   clearTables,
   createArtist,
+  createProfileImage,
   createTier,
   createUser,
 } from "../../../utils";
@@ -52,11 +53,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
 
-      await prisma.profileAvatar.create({
-        data: {
-          profileId: artist.id,
-        },
-      });
+      await createProfileImage(artist.id, "avatar");
 
       const response = await requestApp
         .get(`manage/artists/${artist.id}/subscribers?format=csv`)

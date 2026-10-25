@@ -57,8 +57,9 @@ describe("manage/trackGroups/{trackGroupId}/publish", () => {
         publishedAt: null,
       });
 
-      await prisma.trackGroupCover.delete({
-        where: { trackGroupId: trackGroup.id },
+      await prisma.trackGroup.update({
+        where: { id: trackGroup.id },
+        data: { coverImageId: null },
       });
 
       const response = await requestApp

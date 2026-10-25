@@ -3,12 +3,15 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+
 import {
   clearTables,
   createArtist,
+  createProfileImage,
   createTrackGroup,
   createUser,
 } from "../../../utils";
+
 import prisma from "@mirlo/prisma";
 
 import { requestApp } from "../../utils";
@@ -58,11 +61,7 @@ describe("manage/artists/{artistId}/codes", () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
 
-      await prisma.profileAvatar.create({
-        data: {
-          profileId: artist.id,
-        },
-      });
+      await createProfileImage(artist.id, "avatar");
 
       const trackGroup = await createTrackGroup(artist.id);
       await prisma.trackGroupDownloadCodes.createMany({

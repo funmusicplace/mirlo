@@ -14,8 +14,6 @@ import prisma from "../prisma";
 // Fresh installs use the consolidated 3-bucket layout (see docs/hosting/object-storage.md).
 const IMAGES_BUCKET = "mirlo-images";
 const AUDIO_BUCKET = "mirlo-audio";
-const COVER_PREFIX = "trackgroup-covers";
-const AVATAR_PREFIX = "artist-avatars";
 
 const COVER_SIZES = [1500, 1200, 960, 600, 300, 120, 60];
 const AVATAR_SIZES = [1500, 1200, 960, 600, 300, 120, 60];
@@ -101,11 +99,9 @@ function generateGlitchNoiseBuffer(width: number, height: number): Buffer {
 
 export async function generateAndUploadImage(
   minioClient: Minio.Client,
-  prefix: string,
   sizes: number[]
 ): Promise<{ id: string; urls: string[] }> {
   const id = randomUUID();
-  const keyPrefix = prefix ? `${prefix}/` : "";
   // Seed covers don't need full 1500px; smaller base cuts sharp peak memory hard.
   const baseSize = 600;
   const seedSizes = sizes.filter((s) => s <= baseSize);
@@ -117,11 +113,7 @@ export async function generateAndUploadImage(
     .webp({ quality: 70 })
     .toBuffer();
 
-  await minioClient.putObject(
-    IMAGES_BUCKET,
-    `${keyPrefix}${id}-original.webp`,
-    baseWebp
-  );
+  await minioClient.putObject(IMAGES_BUCKET, `${id}-original.webp`, baseWebp);
 
   // Sequential resizes — parallel sharp pipelines spike memory enough to
   // get the seed process SIGKILL'd under Docker/cgroup limits.
@@ -131,11 +123,7 @@ export async function generateAndUploadImage(
       .resize(size, size, { fit: "inside", withoutEnlargement: true })
       .webp({ quality: 70 })
       .toBuffer();
-    await minioClient.putObject(
-      IMAGES_BUCKET,
-      `${keyPrefix}${id}-x${size}.webp`,
-      resized
-    );
+    await minioClient.putObject(IMAGES_BUCKET, `${id}-x${size}.webp`, resized);
     sizeUrls.push(`${id}-x${size}`);
   }
 
@@ -294,25 +282,27 @@ async function seedPublishedTrackGroupsInner(
     await ensureBuckets(minioClient);
 
     for (const artist of artists) {
-      const existing = await prisma.profileAvatar.findFirst({
-        where: { profileId: artist.id },
+      const existing = await prisma.profile.findUnique({
+        where: { id: artist.id },
+        select: { avatarImageId: true },
       });
-      if (existing) {
+      if (existing?.avatarImageId) {
         console.log(`Avatar already exists for ${artist.name}, skipping`);
         continue;
       }
       try {
         const { id, urls } = await generateAndUploadImage(
           minioClient,
-          AVATAR_PREFIX,
           AVATAR_SIZES
         );
-        await prisma.profileAvatar.create({
+        await prisma.image.create({
           data: {
             id,
             url: urls,
             originalFilename: `seed-avatar-${id}.webp`,
+            dimensions: "avatar",
             profileId: artist.id,
+            avatarOf: { connect: { id: artist.id } },
           },
         });
         console.log(
@@ -385,15 +375,16 @@ async function seedPublishedTrackGroupsInner(
           try {
             const { id: coverId, urls } = await generateAndUploadImage(
               minioClient,
-              COVER_PREFIX,
               COVER_SIZES
             );
-            await prisma.trackGroupCover.create({
+            await prisma.image.create({
               data: {
                 id: coverId,
                 url: urls,
                 originalFilename: `seed-cover-${coverId}.webp`,
-                trackGroupId: trackGroup.id,
+                dimensions: "artwork",
+                profileId: artist.id,
+                coverOf: { connect: { id: trackGroup.id } },
               },
             });
             console.log(`  → Cover uploaded (${urls.length} sizes)`);

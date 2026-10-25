@@ -30,17 +30,15 @@ bucket names are globally unique.
 
 ### `mirlo-images`
 
-Image keys are prefixed with the media type they belong to:
+New images are stored at the bucket root. Images uploaded before they moved
+to the central `Image` table stay under their old prefix, which is recorded in
+`Image.keyPrefix`:
 
-| Key prefix                           | Contents                                                                  |
-| ------------------------------------ | ------------------------------------------------------------------------- |
-| `incoming/<type>/<imageId>`          | Uploaded images awaiting optimization                                     |
-| `trackgroup-covers/`                 | Album/release covers                                                      |
-| `artist-avatars/`, `artist-banners/` | Artist profile images                                                     |
-| `merch-images/`                      | Merch photos uploaded before they moved to the bucket root                |
-| `post-images/`                       | Images embedded in posts                                                  |
-| `instance-logos/`                    | Header logos uploaded by the instance admins                              |
-| _(bucket root)_                      | Generic images (the `image` type): subscription tier images, merch photos |
+| Key prefix                                                                                  | Contents                                                                |
+| ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| _(bucket root)_                                                                             | Covers, avatars, backgrounds, post, merch and subscription tier images  |
+| `trackgroup-covers/`, `artist-avatars/`, `artist-banners/`, `merch-images/`, `post-images/` | The same kinds of images, uploaded before they moved to the bucket root |
+| `instance-logos/`                                                                           | Header logos uploaded by the instance admins                            |
 
 Optimized images are stored in multiple sizes as `<imageId>-x<width>.webp`
 (plus `.jpg` for covers).
