@@ -102,9 +102,3 @@ const stripe = {
 };
 
 export const useStripe = () => stripe;
-
-// The embedded Checkout Session flows aren't rendered in any story.
-export const EmbeddedCheckoutProvider: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => <>{children}</>;
-export const EmbeddedCheckout: React.FC = () => null;
