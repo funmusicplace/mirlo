@@ -301,6 +301,7 @@ export const processTrackGroupCover = async (
     where: { id: trackGroup.id },
     data: { coverImageId: result.imageId },
   });
+  await clearTrackGroupDownloads(trackGroup.id);
   return result;
 };
 
