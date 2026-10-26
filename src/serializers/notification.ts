@@ -140,7 +140,7 @@ export const serializeNotification = <T extends object>(
               : null,
             featuredImage: post.featuredImage
               ? {
-                  ...post.featuredImage,
+                  id: post.featuredImage.id,
                   src: storedImageFileUrl(post.featuredImage),
                 }
               : null,

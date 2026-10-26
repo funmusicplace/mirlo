@@ -156,7 +156,7 @@ export const serializePost = <T extends PostInput>(
         })
       : undefined,
     featuredImage: post.featuredImage && {
-      ...post.featuredImage,
+      id: post.featuredImage.id,
       src: storedImageFileUrl(post.featuredImage),
     },
     isContentHidden: !contentVisible,

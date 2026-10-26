@@ -59,6 +59,7 @@ export default function () {
           $ref: "#/definitions/Post",
         },
       },
+      404: { description: "Image not found for this post" },
       default: {
         description: "An error occurred",
         schema: {
