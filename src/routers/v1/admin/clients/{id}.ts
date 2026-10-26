@@ -14,6 +14,7 @@ import {
   userHasPermission,
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
+import { FRONTEND_CLIENT_NAME } from "../../../../utils/getClient";
 
 export const findUserByEmail = async (userEmail: string | null | undefined) => {
   let userId: number | null | undefined;
@@ -83,6 +84,17 @@ export default function () {
     };
     try {
       const existing = await findClientOr404(Number(req.params.id));
+      if (
+        existing.applicationName === FRONTEND_CLIENT_NAME &&
+        !existing.clientIdUrl &&
+        applicationName !== undefined &&
+        applicationName !== FRONTEND_CLIENT_NAME
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description: "The frontend client can't be renamed",
+        });
+      }
       const userId = await findUserByEmail(userEmail);
       const data = {
         applicationName,

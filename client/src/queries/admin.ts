@@ -220,6 +220,7 @@ export const useRotateAdminClientKeyMutation = () => {
 
 async function updateAdminClient(opts: {
   clientId: number;
+  applicationName?: string;
   status?: AdminClientStatus;
   userEmail?: string | null;
   redirectUris?: string[];

@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import { FaSyncAlt, FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 
+import ClientNameSettings from "./ClientNameSettings";
 import ClientOAuthSettings, { splitList } from "./ClientOAuthSettings";
 
 interface ClientForm {
@@ -181,7 +182,9 @@ const Index: React.FC = () => {
           <tbody>
             {clients.map((client) => (
               <tr key={client.id}>
-                <td>{client.applicationName}</td>
+                <td>
+                  <ClientNameSettings client={client} />
+                </td>
                 <td>{client.applicationUrl}</td>
                 <td>{client.allowedCorsOrigins.join(", ")}</td>
                 <td>{client.user?.email ?? ""}</td>
