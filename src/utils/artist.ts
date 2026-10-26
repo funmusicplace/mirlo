@@ -29,6 +29,7 @@ import { postImagesForContent } from "./postContent";
 import reservedProfileSlugs from "./reservedProfileSlugs";
 import { getSiteSettings } from "./settings";
 import stripe from "./stripe";
+import { subscriptionTierOrderBy } from "./subscriptionTier";
 import {
   deleteTrackGroup,
   subscriptionTierReleasesCount,
@@ -693,9 +694,7 @@ export const singleInclude = (queryOptions?: {
         deletedAt: null,
         isDefaultTier: includeDefaultTier ? undefined : false,
       },
-      orderBy: {
-        minAmount: "asc",
-      },
+      orderBy: subscriptionTierOrderBy,
       include: {
         images: {
           where: {

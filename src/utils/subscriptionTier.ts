@@ -1,8 +1,12 @@
 import prisma, { PrismaTransactionClient } from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
 
 import logger from "../logger";
 
 import generateSlug from "./generateSlug";
+
+export const subscriptionTierOrderBy: Prisma.ProfileSubscriptionTierOrderByWithRelationInput[] =
+  [{ order: { sort: "asc", nulls: "last" } }, { minAmount: "asc" }];
 
 export const generateUniqueTierSlug = async (
   profileId: number,

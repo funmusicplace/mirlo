@@ -10,6 +10,7 @@ import * as sendMailQueueModule from "../../../../src/queues/send-mail-queue";
 import {
   clearTables,
   createArtist,
+  createProfile,
   createTier,
   createUser,
 } from "../../../utils";
@@ -261,5 +262,106 @@ describe("manage/artists/{artistId}/subscriptionTiers/{tierId}", () => {
         0
       );
     });
+  });
+});
+
+describe("manage/artists/{artistId}/subscriptionTierOrder", () => {
+  beforeEach(async () => {
+    try {
+      await clearTables();
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  it("reorders tiers and places newly created (un-ordered) tiers last by minAmount", async () => {
+    const { user, accessToken } = await createUser({
+      email: "test@test.com",
+    });
+    const artist = await createProfile(user.id);
+    const tierLow = await createTier(artist.id, {
+      name: "Bronze",
+      minAmount: 300,
+    });
+    const tierMid = await createTier(artist.id, {
+      name: "Silver",
+      minAmount: 700,
+    });
+    const tierHigh = await createTier(artist.id, {
+      name: "Gold",
+      minAmount: 1500,
+    });
+
+    const reorderRes = await requestApp
+      .put(`manage/artists/${artist.id}/subscriptionTierOrder`)
+      .send({ tierIds: [tierHigh.id, tierLow.id, tierMid.id] })
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(reorderRes.statusCode, 200);
+    assert.deepEqual(
+      reorderRes.body.results.map((t: { id: number }) => t.id),
+      [tierHigh.id, tierLow.id, tierMid.id]
+    );
+
+    const newTier = await createTier(artist.id, {
+      name: "Starter",
+      minAmount: 100,
+    });
+
+    const manageGetRes = await requestApp
+      .get(`manage/artists/${artist.id}/subscriptionTiers`)
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(manageGetRes.statusCode, 200);
+    assert.deepEqual(
+      manageGetRes.body.results.map((t: { id: number }) => t.id),
+      [tierHigh.id, tierLow.id, tierMid.id, newTier.id]
+    );
+
+    const publicGetRes = await requestApp
+      .get(`artists/${artist.id}`)
+      .set("Accept", "application/json");
+
+    assert.equal(publicGetRes.statusCode, 200);
+    assert.deepEqual(
+      publicGetRes.body.result.subscriptionTiers.map(
+        (t: { id: number }) => t.id
+      ),
+      [tierHigh.id, tierLow.id, tierMid.id, newTier.id]
+    );
+  });
+
+  it("does not update order of tiers belonging to another artist", async () => {
+    const { user, accessToken } = await createUser({
+      email: "test@test.com",
+    });
+    const artist = await createProfile(user.id);
+    const ownTier = await createTier(artist.id, {
+      name: "Own",
+      minAmount: 500,
+    });
+
+    const { user: otherUser } = await createUser({
+      email: "other@test.com",
+    });
+    const otherArtist = await createProfile(otherUser.id, { urlSlug: "other" });
+    const otherTier = await createTier(otherArtist.id, {
+      name: "Other",
+      minAmount: 500,
+    });
+
+    const res = await requestApp
+      .put(`manage/artists/${artist.id}/subscriptionTierOrder`)
+      .send({ tierIds: [otherTier.id, ownTier.id] })
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(res.statusCode, 200);
+    const refreshedOther = await prisma.profileSubscriptionTier.findUnique({
+      where: { id: otherTier.id },
+    });
+    assert.equal(refreshedOther?.order, null);
   });
 });

@@ -164,4 +164,24 @@ describe("Support Index", () => {
     expect(screen.queryByTestId("tier-page")).not.toBeInTheDocument();
     expect(screen.getAllByTestId("support-box")).toHaveLength(2);
   });
+
+  test("preserves the tier order returned by the API even when minAmount is not ascending", () => {
+    const highTierFirst = {
+      ...otherTier,
+      minAmount: 1500,
+      order: 1,
+    };
+    const lowTierSecond = {
+      ...supporterTier,
+      minAmount: 500,
+      order: 2,
+    };
+    artistState.artist = makeArtist([highTierFirst, lowTierSecond]);
+    authState.user = { id: 20, artistUserSubscriptions: [] };
+
+    render(<Index />);
+
+    const boxes = screen.getAllByTestId("support-box");
+    expect(boxes.map((b) => b.textContent)).toEqual(["Superfan", "Supporter"]);
+  });
 });

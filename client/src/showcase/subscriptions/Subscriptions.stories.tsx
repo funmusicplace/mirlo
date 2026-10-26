@@ -85,6 +85,9 @@ const handlers = {
     http.get("*/v1/manage/artists/:artistId/subscriptionTiers", () =>
       HttpResponse.json({ results: TIERS })
     ),
+    http.put("*/v1/manage/artists/:artistId/subscriptionTierOrder", () =>
+      HttpResponse.json({ results: TIERS })
+    ),
     http.get("*/v1/manage/artists/:artistId/subscribers", ({ request }) => {
       if (new URL(request.url).searchParams.get("format") === "csv") {
         return new HttpResponse(SUPPORTERS_CSV, {
