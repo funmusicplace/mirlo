@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "target": "esnext",
     "module": "nodenext",
     "sourceMap": true,
     "outDir": "dist",

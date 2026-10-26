@@ -137,10 +137,10 @@ type KeyUse = { file: string; path: string };
 
 const collectSettingsKeyUses = (files: string[], roots: string[]): KeyUse[] => {
   const uses: KeyUse[] = [];
-  // Match both `.key` and optional-chaining `?.key` under a settings JSON root.
+  // Match both `.key` and optional-chaining `?.key` under `settings.<root>`.
   const rootAlt = roots.map(escapeRegExp).join("|");
   const accessRe = new RegExp(
-    `\\b(${rootAlt})(?:\\s*\\?\\.\\s*|\\s*\\.\\s*)([A-Za-z_]\\w*)`,
+    `\\bsettings\\s*\\??\\.\\s*(${rootAlt})(?:\\s*\\?\\.\\s*|\\s*\\.\\s*)([A-Za-z_]\\w*)`,
     "g"
   );
   const stringPathRe = new RegExp(
@@ -182,7 +182,9 @@ const sourceFiles = () => [
 ];
 
 const settingsRoots = (canonical: Set<string>) => [
-  ...new Set([...canonical].map((p) => p.split(".")[0])),
+  ...new Set(
+    [...canonical].filter((p) => p.includes(".")).map((p) => p.split(".")[0])
+  ),
 ];
 
 const isCanonicalPath = (canonical: Set<string>, path: string) => {
