@@ -51,6 +51,10 @@ export default defineConfig({
             link: "/how-tos/accepting-more-payment-types",
           },
           {
+            text: "The social web and discovery",
+            link: "/how-tos/social-web-and-discovery",
+          },
+          {
             text: "Making your own album art",
             link: "/how-tos/making-your-own-album-art",
           },

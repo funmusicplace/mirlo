@@ -1,6 +1,7 @@
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import ArtistSlugInput from "components/common/SlugInput";
+import FederatedStreamingToggle from "components/ManageArtist/ManageArtistDetails/FederatedStreamingToggle";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -46,6 +47,8 @@ const WelcomeUrlSlugStep: React.FC<{
           currentArtistId={artistId}
         />
       </FormComponent>
+
+      <FederatedStreamingToggle />
 
       <Button isLoading={isLoading} type="submit" endIcon={<FaArrowRight />}>
         {t("customizeYourPage")}
