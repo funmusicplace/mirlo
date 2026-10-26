@@ -14,6 +14,7 @@ import {
   federatedArtistAtSomePoint,
   federatedArtist,
   artistOptedOutOrDeleted,
+  whereForVisibleProfile,
 } from "../../../../utils/artist";
 import { getInstanceName } from "../../../../utils/settings";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
@@ -35,13 +36,24 @@ export default function () {
         fromDateFilter = undefined;
       }
 
+      const fullCatalog = !!req.client?.fullCatalog;
+      const listedAtSomePoint = fullCatalog ? {} : federatedArtistAtSomePoint;
+
+      const listedArtist: Prisma.ProfileWhereInput = fullCatalog
+        ? whereForVisibleProfile()
+        : { ...federatedArtist };
+
+      const removedArtist: Prisma.ProfileWhereInput = fullCatalog
+        ? { deletedAt: { not: null } }
+        : { ...artistOptedOutOrDeleted };
+
       let deleted = {
         deletedAt: { not: null },
       };
 
       let trackGroupDeleted: Prisma.TrackGroupWhereInput = {
         AND: [
-          { profile: federatedArtistAtSomePoint },
+          { profile: listedAtSomePoint },
           deleted as Prisma.TrackGroupWhereInput,
         ],
         deletedAt: {},
@@ -49,7 +61,7 @@ export default function () {
 
       let trackDeleted: Prisma.TrackWhereInput = {
         AND: [
-          { trackGroup: { profile: federatedArtistAtSomePoint } },
+          { trackGroup: { profile: listedAtSomePoint } },
           deleted as Prisma.TrackWhereInput,
         ],
         deletedAt: {},
@@ -92,17 +104,21 @@ export default function () {
           },
         };
 
-        federatedArtist.OR = [
-          optInDateFilter,
+        listedArtist.OR = [
+          ...(fullCatalog ? [] : [optInDateFilter]),
           updatedOrCreatedFilter as Prisma.ProfileWhereInput,
           anyTrackGroupUpdatedOrCreated,
         ];
 
-        artistOptedOutOrDeleted.AND = [
-          {
-            federatedStreamingOptOutDate: fromDateFilter,
-          },
-        ];
+        if (fullCatalog) {
+          removedArtist.deletedAt = fromDateFilter;
+        } else {
+          removedArtist.AND = [
+            {
+              federatedStreamingOptOutDate: fromDateFilter,
+            },
+          ];
+        }
 
         trackGroupDeleted.deletedAt = fromDateFilter;
         trackDeleted.deletedAt = fromDateFilter;
@@ -129,7 +145,7 @@ export default function () {
 
       const artists = await prisma.profile.findMany({
         where: {
-          ...federatedArtist,
+          ...listedArtist,
           // only if they have some trackGroup
           trackGroups: {
             some: validTrackGroups,
@@ -160,7 +176,7 @@ export default function () {
       });
 
       const deletedArtists = await prisma.profile.findMany({
-        where: artistOptedOutOrDeleted,
+        where: removedArtist,
         skip: skipQuery ? Number(skipQuery) : undefined,
         take: take ? Number(take) : undefined,
         orderBy: orderByClause as Prisma.ProfileOrderByWithRelationInput,
@@ -243,7 +259,8 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Returns federated artists",
+    summary:
+      "Returns artists who turned on Discovery, or every visible artist for a client with fullCatalog",
     parameters: [{ in: "query", name: "fromDate", type: "string" }],
     responses: {
       200: {

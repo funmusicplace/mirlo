@@ -76,6 +76,7 @@ model Client {
   clientIdUrl        String?      @unique
   redirectUris       String[]     @default([])
   confidential       Boolean      @default(false)
+  fullCatalog        Boolean      @default(false)
   status             ClientStatus @default(approved)
   userId             Int?
   user               User?        @relation(fields: [userId], references: [id], onDelete: SetNull)

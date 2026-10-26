@@ -96,6 +96,18 @@ const Index: React.FC = () => {
     [updateClient, snackbar]
   );
 
+  const onChangeFullCatalog = React.useCallback(
+    async (client: AdminClient, fullCatalog: boolean) => {
+      try {
+        await updateClient({ clientId: client.id, fullCatalog });
+      } catch (e) {
+        console.error(e);
+        snackbar("Oops something went wrong", { type: "warning" });
+      }
+    },
+    [updateClient, snackbar]
+  );
+
   const onRotateKey = React.useCallback(
     async (client: AdminClient) => {
       try {
@@ -215,6 +227,16 @@ const Index: React.FC = () => {
                       title={t("copyKey") ?? ""}
                     />
                   )}
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={client.fullCatalog}
+                      onChange={(e) =>
+                        onChangeFullCatalog(client, e.target.checked)
+                      }
+                    />
+                    {t("fullCatalog")}
+                  </label>
                 </td>
                 <td className="whitespace-nowrap">
                   <div className="flex justify-end gap-2">

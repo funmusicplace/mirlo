@@ -168,6 +168,7 @@ export interface AdminClient {
   status: AdminClientStatus;
   redirectUris: string[];
   confidential: boolean;
+  fullCatalog: boolean;
   clientIdUrl: string | null;
   user: { id: number; email: string } | null;
   createdAt: string;
@@ -225,6 +226,7 @@ async function updateAdminClient(opts: {
   userEmail?: string | null;
   redirectUris?: string[];
   confidential?: boolean;
+  fullCatalog?: boolean;
 }) {
   const { clientId, ...data } = opts;
   return api.put<typeof data, { result: AdminClient }>(

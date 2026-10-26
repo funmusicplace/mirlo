@@ -72,6 +72,7 @@ export default function () {
       userEmail,
       redirectUris,
       confidential,
+      fullCatalog,
     } = req.body as {
       applicationName?: string;
       applicationUrl?: string;
@@ -81,6 +82,7 @@ export default function () {
       userEmail?: string | null;
       redirectUris?: string[];
       confidential?: boolean;
+      fullCatalog?: boolean;
     };
     try {
       const existing = await findClientOr404(Number(req.params.id));
@@ -104,6 +106,7 @@ export default function () {
         userId,
         redirectUris: parseRedirectUris(redirectUris),
         confidential,
+        fullCatalog,
         key: rotateKey ? randomBytes(24).toString("hex") : undefined,
       };
       await validateClientSettings({

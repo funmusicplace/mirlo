@@ -1913,6 +1913,7 @@
     "oauthClientId": "Client ID: {{id}}",
     "oauthSettingsNotSaved": "Couldn't save the OAuth settings.",
     "clientNameNotSaved": "Couldn't save the application name.",
+    "fullCatalog": "Full catalogue: the Canimus feed lists every artist, not only those who turned on Discovery. Only for Mirlo's own apps.",
     "metadataDocument": "Connects with its own metadata document (redirect URIs come from it):"
   },
   "adminDashboard": {
