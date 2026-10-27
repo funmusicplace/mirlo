@@ -111,6 +111,7 @@ export default defineConfig({
             link: "/maintaining/system-architecture",
           },
           { text: "Rapid Response", link: "/maintaining/rapid-response" },
+          { text: "Releases", link: "/maintaining/releases" },
         ],
       },
     ],

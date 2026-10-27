@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "1873edec9d98cdee08cf78ab48b423f74bf63e3e",
+  "include-component-in-tag": false,
+  "pull-request-header": "To put a summary at the top of this release's changelog, edit this description and write it between the `summary` markers below (they only show while editing). Do it just before merging: release-please rewrites this description whenever something new lands on main.\n\n<!-- summary -->\n\n<!-- /summary -->",
+  "packages": {
+    ".": {
+      "release-type": "node"
+    }
+  }
+}

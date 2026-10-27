@@ -1,0 +1,33 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Release Please
+        id: release
+        uses: googleapis/release-please-action@v4
+
+      - name: Checkout
+        if: steps.release.outputs.release_created
+        uses: actions/checkout@v6
+
+      - name: Use the changelog entry as the release notes
+        if: steps.release.outputs.release_created
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+        run: |
+          node .github/scripts/release-summary.mjs notes > release-notes.md
+          gh release edit "$TAG" --notes-file release-notes.md

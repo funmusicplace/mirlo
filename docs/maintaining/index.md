@@ -11,6 +11,10 @@ These pages are to document how to handle Mirlo Maintenance
 
 - [Responding to an emergency](./rapid-response.md)
 
+## Releases
+
+- [Cutting a release](./releases.md)
+
 ## Architecture
 
 - [What we're running on](./system-architecture.md)

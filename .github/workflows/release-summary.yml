@@ -1,0 +1,38 @@
+name: Release summary
+
+on:
+  pull_request:
+    types: [edited]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-summary-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  add-summary:
+    if: "contains(github.event.pull_request.labels.*.name, 'autorelease: pending')"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Copy the summary into the changelog
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: node .github/scripts/release-summary.mjs changelog
+
+      - name: Commit
+        run: |
+          if git diff --quiet CHANGELOG.md; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898333+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: add release summary to changelog"
+          git push
