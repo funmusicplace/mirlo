@@ -6,4 +6,4 @@ set -eu
 
 export DATABASE_URL="${BASE_DATABASE_URL%/*}/umami"
 
-exec npm run start-docker
+exec sh scripts/start-docker.sh
