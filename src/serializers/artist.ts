@@ -1,5 +1,3 @@
-import { join } from "path";
-
 import {
   Profile,
   ProfileSubscriptionTier,
@@ -22,6 +20,7 @@ import { serializePost } from "./post";
 import { serializeProfileSubscriptionTier } from "./profileSubscriptionTier";
 import {
   processSingleTrackGroup,
+  canimusFeedLink,
   serializeSingleTrackGroupIntoCanimus,
   LocalTrackGroup,
 } from "./trackGroup";
@@ -131,12 +130,34 @@ export const serializeProfile = <T extends LocalProfile>(
   } as Serialized<T>;
 };
 
+export const canimusArtistUrl = (artist: { urlSlug: string }) =>
+  new URL(artist.urlSlug, String(process.env.API_DOMAIN)).href;
+
+const canimusSupportsPayment = (artist: LocalProfile) =>
+  Boolean(
+    resolvePayee({
+      profile: { user: artist.user, paymentToUser: artist.paymentToUser },
+    })?.stripeAccountId
+  );
+
+export const serializeSingleArtistTrackGroupIntoCanimus = (
+  trackGroup: TrackGroup,
+  artist: LocalProfile,
+  instanceName: string
+) =>
+  serializeSingleTrackGroupIntoCanimus(
+    trackGroup,
+    canimusArtistUrl(artist),
+    artist.name,
+    canimusSupportsPayment(artist),
+    instanceName
+  );
+
 export const serializeSingleArtistIntoCanimus = (
   artist: LocalProfile,
   instanceName: string
 ) => {
-  const artistUrl = new URL(artist.urlSlug, String(process.env.API_DOMAIN))
-    .href;
+  const artistUrl = canimusArtistUrl(artist);
   const avatarUrl = storedImageVariantUrl(artist.avatar, 600);
   const artistLinks = artist.linksJson.map((link: any) => ({
     name: link.linkLabel,
@@ -144,12 +165,8 @@ export const serializeSingleArtistIntoCanimus = (
     type: link.linkType,
     rel: "me",
   }));
-  const artistSupportsPayment = Boolean(
-    resolvePayee({
-      profile: { user: artist.user, paymentToUser: artist.paymentToUser },
-    })?.stripeAccountId
-  );
-  if (artistSupportsPayment) {
+  artistLinks.push(canimusFeedLink(`v1/artists/${artist.id}/canimus.json`));
+  if (canimusSupportsPayment(artist)) {
     artistLinks.unshift({
       name: "Support",
       href: new URL("support", `${artistUrl}/`).href,
@@ -178,11 +195,9 @@ export const serializeSingleArtistIntoCanimus = (
     links: artistLinks,
     updated_date: artist.updatedAt?.toISOString().split("T")[0],
     children: artist.trackGroups?.map((trackGroup: TrackGroup) =>
-      serializeSingleTrackGroupIntoCanimus(
+      serializeSingleArtistTrackGroupIntoCanimus(
         trackGroup,
-        artistUrl,
-        artist.name,
-        artistSupportsPayment,
+        artist,
         instanceName
       )
     ),
@@ -192,13 +207,12 @@ export const serializeSingleArtistIntoCanimus = (
 export const serializeSingleDeletedArtistIntoCanimus = (
   artist: LocalProfile
 ) => {
-  const artistUrl = join(String(process.env.API_DOMAIN), artist.urlSlug);
-  const deletedArtist = {
+  return {
     type: "artist",
     name: artist.name,
-    url: artistUrl,
+    url: canimusArtistUrl(artist),
+    uid: String(artist.id),
   };
-  return deletedArtist;
 };
 
 /**

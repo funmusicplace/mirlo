@@ -1,22 +1,26 @@
-import { join } from "path";
-
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import {
+  canimusArtistUrl,
   serializeSingleArtistIntoCanimus,
   serializeSingleDeletedArtistIntoCanimus,
 } from "../../../../serializers/artist";
 import { serializeSingleDeletedTrackIntoCanimus } from "../../../../serializers/track";
-import { serializeSingleDeletedTrackGroupIntoCanimus } from "../../../../serializers/trackGroup";
 import {
-  federatedArtistAtSomePoint,
-  federatedArtist,
-  whereForVisibleProfile,
-} from "../../../../utils/artist";
+  canimusReleaseUrl,
+  serializeSingleDeletedTrackGroupIntoCanimus,
+} from "../../../../serializers/trackGroup";
+import { federatedArtistAtSomePoint } from "../../../../utils/artist";
+import {
+  listedProfileInclude,
+  whereForListedProfile,
+} from "../../../../utils/canimus";
+import { AppError } from "../../../../utils/error";
 import { getInstanceName } from "../../../../utils/settings";
-import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
+
+const MAX_FULL_CATALOG_TAKE = 100;
 
 export default function () {
   const operations = {
@@ -36,12 +40,32 @@ export default function () {
       }
 
       const fullCatalog = !!req.client?.fullCatalog;
+      const skip = skipQuery ? Number(skipQuery) : undefined;
+      const pageSize = take ? Number(take) : undefined;
+
+      if (fullCatalog && pageSize === undefined) {
+        throw new AppError({
+          httpCode: 400,
+          description: "take is required for the full catalogue",
+        });
+      }
+      if (
+        (skip !== undefined && !(Number.isInteger(skip) && skip >= 0)) ||
+        (pageSize !== undefined &&
+          !(
+            Number.isInteger(pageSize) &&
+            pageSize > 0 &&
+            (!fullCatalog || pageSize <= MAX_FULL_CATALOG_TAKE)
+          ))
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description: `skip must be 0 or more, and take must be between 1 and ${MAX_FULL_CATALOG_TAKE} for the full catalogue`,
+        });
+      }
       const listedAtSomePoint = fullCatalog ? {} : federatedArtistAtSomePoint;
 
-      const listedArtist: Prisma.ProfileWhereInput = {
-        ...whereForVisibleProfile(),
-        ...(fullCatalog ? {} : federatedArtist),
-      };
+      const listedArtist = whereForListedProfile(fullCatalog);
 
       const removedArtist: Prisma.ProfileWhereInput = {
         ...listedAtSomePoint,
@@ -127,62 +151,29 @@ export default function () {
         trackDeleted.deletedAt = fromDateFilter;
       }
 
-      const orderByClause = {
-        createdAt: "desc",
-      };
+      const orderByClause = [{ createdAt: "desc" }, { id: "desc" }];
 
-      const validTracks: Prisma.TrackWhereInput = {
-        deletedAt: null,
-        audio: {
-          uploadState: "SUCCESS",
-        },
-      };
-
-      const validTrackGroups: Prisma.TrackGroupWhereInput = {
-        ...whereForPublishedTrackGroups(),
-        // only if they have some track
-        tracks: {
-          some: validTracks,
-        },
-      };
+      const include = listedProfileInclude();
 
       const artists = await prisma.profile.findMany({
         where: {
           ...listedArtist,
           // only if they have some trackGroup
           trackGroups: {
-            some: validTrackGroups,
+            some: include.trackGroups.where,
           },
         },
-        skip: skipQuery ? Number(skipQuery) : undefined,
-        take: take ? Number(take) : undefined,
-        orderBy: orderByClause as Prisma.ProfileOrderByWithRelationInput,
-        include: {
-          trackGroups: {
-            where: validTrackGroups,
-            include: {
-              cover: true,
-              tracks: {
-                where: validTracks,
-                include: {
-                  audio: { select: { duration: true } },
-                },
-                orderBy: { order: "asc" },
-              },
-            },
-            orderBy: { orderIndex: "asc" },
-          },
-          avatar: true,
-          user: { select: { stripeAccountId: true } },
-          paymentToUser: { select: { stripeAccountId: true } },
-        },
+        skip,
+        take: pageSize,
+        orderBy: orderByClause as Prisma.ProfileOrderByWithRelationInput[],
+        include,
       });
 
       const deletedArtists = await prisma.profile.findMany({
         where: removedArtist,
-        skip: skipQuery ? Number(skipQuery) : undefined,
-        take: take ? Number(take) : undefined,
-        orderBy: orderByClause as Prisma.ProfileOrderByWithRelationInput,
+        skip,
+        take: pageSize,
+        orderBy: orderByClause as Prisma.ProfileOrderByWithRelationInput[],
       });
 
       const deletedTrackGroups = await prisma.trackGroup.findMany({
@@ -194,9 +185,9 @@ export default function () {
             },
           },
         },
-        skip: skipQuery ? Number(skipQuery) : undefined,
-        take: take ? Number(take) : undefined,
-        orderBy: orderByClause as Prisma.TrackGroupOrderByWithRelationInput,
+        skip,
+        take: pageSize,
+        orderBy: orderByClause as Prisma.TrackGroupOrderByWithRelationInput[],
       });
 
       const deletedTracks = await prisma.track.findMany({
@@ -212,9 +203,9 @@ export default function () {
             },
           },
         },
-        skip: skipQuery ? Number(skipQuery) : undefined,
-        take: take ? Number(take) : undefined,
-        orderBy: orderByClause as Prisma.TrackOrderByWithRelationInput,
+        skip,
+        take: pageSize,
+        orderBy: orderByClause as Prisma.TrackOrderByWithRelationInput[],
       });
 
       let deletedEntities: any = [];
@@ -228,7 +219,7 @@ export default function () {
           deletedTrackGroups.map((trackGroup) =>
             serializeSingleDeletedTrackGroupIntoCanimus(
               trackGroup,
-              join(String(process.env.API_DOMAIN), trackGroup.profile.urlSlug)
+              canimusArtistUrl(trackGroup.profile)
             )
           )
         )
@@ -236,11 +227,9 @@ export default function () {
           deletedTracks.map((track) =>
             serializeSingleDeletedTrackIntoCanimus(
               track,
-              join(
-                String(process.env.API_DOMAIN),
-                track.trackGroup.profile.urlSlug,
-                "release",
-                track.trackGroup.urlSlug
+              canimusReleaseUrl(
+                canimusArtistUrl(track.trackGroup.profile),
+                track.trackGroup
               )
             )
           )
@@ -248,9 +237,29 @@ export default function () {
 
       const instanceName = await getInstanceName();
 
+      const hasMore =
+        pageSize !== undefined &&
+        [artists, deletedArtists, deletedTrackGroups, deletedTracks].some(
+          (page) => page.length === pageSize
+        );
+      let links;
+      if (hasMore) {
+        const next = new URL(req.originalUrl, process.env.API_DOMAIN);
+        next.searchParams.set("skip", String((skip ?? 0) + pageSize));
+        links = [
+          {
+            name: "Next page",
+            href: next.href,
+            type: "application/canimus+json",
+            rel: "next",
+          },
+        ];
+      }
+
       res.json({
         type: "root",
         url: process.env.API_DOMAIN,
+        links,
         children: artists.map((artist) =>
           serializeSingleArtistIntoCanimus(artist, instanceName)
         ),
@@ -264,7 +273,16 @@ export default function () {
   GET.apiDoc = {
     summary:
       "Returns artists who turned on Discovery, or every visible artist for a client with fullCatalog",
-    parameters: [{ in: "query", name: "fromDate", type: "string" }],
+    parameters: [
+      { in: "query", name: "fromDate", type: "string" },
+      { in: "query", name: "skip", type: "string" },
+      {
+        in: "query",
+        name: "take",
+        type: "string",
+        description: `Required for a client with fullCatalog, at most ${MAX_FULL_CATALOG_TAKE}`,
+      },
+    ],
     responses: {
       200: {
         description: "A list of artists",

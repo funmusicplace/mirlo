@@ -68,6 +68,10 @@ export default defineConfig({
         text: "Developers: using the API",
         link: "/api",
         items: [
+          {
+            text: "Catalog feeds and streaming (Canimus)",
+            link: "/api/canimus",
+          },
           { text: "Sign in with Mirlo", link: "/api/oauth" },
           { text: "Setting up Sign in with Mirlo", link: "/api/oauth-setup" },
         ],
