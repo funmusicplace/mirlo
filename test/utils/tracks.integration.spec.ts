@@ -4,9 +4,8 @@ import os from "os";
 import path from "path";
 
 import { Profile, Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
-import { afterEach, describe, it } from "mocha";
-import { parseFile } from "music-metadata";
-import { ITag } from "music-metadata/lib/type";
+import { afterEach, before, describe, it } from "mocha";
+import type { ITag } from "music-metadata";
 
 import { Format } from "../../src/jobs/generate-album";
 import { convertAudioToFormat } from "../../src/utils/tracks";
@@ -138,6 +137,14 @@ const hasLyricsInNativeTags = (
 describeIf("utils/tracks integration (real ffmpeg)", function () {
   this.timeout(20000);
 
+  // music-metadata is ESM-only; load it dynamically so this CommonJS/ts-node
+  // test suite can consume it without require() interop issues.
+  let parseFile: typeof import("music-metadata").parseFile;
+
+  before(async () => {
+    ({ parseFile } = await import("music-metadata"));
+  });
+
   let tempDir = "";
 
   afterEach(async () => {
@@ -189,7 +196,7 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
     assert.deepEqual(parsed.common.genre, ["Experimental"]);
     const expectedLyrics = "Integration test lyrics";
     const hasCommonLyrics = (parsed.common.lyrics ?? []).some((lyrics) =>
-      lyrics.includes(expectedLyrics)
+      containsLyricsText(lyrics, expectedLyrics)
     );
     assert.ok(
       hasCommonLyrics || hasLyricsInNativeTags(parsed.native, expectedLyrics),

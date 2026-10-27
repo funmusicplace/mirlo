@@ -2299,6 +2299,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@borewit/text-codec@npm:^0.2.1, @borewit/text-codec@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "@borewit/text-codec@npm:0.2.2"
+  checksum: 10/c971790a72d9e766286db71f68613d1bac3b8bd9eaba52fbf18a8b17903c095968ed5369efdba378751926440aab93f3dd17c89242ef20525808ddced22d49b8
+  languageName: node
+  linkType: hard
+
 "@bull-board/api@npm:6.21.3, @bull-board/api@npm:^6.15.0":
   version: 6.21.3
   resolution: "@bull-board/api@npm:6.21.3"
@@ -4752,7 +4759,7 @@ __metadata:
     lottie-react: "npm:^2.4.1"
     msw: "npm:^2.14.0"
     msw-storybook-addon: "npm:^2"
-    music-metadata-browser: "npm:^2.5.10"
+    music-metadata: "npm:^12.3.2"
     parallax-js: "npm:^3.1.0"
     parse5: "npm:^7.1.2"
     prop-types: "npm:^15.8.1"
@@ -9188,6 +9195,17 @@ __metadata:
   peerDependencies:
     "@testing-library/dom": ">=7.21.4"
   checksum: 10/34b74fff56a0447731a94b40d4cf246deb8dbc1c1e3aec93acd1c3377a760bb062e979f1572bb34ec164ad28ee2a391744b42d0d6d6cc16c4ce527e5e09610e1
+  languageName: node
+  linkType: hard
+
+"@tokenizer/inflate@npm:^0.5.1":
+  version: 0.5.2
+  resolution: "@tokenizer/inflate@npm:0.5.2"
+  dependencies:
+    debug: "npm:^4.4.3"
+    strtok3: "npm:^10.6.2"
+    token-types: "npm:^6.1.2"
+  checksum: 10/e6c59a56dfa92eec9574db9ae977ad7704a430d33a7eaefb68b8a74a866a9a871689638e3c59f765201c277c612cbb707487c91fc467ae2a5aa76b18b35a9a77
   languageName: node
   linkType: hard
 
@@ -13779,6 +13797,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"content-type@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "content-type@npm:3.1.1"
+  checksum: 10/97d3f22c21475ab05ea3b4a46044d573d281db5706f6268b95adbccdf4d05ebcb34c9517a27e1e60588d04eaf43dc78e7a5ad8f2aae47241caf4fae2fa957eba
+  languageName: node
+  linkType: hard
+
 "conventional-changelog-angular@npm:^8.2.0":
   version: 8.3.1
   resolution: "conventional-changelog-angular@npm:8.3.1"
@@ -16635,7 +16660,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"file-type@npm:16, file-type@npm:^16.5.4":
+"file-type@npm:16":
   version: 16.5.4
   resolution: "file-type@npm:16.5.4"
   dependencies:
@@ -16643,6 +16668,18 @@ __metadata:
     strtok3: "npm:^6.2.4"
     token-types: "npm:^4.1.1"
   checksum: 10/46ced46bb925ab547e0a6d43108a26d043619d234cb0588d7abce7b578dafac142bcfd2e23a6adb0a4faa4b951bd1b14b355134a193362e07cd352f9bf0dc349
+  languageName: node
+  linkType: hard
+
+"file-type@npm:^22.2.0":
+  version: 22.2.0
+  resolution: "file-type@npm:22.2.0"
+  dependencies:
+    "@tokenizer/inflate": "npm:^0.5.1"
+    strtok3: "npm:^10.5.0"
+    token-types: "npm:^6.1.2"
+    uint8array-extras: "npm:^1.6.0"
+  checksum: 10/70fbf215c9db0fed4fa803a5824b81db915e2942c84a912389eba291a043179fe8db2703d67a32e90ec2acba76e8895694b421f5e63009b59988e23c09acdd4d
   languageName: node
   linkType: hard
 
@@ -21291,6 +21328,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"media-typer@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "media-typer@npm:2.0.0"
+  checksum: 10/a9a7ec74e4d146325feabbea3931b33b4065c432362a6627d176ee4d15ab57e9a8d3c4c92751843327dd757d07af845c02925d5efdffce4e4cf6b39cf9eda135
+  languageName: node
+  linkType: hard
+
 "memoizerific@npm:^1.11.3":
   version: 1.11.3
   resolution: "memoizerific@npm:1.11.3"
@@ -22028,7 +22072,7 @@ __metadata:
     lodash: "npm:^4.17.21"
     minio: "npm:^8.0.7"
     mocha: "npm:^10.2.0"
-    music-metadata: "npm:7.13.3"
+    music-metadata: "npm:12.3.2"
     nodemailer: "npm:^8.0.5"
     nodemailer-mailgun-transport: "npm:^2.1.5"
     nodemailer-postmark-transport: "npm:^7.0.0"
@@ -22275,46 +22319,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"music-metadata-browser@npm:^2.5.10":
-  version: 2.5.11
-  resolution: "music-metadata-browser@npm:2.5.11"
+"music-metadata@npm:12.3.2, music-metadata@npm:^12.3.2":
+  version: 12.3.2
+  resolution: "music-metadata@npm:12.3.2"
   dependencies:
-    buffer: "npm:^6.0.3"
-    debug: "npm:^4.3.4"
-    music-metadata: "npm:^7.13.3"
-    readable-stream: "npm:^4.3.0"
-    readable-web-to-node-stream: "npm:^3.0.2"
-  checksum: 10/c0b1476e7ff60d83150ac08ce784e2b91662368d450be991c1787112d2e0cffc4c98c42dc61a08f1b0268d953a6a39fd88ece9368855d5201667dd01b02ea15c
-  languageName: node
-  linkType: hard
-
-"music-metadata@npm:7.13.3":
-  version: 7.13.3
-  resolution: "music-metadata@npm:7.13.3"
-  dependencies:
+    "@borewit/text-codec": "npm:^0.2.2"
     "@tokenizer/token": "npm:^0.3.0"
-    content-type: "npm:^1.0.4"
-    debug: "npm:^4.3.4"
-    file-type: "npm:^16.5.4"
-    media-typer: "npm:^1.1.0"
-    strtok3: "npm:^6.3.0"
-    token-types: "npm:^4.2.1"
-  checksum: 10/d0d2f0fc72325f881004e39015e5325062da77f3033b1cd6aff390e93b4bcbe6fd5a2185d645f05d50b8f516b1d3ca4ebc90a99d58eaed9a81acbd9d1809165a
-  languageName: node
-  linkType: hard
-
-"music-metadata@npm:^7.13.3":
-  version: 7.14.0
-  resolution: "music-metadata@npm:7.14.0"
-  dependencies:
-    "@tokenizer/token": "npm:^0.3.0"
-    content-type: "npm:^1.0.5"
-    debug: "npm:^4.3.4"
-    file-type: "npm:^16.5.4"
-    media-typer: "npm:^1.1.0"
-    strtok3: "npm:^6.3.0"
-    token-types: "npm:^4.2.1"
-  checksum: 10/b6fbfb874e06a540439a8ed67e69c0a73866085e5a1304d5f3808de5b3f912132add13007fc2892114da6a7f72300a54821cc8fc5ae0383910b2a0d2ced61074
+    content-type: "npm:^3.1.1"
+    debug: "npm:^4.4.3"
+    file-type: "npm:^22.2.0"
+    media-typer: "npm:^2.0.0"
+    strtok3: "npm:^10.6.2"
+    token-types: "npm:^6.1.2"
+    uint8array-extras: "npm:^1.6.0"
+    win-guid: "npm:^0.2.1"
+  checksum: 10/0bc9c7bbcea6f9510cc04c18b90dd23d84a40338f091733b840057f8aff1c1aa5ddc28b543d6f18cc48e3f8b29024fb15648ab879d167d3961d9479eb336cc93
   languageName: node
   linkType: hard
 
@@ -25106,7 +25125,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:^4.3.0, readable-stream@npm:^4.7.0":
+"readable-stream@npm:^4.7.0":
   version: 4.7.0
   resolution: "readable-stream@npm:4.7.0"
   dependencies:
@@ -25119,7 +25138,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-web-to-node-stream@npm:^3.0.0, readable-web-to-node-stream@npm:^3.0.2":
+"readable-web-to-node-stream@npm:^3.0.0":
   version: 3.0.4
   resolution: "readable-web-to-node-stream@npm:3.0.4"
   dependencies:
@@ -27346,7 +27365,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strtok3@npm:^6.2.4, strtok3@npm:^6.3.0":
+"strtok3@npm:^10.5.0, strtok3@npm:^10.6.2":
+  version: 10.6.3
+  resolution: "strtok3@npm:10.6.3"
+  dependencies:
+    "@tokenizer/token": "npm:^0.3.0"
+  checksum: 10/43e7e436863ea5f5f1e82442bdfbf87a8e82cc567dcd50f6e5a0b91ff39d674d606f35d9d548dd7cf4886654605b147dd50ccbe92e405fcec49c546c8fb71a89
+  languageName: node
+  linkType: hard
+
+"strtok3@npm:^6.2.4":
   version: 6.3.0
   resolution: "strtok3@npm:6.3.0"
   dependencies:
@@ -27875,13 +27903,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"token-types@npm:^4.1.1, token-types@npm:^4.2.1":
+"token-types@npm:^4.1.1":
   version: 4.2.1
   resolution: "token-types@npm:4.2.1"
   dependencies:
     "@tokenizer/token": "npm:^0.3.0"
     ieee754: "npm:^1.2.1"
   checksum: 10/2995257d246387e773758c3c92a3cc99d0c0bf13cbafe0de5d712e4c35ed298da6704e21545cb123fa1f1b42ad62936c35bbd0611018b735e78c30b8b22b42d9
+  languageName: node
+  linkType: hard
+
+"token-types@npm:^6.1.2":
+  version: 6.1.2
+  resolution: "token-types@npm:6.1.2"
+  dependencies:
+    "@borewit/text-codec": "npm:^0.2.1"
+    "@tokenizer/token": "npm:^0.3.0"
+    ieee754: "npm:^1.2.1"
+  checksum: 10/0c7811a2da5a0ca474c795d883d871a184d1d54f67058d66084110f0b246fff66151885dbcb91d66533e776478bf57f3b4fac69ce03b805a0e1060def87947de
   languageName: node
   linkType: hard
 
@@ -28372,6 +28411,13 @@ __metadata:
   version: 1.6.4
   resolution: "ufo@npm:1.6.4"
   checksum: 10/dbf85425e00dd106abb852c0ea4cef6e58b395b9a43858049a8be0b0825e5cc4b53cf58a41da695c3c2a9ab4f8605923b64812be1358c39a56b3920504759d3a
+  languageName: node
+  linkType: hard
+
+"uint8array-extras@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "uint8array-extras@npm:1.6.0"
+  checksum: 10/485927269f68809fb9b37f17effcf9094b2f4c332d8468c7488d259e662ec0ad5c5bba66ca5500e1f5d8de8cf29c83db9148600b3633d444f1a1bc6b734145da
   languageName: node
   linkType: hard
 
@@ -29512,6 +29558,13 @@ __metadata:
   dependencies:
     string-width: "npm:^4.0.0"
   checksum: 10/03db6c9d0af9329c37d74378ff1d91972b12553c7d72a6f4e8525fe61563fa7adb0b9d6e8d546b7e059688712ea874edd5ded475999abdeedf708de9849310e0
+  languageName: node
+  linkType: hard
+
+"win-guid@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "win-guid@npm:0.2.1"
+  checksum: 10/d4692168a5f1e30ea50e8654bfcf59680519df4bf97576cc695d463c36b6d3c60ba4df7f2fe9a0963b47976840b1d9095c3bd3ee894dcdef5e3b2e1fe664c7d1
   languageName: node
   linkType: hard
 

@@ -1,9 +1,5 @@
 import produce from "immer";
-import type {
-  IAudioMetadata,
-  ICommonTagsResult,
-  ITag,
-} from "music-metadata/lib/type";
+import type { IAudioMetadata, ICommonTagsResult, ITag } from "music-metadata";
 
 import { ACCEPTED_AUDIO } from "./ManageTrackGroup/AlbumFormComponents/ReplaceTrackAudioInput";
 import { DOWNLOADABLE_CONTENT_MIME_TYPES } from "./Merch/DownloadableContent";
@@ -65,7 +61,7 @@ export interface TrackData {
   title: string;
   status: Track["status"];
   order: string;
-  lyrics?: string;
+  lyrics?: string[];
   isrc?: string;
   metadata: { [key: string]: any };
   trackArtists: {
@@ -81,8 +77,73 @@ export interface TrackData {
 
 type ParsedItem = {
   file: File;
-  metadata: IAudioMetadata;
+  metadata: NormalizedAudioMetadata;
 };
+
+type MetadataLyrics = NonNullable<IAudioMetadata["common"]["lyrics"]>;
+type MetadataComments = NonNullable<IAudioMetadata["common"]["comment"]>;
+
+type NormalizedAudioMetadata = Omit<IAudioMetadata, "common"> & {
+  common: Omit<ICommonTagsResult, "lyrics" | "comment"> & {
+    lyrics?: string[];
+    comment?: string[];
+  };
+};
+
+const lyricsToText = (
+  lyrics?: MetadataLyrics | string[]
+): string[] | undefined => {
+  if (!lyrics?.length) {
+    return undefined;
+  }
+
+  const text = lyrics.flatMap((lyric) => {
+    if (typeof lyric === "string") {
+      return lyric ? [lyric] : [];
+    }
+    if (lyric.text) {
+      return [lyric.text];
+    }
+    return (lyric.syncText ?? [])
+      .map((line) => line.text)
+      .filter((line): line is string => Boolean(line));
+  });
+
+  return text.length > 0 ? text : undefined;
+};
+
+const commentsToText = (
+  comments?: MetadataComments | string[]
+): string[] | undefined => {
+  if (!comments?.length) {
+    return undefined;
+  }
+
+  const text = comments.flatMap((comment) => {
+    if (typeof comment === "string") {
+      return comment ? [comment] : [];
+    }
+    return comment.text ? [comment.text] : [];
+  });
+
+  return text.length > 0 ? text : undefined;
+};
+
+/**
+ * music-metadata 12 represents comments and lyrics as structured values.
+ * Mirlo stores the common tag object and uses its plain text values for
+ * display and for FFmpeg tag writing, so keep the previous string-array shape.
+ */
+export const normalizeMetadata = (
+  metadata: IAudioMetadata
+): NormalizedAudioMetadata => ({
+  ...metadata,
+  common: {
+    ...metadata.common,
+    lyrics: lyricsToText(metadata.common.lyrics),
+    comment: commentsToText(metadata.common.comment),
+  },
+});
 
 export interface ParsedTrackArtist {
   artistName: string;
@@ -105,8 +166,12 @@ export interface ParsedTrackArtist {
  * field (which covers every other format and the common case where pop music
  * omits PERFORMER).
  */
+type TrackArtistMetadata = Pick<IAudioMetadata, "native"> & {
+  common: Pick<ICommonTagsResult, "artists">;
+};
+
 export const extractTrackArtists = (
-  metadata: IAudioMetadata
+  metadata: TrackArtistMetadata
 ): ParsedTrackArtist[] => {
   const nativeTags: ITag[] = Object.values(metadata.native ?? {}).flat();
   const valuesForTag = (id: string) =>
@@ -188,11 +253,11 @@ export const convertMetaData = (
 };
 
 export const parse = async (files: File[]): Promise<ParsedItem[]> => {
-  const { parseBlob } = await import("music-metadata-browser");
+  const { parseBlob } = await import("music-metadata");
   const parsed = await Promise.all(
     files.map(async (file) => {
       try {
-        const parsedFile = await parseBlob(file);
+        const parsedFile = normalizeMetadata(await parseBlob(file));
         return {
           file,
           metadata: parsedFile,
@@ -205,7 +270,7 @@ export const parse = async (files: File[]): Promise<ParsedItem[]> => {
             common: {
               title: file.name,
             } as ICommonTagsResult,
-          } as IAudioMetadata,
+          } as NormalizedAudioMetadata,
         };
       }
     })
