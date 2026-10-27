@@ -4,6 +4,7 @@ import * as dotenv from "dotenv";
 import { beforeEach, describe, it } from "mocha";
 dotenv.config();
 
+import { getClient } from "../../../src/utils/getClient";
 import { clearTables, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
@@ -42,6 +43,26 @@ describe("admin/clients", () => {
     assert.equal(updated.status, 200, updated.text);
     assert.deepEqual(updated.body.result.redirectUris, ["myapp://callback"]);
     assert.equal(updated.body.result.confidential, false);
+  });
+
+  it("renames clients but not the frontend client", async () => {
+    const app = await requestApp
+      .post("admin/clients")
+      .set("Cookie", [`jwt=${adminToken}`])
+      .send({ applicationName: "App", applicationUrl: "https://a.example" });
+    const renamed = await requestApp
+      .put(`admin/clients/${app.body.result.id}`)
+      .set("Cookie", [`jwt=${adminToken}`])
+      .send({ applicationName: "Renamed" });
+    assert.equal(renamed.status, 200, renamed.text);
+    assert.equal(renamed.body.result.applicationName, "Renamed");
+
+    const frontend = await getClient();
+    const refused = await requestApp
+      .put(`admin/clients/${frontend.id}`)
+      .set("Cookie", [`jwt=${adminToken}`])
+      .send({ applicationName: "Renamed" });
+    assert.equal(refused.status, 400, refused.text);
   });
 
   it("refuses redirect URIs that aren't URLs or have a fragment", async () => {

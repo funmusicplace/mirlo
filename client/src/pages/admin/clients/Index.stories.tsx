@@ -103,7 +103,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await canvas.findByText("Radiccio");
+    await canvas.findByDisplayValue("Radiccio");
     await expect(
       canvas.getAllByRole("button", { name: "Rotate key" })
     ).toHaveLength(3);
@@ -122,11 +122,13 @@ export const SaveRedirectUris: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await canvas.findByText("Radiccio");
+    await canvas.findByDisplayValue("Radiccio");
     const [input] = canvas.getAllByRole("textbox", {
       name: /redirect URIs/,
     });
-    const [save] = canvas.getAllByRole("button", { name: "Save" });
+    const save = within(input.closest("form")!).getByRole("button", {
+      name: "Save",
+    });
     await expect(save).toBeDisabled();
     await userEvent.type(input, ", https://radiccio.app/other");
     await expect(save).toBeEnabled();
