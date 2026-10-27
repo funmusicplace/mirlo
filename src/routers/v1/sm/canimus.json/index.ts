@@ -13,7 +13,6 @@ import { serializeSingleDeletedTrackGroupIntoCanimus } from "../../../../seriali
 import {
   federatedArtistAtSomePoint,
   federatedArtist,
-  artistOptedOutOrDeleted,
   whereForVisibleProfile,
 } from "../../../../utils/artist";
 import { getInstanceName } from "../../../../utils/settings";
@@ -39,13 +38,27 @@ export default function () {
       const fullCatalog = !!req.client?.fullCatalog;
       const listedAtSomePoint = fullCatalog ? {} : federatedArtistAtSomePoint;
 
-      const listedArtist: Prisma.ProfileWhereInput = fullCatalog
-        ? whereForVisibleProfile()
-        : { ...federatedArtist };
+      const listedArtist: Prisma.ProfileWhereInput = {
+        ...whereForVisibleProfile(),
+        ...(fullCatalog ? {} : federatedArtist),
+      };
 
-      const removedArtist: Prisma.ProfileWhereInput = fullCatalog
-        ? { deletedAt: { not: null } }
-        : { ...artistOptedOutOrDeleted };
+      const removedArtist: Prisma.ProfileWhereInput = {
+        ...listedAtSomePoint,
+        OR: [
+          { deletedAt: fromDateFilter ?? { not: null } },
+          { enabled: false, updatedAt: fromDateFilter },
+          ...(fullCatalog
+            ? []
+            : [
+                {
+                  federatedStreaming: false,
+                  federatedStreamingOptOutDate: fromDateFilter,
+                },
+              ]),
+        ],
+        deletedAt: {},
+      };
 
       let deleted = {
         deletedAt: { not: null },
@@ -109,16 +122,6 @@ export default function () {
           updatedOrCreatedFilter as Prisma.ProfileWhereInput,
           anyTrackGroupUpdatedOrCreated,
         ];
-
-        if (fullCatalog) {
-          removedArtist.deletedAt = fromDateFilter;
-        } else {
-          removedArtist.AND = [
-            {
-              federatedStreamingOptOutDate: fromDateFilter,
-            },
-          ];
-        }
 
         trackGroupDeleted.deletedAt = fromDateFilter;
         trackDeleted.deletedAt = fromDateFilter;

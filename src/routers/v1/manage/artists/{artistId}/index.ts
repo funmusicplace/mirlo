@@ -118,9 +118,12 @@ export default function () {
       let federatedStreamingOptInDate =
         existingProfile?.federatedStreamingOptInDate;
       let federatedStreamingOptOutDate =
-        existingProfile?.federatedStreamingOptInDate;
+        existingProfile?.federatedStreamingOptOutDate;
 
-      if (existingProfile?.federatedStreaming != federatedStreaming) {
+      if (
+        federatedStreaming !== undefined &&
+        existingProfile?.federatedStreaming !== federatedStreaming
+      ) {
         if (federatedStreaming) {
           federatedStreamingOptInDate = new Date(Date.now());
         } else {

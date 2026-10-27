@@ -194,9 +194,40 @@ describe("canimus", () => {
       });
 
       const response = await request(baseURL)
-        .get("sm/canimus.json?" + String(dateNow).split("T")[0])
+        .get(`sm/canimus.json?fromDate=${dateNow.toISOString()}`)
         .set("Accept", "application/json");
       assert.equal(response.body.children.length, 1);
+      assert.equal(response.body.deleted.length, 1);
+    });
+
+    it("should list a disabled artist as deleted, not as a child", async () => {
+      const { user } = await createUser({
+        email: "test@testcom",
+      });
+      await createFederatedArtistWithMusic(user.id, { enabled: false });
+
+      const response = await request(baseURL)
+        .get("sm/canimus.json")
+        .set("Accept", "application/json");
+      assert.equal(response.body.children.length, 0);
+      assert.equal(response.body.deleted.length, 1);
+    });
+
+    it("should list an artist disabled since fromDate as deleted", async () => {
+      const { user } = await createUser({
+        email: "test@testcom",
+      });
+      const artist = await createFederatedArtistWithMusic(user.id);
+      const beforeDisabling = new Date();
+      await prisma.profile.update({
+        where: { id: artist.id },
+        data: { enabled: false },
+      });
+
+      const response = await request(baseURL)
+        .get(`sm/canimus.json?fromDate=${beforeDisabling.toISOString()}`)
+        .set("Accept", "application/json");
+      assert.equal(response.body.children.length, 0);
       assert.equal(response.body.deleted.length, 1);
     });
 
@@ -249,6 +280,24 @@ describe("canimus", () => {
         .get("sm/canimus.json")
         .set("Accept", "application/json");
       assert.equal(withoutKey.body.children.length, 0);
+    });
+
+    it("should list a disabled artist as deleted", async () => {
+      const { user } = await createUser({
+        email: "test@testcom",
+      });
+      await createFederatedArtistWithMusic(user.id, {
+        enabled: false,
+        federatedStreaming: false,
+        federatedStreamingOptInDate: null,
+      });
+
+      const response = await request(baseURL)
+        .get("sm/canimus.json")
+        .set("mirlo-api-key", apiKey)
+        .set("Accept", "application/json");
+      assert.equal(response.body.children.length, 0);
+      assert.equal(response.body.deleted.length, 1);
     });
 
     it("should only list the opt-in feed for a client without fullCatalog", async () => {
