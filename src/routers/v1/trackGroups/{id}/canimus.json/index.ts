@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { serializeSingleArtistTrackGroupIntoCanimus } from "../../../../../serializers/artist";
 import {
   listedTrackGroupInclude,
+  profilePayeeInclude,
   whereForListedProfile,
   whereForListedTrackGroups,
 } from "../../../../../utils/canimus";
@@ -40,12 +41,7 @@ export default function () {
             },
             include: {
               ...listedTrackGroupInclude,
-              profile: {
-                include: {
-                  user: { select: { stripeAccountId: true } },
-                  paymentToUser: { select: { stripeAccountId: true } },
-                },
-              },
+              profile: { include: profilePayeeInclude },
             },
           })
         : null;

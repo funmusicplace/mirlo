@@ -36,6 +36,11 @@ export const listedTrackGroupInclude = {
   },
 } satisfies Prisma.TrackGroupInclude;
 
+export const profilePayeeInclude = {
+  user: { select: { stripeAccountId: true } },
+  paymentToUser: { select: { stripeAccountId: true } },
+} satisfies Prisma.ProfileInclude;
+
 export const listedProfileInclude = () =>
   ({
     trackGroups: {
@@ -44,6 +49,5 @@ export const listedProfileInclude = () =>
       orderBy: { orderIndex: "asc" },
     },
     avatar: true,
-    user: { select: { stripeAccountId: true } },
-    paymentToUser: { select: { stripeAccountId: true } },
+    ...profilePayeeInclude,
   }) satisfies Prisma.ProfileInclude;

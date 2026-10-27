@@ -36,7 +36,7 @@ Instances advertise this feed on their web pages with `<link rel="alternate" typ
 
 ### Pagination
 
-Without `take`, the response is the whole catalog. With `take`, `skip` and `take` apply to `children` and to `deleted`. When there may be more to fetch, the root has a `links` entry with `"rel": "next"` whose `href` is the next page, with your other query parameters kept. Keep following it until a response has no `next` link. The last page may be empty.
+Without `take`, the response is the whole catalog. With `take`, each kind of entry is paged separately: a page has up to `take` artists in `children`, and up to `take` each of removed artists, releases and tracks in `deleted`. When there may be more to fetch, the root has a `links` entry with `"rel": "next"` whose `href` is the next page, with your other query parameters kept. Keep following it until a response has no `next` link. The last page may be empty.
 
 ```json
 {

@@ -88,9 +88,11 @@ export default function () {
         deletedAt: { not: null },
       };
 
+      const publishedAtSomePoint = { publishedAt: { lte: new Date() } };
+
       let trackGroupDeleted: Prisma.TrackGroupWhereInput = {
         AND: [
-          { profile: listedAtSomePoint },
+          { profile: listedAtSomePoint, ...publishedAtSomePoint },
           deleted as Prisma.TrackGroupWhereInput,
         ],
         deletedAt: {},
@@ -98,7 +100,9 @@ export default function () {
 
       let trackDeleted: Prisma.TrackWhereInput = {
         AND: [
-          { trackGroup: { profile: listedAtSomePoint } },
+          {
+            trackGroup: { profile: listedAtSomePoint, ...publishedAtSomePoint },
+          },
           deleted as Prisma.TrackWhereInput,
         ],
         deletedAt: {},

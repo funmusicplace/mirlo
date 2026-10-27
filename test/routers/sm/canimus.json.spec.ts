@@ -176,6 +176,32 @@ describe("canimus", () => {
       assert.equal(response.body.deleted.length, 1);
     });
 
+    it("should not list a deleted release that was never published", async () => {
+      const { user } = await createUser({
+        email: "test@testcom",
+      });
+      const artist = await createArtist(user.id, {
+        name: "test-artist",
+        urlSlug: "test-artist",
+        federatedStreaming: true,
+        federatedStreamingOptInDate: new Date(Date.now()),
+      });
+      const draft = await createTrackGroup(artist.id, { publishedAt: null });
+      await prisma.track.updateMany({
+        where: { trackGroupId: draft.id },
+        data: { deletedAt: new Date() },
+      });
+      await prisma.trackGroup.update({
+        where: { id: draft.id },
+        data: { deletedAt: new Date() },
+      });
+
+      const response = await request(baseURL)
+        .get("sm/canimus.json")
+        .set("Accept", "application/json");
+      assert.equal(response.body.deleted.length, 0);
+    });
+
     it("should GET / with fromDate filter with 1 artist and 1 deleted artist ", async () => {
       const { user } = await createUser({
         email: "test@testcom",

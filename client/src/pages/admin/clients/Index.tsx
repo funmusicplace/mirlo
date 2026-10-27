@@ -235,7 +235,13 @@ const Index: React.FC = () => {
                         onChangeFullCatalog(client, e.target.checked)
                       }
                     />
-                    {t("fullCatalog")}
+                    <a
+                      href="https://docs.mirlo.space/api/canimus#which-artists-are-included"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {t("fullCatalog")}
+                    </a>
                   </label>
                 </td>
                 <td className="whitespace-nowrap">
