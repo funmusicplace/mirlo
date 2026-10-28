@@ -11,6 +11,10 @@ import {
   getImagesBucket,
 } from "../../../../src/utils/minio";
 import {
+  attachPendingImage,
+  markPendingImage,
+} from "../../../../src/utils/pendingImage";
+import {
   clearTables,
   createProfile,
   createProfileImage,
@@ -32,6 +36,16 @@ const png = () =>
     .png()
     .toBuffer();
 
+const findPendingImageId = async (
+  slot: "AVATAR" | "BACKGROUND",
+  ownerId: number
+) =>
+  (
+    await prisma.pendingImage.findUnique({
+      where: { slot_ownerId: { slot, ownerId } },
+    })
+  )?.imageId ?? null;
+
 describe("manage/artists/{artistId}/avatar", () => {
   beforeEach(async () => {
     try {
@@ -42,7 +56,7 @@ describe("manage/artists/{artistId}/avatar", () => {
   });
 
   describe("PUT", () => {
-    it("replaces the old avatar with a new Image owned by the artist", async () => {
+    it("keeps the old avatar and marks a new Image owned by the artist as pending", async () => {
       const { accessToken, profile } = await setup();
       const old = await createProfileImage(profile.id, "avatar", {
         url: ["old-x600"],
@@ -67,7 +81,31 @@ describe("manage/artists/{artistId}/avatar", () => {
       const updated = await prisma.profile.findUniqueOrThrow({
         where: { id: profile.id },
       });
-      assert.equal(updated.avatarImageId, imageId);
+      assert.equal(updated.avatarImageId, old.id);
+      assert.equal(await findPendingImageId("AVATAR", profile.id), imageId);
+    });
+
+    it("replaces the old avatar once the new one is attached", async () => {
+      const { profile } = await setup();
+      const old = await createProfileImage(profile.id, "avatar", {
+        url: ["old-x600"],
+      });
+      const next = await prisma.image.create({
+        data: {
+          dimensions: "avatar",
+          profileId: profile.id,
+          url: ["new-x600"],
+        },
+      });
+      await markPendingImage("AVATAR", profile.id, next.id);
+
+      await attachPendingImage(next.id);
+
+      const updated = await prisma.profile.findUniqueOrThrow({
+        where: { id: profile.id },
+      });
+      assert.equal(updated.avatarImageId, next.id);
+      assert.equal(await findPendingImageId("AVATAR", profile.id), null);
       const oldImage = await prisma.image.findUniqueOrThrow({
         where: { id: old.id },
       });
@@ -76,9 +114,13 @@ describe("manage/artists/{artistId}/avatar", () => {
   });
 
   describe("DELETE", () => {
-    it("unlinks and soft-deletes the avatar", async () => {
+    it("unlinks and soft-deletes the avatar and cancels the pending one", async () => {
       const { accessToken, profile } = await setup();
       const image = await createProfileImage(profile.id, "avatar");
+      const pending = await prisma.image.create({
+        data: { dimensions: "avatar", profileId: profile.id },
+      });
+      await markPendingImage("AVATAR", profile.id, pending.id);
 
       const response = await requestApp
         .delete(`manage/artists/${profile.id}/avatar`)
@@ -90,6 +132,7 @@ describe("manage/artists/{artistId}/avatar", () => {
         where: { id: profile.id },
       });
       assert.equal(updated.avatarImageId, null);
+      assert.equal(await findPendingImageId("AVATAR", profile.id), null);
       const deleted = await prisma.image.findUniqueOrThrow({
         where: { id: image.id },
       });

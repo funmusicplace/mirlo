@@ -8,7 +8,6 @@ import sharp from "sharp";
 import { REDIS_CONFIG } from "../config/redis";
 import sharpConfig from "../config/sharp";
 import logger from "../logger";
-import { deleteProfileImage } from "../utils/artist";
 import { clearTrackGroupDownloads } from "../utils/downloadCache";
 import { AppError, HttpCode } from "../utils/error";
 import { APIContext } from "../utils/file";
@@ -337,45 +336,29 @@ const uploadImage = (
       })
   );
 
-export const processProfileImage = async (
+const uploadToImageSlot = async (
   ctx: APIContext,
-  profileId: number,
-  field: "avatar" | "background"
+  model: string,
+  dimensions: "artwork" | "avatar" | "background" | "splash",
+  profileId: number | undefined,
+  pendingSlot: { slot: ImageSlot; ownerId: number }
 ) => {
-  const result = await uploadImage(
-    ctx,
-    field === "avatar" ? "artistAvatar" : "image",
-    field,
-    profileId
-  );
-  await deleteProfileImage(profileId, field);
-  await prisma.profile.update({
-    where: { id: profileId },
-    data:
-      field === "avatar"
-        ? { avatarImageId: result.imageId }
-        : { backgroundImageId: result.imageId },
-  });
-  return result;
-};
-
-export const processSplashImage = async (ctx: APIContext) => {
   let imageId: string | undefined;
   try {
     return await uploadAndSendToImageQueue(
       ctx,
       "image",
-      "splashImage",
-      "splash",
+      model,
+      dimensions,
       async (fileInfo: { filename: string }) => {
         const image = await prisma.image.create({
-          data: { originalFilename: fileInfo.filename, dimensions: "splash" },
+          data: { originalFilename: fileInfo.filename, dimensions, profileId },
         });
         imageId = image.id;
         return image;
       },
       false,
-      { slot: "SPLASH", ownerId: await findSettingsId() }
+      pendingSlot
     );
   } catch (e) {
     if (imageId) {
@@ -384,6 +367,25 @@ export const processSplashImage = async (ctx: APIContext) => {
     throw e;
   }
 };
+
+export const processProfileImage = (
+  ctx: APIContext,
+  profileId: number,
+  field: "avatar" | "background"
+) =>
+  uploadToImageSlot(
+    ctx,
+    field === "avatar" ? "artistAvatar" : "image",
+    field,
+    profileId,
+    { slot: field === "avatar" ? "AVATAR" : "BACKGROUND", ownerId: profileId }
+  );
+
+export const processSplashImage = async (ctx: APIContext) =>
+  uploadToImageSlot(ctx, "splashImage", "splash", undefined, {
+    slot: "SPLASH",
+    ownerId: await findSettingsId(),
+  });
 
 export const processTrackGroupCover = async (
   ctx: APIContext,

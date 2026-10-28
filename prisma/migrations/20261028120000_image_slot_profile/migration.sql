@@ -1,0 +1,3 @@
+-- AlterEnum
+ALTER TYPE "ImageSlot" ADD VALUE 'AVATAR';
+ALTER TYPE "ImageSlot" ADD VALUE 'BACKGROUND';

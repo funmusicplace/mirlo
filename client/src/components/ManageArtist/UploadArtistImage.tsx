@@ -115,9 +115,14 @@ const UploadArtistImage: React.FC<{
     refresh();
   }, [existing, imageType, refresh]);
 
+  const reportFailedJob = React.useCallback(() => {
+    snackbar("Something went wrong", { type: "warning" });
+  }, [snackbar]);
+
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
     reload: () => {},
     reset: resetWrapper,
+    onFailed: reportFailedJob,
     queue: "optimizeImage",
   });
 

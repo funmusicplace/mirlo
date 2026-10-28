@@ -566,6 +566,8 @@ model Image {
 
 enum ImageSlot {
   SPLASH
+  AVATAR
+  BACKGROUND
 }
 
 model PendingImage {

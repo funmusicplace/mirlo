@@ -11,6 +11,10 @@ import {
   getImagesBucket,
 } from "../../../../src/utils/minio";
 import {
+  attachPendingImage,
+  markPendingImage,
+} from "../../../../src/utils/pendingImage";
+import {
   clearTables,
   createProfile,
   createProfileImage,
@@ -32,6 +36,16 @@ const png = () =>
     .png()
     .toBuffer();
 
+const findPendingImageId = async (
+  slot: "AVATAR" | "BACKGROUND",
+  ownerId: number
+) =>
+  (
+    await prisma.pendingImage.findUnique({
+      where: { slot_ownerId: { slot, ownerId } },
+    })
+  )?.imageId ?? null;
+
 describe("manage/artists/{artistId}/background", () => {
   beforeEach(async () => {
     try {
@@ -42,7 +56,7 @@ describe("manage/artists/{artistId}/background", () => {
   });
 
   describe("PUT", () => {
-    it("links a new Image owned by the artist", async () => {
+    it("marks a new Image owned by the artist as pending", async () => {
       const { accessToken, profile } = await setup();
 
       const response = await requestApp
@@ -62,24 +76,31 @@ describe("manage/artists/{artistId}/background", () => {
       const updated = await prisma.profile.findUniqueOrThrow({
         where: { id: profile.id },
       });
-      assert.equal(updated.backgroundImageId, imageId);
+      assert.equal(updated.backgroundImageId, null);
+      assert.equal(await findPendingImageId("BACKGROUND", profile.id), imageId);
     });
 
-    it("replaces the old background with a new Image", async () => {
-      const { accessToken, profile } = await setup();
+    it("replaces the old background once the new one is attached", async () => {
+      const { profile } = await setup();
       const old = await createProfileImage(profile.id, "background", {
         url: ["old-x625"],
         keyPrefix: "artist-banners",
       });
+      const next = await prisma.image.create({
+        data: {
+          dimensions: "background",
+          profileId: profile.id,
+          url: ["new-x625"],
+        },
+      });
+      await markPendingImage("BACKGROUND", profile.id, next.id);
 
-      const response = await requestApp
-        .put(`manage/artists/${profile.id}/background`)
-        .attach("file", await png(), "background.png")
-        .set("Cookie", [`jwt=${accessToken}`])
-        .set("Accept", "application/json");
+      await attachPendingImage(next.id);
 
-      assert.equal(response.statusCode, 200);
-      assert.notEqual(response.body.result.imageId, old.id);
+      const updated = await prisma.profile.findUniqueOrThrow({
+        where: { id: profile.id },
+      });
+      assert.equal(updated.backgroundImageId, next.id);
       const oldImage = await prisma.image.findUniqueOrThrow({
         where: { id: old.id },
       });
@@ -104,6 +125,7 @@ describe("manage/artists/{artistId}/background", () => {
         where: { id: profile.id },
       });
       assert.equal(updated.backgroundImageId, old.id);
+      assert.equal(await findPendingImageId("BACKGROUND", profile.id), null);
       const oldImage = await prisma.image.findUniqueOrThrow({
         where: { id: old.id },
       });

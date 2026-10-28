@@ -4,10 +4,12 @@ import api from "services/api";
 const useJobStatusCheck = ({
   reload,
   reset,
+  onFailed,
   queue,
 }: {
   reload: () => void;
   reset?: () => void;
+  onFailed?: () => void;
   queue?: "optimizeImage";
 }) => {
   const [uploadJobs, setUploadJobs] = React.useState<
@@ -22,7 +24,10 @@ const useJobStatusCheck = ({
           `jobs?queue=${queue ?? ""}&${uploadJobs.map((job) => `ids=${job.jobId}&`).join("")}`
         );
 
-        if (
+        if (result.results.some((r) => r.jobStatus === "failed")) {
+          setUploadJobs([]);
+          onFailed?.();
+        } else if (
           result.results.some(
             (r) => r.jobStatus !== "completed" && r.jobStatus !== "unknown"
           )
@@ -36,7 +41,7 @@ const useJobStatusCheck = ({
       }, 5000);
     }
     return () => clearInterval(timer);
-  }, [reload, uploadJobs, reset]);
+  }, [reload, uploadJobs, reset, onFailed]);
 
   return {
     uploadJobs,

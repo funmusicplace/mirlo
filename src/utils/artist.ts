@@ -18,13 +18,10 @@ import { serializeProfile } from "../serializers/artist";
 import { AppError } from "./error";
 import generateSlug from "./generateSlug";
 import { getClient } from "./getClient";
-import {
-  convertURLArrayToSizes,
-  deleteStoredImage,
-  storedImageVariantUrl,
-} from "./images";
+import { convertURLArrayToSizes, storedImageVariantUrl } from "./images";
 import { deleteMerch, merchImagesInclude } from "./merch";
 import { storedImagePrefix } from "./minio";
+import { clearImageSlot } from "./pendingImage";
 import { postImagesForContent } from "./postContent";
 import reservedProfileSlugs from "./reservedProfileSlugs";
 import { getSiteSettings } from "./settings";
@@ -558,20 +555,10 @@ export const deleteProfile = async (userId: number, profileId: number) => {
   });
 };
 
-export const deleteProfileImage = async (
+export const deleteProfileImage = (
   profileId: number,
   field: "avatar" | "background"
-) => {
-  const profile = await prisma.profile.findUnique({
-    where: { id: profileId },
-    select: { avatar: true, background: true },
-  });
-  const image = profile?.[field];
-
-  if (image) {
-    await deleteStoredImage(image);
-  }
-};
+) => clearImageSlot(field === "avatar" ? "AVATAR" : "BACKGROUND", profileId);
 
 export const deleteStripeSubscriptions = async (
   where: Prisma.ProfileUserSubscriptionWhereInput

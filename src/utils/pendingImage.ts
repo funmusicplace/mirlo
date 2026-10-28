@@ -34,6 +34,34 @@ const IMAGE_SLOT_TARGETS: Record<ImageSlot, ImageSlotTarget> = {
         data: { splashImageId: imageId },
       }),
   },
+  AVATAR: {
+    findImageId: async (tx, ownerId) =>
+      (
+        await tx.profile.findUnique({
+          where: { id: ownerId },
+          select: { avatarImageId: true },
+        })
+      )?.avatarImageId,
+    setImageId: (tx, ownerId, imageId) =>
+      tx.profile.update({
+        where: { id: ownerId },
+        data: { avatarImageId: imageId },
+      }),
+  },
+  BACKGROUND: {
+    findImageId: async (tx, ownerId) =>
+      (
+        await tx.profile.findUnique({
+          where: { id: ownerId },
+          select: { backgroundImageId: true },
+        })
+      )?.backgroundImageId,
+    setImageId: (tx, ownerId, imageId) =>
+      tx.profile.update({
+        where: { id: ownerId },
+        data: { backgroundImageId: imageId },
+      }),
+  },
 };
 
 const removeImage = async (imageId: string) => {
