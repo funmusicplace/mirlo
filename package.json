@@ -73,7 +73,7 @@
     "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.21",
     "minio": "^8.0.7",
-    "music-metadata": "7.13.3",
+    "music-metadata": "12.3.2",
     "nodemailer": "^8.0.5",
     "nodemailer-mailgun-transport": "^2.1.5",
     "nodemailer-postmark-transport": "^7.0.0",

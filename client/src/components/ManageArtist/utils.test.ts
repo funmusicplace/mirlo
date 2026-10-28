@@ -1,7 +1,7 @@
-import type { IAudioMetadata } from "music-metadata/lib/type";
+import type { IAudioMetadata } from "music-metadata";
 import { describe, expect, test } from "vitest";
 
-import { extractTrackArtists } from "./utils";
+import { extractTrackArtists, normalizeMetadata } from "./utils";
 
 const buildMetadata = (opts: {
   artists?: string[];
@@ -11,6 +11,35 @@ const buildMetadata = (opts: {
     common: { artists: opts.artists },
     native: opts.native ? { vorbis: opts.native } : {},
   }) as unknown as IAudioMetadata;
+
+describe("normalizeMetadata", () => {
+  test("converts structured comments and lyrics to plain strings", () => {
+    const normalized = normalizeMetadata({
+      common: {
+        title: "Tidal Hours",
+        comment: [{ text: "Reader migration" }, { language: "eng" }],
+        lyrics: [
+          {
+            contentType: 1,
+            timeStampFormat: 0,
+            text: "First line",
+            syncText: [],
+          },
+          {
+            contentType: 1,
+            timeStampFormat: 0,
+            syncText: [{ text: "Second line" }],
+          },
+        ],
+      },
+      format: {},
+      native: {},
+    } as unknown as IAudioMetadata);
+
+    expect(normalized.common.comment).toEqual(["Reader migration"]);
+    expect(normalized.common.lyrics).toEqual(["First line", "Second line"]);
+  });
+});
 
 describe("extractTrackArtists", () => {
   test("falls back to common.artists when there is no PERFORMER tag", () => {

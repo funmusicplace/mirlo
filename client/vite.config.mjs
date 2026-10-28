@@ -16,7 +16,21 @@ export default defineConfig({
       },
     }),
     viteTsconfigPaths(),
-    legacy(),
+    // music-metadata 12 targets ECMAScript 2023 and uses BigInt for its DSD
+    // parsers. The plugin's default modern target (Chrome 64) predates BigInt,
+    // which cannot be transpiled, so build modern chunks for browsers that
+    // support it. The DSD parser chunk is lazy and never loaded for the audio
+    // formats Mirlo accepts.
+    legacy({
+      modernTargets: [
+        "chrome >= 67",
+        "chromeAndroid >= 67",
+        "edge >= 79",
+        "firefox >= 68",
+        "safari >= 14",
+        "iOS >= 14",
+      ],
+    }),
     tailwindcss(),
     VitePWA({
       registerType: "prompt",
