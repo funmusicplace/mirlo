@@ -5,7 +5,6 @@ import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../../auth/passport";
-import { serializeInstanceSettings } from "../../../../../serializers/instanceSettings";
 import {
   INSTANCE_LOGO_FIELDS,
   InstanceLogoKind,
@@ -14,21 +13,10 @@ import {
   removeInstanceLogo,
   replaceInstanceLogo,
 } from "../../../../../utils/instanceLogo";
-import { clearPageCache } from "../../../../../utils/pageCache";
+import { respondWithInstanceSettings } from "../../../../../utils/instanceSettingsResponse";
 import { getSiteSettings } from "../../../../../utils/settings";
-import { getAvailableLanguages } from "../../../../../utils/transifexLanguages";
 
 const parseKind = (req: Request) => req.params.kind as InstanceLogoKind;
-
-const respondWithInstanceSettings = async (res: Response) => {
-  clearPageCache();
-  return res.status(200).json({
-    result: serializeInstanceSettings(
-      await getSiteSettings(),
-      getAvailableLanguages()
-    ),
-  });
-};
 
 const KIND_PARAMETER = {
   in: "path",

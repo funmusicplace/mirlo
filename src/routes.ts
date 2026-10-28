@@ -173,6 +173,7 @@ const routes = [
   "admin/purchases",
   "admin/settings",
   "admin/settings/logo/{kind}",
+  "admin/settings/splash",
   "admin/stripeWebhook",
   "admin/setup/complete",
   "admin/setup/status",

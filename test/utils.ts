@@ -43,6 +43,7 @@ const TRUNCATE_TABLES_SQL = `
     "MerchShippingDestination",
     "Notification",
     "OAuthPayload",
+    "PendingImage",
     "Post",
     "PostImage",
     "PostSubscriptionTier",

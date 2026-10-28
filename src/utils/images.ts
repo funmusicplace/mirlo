@@ -113,6 +113,10 @@ export const deleteStoredImage = async (
     where: { coverImageId: imageId },
     data: { coverImageId: null },
   });
+  await prisma.settings.updateMany({
+    where: { splashImageId: imageId },
+    data: { splashImageId: null },
+  });
   await prisma.image.delete({ where: { id: imageId } });
 
   try {

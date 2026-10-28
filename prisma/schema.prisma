@@ -43,6 +43,8 @@ model Settings {
   logo                         InstanceLogo? @relation("logo", fields: [logoId], references: [id], onDelete: SetNull)
   mobileLogoId                 String?       @unique @db.Uuid
   mobileLogo                   InstanceLogo? @relation("mobileLogo", fields: [mobileLogoId], references: [id], onDelete: SetNull)
+  splashImageId                String?       @unique @db.Uuid
+  splashImage                  Image?        @relation("SettingsSplashImage", fields: [splashImageId], references: [id])
 }
 
 model InstanceLogo {
@@ -556,8 +558,23 @@ model Image {
   postImage        PostImage?
   featuredForPost  Post[]                  @relation("PostFeaturedImage")
   coverOf          TrackGroup?             @relation("TrackGroupCoverImage")
+  splashOf         Settings?               @relation("SettingsSplashImage")
+  pendingFor       PendingImage?
 
   @@index([profileId])
+}
+
+enum ImageSlot {
+  SPLASH
+}
+
+model PendingImage {
+  slot    ImageSlot
+  ownerId Int
+  imageId String    @unique @db.Uuid
+  image   Image     @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@id([slot, ownerId])
 }
 
 enum Interval {

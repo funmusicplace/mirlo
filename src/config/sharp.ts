@@ -192,5 +192,17 @@ export default {
         ],
       },
     },
+    splash: {
+      webp: {
+        options: { quality: 85 },
+        variants: [
+          { width: 3840, height: 3840, resize: { fit: "inside" } },
+          { width: 2560, height: 2560, resize: { fit: "inside" } },
+          { width: 1920, height: 1920, resize: { fit: "inside" } },
+          { width: 1280, height: 1280, resize: { fit: "inside" } },
+          { width: 750, height: 750, resize: { fit: "inside" } },
+        ],
+      },
+    },
   },
 };

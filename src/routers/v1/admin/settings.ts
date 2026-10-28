@@ -17,6 +17,7 @@ import {
   resolveFromEmail,
   SettingsType,
 } from "../../../utils/settings";
+import { validateSplashCustomization } from "../../../utils/splashScreen";
 import { refreshStripeClient, stripeKeyMode } from "../../../utils/stripe";
 import { isTrustLevelNames } from "../../../utils/trustLevel";
 
@@ -122,6 +123,10 @@ export default function () {
           });
         }
       }
+      validateSplashCustomization(settings?.instanceCustomization);
+      const incomingSplashTitle = settings?.instanceCustomization?.splashTitle;
+      const incomingSplashSubtitle =
+        settings?.instanceCustomization?.splashSubtitle;
       if (
         hasStoredContactEmail &&
         settings &&
@@ -158,6 +163,12 @@ export default function () {
             }),
             ...(typeof incomingSupportEmail === "string" && {
               supportEmail: incomingSupportEmail.trim(),
+            }),
+            ...(typeof incomingSplashTitle === "string" && {
+              splashTitle: incomingSplashTitle.trim(),
+            }),
+            ...(typeof incomingSplashSubtitle === "string" && {
+              splashSubtitle: incomingSplashSubtitle.trim(),
             }),
           },
         }),
@@ -244,6 +255,7 @@ function maskSecrets(settings: object) {
     cloudflareTurnstileSecret: undefined,
     logo: undefined,
     mobileLogo: undefined,
+    splashImage: undefined,
     settings: settingsJson
       ? {
           ...settingsJson,

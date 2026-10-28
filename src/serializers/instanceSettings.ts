@@ -1,3 +1,4 @@
+import { addSizesToStoredImage } from "../utils/artist";
 import {
   SettingsType,
   SetupStage,
@@ -6,6 +7,10 @@ import {
   resolveSetupStage,
   resolveSupportEmail,
 } from "../utils/settings";
+import {
+  SplashTextPosition,
+  isSplashTextPosition,
+} from "../utils/splashScreen";
 import { AvailableLanguage } from "../utils/transifexLanguages";
 import { resolveTrustLevelNames } from "../utils/trustLevel";
 
@@ -32,6 +37,11 @@ export type InstanceSettings = {
   logo: SerializedInstanceLogo | null;
   mobileLogo: SerializedInstanceLogo | null;
   tintLogo: boolean;
+  showCustomSplash: boolean;
+  splashImage: { sizes: Record<string, string> } | null;
+  splashTitle: string | null;
+  splashSubtitle: string | null;
+  splashTextPosition: SplashTextPosition;
 };
 
 const HEX_COLOR_REGEX = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -44,11 +54,15 @@ const colorOrDefault = (
     ? value.trim()
     : DEFAULT_INSTANCE_COLORS[key];
 
+const serializeSplashImage = (image: SettingsType["splashImage"]) =>
+  image?.url.length ? { sizes: addSizesToStoredImage(image)!.sizes } : null;
+
 export const serializeInstanceSettings = (
   settings: SettingsType,
   languages?: AvailableLanguage[]
 ): InstanceSettings => {
   const customization = settings.settings?.instanceCustomization;
+  const splashTextPosition = customization?.splashTextPosition;
   return {
     name: resolveInstanceName(settings),
     colors: {
@@ -76,5 +90,14 @@ export const serializeInstanceSettings = (
     logo: serializeInstanceLogo(settings.logo),
     mobileLogo: serializeInstanceLogo(settings.mobileLogo),
     tintLogo: customization?.tintLogo === true,
+    showCustomSplash:
+      customization?.showHeroOnHome === true &&
+      customization?.showCustomSplash === true,
+    splashImage: serializeSplashImage(settings.splashImage),
+    splashTitle: customization?.splashTitle || null,
+    splashSubtitle: customization?.splashSubtitle || null,
+    splashTextPosition: isSplashTextPosition(splashTextPosition)
+      ? splashTextPosition
+      : "center",
   };
 };

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import prisma from "@mirlo/prisma";
+import { ImageSlot } from "@mirlo/prisma/client";
 import { Queue, QueueEvents } from "bullmq";
 import sharp from "sharp";
 
@@ -17,7 +18,10 @@ import {
   removeIncomingImageByType,
   uploadIncomingImageByType,
 } from "../utils/minio";
+import { clearPageCache } from "../utils/pageCache";
+import { discardPendingImage, markPendingImage } from "../utils/pendingImage";
 import { stripNullBytes } from "../utils/sanitize";
+import { findSettingsId } from "../utils/splashScreen";
 import { deleteTrackGroupCover } from "../utils/trackGroup";
 
 const queueOptions = {
@@ -54,6 +58,9 @@ imageQueueEvents.on("completed", async (result: { jobId: string }) => {
       if (trackGroup) {
         await clearTrackGroupDownloads(trackGroup.id);
       }
+    }
+    if (job?.data.model === "splashImage") {
+      clearPageCache();
     }
     if (job) {
       // FIXME: post image processing updates
@@ -121,7 +128,13 @@ export const uploadAndSendToImageQueue = async (
   ctx: APIContext,
   imageType: ImageType,
   model: string,
-  sharpConfigKey: "artwork" | "avatar" | "background" | "banner" | "inFormData",
+  sharpConfigKey:
+    | "artwork"
+    | "avatar"
+    | "background"
+    | "banner"
+    | "splash"
+    | "inFormData",
   createDatabaseEntry: (
     {
       filename,
@@ -132,7 +145,8 @@ export const uploadAndSendToImageQueue = async (
     },
     details: { dimensions: "square" | "background" | "banner" }
   ) => Promise<{ id: string } | void>,
-  storeWithExtension?: boolean
+  storeWithExtension?: boolean,
+  pendingSlot?: { slot: ImageSlot; ownerId: number }
 ) => {
   logger.info(`Uploading ${sharpConfigKey} to object storage`);
 
@@ -189,7 +203,8 @@ export const uploadAndSendToImageQueue = async (
           | "background"
           | "banner"
           | "avatar"
-          | "artwork" =
+          | "artwork"
+          | "splash" =
           sharpConfigKey === "inFormData"
             ? (fromBody.dimensions ?? "square")
             : sharpConfigKey;
@@ -271,6 +286,14 @@ export const uploadAndSendToImageQueue = async (
           return;
         }
 
+        if (pendingSlot) {
+          await markPendingImage(
+            pendingSlot.slot,
+            pendingSlot.ownerId,
+            image.id
+          );
+        }
+
         if (imageTypeUsesQueue(imageType)) {
           logger.info("Adding image to queue");
 
@@ -279,6 +302,7 @@ export const uploadAndSendToImageQueue = async (
             model,
             imageType,
             config: sharpConfig.config[config],
+            slot: pendingSlot?.slot,
           });
           resolve({ jobId: job.id, imageId: image.id });
         } else {
@@ -333,6 +357,32 @@ export const processProfileImage = async (
         : { backgroundImageId: result.imageId },
   });
   return result;
+};
+
+export const processSplashImage = async (ctx: APIContext) => {
+  let imageId: string | undefined;
+  try {
+    return await uploadAndSendToImageQueue(
+      ctx,
+      "image",
+      "splashImage",
+      "splash",
+      async (fileInfo: { filename: string }) => {
+        const image = await prisma.image.create({
+          data: { originalFilename: fileInfo.filename, dimensions: "splash" },
+        });
+        imageId = image.id;
+        return image;
+      },
+      false,
+      { slot: "SPLASH", ownerId: await findSettingsId() }
+    );
+  } catch (e) {
+    if (imageId) {
+      await discardPendingImage(imageId);
+    }
+    throw e;
+  }
 };
 
 export const processTrackGroupCover = async (
