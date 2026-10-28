@@ -597,6 +597,133 @@ describe("admin/settings", () => {
       assert.equal(response.statusCode, 400);
     });
 
+    it("should trim the splash screen texts before storing them", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({ platformPercent: 7 });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            instanceCustomization: {
+              title: "Nightjar",
+              showCustomSplash: true,
+              splashTitle: "  Hello  ",
+              splashSubtitle: "  [About](/about)  ",
+            },
+          },
+        });
+
+      assert.equal(response.statusCode, 200);
+      const row = await prisma.settings.findFirst();
+      const stored = row?.settings as Record<string, any>;
+      assert.equal(stored.instanceCustomization.showCustomSplash, true);
+      assert.equal(stored.instanceCustomization.splashTitle, "Hello");
+      assert.equal(
+        stored.instanceCustomization.splashSubtitle,
+        "[About](/about)"
+      );
+    });
+
+    it("should reject splash screen texts that are not strings", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({ platformPercent: 7 });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            instanceCustomization: { title: "Nightjar", splashTitle: 42 },
+          },
+        });
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should reject a custom splash setting that is not a boolean", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({ platformPercent: 7 });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            instanceCustomization: {
+              title: "Nightjar",
+              showCustomSplash: "true",
+            },
+          },
+        });
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should reject a splash title that is too long", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({ platformPercent: 7 });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            instanceCustomization: {
+              title: "Nightjar",
+              splashTitle: "a".repeat(201),
+            },
+          },
+        });
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should reject an unknown splash text position", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({ platformPercent: 7 });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: {
+            platformPercent: 7,
+            instanceCustomization: {
+              title: "Nightjar",
+              splashTextPosition: "top",
+            },
+          },
+        });
+
+      assert.equal(response.statusCode, 400);
+    });
+
     it("should trim the contact email before storing it", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",

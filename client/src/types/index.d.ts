@@ -30,7 +30,14 @@ interface InstanceSettings {
   logo?: InstanceLogo | null;
   mobileLogo?: InstanceLogo | null;
   tintLogo?: boolean;
+  showCustomSplash?: boolean;
+  splashImage?: { sizes: Record<string, string> } | null;
+  splashTitle?: string | null;
+  splashSubtitle?: string | null;
+  splashTextPosition?: SplashTextPosition;
 }
+
+type SplashTextPosition = "left" | "center" | "right";
 
 interface SettingsFromAPI {
   cdnUrl?: string;
@@ -51,6 +58,10 @@ interface SettingsFromAPI {
       purchaseEmail?: string;
       showHeroOnHome?: boolean;
       tintLogo?: boolean;
+      showCustomSplash?: boolean;
+      splashTitle?: string;
+      splashSubtitle?: string;
+      splashTextPosition?: SplashTextPosition;
     };
     stripe?: {
       key?: string;

@@ -2,7 +2,9 @@ import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import { ButtonLink } from "components/common/Button";
+import MarkdownContent from "components/common/MarkdownContent";
 import Parallax from "parallax-js";
+import { useInstanceSettings } from "queries/instanceSettings";
 import { queryInstanceArtist } from "queries/settings";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -11,6 +13,8 @@ import { Link } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 
 import { bp } from "../../constants";
+
+import SplashBackgroundImage from "./SplashBackgroundImage";
 
 export const SplashWrapper = styled.div<{ hasAnnouncement?: boolean }>`
   display: var(--mi-instance-show-hero-on-home, flex);
@@ -61,8 +65,25 @@ const ParallexObjectWrapper = styled.div`
   position: absolute;
 `;
 
+const SPLASH_TEXT_JUSTIFY = {
+  left: "flex-start",
+  center: "center",
+  right: "flex-end",
+};
+
 const Splash = () => {
   const sceneEl = React.useRef<HTMLDivElement>(null);
+  const {
+    name,
+    showCustomSplash,
+    splashImage,
+    splashTitle,
+    splashSubtitle,
+    splashTextPosition,
+  } = useInstanceSettings();
+  const textPosition = showCustomSplash
+    ? (splashTextPosition ?? "center")
+    : "center";
 
   React.useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
@@ -75,7 +96,7 @@ const Splash = () => {
       });
       return () => parallaxInstance.disable();
     }
-  }, []);
+  }, [showCustomSplash]);
 
   const { user } = useAuthContext();
   const { t } = useTranslation("translation", { keyPrefix: "home" });
@@ -83,65 +104,70 @@ const Splash = () => {
 
   return (
     <SplashWrapper hasAnnouncement={!!instanceArtist?.announcementText}>
-      <div
-        className={css`
-          width: 100%;
-          position: absolute !important;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 0;
-        `}
-        ref={sceneEl}
-      >
-        <ParallexObjectWrapper
-          data-depth=".2"
+      {showCustomSplash && splashImage && (
+        <SplashBackgroundImage sizes={splashImage.sizes} />
+      )}
+      {!showCustomSplash && (
+        <div
           className={css`
-            width: 60%;
-            height: 50px;
-            top: -30% !important;
-            left: 0rem !important;
-            background-image: url("/static/images/cloud-no-grain-3.svg");
-            z-index: 1;
-
-            @media screen and (max-width: ${bp.medium}px) {
-              top: -40% !important;
-            }
+            width: 100%;
+            position: absolute !important;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 0;
           `}
-        />
-        <ParallexObjectWrapper
-          data-depth=".4"
-          className={css`
-            height: 80px;
-            width: 70%;
-            top: 75% !important;
-            left: 10% !important;
-            z-index: -1;
-            background-image: url("/static/images/cloud-no-grain-2.svg");
+          ref={sceneEl}
+        >
+          <ParallexObjectWrapper
+            data-depth=".2"
+            className={css`
+              width: 60%;
+              height: 50px;
+              top: -30% !important;
+              left: 0rem !important;
+              background-image: url("/static/images/cloud-no-grain-3.svg");
+              z-index: 1;
 
-            @media screen and (max-width: ${bp.medium}px) {
-              margin-bottom: 0rem;
-              top: 38% !important;
-            }
-          `}
-        />
-        <ParallexObjectWrapper
-          data-depth=".6"
-          className={css`
-            height: 140px;
-            width: 60%;
-            top: 55% !important;
-            left: 35% !important;
-            z-index: -1;
-            background-image: url("/static/images/cloud-toneddowngrain-1-optimized.webp");
+              @media screen and (max-width: ${bp.medium}px) {
+                top: -40% !important;
+              }
+            `}
+          />
+          <ParallexObjectWrapper
+            data-depth=".4"
+            className={css`
+              height: 80px;
+              width: 70%;
+              top: 75% !important;
+              left: 10% !important;
+              z-index: -1;
+              background-image: url("/static/images/cloud-no-grain-2.svg");
 
-            @media screen and (max-width: ${bp.xlarge}px) {
-              display: none !important;
-            }
-          `}
-        ></ParallexObjectWrapper>
-      </div>
+              @media screen and (max-width: ${bp.medium}px) {
+                margin-bottom: 0rem;
+                top: 38% !important;
+              }
+            `}
+          />
+          <ParallexObjectWrapper
+            data-depth=".6"
+            className={css`
+              height: 140px;
+              width: 60%;
+              top: 55% !important;
+              left: 35% !important;
+              z-index: -1;
+              background-image: url("/static/images/cloud-toneddowngrain-1-optimized.webp");
+
+              @media screen and (max-width: ${bp.xlarge}px) {
+                display: none !important;
+              }
+            `}
+          ></ParallexObjectWrapper>
+        </div>
+      )}
       <div
         className={css`
           display: flex !important;
@@ -153,25 +179,33 @@ const Splash = () => {
           @media screen and (max-width: ${bp.medium}px) {
             flex-direction: column;
           }
+          @media screen and (min-width: ${Number(bp.medium) + 1}px) {
+            justify-content: ${SPLASH_TEXT_JUSTIFY[textPosition]};
+            width: ${textPosition === "center"
+              ? "100%"
+              : "min(calc(100% - 4rem), var(--mi-container-big))"};
+          }
         `}
       >
-        <div
-          className={css`
-            background-image: url("/static/images/frog-mirlo-toneddowngrain-optimized.webp");
-            background-size: contain;
-            background-repeat: no-repeat;
-            z-index: 1;
-            width: 540px;
-            height: 370px;
-            margin-right: 4rem;
+        {!showCustomSplash && (
+          <div
+            className={css`
+              background-image: url("/static/images/frog-mirlo-toneddowngrain-optimized.webp");
+              background-size: contain;
+              background-repeat: no-repeat;
+              z-index: 1;
+              width: 540px;
+              height: 370px;
+              margin-right: 4rem;
 
-            @media screen and (max-width: ${bp.medium}px) {
-              margin-right: 0;
-              margin-top: 4rem;
-              width: 300px;
-            }
-          `}
-        />
+              @media screen and (max-width: ${bp.medium}px) {
+                margin-right: 0;
+                margin-top: 4rem;
+                width: 300px;
+              }
+            `}
+          />
+        )}
 
         <TextWrapper>
           <div
@@ -183,21 +217,29 @@ const Splash = () => {
               color: var(--mi-foreground-color);
             `}
           >
-            <SplashTitle>
-              <Trans
-                t={t}
-                i18nKey="support"
-                components={{
-                  red: (
-                    <span
-                      className={css`
-                        color: var(--mi-button-color);
-                      `}
-                    ></span>
-                  ),
-                }}
-              ></Trans>
-            </SplashTitle>
+            {showCustomSplash ? (
+              splashTitle ? (
+                <SplashTitle>{splashTitle}</SplashTitle>
+              ) : (
+                <h1 className="sr-only">{name}</h1>
+              )
+            ) : (
+              <SplashTitle>
+                <Trans
+                  t={t}
+                  i18nKey="support"
+                  components={{
+                    red: (
+                      <span
+                        className={css`
+                          color: var(--mi-button-color);
+                        `}
+                      ></span>
+                    ),
+                  }}
+                ></Trans>
+              </SplashTitle>
+            )}
             {!user && (
               <SplashButtonWrapper>
                 <ButtonLink size="big" to="/signup" rounded>
@@ -214,28 +256,32 @@ const Splash = () => {
                 </ButtonLink>
               </SplashButtonWrapper>
             )}
-            <p
-              className={css`
-                font-size: 1rem;
-                line-height: 1.5;
+            {showCustomSplash ? (
+              splashSubtitle && <MarkdownContent content={splashSubtitle} />
+            ) : (
+              <p
+                className={css`
+                  font-size: 1rem;
+                  line-height: 1.5;
 
-                br {
-                  margin-bottom: 1rem;
-                }
-              `}
-            >
-              <Trans
-                t={t}
-                i18nKey="featuresLink"
-                components={{
-                  features: (
-                    <Link to="https://docs.mirlo.space/features/"></Link>
-                  ),
+                  br {
+                    margin-bottom: 1rem;
+                  }
+                `}
+              >
+                <Trans
+                  t={t}
+                  i18nKey="featuresLink"
+                  components={{
+                    features: (
+                      <Link to="https://docs.mirlo.space/features/"></Link>
+                    ),
 
-                  about: <a href="https://docs.mirlo.space"></a>,
-                }}
-              />
-            </p>
+                    about: <a href="https://docs.mirlo.space"></a>,
+                  }}
+                />
+              </p>
+            )}
           </div>
         </TextWrapper>
       </div>

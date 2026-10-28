@@ -54,6 +54,10 @@ declare global {
         purchaseEmail?: string;
         showHeroOnHome?: boolean;
         tintLogo?: boolean;
+        showCustomSplash?: boolean;
+        splashTitle?: string;
+        splashSubtitle?: string;
+        splashTextPosition?: "left" | "center" | "right";
         colors?: {
           button?: string;
           buttonText?: string;

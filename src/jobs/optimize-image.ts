@@ -1,4 +1,5 @@
 import prisma from "@mirlo/prisma";
+import { ImageSlot } from "@mirlo/prisma/client";
 import { Job } from "bullmq";
 import { uniq } from "lodash";
 import sharp from "sharp";
@@ -14,6 +15,11 @@ import {
   removeIncomingImageByType,
   getImagePrefix,
 } from "../utils/minio";
+import {
+  attachPendingImage,
+  discardPendingImage,
+  isImagePending,
+} from "../utils/pendingImage";
 
 import { logger } from "./queue-worker";
 
@@ -26,6 +32,11 @@ export const sleep = (ms: number) =>
     return setTimeout(resolve, ms);
   });
 
+const dropIncomingImage = (imageType: ImageType, destinationId: string) =>
+  removeIncomingImageByType(imageType, destinationId).catch((e) =>
+    logger.error(`Could not remove incoming image ${destinationId}`, e)
+  );
+
 /**
  * Convert and optimize track artworks to mozjpeg and webp
  */
@@ -36,14 +47,29 @@ const optimizeImage = async (job: Job) => {
     destinationId,
     model,
     imageType,
+    slot,
   } = job.data as {
     config: typeof sharpConfig.artwork;
     destinationId: string;
     model: string;
     imageType: ImageType;
+    slot?: ImageSlot;
   };
 
+  let isAttached = false;
+
   try {
+    if (slot && !(await isImagePending(destinationId))) {
+      const isInSlot = await discardPendingImage(destinationId);
+      await dropIncomingImage(imageType, destinationId);
+      logger.info(
+        isInSlot
+          ? `Image ${destinationId} is already in its slot, skipping`
+          : `Image ${destinationId} is no longer awaited, dropped`
+      );
+      return;
+    }
+
     const profiler = logger.startTimer();
 
     logger.info(`Starting to optimize images ${model}/${destinationId}`);
@@ -54,6 +80,9 @@ const optimizeImage = async (job: Job) => {
 
     if (!buffer) {
       logger.error(`No buffer found for incoming image ${destinationId}`);
+      if (slot) {
+        throw new Error("No buffer found");
+      }
       return { error: "No buffer found" };
     }
 
@@ -272,6 +301,15 @@ const optimizeImage = async (job: Job) => {
       }
     }
 
+    if (slot && urls.length > 0) {
+      isAttached = await attachPendingImage(destinationId);
+      if (!isAttached) {
+        await dropIncomingImage(imageType, destinationId);
+        logger.info(`Image ${destinationId} lost its slot, dropped`);
+        return;
+      }
+    }
+
     profiler.done({ message: "Done optimizing image" });
     logger.info(`Removing incoming image ${destinationId}`);
 
@@ -281,10 +319,13 @@ const optimizeImage = async (job: Job) => {
       logger.warn(
         `No successful image URLs generated for ${destinationId}. Skipping SightEngine check.`
       );
+      if (slot) {
+        throw new Error("No images were successfully optimized");
+      }
       return { error: "No images were successfully optimized" };
     }
 
-    if (SIGHTENGINE_USER && SIGHTENGINE_SECRET) {
+    if (SIGHTENGINE_USER && SIGHTENGINE_SECRET && model !== "splashImage") {
       logger.info("Checking SightEngine");
       const searchParams = new URLSearchParams();
       searchParams.append(
@@ -326,6 +367,15 @@ const optimizeImage = async (job: Job) => {
     const errorMessage = err instanceof Error ? err.message : String(err);
     const errorStack = err instanceof Error ? err.stack : "";
     logger.error(`optimizeImage error: ${errorMessage}`, { stack: errorStack });
+    // Unlike the other images, an image waiting for its slot fails for real
+    // so the page that uploaded it can tell it could not be processed.
+    if (slot && !isAttached) {
+      const isInSlot = await discardPendingImage(destinationId);
+      await dropIncomingImage(imageType, destinationId);
+      if (!isInSlot) {
+        throw err;
+      }
+    }
     return { error: errorMessage };
   }
 };

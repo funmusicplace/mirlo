@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ButtonLink } from "components/common/Button";
+import { useInstanceSettings } from "queries/instanceSettings";
 import { queryInstanceArtist } from "queries/settings";
 import { useTranslation } from "react-i18next";
 import { getArtistUrl } from "utils/artist";
@@ -17,6 +18,11 @@ import {
 const SupportMirlo = () => {
   const { t } = useTranslation("translation", { keyPrefix: "home" });
   const { data: instanceArtist } = useQuery(queryInstanceArtist());
+  const { showCustomSplash } = useInstanceSettings();
+
+  if (showCustomSplash) {
+    return null;
+  }
 
   return (
     <div

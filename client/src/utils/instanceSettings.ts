@@ -17,6 +17,11 @@ export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
   logo: null,
   mobileLogo: null,
   tintLogo: false,
+  showCustomSplash: false,
+  splashImage: null,
+  splashTitle: null,
+  splashSubtitle: null,
+  splashTextPosition: "center",
 };
 
 export const applyInstanceStyles = (settings: InstanceSettings) => {

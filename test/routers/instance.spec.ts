@@ -44,6 +44,11 @@ describe("instance", () => {
         logo: null,
         mobileLogo: null,
         tintLogo: false,
+        showCustomSplash: false,
+        splashImage: null,
+        splashTitle: null,
+        splashSubtitle: null,
+        splashTextPosition: "center",
       });
     });
 
@@ -97,7 +102,12 @@ describe("instance", () => {
         "mobileLogo",
         "name",
         "setupStage",
+        "showCustomSplash",
         "showHeroOnHome",
+        "splashImage",
+        "splashSubtitle",
+        "splashTextPosition",
+        "splashTitle",
         "stripePublishableKey",
         "supportEmail",
         "tintLogo",

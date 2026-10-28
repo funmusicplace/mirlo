@@ -15,8 +15,16 @@ vi.mock("services/api", () => ({
   },
 }));
 
-const { featuredArtistsRequest } = vi.hoisted(() => ({
-  featuredArtistsRequest: { resolve: (_artists: Artist[]) => {} },
+const { featuredArtistsRequest, trackImageJob, untrackImageJob } = vi.hoisted(
+  () => ({
+    featuredArtistsRequest: { resolve: (_artists: Artist[]) => {} },
+    trackImageJob: vi.fn(),
+    untrackImageJob: vi.fn(),
+  })
+);
+
+vi.mock("state/UploadContext", () => ({
+  useUpload: () => ({ trackImageJob, untrackImageJob }),
 }));
 
 vi.mock("queries/settings", () => ({
@@ -65,6 +73,8 @@ describe("useAdminSettingsForm", () => {
     vi.mocked(api.uploadFile).mockResolvedValue({ result: {} } as any);
     vi.mocked(api.delete).mockReset();
     vi.mocked(api.delete).mockResolvedValue({ result: {} } as any);
+    trackImageJob.mockReset();
+    untrackImageJob.mockReset();
   });
 
   const renderLoadedSettingsForm = async () => {
@@ -196,6 +206,85 @@ describe("useAdminSettingsForm", () => {
 
     expect(api.uploadFile).not.toHaveBeenCalled();
     expect(api.delete).not.toHaveBeenCalled();
+  });
+
+  test("uploads a pending splash image when the custom splash screen is on", async () => {
+    vi.mocked(api.uploadFile).mockResolvedValue({
+      result: { jobId: "12", imageId: "abc" },
+    } as any);
+    const { result } = await renderLoadedSettingsForm();
+    const file = new File(["x"], "splash.png", { type: "image/png" });
+
+    await act(() =>
+      result.current.saveSettings({
+        ...result.current.methods.getValues(),
+        instanceCustomization: { showHeroOnHome: true, showCustomSplash: true },
+        pendingSplashImage: file,
+      })
+    );
+
+    expect(api.uploadFile).toHaveBeenCalledWith("admin/settings/splash", [
+      file,
+    ]);
+    expect(trackImageJob).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "splashImage",
+        jobId: "12",
+        file,
+      })
+    );
+    expect(
+      result.current.methods.getValues("pendingSplashImage")
+    ).toBeUndefined();
+  });
+
+  test("leaves a pending splash image out when the custom splash screen is off", async () => {
+    const { result } = await renderLoadedSettingsForm();
+    const file = new File(["x"], "splash.png", { type: "image/png" });
+
+    await act(() =>
+      result.current.saveSettings({
+        ...result.current.methods.getValues(),
+        instanceCustomization: { showCustomSplash: false },
+        pendingSplashImage: file,
+      })
+    );
+
+    expect(api.uploadFile).not.toHaveBeenCalled();
+    expect(trackImageJob).not.toHaveBeenCalled();
+  });
+
+  test("leaves a pending splash image out when the hero is hidden", async () => {
+    const { result } = await renderLoadedSettingsForm();
+    const file = new File(["x"], "splash.png", { type: "image/png" });
+
+    await act(() =>
+      result.current.saveSettings({
+        ...result.current.methods.getValues(),
+        instanceCustomization: {
+          showHeroOnHome: false,
+          showCustomSplash: true,
+        },
+        pendingSplashImage: file,
+      })
+    );
+
+    expect(api.uploadFile).not.toHaveBeenCalled();
+  });
+
+  test("removes the splash image and stops tracking it, even with the custom splash screen off", async () => {
+    const { result } = await renderLoadedSettingsForm();
+
+    await act(() =>
+      result.current.saveSettings({
+        ...result.current.methods.getValues(),
+        instanceCustomization: { showCustomSplash: false },
+        pendingSplashImage: null,
+      })
+    );
+
+    expect(api.delete).toHaveBeenCalledWith("admin/settings/splash");
+    expect(untrackImageJob).toHaveBeenCalledWith("splashImage");
   });
 
   test("is not loaded until the featured artists are known, then saves them", async () => {

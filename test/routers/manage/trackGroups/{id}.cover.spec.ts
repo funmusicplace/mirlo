@@ -11,6 +11,10 @@ import {
   getImagesBucket,
 } from "../../../../src/utils/minio";
 import {
+  attachPendingImage,
+  markPendingImage,
+} from "../../../../src/utils/pendingImage";
+import {
   clearTables,
   createProfile,
   createTrackGroup,
@@ -41,6 +45,13 @@ const png = () =>
     .png()
     .toBuffer();
 
+const findPendingCoverId = async (trackGroupId: number) =>
+  (
+    await prisma.pendingImage.findUnique({
+      where: { slot_ownerId: { slot: "COVER", ownerId: trackGroupId } },
+    })
+  )?.imageId ?? null;
+
 describe("manage/trackGroups/{trackGroupId}/cover", () => {
   beforeEach(async () => {
     try {
@@ -51,7 +62,7 @@ describe("manage/trackGroups/{trackGroupId}/cover", () => {
   });
 
   describe("PUT", () => {
-    it("replaces the old cover with a new Image owned by the artist", async () => {
+    it("keeps the old cover and marks a new Image owned by the artist as pending", async () => {
       const { accessToken, profile, trackGroup } = await setup();
 
       const response = await requestApp
@@ -72,7 +83,28 @@ describe("manage/trackGroups/{trackGroupId}/cover", () => {
       const updated = await prisma.trackGroup.findUniqueOrThrow({
         where: { id: trackGroup.id },
       });
-      assert.equal(updated.coverImageId, imageId);
+      assert.equal(updated.coverImageId, trackGroup.coverImageId);
+      assert.equal(await findPendingCoverId(trackGroup.id), imageId);
+    });
+
+    it("replaces the old cover once the new one is attached", async () => {
+      const { profile, trackGroup } = await setup();
+      const next = await prisma.image.create({
+        data: {
+          dimensions: "artwork",
+          profileId: profile.id,
+          url: ["new-x600"],
+        },
+      });
+      await markPendingImage("COVER", trackGroup.id, next.id);
+
+      await attachPendingImage(next.id);
+
+      const updated = await prisma.trackGroup.findUniqueOrThrow({
+        where: { id: trackGroup.id },
+      });
+      assert.equal(updated.coverImageId, next.id);
+      assert.equal(await findPendingCoverId(trackGroup.id), null);
       const old = await prisma.image.findUniqueOrThrow({
         where: { id: trackGroup.coverImageId! },
       });
@@ -81,8 +113,12 @@ describe("manage/trackGroups/{trackGroupId}/cover", () => {
   });
 
   describe("DELETE", () => {
-    it("unlinks and soft-deletes the cover", async () => {
-      const { accessToken, trackGroup } = await setup();
+    it("unlinks and soft-deletes the cover and cancels the pending one", async () => {
+      const { accessToken, profile, trackGroup } = await setup();
+      const pending = await prisma.image.create({
+        data: { dimensions: "artwork", profileId: profile.id },
+      });
+      await markPendingImage("COVER", trackGroup.id, pending.id);
 
       const response = await requestApp
         .delete(`manage/trackGroups/${trackGroup.id}/cover`)
@@ -94,6 +130,7 @@ describe("manage/trackGroups/{trackGroupId}/cover", () => {
         where: { id: trackGroup.id },
       });
       assert.equal(updated.coverImageId, null);
+      assert.equal(await findPendingCoverId(trackGroup.id), null);
       const deleted = await prisma.image.findUniqueOrThrow({
         where: { id: trackGroup.coverImageId! },
       });

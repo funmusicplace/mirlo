@@ -1,22 +1,26 @@
 import { randomUUID } from "node:crypto";
 
 import prisma from "@mirlo/prisma";
+import { ImageSlot } from "@mirlo/prisma/client";
 import { Queue, QueueEvents } from "bullmq";
 import sharp from "sharp";
 
 import { REDIS_CONFIG } from "../config/redis";
 import sharpConfig from "../config/sharp";
 import logger from "../logger";
-import { deleteProfileImage } from "../utils/artist";
 import { clearTrackGroupDownloads } from "../utils/downloadCache";
 import { AppError, HttpCode } from "../utils/error";
 import { APIContext } from "../utils/file";
 import {
   ImageType,
   imageTypeUsesQueue,
+  removeIncomingImageByType,
   uploadIncomingImageByType,
 } from "../utils/minio";
-import { deleteTrackGroupCover } from "../utils/trackGroup";
+import { clearPageCache } from "../utils/pageCache";
+import { discardPendingImage, markPendingImage } from "../utils/pendingImage";
+import { stripNullBytes } from "../utils/sanitize";
+import { findSettingsId } from "../utils/splashScreen";
 
 const queueOptions = {
   prefix: "mirlo",
@@ -52,6 +56,9 @@ imageQueueEvents.on("completed", async (result: { jobId: string }) => {
       if (trackGroup) {
         await clearTrackGroupDownloads(trackGroup.id);
       }
+    }
+    if (job?.data.model === "splashImage") {
+      clearPageCache();
     }
     if (job) {
       // FIXME: post image processing updates
@@ -103,11 +110,29 @@ const isUnsupportedImageCodecError = (error: unknown) => {
 
 const fileExtension = (filename: string) => filename.split(".").pop();
 
+const rejectMissingFile = () =>
+  new AppError({
+    httpCode: HttpCode.BAD_REQUEST,
+    description: "No image was uploaded.",
+  });
+
+const rejectTooLarge = () =>
+  new AppError({
+    httpCode: HttpCode.PAYLOAD_TOO_LARGE,
+    description: "The image is too large.",
+  });
+
 export const uploadAndSendToImageQueue = async (
   ctx: APIContext,
   imageType: ImageType,
   model: string,
-  sharpConfigKey: "artwork" | "avatar" | "background" | "banner" | "inFormData",
+  sharpConfigKey:
+    | "artwork"
+    | "avatar"
+    | "background"
+    | "banner"
+    | "splash"
+    | "inFormData",
   createDatabaseEntry: (
     {
       filename,
@@ -118,9 +143,14 @@ export const uploadAndSendToImageQueue = async (
     },
     details: { dimensions: "square" | "background" | "banner" }
   ) => Promise<{ id: string } | void>,
-  storeWithExtension?: boolean
+  storeWithExtension?: boolean,
+  pendingSlot?: { slot: ImageSlot; ownerId: number }
 ) => {
   logger.info(`Uploading ${sharpConfigKey} to object storage`);
+
+  if (!ctx.req.busboy) {
+    throw rejectMissingFile();
+  }
 
   // Pipe the request body immediately so the proxy doesn't drop the connection
   // while we do async work. Bucket creation moves inside the file event handler.
@@ -144,8 +174,23 @@ export const uploadAndSendToImageQueue = async (
         fromBody["imageId"] = val;
       }
     });
+    let hasFile = false;
     ctx.req.busboy.on("error", reject);
+    ctx.req.busboy.on("close", () => {
+      if (!hasFile) {
+        reject(rejectMissingFile());
+      }
+    });
     ctx.req.busboy.on("file", async (_fieldname, fileStream, fileInfo) => {
+      hasFile = true;
+      const sanitizedFileInfo = {
+        ...fileInfo,
+        filename: stripNullBytes(fileInfo.filename) ?? "",
+      };
+      let isTooLarge = false;
+      fileStream.on("limit", () => {
+        isTooLarge = true;
+      });
       try {
         if (sharpConfigKey === "inFormData" && !fromBody.dimensions) {
           reject("Must provide dimensions field in form data");
@@ -156,7 +201,8 @@ export const uploadAndSendToImageQueue = async (
           | "background"
           | "banner"
           | "avatar"
-          | "artwork" =
+          | "artwork"
+          | "splash" =
           sharpConfigKey === "inFormData"
             ? (fromBody.dimensions ?? "square")
             : sharpConfigKey;
@@ -164,7 +210,7 @@ export const uploadAndSendToImageQueue = async (
         const webpConfig = sharpConfig.config[config].webp;
         const largestVariant = getLargestVariant(webpConfig?.variants ?? []);
 
-        const image = await createDatabaseEntry(fileInfo, {
+        const image = await createDatabaseEntry(sanitizedFileInfo, {
           ...(fromBody as {
             dimensions: "square";
             relation?: "subscriptionTierImage";
@@ -175,6 +221,10 @@ export const uploadAndSendToImageQueue = async (
           reject("Could not create database entry");
           return;
         }
+
+        const fileName = storeWithExtension
+          ? `${image.id}.${fileExtension(sanitizedFileInfo.filename)}`
+          : image.id;
 
         try {
           const transform = sharp().rotate();
@@ -189,15 +239,15 @@ export const uploadAndSendToImageQueue = async (
           }
 
           const optimizedStream = fileStream.pipe(transform);
-          const fileName = storeWithExtension
-            ? `${image.id}.${fileExtension(fileInfo.filename)}`
-            : image.id;
           await uploadIncomingImageByType(
             imageType,
             fileName,
             optimizedStream,
             { contentType: fileInfo.mimeType || "application/octet-stream" }
           );
+          if (isTooLarge) {
+            throw rejectTooLarge();
+          }
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
 
@@ -206,6 +256,18 @@ export const uploadAndSendToImageQueue = async (
             filename: fileInfo.filename,
             message,
           });
+
+          if (isTooLarge) {
+            await removeIncomingImageByType(imageType, fileName).catch(
+              (removeError) =>
+                logger.error(
+                  `Could not remove the truncated upload ${fileName}`,
+                  removeError
+                )
+            );
+            reject(rejectTooLarge());
+            return;
+          }
 
           if (isUnsupportedImageCodecError(e)) {
             reject(
@@ -222,6 +284,14 @@ export const uploadAndSendToImageQueue = async (
           return;
         }
 
+        if (pendingSlot) {
+          await markPendingImage(
+            pendingSlot.slot,
+            pendingSlot.ownerId,
+            image.id
+          );
+        }
+
         if (imageTypeUsesQueue(imageType)) {
           logger.info("Adding image to queue");
 
@@ -230,6 +300,7 @@ export const uploadAndSendToImageQueue = async (
             model,
             imageType,
             config: sharpConfig.config[config],
+            slot: pendingSlot?.slot,
           });
           resolve({ jobId: job.id, imageId: image.id });
         } else {
@@ -247,62 +318,65 @@ export const uploadAndSendToImageQueue = async (
   return details as { jobId?: string; imageId: string };
 };
 
-const uploadImage = (
+const uploadToImageSlot = async (
   ctx: APIContext,
   model: string,
-  dimensions: "artwork" | "avatar" | "background",
-  profileId: number
-) =>
-  uploadAndSendToImageQueue(
-    ctx,
-    "image",
-    model,
-    dimensions,
-    async (fileInfo: { filename: string }) =>
-      prisma.image.create({
-        data: { originalFilename: fileInfo.filename, dimensions, profileId },
-      })
-  );
+  dimensions: "artwork" | "avatar" | "background" | "splash",
+  profileId: number | undefined,
+  pendingSlot: { slot: ImageSlot; ownerId: number }
+) => {
+  let imageId: string | undefined;
+  try {
+    return await uploadAndSendToImageQueue(
+      ctx,
+      "image",
+      model,
+      dimensions,
+      async (fileInfo: { filename: string }) => {
+        const image = await prisma.image.create({
+          data: { originalFilename: fileInfo.filename, dimensions, profileId },
+        });
+        imageId = image.id;
+        return image;
+      },
+      false,
+      pendingSlot
+    );
+  } catch (e) {
+    if (imageId) {
+      await discardPendingImage(imageId);
+    }
+    throw e;
+  }
+};
 
-export const processProfileImage = async (
+export const processProfileImage = (
   ctx: APIContext,
   profileId: number,
   field: "avatar" | "background"
-) => {
-  const result = await uploadImage(
+) =>
+  uploadToImageSlot(
     ctx,
     field === "avatar" ? "artistAvatar" : "image",
     field,
-    profileId
+    profileId,
+    { slot: field === "avatar" ? "AVATAR" : "BACKGROUND", ownerId: profileId }
   );
-  await deleteProfileImage(profileId, field);
-  await prisma.profile.update({
-    where: { id: profileId },
-    data:
-      field === "avatar"
-        ? { avatarImageId: result.imageId }
-        : { backgroundImageId: result.imageId },
-  });
-  return result;
-};
 
-export const processTrackGroupCover = async (
+export const processSplashImage = async (ctx: APIContext) =>
+  uploadToImageSlot(ctx, "splashImage", "splash", undefined, {
+    slot: "SPLASH",
+    ownerId: await findSettingsId(),
+  });
+
+export const processTrackGroupCover = (
   ctx: APIContext,
   trackGroup: { id: number; profileId: number }
-) => {
-  const result = await uploadImage(
-    ctx,
-    "trackGroupCover",
-    "artwork",
-    trackGroup.profileId
-  );
-  await deleteTrackGroupCover(trackGroup.id);
-  await prisma.trackGroup.update({
-    where: { id: trackGroup.id },
-    data: { coverImageId: result.imageId },
+) =>
+  uploadToImageSlot(ctx, "trackGroupCover", "artwork", trackGroup.profileId, {
+    slot: "COVER",
+    ownerId: trackGroup.id,
   });
-  return result;
-};
 
 export const processMerchImage = (ctx: APIContext) => {
   return async (merchId: string) => {

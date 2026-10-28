@@ -47,22 +47,47 @@ type EnqueueImageArgs = {
   onComplete?: () => void;
 };
 
+export type TrackedImageJob = {
+  key: string;
+  jobId: string;
+  file?: File;
+};
+
+type TrackImageJobArgs = TrackedImageJob & {
+  onComplete?: () => unknown;
+  onFailed?: () => void;
+};
+
+type ImageJobEntry = {
+  jobId: string;
+  itemId?: string;
+  key?: string;
+  onComplete?: () => unknown;
+  onFailed?: () => void;
+};
+
 type UploadContextValue = {
   queue: UploadQueueItem[];
   imageQueue: ImageQueueItem[];
+  trackedImageJobs: TrackedImageJob[];
   isActive: boolean;
   activeTrackGroupIds: number[];
   enqueue: (args: EnqueueArgs) => void;
   enqueueImage: (args: EnqueueImageArgs) => void;
+  trackImageJob: (args: TrackImageJobArgs) => void;
+  untrackImageJob: (key: string) => void;
 };
 
 const UploadContext = React.createContext<UploadContextValue>({
   queue: [],
   imageQueue: [],
+  trackedImageJobs: [],
   isActive: false,
   activeTrackGroupIds: [],
   enqueue: () => {},
   enqueueImage: () => {},
+  trackImageJob: () => {},
+  untrackImageJob: () => {},
 });
 
 const alertUser = (event: BeforeUnloadEvent) => {
@@ -80,6 +105,9 @@ export const UploadContextProvider: React.FC<{
   const { contactEmail } = useInstanceSettings();
   const [queue, setQueue] = React.useState<UploadQueueItem[]>([]);
   const [imageQueue, setImageQueue] = React.useState<ImageQueueItem[]>([]);
+  const [trackedImageJobs, setTrackedImageJobs] = React.useState<
+    TrackedImageJob[]
+  >([]);
   const activeBatchesRef = React.useRef<Set<number>>(new Set());
   const pendingBatchesRef = React.useRef<
     {
@@ -89,9 +117,7 @@ export const UploadContextProvider: React.FC<{
     }[]
   >([]);
   const runningRef = React.useRef(false);
-  const imageJobsRef = React.useRef<
-    { itemId: string; jobId: string; onComplete?: () => void }[]
-  >([]);
+  const imageJobsRef = React.useRef<ImageJobEntry[]>([]);
   const imagePollerRef = React.useRef<
     ReturnType<typeof setInterval> | undefined
   >(undefined);
@@ -264,26 +290,57 @@ export const UploadContextProvider: React.FC<{
             (j) => j.jobId === doneJob.jobId
           );
           if (jobEntry) {
-            if (
-              doneJob.jobStatus === "completed" ||
-              doneJob.jobStatus === "unknown"
-            ) {
-              jobEntry.onComplete?.();
-            }
             imageJobsRef.current = imageJobsRef.current.filter(
               (j) => j.jobId !== doneJob.jobId
             );
-            setTimeout(() => {
-              setImageQueue((q) =>
-                q.filter((item) => item.id !== jobEntry.itemId)
-              );
-            }, 2000);
+            try {
+              if (doneJob.jobStatus === "failed") {
+                jobEntry.onFailed?.();
+              } else {
+                await jobEntry.onComplete?.();
+              }
+            } catch (e) {
+              console.error("Error finishing image job", e);
+            } finally {
+              if (jobEntry.key) {
+                setTrackedImageJobs((tracked) =>
+                  tracked.filter((j) => j.jobId !== doneJob.jobId)
+                );
+              }
+              if (jobEntry.itemId) {
+                setTimeout(() => {
+                  setImageQueue((q) =>
+                    q.filter((item) => item.id !== jobEntry.itemId)
+                  );
+                }, 2000);
+              }
+            }
           }
         }
       } catch (e) {
         console.error("Error polling image jobs", e);
       }
     }, 5000);
+  }, []);
+
+  const trackImageJob = React.useCallback(
+    ({ key, jobId, file, onComplete, onFailed }: TrackImageJobArgs) => {
+      imageJobsRef.current = [
+        ...imageJobsRef.current.filter((j) => j.key !== key),
+        { key, jobId, onComplete, onFailed },
+      ];
+      setTrackedImageJobs((tracked) => [
+        ...tracked.filter((j) => j.key !== key),
+        { key, jobId, file },
+      ]);
+      startImagePolling();
+    },
+    [startImagePolling]
+  );
+
+  const untrackImageJob = React.useCallback((key: string) => {
+    imageJobsRef.current = imageJobsRef.current.filter((j) => j.key !== key);
+    setTrackedImageJobs((tracked) => tracked.filter((j) => j.key !== key));
   }, []);
 
   const enqueueImage = React.useCallback(
@@ -426,12 +483,25 @@ export const UploadContextProvider: React.FC<{
     () => ({
       queue,
       imageQueue,
+      trackedImageJobs,
       isActive,
       activeTrackGroupIds,
       enqueue,
       enqueueImage,
+      trackImageJob,
+      untrackImageJob,
     }),
-    [queue, imageQueue, isActive, activeTrackGroupIds, enqueue, enqueueImage]
+    [
+      queue,
+      imageQueue,
+      trackedImageJobs,
+      isActive,
+      activeTrackGroupIds,
+      enqueue,
+      enqueueImage,
+      trackImageJob,
+      untrackImageJob,
+    ]
   );
 
   return (

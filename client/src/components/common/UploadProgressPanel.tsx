@@ -22,7 +22,14 @@ const ImageUploadRow: React.FC<{ item: ImageQueueItem }> = ({ item }) => {
         />
       )}
       <div className="relative z-[1] flex-1 px-4 py-2 text-sm">
-        {t("processingImage", { name: item.name })}
+        {t(
+          item.status === "failed"
+            ? "processingImageFailed"
+            : "processingImage",
+          {
+            name: item.name,
+          }
+        )}
       </div>
     </div>
   );

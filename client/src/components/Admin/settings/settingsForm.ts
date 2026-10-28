@@ -19,6 +19,7 @@ export interface FormSettings {
   trustLevelNames?: string[];
   pendingLogo?: File | null;
   pendingMobileLogo?: File | null;
+  pendingSplashImage?: File | null;
 }
 
 export const LOGO_FIELDS = {
@@ -49,6 +50,8 @@ export const LOGO_FIELDS = {
 } as const;
 
 export type LogoKind = keyof typeof LOGO_FIELDS;
+
+export const SPLASH_IMAGE_JOB_KEY = "splashImage";
 
 export const SETTINGS_SECTIONS = [
   { id: "settings-identity", labelKey: "sectionIdentity" },

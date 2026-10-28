@@ -7,10 +7,12 @@ import { useTranslation } from "react-i18next";
 import InstanceArtistSelector from "./InstanceArtistSelector";
 import { FormSettings } from "./settingsForm";
 import SettingsSection from "./SettingsSection";
+import SplashSettings from "./SplashSettings";
 
 const GeneralSettingsSection: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "admin" });
-  const { register } = useFormContext<FormSettings>();
+  const { register, watch } = useFormContext<FormSettings>();
+  const showHeroOnHome = watch("instanceCustomization.showHeroOnHome");
 
   return (
     <SettingsSection id="settings-general" title={t("generalSettings")}>
@@ -43,10 +45,18 @@ const GeneralSettingsSection: React.FC = () => {
         <InputEl
           id="input-show-hero-on-home"
           type="checkbox"
+          aria-describedby="hint-show-hero-on-home"
           {...register("instanceCustomization.showHeroOnHome")}
         />
-        <label htmlFor="input-show-hero-on-home">{t("showHeroOnHome")}</label>
+        <div className="flex flex-col">
+          <label htmlFor="input-show-hero-on-home">{t("showHeroOnHome")}</label>
+          <small id="hint-show-hero-on-home" className="max-w-md">
+            {t("showHeroOnHomeHint")}
+          </small>
+        </div>
       </FormComponent>
+
+      {showHeroOnHome && <SplashSettings />}
 
       <FormComponent
         role="group"
