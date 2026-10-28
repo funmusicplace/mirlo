@@ -513,6 +513,7 @@ model ProfileSubscriptionTier {
   autoPurchaseAlbums     Boolean                   @default(false)
   collectAddress         Boolean?                  @default(false)
   urlSlug                String?
+  order                  Int?
   images                 SubscriptionTierImage[]
   releases               SubscriptionTierRelease[]
 

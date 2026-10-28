@@ -1,4 +1,5 @@
-import { css } from "@emotion/css";
+import { DndContext } from "@dnd-kit/core";
+import { SortableContext } from "@dnd-kit/sortable";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArtistButton,
@@ -16,9 +17,11 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaDonate, FaMinus, FaPlus, FaWrench } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
+import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import useSortableReorder from "utils/useSortableReorder";
 
 import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 import ManageSubscriptionTierBox from "components/ManageArtist/ManageSubscriptionTierBox";
@@ -89,6 +92,17 @@ const Index: React.FC<{}> = () => {
     });
   };
 
+  const {
+    items: orderedTiers,
+    sensors,
+    onDragEnd,
+  } = useSortableReorder(tiers?.results, async (tierIds) => {
+    await api.put(`manage/artists/${artistId}/subscriptionTierOrder`, {
+      tierIds,
+    });
+    await handleTierReload();
+  });
+
   if (!artist) {
     return null;
   }
@@ -154,32 +168,30 @@ const Index: React.FC<{}> = () => {
           )}
         </div>
       )}
-      <div className="grid md:grid-cols-3 gap-2">
-        {tiers?.results
-          .sort((a, b) => (a.minAmount ?? 0) - (b.minAmount ?? 0))
-          .map((tier) => (
-            <ManageSubscriptionTierBox
-              tier={tier}
-              key={tier.id}
-              reload={handleTierReload}
-              artist={artist}
-            />
-          ))}
-        <ArtistButton
-          variant="dashed"
-          className={css`
-            .children {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-          `}
-          startIcon={<FaPlus />}
-          onClick={handleAddNewTier}
-        >
-          {t("addNewTier")}
-        </ArtistButton>
-      </div>
+      <DndContext sensors={sensors} onDragEnd={onDragEnd}>
+        <div className="grid md:grid-cols-3 gap-2">
+          {orderedTiers && (
+            <SortableContext items={orderedTiers}>
+              {orderedTiers.map((tier) => (
+                <ManageSubscriptionTierBox
+                  key={tier.id}
+                  tier={tier}
+                  reload={handleTierReload}
+                  artist={artist}
+                />
+              ))}
+            </SortableContext>
+          )}
+          <ArtistButton
+            variant="dashed"
+            className="[&_.children]:flex [&_.children]:items-center [&_.children]:justify-center"
+            startIcon={<FaPlus />}
+            onClick={handleAddNewTier}
+          >
+            {t("addNewTier")}
+          </ArtistButton>
+        </div>
+      </DndContext>
     </ManageSectionWrapper>
   );
 };

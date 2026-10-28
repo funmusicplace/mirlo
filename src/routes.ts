@@ -114,6 +114,7 @@ const routes = [
   "manage/artists/{artistId}/drafts",
   "manage/artists/{artistId}/trackGroupOrder",
   "manage/artists/{artistId}/merchOrder",
+  "manage/artists/{artistId}/subscriptionTierOrder",
   "manage/artists/{artistId}/readers",
   "manage/artists/{artistId}/locationTags",
   "manage/artists/{artistId}/locationTags/{locationTagId}",

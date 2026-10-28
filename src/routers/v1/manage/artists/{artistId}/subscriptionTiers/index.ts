@@ -11,7 +11,10 @@ import {
 import { serializeProfileSubscriptionTier } from "../../../../../../serializers/profileSubscriptionTier";
 import { getPlatformFeeForArtist } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
-import { generateUniqueTierSlug } from "../../../../../../utils/subscriptionTier";
+import {
+  generateUniqueTierSlug,
+  subscriptionTierOrderBy,
+} from "../../../../../../utils/subscriptionTier";
 
 type Params = {
   artistId: string;
@@ -44,9 +47,7 @@ export default function () {
           profileId: Number(artistId),
           ...(includeDefault ? {} : { isDefaultTier: false }),
         },
-        orderBy: {
-          minAmount: "asc",
-        },
+        orderBy: subscriptionTierOrderBy,
         include: {
           images: {
             include: { image: true },

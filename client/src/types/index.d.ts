@@ -498,6 +498,7 @@ interface ArtistSubscriptionTier {
   minAmount?: number;
   name: string;
   urlSlug?: string | null;
+  order?: number | null;
   description: string;
   interval: "MONTH" | "YEAR";
   isDefaultTier: boolean;
