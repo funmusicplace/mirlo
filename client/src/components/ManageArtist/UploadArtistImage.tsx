@@ -11,6 +11,7 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { formatAcceptList } from "utils/uploadFormats";
 import useJobStatusCheck from "utils/useJobStatusCheck";
+import useObjectUrl from "utils/useObjectUrl";
 
 import { bp } from "../../constants";
 
@@ -105,19 +106,26 @@ const UploadArtistImage: React.FC<{
     setExistingImage(getExistingImage(existing, imageType));
   }, [existing, imageType]);
   const [isSaving, setIsSaving] = React.useState(false);
+  const [pendingFile, setPendingFile] = React.useState<File>();
+  const pendingPreview = useObjectUrl(pendingFile);
+  const displayedImage = pendingPreview ?? existingImage;
 
   const resetWrapper = React.useCallback(async () => {
     let result = await api.get<TrackGroup | Artist>(buildRootUrl(existing));
     const image = getExistingImage(result.result, imageType);
 
     setExistingImage(image);
+    setPendingFile(undefined);
 
     refresh();
   }, [existing, imageType, refresh]);
 
   const reportFailedJob = React.useCallback(() => {
-    snackbar("Something went wrong", { type: "warning" });
-  }, [snackbar]);
+    setPendingFile(undefined);
+    snackbar(t("somethingWentWrong", { keyPrefix: "manageArtist" }), {
+      type: "warning",
+    });
+  }, [snackbar, t]);
 
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
     reload: () => {},
@@ -145,6 +153,7 @@ const UploadArtistImage: React.FC<{
       try {
         const file = e.target.files?.[0];
         if (file) {
+          setPendingFile(file);
           const jobInfo = await api.uploadFile(
             `${buildRootUrl(existing)}${imageType}`,
             [file]
@@ -154,6 +163,7 @@ const UploadArtistImage: React.FC<{
           ]);
         }
       } catch (e) {
+        setPendingFile(undefined);
         snackbar("Something went wrong", { type: "warning" });
         console.error(e);
       } finally {
@@ -197,7 +207,7 @@ const UploadArtistImage: React.FC<{
       `}
     >
       <label htmlFor={`${imageType}image`}>
-        {existingImage && (
+        {displayedImage && (
           <div
             className={css`
               span {
@@ -223,11 +233,11 @@ const UploadArtistImage: React.FC<{
             >
               {t("replaceImage")}
             </ReplaceSpan>
-            <Img src={existingImage} alt={imageType} rounded={rounded} />
+            <Img src={displayedImage} alt={imageType} rounded={rounded} />
           </div>
         )}
 
-        {!existingImage && (
+        {!displayedImage && (
           <UploadPrompt
             width={width}
             height={height}
