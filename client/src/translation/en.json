@@ -2483,6 +2483,7 @@
     "uploadsInProgress_other": "{{count}} uploads in progress",
     "uploadsComplete": "All tracks uploaded",
     "processingImage": "Processing {{name}}",
+    "processingImageFailed": "Something went wrong processing {{name}}.",
     "keepBrowserOpen": "Keep this tab open until uploads finish. You can keep browsing.",
     "uploadFailed": "Something went wrong uploading track {{title}}.",
     "uploadFailedContact": "Something went wrong uploading track {{title}}. Please report this incident to {{email}}."
