@@ -21,10 +21,10 @@ import { FormatOptions } from "./audioFormats";
 import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
-import { deleteStoredImage } from "./images";
 import { merchImagesInclude } from "./merch";
 import { streamOriginalAudio } from "./minio";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
+import { clearImageSlot } from "./pendingImage";
 import { deleteTrack } from "./tracks";
 
 export const notifyFollowersOfNewAlbum = async (trackGroup: {
@@ -132,16 +132,8 @@ export const whereForVisibleTrackGroup = (): Prisma.TrackGroupWhereInput => ({
   profile: whereForVisibleProfile(),
 });
 
-export const deleteTrackGroupCover = async (trackGroupId: number) => {
-  const trackGroup = await prisma.trackGroup.findUnique({
-    where: { id: trackGroupId },
-    select: { cover: true },
-  });
-
-  if (trackGroup?.cover) {
-    await deleteStoredImage(trackGroup.cover);
-  }
-};
+export const deleteTrackGroupCover = (trackGroupId: number) =>
+  clearImageSlot("COVER", trackGroupId);
 
 /**
  * We use our own custom function to handle this until we

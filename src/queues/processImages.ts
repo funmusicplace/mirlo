@@ -21,7 +21,6 @@ import { clearPageCache } from "../utils/pageCache";
 import { discardPendingImage, markPendingImage } from "../utils/pendingImage";
 import { stripNullBytes } from "../utils/sanitize";
 import { findSettingsId } from "../utils/splashScreen";
-import { deleteTrackGroupCover } from "../utils/trackGroup";
 
 const queueOptions = {
   prefix: "mirlo",
@@ -319,23 +318,6 @@ export const uploadAndSendToImageQueue = async (
   return details as { jobId?: string; imageId: string };
 };
 
-const uploadImage = (
-  ctx: APIContext,
-  model: string,
-  dimensions: "artwork" | "avatar" | "background",
-  profileId: number
-) =>
-  uploadAndSendToImageQueue(
-    ctx,
-    "image",
-    model,
-    dimensions,
-    async (fileInfo: { filename: string }) =>
-      prisma.image.create({
-        data: { originalFilename: fileInfo.filename, dimensions, profileId },
-      })
-  );
-
 const uploadToImageSlot = async (
   ctx: APIContext,
   model: string,
@@ -387,23 +369,14 @@ export const processSplashImage = async (ctx: APIContext) =>
     ownerId: await findSettingsId(),
   });
 
-export const processTrackGroupCover = async (
+export const processTrackGroupCover = (
   ctx: APIContext,
   trackGroup: { id: number; profileId: number }
-) => {
-  const result = await uploadImage(
-    ctx,
-    "trackGroupCover",
-    "artwork",
-    trackGroup.profileId
-  );
-  await deleteTrackGroupCover(trackGroup.id);
-  await prisma.trackGroup.update({
-    where: { id: trackGroup.id },
-    data: { coverImageId: result.imageId },
+) =>
+  uploadToImageSlot(ctx, "trackGroupCover", "artwork", trackGroup.profileId, {
+    slot: "COVER",
+    ownerId: trackGroup.id,
   });
-  return result;
-};
 
 export const processMerchImage = (ctx: APIContext) => {
   return async (merchId: string) => {

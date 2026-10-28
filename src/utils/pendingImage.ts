@@ -62,6 +62,20 @@ const IMAGE_SLOT_TARGETS: Record<ImageSlot, ImageSlotTarget> = {
         data: { backgroundImageId: imageId },
       }),
   },
+  COVER: {
+    findImageId: async (tx, ownerId) =>
+      (
+        await tx.trackGroup.findUnique({
+          where: { id: ownerId },
+          select: { coverImageId: true },
+        })
+      )?.coverImageId,
+    setImageId: (tx, ownerId, imageId) =>
+      tx.trackGroup.update({
+        where: { id: ownerId },
+        data: { coverImageId: imageId },
+      }),
+  },
 };
 
 const removeImage = async (imageId: string) => {
