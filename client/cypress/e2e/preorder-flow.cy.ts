@@ -76,11 +76,13 @@ describe("pre-order flow", () => {
       cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
-      cy.contains("Pre-order").should("exist");
-      cy.contains("Setup as a pre-order").should("exist");
+      cy.findByRole("heading", { name: "Pre-order" }).should("exist");
+      cy.findByRole("switch", { name: "Setup as a pre-order" }).should("exist");
 
       // Toggle pre-order ON
-      cy.contains("Setup as a pre-order").click();
+      cy.findByRole("switch", { name: "Setup as a pre-order" }).click({
+        force: true,
+      });
 
       cy.wait("@updateTrackGroup")
         .its("request.body")
@@ -100,7 +102,9 @@ describe("pre-order flow", () => {
       cy.wait("@authProfile");
 
       // Toggle pre-order OFF
-      cy.contains("Setup as a pre-order").click();
+      cy.findByRole("switch", { name: "Setup as a pre-order" }).click({
+        force: true,
+      });
 
       cy.wait("@updateTrackGroup")
         .its("request.body")
@@ -152,7 +156,9 @@ describe("pre-order flow", () => {
       cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
-      cy.get("#input-schedule-preorder-release").check({ force: true });
+      cy.findByRole("checkbox", {
+        name: "Schedule the pre-order campaign to end on release date",
+      }).check();
 
       cy.wait("@updateTrackGroup")
         .its("request.body")
@@ -165,9 +171,9 @@ describe("pre-order flow", () => {
       cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
-      cy.get("#input-make-tracks-previewable-on-release").check({
-        force: true,
-      });
+      cy.findByRole("checkbox", {
+        name: "Set all tracks as playable on release day",
+      }).check();
 
       cy.wait("@updateTrackGroup")
         .its("request.body")
@@ -185,19 +191,17 @@ describe("pre-order flow", () => {
       cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
-      cy.contains("Release pre-order now").click();
+      cy.findByRole("button", { name: "Release pre-order now" }).click();
 
       // Modal should appear
-      cy.get('[role="dialog"]').within(() => {
-        cy.contains("Set all tracks as playable on release day").should(
-          "exist"
-        );
-
+      cy.findByRole("dialog").within(() => {
         // Check the make-tracks-previewable checkbox in the modal
-        cy.get("#input-make-tracks-previewable").check({ force: true });
+        cy.findByRole("checkbox", {
+          name: "Set all tracks as playable on release day",
+        }).check();
 
         // Confirm
-        cy.contains("button", "Release pre-order").click();
+        cy.findByRole("button", { name: "Release pre-order" }).click();
       });
 
       cy.wait("@endPreorder")
@@ -241,14 +245,14 @@ describe("pre-order flow", () => {
     it("shows 'Pre-order' button for pre-order album", () => {
       cy.login({ email: customerEmail, password: customerPassword });
       cy.visit(`/${artistSlug}/release/customer-preorder-album`);
-      cy.contains("Pre-order").should("exist");
-      cy.contains("Buy").should("not.exist");
+      cy.findByRole("button", { name: /Pre-order/ }).should("exist");
+      cy.findByRole("button", { name: /^Buy/ }).should("not.exist");
     });
 
     it("shows 'Buy' button for normal album", () => {
       cy.login({ email: customerEmail, password: customerPassword });
       cy.visit(`/${artistSlug}/release/customer-normal-album`);
-      cy.contains("Buy").should("exist");
+      cy.findByRole("button", { name: /^Buy/ }).should("exist");
     });
   });
 
@@ -302,21 +306,21 @@ describe("pre-order flow", () => {
 
     it("does not show album download button during pre-order even when purchased", () => {
       cy.visit(`/${artistSlug}/release/download-block-album`);
-      cy.get('[data-testid="download-button"]').should("not.exist");
+      cy.findByRole("button", { name: "Download" }).should("not.exist");
     });
 
     it("shows download button for preview track when album is purchased", () => {
       cy.visit(
         `/${artistSlug}/release/download-block-album/tracks/${previewTrackId}`
       );
-      cy.get('[data-testid="download-button"]').should("exist");
+      cy.findByRole("button", { name: "Download" }).should("exist");
     });
 
     it("does not show download button for non-preview track during pre-order", () => {
       cy.visit(
         `/${artistSlug}/release/download-block-album/tracks/${nonPreviewTrackId}`
       );
-      cy.get('[data-testid="download-button"]').should("not.exist");
+      cy.findByRole("button", { name: "Download" }).should("not.exist");
     });
   });
 
@@ -344,7 +348,7 @@ describe("pre-order flow", () => {
     it("shows album download button when purchased and not pre-order", () => {
       cy.login({ email: customerEmail, password: customerPassword });
       cy.visit(`/${artistSlug}/release/normal-download-album`);
-      cy.get('[data-testid="download-button"]').should("exist");
+      cy.findByRole("button", { name: "Download" }).should("exist");
     });
   });
 });

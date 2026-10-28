@@ -66,50 +66,85 @@ describe("manage post draft restore", () => {
 
     cy.visit(`/manage/artists/${artistId}/post/${postId}`);
     cy.wait("@authProfile");
-    cy.get(".ProseMirror").should("contain.text", "Original server body");
+    cy.findByRole("textbox", { name: "Content" }).should(
+      "contain.text",
+      "Original server body"
+    );
   });
 
   it("restores the body content from local storage on reload", () => {
-    cy.get(".ProseMirror").click().type(" plus mes edits");
+    cy.findByRole("textbox", { name: "Content" })
+      .click()
+      .type(" plus mes edits");
     waitForBodyDraft(postId, "plus mes edits");
 
     cy.reload();
     cy.wait("@authProfile");
 
-    cy.contains("Some unsaved changes have been restored").should("be.visible");
-    cy.get(".ProseMirror").should("contain.text", "plus mes edits");
+    cy.findByText(/Some unsaved changes have been restored/).should(
+      "be.visible"
+    );
+    cy.findByRole("textbox", { name: "Content" }).should(
+      "contain.text",
+      "plus mes edits"
+    );
   });
 
   it("Discard reverts the body to the server value and clears the banner", () => {
-    cy.get(".ProseMirror").click().type(" to be discarded");
+    cy.findByRole("textbox", { name: "Content" })
+      .click()
+      .type(" to be discarded");
     waitForBodyDraft(postId, "to be discarded");
 
     cy.reload();
     cy.wait("@authProfile");
 
-    cy.contains("Some unsaved changes have been restored").should("be.visible");
-    cy.get(".ProseMirror").should("contain.text", "to be discarded");
+    cy.findByText(/Some unsaved changes have been restored/).should(
+      "be.visible"
+    );
+    cy.findByRole("textbox", { name: "Content" }).should(
+      "contain.text",
+      "to be discarded"
+    );
 
-    cy.contains("button", "Discard").click();
+    cy.findByRole("button", { name: "Discard" }).click();
 
-    cy.contains("Some unsaved changes have been restored").should("not.exist");
-    cy.get(".ProseMirror").should("contain.text", "Original server body");
-    cy.get(".ProseMirror").should("not.contain.text", "to be discarded");
+    cy.findByText(/Some unsaved changes have been restored/).should(
+      "not.exist"
+    );
+    cy.findByRole("textbox", { name: "Content" }).should(
+      "contain.text",
+      "Original server body"
+    );
+    cy.findByRole("textbox", { name: "Content" }).should(
+      "not.contain.text",
+      "to be discarded"
+    );
   });
 
   it("Keep dismisses the banner and leaves the restored body untouched", () => {
-    cy.get(".ProseMirror").click().type(" kept content");
+    cy.findByRole("textbox", { name: "Content" }).click().type(" kept content");
     waitForBodyDraft(postId, "kept content");
 
     cy.reload();
     cy.wait("@authProfile");
 
-    cy.contains("Some unsaved changes have been restored").should("be.visible");
-    cy.get(".ProseMirror").should("contain.text", "kept content");
+    cy.findByText(/Some unsaved changes have been restored/).should(
+      "be.visible"
+    );
+    cy.findByRole("textbox", { name: "Content" }).should(
+      "contain.text",
+      "kept content"
+    );
 
-    cy.contains("button", "Keep").click();
+    cy.findByRole("button", { name: "Keep" }).click();
 
-    cy.contains("Some unsaved changes have been restored").should("not.exist");
-    cy.get(".ProseMirror").should("contain.text", "kept content");
+    cy.findByText(/Some unsaved changes have been restored/).should(
+      "not.exist"
+    );
+    cy.findByRole("textbox", { name: "Content" }).should(
+      "contain.text",
+      "kept content"
+    );
   });
 });

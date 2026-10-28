@@ -140,38 +140,40 @@ describe("sales page", () => {
   });
 
   it("renders sales from the API for a logged in user", () => {
-    cy.contains("Sales");
-    cy.contains("Total sales income")
+    cy.findByRole("heading", { name: "Sales" });
+    cy.findByText("Total sales income")
       .parent()
-      .within(() => cy.contains("$19.99"));
-    cy.contains(/^Total sales$/)
+      .within(() => cy.findByText("$19.99"));
+    cy.findByText("Total sales")
       .parent()
-      .within(() => cy.contains("2"));
-    cy.contains("Total supporters")
+      .within(() => cy.findByText("2"));
+    cy.findByText("Total supporters")
       .parent()
-      .within(() => cy.contains("1"));
+      .within(() => cy.findByText("1"));
 
-    cy.get("table tbody").within(() => {
-      cy.get("tr")
-        .first()
+    cy.findByRole("table").within(() => {
+      cy.findAllByRole("row")
+        .eq(1)
         .within(() => {
-          cy.contains("Example Artist");
-          cy.contains("Example Track");
-          cy.contains("$9.99");
-          cy.contains("Track");
-          cy.get(
-            `[href="/example-artist/release/example-album/tracks/${trackId}"]`
-          ).should("exist");
+          cy.findByText("Example Artist");
+          cy.findByText("$9.99");
+          cy.findByText("Track");
+          cy.findByRole("link", { name: "Example Track" }).should(
+            "have.attr",
+            "href",
+            `/example-artist/release/example-album/tracks/${trackId}`
+          );
         });
-      cy.get("tr")
+      cy.findAllByRole("row")
         .last()
         .within(() => {
-          cy.contains("Example Artist");
-          cy.contains("Example Album");
-          cy.contains("$10.00");
-          cy.contains("Release");
-          cy.get('[href="/example-artist/release/example-album"]').should(
-            "exist"
+          cy.findByText("Example Artist");
+          cy.findByText("$10.00");
+          cy.findByText("Release");
+          cy.findByRole("link", { name: "Example Album" }).should(
+            "have.attr",
+            "href",
+            "/example-artist/release/example-album"
           );
         });
     });

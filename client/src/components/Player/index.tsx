@@ -88,6 +88,10 @@ const Player = () => {
   // var cascade. Its fixed colors only follow the light or dark tone of the current page.
   return createPortal(
     <div
+      id="player"
+      role="region"
+      aria-label={t("audioPlayer")}
+      data-mount-id={mountId}
       data-tone={tone}
       className={css`
         --mi-fixed-bg-color: var(--mi-off-white);
@@ -127,10 +131,6 @@ const Player = () => {
             }
           `
         )}
-        id="player"
-        role="region"
-        aria-label={t("audioPlayer")}
-        data-mount-id={mountId}
       >
         <div aria-live="polite" aria-atomic="true" className="sr-only">
           {currentTrack.title

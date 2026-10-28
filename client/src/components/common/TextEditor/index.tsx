@@ -85,6 +85,7 @@ const TextEditor: React.FC<{
   className?: string;
   disableFloatingToolbar?: boolean;
   basicStyles?: boolean;
+  label?: string;
 }> = ({
   onChange,
   value,
@@ -94,6 +95,7 @@ const TextEditor: React.FC<{
   className,
   disableFloatingToolbar,
   basicStyles = false,
+  label,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
   const mentionHighlightExtRef = useRef<MentionHighlightExtension | null>(null);
@@ -267,6 +269,7 @@ const TextEditor: React.FC<{
       <Remirror
         manager={manager}
         state={state}
+        label={label}
         onChange={(parameter) => {
           const html = prosemirrorNodeToHtml(parameter.state.doc);
           onChange(html);

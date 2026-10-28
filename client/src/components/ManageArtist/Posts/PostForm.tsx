@@ -243,6 +243,7 @@ const PostForm: React.FC<{
         <FormComponent>
           <TextEditor
             key={`${post.id}-${discardCount}`}
+            label={t("content")}
             onChange={bodyDraft.setContent}
             value={bodyDraft.content}
             postId={post.id}

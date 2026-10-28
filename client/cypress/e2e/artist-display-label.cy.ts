@@ -70,53 +70,53 @@ describe("opt-in display label on artist pages", () => {
   it("does not show the label pill on the public artist page until the artist opts in", () => {
     cy.visit(`/${artistSlug}`);
 
-    cy.contains(artistName).should("be.visible");
-    cy.contains(`On ${labelArtistName}`).should("not.exist");
+    cy.findByRole("heading", { name: artistName }).should("be.visible");
+    cy.findByText(`On ${labelArtistName}`).should("not.exist");
   });
 
   it("lets the artist pick a label in the manage modal and persists the choice", () => {
     cy.visit(`/manage/artists/${artistId}/releases`);
 
-    cy.contains("button", "Add label").click();
+    cy.findByRole("button", { name: "Add label" }).click();
 
-    cy.get(`#input-display-label-${labelUserId}`).check({ force: true });
+    cy.findByRole("radio", { name: labelArtistName }).check();
 
-    cy.contains("button", "Save").click();
+    cy.findByRole("button", { name: "Save" }).click();
 
-    cy.contains(/choose a label/i).should("not.exist");
+    cy.findByRole("dialog").should("not.exist");
 
     cy.visit(`/${artistSlug}`);
-    cy.contains(`On ${labelArtistName}`).should("be.visible");
+    cy.findByText(`On ${labelArtistName}`).should("be.visible");
 
     cy.visit(`/manage/artists/${artistId}/releases`);
-    cy.contains("button", "Edit label").should("be.visible");
+    cy.findByRole("button", { name: "Edit label" }).should("be.visible");
   });
 
   it("hides the label pill and the manage button on mobile viewports", () => {
     cy.viewport(375, 812);
 
     cy.visit(`/${artistSlug}`);
-    cy.contains(`On ${labelArtistName}`).should("not.be.visible");
+    cy.findByText(`On ${labelArtistName}`).should("not.be.visible");
 
     cy.visit(`/manage/artists/${artistId}/releases`);
-    cy.contains("button", "Edit label").should("not.be.visible");
+    cy.findByRole("button", { name: "Edit label" }).should("not.exist");
   });
 
   it("clears the label when the artist picks No label", () => {
     cy.visit(`/manage/artists/${artistId}/releases`);
 
-    cy.contains("button", "Edit label").click();
+    cy.findByRole("button", { name: "Edit label" }).click();
 
-    cy.get("#input-display-label-none").check({ force: true });
+    cy.findByRole("radio", { name: "No label" }).check();
 
-    cy.contains("button", "Save").click();
+    cy.findByRole("button", { name: "Save" }).click();
 
-    cy.contains(/choose a label/i).should("not.exist");
+    cy.findByRole("dialog").should("not.exist");
 
     cy.visit(`/${artistSlug}`);
-    cy.contains(`On ${labelArtistName}`).should("not.exist");
+    cy.findByText(`On ${labelArtistName}`).should("not.exist");
 
     cy.visit(`/manage/artists/${artistId}/releases`);
-    cy.contains("button", "Add label").should("be.visible");
+    cy.findByRole("button", { name: "Add label" }).should("be.visible");
   });
 });

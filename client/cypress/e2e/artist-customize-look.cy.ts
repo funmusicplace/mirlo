@@ -49,8 +49,8 @@ describe("artist customize look", () => {
   });
 
   it("toggles transparent container and persists it to artist properties", () => {
-    cy.get("#input-transparent-container").check();
-    cy.contains("button", "Save colors").click();
+    cy.findByRole("checkbox", { name: "Make container transparent" }).check();
+    cy.findByRole("button", { name: "Save colors" }).click();
     cy.wait("@updateArtist")
       .its("request.body.properties.transparentContainer")
       .should("eq", true);
@@ -61,7 +61,7 @@ describe("artist customize look", () => {
   });
 
   it("updates the artist colors live in the page when the form changes without saving", () => {
-    cy.get('[id="input-color-properties.colors.background"]').then(($input) => {
+    cy.findByLabelText("Background color").then(($input) => {
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
         window.HTMLInputElement.prototype,
         "value"

@@ -64,6 +64,6 @@ describe("merch view currency", () => {
       expect(interception.response?.statusCode).to.eq(200);
       expect(interception.response?.body?.result?.currency).to.eq("eur");
     });
-    cy.contains("Test Merch").should("exist");
+    cy.findByRole("heading", { name: "Test Merch" }).should("exist");
   });
 });

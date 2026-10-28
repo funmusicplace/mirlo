@@ -65,7 +65,7 @@ describe("auth profile injection", () => {
     });
 
     // Should show user-specific UI immediately from injected data
-    cy.get("[data-cy='user-nav']").should("be.visible");
+    cy.findByRole("button", { name: "Menu" }).should("be.visible");
 
     // Verify that /auth/profile is still called (after UI is already visible)
     cy.wait("@authProfile").its("response.statusCode").should("eq", 200);

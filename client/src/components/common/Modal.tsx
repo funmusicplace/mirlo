@@ -266,7 +266,7 @@ export const Modal: React.FC<{
         }}
       >
         <Background onClick={onCloseWrapper} />
-        <div className={wrapper} data-cy="modal">
+        <div className={wrapper}>
           <Content size={size} contentTitle={title} className={className}>
             <SpaceBetweenDiv
               className={css`

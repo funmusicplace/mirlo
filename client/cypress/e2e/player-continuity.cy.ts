@@ -89,24 +89,34 @@ describe("player continuity across navigation", () => {
       },
     });
 
-    cy.get("#player", { timeout: 10000 })
+    cy.findByRole("region", { name: "Audio player", timeout: 10000 })
       .invoke("attr", "data-mount-id")
       .as("originalMountId")
       .should("be.a", "string")
       .and("not.be.empty");
 
-    cy.get(`a[href="/${artistSlug}"]`).first().click();
+    cy.findAllByRole("link", { name: TRACK_GROUP_EXAMPLE.artist.name })
+      .first()
+      .click();
     cy.url().should("include", `/${artistSlug}`);
 
     cy.get("@originalMountId").then((id) => {
-      cy.get("#player").should("have.attr", "data-mount-id", id);
+      cy.findByRole("region", { name: "Audio player" }).should(
+        "have.attr",
+        "data-mount-id",
+        id
+      );
     });
 
-    cy.get('a[aria-label="Mirlo"]').first().click();
+    cy.findAllByRole("link", { name: "Mirlo" }).first().click();
     cy.url().should("not.include", `/${artistSlug}`);
 
     cy.get("@originalMountId").then((id) => {
-      cy.get("#player").should("have.attr", "data-mount-id", id);
+      cy.findByRole("region", { name: "Audio player" }).should(
+        "have.attr",
+        "data-mount-id",
+        id
+      );
     });
   });
 });

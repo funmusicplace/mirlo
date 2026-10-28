@@ -759,6 +759,7 @@
     "addLink": "Add link",
     "saveLink": "Save link",
     "editLink": "Edit link",
+    "editLinkNamed": "Edit link {{label}}",
     "deleteLink": "Delete link",
     "linkHiddenFromHeader": "Hidden from header",
     "reorderLinks": "Drag to reorder links",

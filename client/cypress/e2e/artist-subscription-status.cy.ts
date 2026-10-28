@@ -101,10 +101,10 @@ describe("artist support page subscription status", () => {
     cy.visit(`/${artistSlug}/support`);
     cy.wait("@stripeStatus");
 
-    cy.contains(tierName);
-    cy.contains("cancelled").should("not.exist");
-    cy.contains("button", "Change payment method");
-    cy.contains("button", "Manage subscription");
+    cy.findByRole("heading", { name: tierName });
+    cy.findByText(/cancelled/).should("not.exist");
+    cy.findByRole("button", { name: "Change payment method" });
+    cy.findByRole("button", { name: "Manage subscription" });
   });
 
   it("shows both the cancelled notice and a way to resubscribe", () => {
@@ -112,8 +112,8 @@ describe("artist support page subscription status", () => {
     cy.visit(`/${artistSlug}/support`);
     cy.wait("@stripeStatus");
 
-    cy.contains("Your subscription is cancelled");
-    cy.contains("button", "Support");
+    cy.findAllByText(/Your subscription is cancelled/).should("exist");
+    cy.findByRole("button", { name: "Support" });
   });
 
   it("lets a user with no subscription choose a new one", () => {
@@ -140,8 +140,11 @@ describe("artist support page subscription status", () => {
     cy.visit(`/${artistSlug}/support`);
     cy.wait("@stripeStatus");
 
-    cy.contains("Your subscription is cancelled").should("not.exist");
-    cy.contains("button", "Support").click();
+    cy.findByText(/Your subscription is cancelled/).should("not.exist");
+    cy.findByRole("button", { name: "Support" }).click();
+    cy.findByRole("dialog")
+      .findByRole("button", { name: "Support this artist" })
+      .click();
 
     cy.wait("@purchase")
       .its("request.body")

@@ -58,22 +58,22 @@ describe("admin content pages", () => {
     cy.visit("/admin/content");
     cy.wait(["@authProfile"]);
 
-    cy.contains("a", "Trackgroups (releases)").should(
+    cy.findByRole("link", { name: "Trackgroups (releases)" }).should(
       "have.attr",
       "href",
       "/admin/content/track-groups"
     );
-    cy.contains("a", "Artists").should(
+    cy.findByRole("link", { name: "Artists" }).should(
       "have.attr",
       "href",
       "/admin/content/artists"
     );
-    cy.contains("a", "Users").should(
+    cy.findByRole("link", { name: "Users" }).should(
       "have.attr",
       "href",
       "/admin/content/users"
     );
-    cy.contains("a", "Tracks").should(
+    cy.findByRole("link", { name: "Tracks" }).should(
       "have.attr",
       "href",
       "/admin/content/tracks"
@@ -84,48 +84,48 @@ describe("admin content pages", () => {
     cy.visit("/admin/content/track-groups");
     cy.wait(["@authProfile"]);
 
-    cy.contains("Example Album", { timeout: 10000 });
+    cy.findAllByText("Example Album", { timeout: 10000 }).should("exist");
   });
 
   it("renders a track group's detail page", () => {
     cy.visit(`/admin/content/track-groups/${trackGroupId}`);
     cy.wait(["@authProfile"]);
 
-    cy.contains("Example Album");
+    cy.findAllByText("Example Album").should("exist");
   });
 
   it("renders the artists list", () => {
     cy.visit("/admin/content/artists");
     cy.wait(["@authProfile"]);
 
-    cy.contains("Example Artist", { timeout: 10000 });
+    cy.findAllByText("Example Artist", { timeout: 10000 }).should("exist");
   });
 
   it("renders an artist's detail page", () => {
     cy.visit(`/admin/content/artists/${artistId}`);
     cy.wait(["@authProfile"]);
 
-    cy.contains("Example Artist");
+    cy.findAllByText("Example Artist").should("exist");
   });
 
   it("renders the users list", () => {
     cy.visit("/admin/content/users");
     cy.wait(["@authProfile"]);
 
-    cy.contains(adminUserEmail, { timeout: 10000 });
+    cy.findAllByText(adminUserEmail, { timeout: 10000 }).should("exist");
   });
 
   it("renders a user's detail page", () => {
     cy.visit(`/admin/content/users/${userId}`);
     cy.wait(["@authProfile"]);
 
-    cy.contains(adminUserEmail, { timeout: 10000 });
+    cy.findAllByText(adminUserEmail, { timeout: 10000 }).should("exist");
   });
 
   it("renders the tracks list", () => {
     cy.visit("/admin/content/tracks");
     cy.wait(["@authProfile"]);
 
-    cy.contains("Example Track", { timeout: 10000 });
+    cy.findAllByText("Example Track", { timeout: 10000 }).should("exist");
   });
 });

@@ -65,21 +65,29 @@ describe("schedule publication flow", () => {
       cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
-      cy.contains("Schedule publication date").click();
-      cy.contains("button", /^Schedule$/).should("be.disabled");
+      cy.findAllByRole("button", { name: "Schedule publication date" })
+        .first()
+        .click();
+      cy.findByRole("dialog")
+        .findByRole("button", { name: "Schedule" })
+        .should("be.disabled");
     });
 
     it("schedules a publication date and shows the confirmation label", () => {
       cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
-      cy.contains("Schedule publication date").click();
+      cy.findAllByRole("button", { name: "Schedule publication date" })
+        .first()
+        .click();
 
-      cy.get("#input-schedule-publication-date")
+      cy.findByLabelText("Publication date")
         .should("exist")
         .type(futureDateString);
 
-      cy.contains("button", /^Schedule$/).click();
+      cy.findByRole("dialog")
+        .findByRole("button", { name: "Schedule" })
+        .click();
 
       cy.wait("@updateTrackGroup")
         .its("request.body")
@@ -88,7 +96,7 @@ describe("schedule publication flow", () => {
           expect(body.publishedAt.startsWith(futureDateString)).to.equal(true);
         });
 
-      cy.contains("Will be published automatically on").should("exist");
+      cy.findAllByText(/Will be published automatically on/).should("exist");
     });
   });
 
@@ -120,10 +128,12 @@ describe("schedule publication flow", () => {
       cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
-      cy.contains("Will be published automatically on").should("exist");
-      cy.contains("Cancel scheduled publication").click();
+      cy.findAllByText(/Will be published automatically on/).should("exist");
+      cy.findAllByRole("button", { name: "Cancel scheduled publication" })
+        .first()
+        .click();
 
-      cy.contains("button", "Yes, cancel schedule").click();
+      cy.findByRole("button", { name: "Yes, cancel schedule" }).click();
 
       cy.wait("@updateTrackGroup")
         .its("request.body")
@@ -131,7 +141,9 @@ describe("schedule publication flow", () => {
           expect(body.publishedAt).to.equal(null);
         });
 
-      cy.contains("Schedule publication date").should("exist");
+      cy.findAllByRole("button", { name: "Schedule publication date" }).should(
+        "exist"
+      );
     });
   });
 });

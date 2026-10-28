@@ -39,11 +39,13 @@ describe("skip links", { screenshotOnRunFailure: false }, () => {
   });
 
   it("has a skip to main content link as the first link", () => {
-    cy.get("a").first().should("have.text", "Skip to main content");
+    cy.findAllByRole("link")
+      .first()
+      .should("have.text", "Skip to main content");
   });
 
   it("has a valid target for the skip to main content link", () => {
-    cy.get("a")
+    cy.findAllByRole("link")
       .first()
       .then(($element) => {
         const idFromHref = $element.attr("href");
@@ -63,11 +65,13 @@ describe("skip links", { screenshotOnRunFailure: false }, () => {
         );
       },
     });
-    cy.get("a").first().next().should("have.text", "Skip to audio player");
+    cy.findAllByRole("link").eq(1).should("have.text", "Skip to audio player");
   });
 
   it("doesn't have a skip to audio player link when player is not visible", () => {
-    cy.get("a").eq(1).should("not.have.text", "Skip to audio player");
+    cy.findAllByRole("link")
+      .eq(1)
+      .should("not.have.text", "Skip to audio player");
   });
 
   it("has a valid target for the skip to audio player link", () => {
@@ -82,19 +86,16 @@ describe("skip links", { screenshotOnRunFailure: false }, () => {
         );
       },
     });
-    cy.get("a")
-      .first()
-      .next()
-      .then(($element) => {
-        const idFromHref = $element.attr("href");
-        cy.get(idFromHref);
-      });
+    cy.findByRole("link", { name: "Skip to audio player" }).then(($element) => {
+      const idFromHref = $element.attr("href");
+      cy.get(idFromHref);
+    });
   });
 
   it("visually hides skip links unless they are focused", () => {
-    cy.get("a").first().parent().should("have.class", "sr-only");
-    cy.get("a").first().focus();
-    cy.get("a")
+    cy.findAllByRole("link").first().parent().should("have.class", "sr-only");
+    cy.findAllByRole("link").first().focus();
+    cy.findAllByRole("link")
       .first()
       .parent()
       .should("have.class", "focus-within:not-sr-only");

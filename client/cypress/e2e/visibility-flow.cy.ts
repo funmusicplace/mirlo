@@ -62,16 +62,20 @@ describe("visibility flow", () => {
       cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
-      cy.contains("Publish as").should("exist");
-      cy.get("#input-visibility-public").should("exist").and("be.checked");
-      cy.get("#input-visibility-private").should("exist").and("not.be.checked");
+      cy.findByRole("group", { name: "Publish as" }).should("exist");
+      cy.findByRole("radio", { name: /^Public/ })
+        .should("exist")
+        .and("be.checked");
+      cy.findByRole("radio", { name: /^Private/ })
+        .should("exist")
+        .and("not.be.checked");
     });
 
     it("flipping radio Private does not auto-save", () => {
       cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
-      cy.get("#input-visibility-private").check({ force: true });
+      cy.findByRole("radio", { name: /^Private/ }).check();
 
       cy.wait(500);
       cy.get("@updateTrackGroup.all").should("have.length", 0);
@@ -81,8 +85,8 @@ describe("visibility flow", () => {
       cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
-      cy.get("#input-visibility-private").check({ force: true });
-      cy.contains("Publish release").click();
+      cy.findByRole("radio", { name: /^Private/ }).check();
+      cy.findAllByRole("button", { name: "Publish release" }).first().click();
 
       cy.wait("@updateTrackGroup")
         .its("request.body")
@@ -124,21 +128,21 @@ describe("visibility flow", () => {
       cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
-      cy.contains("Visibility").should("exist");
-      cy.get("#input-visibility-private").should("be.checked");
-      cy.get("#input-visibility-public").should("not.be.checked");
+      cy.findByRole("group", { name: "Visibility" }).should("exist");
+      cy.findByRole("radio", { name: /^Private/ }).should("be.checked");
+      cy.findByRole("radio", { name: /^Public/ }).should("not.be.checked");
     });
 
     it("flipping radio Public then Update release commits isPublic=true", () => {
       cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
       cy.wait("@authProfile");
 
-      cy.get("#input-visibility-public").check({ force: true });
+      cy.findByRole("radio", { name: /^Public/ }).check();
 
       cy.wait(500);
       cy.get("@updateTrackGroup.all").should("have.length", 0);
 
-      cy.contains("Update release").click();
+      cy.findAllByRole("button", { name: "Update release" }).first().click();
 
       cy.wait("@updateTrackGroup")
         .its("request.body")

@@ -30,6 +30,7 @@ import {
   linkUrlHref,
 } from "components/common/LinkIconDisplay";
 import WidthContainer from "components/common/WidthContainer";
+import LinkEditModal from "components/ManageArtist/LinkEditModal";
 import { useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -41,8 +42,6 @@ import { transformFromLinks } from "utils/links";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
 import { bp } from "../../../../../constants";
-
-import LinkEditModal from "components/ManageArtist/LinkEditModal";
 
 const linkKey = (link: Link, index: number) =>
   `${link.url || "new"}-${link.linkType || ""}-${index}`;
@@ -94,7 +93,9 @@ const SortableLinkCard: React.FC<{
       <button
         type="button"
         onClick={onEdit}
-        aria-label={t("editLink")}
+        aria-label={t("editLinkNamed", {
+          label: linkUrlDisplay(link) || link.url,
+        })}
         className="flex-1 min-w-0 flex items-center justify-center gap-3 p-6 max-md:p-4 text-lg text-(--mi-button-color) hover:bg-(--mi-tint-color) cursor-pointer border-0 bg-transparent"
       >
         <span aria-hidden className="text-xl shrink-0 flex items-center">
@@ -139,7 +140,8 @@ const SortableLinkCard: React.FC<{
           variant="transparent"
           onlyIcon
           onClick={onEdit}
-          aria-label={t("editLink")}
+          aria-hidden
+          tabIndex={-1}
           startIcon={<FaPen />}
           className="h-full rounded-none!"
         />

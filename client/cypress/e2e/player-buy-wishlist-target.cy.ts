@@ -125,14 +125,18 @@ describe("player wishlist/buy target choice", () => {
     it("wishlist trigger opens a 2-item dropdown that targets the track", () => {
       visitWithTrack(trackId);
 
-      cy.get('[data-cy="player-actions"] button.wishlist', {
-        timeout: 10000,
-      }).click();
+      cy.findByRole("region", { name: "Audio player", timeout: 10000 })
+        .findByRole("button", { name: "Add to wishlist" })
+        .click();
 
-      cy.contains("Wishlist this track").should("be.visible");
-      cy.contains("Wishlist this album").should("be.visible");
+      cy.findByRole("button", { name: "Wishlist this track" }).should(
+        "be.visible"
+      );
+      cy.findByRole("button", { name: "Wishlist this album" }).should(
+        "be.visible"
+      );
 
-      cy.contains("Wishlist this track").click();
+      cy.findByRole("button", { name: "Wishlist this track" }).click();
 
       cy.wait("@favoriteTrack")
         .its("request.body")
@@ -142,10 +146,10 @@ describe("player wishlist/buy target choice", () => {
     it("wishlist dropdown targets the album when album item is picked", () => {
       visitWithTrack(trackId);
 
-      cy.get('[data-cy="player-actions"] button.wishlist', {
-        timeout: 10000,
-      }).click();
-      cy.contains("Wishlist this album").click();
+      cy.findByRole("region", { name: "Audio player", timeout: 10000 })
+        .findByRole("button", { name: "Add to wishlist" })
+        .click();
+      cy.findByRole("button", { name: "Wishlist this album" }).click();
 
       cy.wait("@wishlistAlbum")
         .its("request.body")
@@ -155,12 +159,12 @@ describe("player wishlist/buy target choice", () => {
     it("buy trigger opens a 2-item dropdown with track and album options", () => {
       visitWithTrack(trackId);
 
-      cy.get('[data-cy="player-actions"]', { timeout: 10000 })
-        .contains("button", "Name your price")
+      cy.findByRole("region", { name: "Audio player", timeout: 10000 })
+        .findByRole("button", { name: "Name your price" })
         .click();
 
-      cy.contains("Buy this track").should("be.visible");
-      cy.contains("Buy this album").should("be.visible");
+      cy.findByRole("button", { name: "Buy this track" }).should("be.visible");
+      cy.findByRole("button", { name: "Buy this album" }).should("be.visible");
     });
   });
 
@@ -189,12 +193,16 @@ describe("player wishlist/buy target choice", () => {
     it("wishlist button toggles the album directly without opening a dropdown", () => {
       visitWithTrack(trackId);
 
-      cy.get('[data-cy="player-actions"] button.wishlist', {
-        timeout: 10000,
-      }).click();
+      cy.findByRole("region", { name: "Audio player", timeout: 10000 })
+        .findByRole("button", { name: "Add to wishlist" })
+        .click();
 
-      cy.contains("Wishlist this track").should("not.exist");
-      cy.contains("Wishlist this album").should("not.exist");
+      cy.findByRole("button", { name: "Wishlist this track" }).should(
+        "not.exist"
+      );
+      cy.findByRole("button", { name: "Wishlist this album" }).should(
+        "not.exist"
+      );
 
       cy.wait("@wishlistAlbum")
         .its("request.body")
