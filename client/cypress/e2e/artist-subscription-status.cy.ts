@@ -136,15 +136,13 @@ describe("artist support page subscription status", () => {
         },
       });
     }).as("purchase");
+    cy.intercept("GET", "/auth/profile").as("authProfile");
 
     cy.visit(`/${artistSlug}/support`);
-    cy.wait("@stripeStatus");
+    cy.wait(["@stripeStatus", "@authProfile"]);
 
     cy.findByText(/Your subscription is cancelled/).should("not.exist");
     cy.findByRole("button", { name: "Support" }).click();
-    cy.findByRole("dialog")
-      .findByRole("button", { name: "Support this artist" })
-      .click();
 
     cy.wait("@purchase")
       .its("request.body")
