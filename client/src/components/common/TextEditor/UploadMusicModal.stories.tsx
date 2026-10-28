@@ -75,7 +75,7 @@ function silentWav(name: string) {
 }
 
 const meta = {
-  title: "TextEditor/UploadMusicModal",
+  title: "Features/Posts/UploadMusicModal",
   component: UploadMusicModal,
   args: {
     open: true,

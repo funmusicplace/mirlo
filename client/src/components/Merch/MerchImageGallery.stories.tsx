@@ -14,7 +14,7 @@ import MerchImageGallery from "./MerchImageGallery";
  * row of thumbnails to switch between photos when there's more than one.
  */
 const meta = {
-  title: "Merch/MerchImageGallery",
+  title: "Features/Merch/MerchImageGallery",
   component: MerchImageGallery,
   parameters: { layout: "padded" },
   decorators: [

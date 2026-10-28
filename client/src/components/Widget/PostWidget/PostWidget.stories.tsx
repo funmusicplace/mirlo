@@ -17,7 +17,7 @@ import {
  * featured image and title with the songs attached to it.
  */
 const meta = {
-  title: "Widget/PostWidget",
+  title: "Features/Embeds/PostWidget",
   component: PostWidgetPage,
   beforeEach: clearPlayerQueue,
   decorators: [noPageScroll],

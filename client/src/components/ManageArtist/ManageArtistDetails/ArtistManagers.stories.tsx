@@ -68,7 +68,7 @@ const confirmDialog = async () => {
  * artist. Only the owner (or an admin) can invite and remove people.
  */
 const meta = {
-  title: "ManageArtist/ArtistManagers",
+  title: "Features/Artist management/ArtistManagers",
   component: ArtistManagers,
   args: { artist: ARTIST_EXAMPLE },
   parameters: {

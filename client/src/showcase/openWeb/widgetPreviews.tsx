@@ -3,19 +3,19 @@ import React from "react";
 
 /** Story ids of the release widget stories, by `?variant=` */
 const STORY_FOR_VARIANT: Record<string, string> = {
-  card: "widget-trackgroupwidget--card",
-  compact: "widget-trackgroupwidget--compact",
-  strip: "widget-trackgroupwidget--strip",
+  card: "features-embeds-trackgroupwidget--card",
+  compact: "features-embeds-trackgroupwidget--compact",
+  strip: "features-embeds-trackgroupwidget--strip",
 };
 
-/** Storybook URL of one of the Widget/TrackGroupWidget stories */
+/** Storybook URL of one of the Features/Embeds/TrackGroupWidget stories */
 export const widgetStorySrc = (storyId: string) =>
   `/iframe.html?viewMode=story&id=${storyId}`;
 
 /**
  * The embed preview in the "Embed or share" picker points at the real app
  * (VITE_CLIENT_DOMAIN/widget/...), which isn't running under Storybook.
- * Point it at the matching Widget/TrackGroupWidget story instead, and show
+ * Point it at the matching Features/Embeds/TrackGroupWidget story instead, and show
  * the copied code with the production domain.
  */
 export const useLocalWidgetPreviews: Decorator = (Story) => {

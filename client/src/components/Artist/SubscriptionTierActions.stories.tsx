@@ -31,7 +31,7 @@ const ARTIST: Artist = {
  * an address opens the payment modal for it.
  */
 const meta = {
-  title: "Artist/SubscriptionTierActions",
+  title: "Features/Billing/SubscriptionTierActions",
   component: SubscriptionTierActions,
   args: { subscriptionTier: LIGHTHOUSE_TIER },
   decorators: [

@@ -64,7 +64,7 @@ const loggedInAs = (user: LoggedInUser) =>
  * existing subscription in place, and new subscriptions open the payment form.
  */
 const meta = {
-  title: "Common/SupportArtistTiersForm",
+  title: "Features/Buying/SupportArtistTiersForm",
   component: SupportArtistTiersForm,
   parameters: {
     layout: "padded",

@@ -24,7 +24,7 @@ const ARTIST: Artist = {
  * pop-up. A preset or "Other" amount opens the payment form for a tip.
  */
 const meta = {
-  title: "Common/TipArtistForm",
+  title: "Features/Buying/TipArtistForm",
   component: TipArtistForm,
   parameters: {
     layout: "padded",

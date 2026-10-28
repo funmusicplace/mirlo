@@ -20,7 +20,7 @@ const FREE_RELEASE: TrackGroup = {
  * needed. Note: this component isn't currently rendered anywhere in the app.
  */
 const meta = {
-  title: "TrackGroup/FreeDownload",
+  title: "Features/Buying/FreeDownload",
   component: FreeDownload,
   args: { trackGroup: FREE_RELEASE, chosenPrice: "0" },
   decorators: [

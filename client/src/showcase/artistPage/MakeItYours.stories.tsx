@@ -94,7 +94,7 @@ const SplitPreview = () => (
 );
 
 const meta = {
-  title: "Showcase/Make it yours",
+  title: "Showcase/Artist page/Make it yours",
   component: SplitPreview,
   parameters: {
     layout: "fullscreen",

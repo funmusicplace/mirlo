@@ -8,6 +8,8 @@ import { queryHostedCheckout } from "queries";
 import { useTranslation } from "react-i18next";
 import { Navigate, useSearchParams } from "react-router-dom";
 
+import CheckoutSkeleton from "./CheckoutSkeleton";
+
 /**
  * The Mirlo-hosted checkout page. External API consumers send a buyer here.
  */
@@ -28,7 +30,7 @@ function Index() {
   }
 
   if (isPending) {
-    return <FullPageLoadingSpinner />;
+    return <CheckoutSkeleton />;
   }
 
   if (data?.redirectUrl) {
@@ -73,7 +75,10 @@ function Index() {
           : null;
 
   return (
-    <WidthWrapper variant="medium" className="mt-8 mb-12">
+    <WidthWrapper
+      variant="medium"
+      className="mt-8! mb-12! py-8 px-6 border border-(--mi-tint-color) rounded-[var(--mi-border-radius-x)]"
+    >
       <h1 className="text-xl mb-1">{t("title")}</h1>
       {summary && (
         <p className="mb-4 text-(--mi-lighten-foreground-color)">{summary}</p>

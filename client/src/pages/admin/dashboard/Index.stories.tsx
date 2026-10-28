@@ -31,7 +31,7 @@ const topAccountsHandler = http.get("*/v1/admin/topAccounts", ({ request }) =>
 );
 
 const meta = {
-  title: "Admin/Dashboard",
+  title: "Features/Admin/Dashboard",
   component: AdminDashboard,
   parameters: {
     layout: "fullscreen",

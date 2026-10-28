@@ -34,7 +34,7 @@ const pay = async (canvasElement: HTMLElement, name = "Complete payment") => {
  * buyer clicks pay. Stripe itself is a local stand-in in Storybook.
  */
 const meta = {
-  title: "Common/Purchase/PurchaseElements",
+  title: "Features/Buying/PurchaseElements",
   component: PurchaseElements,
   args: {
     checkout: deferred(),

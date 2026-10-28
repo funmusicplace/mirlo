@@ -23,7 +23,7 @@ const ARTIST: Artist = {
  * nothing is charged or created with Stripe until the buyer pays.
  */
 const meta = {
-  title: "Artist/PurchaseCatalogueButton",
+  title: "Features/Buying/PurchaseCatalogueButton",
   component: PurchaseCatalogueButton,
   args: { artist: ARTIST },
   parameters: {

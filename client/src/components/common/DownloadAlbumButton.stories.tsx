@@ -12,7 +12,7 @@ import DownloadAlbumButton from "./DownloadAlbumButton";
  * Picking one asks the API to generate the zip, then shows a Download button.
  */
 const meta = {
-  title: "Common/DownloadAlbumButton",
+  title: "Features/Buying/DownloadAlbumButton",
   component: DownloadAlbumButton,
   args: { trackGroup: RELEASES.tidal },
   parameters: {

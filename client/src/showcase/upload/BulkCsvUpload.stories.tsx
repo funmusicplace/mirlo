@@ -32,7 +32,7 @@ const bulkHandlers = [
 ];
 
 const meta = {
-  title: "Showcase/Bulk CSV upload",
+  title: "Showcase/Upload/Bulk CSV upload",
   component: BulkTrackUploadPage,
   decorators: [
     (Story) => (

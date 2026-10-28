@@ -67,7 +67,7 @@ const handlers = (details: OAuthInteraction | null) => {
 };
 
 const meta = {
-  title: "OAuth/Connect an app",
+  title: "Features/OAuth/Connect an app",
   component: OAuth,
   parameters: {
     layout: "fullscreen",

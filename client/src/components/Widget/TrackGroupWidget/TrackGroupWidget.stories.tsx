@@ -19,7 +19,7 @@ const RELEASE = RELEASES.tidal;
  * The "Embed or share" picker previews these stories in its iframe.
  */
 const meta = {
-  title: "Widget/TrackGroupWidget",
+  title: "Features/Embeds/TrackGroupWidget",
   component: TrackGroupWidgetPage,
   beforeEach: clearPlayerQueue,
   decorators: [noPageScroll],

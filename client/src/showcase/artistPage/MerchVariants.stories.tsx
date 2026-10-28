@@ -20,7 +20,7 @@ const merchPath = (merch: Merch) => `/lumen-tide/merch/${merch.id}`;
  * bundled album download.
  */
 const meta = {
-  title: "Showcase/Merch variants and shipping",
+  title: "Showcase/Artist page/Merch variants and shipping",
   component: AppFrame,
   parameters: {
     layout: "fullscreen",

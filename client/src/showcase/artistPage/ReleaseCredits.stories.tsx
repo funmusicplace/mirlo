@@ -14,7 +14,7 @@ import {
 const releasePath = `/lumen-tide/release/${TIDAL_HOURS.urlSlug}`;
 
 const meta = {
-  title: "Showcase/Release credits and lyrics",
+  title: "Showcase/Artist page/Release credits and lyrics",
   component: AppFrame,
   parameters: {
     layout: "fullscreen",

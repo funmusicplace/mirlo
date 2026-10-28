@@ -121,7 +121,7 @@ const VIEWPORTS = {
 };
 
 const meta = {
-  title: "ManageArtist/Release/EditRelease",
+  title: "Features/Releases/EditRelease",
   component: ManageTrackGroupPage,
   parameters: {
     layout: "fullscreen",

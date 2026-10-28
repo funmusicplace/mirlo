@@ -25,6 +25,8 @@ import {
   YAxis,
 } from "recharts";
 
+import DashboardSkeleton from "./DashboardSkeleton";
+
 const DAYS = 365;
 
 const SERIES_COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4"];
@@ -244,7 +246,7 @@ export const Index: React.FC = () => {
   }
 
   if (!stats) {
-    return <div>{t("loading")}</div>;
+    return <DashboardSkeleton />;
   }
 
   // Titles follow the data that came back, not the pending toggle.

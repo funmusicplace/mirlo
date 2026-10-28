@@ -172,7 +172,7 @@ const dragSecondImageToFront = async (canvasElement: HTMLElement) => {
  * used in listings, previews and checkout.
  */
 const meta = {
-  title: "ManageArtist/Merch/MerchImagesEditor",
+  title: "Features/Merch/MerchImagesEditor",
   component: EditorHarness,
   parameters: { layout: "padded" },
 } satisfies Meta<typeof EditorHarness>;

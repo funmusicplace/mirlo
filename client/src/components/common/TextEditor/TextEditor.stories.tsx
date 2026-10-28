@@ -65,7 +65,7 @@ const findUploadedImage = (editor: HTMLElement) =>
   });
 
 const meta = {
-  title: "TextEditor/TextEditor",
+  title: "Features/Posts/TextEditor",
   component: TextEditor,
   render: (args) => <EditorWithSavedHtml {...args} />,
   args: {

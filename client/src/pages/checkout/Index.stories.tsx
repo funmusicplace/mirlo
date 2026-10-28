@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { expect, userEvent, waitFor, within } from "@storybook/test";
-import { http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { reactRouterParameters } from "storybook-addon-remix-react-router";
 
 import {
@@ -35,7 +35,7 @@ const at = (searchParams: Record<string, string>) =>
  * opened. Opening the page quotes that checkout; paying creates the intent.
  */
 const meta = {
-  title: "Pages/HostedCheckout",
+  title: "Features/Buying/HostedCheckout",
   component: HostedCheckout,
   parameters: {
     layout: "fullscreen",
@@ -108,6 +108,24 @@ export const SubscriptionWithAddress: Story = {
       await canvas.findByText("Paying Lumen Tide")
     ).toBeInTheDocument();
     await expect(canvas.getByTestId("address-element")).toBeInTheDocument();
+  },
+};
+
+/** Waiting on the quote for the checkout */
+export const Loading: Story = {
+  parameters: {
+    msw: {
+      handlers: {
+        purchase: http.post("*/v1/purchase", () => delay("infinite")),
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    await expect(
+      await within(canvasElement).findByRole("status", {
+        name: "Loading checkout…",
+      })
+    ).toBeInTheDocument();
   },
 };
 

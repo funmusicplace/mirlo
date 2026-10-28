@@ -79,7 +79,7 @@ const StatefulPreview: React.FC<PreviewProps> = (props) => {
  * files, before anything is uploaded.
  */
 const meta = {
-  title: "ManageArtist/ManageTrackGroup/ZipImportPreview",
+  title: "Features/Releases/ZipImportPreview",
   component: ZipImportPreview,
   render: (args) => <StatefulPreview {...args} />,
   args: {

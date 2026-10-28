@@ -34,7 +34,7 @@ const handlers = ({
  * and any pending invites to manage someone else's artist.
  */
 const meta = {
-  title: "ManageArtist/ManageIndex",
+  title: "Features/Artist management/ManageIndex",
   component: ManageIndex,
   parameters: {
     layout: "fullscreen",

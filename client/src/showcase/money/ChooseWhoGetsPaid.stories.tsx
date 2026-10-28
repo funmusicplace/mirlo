@@ -40,7 +40,7 @@ const handlers = [
  * label relationship.
  */
 const meta = {
-  title: "Showcase/Choose who gets paid",
+  title: "Showcase/Money/Choose who gets paid",
   component: CustomizeArtistPage,
   parameters: {
     layout: "fullscreen",

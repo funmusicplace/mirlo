@@ -33,7 +33,7 @@ const handlers = (invites = [ARTIST_MANAGER_INVITE_EXAMPLE]) => [
  * artist, shown at the top of /manage.
  */
 const meta = {
-  title: "ManageArtist/ArtistInvites",
+  title: "Features/Artist management/ArtistInvites",
   component: ArtistInvites,
   parameters: {
     layout: "padded",

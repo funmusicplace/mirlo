@@ -18,7 +18,7 @@ import {
 } from "./zipUploadMocks";
 
 const meta = {
-  title: "Showcase/Zip upload",
+  title: "Showcase/Upload/Zip upload",
   component: ManageTrackGroupPage,
   loaders: [resetZipUploadState],
   decorators: [

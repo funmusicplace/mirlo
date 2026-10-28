@@ -73,7 +73,7 @@ const WithAlbumForm: React.FC<{ fundraiser?: Fundraiser }> = ({
  * all-or-nothing setting locks once supporters have pledged.
  */
 const meta = {
-  title: "ManageArtist/ManageTrackGroup/FundraisingGoal",
+  title: "Features/Releases/FundraisingGoal",
   component: WithAlbumForm,
   parameters: {
     layout: "padded",

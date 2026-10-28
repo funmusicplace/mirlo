@@ -42,7 +42,7 @@ const customizeHandlers = [
 ];
 
 const meta = {
-  title: "ManageArtist/Customize",
+  title: "Features/Artist management/Customize",
   component: CustomizeArtistPage,
   parameters: {
     layout: "padded",
