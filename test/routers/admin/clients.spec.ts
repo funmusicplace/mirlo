@@ -65,6 +65,24 @@ describe("admin/clients", () => {
     assert.equal(refused.status, 400, refused.text);
   });
 
+  it("turns on the full catalogue for a client", async () => {
+    const created = await requestApp
+      .post("admin/clients")
+      .set("Cookie", [`jwt=${adminToken}`])
+      .send({
+        applicationName: "Mirlo mobile",
+        applicationUrl: "https://mirlo.space",
+      });
+    assert.equal(created.body.result.fullCatalog, false);
+
+    const updated = await requestApp
+      .put(`admin/clients/${created.body.result.id}`)
+      .set("Cookie", [`jwt=${adminToken}`])
+      .send({ fullCatalog: true });
+    assert.equal(updated.status, 200, updated.text);
+    assert.equal(updated.body.result.fullCatalog, true);
+  });
+
   it("refuses redirect URIs that aren't URLs or have a fragment", async () => {
     for (const redirectUris of [["not a url"], ["https://a.example/#x"], "x"]) {
       const response = await requestApp

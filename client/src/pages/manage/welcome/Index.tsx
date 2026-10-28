@@ -21,6 +21,7 @@ const PageWrapper = styled.div`
 interface FormData {
   name: string;
   urlSlug: string;
+  federatedStreaming: boolean;
   confirmContentPolicy: boolean;
 }
 
@@ -41,7 +42,11 @@ function Index() {
     async (artist: Artist, data: FormData) => {
       const response = await api.put<Partial<Artist>, { result: Artist }>(
         `manage/artists/${artist.id}`,
-        { name: data.name, urlSlug: data.urlSlug }
+        {
+          name: data.name,
+          urlSlug: data.urlSlug,
+          federatedStreaming: data.federatedStreaming,
+        }
       );
       setLocalArtist(response.result);
       return response.result;
@@ -65,6 +70,7 @@ function Index() {
           reset({
             name: response.result.name,
             urlSlug: response.result.urlSlug,
+            federatedStreaming: false,
             confirmContentPolicy: true,
           });
           setStep((s) => s + 1);

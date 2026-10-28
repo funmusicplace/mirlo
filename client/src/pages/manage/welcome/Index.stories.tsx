@@ -96,7 +96,7 @@ export const SavesEditedSlugBeforeCustomizing: Story = {
     );
     await waitFor(() =>
       expect(savedArtistBodies).toEqual([
-        { name: "Foo Bar", urlSlug: "foobar" },
+        { name: "Foo Bar", urlSlug: "foobar", federatedStreaming: false },
       ])
     );
   },
@@ -112,7 +112,24 @@ export const SavesEditedSlugBeforeSkipping: Story = {
     );
     await waitFor(() =>
       expect(savedArtistBodies).toEqual([
-        { name: "Foo Bar", urlSlug: "foobar" },
+        { name: "Foo Bar", urlSlug: "foobar", federatedStreaming: false },
+      ])
+    );
+  },
+};
+
+export const SavesFederatedStreamingOptIn: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = await createArtistAndEditSlug(canvasElement);
+    await userEvent.click(canvas.getByRole("switch", { name: "Discovery" }));
+    await userEvent.click(
+      canvas.getByRole("button", {
+        name: "Customize what the artist page will look like.",
+      })
+    );
+    await waitFor(() =>
+      expect(savedArtistBodies).toEqual([
+        { name: "Foo Bar", urlSlug: "foobar", federatedStreaming: true },
       ])
     );
   },

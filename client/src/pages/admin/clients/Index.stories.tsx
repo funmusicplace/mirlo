@@ -14,6 +14,7 @@ const makeClient = (overrides: Partial<AdminClient> = {}): AdminClient => ({
   status: "approved",
   redirectUris: ["https://radiccio.app/callback"],
   confidential: false,
+  fullCatalog: false,
   clientIdUrl: null,
   user: { id: 1, email: "dev@radiccio.app" },
   createdAt: "2026-09-01T00:00:00.000Z",

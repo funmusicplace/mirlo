@@ -1,5 +1,3 @@
-import { join } from "path";
-
 import {
   Image,
   Profile,
@@ -58,16 +56,14 @@ export const serializeSingleTrackIntoCanimus = (
 ) => {
   const trackId = String(track.id);
   const metadata: any = track.metadata;
-  const mediaUrl = join(
-    String(process.env.API_DOMAIN),
-    "v1/tracks",
-    trackId,
-    "stream/external/playlist.m3u8"
-  );
+  const mediaUrl = new URL(
+    `v1/tracks/${trackId}/stream/external/playlist.m3u8`,
+    String(process.env.API_DOMAIN)
+  ).href;
   return {
     type: "track",
     name: track.title,
-    url: join(releaseUrl, "tracks", trackId),
+    url: `${releaseUrl}/tracks/${trackId}`,
     id: trackId,
     duration: track.audio?.duration ?? metadata?.format?.duration,
     track: track.order,
@@ -91,6 +87,7 @@ export const serializeSingleDeletedTrackIntoCanimus = (
   return {
     type: "track",
     name: track.title,
-    url: join(releaseUrl, "tracks", trackId),
+    url: `${releaseUrl}/tracks/${trackId}`,
+    id: trackId,
   };
 };

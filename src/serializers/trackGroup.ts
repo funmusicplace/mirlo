@@ -1,5 +1,3 @@
-import { join } from "path";
-
 import {
   Image,
   Profile,
@@ -171,6 +169,18 @@ export const serializeTrackGroupPurchase = <
   } as Serialized<T>;
 };
 
+export const canimusFeedLink = (path: string) => ({
+  name: "Canimus feed",
+  href: new URL(path, String(process.env.API_DOMAIN)).href,
+  type: "application/canimus+json",
+  rel: "alternate",
+});
+
+export const canimusReleaseUrl = (
+  artistUrl: string,
+  trackGroup: { urlSlug: string }
+) => `${artistUrl}/release/${trackGroup.urlSlug}`;
+
 export const serializeSingleTrackGroupIntoCanimus = (
   trackGroup: LocalTrackGroup,
   artistUrl: string,
@@ -178,20 +188,20 @@ export const serializeSingleTrackGroupIntoCanimus = (
   canBePurchased: boolean,
   instanceName: string
 ) => {
-  const releaseUrl = `${artistUrl}/release/${trackGroup.urlSlug}`;
+  const releaseUrl = canimusReleaseUrl(artistUrl, trackGroup);
   const coverUrl = storedImageVariantUrl(trackGroup.cover, 600);
-  let links;
+  const links = [
+    canimusFeedLink(`v1/trackGroups/${trackGroup.id}/canimus.json`),
+  ];
   if (canBePurchased) {
     // TODO: replace with a standalone buy page once that exists
     const purchaseUrl = `${releaseUrl}?buy=true`;
-    links = [
-      {
-        name: `Buy ${trackGroup.title} on ${instanceName}`,
-        href: purchaseUrl,
-        type: "Purchase",
-        rel: "purchase",
-      },
-    ];
+    links.push({
+      name: `Buy ${trackGroup.title} on ${instanceName}`,
+      href: purchaseUrl,
+      type: "Purchase",
+      rel: "purchase",
+    });
   }
 
   return {
@@ -225,10 +235,10 @@ export const serializeSingleDeletedTrackGroupIntoCanimus = (
   trackGroup: LocalTrackGroup,
   artistUrl: string
 ) => {
-  const releaseUrl = join(artistUrl, "release", trackGroup.urlSlug);
   return {
     type: "album",
     name: trackGroup.title,
-    url: releaseUrl,
+    url: canimusReleaseUrl(artistUrl, trackGroup),
+    uid: String(trackGroup.id),
   };
 };

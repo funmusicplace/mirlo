@@ -236,6 +236,63 @@ describe("manage/artists/{artistId}", () => {
     });
   });
 
+  describe("PUT federatedStreaming", () => {
+    const optedIn = new Date("2026-01-01T00:00:00.000Z");
+
+    it("should leave the opt-out date alone when saving other fields", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const profile = await createProfile(user.id);
+      await prisma.profile.update({
+        where: { id: profile.id },
+        data: {
+          federatedStreaming: true,
+          federatedStreamingOptInDate: optedIn,
+        },
+      });
+
+      const response = await requestApp
+        .put(`manage/artists/${profile.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .send({ maxFreePlays: 3 });
+
+      assert.equal(response.statusCode, 200);
+      const updated = await prisma.profile.findFirstOrThrow({
+        where: { id: profile.id },
+      });
+      assert.equal(updated.federatedStreaming, true);
+      assert.equal(updated.federatedStreamingOptOutDate, null);
+    });
+
+    it("should set only the opt-out date when turning it off", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const profile = await createProfile(user.id);
+      await prisma.profile.update({
+        where: { id: profile.id },
+        data: {
+          federatedStreaming: true,
+          federatedStreamingOptInDate: optedIn,
+        },
+      });
+
+      const response = await requestApp
+        .put(`manage/artists/${profile.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .send({ federatedStreaming: false });
+
+      assert.equal(response.statusCode, 200);
+      const updated = await prisma.profile.findFirstOrThrow({
+        where: { id: profile.id },
+      });
+      assert.equal(updated.federatedStreaming, false);
+      assert.deepEqual(updated.federatedStreamingOptInDate, optedIn);
+      assert.ok(updated.federatedStreamingOptOutDate! > optedIn);
+    });
+  });
+
   describe("DELETE", () => {
     it("should succeed", async () => {
       const { user, accessToken } = await createUser({

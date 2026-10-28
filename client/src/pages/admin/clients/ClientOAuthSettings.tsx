@@ -1,5 +1,6 @@
 import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
+import Tooltip from "components/common/Tooltip";
 import { AdminClient, useUpdateAdminClientMutation } from "queries/admin";
 import { MirloFetchError } from "queries/fetch/MirloFetchError";
 import React from "react";
@@ -73,14 +74,16 @@ const ClientOAuthSettings: React.FC<{ client: AdminClient }> = ({ client }) => {
           {t("save")}
         </Button>
       </form>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={client.confidential}
-          onChange={(e) => save({ confidential: e.target.checked })}
-        />
-        {t("confidentialClient")}
-      </label>
+      <Tooltip hoverText={t("confidentialClientHint")}>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={client.confidential}
+            onChange={(e) => save({ confidential: e.target.checked })}
+          />
+          {t("confidentialClient")}
+        </label>
+      </Tooltip>
     </div>
   );
 };

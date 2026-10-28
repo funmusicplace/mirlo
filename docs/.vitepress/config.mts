@@ -51,6 +51,10 @@ export default defineConfig({
             link: "/how-tos/accepting-more-payment-types",
           },
           {
+            text: "The social web and discovery",
+            link: "/how-tos/social-web-and-discovery",
+          },
+          {
             text: "Making your own album art",
             link: "/how-tos/making-your-own-album-art",
           },
@@ -64,6 +68,10 @@ export default defineConfig({
         text: "Developers: using the API",
         link: "/api",
         items: [
+          {
+            text: "Catalog feeds and streaming (Canimus)",
+            link: "/api/canimus",
+          },
           { text: "Sign in with Mirlo", link: "/api/oauth" },
           { text: "Setting up Sign in with Mirlo", link: "/api/oauth-setup" },
         ],

@@ -237,30 +237,12 @@ export const getEditableProfileIds = async (
   return profiles.map((p) => p.id);
 };
 
-export const profileDeleted: Prisma.ProfileWhereInput = {
-  deletedAt: { not: null },
-};
-
 export const federatedProfile: Prisma.ProfileWhereInput = {
   federatedStreaming: true,
 };
 
 export const federatedProfileAtSomePoint: Prisma.ProfileWhereInput = {
   federatedStreamingOptInDate: { not: null },
-};
-
-export const profileNoLongerFederated: Prisma.ProfileWhereInput = {
-  AND: [federatedProfileAtSomePoint, { NOT: federatedProfile }],
-};
-
-// Profiles who opted in at some point but were deleted
-export const profileFederatedButDeleted: Prisma.ProfileWhereInput = {
-  AND: [federatedProfileAtSomePoint, profileDeleted],
-};
-
-export const profileOptedOutOrDeleted: Prisma.ProfileWhereInput = {
-  OR: [profileNoLongerFederated, profileFederatedButDeleted],
-  deletedAt: {}, // this is to avoid the middleware filtering out softDeleted -> /mirlo/prisma/prisma.ts
 };
 
 export const whereForVisibleProfile = (): Prisma.ProfileWhereInput => ({
@@ -895,12 +877,8 @@ export const resolveProfileImageUrl = (artist: {
  */
 export const confirmArtistIdExists = confirmProfileIdExists;
 export const getPlatformFeeForArtist = getPlatformFeeForProfile;
-export const artistDeleted = profileDeleted;
 export const federatedArtist = federatedProfile;
 export const federatedArtistAtSomePoint = federatedProfileAtSomePoint;
-export const artistNoLongerFederated = profileNoLongerFederated;
-export const artistFederatedButDeleted = profileFederatedButDeleted;
-export const artistOptedOutOrDeleted = profileOptedOutOrDeleted;
 export const findArtistIdForURLSlug = findProfileIdForURLSlug;
 export const subscribeUserToArtist = subscribeUserToProfile;
 export const deleteArtist = deleteProfile;

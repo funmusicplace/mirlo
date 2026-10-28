@@ -19,7 +19,7 @@ import { MirloFetchError } from "queries/fetch/MirloFetchError";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { FaSyncAlt, FaTrash } from "react-icons/fa";
+import { FaExternalLinkAlt, FaSyncAlt, FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 
 import ClientNameSettings from "./ClientNameSettings";
@@ -96,6 +96,18 @@ const Index: React.FC = () => {
     [updateClient, snackbar]
   );
 
+  const onChangeFullCatalog = React.useCallback(
+    async (client: AdminClient, fullCatalog: boolean) => {
+      try {
+        await updateClient({ clientId: client.id, fullCatalog });
+      } catch (e) {
+        console.error(e);
+        snackbar("Oops something went wrong", { type: "warning" });
+      }
+    },
+    [updateClient, snackbar]
+  );
+
   const onRotateKey = React.useCallback(
     async (client: AdminClient) => {
       try {
@@ -157,6 +169,7 @@ const Index: React.FC = () => {
             <input type="checkbox" {...register("confidential")} />
             {t("confidentialClient")}
           </label>
+          <small>{t("confidentialClientHint")}</small>
         </FormComponent>
         <Button type="submit">{t("createClient")}</Button>
       </form>
@@ -215,6 +228,24 @@ const Index: React.FC = () => {
                       title={t("copyKey") ?? ""}
                     />
                   )}
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={client.fullCatalog}
+                      onChange={(e) =>
+                        onChangeFullCatalog(client, e.target.checked)
+                      }
+                    />
+                    <a
+                      href="https://docs.mirlo.space/api/canimus#which-artists-are-included"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1"
+                    >
+                      {t("fullCatalog")}
+                      <FaExternalLinkAlt className="text-xs" />
+                    </a>
+                  </label>
                 </td>
                 <td className="whitespace-nowrap">
                   <div className="flex justify-end gap-2">

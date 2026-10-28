@@ -11,6 +11,7 @@ import ArtistIdentitySection from "components/ManageArtist/ManageArtistDetails/A
 import ArtistManagers from "components/ManageArtist/ManageArtistDetails/ArtistManagers";
 import ArtistPaymentReceiver from "components/ManageArtist/ManageArtistDetails/ArtistPaymentReceiver";
 import CustomNamesForTabs from "components/ManageArtist/ManageArtistDetails/CustomNamesForTabs";
+import FederatedStreamingToggle from "components/ManageArtist/ManageArtistDetails/FederatedStreamingToggle";
 import LabelConfirmation from "components/ManageArtist/ManageArtistDetails/LabelConfirmation";
 import LayoutSettings from "components/ManageArtist/ManageArtistDetails/LayoutSettings";
 import ThankYouMessageEditors from "components/ManageArtist/ManageArtistDetails/ThankYouMessageEditors";
@@ -206,7 +207,6 @@ export const Index: React.FC = () => {
   );
 
   const activityPub = methods.watch("activityPub");
-  const federatedStreaming = methods.watch("federatedStreaming");
   const allowDirectMessages = methods.watch("allowDirectMessages");
 
   if (!artist) {
@@ -326,19 +326,7 @@ export const Index: React.FC = () => {
                   {t("makeSearchable")}
                 </small>
               </FormComponent>
-              <FormComponent>
-                <Toggle
-                  ariaDescribedBy="hint-enable-federated-streaming"
-                  label={t("enableFederatedStreaming")}
-                  toggled={federatedStreaming}
-                  onClick={() => {
-                    methods.setValue("federatedStreaming", !federatedStreaming);
-                  }}
-                />
-                <small id="hint-enable-federated-streaming">
-                  {t("makeStreamable")}
-                </small>
-              </FormComponent>
+              <FederatedStreamingToggle />
               <FormComponent>
                 <Toggle
                   ariaDescribedBy="hint-allow-direct-messages"
