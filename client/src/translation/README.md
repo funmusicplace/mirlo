@@ -11,3 +11,5 @@ The other `<locale>.json` files in this folder are pulled from Transifex by `scr
 They ship with the client, so a build without `VITE_TRANSIFEX_TOKEN` (for example a self-hosted instance) still has every language. When a token is set, `client/src/i18n.ts` also fetches from Transifex at runtime and puts those newer strings on top of the bundled ones.
 
 To pull them by hand: `TRANSIFEX_TOKEN=<native project token> yarn ts-node scripts/pull-translations.ts`
+
+To upload translations for a locale from a flat JSON file (dotted keys, the same shape as the pulled files): `TRANSIFEX_API_TOKEN=<REST API token> yarn ts-node scripts/upload-translations.ts <locale> <file.json>`. It's a dry run unless you pass `--apply`. Strings that are already translated in Transifex, or whose English has changed since the file was drafted, are skipped.

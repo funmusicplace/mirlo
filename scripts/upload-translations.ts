@@ -1,18 +1,20 @@
 import fs from "fs";
 import path from "path";
 
+import { chunk } from "lodash";
+
 const API = "https://rest.api.transifex.com";
 const EN_JSON = path.resolve(__dirname, "../client/src/translation/en.json");
 
 const token = process.env.TRANSIFEX_API_TOKEN;
-const org = process.env.TRANSIFEX_ORG;
-const project = process.env.TRANSIFEX_PROJECT;
+const org = process.env.TRANSIFEX_ORGANIZATION || "mirlo";
+const project = process.env.TRANSIFEX_PROJECT || "mirlo";
 const [locale, file] = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const apply = process.argv.includes("--apply");
 
-if (!token || !org || !project || !locale || !file) {
+if (!token || !locale || !file) {
   console.error(
-    "Usage: TRANSIFEX_API_TOKEN=... TRANSIFEX_ORG=... TRANSIFEX_PROJECT=... yarn ts-node scripts/upload-translations.ts <locale> <translations.json> [--apply]"
+    "Usage: TRANSIFEX_API_TOKEN=... yarn ts-node scripts/upload-translations.ts <locale> <translations.json> [--apply]"
   );
   process.exit(1);
 }
@@ -33,7 +35,7 @@ const request = async (
   init: RequestInit = {},
   attempt = 1
 ): Promise<any> => {
-  const res = await fetch(url.startsWith("http") ? url : API + url, {
+  const res = await fetch(url, {
     ...init,
     headers: {
       Authorization: `Bearer ${token}`,
@@ -54,18 +56,11 @@ const request = async (
 };
 
 const findResource = async () => {
-  if (process.env.TRANSIFEX_RESOURCE) {
-    return `o:${org}:p:${project}:r:${process.env.TRANSIFEX_RESOURCE}`;
-  }
   const { data } = await request(
-    `/resources?filter[project]=o:${org}:p:${project}`
+    `${API}/resources?filter[project]=o:${org}:p:${project}`
   );
   if (data.length !== 1) {
-    throw new Error(
-      `Found ${data.length} resources, set TRANSIFEX_RESOURCE to one of: ${data
-        .map((r: { attributes: { slug: string } }) => r.attributes.slug)
-        .join(", ")}`
-    );
+    throw new Error(`Expected one resource, found ${data.length}`);
   }
   return data[0].id;
 };
@@ -81,31 +76,24 @@ const main = async () => {
     [];
   const skipped = { alreadyTranslated: 0, sourceChanged: 0, notInFile: 0 };
 
-  let next: string | undefined =
-    `/resource_translations?filter[resource]=${resource}` +
+  let next: string | null | undefined =
+    `${API}/resource_translations?filter[resource]=${resource}` +
     `&filter[language]=l:${locale}&include=resource_string`;
   while (next) {
     const page = await request(next);
-    const sources = new Map<string, { key: string; source: string }>(
-      (page.included ?? []).map(
-        (s: {
-          id: string;
-          attributes: { key: string; strings: { other: string } };
-        }) => [
-          s.id,
-          { key: s.attributes.key, source: s.attributes.strings.other },
-        ]
-      )
+    const sources = new Map<string, any>(
+      (page.included ?? []).map((s: any) => [s.id, s.attributes])
     );
     for (const row of page.data) {
-      const string = sources.get(row.relationships.resource_string.data.id);
-      if (!string) continue;
-      const translation = translations[string.key];
+      const { key, strings } = sources.get(
+        row.relationships.resource_string.data.id
+      );
+      const translation = translations[key];
       if (!translation) {
         skipped.notInFile++;
       } else if (row.attributes.strings) {
         skipped.alreadyTranslated++;
-      } else if (english[string.key] !== string.source) {
+      } else if (english[key] !== strings.other) {
         skipped.sourceChanged++;
       } else {
         toUpdate.push({
@@ -114,7 +102,7 @@ const main = async () => {
         });
       }
     }
-    next = page.links?.next ?? undefined;
+    next = page.links?.next;
   }
 
   console.log(`${toUpdate.length} to upload`, skipped);
@@ -123,16 +111,17 @@ const main = async () => {
     return;
   }
 
-  for (let i = 0; i < toUpdate.length; i += 150) {
-    const batch = toUpdate.slice(i, i + 150);
-    await request("/resource_translations", {
+  let uploaded = 0;
+  for (const batch of chunk(toUpdate, 150)) {
+    await request(`${API}/resource_translations`, {
       method: "PATCH",
       headers: { "Content-Type": 'application/vnd.api+json;profile="bulk"' },
       body: JSON.stringify({
         data: batch.map((t) => ({ ...t, type: "resource_translations" })),
       }),
     });
-    console.log(`uploaded ${i + batch.length}/${toUpdate.length}`);
+    uploaded += batch.length;
+    console.log(`uploaded ${uploaded}/${toUpdate.length}`);
   }
 };
 
