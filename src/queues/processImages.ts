@@ -14,8 +14,10 @@ import { APIContext } from "../utils/file";
 import {
   ImageType,
   imageTypeUsesQueue,
+  removeIncomingImageByType,
   uploadIncomingImageByType,
 } from "../utils/minio";
+import { stripNullBytes } from "../utils/sanitize";
 import { deleteTrackGroupCover } from "../utils/trackGroup";
 
 const queueOptions = {
@@ -103,6 +105,18 @@ const isUnsupportedImageCodecError = (error: unknown) => {
 
 const fileExtension = (filename: string) => filename.split(".").pop();
 
+const rejectMissingFile = () =>
+  new AppError({
+    httpCode: HttpCode.BAD_REQUEST,
+    description: "No image was uploaded.",
+  });
+
+const rejectTooLarge = () =>
+  new AppError({
+    httpCode: HttpCode.PAYLOAD_TOO_LARGE,
+    description: "The image is too large.",
+  });
+
 export const uploadAndSendToImageQueue = async (
   ctx: APIContext,
   imageType: ImageType,
@@ -121,6 +135,10 @@ export const uploadAndSendToImageQueue = async (
   storeWithExtension?: boolean
 ) => {
   logger.info(`Uploading ${sharpConfigKey} to object storage`);
+
+  if (!ctx.req.busboy) {
+    throw rejectMissingFile();
+  }
 
   // Pipe the request body immediately so the proxy doesn't drop the connection
   // while we do async work. Bucket creation moves inside the file event handler.
@@ -144,8 +162,23 @@ export const uploadAndSendToImageQueue = async (
         fromBody["imageId"] = val;
       }
     });
+    let hasFile = false;
     ctx.req.busboy.on("error", reject);
+    ctx.req.busboy.on("close", () => {
+      if (!hasFile) {
+        reject(rejectMissingFile());
+      }
+    });
     ctx.req.busboy.on("file", async (_fieldname, fileStream, fileInfo) => {
+      hasFile = true;
+      const sanitizedFileInfo = {
+        ...fileInfo,
+        filename: stripNullBytes(fileInfo.filename) ?? "",
+      };
+      let isTooLarge = false;
+      fileStream.on("limit", () => {
+        isTooLarge = true;
+      });
       try {
         if (sharpConfigKey === "inFormData" && !fromBody.dimensions) {
           reject("Must provide dimensions field in form data");
@@ -164,7 +197,7 @@ export const uploadAndSendToImageQueue = async (
         const webpConfig = sharpConfig.config[config].webp;
         const largestVariant = getLargestVariant(webpConfig?.variants ?? []);
 
-        const image = await createDatabaseEntry(fileInfo, {
+        const image = await createDatabaseEntry(sanitizedFileInfo, {
           ...(fromBody as {
             dimensions: "square";
             relation?: "subscriptionTierImage";
@@ -175,6 +208,10 @@ export const uploadAndSendToImageQueue = async (
           reject("Could not create database entry");
           return;
         }
+
+        const fileName = storeWithExtension
+          ? `${image.id}.${fileExtension(sanitizedFileInfo.filename)}`
+          : image.id;
 
         try {
           const transform = sharp().rotate();
@@ -189,15 +226,15 @@ export const uploadAndSendToImageQueue = async (
           }
 
           const optimizedStream = fileStream.pipe(transform);
-          const fileName = storeWithExtension
-            ? `${image.id}.${fileExtension(fileInfo.filename)}`
-            : image.id;
           await uploadIncomingImageByType(
             imageType,
             fileName,
             optimizedStream,
             { contentType: fileInfo.mimeType || "application/octet-stream" }
           );
+          if (isTooLarge) {
+            throw rejectTooLarge();
+          }
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
 
@@ -206,6 +243,18 @@ export const uploadAndSendToImageQueue = async (
             filename: fileInfo.filename,
             message,
           });
+
+          if (isTooLarge) {
+            await removeIncomingImageByType(imageType, fileName).catch(
+              (removeError) =>
+                logger.error(
+                  `Could not remove the truncated upload ${fileName}`,
+                  removeError
+                )
+            );
+            reject(rejectTooLarge());
+            return;
+          }
 
           if (isUnsupportedImageCodecError(e)) {
             reject(
