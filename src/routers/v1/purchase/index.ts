@@ -460,8 +460,9 @@ export default function () {
           deferred,
           shippingAddress,
           checkoutId: checkout?.id,
-          // Opening a checkout link mustn't switch a subscriber's tier.
-          switchImmediately: !checkout,
+          // Opening or creating a checkout link mustn't switch a subscriber's
+          // tier: they confirm the switch on the checkout page.
+          switchImmediately: !checkout && !hosted,
         });
 
         if ("deferred" in result) {

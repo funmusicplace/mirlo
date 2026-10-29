@@ -194,7 +194,7 @@ describe("purchase", () => {
       );
     });
 
-    it("should return success:true (not a hosted redirectUrl) when a tier switch is repriced in place, even with hosted: true", async () => {
+    it("should send a subscriber switching tiers with hosted: true to the checkout page, without switching them yet", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_sub_hosted_switch",
@@ -209,7 +209,7 @@ describe("purchase", () => {
         collectAddress: false,
       });
 
-      await prisma.profileUserSubscription.create({
+      const existing = await prisma.profileUserSubscription.create({
         data: {
           profileSubscriptionTierId: oldTier.id,
           userId: buyer.id,
@@ -218,15 +218,7 @@ describe("purchase", () => {
         },
       });
 
-      sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
-        items: { data: [{ id: "si_existing_item" }] },
-      } as unknown as Stripe.Response<Stripe.Subscription>);
-      sinon
-        .stub(stripeUtils.stripe.subscriptions, "update")
-        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
-      sinon.stub(stripeUtils.stripe.products, "create").resolves({
-        id: "prod_new_tier",
-      } as unknown as Stripe.Response<Stripe.Product>);
+      const update = sinon.stub(stripeUtils.stripe.subscriptions, "update");
 
       const response = await postPurchase(
         {
@@ -238,11 +230,13 @@ describe("purchase", () => {
       );
 
       assert.equal(response.statusCode, 200);
-      assert.equal(response.body.success, true);
-      assert.ok(
-        !response.body.redirectUrl,
-        "there's no payment step left to send the buyer through, so no redirectUrl is needed"
-      );
+      assert.ok(response.body.redirectUrl?.includes("checkoutId="));
+      assert.equal(update.callCount, 0);
+      const after = await prisma.profileUserSubscription.findUnique({
+        where: { id: existing.id },
+      });
+      assert.equal(after?.profileSubscriptionTierId, oldTier.id);
+      assert.equal(after?.amount, 500);
     });
 
     it("should return 401 when a readerId is supplied without being logged in", async () => {
