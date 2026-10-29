@@ -3,7 +3,13 @@ import { promises as fsPromises } from "fs";
 import os from "os";
 import path from "path";
 
-import { Profile, Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
+import {
+  License,
+  Profile,
+  Track,
+  TrackArtist,
+  TrackAudio,
+} from "@mirlo/prisma/client";
 import { afterEach, before, describe, it } from "mocha";
 import type { ITag } from "music-metadata";
 
@@ -59,9 +65,17 @@ const convertAudio = async ({
   outputBasename,
   format = { format: "mp3", audioCodec: "libmp3lame" },
 }: {
-  track: Track & { audio?: TrackAudio; trackArtists: TrackArtist[] };
+  track: Track & {
+    audio?: TrackAudio;
+    trackArtists: TrackArtist[];
+    license?: License | null;
+  };
   artist: Profile;
-  trackGroup: { title: string | null; coverLocation?: string };
+  trackGroup: {
+    title: string | null;
+    coverLocation?: string;
+    catalogNumber?: string | null;
+  };
   inputFile: string;
   outputBasename: string;
   format?: Format;
@@ -252,6 +266,131 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
       hasNativeTag(parsed.native, "ALBUMARTIST"),
       "expected an ALBUMARTIST vorbis comment"
     );
+  });
+
+  it("embeds cover art in flac", async () => {
+    tempDir = await fsPromises.mkdtemp(
+      path.join(os.tmpdir(), "mirlo-track-test-")
+    );
+
+    const inputWav = path.join(tempDir, "input.wav");
+    const coverPng = path.join(tempDir, "cover.png");
+    const outputBase = path.join(tempDir, "output");
+
+    await fsPromises.writeFile(inputWav, createSilentWavBuffer());
+    await fsPromises.writeFile(coverPng, Buffer.from(tinyPngBase64, "base64"));
+
+    await convertAudio({
+      track: createTrack("audio-integration-flac-cover", []),
+      artist: { name: "Album Artist" } as Profile,
+      trackGroup: { title: "Integration Album", coverLocation: coverPng },
+      inputFile: inputWav,
+      outputBasename: outputBase,
+      format: { format: "flac", audioCodec: "flac" },
+    });
+
+    const parsed = await parseFile(`${outputBase}.flac`);
+
+    assert.equal(parsed.common.title, "Integration Track");
+    assert.ok(
+      (parsed.common.picture?.length ?? 0) > 0,
+      "expected embedded cover art"
+    );
+  });
+
+  // #830: fields parsed at upload and Mirlo's own release fields should
+  // reach the download under the names each format's readers expect.
+  for (const format of [
+    { format: "mp3", audioCodec: "libmp3lame" },
+    { format: "flac", audioCodec: "flac" },
+  ] as Format[]) {
+    it(`writes disc, bpm, key, replaygain, catalog number and license to ${format.format}`, async () => {
+      tempDir = await fsPromises.mkdtemp(
+        path.join(os.tmpdir(), "mirlo-track-test-")
+      );
+
+      const inputWav = path.join(tempDir, "input.wav");
+      const outputBase = path.join(tempDir, "output");
+      await fsPromises.writeFile(inputWav, createSilentWavBuffer());
+
+      const track = createTrack("audio-integration-extra-tags", []);
+      track.metadata = {
+        common: {
+          disk: { no: 2, of: 3 },
+          bpm: 120,
+          key: "Am",
+          replaygain_track_gain: { dB: -6.5, ratio: 0.22 },
+          replaygain_track_peak: { dB: -0.1, ratio: 0.988 },
+          replaygain_album_gain: { dB: -7.25, ratio: 0.19 },
+          replaygain_album_peak: { dB: 0, ratio: 1 },
+        },
+      };
+
+      await convertAudio({
+        track: {
+          ...track,
+          license: {
+            id: 1,
+            short: "CC BY 4.0",
+            name: "Creative Commons Attribution 4.0",
+            link: "https://creativecommons.org/licenses/by/4.0/",
+          },
+        },
+        artist: { name: "Album Artist" } as Profile,
+        trackGroup: { title: "Integration Album", catalogNumber: "MIRLO-001" },
+        inputFile: inputWav,
+        outputBasename: outputBase,
+        format,
+      });
+
+      const parsed = await parseFile(`${outputBase}.${format.format}`);
+
+      assert.deepEqual(parsed.common.disk, { no: 2, of: 3 });
+      assert.equal(parsed.common.bpm, 120);
+      assert.equal(parsed.common.key, "Am");
+      assert.deepEqual(parsed.common.catalognumber, ["MIRLO-001"]);
+      assert.equal(
+        parsed.common.copyright,
+        "Creative Commons Attribution 4.0 (https://creativecommons.org/licenses/by/4.0/)"
+      );
+      assert.equal(parsed.common.replaygain_track_gain?.dB, -6.5);
+      assert.equal(parsed.common.replaygain_track_peak?.ratio, 0.988);
+      assert.equal(parsed.common.replaygain_album_gain?.dB, -7.25);
+      assert.equal(parsed.common.replaygain_album_peak?.ratio, 1);
+    });
+  }
+
+  it("keeps the uploaded file's copyright over the track license", async () => {
+    tempDir = await fsPromises.mkdtemp(
+      path.join(os.tmpdir(), "mirlo-track-test-")
+    );
+
+    const inputWav = path.join(tempDir, "input.wav");
+    const outputBase = path.join(tempDir, "output");
+    await fsPromises.writeFile(inputWav, createSilentWavBuffer());
+
+    const track = createTrack("audio-integration-copyright", []);
+    track.metadata = { common: { copyright: "℗ 2023 Foo Records" } };
+
+    await convertAudio({
+      track: {
+        ...track,
+        license: {
+          id: 1,
+          short: "CC BY 4.0",
+          name: "Creative Commons Attribution 4.0",
+          link: "https://creativecommons.org/licenses/by/4.0/",
+        },
+      },
+      artist: { name: "Album Artist" } as Profile,
+      trackGroup: { title: "Integration Album" },
+      inputFile: inputWav,
+      outputBasename: outputBase,
+    });
+
+    const parsed = await parseFile(`${outputBase}.mp3`);
+
+    assert.equal(parsed.common.copyright, "℗ 2023 Foo Records");
   });
 
   // Regression test for #1864: MusicBrainz identifiers parsed from an

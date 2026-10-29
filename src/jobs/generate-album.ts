@@ -13,6 +13,7 @@ import {
 import archiver from "archiver";
 import { Job } from "bullmq";
 import filenamify from "filenamify";
+import { compact, keyBy } from "lodash";
 
 import { sendMailQueue } from "../queues/send-mail-queue";
 import { getClient } from "../utils/getClient";
@@ -89,6 +90,7 @@ const downloadTracks = async ({
     coverLocation?: string;
     releaseDate?: Date | null;
     totalTracks?: number | null;
+    catalogNumber?: string | null;
   };
   progress: number;
   job: Job;
@@ -97,6 +99,13 @@ const downloadTracks = async ({
   artist: Profile;
 }) => {
   let i = 0;
+
+  const licenses = keyBy(
+    await prisma.license.findMany({
+      where: { id: { in: compact(tracks.map((track) => track.licenseId)) } },
+    }),
+    "id"
+  );
 
   for await (const track of tracks) {
     if (track.deletedAt) {
@@ -155,7 +164,10 @@ const downloadTracks = async ({
 
         convertAudioToFormat(
           {
-            track,
+            track: {
+              ...track,
+              license: track.licenseId ? licenses[track.licenseId] : null,
+            },
             artist,
             trackGroup,
           },
@@ -352,6 +364,7 @@ const downloadAndZipTracks = async ({
     id: number;
     cover?: Image | null;
     releaseDate?: Date | null;
+    catalogNumber?: string | null;
   };
   job: Job;
   artist: Profile;
@@ -388,6 +401,7 @@ const downloadAndZipTracks = async ({
         coverLocation,
         releaseDate: trackGroup.releaseDate,
         totalTracks: tracks.filter((t) => !t.deletedAt).length,
+        catalogNumber: trackGroup.catalogNumber,
       },
       artist,
     });
