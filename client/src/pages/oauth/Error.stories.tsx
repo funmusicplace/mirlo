@@ -5,7 +5,7 @@ import { reactRouterParameters } from "storybook-addon-remix-react-router";
 import OAuthError from "./Error";
 
 const meta = {
-  title: "OAuth/Error",
+  title: "Features/OAuth/Error",
   component: OAuthError,
   parameters: {
     layout: "fullscreen",

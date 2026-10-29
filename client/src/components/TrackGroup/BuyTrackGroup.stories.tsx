@@ -53,7 +53,7 @@ const waitForPriceInput = async () => {
  * in the buy modal on release and track pages.
  */
 const meta = {
-  title: "TrackGroup/BuyTrackGroup",
+  title: "Features/Buying/BuyTrackGroup",
   component: BuyTrackGroup,
   args: { trackGroup: RELEASE },
   decorators: [

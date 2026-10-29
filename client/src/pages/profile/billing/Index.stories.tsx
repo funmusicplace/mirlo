@@ -26,7 +26,7 @@ const PAYMENT_LINK = {
  * PaymentIntent, which the page confirms with a new payment method.
  */
 const meta = {
-  title: "Pages/Billing",
+  title: "Features/Billing/Billing",
   component: Billing,
   parameters: {
     layout: "fullscreen",

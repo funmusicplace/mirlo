@@ -11,7 +11,7 @@ import {
  * for the failing ones, by the dashboard card.
  */
 const meta = {
-  title: "Admin/SetupChecklist",
+  title: "Features/Admin/SetupChecklist",
   component: SetupChecklist,
   parameters: { layout: "padded" },
 } satisfies Meta<typeof SetupChecklist>;

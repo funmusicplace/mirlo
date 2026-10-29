@@ -125,7 +125,7 @@ const salesHandlers = [
  * their cut to 0%, so Mirlo's column reads $0.00 there.
  */
 const meta = {
-  title: "Showcase/Sales and fees",
+  title: "Showcase/Money/Sales and fees",
   component: SalesPage,
   parameters: {
     layout: "padded",

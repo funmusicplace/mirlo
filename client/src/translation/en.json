@@ -822,6 +822,7 @@
   },
   "hostedCheckout": {
     "title": "Complete your purchase",
+    "loading": "Loading checkout…",
     "payingArtistAmount": "Paying {{amount}} to {{artistName}}",
     "payingArtist": "Paying {{artistName}}",
     "payingAmount": "Total: {{amount}}",

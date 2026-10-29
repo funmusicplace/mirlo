@@ -38,7 +38,7 @@ const welcomeHandlers = [
  * artist), then choose the URL slug before customizing or viewing the page.
  */
 const meta = {
-  title: "ManageArtist/Welcome",
+  title: "Features/Artist management/Welcome",
   component: WelcomePage,
   parameters: {
     layout: "padded",

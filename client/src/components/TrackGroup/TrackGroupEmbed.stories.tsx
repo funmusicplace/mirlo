@@ -18,7 +18,7 @@ const RELEASE = RELEASES.tidal;
  * Widget/TrackGroupWidget stories in place of the real app.
  */
 const meta = {
-  title: "TrackGroup/TrackGroupEmbed",
+  title: "Features/Embeds/TrackGroupEmbed",
   component: TrackGroupEmbed,
   args: { trackGroup: RELEASE },
   decorators: [useLocalWidgetPreviews],

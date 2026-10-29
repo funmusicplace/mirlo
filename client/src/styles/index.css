@@ -237,6 +237,16 @@ button {
 @layer mi-defaults;
 @import "tailwindcss";
 
+@theme {
+  --animate-shine: shine 0.75s linear infinite;
+
+  @keyframes shine {
+    to {
+      background-position-x: -200%;
+    }
+  }
+}
+
 .mi-table th {
   text-align: left;
   font-weight: 500;

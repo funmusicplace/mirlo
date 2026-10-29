@@ -73,7 +73,7 @@ const artistPageRoute = reactRouterParameters({
 });
 
 const meta = {
-  title: "Showcase/Fediverse",
+  title: "Showcase/Open web/Fediverse",
   component: ArtistLayout,
   decorators: [withHiddenCaptcha, withArtistColors],
   parameters: {

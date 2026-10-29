@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import PostCard from "./PostCard";
+
 import { POST_EXAMPLE } from "../../../test/mocks";
+
+import PostCard from "./PostCard";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
-  title: "Post/PostCard",
+  title: "Features/Posts/PostCard",
   component: PostCard,
   parameters: {
     // Optional parameter to center the component in the Canvas. More info: https://storybook.js.org/docs/configure/story-layout

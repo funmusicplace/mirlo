@@ -148,7 +148,9 @@ describe("admin dashboard Index", () => {
 
     renderDashboard();
 
-    expect(screen.getByText("Loading dashboard...")).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "Loading dashboard..." })
+    ).toBeInTheDocument();
   });
 
   test("shows an error message when the request fails", async () => {

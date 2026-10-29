@@ -49,7 +49,7 @@ const merchHandlers = (merch: Merch[]) => [
  * drag-to-reorder list of their merch with links to view and edit each item.
  */
 const meta = {
-  title: "ManageArtist/Merch/ManageMerch",
+  title: "Features/Merch/ManageMerch",
   component: ManageMerchPage,
   parameters: {
     layout: "padded",

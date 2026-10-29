@@ -90,7 +90,7 @@ const clientHandlers = (initial: AdminClient[]) => {
 };
 
 const meta = {
-  title: "Admin/Clients",
+  title: "Features/Admin/Clients",
   component: Clients,
   parameters: {
     layout: "fullscreen",

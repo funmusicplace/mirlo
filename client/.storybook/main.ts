@@ -29,10 +29,12 @@ const config: StorybookConfig = {
     autodocs: "tag",
   },
   // PurchaseElements renders nothing without a publishable key, and CI has no
-  // client/.env. Stripe.js is mocked below, so any key will do.
+  // client/.env. Stripe.js is mocked below, so any key will do. Mentions need
+  // an API domain to build ActivityPub handles; MSW answers whatever it is.
   env: (config) => ({
     ...config,
     VITE_PUBLISHABLE_STRIPE_KEY: "pk_test_storybook",
+    VITE_API_DOMAIN: "http://localhost:3000",
   }),
   // Storybook inherits vite.config.mjs. The legacy plugin's transpile target
   // can't handle BigInt literals in Storybook's own bundle, and the PWA plugin

@@ -30,7 +30,7 @@ const TRACKS: Track[] = RELEASE.tracks.slice(0, 2).map((track) => ({
  * on to the next track (#2479).
  */
 const meta = {
-  title: "Player/Player",
+  title: "Features/Player/Player",
   component: Player,
   render: () => {
     localStorage.setItem(

@@ -25,7 +25,7 @@ const handlersFor = (artist: Artist) => ({
  * around while recording.
  */
 const meta = {
-  title: "Showcase/Artist page",
+  title: "Showcase/Artist page/Artist page",
   component: AppFrame,
   parameters: {
     layout: "fullscreen",

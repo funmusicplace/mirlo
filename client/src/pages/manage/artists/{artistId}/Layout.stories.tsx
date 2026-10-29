@@ -26,7 +26,7 @@ const noPayments = stripeStatusHandlers({ chargesEnabled: false });
  * how the logged in user relates to the artist.
  */
 const meta = {
-  title: "ManageArtist/Layout",
+  title: "Features/Artist management/Layout",
   component: Layout,
   parameters: {
     layout: "fullscreen",

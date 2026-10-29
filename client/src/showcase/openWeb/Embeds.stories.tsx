@@ -26,7 +26,7 @@ const RELEASE = RELEASES.tidal;
 const TRACK = RELEASES.moss.tracks[1];
 
 const meta = {
-  title: "Showcase/Embeds",
+  title: "Showcase/Open web/Embeds",
   // Start every story with an empty player queue, so nothing played in an
   // earlier take shows up as already loaded
   beforeEach: clearPlayerQueue,

@@ -4,7 +4,7 @@ import { expect, fn, userEvent, within } from "@storybook/test";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 
 const meta = {
-  title: "Common/ConfirmDeleteModal",
+  title: "UI/ConfirmDeleteModal",
   component: ConfirmDeleteModal,
   args: {
     open: true,

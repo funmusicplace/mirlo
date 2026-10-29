@@ -94,6 +94,9 @@ const preview: Preview = {
         errorElement: <RouterErrorHandler />,
       },
     }),
+    options: {
+      storySort: { order: ["Showcase", "Features", "UI"] },
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,

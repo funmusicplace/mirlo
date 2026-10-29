@@ -19,7 +19,7 @@ const topAccountsHandler = (
   });
 
 const meta = {
-  title: "Admin/TopAccountsTables",
+  title: "Features/Admin/TopAccountsTables",
   component: TopAccountsTables,
   parameters: {
     layout: "padded",

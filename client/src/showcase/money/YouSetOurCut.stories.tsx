@@ -75,7 +75,7 @@ const releaseHandlers = [
  * apply it to everything they sell.
  */
 const meta = {
-  title: "Showcase/You set our cut",
+  title: "Showcase/Money/You set our cut",
   component: CustomizeArtistPage,
   parameters: {
     layout: "fullscreen",

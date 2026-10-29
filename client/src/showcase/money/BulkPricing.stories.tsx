@@ -43,7 +43,7 @@ const pricingHandlers = [
  * /manage/artists/:artistId/pricing. Prices save row by row.
  */
 const meta = {
-  title: "Showcase/Bulk edit prices",
+  title: "Showcase/Money/Bulk edit prices",
   component: BulkPricingPage,
   parameters: {
     layout: "fullscreen",

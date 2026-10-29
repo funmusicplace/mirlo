@@ -39,7 +39,7 @@ const rssHandlers = [
 ];
 
 const meta = {
-  title: "Showcase/RSS feeds",
+  title: "Showcase/Open web/RSS feeds",
   component: ReleasesPage,
   parameters: {
     layout: "fullscreen",

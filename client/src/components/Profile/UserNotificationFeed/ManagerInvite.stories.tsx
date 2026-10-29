@@ -28,7 +28,7 @@ const NOTIFICATION = {
 
 /** The feed item for an invite to help manage someone else's artist. */
 const meta = {
-  title: "Notifications/ManagerInvite",
+  title: "Features/Artist management/ManagerInvite",
   component: NotificationFeedItem,
   args: { notification: NOTIFICATION },
   decorators: [

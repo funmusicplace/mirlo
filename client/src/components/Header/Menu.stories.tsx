@@ -17,7 +17,7 @@ const OpenMenu: React.FC<React.ComponentProps<typeof Menu>> = (props) => {
 };
 
 const meta = {
-  title: "Header/Menu",
+  title: "UI/HeaderMenu",
   component: OpenMenu,
   args: {
     dialogId: "menu-story",

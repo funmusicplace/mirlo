@@ -53,7 +53,7 @@ const handlers = (
  * steps that reuse existing settings.
  */
 const meta = {
-  title: "Admin/SetupGuide",
+  title: "Features/Admin/SetupGuide",
   component: SetupGuide,
   parameters: {
     layout: "fullscreen",

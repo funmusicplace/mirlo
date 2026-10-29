@@ -12,7 +12,7 @@ import ChangePaymentMethodButton from "./ChangePaymentMethodButton";
  * confirms it as is — this flow never goes through POST /v1/purchase.
  */
 const meta = {
-  title: "Artist/ChangePaymentMethodButton",
+  title: "Features/Billing/ChangePaymentMethodButton",
   component: ChangePaymentMethodButton,
   args: { subscriptionId: 55, onUpdated: fn() },
   parameters: {

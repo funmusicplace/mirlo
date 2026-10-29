@@ -62,7 +62,7 @@ const handlers = ({
  * asking for the instance name, a contact email and an accent color.
  */
 const meta = {
-  title: "Admin/Welcome",
+  title: "Features/Admin/Welcome",
   component: Welcome,
   parameters: {
     layout: "fullscreen",

@@ -38,7 +38,7 @@ const widgetRoute = (trackId: number, variant: "card" | "strip") =>
  * posts and on third-party sites. `?variant=` picks the Card or Strip layout.
  */
 const meta = {
-  title: "Widget/TrackWidget",
+  title: "Features/Embeds/TrackWidget",
   component: TrackWidgetPage,
   parameters: {
     layout: "fullscreen",

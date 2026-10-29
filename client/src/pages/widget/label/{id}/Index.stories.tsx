@@ -18,7 +18,7 @@ import LabelWidgetPage from "./Index";
  * songs from across the label's roster.
  */
 const meta = {
-  title: "Widget/LabelWidget",
+  title: "Features/Embeds/LabelWidget",
   component: LabelWidgetPage,
   beforeEach: clearPlayerQueue,
   decorators: [noPageScroll],

@@ -16,7 +16,7 @@ const RELEASE = RELEASES.tidal;
  * pay-what-you-want form for the album.
  */
 const meta = {
-  title: "Player/BuyTrackModal",
+  title: "Features/Buying/BuyTrackModal",
   component: BuyTrackModal,
   args: {
     showBuyModal: true,

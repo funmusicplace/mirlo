@@ -1,28 +1,9 @@
-import React from "react";
-import { range } from "lodash";
-import styled from "@emotion/styled";
 import { css } from "@emotion/css";
+import Skeleton from "components/common/Skeleton";
+import { range } from "lodash";
+import React from "react";
+
 import { bp } from "../../constants";
-
-const Shine = styled("div")`
-  animation: 0.75s shine linear infinite;
-  background: #eee;
-
-  background: linear-gradient(
-    110deg,
-    var(--mi-tint-color) 8%,
-    var(--mi-tint-x-color) 18%,
-    var(--mi-tint-color) 33%
-  );
-  border-radius: 5px;
-  background-size: 200% 100%;
-
-  @keyframes shine {
-    to {
-      background-position-x: -200%;
-    }
-  }
-`;
 
 /**
  * Loading skeleton blocks for placeholder content.
@@ -50,16 +31,13 @@ const LoadingBlocks: React.FC<{
         gap: ${margin};
       `}
     >
-      {range(rows).map((r) => (
-        <Shine
-          key={r}
-          style={{
-            // width: squares ? height : "100%",
-            // height,
-            aspectRatio: squares ? "1 / 1" : "auto",
-          }}
-        />
-      ))}
+      {range(rows).map((r) =>
+        squares ? (
+          <Skeleton key={r} className="aspect-square" />
+        ) : (
+          <Skeleton key={r} style={{ height }} />
+        )
+      )}
     </div>
   );
 };
