@@ -2,7 +2,13 @@ import { existsSync } from "fs";
 import { Readable } from "stream";
 
 import prisma from "@mirlo/prisma";
-import { Profile, Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
+import {
+  License,
+  Profile,
+  Track,
+  TrackArtist,
+  TrackAudio,
+} from "@mirlo/prisma/client";
 import ffmpeg from "fluent-ffmpeg";
 
 import { Format } from "../jobs/generate-album";
@@ -80,20 +86,33 @@ const addMetadataTag = (
   processor.outputOptions("-metadata", `${key}=${normalizedValue}`);
 };
 
+const replayGainDb = (value: unknown) => {
+  const dB = (value as { dB?: unknown } | undefined)?.dB;
+  return typeof dB === "number" ? `${dB.toFixed(2)} dB` : undefined;
+};
+
+const replayGainPeak = (value: unknown) => {
+  const ratio = (value as { ratio?: unknown } | undefined)?.ratio;
+  return typeof ratio === "number" ? ratio.toFixed(6) : undefined;
+};
+
 const addTrackMetadataTags = (
   processor: ffmpeg.FfmpegCommand,
-  track: Track,
+  track: Track & { license?: License | null },
   trackGroupTitle: string | null,
   albumArtistName: string,
+  format: Format["format"],
   trackGroupContext?: {
     releaseDate?: Date | null;
     totalTracks?: number | null;
+    catalogNumber?: string | null;
   }
 ) => {
   const trackMetadata = (track.metadata ?? {}) as {
     common?: Record<string, unknown>;
   };
   const common = trackMetadata.common ?? {};
+  const isId3 = format === "mp3";
 
   const lyricsValue =
     track.lyrics ?? common.lyrics ?? common.unsynchronisedLyrics;
@@ -110,6 +129,15 @@ const addTrackMetadataTags = (
       ? `${track.order}/${trackGroupContext.totalTracks}`
       : track.order;
   addMetadataTag(processor, "track", trackOrderTag);
+
+  const disk = common.disk as
+    | { no?: number | null; of?: number | null }
+    | undefined;
+  addMetadataTag(
+    processor,
+    "disc",
+    disk?.no && disk.of ? `${disk.no}/${disk.of}` : disk?.no
+  );
 
   addMetadataTag(processor, "lyrics", lyricsValue);
   // Different ffmpeg/id3 readers expose lyrics via different frame mappings.
@@ -138,10 +166,44 @@ const addTrackMetadataTags = (
 
   addMetadataTag(processor, "composer", common.composer);
   addMetadataTag(processor, "lyricist", common.lyricist);
-  addMetadataTag(processor, "copyright", common.copyright); // FIXME we can draw this from our own licenseId
+  addMetadataTag(
+    processor,
+    "copyright",
+    track.license
+      ? track.license.link
+        ? `${track.license.name} (${track.license.link})`
+        : track.license.name
+      : common.copyright
+  );
   addMetadataTag(processor, "label", common.label);
   addMetadataTag(processor, "language", common.language);
   addMetadataTag(processor, "isrc", track.isrc);
+  addMetadataTag(processor, "CATALOGNUMBER", trackGroupContext?.catalogNumber);
+  addMetadataTag(processor, isId3 ? "TBPM" : "BPM", common.bpm);
+  addMetadataTag(processor, isId3 ? "TKEY" : "KEY", common.key);
+
+  if (format !== "opus") {
+    addMetadataTag(
+      processor,
+      "REPLAYGAIN_TRACK_GAIN",
+      replayGainDb(common.replaygain_track_gain)
+    );
+    addMetadataTag(
+      processor,
+      "REPLAYGAIN_TRACK_PEAK",
+      replayGainPeak(common.replaygain_track_peak)
+    );
+    addMetadataTag(
+      processor,
+      "REPLAYGAIN_ALBUM_GAIN",
+      replayGainDb(common.replaygain_album_gain)
+    );
+    addMetadataTag(
+      processor,
+      "REPLAYGAIN_ALBUM_PEAK",
+      replayGainPeak(common.replaygain_album_peak)
+    );
+  }
 
   const comments = [
     asStringValue(common.comment),
@@ -251,13 +313,18 @@ const addTrackArtistRoleTags = (
 
 export const convertAudioToFormat = (
   content: {
-    track: Track & { audio?: TrackAudio; trackArtists: TrackArtist[] };
+    track: Track & {
+      audio?: TrackAudio;
+      trackArtists: TrackArtist[];
+      license?: License | null;
+    };
     artist: Profile;
     trackGroup: {
       title: string | null;
       coverLocation?: string;
       releaseDate?: Date | null;
       totalTracks?: number | null;
+      catalogNumber?: string | null;
     };
   },
   stream: Readable,
@@ -288,7 +355,7 @@ export const convertAudioToFormat = (
   logger.info(`audioId ${audioId}: destination: ${destination}`);
 
   const hasEmbeddedCoverArt =
-    (format === "mp3" || format === "ipod") &&
+    (format === "mp3" || format === "ipod" || format === "flac") &&
     !!content.trackGroup.coverLocation &&
     fileExists(content.trackGroup.coverLocation);
 
@@ -323,9 +390,11 @@ export const convertAudioToFormat = (
     content.track,
     content.trackGroup.title,
     content.artist.name,
+    format,
     {
       releaseDate: content.trackGroup.releaseDate,
       totalTracks: content.trackGroup.totalTracks,
+      catalogNumber: content.trackGroup.catalogNumber,
     }
   );
   addTrackArtistRoleTags(
