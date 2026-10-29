@@ -342,8 +342,6 @@ model Post {
 
 model PostImage {
   id        String    @id @default(uuid()) @db.Uuid
-  mimeType  String?
-  extension String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -378,11 +376,9 @@ model Profile {
   updatedAt                           DateTime                              @default(now()) @updatedAt
   deletedAt                           DateTime?
   subscriptionTiers                   ProfileSubscriptionTier[]
-  legacyBackground                    ProfileBackground?
   backgroundImageId                   String?                               @unique @db.Uuid
   background                          Image?                                @relation("ProfileBackgroundImage", fields: [backgroundImageId], references: [id])
   images                              Image[]                               @relation("ProfileImages")
-  legacyAvatar                        ProfileAvatar?
   avatarImageId                       String?                               @unique @db.Uuid
   avatar                              Image?                                @relation("ProfileAvatarImage", fields: [avatarImageId], references: [id])
   urlSlug                             String
@@ -440,28 +436,6 @@ model ProfileManager {
 
   @@id([profileId, userId])
   @@index([userId])
-}
-
-model ProfileAvatar {
-  id               String    @id @default(uuid()) @db.Uuid
-  url              String[]
-  profile          Profile   @relation(fields: [profileId], references: [id])
-  profileId        Int       @unique
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  deletedAt        DateTime?
-  originalFilename String?
-}
-
-model ProfileBackground {
-  id               String    @id @default(uuid()) @db.Uuid
-  url              String[]
-  profile          Profile   @relation(fields: [profileId], references: [id])
-  profileId        Int       @unique
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  deletedAt        DateTime?
-  originalFilename String?
 }
 
 model ArtistLabel {
@@ -890,7 +864,6 @@ model TrackGroup {
   title                           String?
   isHiddenTrackGroupForSongDrafts Boolean                         @default(false)
   tracks                          Track[]
-  legacyCover                     TrackGroupCover?
   coverImageId                    String?                         @unique @db.Uuid
   cover                           Image?                          @relation("TrackGroupCoverImage", fields: [coverImageId], references: [id])
   publishedAt                     DateTime?
@@ -1007,17 +980,6 @@ enum FundraiserStatus {
   ACTIVE
   SUCCESSFUL
   FAILED
-}
-
-model TrackGroupCover {
-  id               String     @id @default(uuid()) @db.Uuid
-  url              String[]
-  trackGroup       TrackGroup @relation(fields: [trackGroupId], references: [id])
-  trackGroupId     Int        @unique
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-  deletedAt        DateTime?
-  originalFilename String?
 }
 
 model FundraiserPledge {

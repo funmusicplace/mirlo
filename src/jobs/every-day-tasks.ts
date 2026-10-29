@@ -6,6 +6,7 @@ import sendOnboardingEmail from "./send-onboarding-email";
 import sendSubscriptionRenewalReminders from "./send-subscription-renewal-reminders";
 import cleanUpCheckouts from "./tasks/clean-up-checkouts";
 import cleanUpOAuthPayloads from "./tasks/clean-up-oauth-payloads";
+import cleanUpOrphanedImages from "./tasks/clean-up-orphaned-images";
 import syncPaymentAccountStatuses from "./tasks/sync-payment-account-statuses";
 
 export const dailyTasks = async () => {
@@ -14,6 +15,7 @@ export const dailyTasks = async () => {
   await syncPaymentAccountStatuses();
   await cleanUpCheckouts();
   await cleanUpOAuthPayloads();
+  await cleanUpOrphanedImages();
 };
 
 if (require.main === module) {
