@@ -205,16 +205,17 @@ export class StripePaymentProcessor implements PaymentProcessor {
     tier,
     amount,
     currency,
-  }: UpdateSubscriptionTierArgs): Promise<void> {
+  }: UpdateSubscriptionTierArgs): Promise<{ nextBillingDate?: Date }> {
     const subscription = await stripe.subscriptions.retrieve(subscriptionKey, {
       stripeAccount: accountId,
     });
-    await repriceStripeSubscription({
+    return repriceStripeSubscription({
       subscription,
       accountId,
       tier,
       amount,
       currency,
+      paymentBehavior: "error_if_incomplete",
     });
   }
 

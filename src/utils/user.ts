@@ -83,6 +83,8 @@ export const userSelect = {
       amount: true,
       deleteReason: true,
       nextBillingDate: true,
+      shippingAddress: true,
+      stripeSubscriptionKey: true,
       profileSubscriptionTierId: true,
       profileUserSubscriptionCharges: {
         orderBy: {

@@ -9,7 +9,7 @@ import {
   ArtistSubscriptionReceiptEmailType,
   ArtistNewSubscriberAnnounceEmailType,
 } from "../../src/utils/subscription";
-import { clearTables, createUser } from "../utils";
+import { clearTables, createTrackGroup, createUser } from "../utils";
 
 import prisma from "@mirlo/prisma";
 
@@ -176,6 +176,58 @@ describe("subscription", () => {
 
       assert.notEqual(updatedSubscription?.nextBillingDate, null);
       assert.deepEqual(updatedSubscription?.nextBillingDate, nextBillingDate);
+    });
+
+    it("grants the tier's releases when a later invoice is paid, such as one after a tier switch", async () => {
+      sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
+
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+      });
+      const { user: subscriber } = await createUser({
+        email: "follower@follower.com",
+        emailConfirmationToken: null,
+      });
+      const artist = await prisma.profile.create({
+        data: {
+          name: "Test artist",
+          urlSlug: "test-artist",
+          userId: artistUser.id,
+          enabled: true,
+        },
+      });
+      const tier = await prisma.profileSubscriptionTier.create({
+        data: { profileId: artist.id, name: "Tier" },
+      });
+      const trackGroup = await createTrackGroup(artist.id);
+      await prisma.subscriptionTierRelease.create({
+        data: { tierId: tier.id, trackGroupId: trackGroup.id },
+      });
+      await prisma.profileUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "test-key-switched",
+          userId: subscriber.id,
+          profileSubscriptionTierId: tier.id,
+          amount: 1200,
+        },
+      });
+
+      await manageSubscriptionReceipt({
+        processorPaymentReferenceId: "invoice-key-switched",
+        processorSubscriptionReferenceId: "test-key-switched",
+        amountPaid: 1200,
+        currency: "usd",
+        platformCut: 240,
+        paymentProcessorFee: 30,
+        status: "COMPLETED",
+        billingReason: "subscription_update",
+        nextBillingDate: new Date("2025-12-31"),
+      });
+
+      const purchase = await prisma.userTrackGroupPurchase.findFirst({
+        where: { userId: subscriber.id, trackGroupId: trackGroup.id },
+      });
+      assert.equal(purchase?.proGratis, true);
     });
 
     it("should not update nextBillingDate when status is FAILED", async () => {

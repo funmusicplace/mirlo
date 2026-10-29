@@ -329,6 +329,32 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 400);
     });
 
+    it("prices a fixed subscription tier at its minAmount when a stale defaultAmount differs", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_stale_default",
+        currency: "usd",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, {
+        minAmount: 800,
+        defaultAmount: 500,
+      });
+
+      for (const item of [
+        { type: "subscription", tierId: tier.id, amount: 800 },
+        { type: "subscription", tierId: tier.id },
+      ]) {
+        const response = await postPurchase(
+          { artistId: profile.id, items: [item], deferred: true },
+          accessToken
+        );
+        assert.equal(response.statusCode, 200);
+        assert.equal(response.body.deferred.amount, 800);
+      }
+    });
+
     it("should return 400 for a tip with zero or missing amount", async () => {
       const { user, accessToken } = await createUser({
         email: "buyer@test.com",
@@ -2374,7 +2400,7 @@ describe("purchase", () => {
         readerId: "tmr_test",
         profileId: profile.id,
         tierId: tier.id,
-        amount: 1000,
+        amount: 500,
         userEmail: buyer.email,
         userId: String(buyer.id),
       });
@@ -2516,12 +2542,18 @@ describe("purchase", () => {
   });
 
   describe("switchSubscriptionTier (direct)", () => {
-    const stubStripeSubscription = (interval: "month" | "year" = "month") => {
+    const stubStripeSubscription = (
+      interval: "month" | "year" = "month",
+      unitAmount = 500
+    ) => {
       sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
         id: "sub_existing",
         items: {
           data: [
-            { id: "si_existing_item", price: { recurring: { interval } } },
+            {
+              id: "si_existing_item",
+              price: { unit_amount: unitAmount, recurring: { interval } },
+            },
           ],
         },
       } as unknown as Stripe.Response<Stripe.Subscription>);
@@ -2541,7 +2573,7 @@ describe("purchase", () => {
         include: { profileSubscriptionTier: true },
       });
 
-    it("reprices the existing subscription in place, from the next bill", async () => {
+    it("reprices the existing subscription in place, billing the difference now for a pricier tier", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_sub_switch",
@@ -2566,15 +2598,22 @@ describe("purchase", () => {
       await switchSubscriptionTier(existing, newTier.id);
 
       assert.equal(updateStub.calledOnce, true);
-      assert.equal(updateStub.getCall(0).args[1]?.proration_behavior, "none");
+      const params = updateStub.getCall(0).args[1];
+      assert.equal(params?.proration_behavior, "always_invoice");
       assert.equal(
-        updateStub.getCall(0).args[1]?.application_fee_percent,
+        params?.application_fee_percent,
         12,
         "the new tier's platform fee percentage should be applied to the repriced subscription"
       );
+      assert.equal(
+        params?.payment_behavior,
+        "error_if_incomplete",
+        "a charge that fails leaves the subscription on its old tier"
+      );
+      assert.deepEqual(params?.metadata, { tierId: String(newTier.id) });
 
       const after = await prisma.profileUserSubscription.findFirst({
-        where: { id: existing.id },
+        where: { userId: buyer.id },
       });
       assert.equal(after?.profileSubscriptionTierId, newTier.id);
       assert.equal(after?.amount, 1000);
@@ -2588,6 +2627,38 @@ describe("purchase", () => {
         "sub_existing_123",
         "the underlying Stripe subscription is repriced, not replaced"
       );
+    });
+
+    it("takes a cheaper or same-price tier's price from the next bill", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_switch_down",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 1000 });
+      const cheaperTier = await createTier(profile.id, { minAmount: 500 });
+      const samePriceTier = await createTier(profile.id, { minAmount: 1000 });
+      const updateStub = stubStripeSubscription("month", 1000);
+
+      for (const [index, newTier] of [cheaperTier, samePriceTier].entries()) {
+        const { user: buyer } = await createUser({
+          email: `buyer${index}@test.com`,
+        });
+        const existing = await createExistingSubscription({
+          profileSubscriptionTierId: oldTier.id,
+          userId: buyer.id,
+          amount: 1000,
+          stripeSubscriptionKey: `sub_existing_down_${index}`,
+        });
+
+        await switchSubscriptionTier(existing, newTier.id);
+
+        assert.equal(
+          updateStub.getCall(index).args[1]?.proration_behavior,
+          "none"
+        );
+      }
     });
 
     it("bills a switch from monthly to yearly now, with credit for the time already paid for", async () => {
@@ -2651,7 +2722,7 @@ describe("purchase", () => {
       );
 
       const after = await prisma.profileUserSubscription.findFirst({
-        where: { id: existing.id },
+        where: { userId: buyer.id },
       });
       assert.equal(after?.platformCut, 250);
     });
@@ -2679,7 +2750,7 @@ describe("purchase", () => {
 
       assert.equal(updateStub.getCall(0).args[1]?.cancel_at_period_end, false);
       const after = await prisma.profileUserSubscription.findFirst({
-        where: { id: existing.id },
+        where: { userId: buyer.id },
       });
       assert.equal(after?.profileSubscriptionTierId, newTier.id);
       assert.equal(
@@ -2758,6 +2829,93 @@ describe("purchase", () => {
       );
       assert.equal(updateStub.callCount, 0);
     });
+
+    it("moves back onto the row left by an earlier subscription to the new tier", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_switch_back",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const tierA = await createTier(profile.id, { minAmount: 500 });
+      const tierB = await createTier(profile.id, { minAmount: 1000 });
+
+      const earlier = await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: tierA.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_switch_back",
+          deletedAt: new Date(),
+          deleteReason: "TIER_SWITCHED",
+        },
+      });
+      const existing = await createExistingSubscription({
+        profileSubscriptionTierId: tierB.id,
+        userId: buyer.id,
+        amount: 1000,
+        stripeSubscriptionKey: "sub_switch_back",
+      });
+      stubStripeSubscription();
+
+      await switchSubscriptionTier(existing, tierA.id);
+
+      const live = await prisma.profileUserSubscription.findMany({
+        where: { userId: buyer.id },
+      });
+      assert.equal(live.length, 1);
+      assert.equal(live[0].id, earlier.id);
+      assert.equal(live[0].profileSubscriptionTierId, tierA.id);
+      assert.equal(live[0].deleteReason, null);
+      const retired = await prisma.profileUserSubscription.findFirst({
+        where: { id: existing.id, deletedAt: { not: null } },
+      });
+      assert.equal(retired?.deleteReason, "TIER_SWITCHED");
+    });
+
+    it("keeps the billing date, or takes Stripe's new one when the switch resets it", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_switch_billing_date",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const monthly = await createTier(profile.id, { minAmount: 500 });
+      const otherMonthly = await createTier(profile.id, { minAmount: 1000 });
+      const yearly = await createTier(profile.id, {
+        minAmount: 5000,
+        interval: "YEAR",
+      });
+      const billedUntil = new Date("2030-01-15T00:00:00Z");
+
+      const existing = await createExistingSubscription({
+        profileSubscriptionTierId: monthly.id,
+        userId: buyer.id,
+        amount: 500,
+        stripeSubscriptionKey: "sub_billing_date",
+        nextBillingDate: billedUntil,
+      });
+      const updateStub = stubStripeSubscription();
+
+      const moved = await switchSubscriptionTier(existing, otherMonthly.id);
+      assert.deepEqual(moved.nextBillingDate, billedUntil);
+
+      const yearFromNow = Math.floor(Date.UTC(2031, 0, 1) / 1000);
+      updateStub.resolves({
+        current_period_end: yearFromNow,
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      const movedAgain = await switchSubscriptionTier(
+        await prisma.profileUserSubscription.findUniqueOrThrow({
+          where: { id: moved.id },
+          include: { profileSubscriptionTier: true },
+        }),
+        yearly.id
+      );
+      assert.deepEqual(
+        movedAgain.nextBillingDate,
+        new Date(yearFromNow * 1000)
+      );
+    });
   });
 
   describe("finalizeSubscriptionSetup (direct)", () => {
@@ -2771,7 +2929,10 @@ describe("purchase", () => {
         customer: "cus_existing",
         items: {
           data: [
-            { id: "si_existing", price: { recurring: { interval: "month" } } },
+            {
+              id: "si_existing",
+              price: { unit_amount: 500, recurring: { interval: "month" } },
+            },
           ],
         },
       } as unknown as Stripe.Response<Stripe.Subscription>);
@@ -2802,9 +2963,12 @@ describe("purchase", () => {
       sinon.stub(stripeUtils.stripe.products, "create").resolves({
         id: "prod_move",
       } as unknown as Stripe.Response<Stripe.Product>);
+      const periodEnd = Math.floor(Date.UTC(2030, 5, 1) / 1000);
       const updateStub = sinon
         .stub(stripeUtils.stripe.subscriptions, "update")
-        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+        .resolves({
+          current_period_end: periodEnd,
+        } as unknown as Stripe.Response<Stripe.Subscription>);
       const createStub = sinon.stub(stripeUtils.stripe.subscriptions, "create");
       const cancelStub = sinon.stub(stripeUtils.stripe.subscriptions, "cancel");
 
@@ -2828,7 +2992,11 @@ describe("purchase", () => {
       );
       const params = updateStub.getCall(0).args[1];
       assert.equal(params?.default_payment_method, "pm_test");
-      assert.equal(params?.proration_behavior, "none");
+      assert.equal(
+        params?.proration_behavior,
+        "always_invoice",
+        "moving to a pricier tier bills the difference now"
+      );
       assert.equal(params?.items?.[0]?.price_data?.unit_amount, 1000);
 
       const remaining = await prisma.profileUserSubscription.findMany({
@@ -2837,6 +3005,11 @@ describe("purchase", () => {
       assert.equal(remaining.length, 1);
       assert.equal(remaining[0].profileSubscriptionTierId, newTier.id);
       assert.equal(remaining[0].stripeSubscriptionKey, "sub_old_move");
+      assert.deepEqual(
+        remaining[0].nextBillingDate,
+        new Date(periodEnd * 1000),
+        "a move to a cheaper tier has no invoice to bring the date, so it comes from the update"
+      );
     });
 
     it("starts a new subscription and cancels the old one when the old one is past due", async () => {

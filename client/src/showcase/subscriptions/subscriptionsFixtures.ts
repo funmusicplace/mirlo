@@ -124,6 +124,7 @@ export const subscribedFan = (
     {
       id: 9001,
       amount,
+      isPaid: true,
       userId: FAN.id,
       artistSubscriptionTierId: subscriptionTier.id,
       artistSubscriptionTier: subscriptionTier,

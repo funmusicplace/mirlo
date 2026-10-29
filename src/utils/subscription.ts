@@ -140,17 +140,15 @@ export const manageSubscriptionReceipt = async ({
         data: { nextBillingDate },
       });
 
-      if (isNewSubscription) {
-        const grantedCount = await grantSubscriptionTierReleases({
-          userId: profileUserSubscription.userId,
-          tierId: profileUserSubscription.profileSubscriptionTierId,
-          userTransactionId: transaction.id,
-        });
-        if (grantedCount > 0) {
-          logger.info(
-            `invoice.paid: ${processorPaymentReferenceId} has ${grantedCount} pro grata track groups, granting access`
-          );
-        }
+      const grantedCount = await grantSubscriptionTierReleases({
+        userId: profileUserSubscription.userId,
+        tierId: profileUserSubscription.profileSubscriptionTierId,
+        userTransactionId: transaction.id,
+      });
+      if (grantedCount > 0) {
+        logger.info(
+          `invoice.paid: ${processorPaymentReferenceId} has ${grantedCount} pro grata track groups, granting access`
+        );
       }
     }
 

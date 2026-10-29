@@ -11,6 +11,10 @@ import logger from "../../logger";
 import { sendSubscriptionCancellationEmail } from "../artist";
 import { AppError } from "../error";
 import { calculatePlatformPercent } from "../processingPayments";
+import {
+  registerSubscription,
+  retireOtherTierSubscriptions,
+} from "../subscriptionTier";
 
 import {
   getPaymentProcessor,
@@ -35,7 +39,7 @@ const resolveTierAndAmount = async (
     });
   }
 
-  const tierPrice = tier.defaultAmount ?? tier.minAmount ?? 0;
+  const tierPrice = tier.minAmount ?? tier.defaultAmount ?? 0;
   if (amount !== undefined && !tier.allowVariable && amount !== tierPrice) {
     throw new AppError({
       httpCode: 400,
@@ -235,26 +239,36 @@ export const switchSubscriptionTier = async (
   const { stripeAccountId, currency } =
     await resolveProfilePaymentContext(profileId);
 
-  await getPaymentProcessor().updateSubscriptionTier({
-    subscriptionKey: subscription.stripeSubscriptionKey,
-    accountId: stripeAccountId,
-    tier,
-    amount: resolvedAmount,
-    currency,
-  });
+  const { nextBillingDate } =
+    await getPaymentProcessor().updateSubscriptionTier({
+      subscriptionKey: subscription.stripeSubscriptionKey,
+      accountId: stripeAccountId,
+      tier,
+      amount: resolvedAmount,
+      currency,
+    });
 
   const platformPercent = await calculatePlatformPercent(
     currency || "usd",
     tier.platformPercent ?? tier.profile.defaultPlatformFee
   );
-  return prisma.profileUserSubscription.update({
-    where: { id: subscription.id },
-    data: {
-      profileSubscriptionTierId: tier.id,
-      amount: resolvedAmount,
-      platformCut: Math.round((resolvedAmount * platformPercent) / 100),
-      deleteReason: null,
-    },
+  const moved = await registerSubscription({
+    userId: subscription.userId,
+    tierId: tier.id,
+    amount: resolvedAmount,
+    paymentProcessorKey: subscription.stripeSubscriptionKey,
+    platformCut: Math.round((resolvedAmount * platformPercent) / 100),
+    shippingAddress: subscription.shippingAddress as object | null,
+    nextBillingDate: nextBillingDate ?? subscription.nextBillingDate,
+  });
+  await retireOtherTierSubscriptions({
+    userId: subscription.userId,
+    tierId: tier.id,
+    profileId,
+  });
+
+  return prisma.profileUserSubscription.findUniqueOrThrow({
+    where: { id: moved.id },
   });
 };
 

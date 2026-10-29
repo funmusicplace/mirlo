@@ -23,7 +23,10 @@ import {
   calculatePlatformPercent,
 } from "../processingPayments";
 import { manageSubscriptionReceipt } from "../subscription";
-import { registerSubscription } from "../subscriptionTier";
+import {
+  registerSubscription,
+  retireOtherTierSubscriptions,
+} from "../subscriptionTier";
 import { createOrUpdatePledge } from "../trackGroup";
 import { findOrCreateUserBasedOnEmail, updateCurrencies } from "../user";
 
@@ -350,6 +353,7 @@ export const repriceStripeSubscription = async ({
   amount,
   currency,
   paymentMethodId,
+  paymentBehavior,
 }: {
   subscription: Stripe.Subscription;
   accountId: string;
@@ -359,12 +363,16 @@ export const repriceStripeSubscription = async ({
   amount: number;
   currency: string;
   paymentMethodId?: string;
+  paymentBehavior?: Stripe.SubscriptionUpdateParams.PaymentBehavior;
 }) => {
   const productKey = await createSubscriptionStripeProduct(tier, accountId);
   const [item] = subscription.items.data;
   const interval = tier.interval === "YEAR" ? "year" : "month";
+  const billedNow =
+    item.price.recurring?.interval !== interval ||
+    amount > (item.price.unit_amount ?? 0);
 
-  await stripe.subscriptions.update(
+  const updated = await stripe.subscriptions.update(
     subscription.id,
     {
       items: [
@@ -378,17 +386,24 @@ export const repriceStripeSubscription = async ({
           },
         },
       ],
-      proration_behavior:
-        item.price.recurring?.interval === interval ? "none" : "always_invoice",
+      proration_behavior: billedNow ? "always_invoice" : "none",
       cancel_at_period_end: false,
       application_fee_percent: await calculatePlatformPercent(
         currency || "usd",
         tier.platformPercent ?? tier.profile.defaultPlatformFee
       ),
       ...(paymentMethodId && { default_payment_method: paymentMethodId }),
+      ...(paymentBehavior && { payment_behavior: paymentBehavior }),
+      metadata: { tierId: String(tier.id) },
     },
     { stripeAccount: accountId }
   );
+
+  return {
+    nextBillingDate: updated.current_period_end
+      ? new Date(updated.current_period_end * 1000)
+      : undefined,
+  };
 };
 
 export const verifyStripeSignature = async (
@@ -713,6 +728,7 @@ export const finalizeSubscriptionSetup = async ({
   );
 
   let subscriptionId: string;
+  let nextBillingDate: Date | undefined;
   if (subscriptionToMove) {
     await stripe.paymentMethods.attach(
       paymentMethodId,
@@ -724,14 +740,14 @@ export const finalizeSubscriptionSetup = async ({
       },
       { stripeAccount: stripeAccountId }
     );
-    await repriceStripeSubscription({
+    ({ nextBillingDate } = await repriceStripeSubscription({
       subscription: subscriptionToMove,
       accountId: stripeAccountId,
       tier,
       amount,
       currency,
       paymentMethodId,
-    });
+    }));
     subscriptionId = subscriptionToMove.id;
   } else {
     const customer = await findOrCreateStripeCustomer(
@@ -784,6 +800,7 @@ export const finalizeSubscriptionSetup = async ({
     paymentProcessorKey: subscriptionId,
     platformCut: Math.round((amount * platformPercent) / 100),
     shippingAddress,
+    nextBillingDate,
   });
 
   const oldStripeSubscriptionKeys = uniq(
@@ -807,17 +824,10 @@ export const finalizeSubscriptionSetup = async ({
   }
 
   // The new tier's row is now the user's only subscription to this artist.
-  const oldTierSubscriptionsWhere = {
+  await retireOtherTierSubscriptions({
     userId,
-    profileSubscriptionTierId: { not: tier.id },
-    profileSubscriptionTier: { profileId: tier.profileId },
-  };
-  await prisma.profileUserSubscription.updateMany({
-    where: oldTierSubscriptionsWhere,
-    data: { deleteReason: "TIER_SWITCHED" },
-  });
-  await prisma.profileUserSubscription.deleteMany({
-    where: oldTierSubscriptionsWhere,
+    tierId: tier.id,
+    profileId: tier.profileId,
   });
 
   logger.info(

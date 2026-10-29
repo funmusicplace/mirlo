@@ -29,7 +29,6 @@ export default function () {
         where: {
           id: Number(subscriptionId),
           userId: req.user.id,
-          deletedAt: null,
         },
         include: { profileSubscriptionTier: true },
       });
@@ -55,10 +54,12 @@ export default function () {
     summary: "Move one of the user's own paid subscriptions to another tier",
     description:
       "Reprices the subscription's existing Stripe subscription at the new " +
-      "tier's price. Between tiers with the same interval the new price " +
-      "applies from the next bill; a change between monthly and yearly is " +
-      "billed now, with credit for the time already paid for. Only " +
-      "available while signed in on the site.",
+      "tier's price. A move to a pricier tier, or between monthly and " +
+      "yearly, is billed now, with credit for the time already paid for; " +
+      "if that charge fails the subscription stays on its tier. A move to " +
+      "a tier with the same interval that costs the same or less takes " +
+      "the new price from the next bill. Only available while signed in " +
+      "on the site.",
     parameters: [
       {
         in: "path",

@@ -209,7 +209,12 @@ describe("ArtistSupportBox", () => {
       authState.user = {
         id: 20,
         artistUserSubscriptions: [
-          { id: 77, artistSubscriptionTier: otherTier },
+          {
+            id: 77,
+            amount: 500,
+            isPaid: true,
+            artistSubscriptionTier: otherTier,
+          },
         ],
       };
     });
@@ -237,6 +242,27 @@ describe("ArtistSupportBox", () => {
       expect(startPurchase).not.toHaveBeenCalled();
     });
 
+    test("warns that the difference for a pricier tier is billed now", async () => {
+      apiPut.mockResolvedValue({});
+
+      renderComponent({ ...baseTier, minAmount: 1500, allowVariable: false });
+
+      fireEvent.click(screen.getByText("chooseThisSubscription"));
+
+      expect(
+        screen.getByText("switchTierUpgradeBilledNow")
+      ).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText("switchTier"));
+
+      await vi.waitFor(() =>
+        expect(snackbar).toHaveBeenCalledWith(
+          "subscriptionTierChangedBilledNow",
+          expect.objectContaining({ type: "success" })
+        )
+      );
+    });
+
     test("warns that a change between monthly and yearly is billed now", () => {
       renderComponent({
         ...baseTier,
@@ -259,6 +285,45 @@ describe("ArtistSupportBox", () => {
       });
 
       fireEvent.click(screen.getByText("chooseThisSubscription"));
+      fireEvent.click(screen.getByText("switchTier"));
+
+      expect(startPurchase).toHaveBeenCalledWith({
+        artistId: baseTier.artistId,
+        items: [{ type: "subscription", tierId: baseTier.id }],
+      });
+      expect(apiPut).not.toHaveBeenCalled();
+    });
+
+    test("switches to a tier that needs a shipping address in place when one is on file", async () => {
+      authState.user.artistUserSubscriptions[0].shippingAddress = {
+        name: "Fan",
+        address: { country: "US" },
+      };
+      apiPut.mockResolvedValue({});
+
+      renderComponent({
+        ...baseTier,
+        minAmount: 500,
+        allowVariable: false,
+        collectAddress: true,
+      });
+
+      fireEvent.click(screen.getByText("chooseThisSubscription"));
+      fireEvent.click(screen.getByText("switchTier"));
+
+      await vi.waitFor(() => expect(apiPut).toHaveBeenCalled());
+      expect(startPurchase).not.toHaveBeenCalled();
+    });
+
+    test("sends a subscription that isn't paid through checkout", () => {
+      authState.user.artistUserSubscriptions[0].isPaid = false;
+
+      renderComponent({ ...baseTier, minAmount: 500, allowVariable: false });
+
+      fireEvent.click(screen.getByText("chooseThisSubscription"));
+
+      expect(screen.getByText("switchTierNeedsPayment")).toBeInTheDocument();
+
       fireEvent.click(screen.getByText("switchTier"));
 
       expect(startPurchase).toHaveBeenCalledWith({

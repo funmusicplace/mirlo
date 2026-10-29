@@ -556,6 +556,7 @@ interface ArtistUserSubscription {
   userId: number;
   artistSubscriptionTierId: number;
   artistSubscriptionTier: ArtistSubscriptionTier;
+  isPaid?: boolean;
   shippingAddress?: {
     name?: string;
     address?: {

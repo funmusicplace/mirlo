@@ -89,10 +89,12 @@ describe("PUT manage/subscriptions/{subscriptionId}/tier", () => {
       .set("Accept", "application/json");
 
     assert.equal(response.statusCode, 200);
+    assert.equal(response.body.result.artistSubscriptionTierId, newTier.id);
     const after = await prisma.profileUserSubscription.findFirst({
-      where: { id: subscription.id },
+      where: { userId: buyer.id },
     });
     assert.equal(after?.profileSubscriptionTierId, newTier.id);
     assert.equal(after?.amount, 1000);
+    assert.equal(after?.stripeSubscriptionKey, "sub_switch_tier_ok");
   });
 });

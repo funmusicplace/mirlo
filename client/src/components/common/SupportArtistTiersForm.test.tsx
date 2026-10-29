@@ -44,8 +44,12 @@ const snackbar = vi.fn();
 vi.mock("state/SnackbarContext", () => ({ useSnackbar: () => snackbar }));
 
 const apiPost = vi.fn();
+const apiPut = vi.fn();
 vi.mock("services/api", () => ({
-  default: { post: (...args: unknown[]) => apiPost(...args) },
+  default: {
+    post: (...args: unknown[]) => apiPost(...args),
+    put: (...args: unknown[]) => apiPut(...args),
+  },
 }));
 
 const startPurchase = vi.fn();
@@ -108,6 +112,62 @@ describe("SupportArtistTiersForm", () => {
 
     await waitFor(() => expect(startPurchase).toHaveBeenCalled());
     expect(startPurchase.mock.calls[0][0].email).toBeUndefined();
+  });
+
+  describe("a fan already subscribed to another tier", () => {
+    const subscribedTo = (isPaid: boolean) => ({
+      id: 5,
+      email: "buyer@example.com",
+      artistUserSubscriptions: [
+        {
+          id: 77,
+          amount: 500,
+          isPaid,
+          artistSubscriptionTier: {
+            ...PAID_TIER,
+            id: 9,
+            name: "Other tier",
+          },
+        },
+      ],
+    });
+
+    test("asks before switching, then switches in place", async () => {
+      authState.user = subscribedTo(true);
+      apiPut.mockResolvedValue({});
+      renderForm();
+
+      fireEvent.click(screen.getByText("continueWithPriceMonthly"));
+
+      expect(screen.getByText("switchTierNextBill")).toBeInTheDocument();
+      expect(startPurchase).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByText("switchTier"));
+
+      await waitFor(() =>
+        expect(apiPut).toHaveBeenCalledWith("manage/subscriptions/77/tier", {
+          tierId: PAID_TIER.id,
+        })
+      );
+      expect(startPurchase).not.toHaveBeenCalled();
+    });
+
+    test("sends a fan whose subscription isn't paid through checkout", () => {
+      authState.user = subscribedTo(false);
+      renderForm();
+
+      fireEvent.click(screen.getByText("continueWithPriceMonthly"));
+
+      expect(screen.getByText("switchTierNeedsPayment")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText("switchTier"));
+
+      expect(startPurchase).toHaveBeenCalledWith({
+        artistId: ARTIST.id,
+        items: [{ type: "subscription", tierId: PAID_TIER.id }],
+      });
+      expect(apiPut).not.toHaveBeenCalled();
+    });
   });
 
   test("shows the payment form once checkout has started", () => {

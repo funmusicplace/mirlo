@@ -65,8 +65,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Subscribed to another tier: asks before switching, then moves the
- * subscription without a new checkout
+ * Subscribed to a cheaper tier: asks before switching, says the difference
+ * is billed today, then moves the subscription without a new checkout
  */
 export const SwitchToAnotherTier: Story = {
   parameters: {
@@ -97,7 +97,7 @@ export const SwitchToAnotherTier: Story = {
     const body = within(document.body);
     await expect(
       await body.findByText(
-        "The new price applies from your next billing date."
+        "You'll be charged the difference for the rest of this billing period today, then the new price from your next billing date."
       )
     ).toBeInTheDocument();
     await userEvent.click(await body.findByRole("button", { name: "Switch" }));

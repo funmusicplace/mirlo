@@ -812,9 +812,9 @@ export default function () {
       "needs, and `{ checkoutId, email?, shippingAddress? }` when the " +
       "buyer pays, which creates the intent. Pass `email` on that second " +
       "call when no one is logged in. Paying again replaces the intent; " +
-      "`success: true` means the checkout is already paid. A subscriber " +
-      "who checks out another tier keeps their subscription, moved to the " +
-      "new tier once they confirm.",
+      "`success: true` means the checkout is already paid. When a " +
+      "subscriber checks out another tier, an active subscription is moved " +
+      "to the new tier once they confirm; one that isn't active is replaced.",
     parameters: [
       {
         in: "body",

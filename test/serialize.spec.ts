@@ -252,6 +252,37 @@ describe("outbound serializers", () => {
       assertPreservedKeys(input, user, "serializeUser");
       assertNoLeaks(user, "serializeUser");
     });
+
+    it("sends whether a subscription is paid instead of its Stripe key", () => {
+      const subscription = (
+        id: number,
+        stripeSubscriptionKey: string | null
+      ) => ({
+        id,
+        stripeSubscriptionKey,
+        profileSubscriptionTierId: 5,
+        profileSubscriptionTier: {
+          id: 5,
+          profileId: 4,
+          profile: { ...artistFixture(4), avatar: null },
+        },
+      });
+      const user = serializeUser({
+        id: 2,
+        profileUserSubscriptions: [
+          subscription(3, "sub_123"),
+          subscription(4, null),
+        ],
+      });
+
+      const [paid, comped] = user.artistUserSubscriptions as unknown as Record<
+        string,
+        unknown
+      >[];
+      assert.equal(paid.isPaid, true);
+      assert.equal(comped.isPaid, false);
+      assert.equal("stripeSubscriptionKey" in paid, false);
+    });
   });
 
   describe("serializeUserProfileTip", () => {
