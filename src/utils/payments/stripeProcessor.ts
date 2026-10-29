@@ -1,13 +1,12 @@
 // Stripe implementation of the PaymentProcessor interface.
 import logger from "../../logger";
-import { calculatePlatformPercent } from "../processingPayments";
 import { SettingsType } from "../settings";
 import stripe, {
   createOnlinePaymentIntent,
-  createSubscriptionStripeProduct,
   findOrCreateStripeCustomer,
   hasStripeCredentials,
   refreshStripeClient,
+  repriceStripeSubscription,
 } from "../stripe";
 import { getIntentStatus } from "../stripe/status";
 import {
@@ -207,39 +206,16 @@ export class StripePaymentProcessor implements PaymentProcessor {
     amount,
     currency,
   }: UpdateSubscriptionTierArgs): Promise<void> {
-    const [productKey, subscription] = await Promise.all([
-      createSubscriptionStripeProduct(tier, accountId),
-      stripe.subscriptions.retrieve(subscriptionKey, {
-        stripeAccount: accountId,
-      }),
-    ]);
-    const itemId = subscription.items.data[0].id;
-
-    await stripe.subscriptions.update(
-      subscriptionKey,
-      {
-        items: [
-          {
-            id: itemId,
-            price_data: {
-              currency,
-              product: productKey,
-              unit_amount: amount,
-              recurring: {
-                interval: tier.interval === "YEAR" ? "year" : "month",
-              },
-            },
-          },
-        ],
-        proration_behavior: "none",
-        cancel_at_period_end: false,
-        application_fee_percent: await calculatePlatformPercent(
-          currency || "usd",
-          tier.platformPercent ?? tier.profile.defaultPlatformFee
-        ),
-      },
-      { stripeAccount: accountId }
-    );
+    const subscription = await stripe.subscriptions.retrieve(subscriptionKey, {
+      stripeAccount: accountId,
+    });
+    await repriceStripeSubscription({
+      subscription,
+      accountId,
+      tier,
+      amount,
+      currency,
+    });
   }
 
   async createSubscriptionPaymentMethodSetup({

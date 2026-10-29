@@ -460,20 +460,15 @@ export default function () {
           deferred,
           shippingAddress,
           checkoutId: checkout?.id,
-          // Opening or creating a checkout link mustn't switch a subscriber's
-          // tier: they confirm the switch on the checkout page.
-          switchImmediately: !checkout && !hosted,
         });
 
         if ("deferred" in result) {
           return respondDeferred(result.deferred);
         }
-        if ("setupIntentId" in result) {
-          await recordIntent({
-            stripeId: result.setupIntentId,
-            stripeAccountId: result.stripeAccountId,
-          });
-        }
+        await recordIntent({
+          stripeId: result.setupIntentId,
+          stripeAccountId: result.stripeAccountId,
+        });
 
         return res.status(200).json(result);
       }
@@ -817,7 +812,9 @@ export default function () {
       "needs, and `{ checkoutId, email?, shippingAddress? }` when the " +
       "buyer pays, which creates the intent. Pass `email` on that second " +
       "call when no one is logged in. Paying again replaces the intent; " +
-      "`success: true` means the checkout is already paid.",
+      "`success: true` means the checkout is already paid. A subscriber " +
+      "who checks out another tier keeps their subscription, moved to the " +
+      "new tier once they confirm.",
     parameters: [
       {
         in: "body",

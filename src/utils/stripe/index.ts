@@ -343,6 +343,54 @@ export const createSubscriptionStripeProduct = async (
   });
 };
 
+export const repriceStripeSubscription = async ({
+  subscription,
+  accountId,
+  tier,
+  amount,
+  currency,
+  paymentMethodId,
+}: {
+  subscription: Stripe.Subscription;
+  accountId: string;
+  tier: Prisma.ProfileSubscriptionTierGetPayload<{
+    include: { profile: true };
+  }>;
+  amount: number;
+  currency: string;
+  paymentMethodId?: string;
+}) => {
+  const productKey = await createSubscriptionStripeProduct(tier, accountId);
+  const [item] = subscription.items.data;
+  const interval = tier.interval === "YEAR" ? "year" : "month";
+
+  await stripe.subscriptions.update(
+    subscription.id,
+    {
+      items: [
+        {
+          id: item.id,
+          price_data: {
+            currency,
+            product: productKey,
+            unit_amount: amount,
+            recurring: { interval },
+          },
+        },
+      ],
+      proration_behavior:
+        item.price.recurring?.interval === interval ? "none" : "always_invoice",
+      cancel_at_period_end: false,
+      application_fee_percent: await calculatePlatformPercent(
+        currency || "usd",
+        tier.platformPercent ?? tier.profile.defaultPlatformFee
+      ),
+      ...(paymentMethodId && { default_payment_method: paymentMethodId }),
+    },
+    { stripeAccount: accountId }
+  );
+};
+
 export const verifyStripeSignature = async (
   req: Request,
   res: Response,
@@ -585,6 +633,29 @@ export const handleSubscriptionPaymentMethodUpdateSucceeded = async (
   );
 };
 
+const findActiveSubscription = async (
+  stripeAccountId: string,
+  subscriptionKey?: string | null
+) => {
+  if (!subscriptionKey) {
+    return null;
+  }
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionKey, {
+      stripeAccount: stripeAccountId,
+    });
+    return ["active", "trialing"].includes(subscription.status)
+      ? subscription
+      : null;
+  } catch (e) {
+    logger.error(
+      `finalizeSubscriptionSetup: could not retrieve subscription ${subscriptionKey}`,
+      e
+    );
+    return null;
+  }
+};
+
 /**
  * Finalizes the subscription set up, whether made by a terminal or online.
  */
@@ -609,13 +680,10 @@ export const finalizeSubscriptionSetup = async ({
   oldStripeSubscriptionKey?: string;
   shippingAddress?: { name?: string; address: Record<string, unknown> } | null;
 }) => {
-  const [tier, customer] = await Promise.all([
-    prisma.profileSubscriptionTier.findFirst({
-      where: { id: tierId, deletedAt: null },
-      include: { profile: true },
-    }),
-    findOrCreateStripeCustomer(stripeAccountId, userId, userEmail),
-  ]);
+  const tier = await prisma.profileSubscriptionTier.findFirst({
+    where: { id: tierId, deletedAt: null },
+    include: { profile: true },
+  });
 
   if (!tier) {
     logger.error(`finalizeSubscriptionSetup: tier ${tierId} not found`);
@@ -638,47 +706,82 @@ export const finalizeSubscriptionSetup = async ({
     tier.platformPercent ?? tier.profile.defaultPlatformFee
   );
 
-  const [, productKey] = await Promise.all([
-    stripe.paymentMethods.attach(
-      paymentMethodId,
-      { customer: customer.id },
-      { stripeAccount: stripeAccountId }
-    ),
-    createSubscriptionStripeProduct(tier, stripeAccountId),
-  ]);
+  const subscriptionToMove = await findActiveSubscription(
+    stripeAccountId,
+    oldStripeSubscriptionKey ??
+      existingPaidSubscriptions[0]?.stripeSubscriptionKey
+  );
 
-  const subscription = await stripe.subscriptions.create(
-    {
-      customer: customer.id,
-      items: [
-        {
-          price_data: {
-            currency,
-            product: productKey,
-            unit_amount: amount,
-            recurring: {
-              interval: tier.interval === "YEAR" ? "year" : "month",
+  let subscriptionId: string;
+  if (subscriptionToMove) {
+    await stripe.paymentMethods.attach(
+      paymentMethodId,
+      {
+        customer:
+          typeof subscriptionToMove.customer === "string"
+            ? subscriptionToMove.customer
+            : subscriptionToMove.customer.id,
+      },
+      { stripeAccount: stripeAccountId }
+    );
+    await repriceStripeSubscription({
+      subscription: subscriptionToMove,
+      accountId: stripeAccountId,
+      tier,
+      amount,
+      currency,
+      paymentMethodId,
+    });
+    subscriptionId = subscriptionToMove.id;
+  } else {
+    const customer = await findOrCreateStripeCustomer(
+      stripeAccountId,
+      userId,
+      userEmail
+    );
+    const [, productKey] = await Promise.all([
+      stripe.paymentMethods.attach(
+        paymentMethodId,
+        { customer: customer.id },
+        { stripeAccount: stripeAccountId }
+      ),
+      createSubscriptionStripeProduct(tier, stripeAccountId),
+    ]);
+
+    const subscription = await stripe.subscriptions.create(
+      {
+        customer: customer.id,
+        items: [
+          {
+            price_data: {
+              currency,
+              product: productKey,
+              unit_amount: amount,
+              recurring: {
+                interval: tier.interval === "YEAR" ? "year" : "month",
+              },
             },
           },
+        ],
+        default_payment_method: paymentMethodId,
+        application_fee_percent: platformPercent,
+        metadata: {
+          tierId: String(tier.id),
+          userId: String(userId),
+          stripeAccountId,
+          purchaseType: "subscription",
         },
-      ],
-      default_payment_method: paymentMethodId,
-      application_fee_percent: platformPercent,
-      metadata: {
-        tierId: String(tier.id),
-        userId: String(userId),
-        stripeAccountId,
-        purchaseType: "subscription",
       },
-    },
-    { stripeAccount: stripeAccountId }
-  );
+      { stripeAccount: stripeAccountId }
+    );
+    subscriptionId = subscription.id;
+  }
 
   await registerSubscription({
     userId,
     tierId: tier.id,
     amount,
-    paymentProcessorKey: subscription.id,
+    paymentProcessorKey: subscriptionId,
     platformCut: Math.round((amount * platformPercent) / 100),
     shippingAddress,
   });
@@ -687,7 +790,7 @@ export const finalizeSubscriptionSetup = async ({
     [
       oldStripeSubscriptionKey,
       ...existingPaidSubscriptions.map((sub) => sub.stripeSubscriptionKey),
-    ].filter((key): key is string => !!key && key !== subscription.id)
+    ].filter((key): key is string => !!key && key !== subscriptionId)
   );
 
   for (const oldKey of oldStripeSubscriptionKeys) {
@@ -718,7 +821,7 @@ export const finalizeSubscriptionSetup = async ({
   });
 
   logger.info(
-    `finalizeSubscriptionSetup: created subscription ${subscription.id} for user ${userId}, tier ${tier.id}`
+    `finalizeSubscriptionSetup: ${subscriptionToMove ? "moved" : "created"} subscription ${subscriptionId} for user ${userId}, tier ${tier.id}`
   );
 };
 

@@ -251,6 +251,7 @@ export const createTier = async (
       isDefaultTier: data?.isDefaultTier,
       collectAddress: data?.collectAddress,
       platformPercent: data?.platformPercent,
+      interval: data?.interval,
     },
   });
   return tier;

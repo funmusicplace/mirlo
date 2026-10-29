@@ -73,16 +73,11 @@ const SupportArtistTiersForm: React.FC<{
       const tier = methods.getValues("tier");
       const email = methods.getValues("email");
       if (!tier.isDefaultTier) {
-        const result = await startPurchase({
+        await startPurchase({
           artistId: artist.id,
           items: [{ type: "subscription", tierId: tier.id }],
           email: user ? undefined : email,
         });
-        if (result?.success) {
-          snackbar(t("subscriptionTierChanged", { tierName: tier.name }), {
-            type: "success",
-          });
-        }
         return;
       } else {
         // @ts-ignore

@@ -47,6 +47,8 @@ export type DeferredQuote = {
   stripeAccountId: string;
   requiresShipping: boolean;
   allowedCountries?: string[];
+  interval?: "MONTH" | "YEAR";
+  replacesSubscription?: boolean;
 };
 
 export type UpdateSubscriptionTierArgs = {

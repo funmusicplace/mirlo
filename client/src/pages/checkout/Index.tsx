@@ -60,10 +60,16 @@ function Index() {
 
   const returnUrl = quote.successUrl ?? window.location.origin;
 
-  const total =
+  const price =
     quote.amount != null
       ? moneyDisplay({ amount: quote.amount / 100, currency: quote.currency })
       : null;
+  const total =
+    price && quote.interval
+      ? t(quote.interval === "YEAR" ? "amountPerYear" : "amountPerMonth", {
+          amount: price,
+        })
+      : price;
 
   const summary =
     quote.artistName && total
@@ -82,6 +88,9 @@ function Index() {
       <h1 className="text-xl mb-1">{t("title")}</h1>
       {summary && (
         <p className="mb-4 text-(--mi-lighten-foreground-color)">{summary}</p>
+      )}
+      {quote.replacesSubscription && (
+        <p className="mb-4">{t("replacesSubscription")}</p>
       )}
       <PurchaseElements
         checkout={{ kind: "deferred", quote }}

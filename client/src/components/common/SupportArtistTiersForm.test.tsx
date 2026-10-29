@@ -110,20 +110,6 @@ describe("SupportArtistTiersForm", () => {
     expect(startPurchase.mock.calls[0][0].email).toBeUndefined();
   });
 
-  test("confirms an in-place tier switch", async () => {
-    authState.user = { id: 5, email: "buyer@example.com" };
-    startPurchase.mockResolvedValue({ success: true });
-    renderForm();
-
-    fireEvent.click(screen.getByText("continueWithPriceMonthly"));
-
-    await waitFor(() =>
-      expect(snackbar).toHaveBeenCalledWith("subscriptionTierChanged", {
-        type: "success",
-      })
-    );
-  });
-
   test("shows the payment form once checkout has started", () => {
     purchaseState.checkout = {
       clientSecret: "seti_secret",

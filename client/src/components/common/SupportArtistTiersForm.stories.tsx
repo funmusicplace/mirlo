@@ -45,10 +45,9 @@ const handlersFor = (artist: Artist) => ({
   artist: http.get("*/v1/artists/:artistSlug", () =>
     HttpResponse.json({ result: artist })
   ),
-  // An existing subscriber switching tiers is updated in place, no checkout
   purchase: http.post("*/v1/purchase", async ({ request }) => {
     lastPurchaseBody = await request.json();
-    return HttpResponse.json({ success: true });
+    return HttpResponse.json({ deferred: setupQuote() });
   }),
   follow: http.post("*/v1/artists/:artistId/follow", () =>
     HttpResponse.json({})
@@ -60,8 +59,9 @@ const loggedInAs = (user: LoggedInUser) =>
 
 /**
  * The tier picker in the support/follow pop-ups and the artist connect page.
- * Paid tiers go through POST /v1/purchase: a tier switch is applied to the
- * existing subscription in place, and new subscriptions open the payment form.
+ * Paid tiers go through POST /v1/purchase and open the payment form. A
+ * subscriber who picks another tier keeps their subscription, moved to the
+ * new tier once they confirm.
  */
 const meta = {
   title: "Features/Buying/SupportArtistTiersForm",

@@ -89,6 +89,7 @@ const routes = [
   "users/{userId}/stripe/resetCode",
   "manage/subscriptions",
   "manage/subscriptions/{subscriptionId}",
+  "manage/subscriptions/{subscriptionId}/tier",
   "manage/artists",
   "manage/bulkTrackUpload",
   "manage/label",
