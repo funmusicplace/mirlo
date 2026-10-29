@@ -360,6 +360,39 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
     });
   }
 
+  it("keeps the uploaded file's copyright over the track license", async () => {
+    tempDir = await fsPromises.mkdtemp(
+      path.join(os.tmpdir(), "mirlo-track-test-")
+    );
+
+    const inputWav = path.join(tempDir, "input.wav");
+    const outputBase = path.join(tempDir, "output");
+    await fsPromises.writeFile(inputWav, createSilentWavBuffer());
+
+    const track = createTrack("audio-integration-copyright", []);
+    track.metadata = { common: { copyright: "℗ 2023 Foo Records" } };
+
+    await convertAudio({
+      track: {
+        ...track,
+        license: {
+          id: 1,
+          short: "CC BY 4.0",
+          name: "Creative Commons Attribution 4.0",
+          link: "https://creativecommons.org/licenses/by/4.0/",
+        },
+      },
+      artist: { name: "Album Artist" } as Profile,
+      trackGroup: { title: "Integration Album" },
+      inputFile: inputWav,
+      outputBasename: outputBase,
+    });
+
+    const parsed = await parseFile(`${outputBase}.mp3`);
+
+    assert.equal(parsed.common.copyright, "℗ 2023 Foo Records");
+  });
+
   // Regression test for #1864: MusicBrainz identifiers parsed from an
   // uploaded file (stored on Track.metadata.common) were being silently
   // dropped by `-map_metadata -1` when generating downloads.

@@ -169,11 +169,10 @@ const addTrackMetadataTags = (
   addMetadataTag(
     processor,
     "copyright",
-    track.license
-      ? track.license.link
+    common.copyright ??
+      (track.license?.link
         ? `${track.license.name} (${track.license.link})`
-        : track.license.name
-      : common.copyright
+        : track.license?.name)
   );
   addMetadataTag(processor, "label", common.label);
   addMetadataTag(processor, "language", common.language);
