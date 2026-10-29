@@ -1,8 +1,10 @@
-import { describe, it, afterEach } from "mocha";
 import assert from "assert";
-import sinon from "sinon";
 import { Readable } from "stream";
+
 import { Track, TrackArtist, TrackAudio } from "@mirlo/prisma/client";
+import { describe, it, afterEach } from "mocha";
+import sinon from "sinon";
+
 import * as tracksUtils from "../../src/utils/tracks";
 
 type OutputOptionCall = [string, string?];
@@ -311,7 +313,7 @@ describe("utils/tracks.convertAudioToFormat", () => {
     );
   });
 
-  it("does not try to attach cover art for non-mp3 outputs", () => {
+  it("does not try to attach cover art for opus outputs", () => {
     const command = new FakeFfmpegCommand();
     sinon
       .stub(tracksUtils, "createFfmpegCommand")
@@ -329,14 +331,14 @@ describe("utils/tracks.convertAudioToFormat", () => {
       },
       Readable.from(Buffer.from("audio")),
       {
-        format: "flac",
-        audioCodec: "flac",
+        format: "opus",
+        audioCodec: "opus",
       },
       "/tmp/output"
     );
 
     assert.equal(command.inputCalls.length, 0);
     assert.equal(command.noVideoCallCount, 1);
-    assert.equal(command.savedDestination, "/tmp/output.flac");
+    assert.equal(command.savedDestination, "/tmp/output.opus");
   });
 });
