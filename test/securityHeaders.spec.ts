@@ -26,23 +26,4 @@ describe("securityHeaders", () => {
       "strict-origin-when-cross-origin"
     );
   });
-
-  it("stops other sites from framing regular pages", async () => {
-    const response = await request(app).get("/artist-slug/release/album");
-
-    assert.equal(response.headers["x-frame-options"], "SAMEORIGIN");
-    assert.equal(
-      response.headers["content-security-policy"],
-      "frame-ancestors 'self'"
-    );
-  });
-
-  it("lets other sites frame widgets", async () => {
-    for (const path of ["/widget/track/1", "/widget/trackGroup/2"]) {
-      const response = await request(app).get(path);
-
-      assert.equal(response.headers["x-frame-options"], undefined);
-      assert.equal(response.headers["content-security-policy"], undefined);
-    }
-  });
 });

@@ -71,10 +71,7 @@ model Client {
   applicationName    String
   applicationUrl     String
   allowedCorsOrigins String[]
-  // Unused since the OAuth work (#1768). Drop it in a release after that one
-  // ships: dropping it in the same release breaks the old instance mid-deploy.
-  secret             String?
-  key                String?
+  key              String?
   clientIdUrl        String?      @unique
   redirectUris       String[]     @default([])
   confidential       Boolean      @default(false)
