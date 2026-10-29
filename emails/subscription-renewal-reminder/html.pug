@@ -2,7 +2,7 @@ extends ../layout.pug
 include ../mixins.pug
 
 block content
-  - const renewalAmount = formatMoney(artistUserSubscription.amount, artist.user.currency || "usd")
+  - const renewalAmount = formatMoney(artistUserSubscription.amount, currency || artist.user.currency || "usd")
   +greeting()
   if renewalDate
     p= t("emails.subscriptionRenewalReminder.willRenew", { artistName: artist.name, tierName: artistUserSubscription.artistSubscriptionTier.name, renewalDate: formatDate(renewalDate) })

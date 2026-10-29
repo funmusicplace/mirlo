@@ -40,9 +40,15 @@ export const hasTranslation = (language: unknown): language is string =>
   typeof language === "string" &&
   getEmailI18n().hasResourceBundle(language, "translation");
 
+const hasEmailTranslation = (language: string) =>
+  hasTranslation(language) &&
+  Object.keys(
+    getEmailI18n().getResourceBundle(language, "translation") ?? {}
+  ).some((key) => key.split(".")[0] === "emails");
+
 const resolveLanguage = (language?: string | null) => {
   const candidates = language ? [language, language.split(/[-_]/)[0]] : [];
-  return candidates.find(hasTranslation) ?? "en";
+  return candidates.find(hasEmailTranslation) ?? "en";
 };
 
 export const getEmailLocals = (requestedLanguage?: string | null) => {

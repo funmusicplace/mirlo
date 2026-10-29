@@ -878,7 +878,7 @@ describe("send-mail job", () => {
   });
 
   describe("translation", () => {
-    const sendPasswordReset = async (to: string) => {
+    const sendPasswordReset = async (to: string, language?: string) => {
       let sent: { html?: string; subject?: string } = {};
       sandbox.stub(nodemailer, "createTransport").returns({
         sendMail: (mail: typeof sent) => {
@@ -899,6 +899,7 @@ describe("send-mail job", () => {
               accountIncomplete: false,
             },
             message: { to },
+            language,
           },
         } as Job);
       } finally {
@@ -949,6 +950,35 @@ describe("send-mail job", () => {
 
       assert.equal(sent.subject, "Nightjar: Password Reset");
       assert.ok((sent.html ?? "").includes("Someone wants to reset"));
+    });
+
+    it("renders in English when the language has no email strings yet", async () => {
+      getEmailI18n().addResourceBundle(
+        "yy",
+        "translation",
+        { footer: { contact: "Kontakt" } },
+        true,
+        true
+      );
+      await createSiteSettings({
+        instanceCustomization: { title: "Nightjar" },
+      });
+      await createUser({ email: "yy@example.com", language: "yy" });
+
+      const sent = await sendPasswordReset("yy@example.com");
+
+      assert.equal(sent.subject, "Nightjar: Password Reset");
+      assert.ok((sent.html ?? "").includes('lang="en"'));
+    });
+
+    it("prefers the language passed with the job over the recipient's", async () => {
+      await createSiteSettings({
+        instanceCustomization: { title: "Nightjar" },
+      });
+
+      const sent = await sendPasswordReset("new-address@example.com", "zz");
+
+      assert.equal(sent.subject, "Nightjar : réinitialisation");
     });
   });
 

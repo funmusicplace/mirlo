@@ -11,7 +11,7 @@ block content
     table 
       tr 
         td #{artist.name}
-        td.pa3 #{formatMoney(artistUserSubscription.amount, artist.user.currency || "usd")}
+        td.pa3 #{formatMoney(artistUserSubscription.amount, currency || artist.user.currency || "usd")}
     p= t("emails.artistSubscriptionReceipt.viewSubscriptions")
     
     p= t("emails.artistSubscriptionReceipt.thankYou")

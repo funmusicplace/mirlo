@@ -21,6 +21,7 @@ export type SubscriptionRenewalReminderEmailType = {
     updatedAt: Date;
   };
   renewalDate: string | null;
+  currency?: string;
 };
 
 /**
@@ -77,6 +78,11 @@ const sendSubscriptionRenewalReminders = async () => {
               },
             },
           },
+          profileUserSubscriptionCharges: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+            select: { transaction: { select: { currency: true } } },
+          },
         },
       }
     );
@@ -117,6 +123,9 @@ const sendSubscriptionRenewalReminders = async () => {
                 client: (await getClient()).applicationUrl,
                 renewalDate:
                   subscription.nextBillingDate?.toISOString() ?? null,
+                currency:
+                  subscription.profileUserSubscriptionCharges[0]?.transaction
+                    ?.currency,
               } as SubscriptionRenewalReminderEmailType,
             },
             { priority: BULK_MAIL_PRIORITY }

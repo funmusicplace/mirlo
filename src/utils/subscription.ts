@@ -19,6 +19,7 @@ export type ArtistSubscriptionReceiptEmailType = {
   host: string;
   isNewSubscription: boolean;
   client: string;
+  currency: string;
   artistUserSubscription: {
     id: number;
     createdAt: Date;
@@ -44,7 +45,7 @@ export type ArtistNewSubscriberAnnounceEmailType = {
     };
   };
   user: {
-    name: string;
+    name: string | null;
     email: string;
   };
   transaction?: {
@@ -185,6 +186,7 @@ export const manageSubscriptionReceipt = async ({
           artistUserSubscription: artistUserSubscriptionForEmail,
           host: process.env.API_DOMAIN,
           client: client.applicationUrl,
+          currency: transaction.currency,
         } as ArtistSubscriptionReceiptEmailType,
       });
 

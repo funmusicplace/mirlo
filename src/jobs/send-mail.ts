@@ -334,6 +334,7 @@ export const sendMail = async <T>(job: {
     message: Mail.Options;
     locals: T;
     fromName?: string;
+    language?: string | null;
   };
 }): Promise<{ fromEmail: string }> => {
   logger.info(`sendMail: sending: ${job.data.template}`);
@@ -371,7 +372,9 @@ export const sendMail = async <T>(job: {
       instanceName,
       contactEmail,
       supportEmail,
-      ...getEmailLocals(await getRecipientLanguage(message)),
+      ...getEmailLocals(
+        job.data.language ?? (await getRecipientLanguage(message))
+      ),
     };
 
     if (

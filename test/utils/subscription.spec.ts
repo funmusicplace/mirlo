@@ -111,6 +111,7 @@ describe("subscription", () => {
         tier.id
       );
       assert.equal(locals.artistUserSubscription.amount, 10);
+      assert.equal(locals.currency, "usd");
     });
 
     it("should store nextBillingDate when provided", async () => {

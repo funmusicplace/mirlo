@@ -9,6 +9,7 @@ import { getClient } from "../utils/getClient";
 export type AnnounceMonthlyReceiptsEmailType = {
   userSubscriptions: {
     amount: number;
+    currency?: string;
     artistSubscriptionTier: {
       artistId: number;
       artist: { name: string; user: { currency: string | null } };
@@ -45,6 +46,11 @@ const sendOutMonthlyReceipts = async () => {
           },
         },
         user: { select: { id: true, name: true, email: true } },
+        profileUserSubscriptionCharges: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          select: { transaction: { select: { currency: true } } },
+        },
       },
       orderBy: {
         userId: "desc",
@@ -69,9 +75,12 @@ const sendOutMonthlyReceipts = async () => {
                 to: userSubscriptions[0].user.email,
               },
               locals: {
-                userSubscriptions: userSubscriptions.map((sub) =>
-                  serializeProfileUserSubscription(sub)
-                ),
+                userSubscriptions: userSubscriptions.map((sub) => ({
+                  ...serializeProfileUserSubscription(sub),
+                  currency:
+                    sub.profileUserSubscriptionCharges[0]?.transaction
+                      ?.currency,
+                })),
                 user: userSubscriptions[0].user,
                 host: process.env.API_DOMAIN || "",
                 client: (await getClient()).applicationUrl,

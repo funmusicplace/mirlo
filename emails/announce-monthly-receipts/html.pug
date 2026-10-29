@@ -15,7 +15,7 @@ block content
       each val in userSubscriptions
         tr
           td #{val.artistSubscriptionTier.artist.name}
-          td.num #{formatMoney(val.amount, val.artistSubscriptionTier.artist.user.currency || "usd")}
+          td.num #{formatMoney(val.amount, val.currency || val.artistSubscriptionTier.artist.user.currency || "usd")}
 
   p= t("emails.announceMonthlyReceipts.loveToSeeIt")
   p= t("emails.common.enjoy")

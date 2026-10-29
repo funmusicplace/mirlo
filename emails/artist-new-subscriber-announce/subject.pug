@@ -1,4 +1,4 @@
-- const amount = formatMoney(artistUserSubscription.amount, artist.user.currency || "usd")
+- const amount = formatMoney(artistUserSubscription.amount, transaction ? transaction.currency : artist.user.currency || "usd")
 - const tierName = artistUserSubscription.artistSubscriptionTier.name
 if isNewSubscription && interval === 'MONTH'
   != t("emails.artistNewSubscriberAnnounce.subjectNewMonthly", { instanceName, amount, tierName })
