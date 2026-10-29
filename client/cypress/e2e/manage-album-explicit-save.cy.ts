@@ -57,26 +57,43 @@ describe("manage album explicit save", () => {
 
     cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
     cy.wait("@authProfile");
-    cy.contains("h2", "Key details").should("exist");
+    cy.findByRole("heading", { name: "Key details" }).should("exist");
   });
 
   describe("Save draft button", () => {
     it("is disabled when nothing has changed", () => {
-      cy.contains("button", "Save draft").should("be.disabled");
+      cy.findAllByRole("button", { name: "Save draft" })
+        .first()
+        .should("be.disabled");
     });
 
     it("becomes enabled as soon as any field changes", () => {
-      cy.get("#input-title").clear().type("Updated Title");
-      cy.contains("button", "Save draft").should("not.be.disabled");
+      cy.findByRole("textbox", { name: /^Title/ })
+        .clear()
+        .type("Updated Title");
+      cy.findAllByRole("button", { name: "Save draft" })
+        .first()
+        .should("not.be.disabled");
     });
 
     it("commits all dirty fields in a single PUT and goes back to disabled", () => {
-      cy.get("#input-title").clear().type("Brand New Title");
-      cy.get("#input-about").clear().type("A fresh description");
-      cy.get("#input-minimum-price").clear().type("12");
-      cy.get("#input-catalog-number").clear().type("CAT-042");
+      cy.findByRole("textbox", { name: /^Title/ })
+        .clear()
+        .type("Brand New Title");
+      cy.findByRole("textbox", { name: /^About/ })
+        .clear()
+        .type("A fresh description");
+      cy.findByRole("spinbutton", { name: /^Minimum price/ })
+        .clear()
+        .type("12");
+      cy.findByRole("textbox", { name: /^Catalog number/ })
+        .clear()
+        .type("CAT-042");
 
-      cy.contains("button", "Save draft").should("not.be.disabled").click();
+      cy.findAllByRole("button", { name: "Save draft" })
+        .first()
+        .should("not.be.disabled")
+        .click();
 
       cy.wait("@updateTrackGroup")
         .its("request.body")
@@ -87,14 +104,20 @@ describe("manage album explicit save", () => {
           expect(body.catalogNumber).to.equal("CAT-042");
         });
 
-      cy.contains("button", "Save draft").should("be.disabled");
+      cy.findAllByRole("button", { name: "Save draft" })
+        .first()
+        .should("be.disabled");
     });
 
     it("only fires once per click even with multiple dirty fields", () => {
-      cy.get("#input-title").clear().type("Single PUT Title");
-      cy.get("#input-about").clear().type("Single PUT about");
+      cy.findByRole("textbox", { name: /^Title/ })
+        .clear()
+        .type("Single PUT Title");
+      cy.findByRole("textbox", { name: /^About/ })
+        .clear()
+        .type("Single PUT about");
 
-      cy.contains("button", "Save draft").click();
+      cy.findAllByRole("button", { name: "Save draft" }).first().click();
       cy.wait("@updateTrackGroup");
 
       cy.wait(500);
@@ -105,77 +128,103 @@ describe("manage album explicit save", () => {
   describe("local draft restoration", () => {
     it("restores unsaved changes from local storage on reload", () => {
       const draftTitle = "Local Draft Title";
-      cy.get("#input-title").clear().type(draftTitle);
+      cy.findByRole("textbox", { name: /^Title/ })
+        .clear()
+        .type(draftTitle);
 
       cy.wait(700);
 
       cy.reload();
       cy.wait("@authProfile");
 
-      cy.contains("Some unsaved changes have been restored").should(
+      cy.findByText(/Some unsaved changes have been restored/).should(
         "be.visible"
       );
-      cy.get("#input-title").should("have.value", draftTitle);
-      cy.contains("button", "Save draft").should("not.be.disabled");
+      cy.findByRole("textbox", { name: /^Title/ }).should(
+        "have.value",
+        draftTitle
+      );
+      cy.findAllByRole("button", { name: "Save draft" })
+        .first()
+        .should("not.be.disabled");
     });
 
     it("Discard reverts to server values and clears the banner", () => {
-      cy.get("#input-title")
+      cy.findByRole("textbox", { name: /^Title/ })
         .invoke("val")
         .then((serverTitle) => {
-          cy.get("#input-title").clear().type("To Be Discarded");
+          cy.findByRole("textbox", { name: /^Title/ })
+            .clear()
+            .type("To Be Discarded");
           cy.wait(700);
 
           cy.reload();
           cy.wait("@authProfile");
 
-          cy.contains("Some unsaved changes have been restored").should(
+          cy.findByText(/Some unsaved changes have been restored/).should(
             "be.visible"
           );
-          cy.contains("button", "Discard").click();
+          cy.findByRole("button", { name: "Discard" }).click();
 
-          cy.contains("Some unsaved changes have been restored").should(
+          cy.findByText(/Some unsaved changes have been restored/).should(
             "not.exist"
           );
-          cy.get("#input-title").should("have.value", serverTitle as string);
-          cy.contains("button", "Save draft").should("be.disabled");
+          cy.findByRole("textbox", { name: /^Title/ }).should(
+            "have.value",
+            serverTitle as string
+          );
+          cy.findAllByRole("button", { name: "Save draft" })
+            .first()
+            .should("be.disabled");
         });
     });
 
     it("Keep dismisses the banner without touching the form", () => {
       const draftTitle = "Kept Draft Title";
-      cy.get("#input-title").clear().type(draftTitle);
+      cy.findByRole("textbox", { name: /^Title/ })
+        .clear()
+        .type(draftTitle);
       cy.wait(700);
 
       cy.reload();
       cy.wait("@authProfile");
 
-      cy.contains("Some unsaved changes have been restored").should(
+      cy.findByText(/Some unsaved changes have been restored/).should(
         "be.visible"
       );
-      cy.contains("button", "Keep").click();
+      cy.findByRole("button", { name: "Keep" }).click();
 
-      cy.contains("Some unsaved changes have been restored").should(
+      cy.findByText(/Some unsaved changes have been restored/).should(
         "not.exist"
       );
-      cy.get("#input-title").should("have.value", draftTitle);
-      cy.contains("button", "Save draft").should("not.be.disabled");
+      cy.findByRole("textbox", { name: /^Title/ }).should(
+        "have.value",
+        draftTitle
+      );
+      cy.findAllByRole("button", { name: "Save draft" })
+        .first()
+        .should("not.be.disabled");
     });
 
     it("Save draft clears the local storage so no banner on reload", () => {
-      cy.get("#input-title").clear().type("Saved Through Draft");
+      cy.findByRole("textbox", { name: /^Title/ })
+        .clear()
+        .type("Saved Through Draft");
       cy.wait(700);
 
-      cy.contains("button", "Save draft").click();
+      cy.findAllByRole("button", { name: "Save draft" }).first().click();
       cy.wait("@updateTrackGroup");
 
       cy.reload();
       cy.wait("@authProfile");
 
-      cy.contains("Some unsaved changes have been restored").should(
+      cy.findByText(/Some unsaved changes have been restored/).should(
         "not.exist"
       );
-      cy.get("#input-title").should("have.value", "Saved Through Draft");
+      cy.findByRole("textbox", { name: /^Title/ }).should(
+        "have.value",
+        "Saved Through Draft"
+      );
     });
   });
 });

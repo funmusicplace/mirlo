@@ -5,6 +5,8 @@ dist/
 /data
 error.log
 client/build
+client/cypress/downloads
+client/cypress/screenshots
 package-lock.json
 yarn-error.log
 .DS_Store

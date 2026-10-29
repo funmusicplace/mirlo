@@ -99,6 +99,6 @@ describe("notification feed currency", () => {
   it("displays the purchase amount with the correct currency symbol", () => {
     cy.visit(`/profile/notifications`);
     cy.wait("@fetchPurchaseNotifs");
-    cy.contains("€15.00").should("exist");
+    cy.findAllByText("€15.00").should("exist");
   });
 });

@@ -83,17 +83,19 @@ describe("album zip generation and download", () => {
     }).as("jobStatus");
 
     cy.visit(`/${artistSlug}/release/${albumSlug}`);
-    cy.get('[data-testid="download-button"]').click();
+    cy.findByRole("button", { name: "Download" }).click();
 
-    cy.contains("What file type do you want to download?").should("be.visible");
-    cy.get('[role="dialog"]').contains("button", "FLAC").click();
+    cy.findByText("What file type do you want to download?").should(
+      "be.visible"
+    );
+    cy.findByRole("dialog").findByRole("button", { name: "FLAC" }).click();
 
     cy.wait("@generateAlbum");
-    cy.contains("We're generating the release!").should("be.visible");
+    cy.findByText(/We're generating the release!/).should("be.visible");
 
     cy.wait("@jobStatus", { timeout: 10000 });
-    cy.get('[role="dialog"]')
-      .contains("button", "Download")
+    cy.findByRole("dialog")
+      .findByRole("button", { name: "Download" })
       .should("be.visible");
   });
 
@@ -107,13 +109,13 @@ describe("album zip generation and download", () => {
     }).as("generateAlbum");
 
     cy.visit(`/${artistSlug}/release/${albumSlug}`);
-    cy.get('[data-testid="download-button"]').click();
-    cy.get('[role="dialog"]').contains("button", "FLAC").click();
+    cy.findByRole("button", { name: "Download" }).click();
+    cy.findByRole("dialog").findByRole("button", { name: "FLAC" }).click();
 
     cy.wait("@generateAlbum");
-    cy.contains("We're generating the release!").should("not.exist");
-    cy.get('[role="dialog"]')
-      .contains("button", "Download")
+    cy.findByText(/We're generating the release!/).should("not.exist");
+    cy.findByRole("dialog")
+      .findByRole("button", { name: "Download" })
       .should("be.visible");
   });
 
@@ -124,8 +126,10 @@ describe("album zip generation and download", () => {
     }).as("generateAlbum");
 
     cy.visit(`/${artistSlug}/release/${albumSlug}`);
-    cy.get('[data-testid="download-button"]').click();
-    cy.get('[role="dialog"]').contains("button", "MP3 320kbps").click();
+    cy.findByRole("button", { name: "Download" }).click();
+    cy.findByRole("dialog")
+      .findByRole("button", { name: "MP3 320kbps" })
+      .click();
 
     cy.wait("@generateAlbum");
 
@@ -138,8 +142,8 @@ describe("album zip generation and download", () => {
       body: "",
     }).as("downloadAlbum");
 
-    cy.get('[role="dialog"]')
-      .contains("button", "Download")
+    cy.findByRole("dialog")
+      .findByRole("button", { name: "Download" })
       .should("be.visible")
       .click();
 
@@ -156,17 +160,19 @@ describe("album zip generation and download", () => {
     }).as("generateAlbum");
 
     cy.visit(`/${artistSlug}/release/${albumSlug}`);
-    cy.get('[data-testid="download-button"]').click();
-    cy.get('[role="dialog"]').contains("button", "FLAC").click();
+    cy.findByRole("button", { name: "Download" }).click();
+    cy.findByRole("dialog").findByRole("button", { name: "FLAC" }).click();
 
     cy.wait("@generateAlbum");
-    cy.get('[role="dialog"]')
-      .contains("button", "Download")
+    cy.findByRole("dialog")
+      .findByRole("button", { name: "Download" })
       .should("be.visible");
 
-    cy.get('[role="dialog"]')
-      .contains("button", "Choose another format")
+    cy.findByRole("dialog")
+      .findByRole("button", { name: "Choose another format" })
       .click();
-    cy.contains("What file type do you want to download?").should("be.visible");
+    cy.findByText("What file type do you want to download?").should(
+      "be.visible"
+    );
   });
 });

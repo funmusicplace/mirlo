@@ -13,6 +13,7 @@ describe("email change verification", () => {
 
   beforeEach(() => {
     cy.task("clearTables");
+    cy.request("DELETE", "http://localhost:8025/api/v1/messages");
   });
 
   it("should verify email change through email verification link", () => {
@@ -38,19 +39,15 @@ describe("email change verification", () => {
         cy.intercept("PUT", /\/v1\/users\/\d+/).as("updateUser");
 
         // Find and fill the email input (get the last one since there might be multiple)
-        cy.get('input[type="email"]')
-          .first()
-          .clear({ force: true })
-          .type(newEmail, { force: true });
+        cy.findByRole("textbox", { name: "Email:" }).clear().type(newEmail);
 
         // Find and fill password input
-        cy.get('input[type="password"]').type(password, { force: true });
+        cy.findByLabelText(
+          "Updating your email requires entering your password"
+        ).type(password);
 
         // Click save/submit button
-        cy.get("button")
-          .contains(/update account/i)
-          .first()
-          .click({ force: true });
+        cy.findByRole("button", { name: "Update account" }).click();
 
         // Wait for the PUT request to complete and verify it succeeded
         cy.wait("@updateUser", { timeout: 10000 })
@@ -139,8 +136,8 @@ describe("email change verification", () => {
             );
 
             // Wait for confirmation message
-            cy.contains(/email|confirmed|success|updated/i, {
-              timeout: 5000,
+            cy.findByRole("heading", {
+              name: "Email verified! Redirecting...",
             }).should("exist");
 
             // Give it a moment to process and redirect
@@ -176,9 +173,7 @@ describe("email change verification", () => {
       });
 
       // Should show error about invalid token
-      cy.contains(/no pending email change/i, { timeout: 5000 }).should(
-        "exist"
-      );
+      cy.findByText(/no pending email change/i).should("exist");
 
       // Verify email was NOT changed
       cy.task("getCurrentUser", originalEmail).then((currentUser: any) => {
@@ -205,21 +200,15 @@ describe("email change verification", () => {
         cy.visit("/account");
 
         // Try to change email without password
-        cy.get('input[type="email"]')
-          .last()
-          .clear({ force: true })
-          .type(newEmail, { force: true });
+        cy.findByRole("textbox", { name: "Email:" }).clear().type(newEmail);
 
         // Don't fill password - try to submit
-        cy.get("button")
-          .contains(/save|update|change|submit/i)
-          .first()
-          .click({ force: true });
+        cy.findByRole("button", { name: "Update account" }).click();
 
-        // Should show error
-        cy.contains(/password|required|error/i, { timeout: 5000 }).should(
-          "exist"
-        );
+        // The browser blocks submission until the password is filled
+        cy.findByLabelText(
+          "Updating your email requires entering your password"
+        ).should("match", ":invalid");
 
         // Verify email was NOT changed
         cy.task("getCurrentUser", originalEmail).then((currentUser: any) => {

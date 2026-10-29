@@ -117,28 +117,28 @@ describe("preview track downloads with album purchase", () => {
   describe("pre-order album (isPreorder = true)", () => {
     it("does not show album download button before release date", () => {
       cy.visit(`/${artistSlug}/release/${preOrderReleaseSlug}`);
-      cy.get('[data-testid="download-button"]').should("not.exist");
+      cy.findByRole("button", { name: "Download" }).should("not.exist");
     });
 
     it("shows download button for a preview track when album is purchased", () => {
       cy.visit(
         `/${artistSlug}/release/${preOrderReleaseSlug}/tracks/${previewTrackId}`
       );
-      cy.get('[data-testid="download-button"]').should("exist");
+      cy.findByRole("button", { name: "Download" }).should("exist");
     });
 
     it("does not show download button for a non-preview track without direct purchase", () => {
       cy.visit(
         `/${artistSlug}/release/${preOrderReleaseSlug}/tracks/${nonPreviewTrackId}`
       );
-      cy.get('[data-testid="download-button"]').should("not.exist");
+      cy.findByRole("button", { name: "Download" }).should("not.exist");
     });
   });
 
   describe("released album (past release date)", () => {
     it("shows album download button after release date when album is purchased", () => {
       cy.visit(`/${artistSlug}/release/${releasedAlbumSlug}`);
-      cy.get('[data-testid="download-button"]').should("exist");
+      cy.findByRole("button", { name: "Download" }).should("exist");
     });
   });
 });

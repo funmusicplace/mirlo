@@ -50,17 +50,19 @@ describe("manage artist links", () => {
       },
     });
     cy.wait("@authProfile");
-    cy.contains("button", "Add new link").should("exist");
+    cy.findByRole("button", { name: "Add new link" }).should("exist");
   });
 
   it("adds a new link and shows it in the list", () => {
-    cy.contains("button", "Add new link").click();
+    cy.findByRole("button", { name: "Add new link" }).click();
 
-    cy.contains("h2, h3, h4", "Add new link").should("be.visible");
-    cy.get("#input-url").type("https://example.com");
-    cy.get("#input-linkLabel").clear().type("My Site");
+    cy.findByRole("heading", { name: "Add new link" }).should("be.visible");
+    cy.findByRole("textbox", { name: "URL" }).type("https://example.com");
+    cy.findByRole("textbox", { name: "Name of linked website" })
+      .clear()
+      .type("My Site");
 
-    cy.contains("button", "Add link").click();
+    cy.findByRole("button", { name: "Add link" }).click();
 
     cy.wait("@updateArtist")
       .its("request.body")
@@ -71,22 +73,29 @@ describe("manage artist links", () => {
         expect(body.linksJson[0].inHeader).to.equal(true);
       });
 
-    cy.contains("Updated links").should("be.visible");
-    cy.contains("button[aria-label='Edit link']", "My Site").should("exist");
+    cy.findByText("Updated links").should("be.visible");
+    cy.findByRole("button", { name: "Edit link My Site" }).should("exist");
   });
 
   it("edits an existing link's label and persists it", () => {
-    cy.contains("button", "Add new link").click();
-    cy.get("#input-url").type("https://second.example");
-    cy.get("#input-linkLabel").clear().type("Second");
-    cy.contains("button", "Add link").click();
+    cy.findByRole("button", { name: "Add new link" }).click();
+    cy.findByRole("textbox", { name: "URL" }).type("https://second.example");
+    cy.findByRole("textbox", { name: "Name of linked website" })
+      .clear()
+      .type("Second");
+    cy.findByRole("button", { name: "Add link" }).click();
     cy.wait("@updateArtist");
 
-    cy.contains("button[aria-label='Edit link']", "Second").click();
-    cy.contains("h2, h3, h4", "Edit link").should("be.visible");
-    cy.get("#input-linkLabel").should("have.value", "Second");
-    cy.get("#input-linkLabel").clear().type("Second Updated");
-    cy.contains("button", "Save link").click();
+    cy.findByRole("button", { name: "Edit link Second" }).click();
+    cy.findByRole("heading", { name: "Edit link" }).should("be.visible");
+    cy.findByRole("textbox", { name: "Name of linked website" }).should(
+      "have.value",
+      "Second"
+    );
+    cy.findByRole("textbox", { name: "Name of linked website" })
+      .clear()
+      .type("Second Updated");
+    cy.findByRole("button", { name: "Save link" }).click();
 
     cy.wait("@updateArtist")
       .its("request.body")
@@ -99,15 +108,19 @@ describe("manage artist links", () => {
   });
 
   it("toggles inHeader off and shows the Hidden from header badge", () => {
-    cy.contains("button", "Add new link").click();
-    cy.get("#input-url").type("https://hidden.example");
-    cy.get("#input-linkLabel").clear().type("Hidden");
-    cy.contains("button", "Add link").click();
+    cy.findByRole("button", { name: "Add new link" }).click();
+    cy.findByRole("textbox", { name: "URL" }).type("https://hidden.example");
+    cy.findByRole("textbox", { name: "Name of linked website" })
+      .clear()
+      .type("Hidden");
+    cy.findByRole("button", { name: "Add link" }).click();
     cy.wait("@updateArtist");
 
-    cy.contains("button[aria-label='Edit link']", "Hidden").click();
-    cy.get("#inHeader").uncheck();
-    cy.contains("button", "Save link").click();
+    cy.findByRole("button", { name: "Edit link Hidden" }).click();
+    cy.findByRole("checkbox", {
+      name: "Include this link in your artist header",
+    }).uncheck();
+    cy.findByRole("button", { name: "Save link" }).click();
 
     cy.wait("@updateArtist")
       .its("request.body")
@@ -118,22 +131,22 @@ describe("manage artist links", () => {
         expect(updated.inHeader).to.equal(false);
       });
 
-    cy.contains("button[aria-label='Edit link']", "Hidden")
-      .parent()
-      .parent()
-      .contains("Hidden from header")
+    cy.findByRole("button", { name: "Edit link Hidden" })
+      .findByText("Hidden from header")
       .should("exist");
   });
 
   it("deletes a link via the edit modal", () => {
-    cy.contains("button", "Add new link").click();
-    cy.get("#input-url").type("https://delete-me.example");
-    cy.get("#input-linkLabel").clear().type("Delete Me");
-    cy.contains("button", "Add link").click();
+    cy.findByRole("button", { name: "Add new link" }).click();
+    cy.findByRole("textbox", { name: "URL" }).type("https://delete-me.example");
+    cy.findByRole("textbox", { name: "Name of linked website" })
+      .clear()
+      .type("Delete Me");
+    cy.findByRole("button", { name: "Add link" }).click();
     cy.wait("@updateArtist");
 
-    cy.contains("button[aria-label='Edit link']", "Delete Me").click();
-    cy.contains("button", "Delete link").click();
+    cy.findByRole("button", { name: "Edit link Delete Me" }).click();
+    cy.findByRole("button", { name: "Delete link" }).click();
 
     cy.wait("@updateArtist")
       .its("request.body")
@@ -144,7 +157,7 @@ describe("manage artist links", () => {
         expect(present).to.equal(false);
       });
 
-    cy.contains("button[aria-label='Edit link']", "Delete Me").should(
+    cy.findByRole("button", { name: "Edit link Delete Me" }).should(
       "not.exist"
     );
   });

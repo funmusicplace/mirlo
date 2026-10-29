@@ -80,21 +80,21 @@ describe("manage subscription tier", () => {
 
   it("creates a subscription tier with all fields filled and linked releases, then verifies on reload and public profile", () => {
     // Navigate to create subscription tier
-    cy.contains("button", "Add new tier").click();
+    cy.findAllByRole("button", { name: "Add new tier" }).first().click();
 
     // Wait for navigation to the edit page for the new tier
     cy.url().should("include", "/tiers/");
 
     // Wait for the tier data to load
     cy.wait("@getSubscriptionTier");
-    cy.get('input[name="name"]').should("be.visible");
+    cy.findByRole("textbox", { name: /^Name/ }).should("be.visible");
 
     // Fill in subscription tier form fields (select all existing text first, then type)
-    cy.get('input[name="name"]')
+    cy.findByRole("textbox", { name: /^Name/ })
       .focus()
       .type("{selectAll}Platinum Member")
       .blur();
-    cy.get('textarea[name="description"]')
+    cy.findByRole("textbox", { name: "Description" })
       .focus()
       .type(
         "{selectAll}Exclusive access to all premium content and early releases"
@@ -102,83 +102,101 @@ describe("manage subscription tier", () => {
       .blur();
 
     // Set subscription price
-    cy.get('input[name="minAmount"]').focus().type("{selectAll}9.99").blur();
+    cy.findByRole("spinbutton", { name: /^Minimum amount/ })
+      .focus()
+      .type("{selectAll}9.99")
+      .blur();
 
     // Set interval to MONTH (should be the default)
-    cy.get('select[name="interval"]').should("have.value", "MONTH");
+    cy.findByRole("combobox", {
+      name: "What's the interval for this subscription?",
+    }).should("have.value", "MONTH");
 
     // Enable variable amounts
-    cy.get('input[name="allowVariable"]').check({ force: true });
+    cy.findByRole("checkbox", {
+      name: /Allow supporters to enter a larger number/,
+    }).check({ force: true });
 
     // Enable auto-purchase
-    cy.get('input[name="autoPurchaseAlbums"]').check({ force: true });
+    cy.findByRole("checkbox", {
+      name: /automatically get every new release/,
+    }).check({ force: true });
 
     // Enable address collection
-    cy.get('input[name="collectAddress"]')
+    cy.findByRole("checkbox", { name: /collect the address of the supporter/ })
       .check({ force: true })
       .should("be.checked");
 
     // Set platform fee percentage - use keyboard to select all and type in one action
-    cy.get('input[type="number"][name="platformPercent"]')
+    cy.findByRole("spinbutton", { name: "Platform cut" })
       .focus()
       .type("{selectAll}15")
       .blur();
 
     // Set digital discount
-    cy.get('input[type="number"][name="digitalDiscountPercent"]')
+    cy.findByRole("spinbutton", {
+      name: "Subscriber discount percent on digital purchases",
+    })
       .focus()
       .type("{selectAll}10")
       .blur();
 
     // Set merch discount
-    cy.get('input[type="number"][name="merchDiscountPercent"]')
+    cy.findByRole("spinbutton", {
+      name: "Subscriber discount percent on merch",
+    })
       .focus()
       .type("{selectAll}20")
       .blur();
 
     // Verify all values are set correctly before submitting
-    cy.get('input[name="name"]').should("have.value", "Platinum Member");
-    cy.get('textarea[name="description"]').should(
+    cy.findByRole("textbox", { name: /^Name/ }).should(
+      "have.value",
+      "Platinum Member"
+    );
+    cy.findByRole("textbox", { name: "Description" }).should(
       "have.value",
       "Exclusive access to all premium content and early releases"
     );
-    cy.get('input[name="minAmount"]').should("have.value", "9.99");
-    cy.get('input[name="allowVariable"]').should("be.checked");
-    cy.get('input[name="autoPurchaseAlbums"]').should("be.checked");
-    cy.get('input[name="collectAddress"]').should("be.checked");
-    cy.get('input[type="number"][name="platformPercent"]').should(
+    cy.findByRole("spinbutton", { name: /^Minimum amount/ }).should(
+      "have.value",
+      "9.99"
+    );
+    cy.findByRole("checkbox", {
+      name: /Allow supporters to enter a larger number/,
+    }).should("be.checked");
+    cy.findByRole("checkbox", {
+      name: /automatically get every new release/,
+    }).should("be.checked");
+    cy.findByRole("checkbox", {
+      name: /collect the address of the supporter/,
+    }).should("be.checked");
+    cy.findByRole("spinbutton", { name: "Platform cut" }).should(
       "have.value",
       "15"
     );
-    cy.get('input[type="number"][name="digitalDiscountPercent"]').should(
-      "have.value",
-      "10"
-    );
-    cy.get('input[type="number"][name="merchDiscountPercent"]').should(
-      "have.value",
-      "20"
-    );
+    cy.findByRole("spinbutton", {
+      name: "Subscriber discount percent on digital purchases",
+    }).should("have.value", "10");
+    cy.findByRole("spinbutton", {
+      name: "Subscriber discount percent on merch",
+    }).should("have.value", "20");
 
     // Select related releases by clicking on them in the release selector
-    cy.contains("label", "Releases included with subscription").should("exist");
+    cy.findByText("Releases included with subscription").should("exist");
 
     // Find and click the first release checkbox
-    cy.contains("label", "Exclusive Album")
-      .find("input[type='checkbox']")
-      .check({
-        force: true,
-      });
+    cy.findByRole("checkbox", { name: /Exclusive Album/ }).check({
+      force: true,
+    });
 
     // Find and click the second release checkbox
-    cy.contains("label", "Premium Collection")
-      .find("input[type='checkbox']")
-      .check({ force: true });
-
-    // Scroll the form to top to ensure button is in view
-    cy.get("form").scrollIntoView({ position: "bottom" });
+    cy.findByRole("checkbox", { name: /Premium Collection/ }).check({
+      force: true,
+    });
 
     // Save the subscription tier
-    cy.contains("button", "Save subscription").click();
+    cy.findByRole("button", { name: "Save subscription" }).click();
 
     // Wait for the form submission (PUT request to update the tier)
     cy.wait("@updateSubscriptionTier").then((xhr) => {
@@ -190,7 +208,7 @@ describe("manage subscription tier", () => {
     cy.wait("@getSubscriptionTier");
 
     // Verify we're back on the list page and the tier is visible
-    cy.contains("Platinum Member").should("exist");
+    cy.findByText("Platinum Member").should("exist");
 
     // Reload the page to verify all changes persist
     cy.reload();
@@ -198,38 +216,46 @@ describe("manage subscription tier", () => {
     cy.wait("@getSubscriptionTiers");
 
     // Verify all fields are still there after reload
-    cy.contains("Platinum Member").should("exist");
+    cy.findByText("Platinum Member").should("exist");
 
     // Verify form fields are populated with saved values
-    cy.get('input[name="name"]').should("have.value", "Platinum Member");
-    cy.get('textarea[name="description"]').should(
+    cy.findByRole("textbox", { name: /^Name/ }).should(
+      "have.value",
+      "Platinum Member"
+    );
+    cy.findByRole("textbox", { name: "Description" }).should(
       "have.value",
       "Exclusive access to all premium content and early releases"
     );
-    cy.get('input[name="minAmount"]').should("have.value", "9.99");
-    cy.get('input[name="allowVariable"]').should("be.checked");
-    cy.get('input[name="autoPurchaseAlbums"]').should("be.checked");
-    cy.get('input[name="collectAddress"]').should("be.checked");
-    cy.get('input[type="number"][name="platformPercent"]').should(
+    cy.findByRole("spinbutton", { name: /^Minimum amount/ }).should(
+      "have.value",
+      "9.99"
+    );
+    cy.findByRole("checkbox", {
+      name: /Allow supporters to enter a larger number/,
+    }).should("be.checked");
+    cy.findByRole("checkbox", {
+      name: /automatically get every new release/,
+    }).should("be.checked");
+    cy.findByRole("checkbox", {
+      name: /collect the address of the supporter/,
+    }).should("be.checked");
+    cy.findByRole("spinbutton", { name: "Platform cut" }).should(
       "have.value",
       "15"
     );
-    cy.get('input[type="number"][name="digitalDiscountPercent"]').should(
-      "have.value",
-      "10"
-    );
-    cy.get('input[type="number"][name="merchDiscountPercent"]').should(
-      "have.value",
-      "20"
-    );
+    cy.findByRole("spinbutton", {
+      name: "Subscriber discount percent on digital purchases",
+    }).should("have.value", "10");
+    cy.findByRole("spinbutton", {
+      name: "Subscriber discount percent on merch",
+    }).should("have.value", "20");
 
     // Verify related releases are still selected
-    cy.contains("label", "Exclusive Album")
-      .find("input[type='checkbox']")
-      .should("be.checked");
-    cy.contains("label", "Premium Collection")
-      .find("input[type='checkbox']")
-      .should("be.checked");
+    cy.findByRole("checkbox", { name: /Exclusive Album/ }).should("be.checked");
+    cy.findByRole("checkbox", { name: /Premium Collection/ }).should(
+      "be.checked"
+    );
 
     // Navigate to artist's public profile support page
     cy.visit(`/subscriber-artist/support`);
@@ -237,11 +263,11 @@ describe("manage subscription tier", () => {
     cy.wait("@getArtist");
 
     // Wait for the subscription tier to actually render on the page
-    cy.contains("Platinum Member").should("be.visible");
-    cy.contains(/\$9\.99.*Month/).should("be.visible");
+    cy.findByText("Platinum Member").should("be.visible");
+    cy.findByText(/\$9\.99.*Month/).should("be.visible");
 
     // Verify included releases are shown
-    cy.contains("Exclusive Album").should("exist");
-    cy.contains("Premium Collection").should("exist");
+    cy.findByText("Exclusive Album").should("exist");
+    cy.findByText("Premium Collection").should("exist");
   });
 });

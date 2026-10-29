@@ -58,13 +58,15 @@ describe("manage label roster tab", () => {
   it("renders the new manage roster route without crashing", () => {
     cy.visit(`/manage/artists/${labelArtistId}/roster`);
 
-    cy.contains("a", "Manage label artists").should("be.visible");
+    cy.findByRole("link", { name: "Manage label artists" }).should(
+      "be.visible"
+    );
   });
 
   it("keeps the roster tab inside the manage section instead of jumping to /account/label", () => {
     cy.visit(`/manage/artists/${labelArtistId}/releases`);
 
-    cy.get("nav").contains("a", "Roster").click();
+    cy.findByRole("link", { name: "Roster" }).click();
 
     cy.location("pathname").should(
       "eq",
@@ -75,7 +77,7 @@ describe("manage label roster tab", () => {
   it("redirects to /account/label when clicking the manage label artists button", () => {
     cy.visit(`/manage/artists/${labelArtistId}/roster`);
 
-    cy.contains("a", "Manage label artists").click();
+    cy.findByRole("link", { name: "Manage label artists" }).click();
 
     cy.location("pathname").should("eq", "/account/label");
   });

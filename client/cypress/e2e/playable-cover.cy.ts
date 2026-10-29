@@ -76,7 +76,10 @@ const injectCoarsePointerStyles = (win: Window) => {
 };
 
 const getReleaseCard = () =>
-  cy.contains("li", playableRelease.title).should("be.visible");
+  cy
+    .findByRole("link", { name: playableRelease.title })
+    .closest("li")
+    .should("be.visible");
 
 const getPlayableCover = () =>
   getReleaseCard().find(".playable-cover").should("exist");
@@ -86,12 +89,11 @@ describe("PlayableCover go-to", () => {
     beforeEach(() => {
       stubHomeRoutes();
       cy.visit("/");
-      cy.contains("Recent releases").scrollIntoView();
+      cy.findByRole("heading", { name: "Recent releases" }).scrollIntoView();
       getPlayableCover();
     });
     it("reveals the overlay and go-to faux button when the title link is keyboard focused", () => {
-      getReleaseCard()
-        .contains("a", playableRelease.title)
+      cy.findByRole("link", { name: playableRelease.title })
         .focus()
         .should("have.focus");
 
@@ -113,16 +115,10 @@ describe("PlayableCover go-to", () => {
     });
 
     it("associates the title link with the screen-reader go-to label", () => {
-      getPlayableCover()
-        .find("a.go-to-link .sr-only")
-        .invoke("attr", "id")
-        .then((goToId) => {
-          expect(goToId).to.be.a("string").and.not.be.empty;
-          getReleaseCard()
-            .contains("a", playableRelease.title)
-            .invoke("attr", "aria-describedby")
-            .should("contain", goToId);
-        });
+      cy.findByRole("link", {
+        name: playableRelease.title,
+        description: /Go to track/,
+      }).should("exist");
     });
 
     it("does not show the touch navigation link", () => {
@@ -134,13 +130,13 @@ describe("PlayableCover go-to", () => {
     beforeEach(() => {
       stubHomeRoutes();
       cy.visit("/", { onBeforeLoad: injectCoarsePointerStyles });
-      cy.contains("Recent releases").scrollIntoView();
+      cy.findByRole("heading", { name: "Recent releases" }).scrollIntoView();
       getPlayableCover();
     });
     it("shows play/pause without the overlay scrim or go-to link", () => {
       getPlayableCover().find("a.go-to-link").should("not.be.visible");
       getPlayableCover()
-        .find("[data-playable-play-control] button")
+        .findByRole("button", { name: /play/i })
         .should("be.visible");
     });
 
@@ -150,12 +146,12 @@ describe("PlayableCover go-to", () => {
     });
 
     it("still allows tapping the play control", () => {
-      getPlayableCover()
-        .find("[data-playable-play-control] button")
-        .click();
+      getPlayableCover().findByRole("button", { name: /play/i }).click();
 
       cy.window().then((win) => {
-        const state = JSON.parse(win.localStorage.getItem("nomadState") ?? "{}");
+        const state = JSON.parse(
+          win.localStorage.getItem("nomadState") ?? "{}"
+        );
         expect(state.playerQueueIds).to.deep.equal([101]);
       });
     });

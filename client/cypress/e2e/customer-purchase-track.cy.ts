@@ -101,12 +101,15 @@ describe("customer purchase - single track", () => {
   it("purchases the track (not the trackGroup) via the unified endpoint", () => {
     cy.visit(`/${artistSlug}/release/${releaseSlug}/tracks/${trackId}`);
 
-    cy.contains("button", "Buy").click();
+    cy.findByRole("button", { name: /^Buy/ }).click();
     cy.wait("@stripeStatus");
 
-    cy.get('[role="dialog"]').within(() => {
-      cy.get("#priceInput").should("have.value", "3");
-      cy.contains("button", "Buy").click();
+    cy.findByRole("dialog").within(() => {
+      cy.findByRole("spinbutton", { name: /^Name your price/ }).should(
+        "have.value",
+        "3"
+      );
+      cy.findByRole("button", { name: /^Buy/ }).click();
     });
 
     cy.wait("@purchaseTrack")

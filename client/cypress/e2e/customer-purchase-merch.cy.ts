@@ -105,12 +105,14 @@ describe("customer purchase - merch", () => {
   it("submits quantity, price, and shipping destination via the unified endpoint", () => {
     cy.visit(`/${artistSlug}/merch/${merchSlug}`);
 
-    cy.contains("button", /buy/i).click();
+    cy.findByRole("button", { name: /buy/i }).click();
     cy.wait("@stripeStatus");
 
-    cy.get('[role="dialog"]').within(() => {
-      cy.get("#quantity").clear().type("2");
-      cy.contains("button", "Proceed to checkout").click();
+    cy.findByRole("dialog").within(() => {
+      cy.findByRole("spinbutton", { name: "How many do you want?" })
+        .clear()
+        .type("2");
+      cy.findByRole("button", { name: "Proceed to checkout" }).click();
     });
 
     cy.wait("@purchaseMerch")

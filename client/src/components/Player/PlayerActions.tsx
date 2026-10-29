@@ -40,7 +40,6 @@ const PlayerActions: React.FC = () => {
 
   return (
     <div
-      data-cy="player-actions"
       className={css`
         z-index: 10;
         bottom: var(--player-actions-bottom-offset, 70px);

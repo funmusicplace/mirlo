@@ -62,10 +62,12 @@ describe("merch buy currency", () => {
 
   it("opens the buy modal and displays shipping cost without crashing", () => {
     cy.visit(`/${artistSlug}/merch/${merchSlug}`);
-    cy.contains("Test Buy Merch").should("exist");
+    cy.findByRole("heading", { name: "Test Buy Merch" }).should("exist");
 
-    cy.contains("button", /buy/i).click();
+    cy.findByRole("button", { name: /^Buy/ }).click();
 
-    cy.contains("€5.00").should("exist");
+    cy.findByRole("dialog")
+      .findAllByText(/€5\.00/)
+      .should("exist");
   });
 });

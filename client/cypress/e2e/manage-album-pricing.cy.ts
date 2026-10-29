@@ -56,15 +56,15 @@ describe("manage album pricing", () => {
     );
     cy.visit(`/manage/artists/${artistId}/release/${trackGroupId}`);
     cy.wait("@authProfile");
-    cy.contains("h2", "Pricing").should("exist");
+    cy.findByRole("heading", { name: "Pricing" }).should("exist");
   });
 
   it("pricing mode toggles only commit on Save draft click", () => {
-    cy.contains("button", "No payments").click();
+    cy.findByRole("button", { name: "No payments" }).click();
     cy.wait(500);
     cy.get("@updateTrackGroup.all").should("have.length", 0);
 
-    cy.contains("button", "Save draft").click();
+    cy.findAllByRole("button", { name: "Save draft" }).first().click();
     cy.wait("@updateTrackGroup")
       .its("request.body")
       .should((body) => {
@@ -76,8 +76,8 @@ describe("manage album pricing", () => {
     // let save()'s reset + reload settle after the intercepted PUT response
     cy.wait(200);
 
-    cy.contains("button", "$0 or donate").click();
-    cy.contains("button", "Save draft").click();
+    cy.findByRole("button", { name: "$0 or donate" }).click();
+    cy.findAllByRole("button", { name: "Save draft" }).first().click();
     cy.wait("@updateTrackGroup")
       .its("request.body")
       .should((body) => {
@@ -90,8 +90,8 @@ describe("manage album pricing", () => {
       });
     cy.wait(200);
 
-    cy.contains("button", "Paid").click();
-    cy.contains("button", "Save draft").click();
+    cy.findByRole("button", { name: "Paid" }).click();
+    cy.findAllByRole("button", { name: "Save draft" }).first().click();
     cy.wait("@updateTrackGroup")
       .its("request.body")
       .should((body) => {

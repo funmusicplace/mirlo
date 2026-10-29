@@ -85,12 +85,15 @@ describe("customer purchase pricing", () => {
   it("defaults purchase price to suggested price and submits it", () => {
     cy.visit(`/${artistSlug}/release/${releaseSlug}`);
 
-    cy.contains("button", "Buy").click();
+    cy.findByRole("button", { name: /^Buy/ }).click();
     cy.wait("@stripeStatus");
 
-    cy.get('[role="dialog"]').within(() => {
-      cy.get("#priceInput").should("have.value", "7");
-      cy.contains("button", "Buy").click();
+    cy.findByRole("dialog").within(() => {
+      cy.findByRole("spinbutton", { name: /^Name your price/ }).should(
+        "have.value",
+        "7"
+      );
+      cy.findByRole("button", { name: /^Buy/ }).click();
     });
 
     cy.wait("@purchaseTrackGroup")

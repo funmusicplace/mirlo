@@ -103,19 +103,19 @@ describe("blog post subscriber visibility", () => {
     it("is visible to a non-subscriber", () => {
       cy.login({ email: nonSubscriberEmail, password: nonSubscriberPassword });
       cy.visit(`/${artistSlug}/posts/${publicPostId}/`);
-      cy.contains(
+      cy.findByText(
         "This is public content that everyone should be able to read."
       ).should("exist");
-      cy.contains("This post is for subscribers only.").should("not.exist");
+      cy.findByText(/This post is for subscribers only\./).should("not.exist");
     });
 
     it("is visible to a subscriber", () => {
       cy.login({ email: subscriberEmail, password: subscriberPassword });
       cy.visit(`/${artistSlug}/posts/${publicPostId}/`);
-      cy.contains(
+      cy.findByText(
         "This is public content that everyone should be able to read."
       ).should("exist");
-      cy.contains("This post is for subscribers only.").should("not.exist");
+      cy.findByText(/This post is for subscribers only\./).should("not.exist");
     });
   });
 
@@ -137,7 +137,7 @@ describe("blog post subscriber visibility", () => {
       cy.wait("@fetchArtist");
 
       // Create a new draft post
-      cy.contains("Add new post").click();
+      cy.findAllByRole("button", { name: "Add new post" }).first().click();
       cy.wait("@createPost");
 
       // Capture the new post's ID from the URL
@@ -149,17 +149,19 @@ describe("blog post subscriber visibility", () => {
         }
       });
 
-      cy.get("#input-title").type("Exclusive Subscriber Post");
+      cy.findByRole("textbox", { name: "Title" }).type(
+        "Exclusive Subscriber Post"
+      );
 
-      cy.get(".ProseMirror")
+      cy.findByRole("textbox", { name: "Content" })
         .click()
         .type("This is exclusive content only for paying subscribers.");
 
       // The post is created with isPublic: false (subscribers-only is checked by default).
-      cy.get(`#subscription-tier-${tierId}`).check();
+      cy.findByRole("checkbox", { name: "Supporter" }).check();
 
       // Publish the post — this saves title + content + tier then publishes.
-      cy.contains("button", "Publish post").click();
+      cy.findByRole("button", { name: "Publish post" }).click();
       cy.wait("@publishPost").its("response.statusCode").should("equal", 200);
     });
 
@@ -167,8 +169,8 @@ describe("blog post subscriber visibility", () => {
       cy.visit("/");
       cy.login({ email: nonSubscriberEmail, password: nonSubscriberPassword });
       cy.visit(`/${artistSlug}/posts/${subscriberPostId}/`);
-      cy.contains("This post is for subscribers only.").should("exist");
-      cy.contains(
+      cy.findByText(/This post is for subscribers only\./).should("exist");
+      cy.findByText(
         "This is exclusive content only for paying subscribers."
       ).should("not.exist");
     });
@@ -176,8 +178,8 @@ describe("blog post subscriber visibility", () => {
     it("shows the full post to the artist owner", () => {
       cy.login({ email: ownerEmail, password: ownerPassword });
       cy.visit(`/${artistSlug}/posts/${subscriberPostId}/`);
-      cy.contains("This post is for subscribers only.").should("not.exist");
-      cy.contains(
+      cy.findByText(/This post is for subscribers only\./).should("not.exist");
+      cy.findByText(
         "This is exclusive content only for paying subscribers."
       ).should("exist");
     });
@@ -185,8 +187,8 @@ describe("blog post subscriber visibility", () => {
     it("shows the full post to a subscriber", () => {
       cy.login({ email: subscriberEmail, password: subscriberPassword });
       cy.visit(`/${artistSlug}/posts/${subscriberPostId}/`);
-      cy.contains("This post is for subscribers only.").should("not.exist");
-      cy.contains(
+      cy.findByText(/This post is for subscribers only\./).should("not.exist");
+      cy.findByText(
         "This is exclusive content only for paying subscribers."
       ).should("exist");
     });
@@ -212,8 +214,8 @@ describe("blog post subscriber visibility", () => {
 
     it("is hidden from a logged-out visitor", () => {
       cy.visit(`/${artistSlug}/posts/${gatedPostId}/`);
-      cy.contains("This post is for subscribers only.").should("exist");
-      cy.contains(
+      cy.findByText(/This post is for subscribers only\./).should("exist");
+      cy.findByText(
         "This is exclusive content only for paying subscribers."
       ).should("not.exist");
     });
@@ -221,8 +223,8 @@ describe("blog post subscriber visibility", () => {
     it("is hidden from a non-subscriber", () => {
       cy.login({ email: nonSubscriberEmail, password: nonSubscriberPassword });
       cy.visit(`/${artistSlug}/posts/${gatedPostId}/`);
-      cy.contains("This post is for subscribers only.").should("exist");
-      cy.contains(
+      cy.findByText(/This post is for subscribers only\./).should("exist");
+      cy.findByText(
         "This is exclusive content only for paying subscribers."
       ).should("not.exist");
     });
@@ -230,8 +232,8 @@ describe("blog post subscriber visibility", () => {
     it("is visible to a subscriber", () => {
       cy.login({ email: subscriberEmail, password: subscriberPassword });
       cy.visit(`/${artistSlug}/posts/${gatedPostId}/`);
-      cy.contains("This post is for subscribers only.").should("not.exist");
-      cy.contains(
+      cy.findByText(/This post is for subscribers only\./).should("not.exist");
+      cy.findByText(
         "This is exclusive content only for paying subscribers."
       ).should("exist");
     });
