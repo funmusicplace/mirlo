@@ -1,8 +1,11 @@
 extends ../layout.pug
 
 block content
-  p We're sorry to inform you that there was an issue charging your card #{amount} #{currency } for #{cardChargeContext}.
+  if fundraiserName
+    p= t("emails.chargeFailure.pledgeFailed", { amount: formatMoney(amount, currency), artistName, fundraiserName })
+  else
+    p= t("emails.chargeFailure.subscriptionFailed", { amount: formatMoney(amount, currency), artistName, tierName })
 
-  p To fix this, please #[a(href!=`${client}/profile/billing?${urlParams}`) complete your payment] on #{instanceName} with a different card or payment method.
+  p!= tHtml("emails.chargeFailure.completePayment", { url: `${client}/profile/billing?${urlParams}`, instanceName })
   hr
-  p Thank you for supporting artists on #{instanceName}!
+  p= t("emails.chargeFailure.thanks", { instanceName })

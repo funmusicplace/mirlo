@@ -1,13 +1,17 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-    p Hello from #{instanceName}!
-    p A supporter is contacting you regarding a merch purchase they made:
+    p= t("emails.artistMerchContactForm.hello", { instanceName })
+    p= t("emails.artistMerchContactForm.intro")
     div 
-      p Purchase ID: #{purchase.id}
-      p Supporter: #{purchase.user.name} (#{purchase.user.email})
-      p Item: #{purchase.merch.title}
-      p Status: #{purchase.fulfillmentStatus}
+      p= t("emails.artistMerchContactForm.purchaseId", { id: purchase.id })
+      p= t("emails.artistMerchContactForm.supporter", { name: purchase.user.name, email: purchase.user.email })
+      p= t("emails.artistMerchContactForm.item", { title: purchase.merch.title })
+      p
+        | #{t("emails.common.fulfillmentStatusLabel")}
+        |
+        +fulfillmentStatus(purchase.fulfillmentStatus)
       p
         em "#{message}"
-    p Please respond to the supporter directly via email at #{purchase.user.email}.
+    p= t("emails.artistMerchContactForm.respond", { email: purchase.user.email })

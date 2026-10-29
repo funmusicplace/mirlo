@@ -1,1 +1,10 @@
-= `${instanceName}: A ${isNewSubscription ? 'new' : ''} ${interval === 'MONTH' ? 'monthly' : 'yearly'} supporter at ${artist.user.currency.toUpperCase()} ${(artistUserSubscription.amount / 100).toFixed(2)} - ${artistUserSubscription.artistSubscriptionTier.name} tier`
+- const amount = formatMoney(artistUserSubscription.amount, transaction ? transaction.currency : artist.user.currency || "usd")
+- const tierName = artistUserSubscription.artistSubscriptionTier.name
+if isNewSubscription && interval === 'MONTH'
+  != t("emails.artistNewSubscriberAnnounce.subjectNewMonthly", { instanceName, amount, tierName })
+else if isNewSubscription
+  != t("emails.artistNewSubscriberAnnounce.subjectNewYearly", { instanceName, amount, tierName })
+else if interval === 'MONTH'
+  != t("emails.artistNewSubscriberAnnounce.subjectMonthly", { instanceName, amount, tierName })
+else
+  != t("emails.artistNewSubscriberAnnounce.subjectYearly", { instanceName, amount, tierName })

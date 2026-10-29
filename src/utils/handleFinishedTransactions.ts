@@ -687,7 +687,7 @@ const attachCatalogue = async (
         artist: serializedProfile,
         pricePaid: item.amount,
         currencyPaid: transaction.currency,
-        platformCut: (catalogueAppFee ?? 0) / 100,
+        platformCut: catalogueAppFee ?? 0,
         email: user.email,
       },
     });
@@ -1004,8 +1004,8 @@ export const handleFundraiserPledgePaymentSuccess = async (
       host: process.env.API_DOMAIN,
       trackGroup: fundraiser.trackGroups[0],
       currency: transaction.currency,
-      pledgedAmountFormatted: pledge.amount / 100,
-      fundraisingGoalFormatted: fundraiser.goalAmount / 100,
+      pledgedAmount: pledge.amount,
+      fundraisingGoal: fundraiser.goalAmount,
       client: applicationUrl,
     },
   });
@@ -1063,9 +1063,10 @@ export const handleFundraiserPledgePaymentFailure = async (
     locals: {
       email: encodeURIComponent(transaction.associatedPledge?.user.email),
       host: process.env.API_DOMAIN,
-      cardChargeContext: `your pledge to ${fundraiser.profile.name}'s "${fundraiser.name}" fundraiser`,
+      artistName: fundraiser.profile.name,
+      fundraiserName: fundraiser.name,
       currency: transaction.currency,
-      pledgedAmountFormatted: transaction.associatedPledge.amount / 100,
+      amount: transaction.associatedPledge.amount,
       client: applicationUrl,
       urlParams,
     },

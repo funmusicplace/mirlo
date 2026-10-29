@@ -2,18 +2,13 @@ extends ../layout.pug
 include ../mixins.pug
 
 block content
-  p
-    | We've finished preparing your download of
-    strong  #{trackGroup.title}
-    |  by
-    strong  #{trackGroup.artist.name}
-    | , in #{format} format. It took a little while, so here's a link in case you'd stopped waiting.
+  p!= tHtml("emails.downloadReady.intro", { title: trackGroup.title, artistName: trackGroup.artist.name, format })
   table
     tr
       td #{trackGroup.title}
       td
-        a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download`) download
+        +releaseLink(trackGroup, "/download")= t("emails.downloadReady.download")
 
   p
   +supportArtist(trackGroup.artist, client, hasSubscriptionTiers)
-  p Enjoy!
+  p= t("emails.common.enjoy")

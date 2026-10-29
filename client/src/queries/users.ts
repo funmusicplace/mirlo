@@ -176,8 +176,8 @@ type ProfileChangeBody = {
   userId: number;
   password?: string;
   newEmail?: string;
-  language: string;
-  isLabelAccount: boolean;
+  language?: string;
+  isLabelAccount?: boolean;
   combineSubscriptionEmails?: boolean;
 };
 

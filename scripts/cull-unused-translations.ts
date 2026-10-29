@@ -1,6 +1,7 @@
 /**
  * Finds translation keys in client/src/translation/en.json that are no
- * longer referenced from client/src, and (optionally) removes them.
+ * longer referenced from client/src or the email templates in emails/, and
+ * (optionally) removes them.
  *
  * en.json is the source pushed to Transifex on every push to main
  * (.github/workflows/transifex.yml runs
@@ -16,7 +17,7 @@
  * This is a heuristic, regex-based scan (no TS/AST parsing), and it is
  * deliberately conservative: a key is only reported as unused if neither
  * a structural `t()` call match nor a plain substring search finds it
- * anywhere in client/src. Always eyeball the list (and search for the
+ * anywhere in client/src or emails/. Always eyeball the list (and search for the
  * user-facing text itself) before deleting anything you're unsure about,
  * since e.g. dynamically-built keys (`t(someVar)`) can't be detected here.
  */
@@ -26,7 +27,7 @@ import path from "path";
 
 const ROOT = path.resolve(__dirname, "..");
 const EN_JSON_PATH = path.join(ROOT, "client/src/translation/en.json");
-const SRC_DIR = path.join(ROOT, "client/src");
+const SOURCE_DIRS = [path.join(ROOT, "client/src"), path.join(ROOT, "emails")];
 const WRITE = process.argv.includes("--write");
 
 type Translations = Record<string, Record<string, unknown>>;
@@ -38,12 +39,14 @@ function isExcludedNamespace(namespace: string): boolean {
   return namespace === "mobileApp" || namespace.startsWith("mobileApp.");
 }
 
-function flatten(translations: Translations): string[] {
-  const keys: string[] = [];
+type TranslationKey = { namespace: string; key: string; fullKey: string };
+
+function flatten(translations: Translations): TranslationKey[] {
+  const keys: TranslationKey[] = [];
   for (const [namespace, entries] of Object.entries(translations)) {
     if (isExcludedNamespace(namespace)) continue;
     for (const key of Object.keys(entries)) {
-      keys.push(`${namespace}.${key}`);
+      keys.push({ namespace, key, fullKey: `${namespace}.${key}` });
     }
   }
   return keys;
@@ -57,7 +60,7 @@ function walk(dir: string, files: string[] = []): string[] {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       walk(full, files);
-    } else if (/\.(tsx?|jsx?)$/.test(entry.name)) {
+    } else if (/\.(tsx?|jsx?|pug)$/.test(entry.name)) {
       files.push(full);
     }
   }
@@ -69,8 +72,9 @@ function collectUsedKeys(files: string[]): Set<string> {
 
   const useTranslationRe =
     /const\s*{\s*([^}]*?)\s*}\s*=\s*useTranslation\(\s*["'`][^"'`]*["'`]\s*(?:,\s*{\s*keyPrefix:\s*["'`]([^"'`]+)["'`][^}]*})?\s*\)/g;
-  // any t("literal") / t('literal') / t(`literal`) call, capturing the fn name
-  const tCallRe = /\b([A-Za-z0-9_$]*t)\(\s*["'`]([^"'`${}]+)["'`]/g;
+  // any t("literal") / t('literal') / t(`literal`) call (or the email
+  // templates' tHtml), capturing the fn name
+  const tCallRe = /\b([A-Za-z0-9_$]*t|tHtml)\(\s*["'`]([^"'`${}]+)["'`]/g;
 
   for (const file of files) {
     const contents = fs.readFileSync(file, "utf-8");
@@ -102,6 +106,9 @@ function collectUsedKeys(files: string[]): Set<string> {
     if (!("t" in prefixesByVar) && /\bt\(/.test(contents)) {
       prefixesByVar["t"] = undefined;
     }
+    if (/\btHtml\(/.test(contents)) {
+      prefixesByVar["tHtml"] = undefined;
+    }
 
     tCallRe.lastIndex = 0;
     while ((m = tCallRe.exec(contents))) {
@@ -126,7 +133,7 @@ function main() {
   const translations: Translations = JSON.parse(raw);
   const allKeys = flatten(translations);
 
-  const files = walk(SRC_DIR);
+  const files = SOURCE_DIRS.flatMap((dir) => walk(dir));
   const structurallyUsed = collectUsedKeys(files);
 
   const fileContentsCache = files.map((f) => fs.readFileSync(f, "utf-8"));
@@ -137,12 +144,10 @@ function main() {
   // verbatim in a t() call. Treat a suffixed key as used if its base key is.
   const pluralSuffixRe = /_(zero|one|two|few|many|other)$/;
 
-  const unused: string[] = [];
-  for (const fullKey of allKeys) {
+  const unused: TranslationKey[] = [];
+  for (const entry of allKeys) {
+    const { fullKey, key: bareKey } = entry;
     if (structurallyUsed.has(fullKey)) continue;
-
-    const [, ...rest] = fullKey.split(".");
-    const bareKey = rest.join(".");
 
     const pluralMatch = bareKey.match(pluralSuffixRe);
     if (pluralMatch) {
@@ -176,7 +181,7 @@ function main() {
       if (baseFoundLoosely) continue;
     }
 
-    unused.push(fullKey);
+    unused.push(entry);
   }
 
   if (unused.length === 0) {
@@ -185,7 +190,7 @@ function main() {
   }
 
   console.log(`Found ${unused.length} likely-unused key(s):\n`);
-  unused.forEach((k) => console.log(`  ${k}`));
+  unused.forEach(({ fullKey }) => console.log(`  ${fullKey}`));
 
   if (!WRITE) {
     console.log(
@@ -198,11 +203,8 @@ function main() {
     return;
   }
 
-  for (const fullKey of unused) {
-    const [namespace, ...rest] = fullKey.split(".");
-    const bareKey = rest.join(".");
-    console.log(namespace, bareKey, translations[namespace]);
-    delete translations[namespace][bareKey];
+  for (const { namespace, key } of unused) {
+    delete translations[namespace][key];
     if (Object.keys(translations[namespace]).length === 0) {
       delete translations[namespace];
     }

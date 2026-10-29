@@ -1,17 +1,17 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-    p Hi,
-    - const supportMessage = artist?.properties?.emails?.support
-    if supportMessage
-      div!= supportMessage
-    p
-      | Thank you for supporting #{artist.name} with your #{interval === 'MONTH' ? 'monthly': 'yearly'} 
-      | support at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
+    +greeting()
+    +artistMessage(artist, "support")
+    if interval === 'MONTH'
+      p= t("emails.artistSubscriptionReceipt.thanksMonthly", { artistName: artist.name, tierName: artistUserSubscription.artistSubscriptionTier.name })
+    else
+      p= t("emails.artistSubscriptionReceipt.thanksYearly", { artistName: artist.name, tierName: artistUserSubscription.artistSubscriptionTier.name })
     table 
       tr 
         td #{artist.name}
-        td.pa3 #{artistUserSubscription.amount / 100} #{artist.user.currency}
-    p To view all your subscriptions log in or create an account with this email address.
+        td.pa3 #{formatMoney(artistUserSubscription.amount, currency || artist.user.currency || "usd")}
+    p= t("emails.artistSubscriptionReceipt.viewSubscriptions")
     
-    p Thank you!
+    p= t("emails.artistSubscriptionReceipt.thankYou")

@@ -1,31 +1,33 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-  p Hi,
-  p
-    | Your subscription to #{artist.name}'s "#{artistUserSubscription.artistSubscriptionTier.name}" tier will renew on #{renewalDate}.
+  - const renewalAmount = formatMoney(artistUserSubscription.amount, currency || artist.user.currency || "usd")
+  +greeting()
+  if renewalDate
+    p= t("emails.subscriptionRenewalReminder.willRenew", { artistName: artist.name, tierName: artistUserSubscription.artistSubscriptionTier.name, renewalDate: formatDate(renewalDate) })
+  else
+    p= t("emails.subscriptionRenewalReminder.willRenewUnknownDate", { artistName: artist.name, tierName: artistUserSubscription.artistSubscriptionTier.name })
 
   table
     thead
       tr
-        th Artist
-        th.num Renewal
+        th= t("emails.subscriptionRenewalReminder.artist")
+        th.num= t("emails.subscriptionRenewalReminder.renewal")
     tbody
       tr
         td #{artist.name}
-        td.num #{artistUserSubscription.amount / 100} #{artist.user.currency} / #{interval === 'MONTH' ? 'month': 'year'}
+        if interval === 'MONTH'
+          td.num= t("emails.subscriptionRenewalReminder.amountPerMonth", { amount: renewalAmount })
+        else
+          td.num= t("emails.subscriptionRenewalReminder.amountPerYear", { amount: renewalAmount })
 
-  p
-    | If you'd like to make any changes to your subscription before the renewal, you can:
+  p= t("emails.subscriptionRenewalReminder.changesIntro")
   ul
-    li Modify your subscription amount #[a(href=`${client}/${artist.urlSlug}/support`) on #{artist.name}'s support page].
-    li Cancel your subscription if you no longer wish to support them.
+    li!= tHtml("emails.subscriptionRenewalReminder.modifyAmount", { url: `${client}/${artist.urlSlug}/support`, artistName: artist.name })
+    li= t("emails.subscriptionRenewalReminder.cancel")
 
-  p
-    | Thank you for supporting #{artist.name}!
+  p= t("emails.subscriptionRenewalReminder.thanks", { artistName: artist.name })
 
-  - const supportMessage = artist?.properties?.emails?.support
-  if supportMessage
-    div!= supportMessage
-  else
-    p Enjoy!
+  +artistMessage(artist, "support")
+    p= t("emails.common.enjoy")

@@ -1,15 +1,12 @@
 extends ../layout.pug
 
 block content
-    p Hello from #{instanceName}!
-    p #{sender.name} (#{sender.email}) sent you a message regarding #{artist.name}:
+    p= t("emails.artistContactMessage.hello", { instanceName })
+    p= t("emails.artistContactMessage.intro", { senderName: sender.name, senderEmail: sender.email, artistName: artist.name })
     blockquote(style="border-left: 3px solid #ccc; margin: 1rem 0; padding: 0.25rem 1rem;")
       each line, i in message.split("\n")
         if i > 0
           br
         span= line
-    p You can reply directly to this email to respond to #{sender.name}.
-    p
-      | This message is also visible in your&nbsp;
-      a(href!=`${client}/profile/notifications`) #{instanceName} notifications
-      | , where you can report it as spam if it's unwanted.
+    p= t("emails.artistContactMessage.replyDirectly", { senderName: sender.name })
+    p!= tHtml("emails.artistContactMessage.alsoVisible", { notificationsUrl: `${client}/profile/notifications`, instanceName })

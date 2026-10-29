@@ -20,7 +20,6 @@ import { useSnackbar } from "state/SnackbarContext";
 
 type FormData = {
   name: string;
-  language: string;
   isLabelAccount: boolean;
   combineSubscriptionEmails: boolean;
   newEmail?: string;
@@ -35,12 +34,10 @@ const Index: React.FC = () => {
   const { user } = useAuthContext();
   const [isSaving, setIsSaving] = React.useState(false);
   const errorHandler = useErrorHandler();
-  const language = user?.language ?? navigator.language;
   const methods = useForm<FormData>({
     defaultValues: {
       newEmail: user?.email,
       name: user?.name,
-      language: language.split("-")[0],
       isLabelAccount: user?.isLabelAccount,
       combineSubscriptionEmails: user?.combineSubscriptionEmails,
       urlSlug: user?.urlSlug,

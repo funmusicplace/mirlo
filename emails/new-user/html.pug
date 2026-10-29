@@ -1,9 +1,10 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-  p Hi!
-  p Someone signed up to #{instanceName} using this email address
+  +greeting()
+  p= t("emails.newUser.signedUp", { instanceName })
   p #{user.email}
   p 
-    a(href!=`${clientDomain}/email-confirmation?token=${user.emailConfirmationToken}&id=${user.id}&client=${client}&accountType=${accountType}&email=${encodeURIComponent(user.email)}`) Click here to confirm
-  p If this was not you, you can safely ignore this email.
+    a(href!=`${clientDomain}/email-confirmation?token=${user.emailConfirmationToken}&id=${user.id}&client=${client}&accountType=${accountType}&email=${encodeURIComponent(user.email)}`)= t("emails.newUser.confirm")
+  p= t("emails.common.ignore")

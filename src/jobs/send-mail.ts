@@ -10,6 +10,7 @@ import sendgrid from "nodemailer-sendgrid";
 
 import { logger } from "../logger";
 import { isValidEmail } from "../utils/email";
+import { getEmailLocals } from "../utils/emailTranslation";
 import {
   DEFAULT_INSTANCE_NAME,
   getSiteSettings,
@@ -293,6 +294,19 @@ const deadAddressBounces = (errors: RecipientError[]): Bounce[] =>
 
 const escapeLikePattern = (value: string) => value.replace(/[\\%_]/g, "\\$&");
 
+const getRecipientLanguage = async (message: Mail.Options) => {
+  const [recipient] = normalizeRecipients(message.to);
+  const email = recipient ? recipientToEmail(recipient) : null;
+  if (!email) {
+    return undefined;
+  }
+  const user = await prisma.user.findFirst({
+    where: { email: { equals: escapeLikePattern(email), mode: "insensitive" } },
+    select: { language: true },
+  });
+  return user?.language;
+};
+
 export const recordBouncedRecipients = async (bounces: Bounce[]) => {
   try {
     await Promise.all(
@@ -320,6 +334,7 @@ export const sendMail = async <T>(job: {
     message: Mail.Options;
     locals: T;
     fromName?: string;
+    language?: string | null;
   };
 }): Promise<{ fromEmail: string }> => {
   logger.info(`sendMail: sending: ${job.data.template}`);
@@ -357,6 +372,9 @@ export const sendMail = async <T>(job: {
       instanceName,
       contactEmail,
       supportEmail,
+      ...getEmailLocals(
+        job.data.language ?? (await getRecipientLanguage(message))
+      ),
     };
 
     if (

@@ -22064,6 +22064,7 @@ __metadata:
     github-slugger: "npm:^2.0.0"
     globals: "npm:^17.5.0"
     husky: "npm:^9"
+    i18next: "npm:^23.0.1"
     image-size: "npm:^1.0.2"
     ioredis: "npm:^5.8.2"
     json2csv: "npm:^6.0.0-alpha.2"

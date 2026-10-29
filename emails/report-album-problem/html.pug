@@ -1,16 +1,14 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-    .pa4
-      | This person #{email} reported a problem with an album: 
+    .pa4= t("emails.reportAlbumProblem.reported", { email })
     .pa4 
       | #{reason}: #{description}
     .pa4 
       | trackgroupId: #{trackGroupId}
     if trackGroup
+      .pa4= t("emails.reportAlbumProblem.trackGroup", { title: trackGroup.title, artistName: trackGroup.artist.name })
+      .pa4= t("emails.reportAlbumProblem.viewHere")
       .pa4
-        | trackGroup: #{trackGroup.title} by #{trackGroup.artist.name}
-    .pa4
-      | You can view and manage the album here:
-    .pa4
-      a(href!=`${client}/${trackGroup.artist.urlSlug}/releases/${trackGroup.urlSlug}`)= `${client}/${trackGroup.artist.urlSlug}/releases/${trackGroup.urlSlug}`
+        +releaseLink(trackGroup) #{trackGroup.title}

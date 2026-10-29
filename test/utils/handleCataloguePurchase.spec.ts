@@ -31,7 +31,7 @@ describe("handleCataloguePurchase", () => {
     sinon.restore();
   });
 
-  it("should pass a resolved, correctly-scaled platformCut to the artist notification template", async () => {
+  it("should pass a resolved platformCut in cents to the artist notification template", async () => {
     const stub = sinon.stub(sendMailQueue, "add").resolves();
 
     const { user: artistUser } = await createUser({
@@ -83,8 +83,8 @@ describe("handleCataloguePurchase", () => {
     const expectedFeeCents = await calculateAppFee(1000, "usd");
     assert.equal(
       locals.platformCut,
-      expectedFeeCents / 100,
-      "platformCut must equal the calculated app fee, scaled to dollars like pricePaid's own template display"
+      expectedFeeCents,
+      "platformCut must equal the calculated app fee, in cents like pricePaid"
     );
   });
 });

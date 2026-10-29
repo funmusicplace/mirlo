@@ -1,9 +1,10 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-    p Hi!
-    p Someone is using this e-mail address to verify their identity on #{instanceName}.
-    p To continue, enter the following code in the browser: 
+    +greeting()
+    p= t("emails.verifyEmail.intro", { instanceName })
+    p= t("emails.verifyEmail.enterCode")
     p 
       strong #{code}
-    p If this was not you, you can safely ignore this email.
+    p= t("emails.common.ignore")

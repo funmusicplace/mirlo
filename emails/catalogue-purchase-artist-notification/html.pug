@@ -1,19 +1,12 @@
 extends ../layout.pug
 
 block content
-  p 
-    | Hello #{artist.name}!
-  p 
-    | Someone (#{email}) bought your entire digital catalogue!
-  p
-    | #{currencyPaid.toUpperCase()} 
-    | #{pricePaid.toFixed(2)} 
-    | (#{instanceName}'s share: #{platformCut.toFixed(2)})
+  p= t("emails.cataloguePurchaseArtistNotification.hello", { artistName: artist.name })
+  p= t("emails.cataloguePurchaseArtistNotification.boughtCatalogue", { email })
+  p= t("emails.cataloguePurchaseArtistNotification.amountPaid", { amount: formatMoney(pricePaid, currencyPaid), instanceName, platformCut: formatMoney(platformCut, currencyPaid) })
     
-  p The final money will be available via your Stripe dashboard
-  p Learn more about
-    a(href="https://docs.mirlo.space/payouts") how payouts work on Mirlo
-    | .
+  p= t("emails.cataloguePurchaseArtistNotification.stripeDashboard")
+  p!= tHtml("emails.cataloguePurchaseArtistNotification.learnAboutPayouts", { url: "https://docs.mirlo.space/payouts" })
   if contactEmail
-    p If you have any questions please reach out to #{contactEmail}
+    p= t("emails.cataloguePurchaseArtistNotification.questions", { contactEmail })
 

@@ -111,6 +111,7 @@ describe("subscription", () => {
         tier.id
       );
       assert.equal(locals.artistUserSubscription.amount, 10);
+      assert.equal(locals.currency, "usd");
     });
 
     it("should store nextBillingDate when provided", async () => {
@@ -769,9 +770,9 @@ describe("subscription", () => {
       assert.equal(locals.transaction.platformCut, 100);
       // html.pug: transaction.stripeCut / 100
       assert.equal(locals.transaction.stripeCut, 29);
-      // html.pug: #{user.email} #{user.name}
+      // html.pug: user.email, and user.name falling back to "A supporter"
       assert.equal(locals.user.email, "subscriber@subscriber.com");
-      assert.ok(locals.user.name, "user.name must be present");
+      assert.equal(locals.user.name, null);
     });
   });
 });

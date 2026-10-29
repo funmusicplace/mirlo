@@ -1,2 +1,4 @@
-- const artistName = (artist && artist.name) || "an artist"
-= `You've been invited to manage ${artistName}`
+if artist && artist.name
+  != t("emails.announceManagerInvite.subject", { artistName: artist.name })
+else
+  != t("emails.announceManagerInvite.subjectUnnamed")

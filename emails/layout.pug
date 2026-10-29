@@ -1,5 +1,5 @@
 doctype html
-html
+html(lang=language)
   head
     block head
       meta(charset="utf-8")
@@ -13,7 +13,6 @@ html
       div.email-card.mw600
         block content
       block footer
-        p.email-footer This email was sent using Mirlo.
+        p.email-footer= t("emails.layout.sentUsingMirlo")
         if fromEmail
-          p.email-footer
-            | Add #{fromEmail} to your contacts so future emails from #{instanceName} don't end up in spam.
+          p.email-footer= t("emails.layout.addToContacts", { fromEmail, instanceName })

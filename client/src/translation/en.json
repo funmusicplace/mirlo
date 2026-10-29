@@ -2559,5 +2559,348 @@
     "cannotBeUndone": "This is permanent. Neither you nor Mirlo support can undo it.",
     "typeToConfirm": "To confirm, type \"{{text}}\" below.",
     "cancel": "Cancel"
+  },
+  "emails.common": {
+    "greeting": "Hi there,",
+    "supportArtistWithSubscription": "Consider supporting <a href=\"{{artistUrl}}\">{{artistName}}</a> with a subscription or a purchase.",
+    "supportArtistWithPurchase": "Consider supporting <a href=\"{{artistUrl}}\">{{artistName}}</a> with a purchase.",
+    "platformCut": "(platform cut: {{amount}})",
+    "paymentProcessorCut": "(payment processor: {{amount}})",
+    "aSupporter": "A supporter",
+    "fulfillmentStatusLabel": "Status:",
+    "fulfillmentNoProgress": "Not started yet",
+    "fulfillmentStarted": "Being prepared",
+    "fulfillmentShipped": "Shipped",
+    "fulfillmentCompleted": "Completed",
+    "greetingName": "Hi {{name}},",
+    "enjoy": "Enjoy!",
+    "ignore": "If this was not you, you can safely ignore this email.",
+    "setPassword": "If you want to have access to all your purchases for this e-mail address, simply <a href=\"{{url}}\">set a password for it</a>."
+  },
+  "emails.layout": {
+    "sentUsingMirlo": "This email was sent using Mirlo.",
+    "addToContacts": "Add {{fromEmail}} to your contacts so future emails from {{instanceName}} don't end up in spam."
+  },
+  "emails.passwordReset": {
+    "subject": "{{instanceName}}: Password Reset",
+    "setPassword": "Someone wants to set a password for this email",
+    "resetPassword": "Someone wants to reset the password for this email",
+    "confirm": "Click here to confirm"
+  },
+  "emails.albumDownload": {
+    "subject": "{{instanceName}}: Your download is inside!",
+    "intro": "Here's your download of <strong>{{title}}</strong> by <strong>{{artistName}}</strong>.",
+    "download": "download"
+  },
+  "emails.albumFreeDownload": {
+    "subject": "{{instanceName}}: Your download is inside!",
+    "woohoo": "Woohoo!",
+    "intro": "Here's your free download of <strong>{{title}}</strong> by <strong>{{artistName}}</strong>.",
+    "title": "Title",
+    "downloadHeader": "Download",
+    "download": "download"
+  },
+  "emails.albumPurchaseLink": {
+    "subject": "{{instanceName}}: Purchase Link for {{title}} by {{artistName}}",
+    "byArtist": "by <strong>{{artistName}}</strong>.",
+    "buyNow": "Buy Now",
+    "support": "Consider supporting <a href=\"{{artistUrl}}\">{{artistName}}</a> on {{instanceName}} with a subscription or a purchase."
+  },
+  "emails.albumPurchaseReceipt": {
+    "subject": "{{instanceName}}: purchase confirmation",
+    "wow": "Wow!",
+    "thanksPreOrder": "Thank you for supporting {{artistName}} with your pre-order of {{title}}.",
+    "thanksPurchase": "Thank you for supporting {{artistName}} with your purchase of {{title}}.",
+    "availableOnRelease": "The release will become available in your collection for unlimited listening and downloading once it is released.",
+    "availableNow": "The release is now available in your collection for unlimited listening and downloading."
+  },
+  "emails.automaticallyReceivedAlbum": {
+    "subject": "{{artistName}}: Thank you for your support!",
+    "yay": "Yay!",
+    "receivedWithTitle": "Because you support {{artistName}} with a regular contribution, you've received their newest release, {{title}}!",
+    "received": "Because you support {{artistName}} with a regular contribution, you've received their newest release!",
+    "listen": "Listen to the release",
+    "availableNow": "The release is now available in your collection for unlimited listening and downloading."
+  },
+  "emails.catalogueReceipt": {
+    "subject": "{{instanceName}}: Entire Catalogue Receipt",
+    "intro": "You bought {{artistName}} entire digital catalogue! This includes digital downloads of:",
+    "title": "Title",
+    "downloadHeader": "Download",
+    "download": "download"
+  },
+  "emails.downloadReady": {
+    "subject": "{{instanceName}}: {{title}} is ready to download",
+    "intro": "We've finished preparing your download of <strong>{{title}}</strong> by <strong>{{artistName}}</strong>, in {{format}} format. It took a little while, so here's a link in case you'd stopped waiting.",
+    "download": "download"
+  },
+  "emails.purchaseReceipt": {
+    "subject": "{{instanceName}}: Purchase receipt",
+    "thanks": "Thank you for your purchase!",
+    "transactionId": "Transaction ID",
+    "item": "Item",
+    "amount": "Amount",
+    "amountWithCurrency": "Amount ({{currency}})",
+    "platformFee": "Platform fee",
+    "paymentProcessorFee": "Payment processor fee",
+    "viewRelease": "View release",
+    "tip": "Tip",
+    "community": "Your support keeps our community strong.",
+    "newTo": "New to {{instanceName}}?"
+  },
+  "emails.merchShipmentUpdate": {
+    "subject": "{{instanceName}}: update on your {{merchTitle}} order from {{artistName}}",
+    "update": "There's an update on your order of <strong>{{merchTitle}}</strong> from <a href=\"{{artistUrl}}\">{{artistName}}</a>.",
+    "updateWithQuantity": "There's an update on your order of <strong>{{merchTitle}}</strong> (× {{quantity}}) from <a href=\"{{artistUrl}}\">{{artistName}}</a>.",
+    "trackingNumber": "Tracking number: <strong>{{trackingNumber}}</strong>",
+    "trackShipment": "Track your shipment: <a href=\"{{trackingUrl}}\">{{trackingWebsite}}</a>",
+    "seePurchases": "You can see all your purchases on <a href=\"{{url}}\">your {{instanceName}} profile</a>.",
+    "contactArtist": "If you have questions about your order, you can contact the artist from your purchases page."
+  },
+  "emails.fundraiserSuccess": {
+    "subject": "Fundraiser successful: {{fundraiserName}} has been funded!",
+    "fundedRelease": "The fundraiser for {{artistName}}'s {{title}} has been successfully funded!",
+    "funded": "{{artistName}}'s fundraiser \"{{fundraiserName}}\" has been successfully funded!",
+    "contributed": "You contributed {{amount}} towards the goal of {{goal}}, and your card has been charged!",
+    "viewIt": "View it on {{instanceName}}.",
+    "thanks": "Thank you for supporting independent artists on {{instanceName}}!"
+  },
+  "emails.chargeFailure": {
+    "subject": "Charge failure: Your payment method could not be processed",
+    "pledgeFailed": "We're sorry to inform you that there was an issue charging your card {{amount}} for your pledge to {{artistName}}'s \"{{fundraiserName}}\" fundraiser.",
+    "subscriptionFailed": "We're sorry to inform you that there was an issue charging your card {{amount}} for your subscription to \"{{artistName}}'s {{tierName}}\" tier.",
+    "completePayment": "To fix this, please <a href=\"{{url}}\">complete your payment</a> on {{instanceName}} with a different card or payment method.",
+    "thanks": "Thank you for supporting artists on {{instanceName}}!"
+  },
+  "emails.artistSubscriptionConfirmation": {
+    "subject": "{{instanceName}}: Confirm Subscription",
+    "intro": "Someone used this email address to subscribe to {{artistName}} on {{instanceName}}",
+    "confirm": "Click here to confirm",
+    "contactInfo": "Please find contact information on <a href=\"{{url}}\">our website</a>"
+  },
+  "emails.artistSubscriptionReceipt": {
+    "subjectMonthly": "{{instanceName}}: Supporting {{artistName}} monthly receipt!",
+    "subjectYearly": "{{instanceName}}: Supporting {{artistName}} yearly receipt!",
+    "thanksMonthly": "Thank you for supporting {{artistName}} with your monthly support at the \"{{tierName}}\" tier.",
+    "thanksYearly": "Thank you for supporting {{artistName}} with your yearly support at the \"{{tierName}}\" tier.",
+    "viewSubscriptions": "To view all your subscriptions log in or create an account with this email address.",
+    "thankYou": "Thank you!"
+  },
+  "emails.artistSubscriptionCancelled": {
+    "subject": "{{instanceName}}: Your subscription to {{artistName}} has been cancelled",
+    "cancelledByArtist": "{{artistName}} has cancelled your subscription to them on {{instanceName}}.",
+    "cancelled": "Your subscription to {{artistName}} on {{instanceName}} has been cancelled.",
+    "accessUntil": "You won't be charged again, and you'll keep access until the end of the period you've already paid for, on {{date}}.",
+    "subscribeAgain": "Thank you for your support! You can subscribe again any time from <a href=\"{{url}}\">our website</a>.",
+    "questionsForArtist": "If you have questions about this, please get in touch with {{artistName}}.",
+    "didNotRequest": "If you didn't request this, please get in touch."
+  },
+  "emails.subscriptionRenewalReminder": {
+    "subject": "{{instanceName}}: Your {{artistName}} subscription renews on {{renewalDate}}",
+    "subjectUnknownDate": "{{instanceName}}: Your {{artistName}} subscription renews on unknown date",
+    "willRenew": "Your subscription to {{artistName}}'s \"{{tierName}}\" tier will renew on {{renewalDate}}.",
+    "willRenewUnknownDate": "Your subscription to {{artistName}}'s \"{{tierName}}\" tier will renew on unknown date.",
+    "artist": "Artist",
+    "renewal": "Renewal",
+    "amountPerMonth": "{{amount}} / month",
+    "amountPerYear": "{{amount}} / year",
+    "changesIntro": "If you'd like to make any changes to your subscription before the renewal, you can:",
+    "modifyAmount": "Modify your subscription amount <a href=\"{{url}}\">on {{artistName}}'s support page</a>.",
+    "cancel": "Cancel your subscription if you no longer wish to support them.",
+    "thanks": "Thank you for supporting {{artistName}}!"
+  },
+  "emails.artistNewSubscriberAnnounce": {
+    "subjectNewMonthly": "{{instanceName}}: A new monthly supporter at {{amount}} - {{tierName}} tier",
+    "subjectNewYearly": "{{instanceName}}: A new yearly supporter at {{amount}} - {{tierName}} tier",
+    "subjectMonthly": "{{instanceName}}: A monthly supporter at {{amount}} - {{tierName}} tier",
+    "subjectYearly": "{{instanceName}}: A yearly supporter at {{amount}} - {{tierName}} tier",
+    "wow": "Wow!",
+    "startedSupporting": "({{email}}) {{name}} started supporting you on {{instanceName}}.",
+    "isSupporting": "({{email}}) {{name}} is supporting you on {{instanceName}}!",
+    "supportMonthly": "Support for {{artistName}} on {{instanceName}} with a monthly contribution at the \"{{tierName}}\" tier.",
+    "supportYearly": "Support for {{artistName}} on {{instanceName}} with a yearly contribution at the \"{{tierName}}\" tier.",
+    "grossAmount": "Gross Amount",
+    "platformFee": "Platform Fee",
+    "paymentProcessorFee": "Payment Processor Fee",
+    "netAmount": "Net Amount",
+    "viewSupporters": "To view all your supporters log in to {{instanceName}} and go to your artist supporter page."
+  },
+  "emails.artistPurchaseNotification": {
+    "subject": "{{instanceName}}: {{amount}} Sale Notification",
+    "intro": "New purchases on your {{instanceName}} store!",
+    "purchasedBy": "Purchased by: {{email}}",
+    "transactionId": "Transaction ID",
+    "item": "Item",
+    "sku": "SKU/ISRC",
+    "gross": "Gross ({{currency}})",
+    "platformFee": "Platform fee",
+    "paymentProcessorFee": "Payment processor fee",
+    "net": "Net ({{currency}})",
+    "digitalItem": "Digital: {{artistName}} \\ {{title}}",
+    "merchItem": "Merch: {{artistName}} \\ {{title}}",
+    "tip": "Tip",
+    "total": "Total",
+    "viewSales": "You can view your sales in your <a href=\"{{url}}\">artist dashboard</a>.",
+    "learnAboutPayouts": "Learn more about <a href=\"{{url}}\">how payouts work on Mirlo</a>."
+  },
+  "emails.cataloguePurchaseArtistNotification": {
+    "subject": "{{instanceName}}: Someone bought your entire catalogue!",
+    "hello": "Hello {{artistName}}!",
+    "boughtCatalogue": "Someone ({{email}}) bought your entire digital catalogue!",
+    "amountPaid": "{{amount}} ({{instanceName}}'s share: {{platformCut}})",
+    "stripeDashboard": "The final money will be available via your Stripe dashboard",
+    "learnAboutPayouts": "Learn more about <a href=\"{{url}}\">how payouts work on Mirlo</a>.",
+    "questions": "If you have any questions please reach out to {{contactEmail}}"
+  },
+  "emails.announceMonthlyIncomeReport": {
+    "subject": "{{instanceName}}: Your Monthly Income Report",
+    "intro": "Here's your report for the past month.",
+    "salesWithCount": "Sales ({{number}})",
+    "subscriptionPaymentsWithCount": "Subscription payments ({{number}})",
+    "totalIncome": "Total income",
+    "cancelledSubscriptions": "Cancelled subscriptions",
+    "sales": "Sales",
+    "artist": "Artist",
+    "date": "Date",
+    "type": "Type",
+    "title": "Title",
+    "buyer": "Buyer",
+    "amount": "Amount",
+    "typeMerch": "Merch",
+    "typeAlbum": "Album",
+    "typeTrack": "Track",
+    "typeTip": "Tip",
+    "salesIncome": "Sales income: {{amount}}",
+    "subscriptionPayments": "Subscription payments",
+    "supporter": "Supporter",
+    "tier": "Tier",
+    "interval": "Interval",
+    "yearly": "Yearly",
+    "monthly": "Monthly",
+    "subscriptionIncome": "Subscription income: {{amount}}",
+    "reason": "Reason",
+    "amountNoLongerRecurring": "Amount no longer recurring",
+    "reasonUserCancelled": "Cancelled by supporter",
+    "reasonPaymentFailure": "Payment failed",
+    "reasonUserAccountDeleted": "Account deleted",
+    "reasonAdminRemoved": "Removed by an admin",
+    "reasonArtistCancelled": "Cancelled by you",
+    "reasonTierSwitched": "Switched tiers",
+    "reasonCancelled": "Cancelled",
+    "enjoy": "We love to see it. Enjoy!"
+  },
+  "emails.announceMonthlyReceipts": {
+    "subject": "{{instanceName}}: Your Monthly Subscriptions",
+    "thanks": "From all the folks at and using Mirlo, thank you!",
+    "meansALot": "Your support means a lot to us.",
+    "supporting": "You're supporting the following artists:",
+    "artist": "Artist",
+    "amount": "Amount",
+    "loveToSeeIt": "We love to see it."
+  },
+  "emails.newUser": {
+    "subject": "Welcome to {{instanceName}}!",
+    "signedUp": "Someone signed up to {{instanceName}} using this email address",
+    "confirm": "Click here to confirm"
+  },
+  "emails.verifyEmail": {
+    "subject": "Sign in code: {{code}} for {{name}}",
+    "intro": "Someone is using this e-mail address to verify their identity on {{instanceName}}.",
+    "enterCode": "To continue, enter the following code in the browser:"
+  },
+  "emails.confirmEmailChange": {
+    "subject": "{{instanceName}}: Confirm your email change to {{newEmail}}",
+    "intro": "Someone requested to change the email for your {{instanceName}} account to:",
+    "confirm": "Click here to confirm this email change",
+    "ignore": "If this was not you, you can safely ignore this email. Your email will not be changed.",
+    "contactUs": "If this wasn't you, please contact {{contactEmail}} ASAP"
+  },
+  "emails.inviteEmail": {
+    "subject": "You've been invited to join a Mirlo instance",
+    "title": "You've just been invited to join a Mirlo instance!",
+    "invitedBy": "{{name}} ({{email}}) has invited you to join their Mirlo instance.",
+    "claim": "Claim your invite.",
+    "ignore": "Not interested? You can safely ignore this e-mail."
+  },
+  "emails.announceLabelInvite": {
+    "subject": "You've been invited to join {{labelName}} on {{instanceName}}",
+    "subjectUnnamed": "You've been invited to join a label on {{instanceName}}",
+    "invited": "You've been invited to join <strong>{{labelName}}</strong> on {{instanceName}}.",
+    "invitedUnnamed": "You've been invited to join <strong>a label</strong> on {{instanceName}}.",
+    "acceptHere": "accept the invite here:",
+    "accept": "Accept Invite",
+    "viewLabel": "View {{labelName}} on {{instanceName}}.",
+    "viewUnnamedLabel": "View this label on {{instanceName}}."
+  },
+  "emails.announceManagerInvite": {
+    "subject": "You've been invited to manage {{artistName}}",
+    "subjectUnnamed": "You've been invited to manage an artist",
+    "invited": "{{inviterName}} has invited you to help manage <strong>{{artistName}}</strong>.",
+    "invitedUnnamedArtist": "{{inviterName}} has invited you to help manage <strong>an artist</strong>.",
+    "invitedBySomeone": "Someone has invited you to help manage <strong>{{artistName}}</strong>.",
+    "invitedBySomeoneUnnamedArtist": "Someone has invited you to help manage <strong>an artist</strong>.",
+    "permissions": "Once you accept, you'll be able to edit the artist's page, releases, merch and posts, and see their sales.",
+    "review": "Review the invite",
+    "ignore": "If you weren't expecting this, you can ignore this email."
+  },
+  "emails.stripeResetCode": {
+    "subject": "Reset your Stripe account on {{instanceName}}, code: {{code}}",
+    "intro": "You (or someone with access to your {{instanceName}} account) requested to reset the Stripe payment account linked to your {{instanceName}} account.",
+    "enterCode": "To continue, enter the following code in the browser:",
+    "expires": "This code will expire in 15 minutes.",
+    "ignore": "If you didn't request this, you can safely ignore this email — your Stripe account won't be touched without the code."
+  },
+  "emails.oauthApprovalRequested": {
+    "subject": "An app is asking to connect to {{instanceName}}",
+    "intro": "{{requestedBy}} asked for an app to be approved on {{instanceName}}, so it can connect to people's accounts:",
+    "clientId": "Its client ID is {{clientId}}.",
+    "approveOrBlock": "You can approve or block it here:"
+  },
+  "emails.reportAlbumProblem": {
+    "subject": "Release reported",
+    "reported": "This person {{email}} reported a problem with an album:",
+    "trackGroup": "trackGroup: {{title}} by {{artistName}}",
+    "viewHere": "You can view and manage the album here:"
+  },
+  "emails.adminAnnouncement": {
+    "subject": "A Message From {{instanceName}}"
+  },
+  "emails.artistContactMessage": {
+    "subject": "{{senderName}} sent you a message on {{instanceName}}",
+    "hello": "Hello from {{instanceName}}!",
+    "intro": "{{senderName}} ({{senderEmail}}) sent you a message regarding {{artistName}}:",
+    "replyDirectly": "You can reply directly to this email to respond to {{senderName}}.",
+    "alsoVisible": "This message is also visible in your <a href=\"{{notificationsUrl}}\">{{instanceName}} notifications</a>, where you can report it as spam if it's unwanted."
+  },
+  "emails.artistMerchContactForm": {
+    "subject": "Someone asked about your merch!",
+    "hello": "Hello from {{instanceName}}!",
+    "intro": "A supporter is contacting you regarding a merch purchase they made:",
+    "purchaseId": "Purchase ID: {{id}}",
+    "supporter": "Supporter: {{name}} ({{email}})",
+    "item": "Item: {{title}}",
+    "respond": "Please respond to the supporter directly via email at {{email}}."
+  },
+  "emails.artistDisabledNotification": {
+    "subject": "{{instanceName}}: Your artist account has been disabled",
+    "disabled": "Your artist page \"{{artistName}}\" has been disabled on {{instanceName}}.",
+    "reason": "Reason for disablement:",
+    "whatThisMeans": "What this means:",
+    "noSearch": "Your music will no longer appear in search results",
+    "directUrlOnly": "Your profile page will only be accessible via direct URL",
+    "noPurchases": "New purchases and subscriptions cannot be processed",
+    "nextSteps": "Next steps:",
+    "appeal": "If you believe this decision was made in error, you can appeal by contacting us at <a href=\"mailto:{{supportEmail}}\">{{supportEmail}}</a>. Please include details about why you believe your account was disabled in error.",
+    "review": "Our team will review your appeal and get back to you as soon as possible.",
+    "bestRegards": "Best regards,",
+    "signature": "The Mirlo Team"
+  },
+  "emails.announcePostPublished": {
+    "subject": "New Post: {{title}}",
+    "featuredImageAlt": "Featured Image",
+    "byline": "{{artistName}} just published a new post on {{instanceName}}",
+    "readOn": "Read it on {{instanceName}}.",
+    "unsubscribePrompt": "Don't want to receive emails from {{artistName}} anymore?",
+    "unsubscribe": "Unsubscribe."
   }
 }

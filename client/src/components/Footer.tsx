@@ -1,10 +1,12 @@
 import { css } from "@emotion/css";
 import { getFinishedLanguages, setStoredLanguage } from "i18n";
+import { useProfileMutation } from "queries";
 import { useInstanceSettings } from "queries/instanceSettings";
 import { Trans, useTranslation } from "react-i18next";
 import { FaInstagram, FaMastodon } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
 import { Link } from "react-router-dom";
+import { useAuthContext } from "state/AuthContext";
 
 import { bp } from "../constants";
 
@@ -14,12 +16,17 @@ import WidthContainer from "./common/WidthContainer";
 export const Footer = () => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "footer" });
   const { contactEmail } = useInstanceSettings();
+  const { user } = useAuthContext();
+  const { mutate: saveLanguage } = useProfileMutation();
 
   const finishedLanguages = getFinishedLanguages();
 
   const onChangeLanguage = (language: string) => {
     setStoredLanguage(language);
     i18n.changeLanguage(language);
+    if (user) {
+      saveLanguage({ userId: user.id, language });
+    }
   };
 
   const columns: {

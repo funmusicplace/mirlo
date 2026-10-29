@@ -1,20 +1,16 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-    p Hi,
+    +greeting()
     if cancelledByArtist
-      p #{artist.name} has cancelled your subscription to them on #{instanceName}.
+      p= t("emails.artistSubscriptionCancelled.cancelledByArtist", { artistName: artist.name, instanceName })
     else
-      p Your subscription to #{artist.name} on #{instanceName} has been cancelled.
+      p= t("emails.artistSubscriptionCancelled.cancelled", { artistName: artist.name, instanceName })
     if endsAt
-      p
-        | You won't be charged again, and you'll keep access until the end of the
-        | period you've already paid for, on #{new Date(endsAt).toLocaleDateString()}.
-    p
-      | Thank you for your support! You can subscribe again any time from
-      a(href!=`${client}`) our website
-      | .
+      p= t("emails.artistSubscriptionCancelled.accessUntil", { date: formatDate(endsAt) })
+    p!= tHtml("emails.artistSubscriptionCancelled.subscribeAgain", { url: client })
     if cancelledByArtist
-      p If you have questions about this, please get in touch with #{artist.name}.
+      p= t("emails.artistSubscriptionCancelled.questionsForArtist", { artistName: artist.name })
     else
-      p If you didn't request this, please get in touch.
+      p= t("emails.artistSubscriptionCancelled.didNotRequest")

@@ -1,47 +1,47 @@
 extends ../layout-wide.pug
+include ../mixins.pug
 
 mixin purchaseRow(title, transaction)
   tr
     td #{transaction.userFriendlyId || '---'}
     td #{title}
-    td.num #{(transaction.amount / 100).toFixed(2)}
-    td.num #{transaction.platformCut / 100 ? (transaction.platformCut / 100).toFixed(2) : ''}
-    td.num #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : ''}
+    +feeCells(transaction)
 
 block content
-  p Thank you for your purchase!
-  - const supportMessage = artist?.properties?.emails?.purchase
-  if supportMessage
-    div.border.pa3!= supportMessage
+  p= t("emails.purchaseReceipt.thanks")
+  +artistMessage(artist, "purchase")(class="border pa3")
   - var receiptCurrency = transactions && transactions[0] && transactions[0].currency ? transactions[0].currency.toUpperCase() : ''
   table
     thead
       tr
-        th Transaction ID
-        th Item
-        th.num Amount#{receiptCurrency ? ` (${receiptCurrency})` : ''}
-        th.num Platform fee
-        th.num Payment processor fee
+        th= t("emails.purchaseReceipt.transactionId")
+        th= t("emails.purchaseReceipt.item")
+        if receiptCurrency
+          th.num= t("emails.purchaseReceipt.amountWithCurrency", { currency: receiptCurrency })
+        else
+          th.num= t("emails.purchaseReceipt.amount")
+        th.num= t("emails.purchaseReceipt.platformFee")
+        th.num= t("emails.purchaseReceipt.paymentProcessorFee")
     tbody
       each transaction in transactions
         each purchase in transaction.trackGroupPurchases
           +purchaseRow(purchase.trackGroup.title, transaction)
           tr
             td(colspan="5")
-              a(href!=`${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`) View release
+              +releaseLink(purchase.trackGroup)= t("emails.purchaseReceipt.viewRelease")
 
         each purchase in transaction.trackPurchases
           +purchaseRow(purchase.track.title, transaction)
           tr
             td(colspan="5")
-              a(href!=`${client}/${purchase.track.trackGroup.artist.urlSlug}/release/${purchase.track.trackGroup.urlSlug}`) View release
+              +releaseLink(purchase.track.trackGroup)= t("emails.purchaseReceipt.viewRelease")
 
         each purchase in transaction.merchPurchases
           +purchaseRow(`${purchase.merch.title} ${purchase.options.map((o) => o.name).join(', ')}: ${purchase.quantity}`, transaction)
         each tip in transaction.tips
-          +purchaseRow('Tip', transaction)
+          +purchaseRow(t("emails.purchaseReceipt.tip"), transaction)
 
-  p Your support keeps our community strong.
+  p= t("emails.purchaseReceipt.community")
   hr
-  p
-    | New to #{instanceName}? If you want to have access to all your purchases for this e-mail address, simply #[a(href!=`${client}/password-reset?email=${encodeURIComponent(email)}`) set a password for it].
+  +setPasswordPrompt(email)
+    | #{t("emails.purchaseReceipt.newTo", { instanceName })}

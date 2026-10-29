@@ -1,28 +1,26 @@
 extends ../layout-wide.pug
+include ../mixins.pug
 
 block content
-  p Wow!
-  p
-    if isNewSubscription
-      | (#{user.email}) #{user.name} started supporting your on #{instanceName}.
-    else
-      | (#{user.email}) #{user.name} is supporting your on #{instanceName}!
-  p
-    | Support for #{artist.name} on #{instanceName} with a #{interval === 'MONTH' ? 'monthly': 'yearly'}
-    | contribution at the "#{artistUserSubscription.artistSubscriptionTier.name}" tier.
+  p= t("emails.artistNewSubscriberAnnounce.wow")
+  if isNewSubscription
+    p= t("emails.artistNewSubscriberAnnounce.startedSupporting", { email: user.email, name: user.name || t("emails.common.aSupporter"), instanceName })
+  else
+    p= t("emails.artistNewSubscriberAnnounce.isSupporting", { email: user.email, name: user.name || t("emails.common.aSupporter"), instanceName })
+  if interval === 'MONTH'
+    p= t("emails.artistNewSubscriberAnnounce.supportMonthly", { artistName: artist.name, instanceName, tierName: artistUserSubscription.artistSubscriptionTier.name })
+  else
+    p= t("emails.artistNewSubscriberAnnounce.supportYearly", { artistName: artist.name, instanceName, tierName: artistUserSubscription.artistSubscriptionTier.name })
   if transaction
     table
       thead
         tr
-          th.num Gross Amount
-          th.num Platform Fee
-          th.num Payment Processor Fee
-          th.num Net Amount
+          th.num= t("emails.artistNewSubscriberAnnounce.grossAmount")
+          th.num= t("emails.artistNewSubscriberAnnounce.platformFee")
+          th.num= t("emails.artistNewSubscriberAnnounce.paymentProcessorFee")
+          th.num= t("emails.artistNewSubscriberAnnounce.netAmount")
       tbody
         tr
-          td.num #{transaction.currency.toUpperCase()} #{(transaction.amount / 100).toFixed(2)}
-          td.num #{transaction.platformCut / 100 ? (transaction.platformCut / 100).toFixed(2) : 0}
-          td.num #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : 0}
-          td.num #{transaction.currency.toUpperCase()} #{(((transaction.amount || 0) - (transaction.platformCut || 0) - (transaction.stripeCut || 0)) / 100).toFixed(2)}
-  p To view all your supporters log in to #{instanceName} and go to your artist supporter page.
-  p Enjoy!
+          +feeCells(transaction, { currency: transaction.currency, net: true })
+  p= t("emails.artistNewSubscriberAnnounce.viewSupporters", { instanceName })
+  p= t("emails.common.enjoy")

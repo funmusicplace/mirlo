@@ -2,26 +2,15 @@ extends ../layout.pug
 include ../mixins.pug
 
 block content
-  p 
-    | Here's your download of 
-    strong #{trackGroup.title} 
-    | by 
-    strong #{trackGroup.artist.name}.
+  p!= tHtml("emails.albumDownload.intro", { title: trackGroup.title, artistName: trackGroup.artist.name })
   table 
     tr 
       td #{trackGroup.title}
       td 
-        a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${token}&email=${encodeURIComponent(email)}`) download
+        +releaseLink(trackGroup, `/download?token=${token}&email=${encodeURIComponent(email)}`)= t("emails.albumDownload.download")
 
   p
   +supportArtist(trackGroup.artist, client, hasSubscriptionTiers)
-  p
-    | If you want to have access to all your purchases for this e-mail address,
-    | simply
-    a(href!=`${client}/password-reset?email=${encodeURIComponent(email)}`) set a password for it
-    | .
-  - const purchaseMessage = trackGroup.artist?.properties?.emails?.purchase
-  if purchaseMessage
-    div!= purchaseMessage
-  else
-    p Enjoy!
+  +setPasswordPrompt(email)
+  +artistMessage(trackGroup.artist, "purchase")
+    p= t("emails.common.enjoy")

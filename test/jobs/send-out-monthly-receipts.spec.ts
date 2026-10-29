@@ -60,6 +60,18 @@ describe("send-out-monthly-receipts", () => {
         userId: followerUser.id,
         profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
+        profileUserSubscriptionCharges: {
+          create: {
+            transaction: {
+              create: {
+                userId: followerUser.id,
+                amount: 5,
+                currency: "eur",
+                paymentStatus: "COMPLETED",
+              },
+            },
+          },
+        },
       },
     });
 
@@ -72,6 +84,7 @@ describe("send-out-monthly-receipts", () => {
     const locals = data0.locals as AnnounceMonthlyReceiptsEmailType;
 
     assert.equal(locals.userSubscriptions.length, 1);
+    assert.equal(locals.userSubscriptions[0].currency, "eur");
     assert.equal(locals.user.email, followerUser.email);
   });
 

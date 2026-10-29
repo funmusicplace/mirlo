@@ -1,1 +1,4 @@
-= `${instanceName}: Your ${artist.name} subscription renews on ${renewalDate}`
+if renewalDate
+  != t("emails.subscriptionRenewalReminder.subject", { instanceName, artistName: artist.name, renewalDate: formatDate(renewalDate) })
+else
+  != t("emails.subscriptionRenewalReminder.subjectUnknownDate", { instanceName, artistName: artist.name })

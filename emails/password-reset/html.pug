@@ -1,13 +1,14 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-    p Hi!
+    +greeting()
     if accountIncomplete
-      p Someone wants to set a password for this email
+      p= t("emails.passwordReset.setPassword")
     else 
-      p Someone wants to reset the password for this email
+      p= t("emails.passwordReset.resetPassword")
 
     p #{user.email}
     p 
-      a(href!=`${host}/auth/password-reset/confirmation/${token}?id=${user.id}&redirectClient=${redirectClient}&accountIncomplete=${accountIncomplete}`) Click here to confirm
-    p If this was not you, you can safely ignore this email.
+      a(href!=`${host}/auth/password-reset/confirmation/${token}?id=${user.id}&redirectClient=${redirectClient}&accountIncomplete=${accountIncomplete}`)= t("emails.passwordReset.confirm")
+    p= t("emails.common.ignore")

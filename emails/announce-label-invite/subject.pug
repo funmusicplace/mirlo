@@ -1,2 +1,4 @@
-- const labelName = (label && label.name) || "a label"
-= `You've been invited to join ${labelName} on ${instanceName}`
+if label && label.name
+  != t("emails.announceLabelInvite.subject", { labelName: label.name, instanceName })
+else
+  != t("emails.announceLabelInvite.subjectUnnamed", { instanceName })

@@ -212,6 +212,7 @@ export default function () {
           email: true,
           pendingEmail: true,
           id: true,
+          language: true,
         },
       });
 
@@ -223,6 +224,7 @@ export default function () {
             message: {
               to: refreshedUser.pendingEmail,
             },
+            language: refreshedUser.language,
             locals: {
               userId: user.id,
               newEmail: refreshedUser.pendingEmail,

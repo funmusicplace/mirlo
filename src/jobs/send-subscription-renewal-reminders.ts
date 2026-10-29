@@ -20,7 +20,8 @@ export type SubscriptionRenewalReminderEmailType = {
     createdAt: Date;
     updatedAt: Date;
   };
-  renewalDate: string;
+  renewalDate: string | null;
+  currency?: string;
 };
 
 /**
@@ -77,6 +78,11 @@ const sendSubscriptionRenewalReminders = async () => {
               },
             },
           },
+          profileUserSubscriptionCharges: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+            select: { transaction: { select: { currency: true } } },
+          },
         },
       }
     );
@@ -91,17 +97,6 @@ const sendSubscriptionRenewalReminders = async () => {
         try {
           const serializedSubscription =
             serializeProfileUserSubscription(subscription);
-
-          const renewalDate = subscription.nextBillingDate
-            ? new Date(subscription.nextBillingDate).toLocaleDateString(
-                "en-US",
-                {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                }
-              )
-            : "unknown date";
 
           // Queue the email job
           await sendMailQueue.add(
@@ -126,7 +121,11 @@ const sendSubscriptionRenewalReminders = async () => {
                 },
                 host: process.env.API_DOMAIN,
                 client: (await getClient()).applicationUrl,
-                renewalDate,
+                renewalDate:
+                  subscription.nextBillingDate?.toISOString() ?? null,
+                currency:
+                  subscription.profileUserSubscriptionCharges[0]?.transaction
+                    ?.currency,
               } as SubscriptionRenewalReminderEmailType,
             },
             { priority: BULK_MAIL_PRIORITY }

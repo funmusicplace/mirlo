@@ -50,6 +50,9 @@ services:
         - action: sync+restart
           path: ./emails
           target: /var/www/api/emails
+        - action: sync+restart
+          path: ./client/src/translation
+          target: /var/www/api/client/src/translation
         - action: rebuild
           path: ./prisma
           target: /var/www/api/prisma
@@ -87,6 +90,9 @@ services:
         - action: sync+restart
           path: ./emails
           target: /var/www/api/emails
+        - action: sync+restart
+          path: ./client/src/translation
+          target: /var/www/api/client/src/translation
         - action: rebuild
           path: ./prisma
           target: /var/www/api/prisma
