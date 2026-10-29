@@ -95,17 +95,23 @@ app.use(denyFramingExceptWidgets);
 app.use(logHeavyRequests);
 
 // Set a rate limiter on all auth endpoints to be only 50 requests a minute
-const authLimiter = isDev
-  ? undefined
-  : rateLimit({
-      windowMs: 60 * 1000, // 1 minute
-      limit: 50, // Limit each IP to 50 requests per `window`
-      standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers,
-      skip: () => process.env.NODE_ENV === "test",
-    });
+const buildAuthLimiter = () =>
+  isDev
+    ? undefined
+    : rateLimit({
+        windowMs: 60 * 1000, // 1 minute
+        limit: 50, // Limit each IP to 50 requests per `window`
+        standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers,
+        skip: () => process.env.NODE_ENV === "test",
+      });
+const authLimiter = buildAuthLimiter();
+const oidcTokenLimiter = buildAuthLimiter();
 
 if (authLimiter) {
   app.use(`${OIDC_MOUNT_PATH}/auth`, authLimiter);
+}
+if (oidcTokenLimiter) {
+  app.use(`${OIDC_MOUNT_PATH}/token`, oidcTokenLimiter);
 }
 app.use(OIDC_MOUNT_PATH, oidcHandler);
 app.get(
