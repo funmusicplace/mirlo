@@ -9,7 +9,10 @@ import { getClient } from "../utils/getClient";
 export type AnnounceMonthlyReceiptsEmailType = {
   userSubscriptions: {
     amount: number;
-    artistSubscriptionTier: { artistId: number; artist: { name: string } };
+    artistSubscriptionTier: {
+      artistId: number;
+      artist: { name: string; user: { currency: string | null } };
+    };
   }[];
   user: {
     id: number;
@@ -36,7 +39,9 @@ const sendOutMonthlyReceipts = async () => {
       include: {
         profileSubscriptionTier: {
           include: {
-            profile: true,
+            profile: {
+              include: { user: { select: { currency: true } } },
+            },
           },
         },
         user: { select: { id: true, name: true, email: true } },

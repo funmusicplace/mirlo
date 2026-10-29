@@ -1,19 +1,20 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
-
-import { clearTables, createUser } from "../utils";
+import sinon from "sinon";
 
 import sendSubscriptionRenewalReminders, {
   SubscriptionRenewalReminderEmailType,
 } from "../../src/jobs/send-subscription-renewal-reminders";
-import prisma from "@mirlo/prisma";
-import assert from "assert";
-import sinon from "sinon";
 import {
   sendMailQueue,
   sendMailQueueEvents,
 } from "../../src/queues/send-mail-queue";
+import { clearTables, createUser } from "../utils";
+
+import prisma from "@mirlo/prisma";
+
+import assert from "assert";
 
 describe("send-subscription-renewal-reminders", () => {
   beforeEach(async () => {
@@ -494,7 +495,7 @@ describe("send-subscription-renewal-reminders", () => {
       const jobData = call.args[1];
       const locals = jobData.locals as SubscriptionRenewalReminderEmailType;
       assert.strictEqual(typeof locals.renewalDate, "string");
-      assert.match(locals.renewalDate, /May 15, 2025/);
+      assert.match(locals.renewalDate ?? "", /^2025-05-15/);
     }
   });
 

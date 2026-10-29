@@ -1,5 +1,4 @@
 import prisma from "@mirlo/prisma";
-import { SubscriptionDeleteReason } from "@mirlo/prisma/client";
 import { groupBy, keyBy, uniq } from "lodash";
 
 import logger from "../logger";
@@ -30,12 +29,11 @@ type ReportSale = {
 export type MonthlyIncomeReportEmailType = {
   user: { name: string; email: string };
   /** One-off sales: albums, tracks, merch and tips. */
-  sales: (ReportSale & { saleTypeLabel: string })[];
+  sales: (ReportSale & { saleKind: "merch" | "album" | "track" | "tip" })[];
   subscriptionPayments: ReportSale[];
   cancelledSubscriptions: {
     amount: number;
     deleteReason: string | null;
-    deleteReasonLabel: string;
     user: { name: string | null };
     artistSubscriptionTier: {
       name: string;
@@ -51,25 +49,16 @@ export type MonthlyIncomeReportEmailType = {
   client: string;
 };
 
-const deleteReasonLabels: Record<SubscriptionDeleteReason, string> = {
-  USER_CANCELLED: "Cancelled by supporter",
-  PAYMENT_FAILURE: "Payment failed",
-  USER_ACCOUNT_DELETED: "Account deleted",
-  ADMIN_REMOVED: "Removed by an admin",
-  ARTIST_CANCELLED: "Cancelled by you",
-  TIER_SWITCHED: "Switched tiers",
-};
-
 type Sale = Awaited<ReturnType<typeof findSales>>[number];
 
 const isSubscriptionPayment = (sale: Sale) =>
   sale.profileUserSubscriptionCharges.length > 0;
 
-const saleTypeLabel = (sale: Sale) => {
-  if (sale.merchPurchases.length) return "Merch";
-  if (sale.trackGroupPurchases.length) return "Album";
-  if (sale.trackPurchases.length) return "Track";
-  return "Tip";
+const saleKind = (sale: Sale) => {
+  if (sale.merchPurchases.length) return "merch";
+  if (sale.trackGroupPurchases.length) return "album";
+  if (sale.trackPurchases.length) return "track";
+  return "tip";
 };
 
 const sumAmounts = (sales: { amount: number }[]) =>
@@ -139,12 +128,7 @@ const sendOutMonthlyIncomeReport = async () => {
     ]);
     const buyers = keyBy(buyerRows, "id");
     const groupedCancellations = groupBy(
-      cancelledSubscriptions.map((subscription) => ({
-        ...subscription,
-        deleteReasonLabel: subscription.deleteReason
-          ? deleteReasonLabels[subscription.deleteReason]
-          : "Cancelled",
-      })),
+      cancelledSubscriptions,
       (subscription) => subscription.profileSubscriptionTier.profile.userId
     );
 
@@ -168,7 +152,7 @@ const sendOutMonthlyIncomeReport = async () => {
         serializeUserTransaction({
           ...sale,
           user: {
-            name: buyers[sale.userId]?.name || "A supporter",
+            name: buyers[sale.userId]?.name || "",
             email: buyers[sale.userId]?.email || "",
           },
         });
@@ -193,7 +177,7 @@ const sendOutMonthlyIncomeReport = async () => {
               user,
               sales: oneOffSales.map((sale) => ({
                 ...serializeSale(sale),
-                saleTypeLabel: saleTypeLabel(sale),
+                saleKind: saleKind(sale),
               })),
               subscriptionPayments: subscriptionPayments.map(serializeSale),
               cancelledSubscriptions: cancellations.map((subscription) =>

@@ -1,30 +1,29 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-    p Hi #{userName},
+    +greeting(userName)
     
-    p Your artist page "#{artistName}" has been disabled on #{instanceName}.
+    p= t("emails.artistDisabledNotification.disabled", { artistName, instanceName })
     
     if reason
-        strong Reason for disablement:
+        strong= t("emails.artistDisabledNotification.reason")
         != reason
     
     p
-        strong What this means:
+        strong= t("emails.artistDisabledNotification.whatThisMeans")
     ul
-        li Your music will no longer appear in search results
-        li Your profile page will only be accessible via direct URL
-        li New purchases and subscriptions cannot be processed
+        li= t("emails.artistDisabledNotification.noSearch")
+        li= t("emails.artistDisabledNotification.directUrlOnly")
+        li= t("emails.artistDisabledNotification.noPurchases")
     
     if supportEmail
         p
-            strong Next steps:
-        p If you believe this decision was made in error, you can appeal by contacting us at 
-            a(href=`mailto:${supportEmail}`) #{supportEmail}
-            | . Please include details about why you believe your account was disabled in error.
+            strong= t("emails.artistDisabledNotification.nextSteps")
+        p!= tHtml("emails.artistDisabledNotification.appeal", { supportEmail })
 
-        p Our team will review your appeal and get back to you as soon as possible.
+        p= t("emails.artistDisabledNotification.review")
     
-    p Best regards,
+    p= t("emails.artistDisabledNotification.bestRegards")
     br
-    | The Mirlo Team
+    | #{t("emails.artistDisabledNotification.signature")}

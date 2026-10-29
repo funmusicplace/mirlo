@@ -1,14 +1,19 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-  p Yay!
+  p= t("emails.automaticallyReceivedAlbum.yay")
   if trackGroup.title
-    p Because you support #{artist.name} with a regular contribution, you've received their newest release, #{trackGroup.title}!
+    p= t("emails.automaticallyReceivedAlbum.receivedWithTitle", { artistName: artist.name, title: trackGroup.title })
   else
-    p Because you support #{artist.name} with a regular contribution, you've received their newest release!
+    p= t("emails.automaticallyReceivedAlbum.received", { artistName: artist.name })
 
   p
-    a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}`) #{trackGroup.title || "Listen to the release"}
+    +releaseLink(trackGroup)
+      if trackGroup.title
+        | #{trackGroup.title}
+      else
+        = t("emails.automaticallyReceivedAlbum.listen")
 
-  p The release is now available in your collection for unlimited listening and downloading.
-  p Enjoy!
+  p= t("emails.automaticallyReceivedAlbum.availableNow")
+  p= t("emails.common.enjoy")

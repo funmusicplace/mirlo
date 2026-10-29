@@ -97,7 +97,7 @@ const ArtistToggle = styled(FormComponent)`
 `;
 
 function Index() {
-  const { t } = useTranslation("translation", { keyPrefix: "signUp" });
+  const { t, i18n } = useTranslation("translation", { keyPrefix: "signUp" });
   const [search] = useSearchParams();
   const snackbar = useSnackbar();
   const { isClosedToPublicArtistSignup } = useInstanceSettings();
@@ -155,6 +155,7 @@ function Index() {
             receiveMailingList: !!data.receiveMailingList,
             client: import.meta.env.VITE_CLIENT_DOMAIN,
             cfTurnstile: cfTurnstile.current,
+            language: i18n.resolvedLanguage,
           },
           {
             credentials: undefined,
@@ -199,7 +200,7 @@ function Index() {
         setIsLoading(false);
       }
     },
-    [errorHandler, snackbar, t]
+    [errorHandler, snackbar, t, i18n]
   );
 
   const handleResendVerification = React.useCallback(async () => {

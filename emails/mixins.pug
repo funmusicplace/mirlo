@@ -1,16 +1,57 @@
 
 mixin supportArtist(artist, client, hasSubscriptionTiers)
-  - const supportWith = hasSubscriptionTiers ? "with a subscription or a purchase." : "with a purchase."
-  p
-    | Consider supporting
-    |
-    a(href!=`${client}/${artist.urlSlug}`) #{artist.name}
-    |
-    | #{supportWith}
+  - const artistUrl = `${client}/${artist.urlSlug}`
+  if hasSubscriptionTiers
+    p!= tHtml("emails.common.supportArtistWithSubscription", { artistUrl, artistName: artist.name })
+  else
+    p!= tHtml("emails.common.supportArtistWithPurchase", { artistUrl, artistName: artist.name })
 
 mixin currency(amount, currency, platformCut, paymentProcessorCut)
-  | #{currency.toUpperCase()} #{(amount / 100).toFixed(2)}
+  | #{formatMoney(amount, currency)}
   if (platformCut)
-    | (platform cut: #{(platformCut / 100).toFixed(2)})
+    | #{t("emails.common.platformCut", { amount: formatAmount(platformCut) })}
   if (paymentProcessorCut)
-    | (payment processor: #{(paymentProcessorCut / 100).toFixed(2)})
+    | #{t("emails.common.paymentProcessorCut", { amount: formatAmount(paymentProcessorCut) })}
+
+mixin fulfillmentStatus(status)
+  case status
+    when "NO_PROGRESS"
+      | #{t("emails.common.fulfillmentNoProgress")}
+    when "STARTED"
+      | #{t("emails.common.fulfillmentStarted")}
+    when "SHIPPED"
+      | #{t("emails.common.fulfillmentShipped")}
+    when "COMPLETED"
+      | #{t("emails.common.fulfillmentCompleted")}
+
+mixin greeting(name)
+  if name
+    p= t("emails.common.greetingName", { name })
+  else
+    p= t("emails.common.greeting")
+
+mixin releaseLink(trackGroup, path)
+  a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}${path || ""}`)&attributes(attributes)
+    block
+
+mixin artistMessage(artist, kind)
+  - const message = artist?.properties?.emails?.[kind]
+  if message
+    div&attributes(attributes)!= message
+  else if block
+    block
+
+mixin setPasswordPrompt(email)
+  p
+    if block
+      block
+      = " "
+    | !{tHtml("emails.common.setPassword", { url: `${client}/password-reset?email=${encodeURIComponent(email)}` })}
+
+mixin feeCells(transaction, options)
+  - const format = (cents) => options && options.currency ? formatMoney(cents, options.currency) : formatAmount(cents)
+  td.num #{format(transaction.amount)}
+  td.num #{transaction.platformCut ? format(transaction.platformCut) : ''}
+  td.num #{transaction.stripeCut ? format(transaction.stripeCut) : ''}
+  if options && options.net
+    td.num #{format((transaction.amount || 0) - (transaction.platformCut || 0) - (transaction.stripeCut || 0))}

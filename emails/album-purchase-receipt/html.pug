@@ -1,22 +1,20 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-    p Wow! 
+    p= t("emails.albumPurchaseReceipt.wow")
     if isBeforeReleaseDate
-      p Thank you for supporting #{trackGroup.artist.name} with your pre-order of #{trackGroup.title}.
+      p= t("emails.albumPurchaseReceipt.thanksPreOrder", { artistName: trackGroup.artist.name, title: trackGroup.title })
     else
-      p Thank you for supporting #{trackGroup.artist.name} with your purchase of #{trackGroup.title}.
+      p= t("emails.albumPurchaseReceipt.thanksPurchase", { artistName: trackGroup.artist.name, title: trackGroup.title })
      
     div
       p
-        a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}`) #{trackGroup.title}
-      p #{purchase.transaction.currency.toUpperCase()} #{(purchase.transaction.amount / 100).toFixed(2)}
+        +releaseLink(trackGroup) #{trackGroup.title}
+      p #{formatMoney(purchase.transaction.amount, purchase.transaction.currency)}
     if isBeforeReleaseDate
-      p The release will become available in your collection for unlimited listening and downloading once it is released.
+      p= t("emails.albumPurchaseReceipt.availableOnRelease")
     else 
-      p The release is now available in your collection for unlimited listening and downloading.
-    - const purchaseMessage = trackGroup.artist?.properties?.emails?.purchase
-    if purchaseMessage
-      div!= purchaseMessage
-    else
-      p Enjoy!
+      p= t("emails.albumPurchaseReceipt.availableNow")
+    +artistMessage(trackGroup.artist, "purchase")
+      p= t("emails.common.enjoy")

@@ -177,7 +177,7 @@ type ProfileChangeBody = {
   password?: string;
   newEmail?: string;
   language: string;
-  isLabelAccount: boolean;
+  isLabelAccount?: boolean;
   combineSubscriptionEmails?: boolean;
 };
 

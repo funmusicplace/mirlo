@@ -20,7 +20,7 @@ export type SubscriptionRenewalReminderEmailType = {
     createdAt: Date;
     updatedAt: Date;
   };
-  renewalDate: string;
+  renewalDate: string | null;
 };
 
 /**
@@ -92,17 +92,6 @@ const sendSubscriptionRenewalReminders = async () => {
           const serializedSubscription =
             serializeProfileUserSubscription(subscription);
 
-          const renewalDate = subscription.nextBillingDate
-            ? new Date(subscription.nextBillingDate).toLocaleDateString(
-                "en-US",
-                {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                }
-              )
-            : "unknown date";
-
           // Queue the email job
           await sendMailQueue.add(
             "send-mail",
@@ -126,7 +115,8 @@ const sendSubscriptionRenewalReminders = async () => {
                 },
                 host: process.env.API_DOMAIN,
                 client: (await getClient()).applicationUrl,
-                renewalDate,
+                renewalDate:
+                  subscription.nextBillingDate?.toISOString() ?? null,
               } as SubscriptionRenewalReminderEmailType,
             },
             { priority: BULK_MAIL_PRIORITY }

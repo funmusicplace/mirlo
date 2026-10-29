@@ -2,30 +2,20 @@ extends ../layout.pug
 include ../mixins.pug
 
 block content
-  p
-    | You bought #{artist.name} entire digital catalogue!
-    | This includes digital downloads of:
+  p= t("emails.catalogueReceipt.intro", { artistName: artist.name })
   table
     thead
       tr
-        th Title
-        th Download
+        th= t("emails.catalogueReceipt.title")
+        th= t("emails.catalogueReceipt.downloadHeader")
     tbody
       each trackGroup in trackGroups
         tr
           td #{trackGroup.title}
           td
-            a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${trackGroup.token}&email=${encodeURIComponent(email)}`) download
+            +releaseLink(trackGroup, `/download?token=${trackGroup.token}&email=${encodeURIComponent(email)}`)= t("emails.catalogueReceipt.download")
 
   +supportArtist(artist, client, hasSubscriptionTiers)
-  p
-    | If you want to have access to all your purchases for this e-mail address,
-    | simply
-    |
-    a(href!=`${client}/password-reset?email=${encodeURIComponent(email)}`) set a password for it
-    | .
-  - const purchaseMessage = artist?.properties?.emails?.purchase
-  if purchaseMessage
-    div!= purchaseMessage
-  else
-    p Enjoy!
+  +setPasswordPrompt(email)
+  +artistMessage(artist, "purchase")
+    p= t("emails.common.enjoy")

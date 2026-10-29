@@ -10,13 +10,6 @@ type ShipmentFields = {
   trackingWebsite: string | null;
 };
 
-export const fulfillmentStatusLabels: Record<FulfillmentStatus, string> = {
-  NO_PROGRESS: "Not started yet",
-  STARTED: "Being prepared",
-  SHIPPED: "Shipped",
-  COMPLETED: "Completed",
-};
-
 // The fulfillment form submits "" for empty inputs, so treat blank and null
 // as the same "no tracking info" value.
 const normalise = (value?: string | null) => value?.trim() || null;
@@ -79,7 +72,6 @@ export const sendShipmentUpdateEmail = async (
       merchTitle: purchase.merch.title,
       quantity: purchase.quantity,
       fulfillmentStatus: purchase.fulfillmentStatus,
-      statusLabel: fulfillmentStatusLabels[purchase.fulfillmentStatus],
       trackingNumber: normalise(purchase.trackingNumber),
       trackingWebsite,
       trackingUrl: toTrackingUrl(trackingWebsite),

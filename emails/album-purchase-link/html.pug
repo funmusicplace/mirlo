@@ -1,22 +1,13 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
     h2 #{trackGroup.title} 
-    p 
-      | by 
-      strong #{trackGroup.artist.name}.
+    p!= tHtml("emails.albumPurchaseLink.byArtist", { artistName: trackGroup.artist.name })
   
-    a(
-        href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}`
-        style="background-color:#BE3455;color:#ffffff;padding:12px 24px;text-decoration:none;font-size:16px;border-radius:4px;display:inline-block;"
-    )
-      | Buy Now
+    +releaseLink(trackGroup)(style="background-color:#BE3455;color:#ffffff;padding:12px 24px;text-decoration:none;font-size:16px;border-radius:4px;display:inline-block;")= t("emails.albumPurchaseLink.buyNow")
 
-    p 
-      | Consider supporting 
-      a(href!=`${client}/${trackGroup.artist.urlSlug}`) #{trackGroup.artist.name} 
-      | on #{instanceName} with a subscription or a purchase.
-    p Enjoy!
+    p!= tHtml("emails.albumPurchaseLink.support", { artistUrl: `${client}/${trackGroup.artist.urlSlug}`, artistName: trackGroup.artist.name, instanceName })
+    p= t("emails.common.enjoy")
      
-    p 
-      | If this was not you, you can safely ignore this email.
+    p= t("emails.common.ignore")

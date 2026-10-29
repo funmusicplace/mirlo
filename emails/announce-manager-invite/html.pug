@@ -1,15 +1,19 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
+  +greeting(user && user.name)
+  - const inviterName = invitedBy && invitedBy.name
+  - const artistName = artist && artist.name
+  if inviterName && artistName
+    p!= tHtml("emails.announceManagerInvite.invited", { inviterName, artistName })
+  else if inviterName
+    p!= tHtml("emails.announceManagerInvite.invitedUnnamedArtist", { inviterName })
+  else if artistName
+    p!= tHtml("emails.announceManagerInvite.invitedBySomeone", { artistName })
+  else
+    p!= tHtml("emails.announceManagerInvite.invitedBySomeoneUnnamedArtist")
+  p= t("emails.announceManagerInvite.permissions")
   p 
-    | Hi #{(user && user.name) || 'there'},
-  p 
-    | #{(invitedBy && invitedBy.name) || 'Someone'} has invited you to help manage 
-    strong #{(artist && artist.name) || 'an artist'} 
-    |.
-  p 
-    | Once you accept, you'll be able to edit the artist's page, releases, merch and posts, and see their sales.
-  p 
-    a(href!=`${client}/manage`) Review the invite
-  p 
-    | If you weren't expecting this, you can ignore this email.
+    a(href!=`${client}/manage`)= t("emails.announceManagerInvite.review")
+  p= t("emails.announceManagerInvite.ignore")

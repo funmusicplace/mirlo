@@ -1,20 +1,21 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-  p Hi #{userSubscriptions[0].user.name}
-  p From all the folks at and using Mirlo, thank you!
-  p Your support means a lot to us.
-  p You're supporting the following artists:
+  +greeting(userSubscriptions[0].user.name)
+  p= t("emails.announceMonthlyReceipts.thanks")
+  p= t("emails.announceMonthlyReceipts.meansALot")
+  p= t("emails.announceMonthlyReceipts.supporting")
   table
     thead
       tr
-        th Artist
-        th.num Amount
+        th= t("emails.announceMonthlyReceipts.artist")
+        th.num= t("emails.announceMonthlyReceipts.amount")
     tbody
       each val in userSubscriptions
         tr
           td #{val.artistSubscriptionTier.artist.name}
-          td.num #{val.currency} #{val.amount / 100}
+          td.num #{formatMoney(val.amount, val.artistSubscriptionTier.artist.user.currency || "usd")}
 
-  p We love to see it.
-  p Enjoy!
+  p= t("emails.announceMonthlyReceipts.loveToSeeIt")
+  p= t("emails.common.enjoy")

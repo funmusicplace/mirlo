@@ -1,1 +1,4 @@
-= `${instanceName}: Supporting ${artist.name} ${interval === 'MONTH' ? 'monthly': 'yearly'} receipt!`
+if interval === 'MONTH'
+  != t("emails.artistSubscriptionReceipt.subjectMonthly", { instanceName, artistName: artist.name })
+else
+  != t("emails.artistSubscriptionReceipt.subjectYearly", { instanceName, artistName: artist.name })

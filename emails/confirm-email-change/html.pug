@@ -1,13 +1,13 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-  p Hi there,
-  p Someone requested to change the email for your #{instanceName} account to:
+  +greeting()
+  p= t("emails.confirmEmailChange.intro", { instanceName })
   p 
     strong #{newEmail}
   p 
-    a(href!=`${clientDomain}/confirm-email-change?token=${token}&userId=${userId}`) Click here to confirm this email change
-  p 
-    | If this was not you, you can safely ignore this email. Your email will not be changed.
+    a(href!=`${clientDomain}/confirm-email-change?token=${token}&userId=${userId}`)= t("emails.confirmEmailChange.confirm")
+  p= t("emails.confirmEmailChange.ignore")
   if contactEmail
-    p If this wasn't you, please contact #{contactEmail} ASAP
+    p= t("emails.confirmEmailChange.contactUs", { contactEmail })

@@ -1,6 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getStoredLanguage } from "i18n";
-import { queryAuthProfile, useAuthRefreshMutation } from "queries";
+import {
+  queryAuthProfile,
+  useAuthRefreshMutation,
+  useProfileMutation,
+} from "queries";
 import { QUERY_KEY_AUTH, queryKeyIncludes } from "queries/queryKeys";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,6 +27,7 @@ export function AuthContextProvider({ children }: React.PropsWithChildren) {
   const userId = user?.id;
 
   const { authRefresh } = useAuthRefreshMutation();
+  const { mutate: saveLanguage } = useProfileMutation();
 
   const userLanguage = user?.language;
 
@@ -32,6 +37,12 @@ export function AuthContextProvider({ children }: React.PropsWithChildren) {
     }
     i18n.changeLanguage(userLanguage);
   }, [userLanguage]);
+
+  React.useEffect(() => {
+    if (userId && !userLanguage) {
+      saveLanguage({ userId, language: i18n.language });
+    }
+  }, [userId, userLanguage]);
 
   React.useEffect(() => {
     let interval: NodeJS.Timeout | null = null;

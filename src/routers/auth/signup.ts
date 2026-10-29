@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import logger from "../../logger";
 import { subscribeUserToArtist } from "../../utils/artist";
 import { checkCloudFlareTurnstile } from "../../utils/cloudflare";
+import { hasTranslation } from "../../utils/emailTranslation";
 import { AppError } from "../../utils/error";
 import { getSiteSettings } from "../../utils/settings";
 
@@ -26,6 +27,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     emailInvited,
     inviteToken,
     cfTurnstile,
+    language,
   } = req.body;
   const connectingIP = req.body["CF-Connecting-IP"];
 
@@ -135,6 +137,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
           promoCodes: promoCode ? [promoCode] : [],
           canCreateArtists,
           isLabelAccount,
+          language: hasTranslation(language) ? language : undefined,
         },
         select: {
           name: true,

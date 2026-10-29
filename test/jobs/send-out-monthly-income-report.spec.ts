@@ -174,7 +174,7 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals.totalIncome, 7);
     assert.equal(locals.salesTotal, 7);
     assert.equal(locals.sales[0].amount, 7);
-    assert.equal(locals.sales[0].saleTypeLabel, "Tip");
+    assert.equal(locals.sales[0].saleKind, "tip");
   });
 
   it("should not send an e-mail if sale is from two months ago", async () => {
@@ -667,8 +667,8 @@ describe("send-out-monthly-income-report", () => {
     assert.equal(locals.sales[0].artist[0].id, artist.id);
     assert.equal(locals.sales[1].amount, 3);
     assert.equal(locals.sales[1].artist[0].id, artist2.id);
-    assert.equal(locals.sales[0].saleTypeLabel, "Tip");
-    assert.equal(locals.sales[1].saleTypeLabel, "Tip");
+    assert.equal(locals.sales[0].saleKind, "tip");
+    assert.equal(locals.sales[1].saleKind, "tip");
   });
 
   it("should list each transaction once, splitting sales from subscription payments", async () => {
@@ -737,7 +737,7 @@ describe("send-out-monthly-income-report", () => {
     const locals = stub.getCall(0).args[1]
       .locals as MonthlyIncomeReportEmailType;
     assert.equal(locals.sales.length, 1);
-    assert.equal(locals.sales[0].saleTypeLabel, "Album");
+    assert.equal(locals.sales[0].saleKind, "album");
     assert.equal(locals.subscriptionPayments.length, 1);
     assert.equal(locals.salesTotal, 1200);
     assert.equal(locals.subscriptionTotal, 500);

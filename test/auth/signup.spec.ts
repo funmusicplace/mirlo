@@ -64,6 +64,56 @@ describe("auth/signup", () => {
     assert(stub.calledWithMatch("send-mail", { template: "new-user" }));
   });
 
+  it("signup stores the language the user signed up in", async () => {
+    sinon.stub(sendMailQueue, "add").resolves();
+
+    await prisma.client.create({
+      data: {
+        applicationUrl: "test",
+        applicationName: "test",
+        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+      },
+    });
+
+    await signup(
+      { body: { ...mockReq.body, language: "fr" } } as unknown as Request,
+      mockRes,
+      mockNext
+    );
+
+    const createdUser = await prisma.user.findFirst({
+      where: { email: mockReq.body.email },
+    });
+    assert.equal(createdUser?.language, "fr");
+  });
+
+  it("signup ignores a language there are no translations for", async () => {
+    sinon.stub(sendMailQueue, "add").resolves();
+
+    await prisma.client.create({
+      data: {
+        applicationUrl: "test",
+        applicationName: "test",
+        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+      },
+    });
+
+    await signup(
+      {
+        body: { ...mockReq.body, language: "not-a-language" },
+      } as unknown as Request,
+      mockRes,
+      mockNext
+    );
+
+    const createdUser = await prisma.user.findFirst({
+      where: { email: mockReq.body.email },
+    });
+    assert.equal(createdUser?.language, null);
+  });
+
   it("signup should error if no password supplied", async () => {
     sinon.stub(sendMailQueue, "add").resolves();
 

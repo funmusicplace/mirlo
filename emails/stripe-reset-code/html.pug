@@ -1,10 +1,11 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-    p Hi!
-    p You (or someone with access to your #{instanceName} account) requested to reset the Stripe payment account linked to your #{instanceName} account.
-    p To continue, enter the following code in the browser:
+    +greeting()
+    p= t("emails.stripeResetCode.intro", { instanceName })
+    p= t("emails.stripeResetCode.enterCode")
     p
       strong #{code}
-    p This code will expire in 15 minutes.
-    p If you didn't request this, you can safely ignore this email — your Stripe account won't be touched without the code.
+    p= t("emails.stripeResetCode.expires")
+    p= t("emails.stripeResetCode.ignore")

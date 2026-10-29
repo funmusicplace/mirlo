@@ -220,7 +220,7 @@ export const manageSubscriptionReceipt = async ({
               },
             },
             user: {
-              name: profileUserSubscription.user.name || "A supporter",
+              name: profileUserSubscription.user.name,
               email: profileUserSubscription.user.email,
             },
             transaction: {
@@ -245,9 +245,10 @@ export const manageSubscriptionReceipt = async ({
           artist: serializedTier.artist,
           email: encodeURIComponent(profileUserSubscription.user.email),
           host: process.env.API_DOMAIN,
-          cardChargeContext: `your subscription to "${serializedTier.artist.name}'s ${serializedTier.name}" tier`,
+          artistName: serializedTier.artist.name,
+          tierName: serializedTier.name,
           currency: transaction.currency,
-          pledgedAmountFormatted: profileUserSubscription.amount / 100,
+          amount: profileUserSubscription.amount,
           client: client.applicationUrl,
           urlParams,
         },

@@ -2,26 +2,19 @@ extends ../layout.pug
 include ../mixins.pug
 
 block content
-  p Woohoo!
-  p
-    | Here's your free download of
-    |
-    strong #{trackGroup.title}
-    |
-    | by
-    |
-    strong #{trackGroup.artist.name}.
+  p= t("emails.albumFreeDownload.woohoo")
+  p!= tHtml("emails.albumFreeDownload.intro", { title: trackGroup.title, artistName: trackGroup.artist.name })
 
   table
     thead
       tr
-        th Title
-        th Download
+        th= t("emails.albumFreeDownload.title")
+        th= t("emails.albumFreeDownload.downloadHeader")
     tbody
       tr
         td #{trackGroup.title}
         td
-          a(href!=`${client}/${trackGroup.artist.urlSlug}/release/${trackGroup.urlSlug}/download?token=${token}&email=${encodeURIComponent(email)}`) download
+          +releaseLink(trackGroup, `/download?token=${token}&email=${encodeURIComponent(email)}`)= t("emails.albumFreeDownload.download")
 
   +supportArtist(trackGroup.artist, client, hasSubscriptionTiers)
-  p Enjoy!
+  p= t("emails.common.enjoy")

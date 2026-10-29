@@ -1,64 +1,60 @@
 extends ../layout-wide.pug
+include ../mixins.pug
 
-mixin purchaseRow(title, sku, transaction, url)
+mixin purchaseRow(title, sku, transaction, trackGroup)
   tr
     td #{transaction.userFriendlyId || '---'}
     td
-      if url
-        a(href!=url) #{title}
+      if trackGroup
+        +releaseLink(trackGroup) #{title}
       else
         | #{title}
     td #{sku}
-    td.num #{(transaction.amount / 100).toFixed(2)}
-    td.num #{transaction.platformCut / 100 ? (transaction.platformCut / 100).toFixed(2) : ''}
-    td.num #{transaction.stripeCut / 100 ? (transaction.stripeCut / 100).toFixed(2) : ''}
-    td.num #{(((transaction.amount || 0) - (transaction.platformCut || 0) - (transaction.stripeCut || 0)) / 100).toFixed(2)}
+    +feeCells(transaction, { net: true })
 
 block content
-  p New purchases on your #{instanceName} store!
-  p Purchased by: #{email}
+  p= t("emails.artistPurchaseNotification.intro", { instanceName })
+  p= t("emails.artistPurchaseNotification.purchasedBy", { email })
 
   table
     thead
       tr
-        th Transaction ID
-        th Item
-        th SKU/ISRC
-        th.num Gross (#{currency.toUpperCase()})
-        th.num Platform fee
-        th.num Payment processor fee
-        th.num Net (#{currency.toUpperCase()})
+        th= t("emails.artistPurchaseNotification.transactionId")
+        th= t("emails.artistPurchaseNotification.item")
+        th= t("emails.artistPurchaseNotification.sku")
+        th.num= t("emails.artistPurchaseNotification.gross", { currency: currency.toUpperCase() })
+        th.num= t("emails.artistPurchaseNotification.platformFee")
+        th.num= t("emails.artistPurchaseNotification.paymentProcessorFee")
+        th.num= t("emails.artistPurchaseNotification.net", { currency: currency.toUpperCase() })
     tbody
       each transaction in transactions
         if transaction.trackGroupPurchases
           each purchase in transaction.trackGroupPurchases
             if !purchase.proGratis
-              +purchaseRow(`Digital: ${purchase.trackGroup.artist.name} \ ${purchase.trackGroup.title}`,
+              +purchaseRow(t("emails.artistPurchaseNotification.digitalItem", { artistName: purchase.trackGroup.artist.name, title: purchase.trackGroup.title }),
                  purchase.trackGroup.catalogNumber,
                  transaction,
-                `${client}/${purchase.trackGroup.artist.urlSlug}/release/${purchase.trackGroup.urlSlug}`)
+                 purchase.trackGroup)
         if transaction.trackPurchases
           each purchase in transaction.trackPurchases
-            +purchaseRow(`Digital: ${purchase.track.trackGroup.artist.name} \ ${purchase.track.title}`,
+            +purchaseRow(t("emails.artistPurchaseNotification.digitalItem", { artistName: purchase.track.trackGroup.artist.name, title: purchase.track.title }),
               purchase.track.isrc,
               transaction)
         if transaction.merchPurchases
           each purchase in transaction.merchPurchases
-            +purchaseRow(`Merch: ${purchase.merch.artist.name} \ ${purchase.merch.title}`,
+            +purchaseRow(t("emails.artistPurchaseNotification.merchItem", { artistName: purchase.merch.artist.name, title: purchase.merch.title }),
               purchase.merch.sku,
               transaction)
         if transaction.tips
           each tip in transaction.tips
-            +purchaseRow('Tip', '', transaction)
+            +purchaseRow(t("emails.artistPurchaseNotification.tip"), '', transaction)
       tr.totals
-        td(colspan="3") Total
-        td.num #{(totalGross / 100).toFixed(2)}
+        td(colspan="3")= t("emails.artistPurchaseNotification.total")
+        td.num #{formatAmount(totalGross)}
         td.num
         td.num
-        td.num #{(totalNet / 100).toFixed(2)}
+        td.num #{formatAmount(totalNet)}
 
 
-  p
-    | You can view your sales in your #[a(href!=`${client}/sales`) artist dashboard].
-  p
-    | Learn more about #[a(href="https://docs.mirlo.space/payouts") how payouts work on Mirlo].
+  p!= tHtml("emails.artistPurchaseNotification.viewSales", { url: `${client}/sales` })
+  p!= tHtml("emails.artistPurchaseNotification.learnAboutPayouts", { url: "https://docs.mirlo.space/payouts" })

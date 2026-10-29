@@ -417,7 +417,6 @@ describe("manage/purchases", () => {
       assert.equal(emailData.locals.artistName, "Shipping Artist");
       assert.equal(emailData.locals.merchTitle, "Tour Shirt");
       assert.equal(emailData.locals.fulfillmentStatus, "SHIPPED");
-      assert.equal(emailData.locals.statusLabel, "Shipped");
       assert.equal(emailData.locals.trackingNumber, "1Z999");
       assert.equal(
         emailData.locals.trackingUrl,

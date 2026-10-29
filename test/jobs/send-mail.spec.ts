@@ -10,6 +10,7 @@ import sinon from "sinon";
 import { Job, UnrecoverableError } from "bullmq";
 
 import sendMail, { isEmailTransportConfigured } from "../../src/jobs/send-mail";
+import { getEmailI18n } from "../../src/utils/emailTranslation";
 import { SettingsType } from "../../src/utils/settings";
 import { clearTables, createSiteSettings, createUser } from "../utils";
 
@@ -612,8 +613,8 @@ describe("send-mail job", () => {
               fundraiserName: "New Van",
               trackGroup,
               currency: "usd",
-              pledgedAmountFormatted: 20,
-              fundraisingGoalFormatted: 1000,
+              pledgedAmount: 2000,
+              fundraisingGoal: 100000,
               client: "http://localhost:3000",
             },
             message: { to: "backer@example.com" },
@@ -873,6 +874,81 @@ describe("send-mail job", () => {
         "no-reply@mirlo.space",
         "Should fall back to default when configured email is invalid"
       );
+    });
+  });
+
+  describe("translation", () => {
+    const sendPasswordReset = async (to: string) => {
+      let sent: { html?: string; subject?: string } = {};
+      sandbox.stub(nodemailer, "createTransport").returns({
+        sendMail: (mail: typeof sent) => {
+          sent = mail;
+          return Promise.resolve({ messageId: "test-translation" });
+        },
+      } as any);
+      const originalMailhog = process.env.MAILHOG_PORT;
+      process.env.MAILHOG_PORT = "1025";
+      try {
+        await sendMail({
+          data: {
+            template: "password-reset",
+            locals: {
+              user: { id: 1, email: to },
+              host: "http://localhost",
+              token: "tok",
+              accountIncomplete: false,
+            },
+            message: { to },
+          },
+        } as Job);
+      } finally {
+        if (originalMailhog === undefined) {
+          delete process.env.MAILHOG_PORT;
+        } else {
+          process.env.MAILHOG_PORT = originalMailhog;
+        }
+      }
+      return sent;
+    };
+
+    beforeEach(() => {
+      getEmailI18n().addResourceBundle(
+        "zz",
+        "translation",
+        {
+          emails: {
+            passwordReset: { subject: "{{instanceName}} : réinitialisation" },
+          },
+        },
+        true,
+        true
+      );
+    });
+
+    it("renders in the recipient's language", async () => {
+      await createSiteSettings({
+        instanceCustomization: { title: "Simon's & Co" },
+      });
+      await createUser({ email: "zz@example.com", language: "zz" });
+
+      const sent = await sendPasswordReset("ZZ@example.com");
+
+      assert.equal(sent.subject, "Simon's & Co : réinitialisation");
+      assert.ok(
+        (sent.html ?? "").includes("Click here to confirm"),
+        "untranslated strings fall back to English"
+      );
+    });
+
+    it("renders in English for recipients without an account", async () => {
+      await createSiteSettings({
+        instanceCustomization: { title: "Nightjar" },
+      });
+
+      const sent = await sendPasswordReset("guest@example.com");
+
+      assert.equal(sent.subject, "Nightjar: Password Reset");
+      assert.ok((sent.html ?? "").includes("Someone wants to reset"));
     });
   });
 

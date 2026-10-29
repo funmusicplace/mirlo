@@ -5,17 +5,17 @@ block content
     div.email-header
       if post.featuredImage
         a(href!=`${client}/${artist.urlSlug}/posts/${post.urlSlug}`)
-          img(src=post.featuredImage.src, alt="Featured Image", style="width:100%;height:auto;max-height:400px;object-fit:cover;margin-bottom:8px;")
+          img(src=post.featuredImage.src, alt=t("emails.announcePostPublished.featuredImageAlt"), style="width:100%;height:auto;max-height:400px;object-fit:cover;margin-bottom:8px;")
 
-      p.email-byline #{artist.name} just published a new post on #{instanceName}
+      p.email-byline= t("emails.announcePostPublished.byline", { artistName: artist.name, instanceName })
       h1.email-title #{post.title}
       p.read-on-mirlo
-        a(href!=`${client}/${artist.urlSlug}/posts/${post.urlSlug}`) Read it on #{instanceName}.
+        a(href!=`${client}/${artist.urlSlug}/posts/${post.urlSlug}`)= t("emails.announcePostPublished.readOn", { instanceName })
 
     div
       | !{post.htmlContent}
 
     p.email-unsubscribe
-      | Don't want to receive emails from #{artist.name} anymore?
+      | #{t("emails.announcePostPublished.unsubscribePrompt", { artistName: artist.name })}
       |
-      a(href!=`${client}/${artist.urlSlug || artist.id}/unsubscribe?email=${encodeURIComponent(email)}`) Unsubscribe.
+      a(href!=`${client}/${artist.urlSlug || artist.id}/unsubscribe?email=${encodeURIComponent(email)}`)= t("emails.announcePostPublished.unsubscribe")

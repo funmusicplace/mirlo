@@ -1,1 +1,1 @@
-= `${instanceName}: ${currency} ${(totalGross/100).toFixed(2)} Sale Notification`
+!= t("emails.artistPurchaseNotification.subject", { instanceName, amount: formatMoney(totalGross, currency) })

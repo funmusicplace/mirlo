@@ -1,11 +1,11 @@
 extends ../layout.pug
+include ../mixins.pug
 
 block content
-    p Hi,
-    p Someone used this email address to subscribe to #{artist.name} on #{instanceName} 
+    +greeting()
+    p= t("emails.artistSubscriptionConfirmation.intro", { artistName: artist.name, instanceName })
     p 
-      a(href!=`${host}/v1/artists/${artist.id}/confirmFollow?email=${encodeURIComponent(email)}&token=${token}`) Click here to confirm
+      a(href!=`${host}/v1/artists/${artist.id}/confirmFollow?email=${encodeURIComponent(email)}&token=${token}`)= t("emails.artistSubscriptionConfirmation.confirm")
     p 
-      | If this was not you, you can safely ignore this email. 
-      | Please find contact information on 
-      a(href="https://mirlo.space") our website
+      | #{t("emails.common.ignore")} 
+      | !{tHtml("emails.artistSubscriptionConfirmation.contactInfo", { url: "https://mirlo.space" })}

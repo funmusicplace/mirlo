@@ -1,96 +1,125 @@
 extends ../layout-wide.pug
 include ../mixins.pug
 
+mixin saleKind(kind)
+  case kind
+    when 'merch'
+      | #{t("emails.announceMonthlyIncomeReport.typeMerch")}
+    when 'album'
+      | #{t("emails.announceMonthlyIncomeReport.typeAlbum")}
+    when 'track'
+      | #{t("emails.announceMonthlyIncomeReport.typeTrack")}
+    default
+      | #{t("emails.announceMonthlyIncomeReport.typeTip")}
+
+mixin deleteReason(reason)
+  case reason
+    when 'USER_CANCELLED'
+      | #{t("emails.announceMonthlyIncomeReport.reasonUserCancelled")}
+    when 'PAYMENT_FAILURE'
+      | #{t("emails.announceMonthlyIncomeReport.reasonPaymentFailure")}
+    when 'USER_ACCOUNT_DELETED'
+      | #{t("emails.announceMonthlyIncomeReport.reasonUserAccountDeleted")}
+    when 'ADMIN_REMOVED'
+      | #{t("emails.announceMonthlyIncomeReport.reasonAdminRemoved")}
+    when 'ARTIST_CANCELLED'
+      | #{t("emails.announceMonthlyIncomeReport.reasonArtistCancelled")}
+    when 'TIER_SWITCHED'
+      | #{t("emails.announceMonthlyIncomeReport.reasonTierSwitched")}
+    default
+      | #{t("emails.announceMonthlyIncomeReport.reasonCancelled")}
+
 block content
-  p Hi #{user.name}
-  p Here's your report for the past month.
+  +greeting(user.name)
+  p= t("emails.announceMonthlyIncomeReport.intro")
 
   table
     tbody
       tr
-        th Sales (#{sales.length})
+        th= t("emails.announceMonthlyIncomeReport.salesWithCount", { number: sales.length })
         td.num
           +currency(salesTotal, currency)
       tr
-        th Subscription payments (#{subscriptionPayments.length})
+        th= t("emails.announceMonthlyIncomeReport.subscriptionPaymentsWithCount", { number: subscriptionPayments.length })
         td.num
           +currency(subscriptionTotal, currency)
       tr
-        th Total income
+        th= t("emails.announceMonthlyIncomeReport.totalIncome")
         td.num
           strong
             +currency(totalIncome, currency)
       if cancelledSubscriptions.length
         tr
-          th Cancelled subscriptions
+          th= t("emails.announceMonthlyIncomeReport.cancelledSubscriptions")
           td.num #{cancelledSubscriptions.length}
 
   if sales.length
-    h2 Sales
+    h2= t("emails.announceMonthlyIncomeReport.sales")
     table
       thead
         tr
-          th Artist
-          th Date
-          th Type
-          th Title
-          th Buyer
-          th.num Amount
+          th= t("emails.announceMonthlyIncomeReport.artist")
+          th= t("emails.announceMonthlyIncomeReport.date")
+          th= t("emails.announceMonthlyIncomeReport.type")
+          th= t("emails.announceMonthlyIncomeReport.title")
+          th= t("emails.announceMonthlyIncomeReport.buyer")
+          th.num= t("emails.announceMonthlyIncomeReport.amount")
       tbody
         each sale in sales
           tr
             td #{sale.artist.map(a => a.name).join(', ')}
-            td #{sale.datePurchased.split('T')[0]}
-            td #{sale.saleTypeLabel}
-            td #{sale.saleTypeLabel === 'Tip' ? '' : sale.title}
-            td #{sale.user.name} (#{sale.user.email})
+            td #{formatDate(sale.datePurchased)}
+            td
+              +saleKind(sale.saleKind)
+            td #{sale.saleKind === 'tip' ? '' : sale.title}
+            td #{sale.user.name || t("emails.common.aSupporter")} (#{sale.user.email})
             td.num
               +currency(sale.amount, currency)
-    p
-      | Sales income: 
-      +currency(salesTotal, currency)
+    p= t("emails.announceMonthlyIncomeReport.salesIncome", { amount: formatMoney(salesTotal, currency) })
 
   if subscriptionPayments.length
-    h2 Subscription payments
+    h2= t("emails.announceMonthlyIncomeReport.subscriptionPayments")
     table
       thead
         tr
-          th Date
-          th Supporter
-          th Tier
-          th Interval
-          th.num Amount
+          th= t("emails.announceMonthlyIncomeReport.date")
+          th= t("emails.announceMonthlyIncomeReport.supporter")
+          th= t("emails.announceMonthlyIncomeReport.tier")
+          th= t("emails.announceMonthlyIncomeReport.interval")
+          th.num= t("emails.announceMonthlyIncomeReport.amount")
       tbody
         each sale in subscriptionPayments
           - const tier = sale.artistUserSubscriptionCharges[0].artistUserSubscription.artistSubscriptionTier
           tr
-            td #{sale.datePurchased.split('T')[0]}
-            td #{sale.user.name}
+            td #{formatDate(sale.datePurchased)}
+            td #{sale.user.name || t("emails.common.aSupporter")}
             td #{tier.name}
-            td #{tier.interval === 'YEAR' ? 'Yearly' : 'Monthly'}
+            if tier.interval === 'YEAR'
+              td= t("emails.announceMonthlyIncomeReport.yearly")
+            else
+              td= t("emails.announceMonthlyIncomeReport.monthly")
             td.num
               +currency(sale.amount, currency)
-    p
-      | Subscription income: 
-      +currency(subscriptionTotal, currency)
+    p= t("emails.announceMonthlyIncomeReport.subscriptionIncome", { amount: formatMoney(subscriptionTotal, currency) })
 
   if cancelledSubscriptions.length
-    h2 Cancelled subscriptions
+    h2= t("emails.announceMonthlyIncomeReport.cancelledSubscriptions")
     table
       thead
         tr
-          th Supporter
-          th Tier
-          th Reason
-          th.num Amount no longer recurring
+          th= t("emails.announceMonthlyIncomeReport.supporter")
+          th= t("emails.announceMonthlyIncomeReport.tier")
+          th= t("emails.announceMonthlyIncomeReport.reason")
+          th.num= t("emails.announceMonthlyIncomeReport.amountNoLongerRecurring")
       tbody
         each cancelled in cancelledSubscriptions
           tr
-            td #{cancelled.user.name || 'A supporter'}
+            td #{cancelled.user.name || t("emails.common.aSupporter")}
             td #{cancelled.artistSubscriptionTier.name}
-            td #{cancelled.deleteReasonLabel}
+            td
+              +deleteReason(cancelled.deleteReason)
             td.num
               +currency(cancelled.amount, currency)
 
   if totalIncome > 0
-    p We love to see it. Enjoy!
+    p= t("emails.announceMonthlyIncomeReport.enjoy")
