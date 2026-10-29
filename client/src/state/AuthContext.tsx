@@ -39,9 +39,8 @@ export function AuthContextProvider({ children }: React.PropsWithChildren) {
   }, [userLanguage]);
 
   React.useEffect(() => {
-    const language =
-      getStoredLanguage() ?? (userLanguage ? undefined : i18n.resolvedLanguage);
-    if (userId && language && language !== userLanguage) {
+    const language = getStoredLanguage() ?? i18n.resolvedLanguage;
+    if (userId && language && !userLanguage) {
       saveLanguage({ userId, language });
     }
   }, [userId, userLanguage]);
