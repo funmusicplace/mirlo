@@ -3,12 +3,18 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 
+import { Request } from "express";
 import { afterEach, beforeEach, describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 import sinon from "sinon";
 import Stripe from "stripe";
 
-import { refreshStripeClient, stripe } from "../../src/utils/stripe";
+import { AppError } from "../../src/utils/error";
+import {
+  refreshStripeClient,
+  stripe,
+  verifyStripeSignature,
+} from "../../src/utils/stripe";
 import {
   registerStripeConnectWebhook,
   STRIPE_CONNECT_EVENTS,
@@ -159,6 +165,69 @@ describe("utils/stripe/webhooks", () => {
       await syncStripeConnectWebhookOnBoot();
 
       assert.equal(create.callCount, 0);
+    });
+  });
+
+  describe("verifyStripeSignature", () => {
+    const secret = "whsec_test_secret";
+    const payload = JSON.stringify({
+      id: "evt_test",
+      type: "customer.subscription.deleted",
+      data: { object: { id: "sub_test" } },
+    });
+    const requestWith = (headers: Record<string, string>) =>
+      ({
+        headers,
+        rawBody: payload,
+        body: JSON.parse(payload),
+      }) as unknown as Request;
+
+    const rejectsWith = async (promise: Promise<unknown>, httpCode: number) => {
+      await assert.rejects(
+        promise,
+        (e: unknown) => e instanceof AppError && e.httpCode === httpCode
+      );
+    };
+
+    it("accepts a correctly signed event", async () => {
+      const header = stripe.webhooks.generateTestHeaderString({
+        payload,
+        secret,
+      });
+      const event = await verifyStripeSignature(
+        requestWith({ "stripe-signature": header }),
+        secret
+      );
+      assert.equal(event.id, "evt_test");
+    });
+
+    it("rejects an event with no signature", async () => {
+      await rejectsWith(verifyStripeSignature(requestWith({}), secret), 400);
+    });
+
+    it("rejects an event with a bad signature", async () => {
+      const header = stripe.webhooks.generateTestHeaderString({
+        payload,
+        secret: "whsec_someone_else",
+      });
+      await rejectsWith(
+        verifyStripeSignature(
+          requestWith({ "stripe-signature": header }),
+          secret
+        ),
+        400
+      );
+    });
+
+    it("rejects every event when no signing secret is configured", async () => {
+      const header = stripe.webhooks.generateTestHeaderString({
+        payload,
+        secret,
+      });
+      await rejectsWith(
+        verifyStripeSignature(requestWith({ "stripe-signature": header }), ""),
+        500
+      );
     });
   });
 });

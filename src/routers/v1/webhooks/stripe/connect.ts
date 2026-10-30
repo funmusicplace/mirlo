@@ -27,14 +27,14 @@ export default function () {
   async function POST(req: Request, res: Response, next: Function) {
     const log = req.logger ?? logger;
     log.info("stripe-connect: receiving user account webhook");
-    const event = await verifyStripeSignature(
-      req,
-      res,
-      getStripeWebhookConnectSigningSecret()
-    );
-    log.info(`stripe-connect: event for stripe account ${event.account}`);
 
     try {
+      const event = await verifyStripeSignature(
+        req,
+        getStripeWebhookConnectSigningSecret()
+      );
+      log.info(`stripe-connect: event for stripe account ${event.account}`);
+
       const handler =
         stripeConnectEventHandlers[
           event.type as keyof typeof stripeConnectEventHandlers
