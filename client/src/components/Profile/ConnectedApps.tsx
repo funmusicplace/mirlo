@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import Button from "components/common/Button";
+import { toLanguageTag } from "i18n";
 import {
   queryConnectedApps,
   useRevokeConnectedAppMutation,
@@ -23,7 +24,9 @@ const ConnectedApps: React.FC<{ userId: number }> = ({ userId }) => {
   }
 
   const formatDate = (date: string | null) =>
-    date ? new Date(date).toLocaleDateString(i18n.language) : t("never");
+    date
+      ? new Date(date).toLocaleDateString(toLanguageTag(i18n.resolvedLanguage))
+      : t("never");
 
   return (
     <ProfileSection>
