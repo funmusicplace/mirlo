@@ -507,11 +507,13 @@ interface ArtistSubscriptionTier {
   artistId: number;
   artist: Artist;
   minAmount?: number;
+  defaultAmount?: number | null;
   name: string;
   urlSlug?: string | null;
   order?: number | null;
   description: string;
   interval: "MONTH" | "YEAR";
+  collectAddress?: boolean;
   isDefaultTier: boolean;
   platformPercent: number;
   digitalDiscountPercent?: number;
@@ -554,6 +556,7 @@ interface ArtistUserSubscription {
   userId: number;
   artistSubscriptionTierId: number;
   artistSubscriptionTier: ArtistSubscriptionTier;
+  isPaid?: boolean;
   shippingAddress?: {
     name?: string;
     address?: {

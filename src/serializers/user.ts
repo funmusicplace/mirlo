@@ -47,21 +47,24 @@ export const serializeUser = <T extends object>(user: T): Serialized<T> => {
       : {}),
     ...(profileUserSubscriptions !== undefined
       ? {
-          artistUserSubscriptions: profileUserSubscriptions.map((aus) => {
-            const remapped = serializeProfileUserSubscription(aus);
-            return {
-              ...remapped,
-              artistSubscriptionTier: {
-                ...remapped.artistSubscriptionTier,
-                artist: {
-                  ...remapped.artistSubscriptionTier.artist,
-                  avatar: addSizesToStoredImage(
-                    remapped.artistSubscriptionTier.artist.avatar
-                  ),
+          artistUserSubscriptions: profileUserSubscriptions.map(
+            ({ stripeSubscriptionKey, ...aus }) => {
+              const remapped = serializeProfileUserSubscription(aus);
+              return {
+                ...remapped,
+                isPaid: !!stripeSubscriptionKey,
+                artistSubscriptionTier: {
+                  ...remapped.artistSubscriptionTier,
+                  artist: {
+                    ...remapped.artistSubscriptionTier.artist,
+                    avatar: addSizesToStoredImage(
+                      remapped.artistSubscriptionTier.artist.avatar
+                    ),
+                  },
                 },
-              },
-            };
-          }),
+              };
+            }
+          ),
         }
       : {}),
   } as Serialized<T>;

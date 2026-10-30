@@ -47,6 +47,8 @@ export type DeferredQuote = {
   stripeAccountId: string;
   requiresShipping: boolean;
   allowedCountries?: string[];
+  interval?: "MONTH" | "YEAR";
+  replacesSubscription?: boolean;
 };
 
 export type UpdateSubscriptionTierArgs = {
@@ -84,7 +86,9 @@ export interface PaymentProcessor {
     args: CreatePledgeSetupArgs
   ): Promise<{ setupIntentId: string; clientSecret: string | null }>;
 
-  updateSubscriptionTier(args: UpdateSubscriptionTierArgs): Promise<void>;
+  updateSubscriptionTier(
+    args: UpdateSubscriptionTierArgs
+  ): Promise<{ nextBillingDate?: Date }>;
 
   createSubscriptionPaymentMethodSetup(args: {
     subscriptionKey: string;

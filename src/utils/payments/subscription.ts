@@ -1,8 +1,8 @@
-// Subscription lifecycle: creating a subscription (terminal or online) and
-// cancelling one. Kept separate from purchase.ts (one-time charges) since a
-// recurring Stripe Subscription has a materially different lifecycle —
-// SetupIntent-based authorisation up front, then billing that recurs on its
-// own without a Mirlo-initiated charge each cycle.
+// Subscription lifecycle: creating a subscription (terminal or online),
+// switching its tier and cancelling it. Kept separate from purchase.ts
+// (one-time charges) since a recurring Stripe Subscription has a materially
+// different lifecycle — SetupIntent-based authorisation up front, then
+// billing that recurs on its own without a Mirlo-initiated charge each cycle.
 
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
@@ -11,6 +11,10 @@ import logger from "../../logger";
 import { sendSubscriptionCancellationEmail } from "../artist";
 import { AppError } from "../error";
 import { calculatePlatformPercent } from "../processingPayments";
+import {
+  registerSubscription,
+  retireOtherTierSubscriptions,
+} from "../subscriptionTier";
 
 import {
   getPaymentProcessor,
@@ -35,11 +39,31 @@ const resolveTierAndAmount = async (
     });
   }
 
-  const resolvedAmount = amount ?? tier.defaultAmount ?? tier.minAmount ?? 0;
+  const tierPrice = tier.minAmount ?? tier.defaultAmount ?? 0;
+  if (amount !== undefined && !tier.allowVariable && amount !== tierPrice) {
+    throw new AppError({
+      httpCode: 400,
+      description: "This subscription tier has a fixed price",
+    });
+  }
+
+  const resolvedAmount = amount ?? tierPrice;
   if (resolvedAmount <= 0) {
     throw new AppError({
       httpCode: 400,
       description: "Subscription amount must be greater than 0",
+    });
+  }
+  if (resolvedAmount < (tier.minAmount ?? 0)) {
+    throw new AppError({
+      httpCode: 400,
+      description: "Subscription amount is below the tier's minimum",
+    });
+  }
+  if (tier.maxAmount && resolvedAmount > tier.maxAmount) {
+    throw new AppError({
+      httpCode: 400,
+      description: "Subscription amount is above the tier's maximum",
     });
   }
 
@@ -92,7 +116,6 @@ export const initiateOnlineSubscription = async ({
   deferred,
   shippingAddress,
   checkoutId,
-  switchImmediately = true,
 }: {
   profileId: number;
   tierId: number;
@@ -104,14 +127,7 @@ export const initiateOnlineSubscription = async ({
   deferred?: boolean;
   shippingAddress?: ShippingAddress;
   checkoutId?: string;
-  /**
-   * Whether an existing subscriber's tier switch happens on this call. False
-   * makes them confirm it through a SetupIntent instead, for a call that
-   * isn't their own click (opening a checkout link).
-   */
-  switchImmediately?: boolean;
 }): Promise<
-  | { success: true }
   | { deferred: DeferredQuote }
   | {
       clientSecret: string | null;
@@ -143,37 +159,6 @@ export const initiateOnlineSubscription = async ({
     !!existingSubscription &&
     existingSubscription.profileSubscriptionTierId !== tier.id;
 
-  if (
-    switchImmediately &&
-    isTierSwitch &&
-    existingSubscription.stripeSubscriptionKey &&
-    (!tier.collectAddress || existingSubscription.shippingAddress)
-  ) {
-    await getPaymentProcessor().updateSubscriptionTier({
-      subscriptionKey: existingSubscription.stripeSubscriptionKey,
-      accountId: stripeAccountId,
-      tier,
-      amount: resolvedAmount,
-      currency,
-    });
-
-    const platformPercent = await calculatePlatformPercent(
-      currency || "usd",
-      tier.platformPercent ?? tier.profile.defaultPlatformFee
-    );
-    await prisma.profileUserSubscription.update({
-      where: { id: existingSubscription.id },
-      data: {
-        profileSubscriptionTierId: tier.id,
-        amount: resolvedAmount,
-        platformCut: Math.round((resolvedAmount * platformPercent) / 100),
-        deleteReason: null,
-      },
-    });
-
-    return { success: true };
-  }
-
   const oldStripeSubscriptionKey =
     existingSubscription?.stripeSubscriptionKey ?? undefined;
 
@@ -181,7 +166,15 @@ export const initiateOnlineSubscription = async ({
 
   if (deferred) {
     return {
-      deferred: { mode: "setup", currency, stripeAccountId, requiresShipping },
+      deferred: {
+        mode: "setup",
+        amount: resolvedAmount,
+        interval: tier.interval,
+        replacesSubscription: !!oldStripeSubscriptionKey,
+        currency,
+        stripeAccountId,
+        requiresShipping,
+      },
     };
   }
 
@@ -209,6 +202,74 @@ export const initiateOnlineSubscription = async ({
     setupIntentId,
     requiresShipping,
   };
+};
+
+export const switchSubscriptionTier = async (
+  subscription: Prisma.ProfileUserSubscriptionGetPayload<{
+    include: { profileSubscriptionTier: true };
+  }>,
+  tierId: number
+) => {
+  const { profileId } = subscription.profileSubscriptionTier;
+  const { tier, resolvedAmount } = await resolveTierAndAmount(
+    profileId,
+    tierId
+  );
+
+  if (tier.id === subscription.profileSubscriptionTierId) {
+    throw new AppError({
+      httpCode: 400,
+      description: "Already subscribed to this tier",
+    });
+  }
+  if (!subscription.stripeSubscriptionKey) {
+    throw new AppError({
+      httpCode: 400,
+      description: "Only a paid subscription can switch tiers",
+    });
+  }
+  if (tier.collectAddress && !subscription.shippingAddress) {
+    throw new AppError({
+      httpCode: 400,
+      description:
+        "This tier needs a shipping address, so it has to be chosen through checkout",
+    });
+  }
+
+  const { stripeAccountId, currency } =
+    await resolveProfilePaymentContext(profileId);
+
+  const { nextBillingDate } =
+    await getPaymentProcessor().updateSubscriptionTier({
+      subscriptionKey: subscription.stripeSubscriptionKey,
+      accountId: stripeAccountId,
+      tier,
+      amount: resolvedAmount,
+      currency,
+    });
+
+  const platformPercent = await calculatePlatformPercent(
+    currency || "usd",
+    tier.platformPercent ?? tier.profile.defaultPlatformFee
+  );
+  const moved = await registerSubscription({
+    userId: subscription.userId,
+    tierId: tier.id,
+    amount: resolvedAmount,
+    paymentProcessorKey: subscription.stripeSubscriptionKey,
+    platformCut: Math.round((resolvedAmount * platformPercent) / 100),
+    shippingAddress: subscription.shippingAddress as object | null,
+    nextBillingDate: nextBillingDate ?? subscription.nextBillingDate,
+  });
+  await retireOtherTierSubscriptions({
+    userId: subscription.userId,
+    tierId: tier.id,
+    profileId,
+  });
+
+  return prisma.profileUserSubscription.findUniqueOrThrow({
+    where: { id: moved.id },
+  });
 };
 
 /**

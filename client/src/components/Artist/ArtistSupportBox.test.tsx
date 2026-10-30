@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { APIResponseError } from "services/APIInstance";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.mock("react-i18next", () => ({
@@ -74,6 +75,16 @@ vi.mock("components/common/Purchase/usePurchase", () => ({
     startPurchase: vi.fn(),
     reset: paymentMethodCheckoutReset,
   }),
+}));
+
+vi.mock("components/common/Modal", () => ({
+  default: ({
+    open,
+    children,
+  }: {
+    open: boolean;
+    children: React.ReactNode;
+  }) => (open ? <div>{children}</div> : null),
 }));
 
 vi.mock("components/common/Purchase/PurchaseModal", () => ({
@@ -192,34 +203,152 @@ describe("ArtistSupportBox", () => {
     expect(screen.getByText("support")).toBeInTheDocument();
   });
 
-  describe("switching tiers via the unified purchase endpoint", () => {
+  describe("switching tiers", () => {
     const otherTier = { ...baseTier, id: 2, name: "Other tier" };
 
     beforeEach(() => {
       authState.user = {
         id: 20,
-        artistUserSubscriptions: [{ artistSubscriptionTier: otherTier }],
+        artistUserSubscriptions: [
+          {
+            id: 77,
+            amount: 500,
+            isPaid: true,
+            artistSubscriptionTier: otherTier,
+          },
+        ],
       };
     });
 
-    test("shows a confirmation and opens no payment UI when the switch is applied in place", async () => {
-      startPurchase.mockResolvedValue({ success: true });
+    test("asks before switching, then switches through the subscription's own endpoint", async () => {
+      apiPut.mockResolvedValue({});
 
       renderComponent({ ...baseTier, minAmount: 500, allowVariable: false });
 
       fireEvent.click(screen.getByText("chooseThisSubscription"));
 
-      await vi.waitFor(() => expect(snackbar).toHaveBeenCalled());
+      expect(apiPut).not.toHaveBeenCalled();
+      expect(screen.getByText("switchTierNextBill")).toBeInTheDocument();
 
-      expect(startPurchase).toHaveBeenCalledWith({
-        artistId: baseTier.artistId,
-        items: [{ type: "subscription", tierId: baseTier.id }],
+      fireEvent.click(screen.getByText("switchTier"));
+
+      await vi.waitFor(() => expect(snackbar).toHaveBeenCalled());
+      expect(apiPut).toHaveBeenCalledWith("manage/subscriptions/77/tier", {
+        tierId: baseTier.id,
       });
       expect(snackbar).toHaveBeenCalledWith(
         "subscriptionTierChanged",
         expect.objectContaining({ type: "success" })
       );
-      expect(screen.queryByTestId("purchase-modal")).not.toBeInTheDocument();
+      expect(startPurchase).not.toHaveBeenCalled();
+    });
+
+    test("warns that the difference for a pricier tier is billed now", async () => {
+      apiPut.mockResolvedValue({});
+
+      renderComponent({ ...baseTier, minAmount: 1500, allowVariable: false });
+
+      fireEvent.click(screen.getByText("chooseThisSubscription"));
+
+      expect(
+        screen.getByText("switchTierUpgradeBilledNow")
+      ).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText("switchTier"));
+
+      await vi.waitFor(() =>
+        expect(snackbar).toHaveBeenCalledWith(
+          "subscriptionTierChangedBilledNow",
+          expect.objectContaining({ type: "success" })
+        )
+      );
+    });
+
+    test("warns that a change between monthly and yearly is billed now", () => {
+      renderComponent({
+        ...baseTier,
+        minAmount: 2500,
+        allowVariable: false,
+        interval: "YEAR",
+      });
+
+      fireEvent.click(screen.getByText("chooseThisSubscription"));
+
+      expect(screen.getByText("switchTierBilledNow")).toBeInTheDocument();
+    });
+
+    test("sends a tier that needs a shipping address through checkout", () => {
+      renderComponent({
+        ...baseTier,
+        minAmount: 500,
+        allowVariable: false,
+        collectAddress: true,
+      });
+
+      fireEvent.click(screen.getByText("chooseThisSubscription"));
+      fireEvent.click(screen.getByText("switchTier"));
+
+      expect(startPurchase).toHaveBeenCalledWith({
+        artistId: baseTier.artistId,
+        items: [{ type: "subscription", tierId: baseTier.id }],
+      });
+      expect(apiPut).not.toHaveBeenCalled();
+    });
+
+    test("switches to a tier that needs a shipping address in place when one is on file", async () => {
+      authState.user.artistUserSubscriptions[0].shippingAddress = {
+        name: "Fan",
+        address: { country: "US" },
+      };
+      apiPut.mockResolvedValue({});
+
+      renderComponent({
+        ...baseTier,
+        minAmount: 500,
+        allowVariable: false,
+        collectAddress: true,
+      });
+
+      fireEvent.click(screen.getByText("chooseThisSubscription"));
+      fireEvent.click(screen.getByText("switchTier"));
+
+      await vi.waitFor(() => expect(apiPut).toHaveBeenCalled());
+      expect(startPurchase).not.toHaveBeenCalled();
+    });
+
+    test("sends a subscription that isn't paid through checkout", () => {
+      authState.user.artistUserSubscriptions[0].isPaid = false;
+
+      renderComponent({ ...baseTier, minAmount: 500, allowVariable: false });
+
+      fireEvent.click(screen.getByText("chooseThisSubscription"));
+
+      expect(screen.getByText("switchTierNeedsPayment")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText("switchTier"));
+
+      expect(startPurchase).toHaveBeenCalledWith({
+        artistId: baseTier.artistId,
+        items: [{ type: "subscription", tierId: baseTier.id }],
+      });
+      expect(apiPut).not.toHaveBeenCalled();
+    });
+
+    test("sends a switch the server can't make in place to checkout", async () => {
+      apiPut.mockRejectedValue(new APIResponseError("needs checkout", 409, {}));
+
+      renderComponent({ ...baseTier, minAmount: 500, allowVariable: false });
+
+      fireEvent.click(screen.getByText("chooseThisSubscription"));
+      fireEvent.click(screen.getByText("switchTier"));
+
+      await vi.waitFor(() =>
+        expect(startPurchase).toHaveBeenCalledWith({
+          artistId: baseTier.artistId,
+          items: [{ type: "subscription", tierId: baseTier.id }],
+        })
+      );
+      expect(snackbar).not.toHaveBeenCalled();
     });
 
     test("renders the PurchaseModal once usePurchase reports a checkout in progress", async () => {

@@ -121,6 +121,25 @@ describe("Checkout", () => {
     expect(screen.getByText("payingArtist")).toBeInTheDocument();
   });
 
+  test("shows a subscription's price per interval and that it replaces the buyer's current one", async () => {
+    mockOpen({
+      deferred: {
+        ...quote,
+        mode: "setup",
+        amount: 2500,
+        interval: "YEAR",
+        replacesSubscription: true,
+      },
+    });
+
+    renderAt(PATH);
+
+    await waitFor(() => {
+      expect(screen.getByText("payingArtistAmount")).toBeInTheDocument();
+    });
+    expect(screen.getByText("replacesSubscription")).toBeInTheDocument();
+  });
+
   test("says so when the checkout has already been paid", async () => {
     mockOpen({ success: true });
 

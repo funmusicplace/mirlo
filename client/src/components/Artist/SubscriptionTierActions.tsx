@@ -20,6 +20,7 @@ import ChangePaymentMethodButton from "./ChangePaymentMethodButton";
 import SubscriptionCancelledNotice, {
   isSubscriptionCancelled,
 } from "./SubscriptionCancelledNotice";
+import SwitchTierModal from "./SwitchTierModal";
 
 export const getUserSubscriptionToTier = (
   user: LoggedInUser | null | undefined,
@@ -57,20 +58,7 @@ const SubscriptionTierActions: React.FC<{
     returnUrl,
   } = useSubscriptionCheckout({ artist, refresh });
 
-  const subscribeToTier = async (tier: ArtistSubscriptionTier) => {
-    const result = await startPurchase({
-      artistId: tier.artistId,
-      items: [{ type: "subscription", tierId: tier.id }],
-    });
-    refresh();
-    refreshLoggedInUser();
-    if (result?.success) {
-      snackbar(t("subscriptionTierChanged", { tierName: tier.name }), {
-        type: "success",
-      });
-    }
-  };
-
+  const [isConfirmingSwitch, setIsConfirmingSwitch] = React.useState(false);
   const [isConfirmingCancel, setIsConfirmingCancel] = React.useState(false);
 
   const cancelSubscription = async (keepFollowing: boolean) => {
@@ -106,12 +94,13 @@ const SubscriptionTierActions: React.FC<{
     (tier) => !tier.isDefaultTier && tier.id !== subscriptionTier.id
   );
 
-  const isSubscribedToArtist = !!user?.artistUserSubscriptions?.find(
+  const otherTierSubscription = user?.artistUserSubscriptions?.find(
     (sub) =>
       sub.artistSubscriptionTier.artistId === artist.id &&
       sub.artistSubscriptionTier.id !== subscriptionTier.id &&
       !sub.artistSubscriptionTier.isDefaultTier
   );
+  const isSubscribedToArtist = !!otherTierSubscription;
 
   return (
     <>
@@ -127,7 +116,7 @@ const SubscriptionTierActions: React.FC<{
         >
           {user && isSubscribedToArtist && !isSubscribedToTier && (
             <ArtistButton
-              onClick={() => subscribeToTier(subscriptionTier)}
+              onClick={() => setIsConfirmingSwitch(true)}
               isLoading={isCheckingForSubscription}
             >
               {t("chooseThisSubscription")}
@@ -178,6 +167,25 @@ const SubscriptionTierActions: React.FC<{
               t("thankYouForSupporting", { artistName: artist.name })}
           </p>
         </div>
+      )}
+      {otherTierSubscription && (
+        <SwitchTierModal
+          open={isConfirmingSwitch}
+          onClose={() => setIsConfirmingSwitch(false)}
+          tier={subscriptionTier}
+          currentSubscription={otherTierSubscription}
+          currency={artist.user?.currency}
+          onSwitched={() => {
+            refresh();
+            refreshLoggedInUser();
+          }}
+          startCheckout={() =>
+            startPurchase({
+              artistId: subscriptionTier.artistId,
+              items: [{ type: "subscription", tierId: subscriptionTier.id }],
+            })
+          }
+        />
       )}
       <PurchaseModal
         onClose={reset}

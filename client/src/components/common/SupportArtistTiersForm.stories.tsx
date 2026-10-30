@@ -39,16 +39,16 @@ const ARTIST: Artist = {
 
 /** Records what the form sent to POST /v1/purchase so play tests can check it */
 let lastPurchaseBody: unknown;
+let lastSwitchRequest: unknown;
 
 /** Keyed so a story can swap one of them without replacing the rest */
 const handlersFor = (artist: Artist) => ({
   artist: http.get("*/v1/artists/:artistSlug", () =>
     HttpResponse.json({ result: artist })
   ),
-  // An existing subscriber switching tiers is updated in place, no checkout
   purchase: http.post("*/v1/purchase", async ({ request }) => {
     lastPurchaseBody = await request.json();
-    return HttpResponse.json({ success: true });
+    return HttpResponse.json({ deferred: setupQuote() });
   }),
   follow: http.post("*/v1/artists/:artistId/follow", () =>
     HttpResponse.json({})
@@ -60,8 +60,9 @@ const loggedInAs = (user: LoggedInUser) =>
 
 /**
  * The tier picker in the support/follow pop-ups and the artist connect page.
- * Paid tiers go through POST /v1/purchase: a tier switch is applied to the
- * existing subscription in place, and new subscriptions open the payment form.
+ * Paid tiers go through POST /v1/purchase and open the payment form. A
+ * subscriber who picks another tier is asked first, then their subscription
+ * is moved to it.
  */
 const meta = {
   title: "Features/Buying/SupportArtistTiersForm",
@@ -73,6 +74,7 @@ const meta = {
   args: { artist: ARTIST },
   beforeEach: () => {
     lastPurchaseBody = undefined;
+    lastSwitchRequest = undefined;
   },
 } satisfies Meta<typeof SupportArtistTiersForm>;
 
@@ -89,12 +91,23 @@ export const SwitchingTiers: Story = {
             {
               id: 1,
               amount: 500,
+              isPaid: true,
               userId: USER_EXAMPLE.id,
               artistSubscriptionTierId: SUPPORTER_TIER.id,
               artistSubscriptionTier: SUPPORTER_TIER,
             },
           ],
         }),
+        switchTier: http.put(
+          "*/v1/manage/subscriptions/:subscriptionId/tier",
+          async ({ request, params }) => {
+            lastSwitchRequest = {
+              subscriptionId: params.subscriptionId,
+              body: await request.json(),
+            };
+            return HttpResponse.json({ result: {} });
+          }
+        ),
       },
     },
   },
@@ -104,13 +117,16 @@ export const SwitchingTiers: Story = {
     await userEvent.click(
       await canvas.findByRole("button", { name: /Continue with/ })
     );
+    await userEvent.click(
+      await canvas.findByRole("button", { name: "Switch" })
+    );
     await waitFor(() =>
-      expect(lastPurchaseBody).toEqual({
-        artistId: ARTIST.id,
-        items: [{ type: "subscription", tierId: SUPERFAN_TIER.id }],
-        deferred: true,
+      expect(lastSwitchRequest).toEqual({
+        subscriptionId: "1",
+        body: { tierId: SUPERFAN_TIER.id },
       })
     );
+    await expect(lastPurchaseBody).toBeUndefined();
   },
 };
 

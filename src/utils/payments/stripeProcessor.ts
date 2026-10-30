@@ -1,13 +1,16 @@
 // Stripe implementation of the PaymentProcessor interface.
+import Stripe from "stripe";
+
 import logger from "../../logger";
-import { calculatePlatformPercent } from "../processingPayments";
+import { AppError } from "../error";
 import { SettingsType } from "../settings";
 import stripe, {
   createOnlinePaymentIntent,
-  createSubscriptionStripeProduct,
+  findActiveSubscription,
   findOrCreateStripeCustomer,
   hasStripeCredentials,
   refreshStripeClient,
+  repriceStripeSubscription,
 } from "../stripe";
 import { getIntentStatus } from "../stripe/status";
 import {
@@ -30,6 +33,13 @@ import {
   ShippingAddress,
   TerminalReader,
 } from "./PaymentProcessor";
+
+const subscriptionNeedsCheckout = () =>
+  new AppError({
+    httpCode: 409,
+    description:
+      "This subscription needs new payment details, so the tier has to be chosen through checkout",
+  });
 
 export class StripePaymentProcessor implements PaymentProcessor {
   async createOnlinePayment({
@@ -206,40 +216,29 @@ export class StripePaymentProcessor implements PaymentProcessor {
     tier,
     amount,
     currency,
-  }: UpdateSubscriptionTierArgs): Promise<void> {
-    const [productKey, subscription] = await Promise.all([
-      createSubscriptionStripeProduct(tier, accountId),
-      stripe.subscriptions.retrieve(subscriptionKey, {
-        stripeAccount: accountId,
-      }),
-    ]);
-    const itemId = subscription.items.data[0].id;
-
-    await stripe.subscriptions.update(
-      subscriptionKey,
-      {
-        items: [
-          {
-            id: itemId,
-            price_data: {
-              currency,
-              product: productKey,
-              unit_amount: amount,
-              recurring: {
-                interval: tier.interval === "YEAR" ? "year" : "month",
-              },
-            },
-          },
-        ],
-        proration_behavior: "none",
-        cancel_at_period_end: false,
-        application_fee_percent: await calculatePlatformPercent(
-          currency || "usd",
-          tier.platformPercent ?? tier.profile.defaultPlatformFee
-        ),
-      },
-      { stripeAccount: accountId }
+  }: UpdateSubscriptionTierArgs): Promise<{ nextBillingDate?: Date }> {
+    const subscription = await findActiveSubscription(
+      accountId,
+      subscriptionKey
     );
+    if (!subscription) {
+      throw subscriptionNeedsCheckout();
+    }
+    try {
+      return await repriceStripeSubscription({
+        subscription,
+        accountId,
+        tier,
+        amount,
+        currency,
+        paymentBehavior: "error_if_incomplete",
+      });
+    } catch (e) {
+      if (e instanceof Stripe.errors.StripeCardError) {
+        throw subscriptionNeedsCheckout();
+      }
+      throw e;
+    }
   }
 
   async createSubscriptionPaymentMethodSetup({

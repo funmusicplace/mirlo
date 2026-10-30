@@ -40,6 +40,8 @@ export type DeferredQuote = {
   stripeAccountId: string;
   requiresShipping: boolean;
   allowedCountries?: string[];
+  interval?: "MONTH" | "YEAR";
+  replacesSubscription?: boolean;
   buyerEmailKnown: boolean;
   artistName: string | null;
   successUrl: string | null;

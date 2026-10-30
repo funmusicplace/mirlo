@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import SwitchTierConfirmation from "components/Artist/SwitchTierConfirmation";
 import { isEmpty } from "lodash";
 import React from "react";
 import { FormProvider, Controller, useForm } from "react-hook-form";
@@ -67,22 +68,29 @@ const SupportArtistTiersForm: React.FC<{
     returnUrl,
   } = useSubscriptionCheckout({ artist, refresh: refetch });
 
+  const currentSubscription = user?.artistUserSubscriptions?.find(
+    (sub) =>
+      sub.artistSubscriptionTier.artistId === artist.id &&
+      !sub.artistSubscriptionTier.isDefaultTier
+  );
+  const [switchingTo, setSwitchingTo] =
+    React.useState<ArtistSubscriptionTier | null>(null);
+
   const subscribeToTier = async () => {
+    const tier = methods.getValues("tier");
+    if (!tier.isDefaultTier && currentSubscription) {
+      setSwitchingTo(options.find((option) => option.id === tier.id) ?? null);
+      return;
+    }
     try {
       setIsCheckingForSubscription(true);
-      const tier = methods.getValues("tier");
       const email = methods.getValues("email");
       if (!tier.isDefaultTier) {
-        const result = await startPurchase({
+        await startPurchase({
           artistId: artist.id,
           items: [{ type: "subscription", tierId: tier.id }],
           email: user ? undefined : email,
         });
-        if (result?.success) {
-          snackbar(t("subscriptionTierChanged", { tierName: tier.name }), {
-            type: "success",
-          });
-        }
         return;
       } else {
         // @ts-ignore
@@ -137,6 +145,35 @@ const SupportArtistTiersForm: React.FC<{
         onSuccess={handlePurchaseComplete}
         buttonLabel={t("letsSupport") ?? ""}
       />
+    );
+  }
+
+  if (switchingTo && currentSubscription) {
+    return (
+      <>
+        <p className="mb-3 font-bold">
+          {t("switchTierTitle", { tierName: switchingTo.name })}
+        </p>
+        <SwitchTierConfirmation
+          tier={switchingTo}
+          currentSubscription={currentSubscription}
+          currency={artistDetails?.user?.currency}
+          onCancel={() => setSwitchingTo(null)}
+          onSwitched={() => {
+            setSwitchingTo(null);
+            refetch();
+            refreshLoggedInUser();
+            onFinishedSubscribing?.(false);
+          }}
+          startCheckout={() => {
+            setSwitchingTo(null);
+            startPurchase({
+              artistId: artist.id,
+              items: [{ type: "subscription", tierId: switchingTo.id }],
+            });
+          }}
+        />
+      </>
     );
   }
 

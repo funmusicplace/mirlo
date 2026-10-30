@@ -50,6 +50,7 @@ export const registerSubscription = async ({
   paymentProcessorKey,
   platformCut = null,
   shippingAddress = null,
+  nextBillingDate = null,
 }: {
   tierId: number;
   userId: number;
@@ -57,6 +58,7 @@ export const registerSubscription = async ({
   paymentProcessorKey: string;
   platformCut?: number | null;
   shippingAddress?: object | null;
+  nextBillingDate?: Date | null;
 }) => {
   const tier = await prisma.profileSubscriptionTier.findFirst({
     where: { id: Number(tierId) },
@@ -83,6 +85,7 @@ export const registerSubscription = async ({
     platformCut,
     stripeSubscriptionKey: paymentProcessorKey,
     shippingAddress,
+    nextBillingDate,
   };
 
   const includeArgs = {
@@ -115,6 +118,7 @@ export const registerSubscription = async ({
         stripeSubscriptionKey: paymentProcessorKey,
         platformCut,
         shippingAddress,
+        nextBillingDate,
       },
       update: updateData,
       where: {
@@ -140,6 +144,28 @@ export const registerSubscription = async ({
   logger.info(`Updated/created ${profileUserSubscription.id}`);
 
   return profileUserSubscription;
+};
+
+export const retireOtherTierSubscriptions = async ({
+  userId,
+  tierId,
+  profileId,
+}: {
+  userId: number;
+  tierId: number;
+  profileId: number;
+}) => {
+  const where = {
+    userId,
+    deletedAt: null,
+    profileSubscriptionTierId: { not: tierId },
+    profileSubscriptionTier: { profileId },
+  };
+  await prisma.profileUserSubscription.updateMany({
+    where,
+    data: { deleteReason: "TIER_SWITCHED" },
+  });
+  await prisma.profileUserSubscription.deleteMany({ where });
 };
 
 export const grantSubscriptionTierReleases = async ({
