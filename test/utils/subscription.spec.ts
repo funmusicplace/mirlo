@@ -2,8 +2,10 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import sinon from "sinon";
+import Stripe from "stripe";
 
 import * as sendMailQueueModule from "../../src/queues/send-mail-queue";
+import * as stripeUtils from "../../src/utils/stripe";
 import {
   manageSubscriptionReceipt,
   ArtistSubscriptionReceiptEmailType,
@@ -825,6 +827,189 @@ describe("subscription", () => {
       // html.pug: user.email, and user.name falling back to "A supporter"
       assert.equal(locals.user.email, "subscriber@subscriber.com");
       assert.equal(locals.user.name, null);
+    });
+  });
+
+  describe("tier switch invoices", () => {
+    const setUpSwitch = async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+        combineSubscriptionEmails: true,
+      });
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+        emailConfirmationToken: null,
+      });
+      const artist = await prisma.profile.create({
+        data: {
+          name: "Test artist",
+          urlSlug: "test-artist",
+          userId: artistUser.id,
+          enabled: true,
+        },
+      });
+      const oldTier = await prisma.profileSubscriptionTier.create({
+        data: { profileId: artist.id, name: "Old tier" },
+      });
+      const newTier = await prisma.profileSubscriptionTier.create({
+        data: { profileId: artist.id, name: "New tier" },
+      });
+      const oldRow = await prisma.profileUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub-switch",
+          userId: subscriber.id,
+          profileSubscriptionTierId: oldTier.id,
+          amount: 500,
+        },
+      });
+      return { artist, subscriber, oldRow, newTier };
+    };
+
+    it("records a switch invoice against the tier it was switched to, receipting what was paid", async () => {
+      const sendMailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
+      const { subscriber, newTier } = await setUpSwitch();
+      const newRow = await prisma.profileUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub-switch",
+          userId: subscriber.id,
+          profileSubscriptionTierId: newTier.id,
+          amount: 1000,
+        },
+      });
+
+      await manageSubscriptionReceipt({
+        processorPaymentReferenceId: "inv-switch",
+        processorSubscriptionReferenceId: "sub-switch",
+        amountPaid: 350,
+        currency: "usd",
+        platformCut: 25,
+        paymentProcessorFee: 10,
+        billingReason: "subscription_update",
+        status: "COMPLETED",
+        tierId: newTier.id,
+      });
+
+      const charge = await prisma.profileUserSubscriptionCharge.findFirst({
+        where: { transaction: { stripeId: "inv-switch" } },
+      });
+      assert.equal(charge?.profileUserSubscriptionId, newRow.id);
+
+      const receipt = sendMailStub.getCall(0).args[1]
+        .locals as ArtistSubscriptionReceiptEmailType;
+      assert.equal(receipt.artistUserSubscription.amount, 350);
+      assert.equal(
+        sendMailStub.callCount,
+        2,
+        "the artist hears about a switch even when they combine renewal emails"
+      );
+    });
+
+    it("waits for a switch to be recorded before taking its invoice, so Stripe redelivers it", async () => {
+      sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
+      const { newTier } = await setUpSwitch();
+
+      await assert.rejects(
+        manageSubscriptionReceipt({
+          processorPaymentReferenceId: "inv-switch-early",
+          processorSubscriptionReferenceId: "sub-switch",
+          amountPaid: 350,
+          currency: "usd",
+          platformCut: 25,
+          paymentProcessorFee: 10,
+          billingReason: "subscription_update",
+          status: "COMPLETED",
+          tierId: newTier.id,
+        })
+      );
+
+      const transactions = await prisma.userTransaction.count({
+        where: { stripeId: "inv-switch-early" },
+      });
+      assert.equal(transactions, 0);
+    });
+  });
+
+  describe("handleInvoicePaid", () => {
+    it("records an invoice paid entirely from credit, which has no payment intent", async () => {
+      sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+      });
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+        emailConfirmationToken: null,
+      });
+      const artist = await prisma.profile.create({
+        data: {
+          name: "Test artist",
+          urlSlug: "test-artist",
+          userId: artistUser.id,
+          enabled: true,
+        },
+      });
+      const tier = await prisma.profileSubscriptionTier.create({
+        data: { profileId: artist.id, name: "Monthly tier" },
+      });
+      const trackGroup = await createTrackGroup(artist.id);
+      await prisma.subscriptionTierRelease.create({
+        data: { tierId: tier.id, trackGroupId: trackGroup.id },
+      });
+      const row = await prisma.profileUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub-credit",
+          userId: subscriber.id,
+          profileSubscriptionTierId: tier.id,
+          amount: 500,
+        },
+      });
+
+      const periodEnd = Math.floor(Date.UTC(2030, 0, 1) / 1000);
+      sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
+        id: "sub-credit",
+        current_period_end: periodEnd,
+        default_payment_method: "pm_default",
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      const intentStub = sinon.stub(
+        stripeUtils.stripe.paymentIntents,
+        "retrieve"
+      );
+
+      await stripeUtils.handleInvoicePaid(
+        {
+          id: "in-credit",
+          subscription: "sub-credit",
+          payment_intent: null,
+          amount_paid: 0,
+          currency: "usd",
+          application_fee_amount: null,
+          billing_reason: "subscription_update",
+          subscription_details: { metadata: { tierId: String(tier.id) } },
+        } as unknown as Stripe.Invoice,
+        "acct_credit"
+      );
+
+      assert.equal(intentStub.callCount, 0);
+      const transaction = await prisma.userTransaction.findFirst({
+        where: { stripeId: "in-credit" },
+        include: { profileUserSubscriptionCharges: true },
+      });
+      assert.equal(transaction?.amount, 0);
+      assert.equal(transaction?.stripeCut, 0);
+      assert.equal(
+        transaction?.profileUserSubscriptionCharges[0]
+          ?.profileUserSubscriptionId,
+        row.id
+      );
+      const after = await prisma.profileUserSubscription.findUnique({
+        where: { id: row.id },
+      });
+      assert.deepEqual(after?.nextBillingDate, new Date(periodEnd * 1000));
+      const purchase = await prisma.userTrackGroupPurchase.findFirst({
+        where: { userId: subscriber.id, trackGroupId: trackGroup.id },
+      });
+      assert.equal(purchase?.proGratis, true);
     });
   });
 });

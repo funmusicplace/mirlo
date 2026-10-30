@@ -2544,10 +2544,12 @@ describe("purchase", () => {
   describe("switchSubscriptionTier (direct)", () => {
     const stubStripeSubscription = (
       interval: "month" | "year" = "month",
-      unitAmount = 500
+      unitAmount = 500,
+      status: Stripe.Subscription.Status = "active"
     ) => {
       sinon.stub(stripeUtils.stripe.subscriptions, "retrieve").resolves({
         id: "sub_existing",
+        status,
         items: {
           data: [
             {
@@ -2830,6 +2832,70 @@ describe("purchase", () => {
       assert.equal(updateStub.callCount, 0);
     });
 
+    it("sends a subscription that isn't active in Stripe to checkout instead of repricing it", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_switch_past_due",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, { minAmount: 1000 });
+
+      const existing = await createExistingSubscription({
+        profileSubscriptionTierId: oldTier.id,
+        userId: buyer.id,
+        amount: 500,
+        stripeSubscriptionKey: "sub_existing_past_due",
+      });
+      const updateStub = stubStripeSubscription("month", 500, "past_due");
+
+      await assert.rejects(
+        switchSubscriptionTier(existing, newTier.id),
+        (e: { httpCode?: number }) => e.httpCode === 409
+      );
+      assert.equal(updateStub.callCount, 0);
+      const after = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id },
+      });
+      assert.equal(after?.profileSubscriptionTierId, oldTier.id);
+    });
+
+    it("sends a switch whose charge is declined to checkout, leaving the tier unchanged", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_switch_declined",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, { minAmount: 1000 });
+
+      const existing = await createExistingSubscription({
+        profileSubscriptionTierId: oldTier.id,
+        userId: buyer.id,
+        amount: 500,
+        stripeSubscriptionKey: "sub_existing_declined",
+      });
+      const updateStub = stubStripeSubscription();
+      updateStub.rejects(
+        new Stripe.errors.StripeCardError({
+          type: "card_error",
+          message: "Your card was declined.",
+        })
+      );
+
+      await assert.rejects(
+        switchSubscriptionTier(existing, newTier.id),
+        (e: { httpCode?: number }) => e.httpCode === 409
+      );
+      const after = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id },
+      });
+      assert.equal(after?.profileSubscriptionTierId, oldTier.id);
+      assert.equal(after?.amount, 500);
+    });
+
     it("moves back onto the row left by an earlier subscription to the new tier", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
@@ -2998,6 +3064,11 @@ describe("purchase", () => {
         "moving to a pricier tier bills the difference now"
       );
       assert.equal(params?.items?.[0]?.price_data?.unit_amount, 1000);
+      assert.equal(
+        params?.payment_behavior,
+        "allow_incomplete",
+        "a webhook can't tell the buyer a charge failed, so Stripe's retries handle it"
+      );
 
       const remaining = await prisma.profileUserSubscription.findMany({
         where: { userId: buyer.id },

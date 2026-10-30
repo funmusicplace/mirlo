@@ -2,6 +2,7 @@ import { moneyDisplay } from "components/common/Money";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
+import { APIResponseError } from "services/APIInstance";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 
@@ -59,6 +60,10 @@ const SwitchTierConfirmation: React.FC<{
       );
       onSwitched();
     } catch (e) {
+      if (e instanceof APIResponseError && e.status === 409) {
+        startCheckout();
+        return;
+      }
       errorHandler(e);
     } finally {
       setIsSwitching(false);

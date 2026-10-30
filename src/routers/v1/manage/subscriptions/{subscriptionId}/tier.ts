@@ -56,7 +56,8 @@ export default function () {
       "Reprices the subscription's existing Stripe subscription at the new " +
       "tier's price. A move to a pricier tier, or between monthly and " +
       "yearly, is billed now, with credit for the time already paid for; " +
-      "if that charge fails the subscription stays on its tier. A move to " +
+      "if that charge fails the subscription stays on its tier and the " +
+      "response is a 409. A move to " +
       "a tier with the same interval that costs the same or less takes " +
       "the new price from the next bill. Only available while signed in " +
       "on the site.",
@@ -93,6 +94,10 @@ export default function () {
       404: {
         description:
           "Subscription or tier not found, or the subscription isn't the logged-in user's",
+      },
+      409: {
+        description:
+          "The subscription isn't active or the charge was declined, so the tier has to be chosen through checkout",
       },
       default: {
         description: "An error occurred",

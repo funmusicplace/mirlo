@@ -76,6 +76,7 @@ export const manageSubscriptionReceipt = async ({
   nextBillingDate,
   billingReason,
   platformCurrencyValue,
+  tierId,
 }: {
   processorPaymentReferenceId: string;
   processorSubscriptionReferenceId: string;
@@ -88,6 +89,7 @@ export const manageSubscriptionReceipt = async ({
   nextBillingDate?: Date;
   billingReason: null | string;
   platformCurrencyValue?: PlatformCurrencyValue;
+  tierId?: number;
 }) => {
   const isNewSubscription = billingReason === "subscription_create";
   const profileUserSubscription =
@@ -95,6 +97,7 @@ export const manageSubscriptionReceipt = async ({
       where: {
         stripeSubscriptionKey: processorSubscriptionReferenceId,
         deletedAt: null,
+        ...(tierId && { profileSubscriptionTierId: tierId }),
       },
       include: {
         user: true,
@@ -110,6 +113,11 @@ export const manageSubscriptionReceipt = async ({
         },
       },
     });
+  if (!profileUserSubscription && tierId) {
+    throw new Error(
+      `invoice.paid: ${processorPaymentReferenceId} is for tier ${tierId}, which ${processorSubscriptionReferenceId} hasn't been switched to yet`
+    );
+  }
   if (profileUserSubscription) {
     const transaction = await prisma.userTransaction.create({
       data: {
@@ -165,7 +173,7 @@ export const manageSubscriptionReceipt = async ({
       id: serializedSubscription.id,
       createdAt: serializedSubscription.createdAt,
       updatedAt: serializedSubscription.updatedAt,
-      amount: serializedSubscription.amount,
+      amount: transaction.amount,
       artistSubscriptionTierId: serializedSubscription.artistSubscriptionTierId,
       artistSubscriptionTier: {
         name: serializedTier.name,
@@ -197,7 +205,9 @@ export const manageSubscriptionReceipt = async ({
       });
 
       const shouldNotifyArtist =
-        isNewSubscription || !payee.combineSubscriptionEmails;
+        isNewSubscription ||
+        billingReason === "subscription_update" ||
+        !payee.combineSubscriptionEmails;
 
       if (shouldNotifyArtist) {
         await sendMailQueue.add("send-mail", {

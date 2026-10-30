@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { APIResponseError } from "services/APIInstance";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.mock("react-i18next", () => ({
@@ -331,6 +332,23 @@ describe("ArtistSupportBox", () => {
         items: [{ type: "subscription", tierId: baseTier.id }],
       });
       expect(apiPut).not.toHaveBeenCalled();
+    });
+
+    test("sends a switch the server can't make in place to checkout", async () => {
+      apiPut.mockRejectedValue(new APIResponseError("needs checkout", 409, {}));
+
+      renderComponent({ ...baseTier, minAmount: 500, allowVariable: false });
+
+      fireEvent.click(screen.getByText("chooseThisSubscription"));
+      fireEvent.click(screen.getByText("switchTier"));
+
+      await vi.waitFor(() =>
+        expect(startPurchase).toHaveBeenCalledWith({
+          artistId: baseTier.artistId,
+          items: [{ type: "subscription", tierId: baseTier.id }],
+        })
+      );
+      expect(snackbar).not.toHaveBeenCalled();
     });
 
     test("renders the PurchaseModal once usePurchase reports a checkout in progress", async () => {

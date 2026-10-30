@@ -363,7 +363,7 @@ export const repriceStripeSubscription = async ({
   amount: number;
   currency: string;
   paymentMethodId?: string;
-  paymentBehavior?: Stripe.SubscriptionUpdateParams.PaymentBehavior;
+  paymentBehavior: Stripe.SubscriptionUpdateParams.PaymentBehavior;
 }) => {
   const productKey = await createSubscriptionStripeProduct(tier, accountId);
   const [item] = subscription.items.data;
@@ -393,7 +393,7 @@ export const repriceStripeSubscription = async ({
         tier.platformPercent ?? tier.profile.defaultPlatformFee
       ),
       ...(paymentMethodId && { default_payment_method: paymentMethodId }),
-      ...(paymentBehavior && { payment_behavior: paymentBehavior }),
+      payment_behavior: paymentBehavior,
       metadata: { tierId: String(tier.id) },
     },
     { stripeAccount: accountId }
@@ -648,7 +648,7 @@ export const handleSubscriptionPaymentMethodUpdateSucceeded = async (
   );
 };
 
-const findActiveSubscription = async (
+export const findActiveSubscription = async (
   stripeAccountId: string,
   subscriptionKey?: string | null
 ) => {
@@ -664,7 +664,7 @@ const findActiveSubscription = async (
       : null;
   } catch (e) {
     logger.error(
-      `finalizeSubscriptionSetup: could not retrieve subscription ${subscriptionKey}`,
+      `findActiveSubscription: could not retrieve subscription ${subscriptionKey}`,
       e
     );
     return null;
@@ -747,6 +747,7 @@ export const finalizeSubscriptionSetup = async ({
       amount,
       currency,
       paymentMethodId,
+      paymentBehavior: "allow_incomplete",
     }));
     subscriptionId = subscriptionToMove.id;
   } else {
@@ -1016,14 +1017,12 @@ export const handleInvoicePaid = async (
   const subscription = invoice.subscription;
   logger.info(`invoice.paid: ${invoice.id} for ${subscription}`);
   if (typeof subscription === "string") {
-    const { paymentProcessorFee, intent } = await getFeeDetailsFromInvoice(
-      invoice,
-      accountId
-    );
-    const platformCurrencyValue = await getPlatformCurrencyValueFromIntent(
-      intent,
-      accountId
-    );
+    const { paymentProcessorFee, intent } = invoice.payment_intent
+      ? await getFeeDetailsFromInvoice(invoice, accountId)
+      : { paymentProcessorFee: 0, intent: null };
+    const platformCurrencyValue = intent
+      ? await getPlatformCurrencyValueFromIntent(intent, accountId)
+      : undefined;
 
     // Fetch subscription to get next billing date
     let nextBillingDate: Date | undefined;
@@ -1047,14 +1046,14 @@ export const handleInvoicePaid = async (
     }
 
     const paidWith =
-      typeof intent.payment_method === "string"
+      typeof intent?.payment_method === "string"
         ? intent.payment_method
-        : intent.payment_method?.id;
+        : intent?.payment_method?.id;
     const defaultId =
       typeof defaultPaymentMethod === "string"
         ? defaultPaymentMethod
         : defaultPaymentMethod?.id;
-    if (paidWith && defaultId && paidWith !== defaultId) {
+    if (intent && paidWith && defaultId && paidWith !== defaultId) {
       try {
         await handleSubscriptionPaymentMethodUpdateSucceeded(
           intent,
@@ -1079,6 +1078,10 @@ export const handleInvoicePaid = async (
       status: "COMPLETED",
       nextBillingDate,
       platformCurrencyValue,
+      tierId:
+        invoice.billing_reason === "subscription_update"
+          ? Number(invoice.subscription_details?.metadata?.tierId) || undefined
+          : undefined,
     });
   }
 };
