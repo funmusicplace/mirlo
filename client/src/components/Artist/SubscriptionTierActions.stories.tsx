@@ -119,7 +119,9 @@ export const SwitchToYearlyTier: Story = {
       })
     );
     await expect(
-      await within(document.body).findByText(/you'll be charged today/)
+      await within(document.body).findByText(
+        /a new billing period starts today/
+      )
     ).toBeInTheDocument();
   },
 };
