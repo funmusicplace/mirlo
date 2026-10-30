@@ -1,3 +1,4 @@
+import { toLanguageTag } from "i18n";
 import { i18n } from "i18next";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -17,7 +18,7 @@ export const formatDate = ({
   };
 
   const releaseFormat = new Date(date).toLocaleString(
-    i18n.resolvedLanguage,
+    toLanguageTag(i18n.resolvedLanguage),
     options
   );
 
@@ -41,9 +42,12 @@ export const formatRelativeTime = ({
   const diffMonths = Math.round(diffDays / 30);
   const diffYears = Math.round(diffDays / 365);
 
-  const rtf = new Intl.RelativeTimeFormat(i18n.resolvedLanguage, {
-    numeric: "auto",
-  });
+  const rtf = new Intl.RelativeTimeFormat(
+    toLanguageTag(i18n.resolvedLanguage),
+    {
+      numeric: "auto",
+    }
+  );
 
   if (Math.abs(diffSeconds) < 60) return rtf.format(diffSeconds, "second");
   if (Math.abs(diffMinutes) < 60) return rtf.format(diffMinutes, "minute");

@@ -57,6 +57,16 @@ describe("i18n language list", () => {
     expect(matchLanguage("ja")).toBeUndefined();
     expect(matchLanguage(undefined)).toBeUndefined();
   });
+
+  it("turns Transifex codes into language tags Intl accepts", async () => {
+    const { toLanguageTag } = await loadI18n();
+    expect(toLanguageTag("fr_FR")).toBe("fr-FR");
+    expect(toLanguageTag("fr")).toBe("fr");
+    expect(toLanguageTag(undefined)).toBeUndefined();
+    expect(() =>
+      new Date(0).toLocaleDateString(toLanguageTag("fr_FR"))
+    ).not.toThrow();
+  });
 });
 
 describe("i18n instance name", () => {

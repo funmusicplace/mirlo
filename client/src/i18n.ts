@@ -131,6 +131,9 @@ export const matchLanguage = (code?: string) => {
   );
 };
 
+export const toLanguageTag = (language?: string) =>
+  language?.replace(/_/g, "-");
+
 export const LANGUAGE_STORAGE_KEY = "mirlo-language";
 
 export const getStoredLanguage = () => {

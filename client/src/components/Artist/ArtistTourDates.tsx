@@ -6,13 +6,14 @@ import {
   calculateDateWithTimezoneOffset,
   formatDate,
 } from "components/TrackGroup/ReleaseDate";
+import { toLanguageTag } from "i18n";
+import Artist from "pages/{artistId}/Index";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaPen, FaPlus, FaSave, FaTimes } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 
-import Artist from "pages/{artistId}/Index";
 import { ArtistButton, ArtistButtonAnchor } from "./ArtistButtons";
 import { tabButtonClass } from "./ArtistHeaderActionsStrip";
 
@@ -97,7 +98,9 @@ const ArtistTourDates: React.FC<ArtistHeaderDescriptionProps> = ({
                   const dateObj = calculateDateWithTimezoneOffset(td.date);
                   const isPast = new Date(td.date) < new Date();
                   const month = dateObj
-                    .toLocaleString(i18n.language, { month: "short" })
+                    .toLocaleString(toLanguageTag(i18n.resolvedLanguage), {
+                      month: "short",
+                    })
                     .toUpperCase();
                   const day = dateObj.getDate();
                   return (
