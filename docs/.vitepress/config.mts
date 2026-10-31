@@ -45,6 +45,10 @@ export default defineConfig({
             text: "Setting up an artist account",
             link: "/how-tos/setting-up-an-artist-account",
           },
+          {
+            text: "Subscriber-only releases",
+            link: "/how-tos/subscriber-only-releases",
+          },
           { text: "Label Guide", link: "/how-tos/label-accounts" },
           {
             text: "Accepting more payment types",
