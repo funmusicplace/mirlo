@@ -26,20 +26,24 @@ import { getInstanceName } from "../../../../utils/settings";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 import { isTrackGroup } from "../../../../utils/typeguards";
 
+const wherePublishedPostsForProfile = (
+  profileId: number
+): Prisma.PostWhereInput => ({
+  publishedAt: { lte: new Date() },
+  profileId,
+  isDraft: false,
+  deletedAt: null,
+});
+
 export const getPostsVisibleToUser = async (
   user: User | undefined,
   profile: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
   take: number = 20,
   skip: number = 0
 ) => {
-  const where: Prisma.PostWhereInput = {
-    publishedAt: { lte: new Date() },
-    profileId: Number(profile.id),
-    isDraft: false,
-    deletedAt: null,
-  };
+  const where = wherePublishedPostsForProfile(profile.id);
 
-  const [posts, total] = await prisma.$transaction([
+  const [posts, total] = await Promise.all([
     prisma.post.findMany({
       where,
       include: {
@@ -93,6 +97,14 @@ export const getAlbumsCountForProfile = async (profile: Profile) => {
   return prisma.trackGroup.count({
     where: { ...whereForPublishedTrackGroups(), profileId: profile.id },
   });
+};
+
+export const getFeedCountForProfile = async (profile: Profile) => {
+  const [posts, albums] = await Promise.all([
+    prisma.post.count({ where: wherePublishedPostsForProfile(profile.id) }),
+    getAlbumsCountForProfile(profile),
+  ]);
+  return posts + albums;
 };
 
 const MAX_FEED_TAKE = 50;

@@ -35,7 +35,10 @@ import {
 } from "../activityPub/utils";
 import { redisClient } from "../config/redis";
 import logger from "../logger";
-import { buildFeedForArtist } from "../routers/v1/artists/{id}/feed";
+import {
+  buildFeedForArtist,
+  getFeedCountForProfile,
+} from "../routers/v1/artists/{id}/feed";
 import {
   findArtistIdForURLSlug,
   whereForVisibleProfile,
@@ -221,13 +224,9 @@ federation
     if (!parsedId) return 0n;
     const artist = await prisma.profile.findFirst({
       where: { id: parsedId, activityPub: true },
-      include: {
-        subscriptionTiers: true,
-      },
     });
     if (!artist) return 0n;
-    const { total } = await buildFeedForArtist(undefined, artist);
-    return BigInt(total);
+    return BigInt(await getFeedCountForProfile(artist));
   });
 
 const findAPReleaseById = async (id: number) => {
