@@ -1,7 +1,8 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
+
 import { clearJWT, setTokens } from "./utils";
-import prisma from "@mirlo/prisma";
 
 const refresh_secret = process.env.REFRESH_TOKEN_SECRET ?? "";
 
@@ -24,11 +25,11 @@ const refresh = (req: Request, res: Response, next: NextFunction) => {
           } else {
             // Correct token we send a new access token
 
-            const foundUser = await prisma.user.findFirst({
-              where: {
-                email: (decoded as JwtPayload)?.email,
-              },
-            });
+            const { email, id } = (decoded as JwtPayload) ?? {};
+            const foundUser =
+              email && id
+                ? await prisma.user.findFirst({ where: { id, email } })
+                : null;
 
             if (!foundUser) {
               return res.status(401).json({ error: "Unauthorized" });

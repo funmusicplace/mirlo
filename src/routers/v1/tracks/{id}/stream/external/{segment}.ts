@@ -14,7 +14,8 @@ import socialMusic from "../../../../../../utils/socialMusic";
 import { whereForVisibleTrackGroup } from "../../../../../../utils/trackGroup";
 import { fetchFile } from "../{segment}";
 
-const jwt_secret = process.env.JWT_SECRET ?? "secretkey";
+const jwt_secret = process.env.JWT_SECRET ?? "";
+const PLAYTOKEN_AUDIENCE = "playtoken";
 
 export default function () {
   const operations = {
@@ -96,6 +97,7 @@ export default function () {
           log.debug("Generate playtoken:", payload);
           const playToken = jwt.sign(payload, jwt_secret, {
             expiresIn: "2d",
+            audience: PLAYTOKEN_AUDIENCE,
           });
           res.setHeader(socialMusic.HEADER_PLAYTOKEN, playToken);
         } else {
@@ -113,7 +115,9 @@ export default function () {
           let decoded;
           try {
             // @ts-ignore playtoken type may not be a string?
-            decoded = jwt.verify(playToken, jwt_secret);
+            decoded = jwt.verify(playToken, jwt_secret, {
+              audience: PLAYTOKEN_AUDIENCE,
+            });
           } catch (e: any) {
             throw new AppError({
               httpCode: 400,
