@@ -13,6 +13,7 @@ import { setBucketConfig, ensureAllBucketsExist } from "../utils/minio";
 import { getSiteSettings } from "../utils/settings";
 
 import generateAlbumJob from "./generate-album";
+import moderateImage from "./moderate-image";
 import optimizeImage from "./optimize-image";
 import scheduledTasksJob, {
   registerScheduledTasks,
@@ -162,6 +163,7 @@ yargs
     // audioDurationQueue();
     verifyAudioQueue();
     imageQueue();
+    moderateImageQueue();
     generateAlbumQueueWorker();
     sendMailQueue();
     sendPostNotificationQueue();
@@ -209,6 +211,15 @@ async function imageQueue() {
     optimizeImage,
     workerOptions,
     "Optimize Image worker started"
+  );
+}
+
+async function moderateImageQueue() {
+  createWorkerWithLogging(
+    "moderate-image",
+    moderateImage,
+    workerOptions,
+    "Moderate Image worker started"
   );
 }
 
