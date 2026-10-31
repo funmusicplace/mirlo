@@ -32,7 +32,13 @@ export function queryArtist(opts: { artistSlug?: string }) {
     queryKey: ["fetchArtist", { artistSlug: opts.artistSlug }],
     queryFn: fetchArtist,
     initialData: () =>
-      opts.artistSlug ? getInjectedArtist(opts.artistSlug) : undefined,
+      opts.artistSlug
+        ? getInjectedArtist(opts.artistSlug, { partial: false })
+        : undefined,
+    placeholderData: () =>
+      opts.artistSlug
+        ? getInjectedArtist(opts.artistSlug, { partial: true })
+        : undefined,
     enabled: !!opts.artistSlug,
   });
 }

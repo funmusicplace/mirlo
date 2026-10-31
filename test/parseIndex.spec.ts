@@ -822,6 +822,45 @@ describe("analyzePathAndGenerateHTML", () => {
       );
     });
 
+    it("should inject a partial __MIRLO_ARTIST__ without releases on album page", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createProfile(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      await createTrackGroup(artist.id, {
+        title: "My Album",
+        urlSlug: "test-album",
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist/release/test-album", $);
+
+      const data = JSON.parse($("#__MIRLO_ARTIST__").html()!);
+      assert.equal(data.partial, true);
+      assert.equal(data.artist.name, "My Artist");
+      assert.deepEqual(data.artist.trackGroups, []);
+    });
+
+    it("should inject the full __MIRLO_ARTIST__ on artist profile page", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createProfile(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      await createTrackGroup(artist.id, {
+        title: "My Album",
+        urlSlug: "test-album",
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist", $);
+
+      const data = JSON.parse($("#__MIRLO_ARTIST__").html()!);
+      assert.equal(data.partial, undefined);
+      assert.equal(data.artist.trackGroups.length, 1);
+    });
+
     it("should inject __MIRLO_TRACK__ script on track page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createProfile(user.id, {
