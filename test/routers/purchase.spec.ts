@@ -591,7 +591,10 @@ describe("purchase", () => {
       });
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 0 });
-      const track = await createTrack(tg.id, { minPrice: 0 });
+      const track = await createTrack(tg.id, {
+        minPrice: 0,
+        allowIndividualSale: true,
+      });
 
       const response = await postPurchase(
         {
@@ -611,6 +614,81 @@ describe("purchase", () => {
       assert.ok(purchase, "purchase record should be created in DB");
     });
 
+    it("should not sell a track that isn't for individual sale", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const track = await createTrack(tg.id);
+
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          items: [{ type: "track", id: track.id }],
+        },
+        accessToken
+      );
+
+      assert.equal(response.statusCode, 404);
+      const purchase = await prisma.userTrackPurchase.findFirst({
+        where: { userId: buyer.id, trackId: track.id },
+      });
+      assert.equal(purchase, null);
+    });
+
+    (
+      [
+        ["isn't for sale", { isGettable: false }],
+        ["isn't published", { publishedAt: null }],
+        [
+          "is scheduled to publish later",
+          { publishedAt: new Date(Date.now() + 86_400_000) },
+        ],
+        ["was disabled by an admin", { adminEnabled: false }],
+      ] as const
+    ).forEach(([reason, data]) => {
+      it(`should not hand out a free release that ${reason}`, async () => {
+        const { user: artistUser } = await createUser({
+          email: "artist@test.com",
+        });
+        const { user: buyer, accessToken } = await createUser({
+          email: "buyer@test.com",
+        });
+        const profile = await createProfile(artistUser.id);
+        const tg = await createTrackGroup(profile.id, { minPrice: 0, ...data });
+        const track = await createTrack(tg.id, {
+          minPrice: 0,
+          allowIndividualSale: true,
+        });
+
+        for (const item of [
+          { type: "trackGroup", id: tg.id },
+          { type: "track", id: track.id },
+        ]) {
+          const response = await postPurchase(
+            { artistId: profile.id, items: [item] },
+            accessToken
+          );
+          assert.equal(response.statusCode, 404, `${item.type}`);
+        }
+
+        assert.equal(
+          await prisma.userTrackGroupPurchase.count({
+            where: { userId: buyer.id },
+          }),
+          0
+        );
+        assert.equal(
+          await prisma.userTrackPurchase.count({ where: { userId: buyer.id } }),
+          0
+        );
+      });
+    });
+
     it("should return 200 with clientSecret for a paid online track purchase", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
@@ -619,7 +697,10 @@ describe("purchase", () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 0 });
-      const track = await createTrack(tg.id, { minPrice: 500 });
+      const track = await createTrack(tg.id, {
+        minPrice: 500,
+        allowIndividualSale: true,
+      });
 
       const response = await postPurchase(
         {
@@ -641,7 +722,10 @@ describe("purchase", () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 0 });
-      const track = await createTrack(tg.id, { minPrice: 500 });
+      const track = await createTrack(tg.id, {
+        minPrice: 500,
+        allowIndividualSale: true,
+      });
 
       const response = await postPurchase(
         {
@@ -2008,7 +2092,10 @@ describe("purchase", () => {
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 0 });
-      const track = await createTrack(tg.id, { minPrice: 500 });
+      const track = await createTrack(tg.id, {
+        minPrice: 500,
+        allowIndividualSale: true,
+      });
 
       const createStub = stubStripeForOnline();
 

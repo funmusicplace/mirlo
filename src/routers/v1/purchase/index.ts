@@ -39,6 +39,7 @@ import {
   initiateSubscription,
 } from "../../../utils/payments/subscription";
 import { determinePrice } from "../../../utils/purchasing";
+import { whereForPurchasableTrackGroup } from "../../../utils/trackGroup";
 import { findUserDiscountPercentsForProfile } from "../../../utils/user";
 
 type PurchaseItem =
@@ -546,7 +547,11 @@ export default function () {
       for (const item of items) {
         if (item.type === "trackGroup") {
           const tg = await prisma.trackGroup.findFirst({
-            where: { id: item.id, profile: { id: profileId } },
+            where: {
+              ...whereForPurchasableTrackGroup(),
+              id: item.id,
+              profileId,
+            },
             include: {
               paymentToUser: { select: { stripeAccountId: true } },
               profile: {
@@ -591,7 +596,11 @@ export default function () {
           resolvedItems.push(result.item);
         } else if (item.type === "track") {
           const track = await prisma.track.findFirst({
-            where: { id: item.id, trackGroup: { profileId } },
+            where: {
+              id: item.id,
+              allowIndividualSale: true,
+              trackGroup: { ...whereForPurchasableTrackGroup(), profileId },
+            },
             include: {
               trackGroup: {
                 include: {
