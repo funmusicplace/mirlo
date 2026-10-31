@@ -75,4 +75,28 @@ describe("manage/artists/{artistId}/merchOrder", () => {
     assert.equal(refetchedMerch2?.order, 1);
     assert.equal(refetchedMerch1?.order, 2);
   });
+
+  it("should not reorder or return another artist's merch", async () => {
+    const { user, accessToken } = await createUser({ email: "test@test.com" });
+    const artist = await createArtist(user.id);
+
+    const { user: victim } = await createUser({ email: "victim@test.com" });
+    const victimArtist = await createArtist(victim.id);
+    const victimMerch = await createMerch(victimArtist.id, {
+      title: "Secret merch",
+    });
+
+    const response = await request(baseURL)
+      .put(`manage/artists/${artist.id}/merchOrder`)
+      .send({ merchIds: [victimMerch.id] })
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.body.results, []);
+    const after = await prisma.merch.findFirst({
+      where: { id: victimMerch.id },
+    });
+    assert.equal(after?.order, victimMerch.order);
+  });
 });
