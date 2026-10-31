@@ -5,9 +5,17 @@ import { merchImagesInclude } from "../utils/merch";
 import { postImagesForContent } from "../utils/postContent";
 
 export async function fetchProfileMetadata(profileSlug: string): Promise<any> {
+  const include = singleInclude({ includeDefaultTier: true });
   return await prisma.profile.findFirst({
     where: { urlSlug: profileSlug, ...whereForVisibleProfile() },
-    include: singleInclude({ includeDefaultTier: true }) as any,
+    include: {
+      ...include,
+      posts: {
+        where: (include.posts as { where: object }).where,
+        take: 1,
+        select: { id: true, isPublic: true },
+      },
+    } as any,
   });
 }
 

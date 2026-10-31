@@ -741,6 +741,31 @@ describe("analyzePathAndGenerateHTML", () => {
       assert.equal(data.artist.name, "My Artist");
     });
 
+    it("should not inject post content into __MIRLO_ARTIST__", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createProfile(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      await createPost(artist.id, {
+        title: "First",
+        content: "<p>first post body</p>",
+        isDraft: false,
+      });
+      await createPost(artist.id, {
+        title: "Second",
+        content: "<p>second post body</p>",
+        isDraft: false,
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist", $);
+
+      const data = JSON.parse($("#__MIRLO_ARTIST__").html()!);
+      assert.equal(data.artist.posts.length, 1);
+      assert(!$.html().includes("post body"));
+    });
+
     it("should inject __MIRLO_TRACKGROUP__ script on album page", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createProfile(user.id, {
