@@ -48,7 +48,6 @@ const FundraisingGoal: React.FC<{
 
   const {
     data: { totalAmount, totalPledges } = {
-      results: [],
       total: 0,
       totalAmount: 0,
       totalSupporters: 0,

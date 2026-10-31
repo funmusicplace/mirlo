@@ -17,7 +17,7 @@ import {
 } from "../../utils";
 import { requestApp } from "../utils";
 dotenv.config();
-const jwt_secret = process.env.JWT_SECRET ?? "secretkey";
+const jwt_secret = process.env.JWT_SECRET ?? "";
 
 describe("tracks/{id}/stream/external/", () => {
   const playlistPath = (id: number) =>
@@ -114,7 +114,8 @@ describe("tracks/{id}/stream/external/", () => {
     it("should GET segment 200 if playToken matches", async () => {
       const playToken = jwt.sign(
         { userid: "remoteuser", song: track.id.toString() },
-        jwt_secret
+        jwt_secret,
+        { audience: "playtoken" }
       );
 
       const response = await requestApp.get(
@@ -127,7 +128,8 @@ describe("tracks/{id}/stream/external/", () => {
     it("should GET segment 403 if playToken doesn't match user", async () => {
       const playToken = jwt.sign(
         { userid: "fakeuser", song: track.id.toString() },
-        jwt_secret
+        jwt_secret,
+        { audience: "playtoken" }
       );
 
       const response = await requestApp.get(
