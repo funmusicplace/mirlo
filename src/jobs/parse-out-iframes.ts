@@ -56,7 +56,7 @@ export const parseOutIframes = async (
   fallbackUrl?: string
 ) => {
   // Replace <iframe src="/widget/trackGroup/:id"> or <iframe src="/widget/track/:id">
-  // with a div containing info about the trackGroup or track, fetching live data from the database
+  // with a card containing info about the trackGroup or track, fetching live data from the database
 
   // Find all iframes to process
   let htmlContent = content;
@@ -106,7 +106,7 @@ export const parseOutIframes = async (
     );
     const trackMap = Object.fromEntries(tracks.map((t) => [t.id, t]));
 
-    // Replace iframes with divs containing info
+    // Replace iframes with cards containing info
     const { applicationUrl } = await getClient();
     htmlContent = htmlContent.replace(
       iframeRegex,
@@ -146,7 +146,7 @@ export const parseOutIframes = async (
             url:
               fallbackUrl && isTrackGroupUnreachable(t.trackGroup)
                 ? fallbackUrl
-                : `${applicationUrl}/${t.trackGroup.profile.urlSlug}/release/${t.trackGroup.urlSlug}/track/${t.urlSlug}`,
+                : `${applicationUrl}/${t.trackGroup.profile.urlSlug}/release/${t.trackGroup.urlSlug}/tracks/${t.id}`,
           });
         }
         // If not found, fallback to a placeholder

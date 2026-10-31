@@ -1,11 +1,14 @@
-div(data-type=type, data-id=id, style=`display: flex; flex-direction: row; gap: 16px; align-items: center; background-color: ${background}; color: ${text}; border-radius: 8px; padding: 16px;`)
-  if cover
-    img(src=cover, alt="", width="60", height="60", style="display:block;width:60px;height:60px;border-radius:4px;object-fit:cover;flex-shrink:0;")
-  div(style="flex: 1; min-width: 0; overflow: hidden;")
-    strong(style=`display: block; color: ${button}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`)= title
-    span(style="display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;")
-      | by #[a(href=artistUrl, target="_blank", rel="noopener noreferrer", style=`color: ${button}; text-decoration: none;`)= artistName]
-      if trackCount !== undefined
-        |  &middot; #{trackCount} track#{trackCount === 1 ? "" : "s"} album
-  div(style="flex-shrink: 0;")
-    a(href=url, target="_blank", rel="noopener noreferrer", style=`display: inline-block; text-decoration: none; background: ${text}; color: ${background}; width: 48px; height: 48px; line-height: 48px; text-align: center; border-radius: 50%; font-size: 18px; font-weight: bold;`) &#9654;
+table(data-type=type, data-id=id, role="presentation", width="100%", cellpadding="0", cellspacing="0", border="0", style=`width: 100%; border-collapse: separate; background-color: ${background}; color: ${text}; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 17px; line-height: 1.5;`)
+  tr
+    if cover
+      td(width="60", style="padding: 16px 0 16px 16px; width: 60px; vertical-align: middle;")
+        img(src=cover, alt="", width="60", height="60", style="display:block;width:60px;max-width:60px;height:60px;border-radius:4px;object-fit:cover;")
+    td(style="padding: 16px; width: 100%; vertical-align: middle; max-width: 0; overflow: hidden;")
+      div(style=`font-weight: bold; color: ${button}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`)= title
+      div(style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;")
+        | by #[a(href=artistUrl, target="_blank", rel="noopener noreferrer", style=`color: ${button}; text-decoration: none;`)= artistName]
+        if trackCount !== undefined
+          |  &middot; #{trackCount} track#{trackCount === 1 ? "" : "s"} album
+    td(width="48", style="padding: 16px 16px 16px 0; width: 48px; vertical-align: middle;")
+      a(href=url, target="_blank", rel="noopener noreferrer", style=`display: block; text-decoration: none; background: ${text}; color: ${background}; width: 48px; height: 48px; line-height: 48px; text-align: center; border-radius: 50%; font-size: 0;`)
+        span(style=`display: inline-block; width: 0; height: 0; border-top: 9px solid transparent; border-bottom: 9px solid transparent; border-left: 15px solid ${background}; vertical-align: middle; margin-left: 4px;`)

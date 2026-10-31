@@ -33,7 +33,9 @@ describe("parse-out-iframes", () => {
     const content = `<iframe src="/widget/trackGroup/${trackGroup.id}"></iframe>`;
     const result = await parseOutIframes(content);
     assert(
-      result.includes(`<div data-type="trackGroup" data-id="${trackGroup.id}"`)
+      result.includes(
+        `<table data-type="trackGroup" data-id="${trackGroup.id}"`
+      )
     );
   });
 
@@ -134,6 +136,34 @@ describe("parse-out-iframes", () => {
       );
     });
 
+    it("links to the track page by id when its album is published and public", async () => {
+      const { user: artistUser } = await createUser({
+        email: "trackpublisher@artist.com",
+      });
+      const artist = await createArtist(artistUser.id, {
+        urlSlug: "track-artist",
+      });
+      const trackGroup = await createTrackGroup(artist.id, {
+        title: "Album with Track",
+        urlSlug: "album-with-track",
+        tracks: [{ title: "public track" }],
+      });
+      const track = await prisma.track.findFirstOrThrow({
+        where: { trackGroupId: trackGroup.id },
+      });
+
+      const fallbackUrl = "https://example.test/track-artist/posts/p";
+      const content = `<iframe src="/widget/track/${track.id}"></iframe>`;
+      const result = await parseOutIframes(content, fallbackUrl);
+
+      assert(
+        result.includes(
+          `/track-artist/release/album-with-track/tracks/${track.id}"`
+        ),
+        "published track link should target the track page by id"
+      );
+    });
+
     it("links to the fallback URL for a track whose album is unreachable", async () => {
       const { user: artistUser } = await createUser({
         email: "drafttrack@artist.com",
@@ -151,12 +181,6 @@ describe("parse-out-iframes", () => {
       const track = await prisma.track.findFirstOrThrow({
         where: { trackGroupId: trackGroup.id },
       });
-      // urlSlug is required for tracks; ensure the lookup works.
-      await prisma.track.update({
-        where: { id: track.id },
-        data: { urlSlug: "draft-track" },
-      });
-
       const fallbackUrl = "https://example.test/an-artist/posts/post";
       const content = `<iframe src="/widget/track/${track.id}"></iframe>`;
       const result = await parseOutIframes(content, fallbackUrl);
