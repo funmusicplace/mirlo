@@ -15,6 +15,12 @@ import { downloadCSVFile } from "../../../../../utils/download";
 import { AppError } from "../../../../../utils/error";
 import { grantSubscriptionTierReleases } from "../../../../../utils/subscriptionTier";
 
+type SubscriberRow = {
+  deleteReason?: string | null;
+  deletedAt?: Date | null;
+  nextBillingDate?: Date | null;
+};
+
 const csvColumns = [
   {
     label: "Email",
@@ -41,14 +47,28 @@ const csvColumns = [
     value: "artistSubscriptionTier.name",
   },
   {
+    label: "Status",
+    value: (row: SubscriberRow) =>
+      row.deletedAt ? "ended" : row.deleteReason ? "cancelling" : "active",
+  },
+  {
     label: "Next Renew Date",
-    value: (row: { deleteReason?: string | null; nextBillingDate?: Date }) =>
-      row.deleteReason ? "" : (row.nextBillingDate ?? ""),
+    value: (row: SubscriberRow) =>
+      row.deletedAt || row.deleteReason ? "" : (row.nextBillingDate ?? ""),
   },
   {
     label: "Cancel At",
-    value: (row: { deleteReason?: string | null; nextBillingDate?: Date }) =>
-      row.deleteReason ? (row.nextBillingDate ?? "") : "",
+    value: (row: SubscriberRow) =>
+      !row.deletedAt && row.deleteReason ? (row.nextBillingDate ?? "") : "",
+  },
+  {
+    label: "Ended At",
+    value: (row: SubscriberRow) => row.deletedAt ?? "",
+  },
+  {
+    label: "End Reason",
+    value: (row: SubscriberRow) =>
+      row.deletedAt ? (row.deleteReason ?? "") : "",
   },
   {
     label: "Created At",
@@ -107,18 +127,21 @@ export default function () {
         });
       }
 
+      const includeEnded = req.query?.format === "csv";
+
       const subscribers = await prisma.profileUserSubscription.findMany({
         where: {
           profileSubscriptionTier: {
             profileId: parsedId,
-            deletedAt: null,
+            ...(includeEnded ? {} : { deletedAt: null }),
           },
-          deletedAt: null,
+          deletedAt: includeEnded ? {} : null,
         },
         select: {
           id: true,
           amount: true,
           deleteReason: true,
+          deletedAt: true,
           createdAt: true,
           updatedAt: true,
           profileSubscriptionTierId: true,
