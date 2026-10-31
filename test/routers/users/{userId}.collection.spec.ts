@@ -8,8 +8,11 @@ import { describe, it } from "mocha";
 import {
   clearTables,
   createArtist,
+  createTrack,
   createTrackGroup,
   createUser,
+  createUserTrackGroupPurchase,
+  createUserTrackPurchase,
 } from "../../utils";
 import { requestApp } from "../utils";
 
@@ -285,6 +288,43 @@ describe("users/{userId}/collection", () => {
         responseFiltered.body.results[0].trackGroup.id,
         trackGroup1.id
       );
+    });
+
+    it("should return the collection as a Subsonic albumList2 when format=subsonic", async () => {
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@testcom",
+      });
+      const { user } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      const album = await createTrackGroup(artist.id);
+      await createUserTrackGroupPurchase(purchaser.id, album.id, {
+        createdAt: new Date("2024-01-01"),
+      });
+      const single = await createTrackGroup(artist.id, {
+        title: "Single",
+        urlSlug: "single",
+      });
+      const track = await createTrack(single.id, { title: "Bought track" });
+      await createUserTrackPurchase(purchaser.id, track.id, {
+        createdAt: new Date("2024-02-01"),
+      });
+
+      const response = await requestApp
+        .get(`users/${purchaser.id}/collection?format=subsonic`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const { status, albumList2 } = response.body["subsonic-response"];
+      assert.equal(status, "ok");
+      assert.equal(albumList2.album.length, 2);
+      assert.equal(albumList2.album[0].id, String(single.id));
+      assert.equal(albumList2.album[0].artist, artist.name);
+      assert.equal(albumList2.album[0].songCount, 1);
+      assert.equal(albumList2.album[0].song[0].id, String(track.id));
+      assert.equal(albumList2.album[0].song[0].title, "Bought track");
+      assert.equal(albumList2.album[1].id, String(album.id));
+      assert.equal(albumList2.album[1].song[0].title, "test track");
     });
   });
 });

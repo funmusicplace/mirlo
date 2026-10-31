@@ -6,6 +6,10 @@ import { set } from "lodash";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import {
+  serializeTrackGroupIntoSubsonic,
+  subsonicResponse,
+} from "../../../../serializers/subsonic";
+import {
   processSingleTrackGroup,
   serializeTrackGroupPurchase,
 } from "../../../../serializers/trackGroup";
@@ -25,7 +29,10 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     const { userId } = req.params as unknown as Params;
-    const { trackGroupId } = req.query as unknown as { trackGroupId: string };
+    const { trackGroupId, format } = req.query as unknown as {
+      trackGroupId: string;
+      format?: string;
+    };
 
     assertLoggedIn(req);
     const loggedInUser = req.user;
@@ -113,9 +120,23 @@ export default function () {
           : 1;
       });
 
-      res.json({
-        results: combined,
-      });
+      if (format === "subsonic") {
+        res.json(
+          subsonicResponse({
+            albumList2: {
+              album: combined.map((purchase) =>
+                "track" in purchase
+                  ? serializeTrackGroupIntoSubsonic(purchase.track.trackGroup, [
+                      purchase.track,
+                    ])
+                  : serializeTrackGroupIntoSubsonic(purchase.trackGroup)
+              ),
+            },
+          })
+        );
+      } else {
+        res.json({ results: combined });
+      }
     } else {
       res.status(401);
       res.json({
@@ -132,6 +153,14 @@ export default function () {
         name: "userId",
         required: true,
         type: "string",
+      },
+      {
+        in: "query",
+        name: "format",
+        required: false,
+        type: "string",
+        description:
+          "Set to subsonic to get the collection as a Subsonic albumList2 response",
       },
     ],
     responses: {
