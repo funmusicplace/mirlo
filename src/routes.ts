@@ -27,7 +27,6 @@ const routes = [
   "tracks/topSold",
   "tracks/mostPlayed",
   "tracks/{id}",
-  "tracks/{id}/audio",
   "tracks/{id}/download",
   "tracks/{id}/generate",
   "tracks/{id}/testOwns",

@@ -6,11 +6,17 @@ import { getAudioSegmentBufferIfExists } from "../../../../../utils/minio";
 import { canUserListenToTrack } from "../../../../../utils/ownership";
 import { whereForVisibleTrackGroup } from "../../../../../utils/trackGroup";
 
+const STREAM_FILE = /^(playlist\.m3u8|segment-\d+\.ts)$/;
+
 export const fetchFile = async (
   res: Response,
   filename: string,
   segment: string
 ) => {
+  if (!STREAM_FILE.test(segment)) {
+    res.status(404).send();
+    return;
+  }
   try {
     const buffer = await getAudioSegmentBufferIfExists(filename, segment);
     if (buffer === undefined) {
