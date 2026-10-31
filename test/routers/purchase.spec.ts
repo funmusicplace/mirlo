@@ -11,9 +11,11 @@ import Stripe from "stripe";
 import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import {
   cancelPreviousAttempt,
+  resolveBuyer,
   resolveDigitalPurchaseItem,
   resolveMerchPurchaseItem,
 } from "../../src/routers/v1/purchase";
+import { AppError } from "../../src/utils/error";
 import { getClient } from "../../src/utils/getClient";
 import { getPaymentProcessor } from "../../src/utils/payments/PaymentProcessor";
 import { initiateFundraiserPledge } from "../../src/utils/payments/pledge";
@@ -2493,6 +2495,66 @@ describe("purchase", () => {
       });
 
       assert.equal(result.setupIntentId, "seti_sub_terminal");
+    });
+
+    it("refuses a terminal subscription without the buyer's email", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_terminal_no_email",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
+      const createStub = sinon.stub(stripeUtils.stripe.setupIntents, "create");
+
+      await assert.rejects(
+        initiateSubscription({
+          readerId: "tmr_test",
+          profileId: profile.id,
+          tierId: tier.id,
+          userEmail: "",
+        }),
+        (e: unknown) => e instanceof AppError && e.httpCode === 400
+      );
+      assert.ok(createStub.notCalled);
+    });
+  });
+
+  describe("resolveBuyer", () => {
+    const seller = {
+      id: 7,
+      email: "seller@test.com",
+    } as unknown as Express.User;
+
+    it("credits a card-reader sale to the buyer's email, not the seller", () => {
+      assert.deepEqual(
+        resolveBuyer({
+          loggedInUser: seller,
+          email: "fan@test.com",
+          readerId: "tmr_test",
+        }),
+        { userEmail: "fan@test.com" }
+      );
+    });
+
+    it("falls back to the seller for a card-reader sale with no email", () => {
+      assert.deepEqual(
+        resolveBuyer({ loggedInUser: seller, readerId: "tmr_test" }),
+        { userEmail: "seller@test.com", userId: "7" }
+      );
+    });
+
+    it("keeps the logged-in user over a typed email online", () => {
+      assert.deepEqual(
+        resolveBuyer({ loggedInUser: seller, email: "fan@test.com" }),
+        { userEmail: "seller@test.com", userId: "7" }
+      );
+    });
+
+    it("uses the typed email for a guest", () => {
+      assert.deepEqual(resolveBuyer({ email: "fan@test.com" }), {
+        userEmail: "fan@test.com",
+        userId: undefined,
+      });
     });
   });
 

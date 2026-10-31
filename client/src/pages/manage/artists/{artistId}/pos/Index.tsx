@@ -375,8 +375,8 @@ const Index: React.FC = () => {
       <div className={sectionClass}>
         <h3 className="text-lg font-bold">Subscriptions</h3>
         <p className="text-sm">
-          Subscriptions require a reader id (online subscriptions are not yet
-          supported by this endpoint).
+          Subscriptions require a reader id and the buyer&apos;s email (online
+          subscriptions are not yet supported by this endpoint).
         </p>
         {(tiers?.results ?? []).map((tier) => (
           <div className={rowClass} key={tier.id}>
@@ -386,7 +386,7 @@ const Index: React.FC = () => {
             </span>
             <Button
               size="compact"
-              disabled={isCharging || !readerId.trim()}
+              disabled={isCharging || !readerId.trim() || !email.trim()}
               onClick={() =>
                 charge({ type: "subscription", tierId: tier.id }, tier.name)
               }
