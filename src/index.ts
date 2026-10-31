@@ -350,6 +350,10 @@ app.use(
 
           const fileErr = err as NodeJS.ErrnoException & { status?: number };
 
+          if (fileErr.code === "ECONNABORTED") {
+            return;
+          }
+
           if (fileErr.code === "ENOENT" || fileErr.status === 404) {
             // Not finding a file during build is expected so shouldn't generate error noise.
             if (req.path.startsWith("/assets/")) {
