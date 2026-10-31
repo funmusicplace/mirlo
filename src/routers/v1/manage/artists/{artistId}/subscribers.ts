@@ -119,6 +119,9 @@ export default function () {
           id: true,
           amount: true,
           deleteReason: true,
+          createdAt: true,
+          updatedAt: true,
+          profileSubscriptionTierId: true,
           user: {
             select: {
               email: true,
