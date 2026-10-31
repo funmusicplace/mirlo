@@ -13,13 +13,14 @@ import { postImageAttrs, uploadPostImage } from "./uploadPostImage";
 
 const InsertImageButton: React.FC<{ postId?: number }> = ({ postId }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { register, getValues } = useForm<{ images: FileList }>();
+  const { register, getValues, watch } = useForm<{ images: FileList }>();
+  const hasImage = (watch("images")?.length ?? 0) > 0;
   const { insertImage } = useCommands();
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
 
   const onAdd = React.useCallback(async () => {
-    if (postId) {
-      const images = getValues("images");
+    const images = getValues("images");
+    if (postId && images?.[0]) {
       const image = await uploadPostImage(postId, images[0]);
       insertImage(postImageAttrs(image));
     }
@@ -49,6 +50,7 @@ const InsertImageButton: React.FC<{ postId?: number }> = ({ postId }) => {
         <Button
           type="button"
           onClick={onAdd}
+          disabled={!hasImage}
           className={css`
             margin-top: 1rem;
           `}

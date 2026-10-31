@@ -146,7 +146,8 @@ export const uploadAndSendToImageQueue = async (
   storeWithExtension?: boolean,
   pendingSlot?: { slot: ImageSlot; ownerId: number }
 ) => {
-  logger.info(`Uploading ${sharpConfigKey} to object storage`);
+  const log = ctx.req.logger ?? logger;
+  log.info(`Uploading ${sharpConfigKey} to object storage`);
 
   if (!ctx.req.busboy) {
     throw rejectMissingFile();
@@ -161,9 +162,11 @@ export const uploadAndSendToImageQueue = async (
     relation?: "subscriptionTierImage";
     imageId?: string;
   } = {};
+  const receivedFields: Record<string, string> = {};
 
   const details = await new Promise((resolve, reject) => {
     ctx.req.busboy.on("field", function (fieldname, val) {
+      receivedFields[fieldname] = val.slice(0, 50);
       if (
         fieldname === "dimensions" &&
         ["square", "background", "banner"].includes(val)
@@ -178,6 +181,10 @@ export const uploadAndSendToImageQueue = async (
     ctx.req.busboy.on("error", reject);
     ctx.req.busboy.on("close", () => {
       if (!hasFile) {
+        log.warn("Upload contained no file", {
+          contentLength: ctx.req.headers["content-length"],
+          fields: receivedFields,
+        });
         reject(rejectMissingFile());
       }
     });
@@ -251,7 +258,7 @@ export const uploadAndSendToImageQueue = async (
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
 
-          logger.error("There was an error uploading to storage", {
+          log.error("There was an error uploading to storage", {
             mimeType: fileInfo.mimeType,
             filename: fileInfo.filename,
             message,
@@ -260,7 +267,7 @@ export const uploadAndSendToImageQueue = async (
           if (isTooLarge) {
             await removeIncomingImageByType(imageType, fileName).catch(
               (removeError) =>
-                logger.error(
+                log.error(
                   `Could not remove the truncated upload ${fileName}`,
                   removeError
                 )
@@ -293,7 +300,7 @@ export const uploadAndSendToImageQueue = async (
         }
 
         if (imageTypeUsesQueue(imageType)) {
-          logger.info("Adding image to queue");
+          log.info("Adding image to queue");
 
           const job = await imageQueue.add("optimize-image", {
             destinationId: image.id,
@@ -311,7 +318,9 @@ export const uploadAndSendToImageQueue = async (
       }
     });
   }).catch((e) => {
-    logger.error("There was an error optimizing the image");
+    log.error("Image upload failed", {
+      error: e instanceof Error ? e.message : String(e),
+    });
     throw e;
   });
 
