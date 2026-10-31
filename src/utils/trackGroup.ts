@@ -772,6 +772,12 @@ export const findPurchaseAndVoidToken = async (
   return purchase;
 };
 
+export const purchaseLinkNotFound = () =>
+  new AppError({
+    httpCode: 404,
+    description: "Purchase doesn't exist for this link",
+  });
+
 export const findTrackPurchaseBasedOnTokenAndUpdate = async (
   trackId: number,
   token: string,
@@ -793,10 +799,7 @@ export const findTrackPurchaseBasedOnTokenAndUpdate = async (
   });
 
   if (!purchase) {
-    throw new AppError({
-      httpCode: 404,
-      description: `Track Purchase doesn't exist for trackId: ${trackId}, userId: ${userId}`,
-    });
+    throw purchaseLinkNotFound();
   }
 
   // TODO: do we want a token to be reset after download?
@@ -836,10 +839,7 @@ export const findPurchaseBasedOnTokenAndUpdate = async (
   });
 
   if (!purchase) {
-    throw new AppError({
-      httpCode: 404,
-      description: `Trackgroup Purchase doesn't exist for trackgroupId: ${trackGroupId}, userId: ${userId}`,
-    });
+    throw purchaseLinkNotFound();
   }
 
   // TODO: do we want a token to be reset after download?

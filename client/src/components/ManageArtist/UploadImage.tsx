@@ -1,44 +1,10 @@
 import { css } from "@emotion/css";
-import styled from "@emotion/styled";
 import LoadingSpinner from "components/common/LoadingSpinner";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaFileUpload } from "react-icons/fa";
 
 import { bp } from "../../constants";
-
-export const Img = styled.img<{ rounded?: boolean; naturalRatio?: boolean }>`
-  transition: .25s background-color, .25s filter;
-  ${({ naturalRatio }) =>
-    naturalRatio ? "height: auto;" : "aspect-ratio: 1/1; object-fit: cover;"}
-
-  &:hover {
-    filter: brightness(80%);
-    cursor: pointer;
-  }
-  @media (max-width: ${bp.medium}px) {
-    max-width: 100%;
-  }
-
-  ${({ rounded }) => (rounded ? "border-radius: 100%" : "")}}
-`;
-
-export const ReplaceSpan = styled.span<{ rounded?: boolean }>`
-  position: absolute;
-  text-align: center;
-  vertical-align: middle;
-  line-height: 100%;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  justify-content: center;
-  z-index: 999;
-  ${({ rounded }) => (rounded ? "border-radius: 100% !important" : "")}}
-`;
 
 export const Spinner: React.FC<{ rounded?: boolean }> = ({ rounded }) => {
   return (
@@ -119,8 +85,3 @@ export const UploadPrompt: React.FC<{
     </div>
   );
 };
-
-export const ImageWrap = styled.div`
-  position: relative;
-  display: inline-block;
-`;

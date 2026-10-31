@@ -80,12 +80,16 @@ export const getInjectedTrackGroup = (
 };
 
 export const getInjectedArtist = (
-  artistId: string | number
+  artistId: string | number,
+  options?: { partial?: boolean }
 ): Artist | undefined => {
-  const parsed = readInjectedScript<{ artist?: Artist }>(
+  const parsed = readInjectedScript<{ artist?: Artist; partial?: boolean }>(
     "__MIRLO_ARTIST__",
     artistId
   );
+  if (options && !!parsed?.partial !== options.partial) {
+    return undefined;
+  }
   return parsed?.artist;
 };
 

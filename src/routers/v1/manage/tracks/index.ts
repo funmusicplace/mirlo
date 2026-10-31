@@ -12,6 +12,7 @@ import { whereForProfilesUserOwnsOrManages } from "../../../../utils/artist";
 import { assertSupportedAudioExtension } from "../../../../utils/audioFormats";
 import { getAudioUploadUrl } from "../../../../utils/minio";
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
+import { trackArtistFields } from "../../../../utils/tracks";
 
 export default function () {
   const operations = {
@@ -112,7 +113,7 @@ export default function () {
             },
           },
           trackArtists: {
-            create: trackArtists,
+            create: trackArtists?.map(trackArtistFields),
           },
         },
       });

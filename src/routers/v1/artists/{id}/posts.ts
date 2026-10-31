@@ -8,7 +8,7 @@ import {
 } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 
-import { getPostsVisibleToUser } from "./feed";
+import { countPublishedPostsForProfile, getPostsVisibleToUser } from "./feed";
 
 export default function () {
   const operations = {
@@ -44,16 +44,19 @@ export default function () {
         });
       }
 
-      const posts = await getPostsVisibleToUser(
-        user,
-        profile,
-        take ? Number(take) : undefined,
-        skip ? Number(skip) : undefined
-      );
+      const [{ posts }, total] = await Promise.all([
+        getPostsVisibleToUser(
+          user,
+          profile,
+          take ? Number(take) : undefined,
+          skip ? Number(skip) : undefined
+        ),
+        countPublishedPostsForProfile(profile.id),
+      ]);
 
       res.json({
-        results: posts.posts,
-        total: posts.total,
+        results: posts,
+        total,
       });
     } catch (e) {
       console.error(e);

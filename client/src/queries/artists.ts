@@ -10,7 +10,6 @@ import * as api from "./fetch/fetchWrapper";
 import {
   QUERY_KEY_ARTISTS,
   QUERY_KEY_MERCH,
-  QUERY_KEY_SALES,
   QUERY_KEY_TRACK_GROUPS,
 } from "./queryKeys";
 
@@ -32,7 +31,13 @@ export function queryArtist(opts: { artistSlug?: string }) {
     queryKey: ["fetchArtist", { artistSlug: opts.artistSlug }],
     queryFn: fetchArtist,
     initialData: () =>
-      opts.artistSlug ? getInjectedArtist(opts.artistSlug) : undefined,
+      opts.artistSlug
+        ? getInjectedArtist(opts.artistSlug, { partial: false })
+        : undefined,
+    placeholderData: () =>
+      opts.artistSlug
+        ? getInjectedArtist(opts.artistSlug, { partial: true })
+        : undefined,
     enabled: !!opts.artistSlug,
   });
 }
@@ -231,63 +236,6 @@ export function useCreateSubscriptionTierMutation() {
         ],
       });
     },
-  });
-}
-
-const fetchArtistSupporters: QueryFunction<
-  {
-    results: {
-      name: string;
-      amount: number;
-      message?: string;
-      datePurchased: string;
-    }[];
-    total: number;
-    totalAmount: number;
-    totalSupporters: number;
-  },
-  [
-    "fetchArtistSupporters",
-    opts: {
-      artistId: number;
-      take?: number;
-      skip?: number;
-      trackGroupIds?: number[];
-    },
-    ...any,
-  ]
-> = ({ queryKey: [_, opts], signal }) => {
-  const { artistId } = opts;
-  const params = new URLSearchParams();
-
-  if (opts.trackGroupIds) {
-    opts.trackGroupIds.forEach((id) => {
-      if (isFinite(id)) {
-        params.append("trackGroupIds", String(id));
-      }
-    });
-  }
-
-  if (opts.take) {
-    params.append("take", String(opts.take));
-  }
-  if (opts.skip) {
-    params.append("skip", String(opts.skip));
-  }
-  return api.get(`v1/artists/${artistId}/supporters/?${params.toString()}`, {
-    signal,
-  });
-};
-
-export function queryArtistSupporters(opts: {
-  artistId: number;
-  take?: number;
-  skip?: number;
-  trackGroupIds?: number[];
-}) {
-  return queryOptions({
-    queryKey: ["fetchArtistSupporters", opts, QUERY_KEY_SALES],
-    queryFn: fetchArtistSupporters,
   });
 }
 

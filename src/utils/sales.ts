@@ -1,9 +1,5 @@
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
-import { Request, Response } from "express";
-
-import { serializeUserTransaction } from "../../../../serializers/userTransaction";
-import { findProfileIdForURLSlug } from "../../../../utils/artist";
 
 const constructDateFilter = (
   sinceDate?: string,
@@ -45,44 +41,50 @@ const queryUserTransactions = (
       },
     },
     {
-      merchPurchases: {
-        some: {
-          merch: {
-            profileId: { in: profileId },
-          },
-        },
-      },
-    },
-    {
       trackPurchases: {
         some: {
           track: {
+            trackGroupId: trackGroupIds ? { in: trackGroupIds } : undefined,
             trackGroup: { profileId: { in: profileId } },
           },
         },
       },
     },
-    {
-      tips: {
-        some: {
-          profileId: {
-            in: profileId,
-          },
-        },
-      },
-    },
-    {
-      profileUserSubscriptionCharges: {
-        some: {
-          profileUserSubscription: {
-            profileSubscriptionTier: {
+  ];
+
+  if (!trackGroupIds) {
+    or.push(
+      {
+        merchPurchases: {
+          some: {
+            merch: {
               profileId: { in: profileId },
             },
           },
         },
       },
-    },
-  ];
+      {
+        tips: {
+          some: {
+            profileId: {
+              in: profileId,
+            },
+          },
+        },
+      },
+      {
+        profileUserSubscriptionCharges: {
+          some: {
+            profileUserSubscription: {
+              profileSubscriptionTier: {
+                profileId: { in: profileId },
+              },
+            },
+          },
+        },
+      }
+    );
+  }
 
   if (paymentToUserId !== undefined) {
     // Only trackGroups and tracks carry a release-level `paymentToUser`; merch,
@@ -101,6 +103,7 @@ const queryUserTransactions = (
         trackPurchases: {
           some: {
             track: {
+              trackGroupId: trackGroupIds ? { in: trackGroupIds } : undefined,
               trackGroup: { paymentToUserId },
             },
           },
@@ -325,124 +328,3 @@ export const findSales = async ({
     );
   });
 };
-
-export default function () {
-  const operations = {
-    GET: [GET],
-  };
-
-  async function GET(req: Request, res: Response) {
-    let { id }: { id?: string } = req.params;
-    let {
-      take = 20,
-      skip = 0,
-      sinceDate,
-      trackGroupIds,
-    } = req.query as {
-      take: number | string;
-      skip: number | string;
-      sinceDate?: string | undefined;
-      artistIds?: string | string[] | number[] | undefined;
-      trackGroupIds?: string | string[] | number[] | undefined;
-    };
-
-    try {
-      const parsedId = await findProfileIdForURLSlug(id);
-      let profile;
-      if (parsedId) {
-        profile = await prisma.profile.findFirst({
-          where: {
-            id: Number(parsedId),
-          },
-          include: {
-            subscriptionTiers: true,
-          },
-        });
-      }
-
-      if (!profile) {
-        return res.status(404).json({
-          error: "Artist not found",
-        });
-      }
-
-      if (typeof trackGroupIds === "string") {
-        // If trackGroupIds is a string, split it into an array
-        trackGroupIds = trackGroupIds.split(",");
-      }
-
-      const results = await findSales({
-        profileId: [Number(parsedId)],
-        sinceDate: sinceDate as string,
-        filters: trackGroupIds
-          ? {
-              trackGroupIds: trackGroupIds.map((id) => Number(id)),
-            }
-          : undefined,
-      });
-
-      const total = results.length;
-      const totalAmount = results.reduce((acc, curr) => acc + curr.amount, 0);
-      const totalSupporters = Object.keys(
-        results.reduce(
-          (acc, curr) => {
-            if (acc[curr.userId]) {
-              return acc;
-            } else {
-              return {
-                ...acc,
-                [curr.userId]: 1,
-              };
-            }
-          },
-          {} as Record<number, number>
-        )
-      ).length;
-
-      const page = results.slice(Number(skip), Number(take)).map((r) => ({
-        ...r,
-        userId: undefined,
-      }));
-
-      const apiResults = page.map((ut) => {
-        if (!("trackGroupPurchases" in ut)) {
-          return ut;
-        }
-        return serializeUserTransaction(ut);
-      });
-
-      res.json({
-        results: apiResults,
-        total,
-        totalAmount,
-        totalSupporters,
-      });
-    } catch (e) {
-      console.error(`/v1/artists/{id}/followers ${e}`);
-      res.status(400);
-    }
-  }
-
-  GET.apiDoc = {
-    summary: "Returns supporters of this artist",
-    responses: {
-      200: {
-        description: "A list of supporters of this artist",
-        schema: {
-          type: "array",
-          items: {
-            $ref: "#/definitions/Post",
-          },
-        },
-      },
-      default: {
-        description: "An error occurred",
-        schema: {
-          additionalProperties: true,
-        },
-      },
-    },
-  };
-
-  return operations;
-}

@@ -143,7 +143,10 @@ const buildOpenGraphTags = (
     ["meta", { property: "og:title", content: title }],
     ["meta", { property: "og:description", content: description }],
     ["meta", { name: "description", content: metaDescription }],
-    ["meta", { property: "og:site_name", content: profileName || instanceName }],
+    [
+      "meta",
+      { property: "og:site_name", content: profileName || instanceName },
+    ],
     ["meta", { property: "og:url", content: url }],
     ["meta", { name: "twitter:title", content: title }],
     ["meta", { name: "twitter:description", content: description }],
@@ -279,7 +282,9 @@ const handlePost: RouteHandler<PostParams> = async ({
   const profile = await fetchProfileMetadata(profileSlug);
   if (!profile) return;
 
-  registerProfileHydration(hydrations, profile);
+  registerProfileHydration(hydrations, profile, {
+    partial: !!(postId || postSlug),
+  });
 
   const profileName = profile.name || `A ${instanceName} Profile`;
   const rss = `${process.env.API_DOMAIN}/v1/artists/${profile.urlSlug}/feed?format=rss`;
@@ -465,7 +470,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
   const profile = await fetchProfileMetadata(profileSlug);
   if (!profile) return;
 
-  registerProfileHydration(hydrations, profile);
+  registerProfileHydration(hydrations, profile, { partial: true });
   registerTrackGroupHydration(hydrations, tg);
 
   // Check if it's a specific track

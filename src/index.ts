@@ -8,7 +8,6 @@ import * as dotenv from "dotenv";
 import express from "express";
 import { rateLimit } from "express-rate-limit";
 import { Request, Response, NextFunction } from "express-serve-static-core";
-import qs from "qs";
 import swaggerUi from "swagger-ui-express";
 
 import { federation } from "./activityPub/federation";
@@ -43,6 +42,7 @@ import { denyFramingExceptWidgets } from "./utils/framing";
 import { setCdnUrl } from "./utils/images";
 import { setBucketConfig, ensureAllBucketsExist } from "./utils/minio";
 import { getCachedPage } from "./utils/pageCache";
+import { parseTextQuery } from "./utils/plainInput";
 import {
   attachRequestId,
   logHeavyRequests,
@@ -85,7 +85,7 @@ setInterval(() => {
 }, 30_000).unref();
 
 app.disable("x-powered-by");
-app.set("query parser", (str: string) => qs.parse(str));
+app.set("query parser", parseTextQuery);
 // See https://github.com/express-rate-limit/express-rate-limit/wiki/Troubleshooting-Proxy-Issues
 app.set("trust proxy", 2);
 

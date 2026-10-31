@@ -38,15 +38,27 @@ describe("tracks/{id}/testOwns", () => {
         email: "purchaser@artist.com",
       });
       await prisma.userTrackPurchase.create({
-        data: { userId: purchaser.id, trackId: track.id },
+        data: {
+          userId: purchaser.id,
+          trackId: track.id,
+          singleDownloadToken: "download-token",
+        },
       });
 
       const response = await requestApp
-        .get(`tracks/${track.id}/testOwns?email=${purchaser.email}`)
+        .get(`tracks/${track.id}/testOwns`)
+        .query({ email: purchaser.email, token: "download-token" })
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.result.exists, true);
+
+      const withoutToken = await requestApp
+        .get(`tracks/${track.id}/testOwns`)
+        .query({ email: purchaser.email })
+        .set("Accept", "application/json");
+
+      assert.equal(withoutToken.body.result.exists, false);
     });
 
     it("should return exists=true for isPreview track when user has purchased the album", async () => {
@@ -58,14 +70,15 @@ describe("tracks/{id}/testOwns", () => {
       });
       const track = await createTrack(trackGroup.id, { isPreview: true });
 
-      const { user: purchaser } = await createUser({
+      const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",
       });
       await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
 
       const response = await requestApp
-        .get(`tracks/${track.id}/testOwns?email=${purchaser.email}`)
-        .set("Accept", "application/json");
+        .get(`tracks/${track.id}/testOwns`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.result.exists, true);
@@ -105,14 +118,15 @@ describe("tracks/{id}/testOwns", () => {
       });
       const track = await createTrack(trackGroup.id, { isPreview: false });
 
-      const { user: purchaser } = await createUser({
+      const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",
       });
       await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
 
       const response = await requestApp
-        .get(`tracks/${track.id}/testOwns?email=${purchaser.email}`)
-        .set("Accept", "application/json");
+        .get(`tracks/${track.id}/testOwns`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.result.exists, false);

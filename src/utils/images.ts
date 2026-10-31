@@ -72,11 +72,20 @@ export const storedImageUrl = (
 ) => generateFullStaticImageUrl(fileName, storedImagePrefix(image), extension);
 
 export const storedImageVariantUrl = (
-  image: Pick<StoredImage, "url" | "keyPrefix"> | null | undefined,
+  image:
+    | (Pick<StoredImage, "url" | "keyPrefix"> & { updatedAt?: Date | string })
+    | null
+    | undefined,
   size: number
 ) => {
   const variant = image?.url.find((u) => u.endsWith(`-x${size}`));
-  return image && variant ? storedImageUrl(image, variant) : undefined;
+  if (!image || !variant) {
+    return undefined;
+  }
+  const url = storedImageUrl(image, variant);
+  return image.updatedAt
+    ? `${url}?${new Date(image.updatedAt).getTime()}`
+    : url;
 };
 
 export const storedImageFileUrl = (

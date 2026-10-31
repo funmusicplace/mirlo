@@ -1,11 +1,11 @@
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
-import { uniq } from "lodash";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 
 type Query = {
   email?: string;
+  token?: string;
 };
 
 export default function () {
@@ -15,15 +15,20 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     const { id } = req.params;
-    const { email } = req.query as unknown as Query;
+    const { email, token } = req.query as unknown as Query;
     const user = req.user;
     try {
-      const emails = uniq([email, user?.email].filter((e): e is string => !!e));
+      const identities = [
+        ...(email && token
+          ? [{ user: { email }, singleDownloadToken: token }]
+          : []),
+        ...(user ? [{ userId: user.id }] : []),
+      ];
       let exists = false;
-      if (emails.length > 0) {
+      if (identities.length > 0) {
         const purchase = await prisma.userTrackPurchase.findFirst({
           where: {
-            user: { email: { in: emails } },
+            OR: identities,
             trackId: Number(id),
           },
         });
@@ -38,7 +43,7 @@ export default function () {
               trackGroup: {
                 publishedAt: { lte: new Date() },
                 userTrackGroupPurchases: {
-                  some: { user: { email: { in: emails } } },
+                  some: { OR: identities },
                 },
               },
             },

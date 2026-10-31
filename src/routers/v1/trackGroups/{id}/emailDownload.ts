@@ -8,6 +8,7 @@ import { sendMailQueue } from "../../../../queues/send-mail-queue";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import { getClient } from "../../../../utils/getClient";
 import { hasSubscriptionTiers } from "../../../../utils/subscriptionTier";
+import { whereForPurchasableTrackGroup } from "../../../../utils/trackGroup";
 
 export default function () {
   const operations = {
@@ -22,6 +23,7 @@ export default function () {
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           id: Number(trackGroupId),
+          ...whereForPurchasableTrackGroup(),
         },
         include: {
           profile: true,

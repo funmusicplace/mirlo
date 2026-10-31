@@ -3,10 +3,10 @@ import { groupBy, keyBy, uniq } from "lodash";
 
 import logger from "../logger";
 import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
-import { findSales } from "../routers/v1/artists/{id}/supporters";
 import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
 import { serializeUserTransaction } from "../serializers/userTransaction";
 import { getClient } from "../utils/getClient";
+import { findSales } from "../utils/sales";
 
 type ReportSale = {
   artist: { name: string; id: number }[];

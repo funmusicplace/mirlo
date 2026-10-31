@@ -34,7 +34,6 @@ function CampaignSummary({
 
   const {
     data: { totalAmount, totalSupporters } = {
-      results: [],
       total: 0,
       totalAmount: 0,
       totalSupporters: 0,

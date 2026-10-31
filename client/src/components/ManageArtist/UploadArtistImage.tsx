@@ -1,21 +1,10 @@
-import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import { ArtistButton } from "components/Artist/ArtistButtons";
-import { InputEl } from "components/common/Input";
 import { queryArtist } from "queries";
 import React from "react";
-import { useTranslation } from "react-i18next";
-import { AiFillDelete } from "react-icons/ai";
 import { useParams } from "react-router-dom";
 import api from "services/api";
-import { useSnackbar } from "state/SnackbarContext";
-import { formatAcceptList } from "utils/uploadFormats";
-import useJobStatusCheck from "utils/useJobStatusCheck";
-import useObjectUrl from "utils/useObjectUrl";
 
-import { bp } from "../../constants";
-
-import { Img, ReplaceSpan, Spinner, UploadPrompt } from "./UploadImage";
+import UploadImageField from "./UploadImageField";
 
 type ImageType = "background" | "avatar" | "cover" | "image";
 
@@ -90,10 +79,8 @@ const UploadArtistImage: React.FC<{
   maxDimensions,
   maxSize,
   imageTypeDescription,
-  isLoading: externalIsLoading,
+  isLoading,
 }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
-  const snackbar = useSnackbar();
   const { artistId: artistParamId } = useParams();
 
   const { refetch: refresh } = useQuery(
@@ -105,201 +92,45 @@ const UploadArtistImage: React.FC<{
   React.useEffect(() => {
     setExistingImage(getExistingImage(existing, imageType));
   }, [existing, imageType]);
-  const [isSaving, setIsSaving] = React.useState(false);
-  const [pendingFile, setPendingFile] = React.useState<File>();
-  const pendingPreview = useObjectUrl(pendingFile);
-  const displayedImage = pendingPreview ?? existingImage;
 
-  const resetWrapper = React.useCallback(async () => {
+  const reloadImage = React.useCallback(async () => {
     let result = await api.get<TrackGroup | Artist>(buildRootUrl(existing));
-    const image = getExistingImage(result.result, imageType);
-
-    setExistingImage(image);
-    setPendingFile(undefined);
-
+    setExistingImage(getExistingImage(result.result, imageType));
     refresh();
   }, [existing, imageType, refresh]);
 
-  const reportFailedJob = React.useCallback(() => {
-    setPendingFile(undefined);
-    snackbar(t("somethingWentWrong", { keyPrefix: "manageArtist" }), {
-      type: "warning",
-    });
-  }, [snackbar, t]);
-
-  const { uploadJobs, setUploadJobs } = useJobStatusCheck({
-    reload: () => {},
-    reset: resetWrapper,
-    onFailed: reportFailedJob,
-    queue: "optimizeImage",
-  });
-
-  const deleteImage = React.useCallback(async () => {
-    setIsSaving(true);
-    try {
-      await api.delete(`${buildRootUrl(existing)}${imageType}`);
-    } catch (e) {
-      snackbar("Something went wrong", { type: "warning" });
-      console.error(e);
-    } finally {
-      setIsSaving(false);
-      resetWrapper();
-    }
-  }, [existing, imageType, resetWrapper, snackbar]);
-
-  const callback = React.useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      setIsSaving(true);
-      try {
-        const file = e.target.files?.[0];
-        if (file) {
-          setPendingFile(file);
-          const jobInfo = await api.uploadFile(
-            `${buildRootUrl(existing)}${imageType}`,
-            [file]
-          );
-          setUploadJobs([
-            { jobId: jobInfo.result.jobId, jobStatus: "waiting" },
-          ]);
-        }
-      } catch (e) {
-        setPendingFile(undefined);
-        snackbar("Something went wrong", { type: "warning" });
-        console.error(e);
-      } finally {
-        setIsSaving(false);
-      }
+  const upload = React.useCallback(
+    async (file: File) => {
+      const { result } = await api.uploadFile(
+        `${buildRootUrl(existing)}${imageType}`,
+        [file]
+      );
+      return result;
     },
-    [existing, imageType, setUploadJobs, snackbar]
+    [existing, imageType]
   );
 
-  const isLoading =
-    externalIsLoading ||
-    (uploadJobs?.[0]?.jobStatus !== undefined &&
-      uploadJobs?.[0]?.jobStatus !== "completed");
-
-  const rounded = imageType === "avatar" ? true : false;
+  const remove = React.useCallback(async () => {
+    await api.delete(`${buildRootUrl(existing)}${imageType}`);
+    await reloadImage();
+  }, [existing, imageType, reloadImage]);
 
   return (
-    <div
-      className={css`
-        display: flex;
-        align-items: flex-start;
-        flex-wrap: wrap;
-        flex-direction: column;
-        max-width: 400px;
-        height: 100%;
-        width: 100%;
-
-        img {
-          flex: 45%;
-          width: 100%;
-        }
-        input {
-          flex: 100%;
-          width: 100%;
-        }
-
-        label {
-          position: relative;
-          margin-bottom: 1rem;
-        }
-      `}
-    >
-      <label htmlFor={`${imageType}image`}>
-        {displayedImage && (
-          <div
-            className={css`
-              span {
-                opacity: 0;
-                color: rgba(0, 0, 0, 0);
-              }
-              &:hover {
-                span {
-                  opacity: 1;
-                  color: white;
-                }
-              }
-            `}
-          >
-            <ReplaceSpan
-              rounded={rounded}
-              className={css`
-                @media (max-width: ${bp.medium}px) {
-                  font-size: var(--mi-font-size-xsmall) !important;
-                  height: 96% !important;
-                }
-              `}
-            >
-              {t("replaceImage")}
-            </ReplaceSpan>
-            <Img src={displayedImage} alt={imageType} rounded={rounded} />
-          </div>
-        )}
-
-        {!displayedImage && (
-          <UploadPrompt
-            width={width}
-            height={height}
-            rounded={rounded}
-            imageTypeDescription={imageTypeDescription}
-          />
-        )}
-        {(isLoading || isSaving) && <Spinner rounded={rounded} />}
-      </label>
-
-      <div
-        className={css`
-          display: flex;
-          flex-direction: column;
-        `}
-      >
-        <InputEl
-          type="file"
-          id={`${imageType}image`}
-          accept="image/*"
-          onChange={callback}
-        />
-        <small
-          className={css`
-            width: 100%;
-            flex: 100%;
-            margin-top: 0.5rem !important;
-            @media (max-width: ${bp.medium}px) {
-              font-size: var(--mi-font-size-xsmall);
-            }
-          `}
-        >
-          {t("dimensionsTip", { maxDimensions, maxSize })}
-        </small>
-        <small
-          className={css`
-            width: 100%;
-            flex: 100%;
-            margin-top: 0.25rem !important;
-            opacity: 0.7;
-            @media (max-width: ${bp.medium}px) {
-              font-size: var(--mi-font-size-xsmall);
-            }
-          `}
-        >
-          {t("acceptedFormats", {
-            keyPrefix: "manageAlbum",
-            formats: formatAcceptList("image/*"),
-          })}
-        </small>
-      </div>
-      {existingImage && (
-        <ArtistButton
-          aria-label={t("deleteImage")}
-          onClick={deleteImage}
-          variant="dashed"
-          onlyIcon
-          type="button"
-          startIcon={<AiFillDelete />}
-        />
-      )}
-    </div>
+    <UploadImageField
+      inputId={`${imageType}image`}
+      imageUrl={existingImage}
+      upload={upload}
+      remove={remove}
+      onProcessed={reloadImage}
+      alt={imageType}
+      rounded={imageType === "avatar"}
+      height={height}
+      width={width}
+      maxDimensions={maxDimensions}
+      maxSize={maxSize}
+      imageTypeDescription={imageTypeDescription}
+      isLoading={isLoading}
+    />
   );
 };
 

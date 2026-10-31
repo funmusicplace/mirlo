@@ -6,7 +6,7 @@ import { serializeUserTransaction } from "../../../../serializers/userTransactio
 import { resolveManagedArtistIds } from "../../../../utils/artist";
 import { getDateRange } from "../../../../utils/dateRange";
 import { downloadCSVFile } from "../../../../utils/download";
-import { findSales } from "../../artists/{id}/supporters";
+import { findSales } from "../../../../utils/sales";
 
 export default function () {
   const operations = {

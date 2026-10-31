@@ -14,12 +14,14 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { trackGroupIds } = req.body;
+    const profileId = Number(req.params.artistId);
     try {
       await Promise.all(
         trackGroupIds.map(async (trackGroupId: number, idx: number) => {
-          await prisma.trackGroup.update({
+          await prisma.trackGroup.updateMany({
             where: {
               id: trackGroupId,
+              profileId,
             },
             data: {
               orderIndex: idx + 1,
@@ -33,6 +35,7 @@ export default function () {
           id: {
             in: trackGroupIds,
           },
+          profileId,
         },
         include: {
           tracks: {

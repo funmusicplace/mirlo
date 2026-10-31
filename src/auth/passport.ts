@@ -43,14 +43,18 @@ passport.use(
       secretOrKey: secret ?? "",
     },
     async (jwtPayload, done) => {
-      const { expiration, email } = jwtPayload;
+      const { expiration, email, id } = jwtPayload;
 
       if (Date.now() > expiration) {
         logger.info("token expired");
         return done("Unauthorized", false);
       }
+      if (!email || !id) {
+        return done(null, false);
+      }
       const foundUser = await prisma.user.findFirst({
         where: {
+          id,
           email,
         },
       });

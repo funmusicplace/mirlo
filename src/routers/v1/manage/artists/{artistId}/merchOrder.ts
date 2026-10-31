@@ -14,12 +14,14 @@ export default function () {
 
   async function PUT(req: Request, res: Response, next: NextFunction) {
     const { merchIds } = req.body;
+    const profileId = Number(req.params.artistId);
     try {
       await Promise.all(
         merchIds.map(async (merchId: string, idx: number) => {
-          await prisma.merch.update({
+          await prisma.merch.updateMany({
             where: {
               id: merchId,
+              profileId,
             },
             data: {
               order: idx + 1,
@@ -33,6 +35,7 @@ export default function () {
           id: {
             in: merchIds,
           },
+          profileId,
         },
       });
 

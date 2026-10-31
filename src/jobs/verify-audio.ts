@@ -2,7 +2,7 @@ import { promises as fsPromises } from "fs";
 
 import { Job } from "bullmq";
 
-import { downloadOriginalAudio } from "../utils/minio";
+import { downloadOriginalAudio, presignOriginalAudio } from "../utils/minio";
 
 import { logger } from "./queue-worker";
 const TEMP_LOCATION = process.env.TEMP_LOCATION;
@@ -48,7 +48,7 @@ export default async (job: Job) => {
     // formData.append("file", blob);
     // formData.append("api_token", process.env.AUDD_IO_TOKEN);
 
-    const url = `${process.env.API_DOMAIN}/v1/tracks/${audioId}/audio`;
+    const url = await presignOriginalAudio(audioId, fileExtension);
     const jsonBody = JSON.stringify({
       url,
       api_token: process.env.AUDD_IO_TOKEN,

@@ -945,6 +945,9 @@ export const downloadOriginalAudio = (
   destPath: string
 ) => getFile(getAudioBucket(), `${audioId}/original.${ext}`, destPath);
 
+export const presignOriginalAudio = (audioId: string, ext: string) =>
+  getPresignedDownloadUrl(getAudioBucket(), `${audioId}/original.${ext}`);
+
 export const streamOriginalAudio = (audioId: string, ext: string) =>
   getReadStream(getAudioBucket(), `${audioId}/original.${ext}`);
 

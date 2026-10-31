@@ -1,6 +1,7 @@
 import assert from "assert";
 
 import prisma from "@mirlo/prisma";
+import jwt from "jsonwebtoken";
 import request from "supertest";
 
 import { clearTables, createProfile, createTier, createUser } from "../utils";
@@ -14,6 +15,21 @@ describe("auth/profile", () => {
     } catch (e) {
       console.error(e);
     }
+  });
+
+  it("rejects a JWT that isn't a session token", async () => {
+    await createUser({ email: "first@test.com" });
+    const playToken = jwt.sign(
+      { song: 1, userid: "listener" },
+      process.env.JWT_SECRET ?? "",
+      { expiresIn: "2d", audience: "playtoken" }
+    );
+
+    const response = await authRequestApp
+      .get("profile")
+      .set("Cookie", [`jwt=${playToken}`]);
+
+    assert.equal(response.status, 401);
   });
 
   it("includes what the tier switcher needs to know about each subscription", async () => {

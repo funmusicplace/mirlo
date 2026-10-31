@@ -467,9 +467,6 @@ export const publicArtistHandlers = (artist: Artist | (() => Artist)) => {
     http.get("*/v1/artists/:artistSlug/posts", () =>
       HttpResponse.json({ results: current().posts, total: POSTS.length })
     ),
-    http.get("*/v1/artists/:artistSlug/supporters/", () =>
-      HttpResponse.json({ results: [], total: 0 })
-    ),
     http.get("*/v1/artists/:artistSlug", () =>
       HttpResponse.json({ result: current() })
     ),

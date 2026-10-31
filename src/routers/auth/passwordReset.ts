@@ -6,6 +6,7 @@ import { NextFunction, Request, Response } from "express";
 import { revokeAllConnectedApps } from "../../auth/oidc/grants";
 import logger from "../../logger";
 import { sendMailQueue } from "../../queues/send-mail-queue";
+import { AppError } from "../../utils/error";
 import { getClient } from "../../utils/getClient";
 
 import { hashPassword, setTokens } from "./utils";
@@ -156,6 +157,15 @@ export const passwordResetSetPassword = async (
       id: string;
       token: string;
     };
+
+    if (!token || !id || !newPassword) {
+      return next(
+        new AppError({
+          httpCode: 400,
+          description: "Token, id, and password are required",
+        })
+      );
+    }
 
     const user = await prisma.user.findFirst({
       where: {

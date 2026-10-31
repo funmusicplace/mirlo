@@ -38,14 +38,16 @@ export default function () {
       });
 
       const confirmation =
-        await prisma.profileUserSubscriptionConfirmation.findFirst({
-          where: {
-            profileId: Number(profileId),
-            email,
-            token,
-            tokenExpiration: { gte: new Date() },
-          },
-        });
+        email && token
+          ? await prisma.profileUserSubscriptionConfirmation.findFirst({
+              where: {
+                profileId: Number(profileId),
+                email,
+                token,
+                tokenExpiration: { gte: new Date() },
+              },
+            })
+          : null;
 
       if (!confirmation) {
         res.redirect(applicationUrl + `/?message=Something went wrong`);

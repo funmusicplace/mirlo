@@ -12,6 +12,7 @@ import {
   createArtist,
   createProfile,
   createTier,
+  createTrackGroup,
   createUser,
 } from "../../../utils";
 import { requestApp } from "../../utils";
@@ -363,5 +364,122 @@ describe("manage/artists/{artistId}/subscriptionTierOrder", () => {
       where: { id: otherTier.id },
     });
     assert.equal(refreshedOther?.order, null);
+  });
+});
+
+describe("manage/artists/{artistId}/subscriptionTiers/{tierId}/releases", () => {
+  beforeEach(async () => {
+    try {
+      await clearTables();
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  it("should not add another artist's release to a tier", async () => {
+    const { user, accessToken } = await createUser({ email: "a@test.com" });
+    const artist = await createArtist(user.id);
+    const tier = await createTier(artist.id);
+    await prisma.profileUserSubscription.create({
+      data: { userId: user.id, profileSubscriptionTierId: tier.id, amount: 0 },
+    });
+
+    const { user: victim } = await createUser({ email: "victim@test.com" });
+    const victimArtist = await createArtist(victim.id);
+    const victimRelease = await createTrackGroup(victimArtist.id, {
+      publishedAt: null,
+    });
+
+    const response = await requestApp
+      .post(`manage/artists/${artist.id}/subscriptionTiers/${tier.id}/releases`)
+      .send({ trackGroupId: victimRelease.id })
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 400);
+    assert.equal(
+      await prisma.subscriptionTierRelease.count({
+        where: { tierId: tier.id },
+      }),
+      0
+    );
+    assert.equal(
+      await prisma.userTrackGroupPurchase.count({
+        where: { trackGroupId: victimRelease.id },
+      }),
+      0
+    );
+  });
+
+  it("should add the artist's own release to a tier", async () => {
+    const { user, accessToken } = await createUser({ email: "a@test.com" });
+    const artist = await createArtist(user.id);
+    const tier = await createTier(artist.id);
+    const release = await createTrackGroup(artist.id);
+
+    const response = await requestApp
+      .post(`manage/artists/${artist.id}/subscriptionTiers/${tier.id}/releases`)
+      .send({ trackGroupId: release.id })
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 201);
+    assert.equal(
+      await prisma.subscriptionTierRelease.count({
+        where: { tierId: tier.id },
+      }),
+      1
+    );
+  });
+
+  it("should let a label add a release it's paid for to its tier", async () => {
+    const { user: labelUser, accessToken } = await createUser({
+      email: "label@test.com",
+    });
+    const label = await createArtist(labelUser.id);
+    const tier = await createTier(label.id);
+
+    const { user: artistUser } = await createUser({ email: "artist@test.com" });
+    const artist = await createArtist(artistUser.id);
+    const release = await createTrackGroup(artist.id, {
+      paymentToUserId: labelUser.id,
+    });
+
+    const response = await requestApp
+      .post(`manage/artists/${label.id}/subscriptionTiers/${tier.id}/releases`)
+      .send({ trackGroupId: release.id })
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 201);
+  });
+
+  it("should let a label add a release by an artist that granted it release rights", async () => {
+    const { user: labelUser, accessToken } = await createUser({
+      email: "label@test.com",
+    });
+    const label = await createArtist(labelUser.id);
+    const tier = await createTier(label.id);
+
+    const { user: artistUser } = await createUser({ email: "artist@test.com" });
+    const artist = await createArtist(artistUser.id);
+    await prisma.artistLabel.create({
+      data: {
+        labelUserId: labelUser.id,
+        artistId: artist.id,
+        canLabelAddReleases: true,
+        isArtistApproved: true,
+        isLabelApproved: true,
+      },
+    });
+    const release = await createTrackGroup(artist.id);
+
+    const response = await requestApp
+      .post(`manage/artists/${label.id}/subscriptionTiers/${tier.id}/releases`)
+      .send({ trackGroupId: release.id })
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 201);
   });
 });

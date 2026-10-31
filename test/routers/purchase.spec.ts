@@ -270,6 +270,24 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 404);
     });
 
+    it("should return 400 when a card-reader subscription has no buyer email", async () => {
+      const { user, accessToken } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_reader_no_email",
+      });
+      const profile = await createProfile(user.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          readerId: "tmr_test",
+          items: [{ type: "subscription", tierId: tier.id }],
+        },
+        accessToken
+      );
+      assert.equal(response.statusCode, 400);
+    });
+
     it("should return 404 when subscription tier does not exist", async () => {
       const { user, accessToken } = await createUser({
         email: "buyer@test.com",

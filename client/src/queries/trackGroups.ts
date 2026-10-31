@@ -390,12 +390,6 @@ export function queryFundraiserPledges(opts: {
 
 const fetchTrackGroupSupporters: QueryFunction<
   {
-    results: {
-      name: string;
-      amount: number;
-      message?: string;
-      datePurchased: string;
-    }[];
     total: number;
     totalAmount: number;
     totalSupporters: number;

@@ -1,8 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
-import { findSales } from "../../artists/{id}/supporters";
-import { serializeUserTransaction } from "../../../../serializers/userTransaction";
+import { findSales } from "../../../../utils/sales";
 
 export default function () {
   const operations = {
@@ -11,13 +10,7 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     let { id }: { id?: string } = req.params;
-    let {
-      take = 20,
-      skip = 0,
-      sinceDate,
-    } = req.query as {
-      take: number | string;
-      skip: number | string;
+    const { sinceDate } = req.query as {
       sinceDate?: string | undefined;
     };
 
@@ -95,20 +88,7 @@ export default function () {
         )
       ).length;
 
-      const page = results.slice(Number(skip), Number(take)).map((r) => ({
-        ...r,
-        userId: undefined,
-      }));
-
-      const apiResults = page.map((ut) => {
-        if (!("trackGroupPurchases" in ut)) {
-          return ut;
-        }
-        return serializeUserTransaction(ut);
-      });
-
       res.json({
-        results: apiResults,
         total,
         totalAmount,
         totalSupporters,
@@ -121,14 +101,17 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: "Returns supporters of this trackGroup",
+    summary: "Returns support totals for this trackGroup",
     responses: {
       200: {
-        description: "A list of published posts",
+        description: "Sale and pledge totals",
         schema: {
-          type: "array",
-          items: {
-            $ref: "#/definitions/Post",
+          type: "object",
+          properties: {
+            total: { type: "number" },
+            totalAmount: { type: "number" },
+            totalSupporters: { type: "number" },
+            totalPledges: { type: "number" },
           },
         },
       },

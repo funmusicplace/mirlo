@@ -118,8 +118,21 @@ export const registerPostHydration = (
  */
 export const registerProfileHydration = (
   hydrations: HydrationData[],
-  profile: any
+  profile: any,
+  options?: { partial?: boolean }
 ) => {
+  if (options?.partial) {
+    registerHydration(hydrations, "__MIRLO_ARTIST__", profile.urlSlug, {
+      artist: serializeProfile({
+        ...profile,
+        trackGroups: [],
+        merch: [],
+        posts: [],
+      }),
+      partial: true,
+    });
+    return;
+  }
   registerHydration(hydrations, "__MIRLO_ARTIST__", profile.urlSlug, {
     artist: serializeProfile(profile),
   });
