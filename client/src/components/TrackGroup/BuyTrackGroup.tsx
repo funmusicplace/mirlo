@@ -90,7 +90,7 @@ const BuyTrackGroup: React.FC<{
     async (data: FormData) => {
       try {
         setStripeLoading(true);
-        if (user || verifiedEmail) {
+        if (user) {
           const alreadyOwns = await testOwnership(trackGroup.id);
           if (alreadyOwns && !window.confirm(t("albumExists") ?? "")) {
             return;

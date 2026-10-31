@@ -58,25 +58,20 @@ export const getPostsVisibleToUser = async (
   take: number = 20,
   skip: number = 0
 ) => {
-  const where = wherePublishedPostsForProfile(profile.id);
-
-  const [posts, total] = await Promise.all([
-    prisma.post.findMany({
-      where,
-      include: {
-        profile: { include: { avatar: true } },
-        minimumSubscriptionTier: true,
-        postSubscriptionTiers: true,
-        featuredImage: true,
-        images: postImagesForContent,
-        _count: { select: { tracks: true } },
-      },
-      orderBy: postFeedOrder,
-      take,
-      skip,
-    }),
-    prisma.post.count({ where }),
-  ]);
+  const posts = await prisma.post.findMany({
+    where: wherePublishedPostsForProfile(profile.id),
+    include: {
+      profile: { include: { avatar: true } },
+      minimumSubscriptionTier: true,
+      postSubscriptionTiers: true,
+      featuredImage: true,
+      images: postImagesForContent,
+      _count: { select: { tracks: true } },
+    },
+    orderBy: postFeedOrder,
+    take,
+    skip,
+  });
 
   const isProfileOwner = await canUserEditProfile(profile.id, user);
   const subscriptions = await getUserSubscriptionsForProfile(user, profile.id);
@@ -90,8 +85,11 @@ export const getPostsVisibleToUser = async (
     )
   );
 
-  return { posts: processedPosts, total };
+  return { posts: processedPosts };
 };
+
+export const countPublishedPostsForProfile = (profileId: number) =>
+  prisma.post.count({ where: wherePublishedPostsForProfile(profileId) });
 
 export const getAlbumsVisibleToUser = async (
   profile: Profile,
@@ -119,7 +117,7 @@ export const getAlbumsCountForProfile = async (profile: Profile) => {
 
 export const getFeedCountForProfile = async (profile: Profile) => {
   const [posts, albums] = await Promise.all([
-    prisma.post.count({ where: wherePublishedPostsForProfile(profile.id) }),
+    countPublishedPostsForProfile(profile.id),
     getAlbumsCountForProfile(profile),
   ]);
   return posts + albums;

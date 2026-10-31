@@ -460,7 +460,7 @@ export default function () {
             profileId,
             tierId: subItem.tierId,
             amount: subItem.amount,
-            ...resolveBuyer({ loggedInUser, email, readerId }),
+            userEmail: email ?? "",
           });
 
           return res.status(200).json({ setupIntentId });
