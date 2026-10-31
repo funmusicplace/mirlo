@@ -36,8 +36,8 @@ import {
 import { redisClient } from "../config/redis";
 import logger from "../logger";
 import {
-  buildFeedForArtist,
   getFeedCountForProfile,
+  getFeedPageForProfile,
 } from "../routers/v1/artists/{id}/feed";
 import {
   findArtistIdForURLSlug,
@@ -179,14 +179,14 @@ federation
         },
       });
       if (!artist) return null;
-      const { results: zipped } = await buildFeedForArtist(undefined, artist);
-
-      const skip = cursor ? Number(cursor) : 0;
-      const page = zipped.slice(skip, skip + OUTBOX_PAGE_SIZE);
-      const nextCursor =
-        skip + OUTBOX_PAGE_SIZE < zipped.length
-          ? String(skip + OUTBOX_PAGE_SIZE)
-          : null;
+      const skip = Math.max(parseInt(cursor ?? "", 10) || 0, 0);
+      const { results: page, hasMore } = await getFeedPageForProfile(
+        undefined,
+        artist,
+        OUTBOX_PAGE_SIZE,
+        skip
+      );
+      const nextCursor = hasMore ? String(skip + OUTBOX_PAGE_SIZE) : null;
       const prevCursor =
         skip > 0 ? String(Math.max(0, skip - OUTBOX_PAGE_SIZE)) : null;
 

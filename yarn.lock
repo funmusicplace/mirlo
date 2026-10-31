@@ -3405,117 +3405,120 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fedify/express@npm:^2.3.4":
-  version: 2.3.4
-  resolution: "@fedify/express@npm:2.3.4"
+"@fedify/express@npm:^2.4.5":
+  version: 2.4.5
+  resolution: "@fedify/express@npm:2.4.5"
   peerDependencies:
-    "@fedify/fedify": ^2.3.4
+    "@fedify/fedify": ^2.4.5
     express: ">=4.0.0"
-  checksum: 10/69ae4cf9f6c40419539acb1a94fb7957976e49230df4a6e1658313140bbcc1b39ef9a8fa8fbde0bd6c738a70c6e5590fa760e9715d85d1068f9c7e93bfd7cc94
+  checksum: 10/d0498d4f75be84f889b0b20f4d0d6667f663155f80d06e1c05e839c94b45dc804cf0154416cf8592fe8882a0679447389bd81e8a5615e759db0adcdbc78231f1
   languageName: node
   linkType: hard
 
-"@fedify/fedify@npm:^2.3.4":
-  version: 2.3.4
-  resolution: "@fedify/fedify@npm:2.3.4"
+"@fedify/fedify@npm:^2.4.5":
+  version: 2.4.5
+  resolution: "@fedify/fedify@npm:2.4.5"
   dependencies:
-    "@fedify/uri-template": "npm:2.3.4"
-    "@fedify/vocab": "npm:2.3.4"
-    "@fedify/vocab-runtime": "npm:2.3.4"
-    "@fedify/webfinger": "npm:2.3.4"
-    "@js-temporal/polyfill": "npm:^0.5.1"
+    "@fedify/uri-template": "npm:2.4.5"
+    "@fedify/vocab": "npm:2.4.5"
+    "@fedify/vocab-runtime": "npm:2.4.5"
+    "@fedify/webfinger": "npm:2.4.5"
     "@logtape/logtape": "npm:^2.2.0"
-    "@opentelemetry/api": "npm:^1.9.1"
+    "@opentelemetry/api": "npm:~1.9.1"
     "@opentelemetry/core": "npm:^2.7.1"
     "@opentelemetry/sdk-metrics": "npm:2.7.1"
     "@opentelemetry/sdk-trace-base": "npm:^2.7.1"
     "@opentelemetry/semantic-conventions": "npm:^1.40.0"
+    "@standard-schema/spec": "npm:^1.1.0"
     byte-encodings: "npm:^1.0.11"
+    devalue: "npm:^5.8.1"
     es-toolkit: "npm:1.46.1"
     json-canon: "npm:^1.0.1"
     jsonld: "npm:^9.0.0"
     structured-field-values: "npm:^2.0.4"
+    temporal-polyfill: "npm:^1.0.1"
     urlpattern-polyfill: "npm:^10.1.0"
-  checksum: 10/1c96cb792f57387f1acd842be89dd2c8ddbab70399ae30d3a35edd8ac7b924ebe6a4eacdbdbf51d988fcf32301a56258e93984a103faf578b40254086ff2544a
+  checksum: 10/f399e67754a20654dfc4956025de24297f8380adbaebadf40191ea4473b01a9efeb428a5e192ee3f40519a60cc03e33f2c42e2d3a28327df4c4c59938c88450f
   languageName: node
   linkType: hard
 
-"@fedify/redis@npm:^2.3.4":
-  version: 2.3.4
-  resolution: "@fedify/redis@npm:2.3.4"
+"@fedify/redis@npm:^2.4.5":
+  version: 2.4.5
+  resolution: "@fedify/redis@npm:2.4.5"
   dependencies:
-    "@js-temporal/polyfill": "npm:^0.5.1"
     "@logtape/logtape": "npm:^2.2.0"
+    temporal-polyfill: "npm:^1.0.1"
   peerDependencies:
-    "@fedify/fedify": ^2.3.4
+    "@fedify/fedify": ^2.4.5
     ioredis: ^5.8.2
-  checksum: 10/77be7fe297de33ce7d1100d4fb9f73776788ff4cdd1fe7940e6f59398f4be2157f3462980712c14d2bc43054f5e50a56295c91d52865111920a3142fa85875f9
+  checksum: 10/ec986edce9463865c6e388189e2084d688586ba0e2766f7ca6bd060305f678f40d4e7a945fecbbdaa8e9113a761ebfa4f6ec262d4c08ad69f260c1487edd632e
   languageName: node
   linkType: hard
 
-"@fedify/uri-template@npm:2.3.4":
-  version: 2.3.4
-  resolution: "@fedify/uri-template@npm:2.3.4"
-  checksum: 10/18ecd8aff4de680be194afb373ed0ce00e139c98228183b7326fa727acb3eb16a845efa2f6149de03c20fa65e23e8b23537b39d8737371c57f907052ec302658
+"@fedify/uri-template@npm:2.4.5":
+  version: 2.4.5
+  resolution: "@fedify/uri-template@npm:2.4.5"
+  checksum: 10/4c8794a80d801d075bf0604b6f7605365d5043cf8e69e130c030b925f66ab1adf9e00da69771f00886557bcd9d02f95b1ed3925e896bb0305a9286044be5d156
   languageName: node
   linkType: hard
 
-"@fedify/vocab-runtime@npm:2.3.4":
-  version: 2.3.4
-  resolution: "@fedify/vocab-runtime@npm:2.3.4"
+"@fedify/vocab-runtime@npm:2.4.5":
+  version: 2.4.5
+  resolution: "@fedify/vocab-runtime@npm:2.4.5"
   dependencies:
     "@js-temporal/polyfill": "npm:^0.5.1"
     "@logtape/logtape": "npm:^2.2.0"
     "@multiformats/base-x": "npm:^4.0.1"
-    "@opentelemetry/api": "npm:^1.9.1"
+    "@opentelemetry/api": "npm:~1.9.1"
     asn1js: "npm:^3.0.10"
     byte-encodings: "npm:^1.0.11"
     jsonld: "npm:^9.0.0"
     pkijs: "npm:^3.3.3"
-  checksum: 10/60a7248413aa41ee1ccd5264481ca9dbbe503e1e5114c7a7f52e1cd14b225ded2e542966b14c1532bd98974f93fa785dbe4867f2ce9b702001905289859ac44f
+    undici: "npm:^7.30.1"
+  checksum: 10/5646599af22bfe64e1bc72293fa47931e58d817623d5363aab7c0d57881ac697c17e655d6c7f8e85195b5c53ca1836543d34eb66d6ddbcc5bdf3d569b2479134
   languageName: node
   linkType: hard
 
-"@fedify/vocab-tools@npm:2.3.4":
-  version: 2.3.4
-  resolution: "@fedify/vocab-tools@npm:2.3.4"
+"@fedify/vocab-tools@npm:2.4.5":
+  version: 2.4.5
+  resolution: "@fedify/vocab-tools@npm:2.4.5"
   dependencies:
     "@cfworker/json-schema": "npm:^4.1.1"
     byte-encodings: "npm:^1.0.11"
     es-toolkit: "npm:^1.46.1"
     yaml: "npm:^2.9.0"
-  checksum: 10/6047c558e99e9c6ca3cc05c6a881d9a0ab1237f2f2974ebf4ac23c4a235c0de1417972a150756c065c5e85960ada78ee39cdd19b5acdd6e75b57d5e89bca8a1a
+  checksum: 10/b00436bd0f3ee486056863a9243f94f6d715dbf6b7bca43ec7cd62aebeebc7573dd62996b2c3be33f5c6e53cef12ba996cf03d6da84c367a4f83b4086153382c
   languageName: node
   linkType: hard
 
-"@fedify/vocab@npm:2.3.4":
-  version: 2.3.4
-  resolution: "@fedify/vocab@npm:2.3.4"
+"@fedify/vocab@npm:2.4.5":
+  version: 2.4.5
+  resolution: "@fedify/vocab@npm:2.4.5"
   dependencies:
-    "@fedify/vocab-runtime": "npm:2.3.4"
-    "@fedify/vocab-tools": "npm:2.3.4"
-    "@fedify/webfinger": "npm:2.3.4"
-    "@js-temporal/polyfill": "npm:^0.5.1"
+    "@fedify/vocab-runtime": "npm:2.4.5"
+    "@fedify/vocab-tools": "npm:2.4.5"
+    "@fedify/webfinger": "npm:2.4.5"
     "@logtape/logtape": "npm:^2.2.0"
     "@multiformats/base-x": "npm:^4.0.1"
-    "@opentelemetry/api": "npm:^1.9.1"
+    "@opentelemetry/api": "npm:~1.9.1"
     asn1js: "npm:^3.0.10"
     es-toolkit: "npm:1.46.1"
     jsonld: "npm:^9.0.0"
     pkijs: "npm:^3.3.3"
-  checksum: 10/febe444ceafb69f78e045453b408e0d9cfaec92056dae69e1469dc1dadb2f437ac1d7a2c46e606aaae7f53d55ab5902ff3b352c3be950af7f7230db077bf0766
+    temporal-polyfill: "npm:^1.0.1"
+  checksum: 10/a284168bd16d71709dfb9b55ce81475f5f989514604a30d60c0ce0cfe02de8325f7e841da1ba77c1d21bb6d3e615bbf90a0e98c43e78782e00a475794ed02c18
   languageName: node
   linkType: hard
 
-"@fedify/webfinger@npm:2.3.4":
-  version: 2.3.4
-  resolution: "@fedify/webfinger@npm:2.3.4"
+"@fedify/webfinger@npm:2.4.5":
+  version: 2.4.5
+  resolution: "@fedify/webfinger@npm:2.4.5"
   dependencies:
-    "@fedify/vocab-runtime": "npm:2.3.4"
+    "@fedify/vocab-runtime": "npm:2.4.5"
     "@logtape/logtape": "npm:^2.2.0"
-    "@opentelemetry/api": "npm:^1.9.1"
+    "@opentelemetry/api": "npm:~1.9.1"
     es-toolkit: "npm:1.46.1"
-  checksum: 10/bc2ef3ca9a5fde66b8255579400ae550503809db3efa07050ebb3f9362af84ec3274b8b759b2ad4cd41106b307cc99f6deceaa0a4398c9591dce34502f15bad7
+  checksum: 10/9ea35a0dda8f36f965c39cec0075d2ed779c228265686ea60b27504e6bf810b5942028a82ee60e08bf170547a4be904bc4e1f387b49ad365dd70747d7d519176
   languageName: node
   linkType: hard
 
@@ -5197,7 +5200,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/api@npm:^1.9.1":
+"@opentelemetry/api@npm:~1.9.1":
   version: 1.9.1
   resolution: "@opentelemetry/api@npm:1.9.1"
   checksum: 10/b26032739d3c54ca99b5a2920844a1fbd4c3ee383cacbb0915e8c706a2626fe91e96feaa6e893397abe0545dc8d0a765b220aa18a31b1773176eeaf3a225e10e
@@ -8183,7 +8186,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@standard-schema/spec@npm:^1.0.0":
+"@standard-schema/spec@npm:^1.0.0, @standard-schema/spec@npm:^1.1.0":
   version: 1.1.0
   resolution: "@standard-schema/spec@npm:1.1.0"
   checksum: 10/a209615c9e8b2ea535d7db0a5f6aa0f962fd4ab73ee86a46c100fb78116964af1f55a27c1794d4801e534a196794223daa25ff5135021e03c7828aa3d95e1763
@@ -14810,6 +14813,13 @@ __metadata:
   version: 3.1.0
   resolution: "detect-newline@npm:3.1.0"
   checksum: 10/ae6cd429c41ad01b164c59ea36f264a2c479598e61cba7c99da24175a7ab80ddf066420f2bec9a1c57a6bead411b4655ff15ad7d281c000a89791f48cbe939e7
+  languageName: node
+  linkType: hard
+
+"devalue@npm:^5.8.1":
+  version: 5.9.4
+  resolution: "devalue@npm:5.9.4"
+  checksum: 10/0cc1125e5d2e6c40d92b33fde5671106b07aa33a2b9d7cee47aa7b49e7ea38ffc3d37b3203cdfccfe81e864e71d6cb62e7ee459b61b6ddac2724c08208a18f13
   languageName: node
   linkType: hard
 
@@ -21993,9 +22003,9 @@ __metadata:
     "@commitlint/config-conventional": "npm:^20.5.0"
     "@eslint/js": "npm:^10.0.1"
     "@faker-js/faker": "npm:^8.3.1"
-    "@fedify/express": "npm:^2.3.4"
-    "@fedify/fedify": "npm:^2.3.4"
-    "@fedify/redis": "npm:^2.3.4"
+    "@fedify/express": "npm:^2.4.5"
+    "@fedify/fedify": "npm:^2.4.5"
+    "@fedify/redis": "npm:^2.4.5"
     "@prisma/client": "npm:7.10.0"
     "@sendgrid/eventwebhook": "npm:^8.0.0"
     "@trivago/prettier-plugin-sort-imports": "npm:^6.0.2"
@@ -27624,6 +27634,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"temporal-polyfill@npm:^1.0.1":
+  version: 1.0.6
+  resolution: "temporal-polyfill@npm:1.0.6"
+  dependencies:
+    temporal-spec: "npm:1.0.1"
+    temporal-utils: "npm:1.0.3"
+  checksum: 10/68be452a22552e5ad322dd14ae247b5d84e254fed323ba1092f25e457e2fe6f8241278848288b80179d39a14bade8bd32cd014bb04002f25ba541e87011a0ed8
+  languageName: node
+  linkType: hard
+
+"temporal-spec@npm:1.0.1":
+  version: 1.0.1
+  resolution: "temporal-spec@npm:1.0.1"
+  checksum: 10/7623ba4c36cc4f7842aafb9289ee426650dcf5860a247d8f0ea48bfe8bee09ff7ed1dadabaa3892ecd81c9721b0103a8dae9409d6c343350d1fba7269a712ba6
+  languageName: node
+  linkType: hard
+
+"temporal-utils@npm:1.0.3":
+  version: 1.0.3
+  resolution: "temporal-utils@npm:1.0.3"
+  checksum: 10/fc4b391fbfec4c4775b85fbd04f09b998d65c9fcd2490600b22a8cf54aa4522da598e9ee1bb203e81dcd750025a3079d451a60e2b8afdc3e9bdc6df43dfeed1a
+  languageName: node
+  linkType: hard
+
 "tempy@npm:^0.6.0":
   version: 0.6.0
   resolution: "tempy@npm:0.6.0"
@@ -28482,6 +28516,13 @@ __metadata:
   version: 7.25.0
   resolution: "undici@npm:7.25.0"
   checksum: 10/038d3568c72bb976e3cc389284f7f1cc64cd70d578300e4676a449fbcb624a35fe99ac127b5f3729f18b8246d6c090444ab61b1b67736bb88f52a3e913d76bf8
+  languageName: node
+  linkType: hard
+
+"undici@npm:^7.30.1":
+  version: 7.30.1
+  resolution: "undici@npm:7.30.1"
+  checksum: 10/306a28e4c715652a0e2cd59bcc98cf8b6083b989151054fafaac27bdab6f2bc7e0f33f5847f72f5ba257971226372d04705e0e984b26b42a03271d5a35eb99b1
   languageName: node
   linkType: hard
 
