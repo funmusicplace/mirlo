@@ -71,8 +71,20 @@ export default defineConfig({
           releaseDate?: string;
           isPreorder?: boolean;
           isPublic?: boolean;
+          about?: string;
+          credits?: string;
+          coverCredit?: string;
         }) => {
           return pkg.createTrackGroup(query.artistId, query);
+        },
+        createRecommendedTrackGroup: async (query: {
+          trackGroupId: number;
+          recommendedTrackGroupId: number;
+        }) => {
+          return pkg.createRecommendedTrackGroup(
+            query.trackGroupId,
+            query.recommendedTrackGroupId
+          );
         },
         createTrack: async (query: {
           title: string;

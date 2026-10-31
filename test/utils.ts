@@ -273,6 +273,9 @@ export const createTrackGroup = async (
       minPrice: data?.minPrice,
       suggestedPrice: data?.suggestedPrice,
       title: data?.title ?? "Test trackGroup",
+      about: data?.about,
+      credits: data?.credits,
+      coverCredit: data?.coverCredit,
       urlSlug:
         data?.urlSlug || (data?.title ? slug(data?.title) : "test-trackgroup"),
       profile: { connect: { id: profileId } },
@@ -320,6 +323,15 @@ export const createTrackGroup = async (
     },
   });
   return tg;
+};
+
+export const createRecommendedTrackGroup = async (
+  trackGroupId: number,
+  recommendedTrackGroupId: number
+) => {
+  return prisma.recommendedTrackGroup.create({
+    data: { trackGroupId, recommendedTrackGroupId },
+  });
 };
 
 export const createMerch = async (
@@ -634,6 +646,7 @@ export default {
   createPost,
   createTier,
   createTrackGroup,
+  createRecommendedTrackGroup,
   createTrack,
   createUser,
   createUserTrackGroupPurchase,
