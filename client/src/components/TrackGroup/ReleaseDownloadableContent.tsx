@@ -1,12 +1,64 @@
-import { css } from "@emotion/css";
-import { ArtistButtonAnchor } from "components/Artist/ArtistButtons";
+import styled from "@emotion/styled";
 import { useTranslation } from "react-i18next";
-import { FaDownload } from "react-icons/fa";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { canUserEditArtist } from "utils/artist";
 
-import { bp } from "../../constants";
+const FileChip = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 3px 8px 3px 3px;
+  border: 1px dashed var(--mi-tint-x-color);
+  border-radius: var(--mi-border-radius);
+  background: transparent;
+  color: var(--mi-text-color);
+  font: inherit;
+  line-height: 1.4;
+`;
+
+const FileChipButton = styled(FileChip.withComponent("button"))`
+  border-style: solid;
+  cursor: pointer;
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: var(--mi-button-color);
+  }
+`;
+
+const FILE_EXTENSION_REGEX = /^[a-z0-9]{1,5}$/i;
+
+const FileExtension = styled.span`
+  padding: 1px 5px;
+  border-radius: var(--mi-border-radius);
+  background: var(--mi-tint-x-color);
+  color: var(--mi-light-foreground-color);
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+`;
+
+const splitFilename = (filename: string) => {
+  const dotIndex = filename.lastIndexOf(".");
+  const extension = filename.slice(dotIndex + 1);
+  if (dotIndex <= 0 || !FILE_EXTENSION_REGEX.test(extension)) {
+    return { name: filename, extension: undefined };
+  }
+  return { name: filename.slice(0, dotIndex), extension };
+};
+
+const FileLabel: React.FC<{ filename: string }> = ({ filename }) => {
+  const { name, extension } = splitFilename(filename);
+  return (
+    <>
+      {extension && <FileExtension>{extension}</FileExtension>}
+      <span className="truncate">{name}</span>
+    </>
+  );
+};
 
 const ReleaseDownloadableContent: React.FC<{
   trackGroup: TrackGroup;
@@ -14,6 +66,9 @@ const ReleaseDownloadableContent: React.FC<{
 }> = ({ trackGroup, artist }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
+  });
+  const { t: tDetails } = useTranslation("translation", {
+    keyPrefix: "trackGroupDetails",
   });
 
   const { user } = useAuthContext();
@@ -51,102 +106,53 @@ const ReleaseDownloadableContent: React.FC<{
     });
   };
 
-  if (userHasPurchasedTrackGroup || userIsOwner) {
-    return trackGroup.downloadableContent &&
-      trackGroup.downloadableContent.length > 0 ? (
-      <div
-        className={
-          "includes " +
-          css`
-            margin-top: 1rem;
-            font-size: var(--mi-font-size-small);
-            @media screen and (max-width: ${bp.small}px) {
-              max-width: 100%;
-              flex: 100%;
-              margin: var(--mi-side-paddings-xsmall);
-              margin-top: 1rem;
-            }
-          `
-        }
-      >
-        <p>
-          <strong
-            className={css`
-              font-size: var(--mi-font-size-small);
-              }
-            `}
-          >
-            {t("yourPurchaseIncludes")}
-          </strong>
-        </p>
-        <ul
-          className={css`
-            list-style-type: disc;
-            margin: var(--mi-side-paddings-xsmall);
-            margin-top: 0.5rem;
-            font-size: var(--mi-font-size-small);
-            margin-left: 1rem;
-          `}
-        >
-          {trackGroup.downloadableContent.map((content) => (
-            <li key={content.downloadableContentId}>
-              <ArtistButtonAnchor
-                onClick={(e) => {
-                  e.preventDefault;
-                  download(
-                    content.downloadableContentId,
-                    content.downloadableContent.originalFilename
-                  );
-                }}
-                variant="link"
-                endIcon={<FaDownload />}
-              >
-                {content.downloadableContent.originalFilename}
-              </ArtistButtonAnchor>
-            </li>
-          ))}
-        </ul>
-      </div>
-    ) : null;
+  if (!trackGroup.downloadableContent?.length) {
+    return null;
   }
 
+  const canDownload = userHasPurchasedTrackGroup || userIsOwner;
+
   return (
-    <>
-      {trackGroup.downloadableContent &&
-        trackGroup.downloadableContent.length > 0 && (
-          <div
-            className={css`
-              margin-top: 1rem;
-              font-size: var(--mi-font-size-small);
-              @media screen and (max-width: ${bp.small}px) {
-                max-width: 100%;
-                flex: 100%;
-                margin: var(--mi-side-paddings-xsmall);
-                margin-top: 1rem;
-              }
-            `}
-          >
-            <p>
-              <strong>{t("purchaseIncludesThisDownloadableContent")}</strong>
-            </p>
-            <ul
-              className={css`
-                list-style-type: disc;
-                margin: var(--mi-side-paddings-xsmall);
-                margin-top: 0.5rem;
-                font-size: var(--mi-font-size-small);
-                margin-left: 1rem;
-              `}
-            >
-              {trackGroup.downloadableContent.map((content) => (
-                <li key={content.downloadableContentId}>
-                  {content.downloadableContent.originalFilename}
-                </li>
-              ))}
-            </ul>
-          </div>
+    <div className="flex flex-col gap-2">
+      <p>
+        {t(
+          canDownload
+            ? "yourPurchaseIncludes"
+            : "purchaseIncludesThisDownloadableContent"
         )}
-    </>
+      </p>
+      <ul className="flex flex-wrap gap-1.5 list-none m-0 p-0">
+        {trackGroup.downloadableContent.map((content) => {
+          const filename = content.downloadableContent.originalFilename;
+          return (
+            <li key={content.downloadableContentId} className="min-w-0">
+              {canDownload ? (
+                <FileChipButton
+                  type="button"
+                  title={filename}
+                  aria-label={tDetails("downloadFile", { filename })}
+                  onClick={() =>
+                    download(content.downloadableContentId, filename)
+                  }
+                >
+                  <FileLabel filename={filename} />
+                  <span
+                    aria-hidden
+                    className="font-bold text-(--mi-button-color)"
+                  >
+                    ↓
+                  </span>
+                </FileChipButton>
+              ) : (
+                <FileChip title={filename}>
+                  <FileLabel filename={filename} />
+                </FileChip>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 };
 
