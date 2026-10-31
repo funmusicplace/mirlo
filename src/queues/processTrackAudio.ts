@@ -22,7 +22,13 @@ const queueOptions = {
   connection: REDIS_CONFIG,
 };
 
-export const audioQueue = new Queue("upload-audio", queueOptions);
+export const audioQueue = new Queue("upload-audio", {
+  ...queueOptions,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: { type: "exponential", delay: 30_000 },
+  },
+});
 
 const audioQueueEvents = new QueueEvents("upload-audio", queueOptions);
 
@@ -37,17 +43,7 @@ audioQueueEvents.on(
 
     try {
       const job = await audioQueue.getJob(result.jobId);
-      if (result.returnvalue.error) {
-        logger.error(
-          `Job ${result.jobId} completed with error: ${JSON.stringify(result.returnvalue.error)}`
-        );
-        if (job) {
-          await prisma.trackAudio.update({
-            where: { id: job.data.audioId },
-            data: { uploadState: "ERROR" },
-          });
-        }
-      } else if (result.returnvalue.deleted) {
+      if (result.returnvalue.deleted) {
         logger.info(`Job ${result.jobId}: audio was deleted while processing`);
       } else if (job) {
         const audio = await prisma.trackAudio.update({
