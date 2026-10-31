@@ -37,7 +37,10 @@ function Index() {
         // We need to find the trackgroup id, not the slug
         const tgResponse = await api.get<Track>(`tracks/${trackId}`);
 
-        const ownsQuery = new URLSearchParams({ email: email ?? "" });
+        const ownsQuery = new URLSearchParams({
+          email: email ?? "",
+          token: token ?? "",
+        });
         const result = await api.get<{ exists: boolean }>(
           `tracks/${trackId}/testOwns?${ownsQuery.toString()}`
         );

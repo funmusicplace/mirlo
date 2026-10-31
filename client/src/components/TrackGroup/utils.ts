@@ -1,10 +1,9 @@
 import api from "services/api";
 
-export const testOwnership = async (trackGroupId: number, email: string) => {
+export const testOwnership = async (trackGroupId: number) => {
   try {
-    const query = new URLSearchParams({ email: email.toLowerCase() });
     const response = await api.get<{ exists: boolean }>(
-      `trackGroups/${trackGroupId}/testOwns?${query.toString()}`
+      `trackGroups/${trackGroupId}/testOwns`
     );
     return response.result.exists;
   } catch (e) {

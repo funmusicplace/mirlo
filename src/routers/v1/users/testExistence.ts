@@ -1,11 +1,11 @@
-import { NextFunction, Request, Response } from "express";
-import { userAuthenticated } from "../../../auth/passport";
-import { assertLoggedIn } from "../../../auth/getLoggedInUser";
 import prisma from "@mirlo/prisma";
+import { NextFunction, Request, Response } from "express";
+
+import { assertLoggedIn } from "../../../auth/getLoggedInUser";
+import { userAuthenticated } from "../../../auth/passport";
 
 type Query = {
   urlSlug?: string;
-  email?: string;
 };
 
 export default function () {
@@ -14,18 +14,11 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const { email, urlSlug } = req.query as unknown as Query;
+    const { urlSlug } = req.query as unknown as Query;
     assertLoggedIn(req);
     const loggedInUser = req.user;
     try {
       let exists = false;
-
-      if (email) {
-        const user = await prisma.user.findFirst({
-          where: { email },
-        });
-        exists = !!user;
-      }
 
       if (urlSlug && loggedInUser) {
         const user = await prisma.user.findFirst({

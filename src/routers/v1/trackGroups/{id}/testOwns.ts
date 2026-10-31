@@ -5,6 +5,7 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 
 type Query = {
   email?: string;
+  token?: string;
 };
 
 export default function () {
@@ -14,10 +15,12 @@ export default function () {
 
   async function GET(req: Request, res: Response) {
     const { id } = req.params;
-    const { email } = req.query as unknown as Query;
+    const { email, token } = req.query as unknown as Query;
     try {
       const identities = [
-        ...(email ? [{ user: { email } }] : []),
+        ...(email && token
+          ? [{ user: { email }, singleDownloadToken: token }]
+          : []),
         ...(req.user ? [{ userId: req.user.id }] : []),
       ];
 

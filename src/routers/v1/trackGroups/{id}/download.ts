@@ -14,6 +14,7 @@ import {
   basicTrackGroupInclude,
   findPurchaseAndVoidToken,
   findPurchaseBasedOnTokenAndUpdate,
+  purchaseLinkNotFound,
 } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -65,6 +66,7 @@ export default function () {
           }
         } else if (!req.user) {
           log.info(`trackGroupId: ${trackGroupId} no user found for ${email}`);
+          throw purchaseLinkNotFound();
         }
       }
 

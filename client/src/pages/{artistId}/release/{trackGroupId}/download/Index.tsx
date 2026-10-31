@@ -37,7 +37,10 @@ function Index() {
           `trackGroups/${trackGroupId}?artistId=${artistId}`
         );
 
-        const ownsQuery = new URLSearchParams({ email: email ?? "" });
+        const ownsQuery = new URLSearchParams({
+          email: email ?? "",
+          token: token ?? "",
+        });
         const result = await api.get<{ exists: boolean }>(
           `trackGroups/${tgResponse.result.id}/testOwns?${ownsQuery.toString()}`
         );

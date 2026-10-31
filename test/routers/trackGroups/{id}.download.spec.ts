@@ -307,5 +307,35 @@ describe("trackGroups/{id}/download", () => {
         `should say the purchase/token didn't resolve, got: ${JSON.stringify(response.body.error)}`
       );
     });
+
+    it("answers the same for an unknown email as for a wrong token", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      const { user: purchaser } = await createUser({
+        email: "purchaser@artist.com",
+      });
+      await prisma.userTrackGroupPurchase.create({
+        data: {
+          userId: purchaser.id,
+          trackGroupId: trackGroup.id,
+          singleDownloadToken: randomUUID(),
+        },
+      });
+
+      const [known, unknown] = await Promise.all(
+        [purchaser.email, "nobody@artist.com"].map((email) =>
+          requestApp
+            .get(`trackGroups/${trackGroup.id}/download`)
+            .query({ email, token: "wrong-token" })
+            .set("Accept", "application/json")
+        )
+      );
+
+      assert.equal(known.statusCode, 404);
+      assert.equal(unknown.statusCode, 404);
+      assert.deepEqual(unknown.body, known.body);
+      assert.ok(!JSON.stringify(known.body).includes(String(purchaser.id)));
+    });
   });
 });

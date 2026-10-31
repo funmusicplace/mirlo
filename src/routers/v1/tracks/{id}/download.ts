@@ -12,6 +12,7 @@ import {
   basicTrackGroupInclude,
   findTrackPurchaseAndVoidToken,
   findTrackPurchaseBasedOnTokenAndUpdate,
+  purchaseLinkNotFound,
 } from "../../../../utils/trackGroup";
 import { cleanHeaderValue } from "../../../../utils/validate-http-headers";
 
@@ -62,6 +63,7 @@ export default function () {
           }
         } else if (!req.user) {
           log.info(`trackId: ${trackId} no user found for ${email}`);
+          throw purchaseLinkNotFound();
         }
       }
 
