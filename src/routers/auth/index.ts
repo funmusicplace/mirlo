@@ -2,6 +2,7 @@ import express from "express";
 import { rateLimit } from "express-rate-limit";
 
 import { userAuthenticated } from "../../auth/passport";
+import { plainBodyValuesOnly } from "../../utils/plainInput";
 
 import confirmEmailToken from "./confirmEmailToken";
 import login from "./login";
@@ -19,6 +20,8 @@ import { clearJWT, setTokens } from "./utils";
 import verifyEmail from "./verifyEmail";
 
 const router = express.Router();
+
+router.use(plainBodyValuesOnly);
 
 router.post(`/signup`, signup);
 

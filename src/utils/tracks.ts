@@ -426,16 +426,25 @@ export const createFfmpegCommand = (stream: Readable) => ffmpeg(stream);
 
 export const fileExists = (filePath: string) => existsSync(filePath);
 
+type TrackArtistInput = {
+  artistName: string;
+  artistId: number;
+  role: string;
+  isCoAuthor: boolean;
+  order: number;
+};
+
+export const trackArtistFields = (ta: TrackArtistInput) => ({
+  artistId: ta.artistId,
+  artistName: ta.artistName,
+  role: ta.role,
+  isCoAuthor: ta.isCoAuthor,
+  order: ta.order,
+});
+
 export const updateTrackArtists = async (
   trackId: number,
-  trackArtists?: {
-    artistName: string;
-    id: string;
-    artistId: number;
-    role: string;
-    isCoAuthor: boolean;
-    order: number;
-  }[]
+  trackArtists?: (TrackArtistInput & { id: string })[]
 ) => {
   if (!trackArtists) {
     return;
@@ -457,11 +466,7 @@ export const updateTrackArtists = async (
   await prisma.trackArtist.createMany({
     data: newTrackArtists.map((nta) => ({
       trackId: Number(trackId),
-      artistId: nta.artistId,
-      artistName: nta.artistName,
-      role: nta.role,
-      isCoAuthor: nta.isCoAuthor,
-      order: nta.order,
+      ...trackArtistFields(nta),
     })),
   });
 
@@ -471,13 +476,7 @@ export const updateTrackArtists = async (
         where: {
           id: eta.id,
         },
-        data: {
-          artistId: eta.artistId,
-          artistName: eta.artistName,
-          role: eta.role,
-          isCoAuthor: eta.isCoAuthor,
-          order: eta.order,
-        },
+        data: trackArtistFields(eta),
       })
     )
   );

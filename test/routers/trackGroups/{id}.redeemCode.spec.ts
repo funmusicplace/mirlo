@@ -41,11 +41,43 @@ describe("trackGroups/{id}/redeemCode", () => {
       const trackGroup = await createTrackGroup(profile.id);
       const response = await requestApp
         .post(`trackGroups/${trackGroup.id}/redeemCode`)
-        .send({})
+        .send({ code: "nope", email: "purchaser@artist.com" })
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 404);
       assert.equal(response.body.error, "Code not found or already used.");
+    });
+
+    it("should not redeem a code when none, or a filter, is supplied", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      await prisma.trackGroupDownloadCodes.create({
+        data: {
+          trackGroupId: trackGroup.id,
+          downloadCode: "asdf",
+          group: "press",
+        },
+      });
+
+      for (const body of [
+        { email: "purchaser@artist.com" },
+        { email: "purchaser@artist.com", code: { not: "" } },
+      ]) {
+        const response = await requestApp
+          .post(`trackGroups/${trackGroup.id}/redeemCode`)
+          .send(body)
+          .set("Accept", "application/json");
+
+        assert.equal(response.statusCode, 400);
+        assert.equal(response.body.error, "A code is required");
+      }
+      const code = await prisma.trackGroupDownloadCodes.findFirst({
+        where: { downloadCode: "asdf" },
+      });
+      assert.equal(code?.redeemedByUserId, null);
     });
 
     it("should GET / fail without an email or logged in user", async () => {

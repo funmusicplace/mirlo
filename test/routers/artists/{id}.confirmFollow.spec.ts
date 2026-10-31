@@ -57,7 +57,7 @@ describe("artists/{id}/confirmFollow", () => {
 
       const response = await requestApp
         .get(`artists/${profile.id}/confirmFollow`)
-        .send({
+        .query({
           token: confirmation.token,
           email: followerEmail,
         })
@@ -91,6 +91,40 @@ describe("artists/{id}/confirmFollow", () => {
       assert(follow);
     });
 
+    it("should not confirm a follow without the email and token", async () => {
+      const { user: profileOwner } = await createUser({
+        email: "test@test.com",
+      });
+      const profile = await createProfile(profileOwner.id);
+      await prisma.profileUserSubscriptionConfirmation.create({
+        data: {
+          email: "follower@follower.com",
+          profileId: profile.id,
+        },
+      });
+
+      const response = await requestApp
+        .get(`artists/${profile.id}/confirmFollow`)
+        .query("email[startsWith]=f")
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 302);
+      assert.equal(
+        response.header["location"],
+        "http://localhost:8080/?message=Something%20went%20wrong"
+      );
+      assert.equal(
+        await prisma.profileUserSubscriptionConfirmation.count({
+          where: { profileId: profile.id },
+        }),
+        1
+      );
+      assert.equal(
+        await prisma.user.count({ where: { email: "follower@follower.com" } }),
+        0
+      );
+    });
+
     it("should create a user and if they didn't already exist in the database", async () => {
       const { user: profileOwner } = await createUser({
         email: "test@test.com",
@@ -109,7 +143,7 @@ describe("artists/{id}/confirmFollow", () => {
 
       const response = await requestApp
         .get(`artists/${profile.id}/confirmFollow`)
-        .send({
+        .query({
           token: confirmation.token,
           email: followerEmail,
         })

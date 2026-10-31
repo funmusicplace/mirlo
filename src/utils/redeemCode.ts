@@ -40,6 +40,13 @@ export const redeemDownloadCode = async ({
   userId?: number;
   email?: string;
 }) => {
+  if (typeof code !== "string" || !code) {
+    throw new AppError({
+      httpCode: 400,
+      description: "A code is required",
+    });
+  }
+
   const downloadCode = await prisma.trackGroupDownloadCodes.findFirst({
     where: {
       downloadCode: code,
