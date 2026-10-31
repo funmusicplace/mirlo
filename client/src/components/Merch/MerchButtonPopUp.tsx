@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { ButtonProps } from "components/common/Button";
 import Modal from "components/common/Modal";
 import { moneyDisplay } from "components/common/Money";
 import { queryUserStripeStatus } from "queries";
@@ -9,11 +10,13 @@ import { useTranslation } from "react-i18next";
 
 import BuyMerchItem from "./BuyMerchItem";
 
-const MerchButtonPopUp: React.FC<{
-  merch: Merch;
-  artist: Artist;
-  compact?: boolean;
-}> = ({ merch, artist, compact = false }) => {
+const MerchButtonPopUp: React.FC<
+  {
+    merch: Merch;
+    artist: Artist;
+    compact?: boolean;
+  } & Pick<ButtonProps, "variant" | "rounded">
+> = ({ merch, artist, compact = false, variant, rounded }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "merchDetails",
   });
@@ -26,14 +29,29 @@ const MerchButtonPopUp: React.FC<{
 
   const [isOpen, setIsOpen] = React.useState(false);
 
+  const buttonShape = {
+    wrap: compact,
+    size: compact ? ("compact" as const) : undefined,
+    variant,
+    rounded,
+  };
+
   if (merch.quantityRemaining === 0) {
-    return <ArtistButton disabled>{t("soldOut")}</ArtistButton>;
+    return (
+      <ArtistButton disabled {...buttonShape}>
+        {t("soldOut")}
+      </ArtistButton>
+    );
   }
 
   // Externally-sold merch sidesteps Mirlo's Stripe checkout, so don't gate the
   // button on the artist's Stripe status. See #1424.
   if (!hasExternalUrl && !stripeAccountStatus?.chargesEnabled) {
-    return <ArtistButton disabled>{t("soldOut")}</ArtistButton>;
+    return (
+      <ArtistButton disabled {...buttonShape}>
+        {t("soldOut")}
+      </ArtistButton>
+    );
   }
 
   const hasPricedOptions =
@@ -54,11 +72,7 @@ const MerchButtonPopUp: React.FC<{
 
   return (
     <>
-      <ArtistButton
-        wrap={compact}
-        size={compact ? "compact" : undefined}
-        onClick={() => setIsOpen(true)}
-      >
+      <ArtistButton {...buttonShape} onClick={() => setIsOpen(true)}>
         {buttonLabel}
       </ArtistButton>
       <Modal

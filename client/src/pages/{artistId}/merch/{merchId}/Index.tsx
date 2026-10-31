@@ -14,8 +14,6 @@ import MerchDownloadableContent from "components/Merch/MerchDownloadableContent"
 import MerchImageGallery from "components/Merch/MerchImageGallery";
 import { ItemViewTitle } from "components/TrackGroup/ItemViewTitle";
 import {
-  coverSizeMax,
-  coverSizeMin,
   ImageAndDetailsWrapper,
   ImageWrapper,
 } from "pages/{artistId}/release/{trackGroupId}/Index";
@@ -30,7 +28,7 @@ import {
   getReleaseUrl,
 } from "utils/artist";
 
-import { bp } from "../../../../constants";
+import { bp, coverSizeMax, coverSizeMin } from "../../../../constants";
 
 function Index() {
   const { t } = useTranslation("translation", {

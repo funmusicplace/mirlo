@@ -128,7 +128,10 @@ function Index() {
                   )}
                 </UnderneathImage>
                 {trackGroup.merch && trackGroup.merch.length > 0 && (
-                  <TrackGroupMerch merch={trackGroup.merch} />
+                  <TrackGroupMerch
+                    merch={trackGroup.merch}
+                    releaseArtist={artist}
+                  />
                 )}
                 <SmallScreenPlayWrapper>
                   <ClickToPlayTracks

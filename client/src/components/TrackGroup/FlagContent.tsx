@@ -1,18 +1,18 @@
 import { css } from "@emotion/css";
+import { Turnstile } from "@marsidev/react-turnstile";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
 import { SelectEl } from "components/common/Select";
+import TextArea from "components/common/TextArea";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
-
-import { Turnstile } from "@marsidev/react-turnstile";
-import TextArea from "components/common/TextArea";
 import { useSnackbar } from "state/SnackbarContext";
-import { ArtistButton } from "components/Artist/ArtistButtons";
+
 import { bp } from "../../constants";
 
 const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
@@ -63,8 +63,13 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
         variant="link"
         className={css`
           font-weight: normal !important;
-          font-size: 0.9rem !important;
-          margin-right: 1.25rem;
+          font-size: 0.75rem !important;
+          color: var(--mi-light-foreground-color) !important;
+          text-decoration: none !important;
+
+          &:hover {
+            text-decoration: underline !important;
+          }
 
           @media screen and (max-width: ${bp.medium}px) {
             max-width: 100%;

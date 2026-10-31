@@ -1,41 +1,39 @@
-import { css } from "@emotion/css";
-import DashedList from "components/ManageArtist/Merch/DashedList";
+import styled from "@emotion/styled";
 import { useTranslation } from "react-i18next";
 
 import TrackGroupMerchItem from "./TrackGroupMerchItem";
 
-const TrackGroupMerch: React.FC<{ merch: Merch[] }> = ({ merch }) => {
+const MerchList = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px dashed var(--mi-tint-x-color);
+
+  > li {
+    border-bottom: 1px dashed var(--mi-tint-x-color);
+  }
+`;
+
+const TrackGroupMerch: React.FC<{ merch: Merch[]; releaseArtist: Artist }> = ({
+  merch,
+  releaseArtist,
+}) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
 
   return (
-    <div>
-      <div
-        className={css`
-          margin-top: 1rem;
-          margin-bottom: 0.5rem;
-        `}
-      >
-        {t("relatedMerch")}
-      </div>
-      <DashedList
-        className={css`
-          margin-bottom: 1rem;
-          border: 0;
-          li {
-            padding: 0.5rem !important;
-          }
-
-          a {
-            margin-right: 1rem;
-          }
-        `}
-      >
+    <div className="mt-4">
+      <p className="mb-1.5 text-sm">{t("relatedMerch")}</p>
+      <MerchList>
         {merch?.map((item) => (
-          <TrackGroupMerchItem key={item.id} item={item} />
+          <TrackGroupMerchItem
+            key={item.id}
+            item={item}
+            releaseArtist={releaseArtist}
+          />
         ))}
-      </DashedList>
+      </MerchList>
     </div>
   );
 };

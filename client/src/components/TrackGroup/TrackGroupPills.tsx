@@ -4,7 +4,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const TrackGroupPills: React.FC<{ tags?: string[] }> = ({ tags }) => {
-  if (!tags) {
+  if (!tags?.length) {
     return null;
   }
   return (
