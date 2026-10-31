@@ -26,7 +26,7 @@ const ArtistSubscriberDataDownload: React.FC = () => {
       if (userId && artistId) {
         await api.getFile(
           "artist-subscribers",
-          `manage/artists/${artistId}/subscribers?format=csv`,
+          `manage/artists/${artistId}/subscribers?format=csv&includeEnded=true`,
           "text/csv"
         );
       }

@@ -189,7 +189,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       );
     });
 
-    it("should include ended subscriptions in the csv but not the json", async () => {
+    it("should only include ended subscriptions when includeEnded is set", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const { user: subscriber } = await createUser({
         email: "subscriber1@email.com",
@@ -215,8 +215,16 @@ describe("manage/artists/{artistId}/subscribers", () => {
         .set("Accept", "application/json");
       assert.deepEqual(jsonResponse.body.results, []);
 
-      const response = await requestApp
+      const csvWithoutEnded = await requestApp
         .get(`manage/artists/${artist.id}/subscribers?format=csv`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.ok(!csvWithoutEnded.text.includes("subscriber1@email.com"));
+
+      const response = await requestApp
+        .get(
+          `manage/artists/${artist.id}/subscribers?format=csv&includeEnded=true`
+        )
         .set("Cookie", [`jwt=${accessToken}`])
         .set("Accept", "application/json");
 

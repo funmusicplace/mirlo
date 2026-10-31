@@ -127,7 +127,7 @@ export default function () {
         });
       }
 
-      const includeEnded = req.query?.format === "csv";
+      const includeEnded = req.query?.includeEnded === "true";
 
       const subscribers = await prisma.profileUserSubscription.findMany({
         where: {
@@ -195,6 +195,21 @@ export default function () {
 
   GET.apiDoc = {
     summary: "Returns an artists subscribers",
+    parameters: [
+      {
+        in: "query",
+        name: "includeEnded",
+        type: "string",
+        enum: ["true", "false"],
+        description: "Also return subscriptions that have ended",
+      },
+      {
+        in: "query",
+        name: "format",
+        type: "string",
+        enum: ["csv"],
+      },
+    ],
     responses: {
       200: {
         description: "A list of artist's subscribers",
