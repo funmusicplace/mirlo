@@ -22,6 +22,11 @@ export const getPaidTierCount = (artist: {
   subscriptionTiers: { isDefaultTier: boolean }[];
 }) => artist.subscriptionTiers.filter((tier) => !tier.isDefaultTier).length;
 
+export const canSupportArtist = (
+  artist: { subscriptionTiers: { isDefaultTier: boolean }[] },
+  stripeAccountStatus?: { chargesEnabled?: boolean }
+) => !!stripeAccountStatus?.chargesEnabled && getPaidTierCount(artist) > 0;
+
 export const isTipOnlyArtist = (artist: {
   subscriptionTiers: { isDefaultTier: boolean }[];
   properties?: { showTipOnSupportPage?: boolean };
@@ -76,6 +81,13 @@ export const getArtistTiersUrl = (artist: {
   id?: number;
 }) => {
   return `/${getArtistUrlReference(artist)}/support`;
+};
+
+export const getArtistReleasesUrl = (artist: {
+  urlSlug?: string;
+  id?: number;
+}) => {
+  return `/${getArtistUrlReference(artist)}/releases`;
 };
 
 export const TIERS_VIEW_ALL_SEARCH = "?view=all";

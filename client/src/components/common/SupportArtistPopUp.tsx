@@ -1,16 +1,12 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import { ArtistButton } from "components/Artist/ArtistButtons";
 import { queryUserStripeStatus } from "queries";
 import React from "react";
-import { useTranslation } from "react-i18next";
-import { useAuthContext } from "state/AuthContext";
+import { canSupportArtist } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
 
 import FollowArtist from "./FollowArtist";
-import Modal from "./Modal";
-import SpaceBetweenDiv from "./SpaceBetweenDiv";
-import SupportArtistTiersForm from "./SupportArtistTiersForm";
+import SupportArtistButton from "./SupportArtistButton";
 
 const SupportArtistPopUp: React.FC<{
   artist: Pick<
@@ -20,28 +16,12 @@ const SupportArtistPopUp: React.FC<{
   prefaceText?: string;
 }> = ({ artist, prefaceText }) => {
   const { data: artistData } = useArtistQuery();
-  const [isOpen, setIsOpen] = React.useState(false);
-  const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const [isSubscribed, setIsSubscribed] = React.useState(false);
-  const { user } = useAuthContext();
 
   const { data: stripeAccountStatus } = useQuery(
     queryUserStripeStatus(artist.userId)
   );
 
-  React.useEffect(() => {
-    const foundTier = user?.artistUserSubscriptions?.find(
-      (sub) => sub.artistSubscriptionTier.artistId === artist.id
-    )?.artistSubscriptionTier;
-    if (foundTier) {
-      setIsSubscribed(true);
-    }
-  }, [artist.id, user?.artistUserSubscriptions]);
-
-  const onlyDefaultTier =
-    artistData?.subscriptionTiers.every((tier) => tier.isDefaultTier) &&
-    artistData?.subscriptionTiers.length === 1;
-  if (!stripeAccountStatus?.chargesEnabled || onlyDefaultTier) {
+  if (!canSupportArtist(artistData ?? artist, stripeAccountStatus)) {
     return (
       <div
         className={css`
@@ -59,25 +39,7 @@ const SupportArtistPopUp: React.FC<{
   return (
     <div className="flex flex-col items-center justify-center text-center mx-4 mt-12 mb-4">
       {prefaceText && <p className="mb-3">{prefaceText}</p>}
-      <ArtistButton wrap size="big" rounded onClick={() => setIsOpen(true)}>
-        {isSubscribed
-          ? t("manageArtistSubscription")
-          : t("supportArtist", { artist: artist.name })}
-      </ArtistButton>
-      <Modal
-        title={t("supportArtist", { artist: artist.name }) ?? ""}
-        open={isOpen}
-        size="small"
-        onClose={() => setIsOpen(false)}
-      >
-        <SpaceBetweenDiv>
-          <div>{t("chooseATier", { artistName: artist.name })}</div>
-        </SpaceBetweenDiv>
-        <SupportArtistTiersForm
-          artist={artist}
-          onFinishedSubscribing={() => setIsOpen(false)}
-        />
-      </Modal>
+      <SupportArtistButton artist={artist} size="big" rounded wrap />
     </div>
   );
 };
