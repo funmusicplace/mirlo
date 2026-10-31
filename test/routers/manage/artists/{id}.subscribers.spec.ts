@@ -188,6 +188,60 @@ describe("manage/artists/{artistId}/subscribers", () => {
         nextBillingDate.toISOString()
       );
     });
+
+    it("should only include ended subscriptions when includeEnded is set", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user: subscriber } = await createUser({
+        email: "subscriber1@email.com",
+      });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id, { isDefaultTier: true });
+      const deletedAt = new Date("2026-09-01T00:00:00.000Z");
+
+      await prisma.profileUserSubscription.create({
+        data: {
+          userId: subscriber.id,
+          profileSubscriptionTierId: tier.id,
+          amount: 500,
+          nextBillingDate: new Date("2026-10-01T00:00:00.000Z"),
+          deleteReason: "PAYMENT_FAILURE",
+          deletedAt,
+        },
+      });
+
+      const jsonResponse = await requestApp
+        .get(`manage/artists/${artist.id}/subscribers`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.deepEqual(jsonResponse.body.results, []);
+
+      const csvWithoutEnded = await requestApp
+        .get(`manage/artists/${artist.id}/subscribers?format=csv`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.ok(!csvWithoutEnded.text.includes("subscriber1@email.com"));
+
+      const response = await requestApp
+        .get(
+          `manage/artists/${artist.id}/subscribers?format=csv&includeEnded=true`
+        )
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+
+      const { columns, values } = parseCsvRow(response.text);
+
+      assert.equal(values[columns.indexOf("Email")], "subscriber1@email.com");
+      assert.equal(values[columns.indexOf("Status")], "ended");
+      assert.equal(
+        values[columns.indexOf("Ended At")],
+        deletedAt.toISOString()
+      );
+      assert.equal(values[columns.indexOf("End Reason")], "PAYMENT_FAILURE");
+      assert.equal(values[columns.indexOf("Next Renew Date")], "");
+      assert.equal(values[columns.indexOf("Cancel At")], "");
+    });
   });
 
   describe("POST", () => {

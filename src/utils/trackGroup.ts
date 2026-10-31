@@ -132,6 +132,14 @@ export const whereForVisibleTrackGroup = (): Prisma.TrackGroupWhereInput => ({
   profile: whereForVisibleProfile(),
 });
 
+export const whereForPurchasableTrackGroup =
+  (): Prisma.TrackGroupWhereInput => ({
+    ...whereForVisibleTrackGroup(),
+    publishedAt: { lte: new Date() },
+    isHiddenTrackGroupForSongDrafts: false,
+    isGettable: true,
+  });
+
 export const deleteTrackGroupCover = (trackGroupId: number) =>
   clearImageSlot("COVER", trackGroupId);
 

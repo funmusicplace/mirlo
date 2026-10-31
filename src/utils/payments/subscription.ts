@@ -91,6 +91,13 @@ export const initiateSubscription = async ({
     amount
   );
 
+  if (!userEmail) {
+    throw new AppError({
+      httpCode: 400,
+      description: "A subscription at a card reader needs the buyer's email",
+    });
+  }
+
   const { stripeAccountId, currency } =
     await resolveProfilePaymentContext(profileId);
 

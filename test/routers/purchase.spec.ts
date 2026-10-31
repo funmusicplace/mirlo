@@ -11,9 +11,11 @@ import Stripe from "stripe";
 import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import {
   cancelPreviousAttempt,
+  resolveBuyer,
   resolveDigitalPurchaseItem,
   resolveMerchPurchaseItem,
 } from "../../src/routers/v1/purchase";
+import { AppError } from "../../src/utils/error";
 import { getClient } from "../../src/utils/getClient";
 import { getPaymentProcessor } from "../../src/utils/payments/PaymentProcessor";
 import { initiateFundraiserPledge } from "../../src/utils/payments/pledge";
@@ -591,7 +593,10 @@ describe("purchase", () => {
       });
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 0 });
-      const track = await createTrack(tg.id, { minPrice: 0 });
+      const track = await createTrack(tg.id, {
+        minPrice: 0,
+        allowIndividualSale: true,
+      });
 
       const response = await postPurchase(
         {
@@ -611,6 +616,81 @@ describe("purchase", () => {
       assert.ok(purchase, "purchase record should be created in DB");
     });
 
+    it("should not sell a track that isn't for individual sale", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const track = await createTrack(tg.id);
+
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          items: [{ type: "track", id: track.id }],
+        },
+        accessToken
+      );
+
+      assert.equal(response.statusCode, 404);
+      const purchase = await prisma.userTrackPurchase.findFirst({
+        where: { userId: buyer.id, trackId: track.id },
+      });
+      assert.equal(purchase, null);
+    });
+
+    (
+      [
+        ["isn't for sale", { isGettable: false }],
+        ["isn't published", { publishedAt: null }],
+        [
+          "is scheduled to publish later",
+          { publishedAt: new Date(Date.now() + 86_400_000) },
+        ],
+        ["was disabled by an admin", { adminEnabled: false }],
+      ] as const
+    ).forEach(([reason, data]) => {
+      it(`should not hand out a free release that ${reason}`, async () => {
+        const { user: artistUser } = await createUser({
+          email: "artist@test.com",
+        });
+        const { user: buyer, accessToken } = await createUser({
+          email: "buyer@test.com",
+        });
+        const profile = await createProfile(artistUser.id);
+        const tg = await createTrackGroup(profile.id, { minPrice: 0, ...data });
+        const track = await createTrack(tg.id, {
+          minPrice: 0,
+          allowIndividualSale: true,
+        });
+
+        for (const item of [
+          { type: "trackGroup", id: tg.id },
+          { type: "track", id: track.id },
+        ]) {
+          const response = await postPurchase(
+            { artistId: profile.id, items: [item] },
+            accessToken
+          );
+          assert.equal(response.statusCode, 404, `${item.type}`);
+        }
+
+        assert.equal(
+          await prisma.userTrackGroupPurchase.count({
+            where: { userId: buyer.id },
+          }),
+          0
+        );
+        assert.equal(
+          await prisma.userTrackPurchase.count({ where: { userId: buyer.id } }),
+          0
+        );
+      });
+    });
+
     it("should return 200 with clientSecret for a paid online track purchase", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
@@ -619,7 +699,10 @@ describe("purchase", () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 0 });
-      const track = await createTrack(tg.id, { minPrice: 500 });
+      const track = await createTrack(tg.id, {
+        minPrice: 500,
+        allowIndividualSale: true,
+      });
 
       const response = await postPurchase(
         {
@@ -641,7 +724,10 @@ describe("purchase", () => {
       const { accessToken } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 0 });
-      const track = await createTrack(tg.id, { minPrice: 500 });
+      const track = await createTrack(tg.id, {
+        minPrice: 500,
+        allowIndividualSale: true,
+      });
 
       const response = await postPurchase(
         {
@@ -2008,7 +2094,10 @@ describe("purchase", () => {
       const { user: buyer } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
       const tg = await createTrackGroup(profile.id, { minPrice: 0 });
-      const track = await createTrack(tg.id, { minPrice: 500 });
+      const track = await createTrack(tg.id, {
+        minPrice: 500,
+        allowIndividualSale: true,
+      });
 
       const createStub = stubStripeForOnline();
 
@@ -2406,6 +2495,66 @@ describe("purchase", () => {
       });
 
       assert.equal(result.setupIntentId, "seti_sub_terminal");
+    });
+
+    it("refuses a terminal subscription without the buyer's email", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_terminal_no_email",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
+      const createStub = sinon.stub(stripeUtils.stripe.setupIntents, "create");
+
+      await assert.rejects(
+        initiateSubscription({
+          readerId: "tmr_test",
+          profileId: profile.id,
+          tierId: tier.id,
+          userEmail: "",
+        }),
+        (e: unknown) => e instanceof AppError && e.httpCode === 400
+      );
+      assert.ok(createStub.notCalled);
+    });
+  });
+
+  describe("resolveBuyer", () => {
+    const seller = {
+      id: 7,
+      email: "seller@test.com",
+    } as unknown as Express.User;
+
+    it("credits a card-reader sale to the buyer's email, not the seller", () => {
+      assert.deepEqual(
+        resolveBuyer({
+          loggedInUser: seller,
+          email: "fan@test.com",
+          readerId: "tmr_test",
+        }),
+        { userEmail: "fan@test.com" }
+      );
+    });
+
+    it("falls back to the seller for a card-reader sale with no email", () => {
+      assert.deepEqual(
+        resolveBuyer({ loggedInUser: seller, readerId: "tmr_test" }),
+        { userEmail: "seller@test.com", userId: "7" }
+      );
+    });
+
+    it("keeps the logged-in user over a typed email online", () => {
+      assert.deepEqual(
+        resolveBuyer({ loggedInUser: seller, email: "fan@test.com" }),
+        { userEmail: "seller@test.com", userId: "7" }
+      );
+    });
+
+    it("uses the typed email for a guest", () => {
+      assert.deepEqual(resolveBuyer({ email: "fan@test.com" }), {
+        userEmail: "fan@test.com",
+        userId: undefined,
+      });
     });
   });
 

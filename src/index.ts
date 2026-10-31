@@ -138,9 +138,6 @@ app.use((req, _res, next) => {
   next();
 });
 const federationMiddleware = integrateFederation(federation, () => undefined);
-// Fedify's fromERequest calls Readable.toWeb(req) for all non-GET/HEAD
-// requests, corrupting the stream for any route that reads the body (e.g.
-// multipart uploads). Only run it on the paths it actually handles.
 app.use((req, res, next) => {
   if (isValidActivityPubEndpoint(req.path)) {
     return federationMiddleware(req, res, next);
@@ -352,6 +349,10 @@ app.use(
           }
 
           const fileErr = err as NodeJS.ErrnoException & { status?: number };
+
+          if (fileErr.code === "ECONNABORTED") {
+            return;
+          }
 
           if (fileErr.code === "ENOENT" || fileErr.status === 404) {
             // Not finding a file during build is expected so shouldn't generate error noise.

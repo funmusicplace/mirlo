@@ -1,6 +1,6 @@
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
-import { Request, Response } from "express";
+import { Request } from "express";
 import { compact, uniq } from "lodash";
 import Stripe from "stripe";
 
@@ -408,30 +408,39 @@ export const repriceStripeSubscription = async ({
 
 export const verifyStripeSignature = async (
   req: Request,
-  res: Response,
   signingSecret?: string
-) => {
-  const signature = req.headers["stripe-signature"];
-  let event = req.body;
-  if (signingSecret && signature) {
-    try {
-      event = stripe.webhooks.constructEvent(
-        // See https://stackoverflow.com/a/70951912/154392
-        // @ts-ignore
-        req.rawBody,
-        signature ?? "",
-        signingSecret
-      );
-    } catch (e) {
-      console.error(
-        `⚠️  Webhook signature verification failed.`,
-        (e as Error).message
-      );
-      return res.sendStatus(400);
-    }
+): Promise<Stripe.Event> => {
+  if (!signingSecret) {
+    throw new AppError({
+      httpCode: 500,
+      description: "The Stripe webhook signing secret isn't configured",
+    });
   }
-
-  return event;
+  const signature = req.headers["stripe-signature"];
+  if (!signature) {
+    throw new AppError({
+      httpCode: 400,
+      description: "Missing Stripe signature",
+    });
+  }
+  try {
+    return stripe.webhooks.constructEvent(
+      // See https://stackoverflow.com/a/70951912/154392
+      // @ts-ignore
+      req.rawBody,
+      signature,
+      signingSecret
+    );
+  } catch (e) {
+    console.error(
+      `⚠️  Webhook signature verification failed.`,
+      (e as Error).message
+    );
+    throw new AppError({
+      httpCode: 400,
+      description: "Invalid Stripe signature",
+    });
+  }
 };
 
 type SessionMetaData = {

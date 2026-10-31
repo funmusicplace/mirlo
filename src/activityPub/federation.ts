@@ -35,7 +35,10 @@ import {
 } from "../activityPub/utils";
 import { redisClient } from "../config/redis";
 import logger from "../logger";
-import { buildFeedForArtist } from "../routers/v1/artists/{id}/feed";
+import {
+  getFeedCountForProfile,
+  getFeedPageForProfile,
+} from "../routers/v1/artists/{id}/feed";
 import {
   findArtistIdForURLSlug,
   whereForVisibleProfile,
@@ -176,14 +179,14 @@ federation
         },
       });
       if (!artist) return null;
-      const { results: zipped } = await buildFeedForArtist(undefined, artist);
-
-      const skip = cursor ? Number(cursor) : 0;
-      const page = zipped.slice(skip, skip + OUTBOX_PAGE_SIZE);
-      const nextCursor =
-        skip + OUTBOX_PAGE_SIZE < zipped.length
-          ? String(skip + OUTBOX_PAGE_SIZE)
-          : null;
+      const skip = Math.max(parseInt(cursor ?? "", 10) || 0, 0);
+      const { results: page, hasMore } = await getFeedPageForProfile(
+        undefined,
+        artist,
+        OUTBOX_PAGE_SIZE,
+        skip
+      );
+      const nextCursor = hasMore ? String(skip + OUTBOX_PAGE_SIZE) : null;
       const prevCursor =
         skip > 0 ? String(Math.max(0, skip - OUTBOX_PAGE_SIZE)) : null;
 
@@ -221,13 +224,9 @@ federation
     if (!parsedId) return 0n;
     const artist = await prisma.profile.findFirst({
       where: { id: parsedId, activityPub: true },
-      include: {
-        subscriptionTiers: true,
-      },
     });
     if (!artist) return 0n;
-    const { total } = await buildFeedForArtist(undefined, artist);
-    return BigInt(total);
+    return BigInt(await getFeedCountForProfile(artist));
   });
 
 const findAPReleaseById = async (id: number) => {

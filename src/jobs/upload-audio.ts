@@ -1,7 +1,7 @@
 import { createReadStream, promises as fsPromises } from "fs";
 
 import prisma from "@mirlo/prisma";
-import { Job } from "bullmq";
+import { Job, UnrecoverableError } from "bullmq";
 import ffmpeg from "fluent-ffmpeg";
 
 import {
@@ -71,7 +71,7 @@ export default async (job: Job) => {
         })
         .on("error", (err: { message: unknown }) => {
           logger.error(`Error converting to hls: ${err.message}`);
-          reject(err);
+          reject(new UnrecoverableError(String(err.message)));
         })
         .on("progress", (data: { timemark: string }) => {
           if (data.timemark.includes(":")) {
@@ -119,11 +119,6 @@ export default async (job: Job) => {
     return response;
   } catch (e) {
     logger.error("Error creating audio folder", e);
-    return {
-      error:
-        e instanceof Error
-          ? { message: e.message, stack: e.stack }
-          : { message: String(e) },
-    };
+    throw e;
   }
 };

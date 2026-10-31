@@ -6,6 +6,7 @@ import {
   ProfileSubscriptionTier,
 } from "@mirlo/prisma/client";
 import { Request, Response } from "express";
+import { compact, keyBy, orderBy } from "lodash";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { serializePost } from "../../../../serializers/post";
@@ -24,7 +25,32 @@ import { postImagesForContent } from "../../../../utils/postContent";
 import { turnItemsIntoRSS } from "../../../../utils/rss";
 import { getInstanceName } from "../../../../utils/settings";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
-import { isTrackGroup } from "../../../../utils/typeguards";
+
+const wherePublishedPostsForProfile = (
+  profileId: number
+): Prisma.PostWhereInput => ({
+  publishedAt: { lte: new Date() },
+  profileId,
+  isDraft: false,
+  deletedAt: null,
+});
+
+const wherePublishedAlbumsForProfile = (
+  profileId: number
+): Prisma.TrackGroupWhereInput => ({
+  ...whereForPublishedTrackGroups(),
+  profileId,
+});
+
+const postFeedOrder = [
+  { publishedAt: "desc" },
+  { id: "desc" },
+] satisfies Prisma.PostOrderByWithRelationInput[];
+
+const albumFeedOrder = [
+  { releaseDate: { sort: "desc", nulls: "last" } },
+  { id: "desc" },
+] satisfies Prisma.TrackGroupOrderByWithRelationInput[];
 
 export const getPostsVisibleToUser = async (
   user: User | undefined,
@@ -32,14 +58,9 @@ export const getPostsVisibleToUser = async (
   take: number = 20,
   skip: number = 0
 ) => {
-  const where: Prisma.PostWhereInput = {
-    publishedAt: { lte: new Date() },
-    profileId: Number(profile.id),
-    isDraft: false,
-    deletedAt: null,
-  };
+  const where = wherePublishedPostsForProfile(profile.id);
 
-  const [posts, total] = await prisma.$transaction([
+  const [posts, total] = await Promise.all([
     prisma.post.findMany({
       where,
       include: {
@@ -50,7 +71,7 @@ export const getPostsVisibleToUser = async (
         images: postImagesForContent,
         _count: { select: { tracks: true } },
       },
-      orderBy: { publishedAt: "desc" },
+      orderBy: postFeedOrder,
       take,
       skip,
     }),
@@ -72,27 +93,99 @@ export const getPostsVisibleToUser = async (
   return { posts: processedPosts, total };
 };
 
-const MAX_ALBUMS_IN_FEED = 100;
-
-export const getAlbumsVisibleToUser = async (profile: Profile) => {
+export const getAlbumsVisibleToUser = async (
+  profile: Profile,
+  take: number,
+  skip: number
+) => {
   const albums = await prisma.trackGroup.findMany({
-    where: { ...whereForPublishedTrackGroups(), profileId: profile.id },
+    where: wherePublishedAlbumsForProfile(profile.id),
     include: {
       profile: { omit: { apPrivateKey: true } },
       tags: { include: { tag: true } },
     },
-    orderBy: {
-      releaseDate: "desc",
-    },
-    take: MAX_ALBUMS_IN_FEED,
+    orderBy: albumFeedOrder,
+    take,
+    skip,
   });
   return albums.map((album) => processSingleTrackGroup(album));
 };
 
 export const getAlbumsCountForProfile = async (profile: Profile) => {
   return prisma.trackGroup.count({
-    where: { ...whereForPublishedTrackGroups(), profileId: profile.id },
+    where: wherePublishedAlbumsForProfile(profile.id),
   });
+};
+
+export const getFeedCountForProfile = async (profile: Profile) => {
+  const [posts, albums] = await Promise.all([
+    prisma.post.count({ where: wherePublishedPostsForProfile(profile.id) }),
+    getAlbumsCountForProfile(profile),
+  ]);
+  return posts + albums;
+};
+
+export const getFeedPageForProfile = async (
+  user: User | undefined,
+  profile: Profile & { subscriptionTiers: ProfileSubscriptionTier[] },
+  take: number,
+  skip: number
+) => {
+  const [postKeys, albumKeys] = await Promise.all([
+    prisma.post.findMany({
+      where: wherePublishedPostsForProfile(profile.id),
+      select: { id: true, publishedAt: true },
+      orderBy: postFeedOrder,
+      take: skip + take + 1,
+    }),
+    prisma.trackGroup.findMany({
+      where: wherePublishedAlbumsForProfile(profile.id),
+      select: { id: true, releaseDate: true },
+      orderBy: albumFeedOrder,
+      take: skip + take + 1,
+    }),
+  ]);
+
+  const keys = orderBy(
+    [
+      ...postKeys.map((p) => ({
+        type: "post",
+        id: p.id,
+        date: p.publishedAt,
+      })),
+      ...albumKeys.map((a) => ({
+        type: "album",
+        id: a.id,
+        date: a.releaseDate ?? new Date(0),
+      })),
+    ],
+    [(k) => k.date.getTime(), "type", "id"],
+    ["desc", "desc", "desc"]
+  );
+  const before = keys.slice(0, skip);
+  const page = keys.slice(skip, skip + take);
+  const countOf = (list: typeof keys, type: string) =>
+    list.filter((k) => k.type === type).length;
+
+  const postTake = countOf(page, "post");
+  const albumTake = countOf(page, "album");
+  const [{ posts }, albums] = await Promise.all([
+    postTake > 0
+      ? getPostsVisibleToUser(user, profile, postTake, countOf(before, "post"))
+      : { posts: [] },
+    albumTake > 0
+      ? getAlbumsVisibleToUser(profile, albumTake, countOf(before, "album"))
+      : [],
+  ]);
+
+  const postsById = keyBy(posts, "id");
+  const albumsById = keyBy(albums, "id");
+  return {
+    results: compact(
+      page.map((k) => (k.type === "post" ? postsById[k.id] : albumsById[k.id]))
+    ),
+    hasMore: keys.length > skip + take,
+  };
 };
 
 const MAX_FEED_TAKE = 50;
@@ -109,25 +202,12 @@ export const buildFeedForProfile = async (
   );
   const clampedSkip = Math.max(Number.isFinite(skip) ? skip : 0, 0);
 
-  const { posts, total: totalPosts } = await getPostsVisibleToUser(
-    user,
-    profile,
-    clampedTake,
-    clampedSkip
-  );
-  const albums = await getAlbumsVisibleToUser(profile);
-  const totalAlbums = await getAlbumsCountForProfile(profile);
+  const [{ results }, total] = await Promise.all([
+    getFeedPageForProfile(user, profile, clampedTake, clampedSkip),
+    getFeedCountForProfile(profile),
+  ]);
 
-  return {
-    results: [...posts, ...albums].sort((a, b) => {
-      const dateA =
-        (isTrackGroup(a) ? a.releaseDate : a.publishedAt) ?? new Date(0);
-      const dateB =
-        (isTrackGroup(b) ? b.releaseDate : b.publishedAt) ?? new Date(0);
-      return dateA > dateB ? -1 : 1;
-    }),
-    total: totalPosts + totalAlbums,
-  };
+  return { results, total };
 };
 
 export default function () {
@@ -223,6 +303,3 @@ export default function () {
 
   return operations;
 }
-
-/** @deprecated alias while ActivityPub migrates */
-export const buildFeedForArtist = buildFeedForProfile;

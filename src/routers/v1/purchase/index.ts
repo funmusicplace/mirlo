@@ -39,6 +39,7 @@ import {
   initiateSubscription,
 } from "../../../utils/payments/subscription";
 import { determinePrice } from "../../../utils/purchasing";
+import { whereForPurchasableTrackGroup } from "../../../utils/trackGroup";
 import { findUserDiscountPercentsForProfile } from "../../../utils/user";
 
 type PurchaseItem =
@@ -269,6 +270,22 @@ const assertAllowedSuccessUrl = (
   }
 };
 
+export const resolveBuyer = ({
+  loggedInUser,
+  email,
+  readerId,
+}: {
+  loggedInUser?: Express.User;
+  email?: string;
+  readerId?: string;
+}): { userEmail: string; userId?: string } =>
+  readerId && email
+    ? { userEmail: email }
+    : {
+        userEmail: loggedInUser?.email ?? email ?? "",
+        userId: loggedInUser ? String(loggedInUser.id) : undefined,
+      };
+
 export const cancelPreviousAttempt = async (checkout: {
   stripeId: string | null;
   stripeAccountId: string | null;
@@ -347,7 +364,7 @@ export default function () {
         await profileEditableByUser(profileId, loggedInUser);
       }
 
-      if (email && !loggedInUser && !EMAIL_REGEX.test(email)) {
+      if (email && (!loggedInUser || readerId) && !EMAIL_REGEX.test(email)) {
         throw new AppError({
           httpCode: 400,
           description: "email is not a valid email address",
@@ -443,8 +460,7 @@ export default function () {
             profileId,
             tierId: subItem.tierId,
             amount: subItem.amount,
-            userEmail: loggedInUser?.email ?? email ?? "",
-            userId: loggedInUser ? String(loggedInUser.id) : undefined,
+            ...resolveBuyer({ loggedInUser, email, readerId }),
           });
 
           return res.status(200).json({ setupIntentId });
@@ -546,7 +562,11 @@ export default function () {
       for (const item of items) {
         if (item.type === "trackGroup") {
           const tg = await prisma.trackGroup.findFirst({
-            where: { id: item.id, profile: { id: profileId } },
+            where: {
+              ...whereForPurchasableTrackGroup(),
+              id: item.id,
+              profileId,
+            },
             include: {
               paymentToUser: { select: { stripeAccountId: true } },
               profile: {
@@ -591,7 +611,11 @@ export default function () {
           resolvedItems.push(result.item);
         } else if (item.type === "track") {
           const track = await prisma.track.findFirst({
-            where: { id: item.id, trackGroup: { profileId } },
+            where: {
+              id: item.id,
+              allowIndividualSale: true,
+              trackGroup: { ...whereForPurchasableTrackGroup(), profileId },
+            },
             include: {
               trackGroup: {
                 include: {
@@ -777,8 +801,7 @@ export default function () {
         readerId,
         profileId,
         items: resolvedItems,
-        userEmail: loggedInUser?.email ?? email ?? "",
-        userId: loggedInUser ? String(loggedInUser.id) : undefined,
+        ...resolveBuyer({ loggedInUser, email, readerId }),
         clientId,
         stripeAccountId: payeeAccountId,
         checkoutId: checkout?.id,
