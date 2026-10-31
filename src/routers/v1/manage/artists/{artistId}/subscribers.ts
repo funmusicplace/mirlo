@@ -26,7 +26,7 @@ const csvColumns = [
   },
   {
     label: "Amount",
-    value: "amount",
+    value: (row: { amount: number }) => (row.amount / 100).toFixed(2),
   },
   {
     label: "Currency",
