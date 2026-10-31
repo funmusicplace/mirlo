@@ -8,6 +8,7 @@ import {
   userOrAppAuthenticated,
 } from "../../../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../../../serializers/trackGroup";
+import { whereForAllProfilesUserCanAddReleasesFor } from "../../../../../../../utils/artist";
 import { AppError } from "../../../../../../../utils/error";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
 import { grantReleaseToExistingSubscribers } from "../../../../../../../utils/subscriptionTier";
@@ -131,6 +132,11 @@ export default function () {
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           id: Number(trackGroupId),
+          OR: [
+            { profileId: subscriptionTier.profileId },
+            { profile: whereForAllProfilesUserCanAddReleasesFor(user.id) },
+            { paymentToUserId: user.id },
+          ],
         },
       });
 
