@@ -9,6 +9,7 @@ import prisma from "@mirlo/prisma";
 import {
   clearTables,
   createArtist,
+  createTrack,
   createTrackGroup,
   createUser,
 } from "../../../utils";
@@ -145,5 +146,36 @@ describe("manage/tracks POST", () => {
     assert.equal(trackArtist?.role, "vocals");
     assert.equal(trackArtist?.isCoAuthor, true);
     assert.equal(trackArtist?.artistId, null);
+  });
+
+  it("should not update another track's artists through trackArtists", async () => {
+    const { user, accessToken } = await createUser({ email: "test@testcom" });
+    const artist = await createArtist(user.id);
+    const trackGroup = await createTrackGroup(artist.id, { tracks: [] });
+    const ownTrack = await createTrack(trackGroup.id);
+
+    const { user: victim } = await createUser({ email: "victim@testcom" });
+    const victimArtist = await createArtist(victim.id);
+    const victimTrackGroup = await createTrackGroup(victimArtist.id, {
+      tracks: [],
+    });
+    const victimTrack = await createTrack(victimTrackGroup.id);
+    const victimTrackArtist = await prisma.trackArtist.create({
+      data: { trackId: victimTrack.id, artistName: "Victim" },
+    });
+
+    const response = await requestApp
+      .put(`manage/tracks/${ownTrack.id}/trackArtists`)
+      .send({
+        trackArtists: [{ id: victimTrackArtist.id, artistName: "Hijacked" }],
+      })
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.status, 200);
+    const after = await prisma.trackArtist.findUnique({
+      where: { id: victimTrackArtist.id },
+    });
+    assert.equal(after?.artistName, "Victim");
   });
 });

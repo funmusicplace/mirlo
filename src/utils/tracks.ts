@@ -472,9 +472,10 @@ export const updateTrackArtists = async (
 
   await Promise.all(
     existingTrackArtists.map((eta) =>
-      prisma.trackArtist.update({
+      prisma.trackArtist.updateMany({
         where: {
           id: eta.id,
+          trackId: Number(trackId),
         },
         data: trackArtistFields(eta),
       })
