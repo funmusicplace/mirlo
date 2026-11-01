@@ -7,7 +7,10 @@ import { describe, it, beforeEach } from "mocha";
 import request from "supertest";
 
 import { findActivityPubAlternate } from "../../src/activityPub/pageAlternate";
-import { analyzePathAndGenerateHTML } from "../../src/parseIndex";
+import {
+  analyzePathAndGenerateHTML,
+  parseIndexOptionsFor,
+} from "../../src/parseIndex";
 import {
   clearTables,
   createArtist,
@@ -134,6 +137,36 @@ describe("ActivityPub page alternates (#2400)", () => {
       $('link[rel="alternate"][type="application/activity+json"]').attr("href"),
       `${apBase}/test-artist`
     );
+  });
+
+  it("leaves the alternate tag out when asked to", async () => {
+    await setup();
+    const $ = cheerio.load("<html><head></head></html>");
+    await analyzePathAndGenerateHTML("/test-artist", $, undefined, {
+      activityPubAlternate: false,
+    });
+    assert.equal(
+      $('link[rel="alternate"][type="application/activity+json"]').length,
+      0
+    );
+  });
+
+  it("does not send the alternate tag to Discord's crawler", () => {
+    assert.deepEqual(
+      parseIndexOptionsFor(
+        "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)"
+      ),
+      { activityPubAlternate: false }
+    );
+    assert.deepEqual(
+      parseIndexOptionsFor(
+        "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0"
+      ),
+      { activityPubAlternate: true }
+    );
+    assert.deepEqual(parseIndexOptionsFor(undefined), {
+      activityPubAlternate: true,
+    });
   });
 
   it("redirects AP requests for a page to the AP object", async () => {

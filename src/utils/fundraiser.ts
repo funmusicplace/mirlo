@@ -41,36 +41,57 @@ export const chargeFundraiserPledges = async (fundraiserId: number) => {
     }
   }
 
-  const pledgesForFundraiser = await prisma.fundraiserPledge.findMany({
-    where: {
-      fundraiserId,
-      paidAt: null,
-      cancelledAt: null,
-    },
-    include: pledgeChargeInclude,
-  });
-
-  for (const pledge of pledgesForFundraiser) {
-    // If the user already has a purchase for this track group, skip charging them
-    // likely a weird edge case.
-    const purchaseExists = await prisma.userTrackGroupPurchase.findFirst({
-      where: {
-        userId: pledge.userId,
-        trackGroupId: { in: pledge.fundraiser.trackGroups.map((tg) => tg.id) },
-      },
-    });
-
-    if (purchaseExists) {
-      continue;
-    }
-
-    await chargePledgePayments(pledge);
-  }
-
-  // Mark the fundraiser SUCCESSFUL so future visitors get the regular
+  // Mark the fundraiser SUCCESSFUL before charging, so a second request
+  // can't charge the same pledges, and so future visitors get the regular
   // buy flow instead of the pledge flow (#1681).
-  await prisma.fundraiser.update({
-    where: { id: fundraiserId },
+  const claimed = await prisma.fundraiser.updateMany({
+    where: { id: fundraiserId, status: "ACTIVE" },
     data: { status: "SUCCESSFUL" },
   });
+  if (claimed.count === 0) {
+    throw new AppError({
+      httpCode: 409,
+      description: "This fundraiser's pledges are already being charged",
+    });
+  }
+
+  try {
+    const pledgesForFundraiser = await prisma.fundraiserPledge.findMany({
+      where: {
+        fundraiserId,
+        paidAt: null,
+        cancelledAt: null,
+        OR: [
+          { associatedTransactionId: null },
+          { associatedTransaction: { paymentStatus: "FAILED" } },
+        ],
+      },
+      include: pledgeChargeInclude,
+    });
+
+    for (const pledge of pledgesForFundraiser) {
+      // If the user already has a purchase for this track group, skip charging them
+      // likely a weird edge case.
+      const purchaseExists = await prisma.userTrackGroupPurchase.findFirst({
+        where: {
+          userId: pledge.userId,
+          trackGroupId: {
+            in: pledge.fundraiser.trackGroups.map((tg) => tg.id),
+          },
+        },
+      });
+
+      if (purchaseExists) {
+        continue;
+      }
+
+      await chargePledgePayments(pledge);
+    }
+  } catch (e) {
+    await prisma.fundraiser.updateMany({
+      where: { id: fundraiserId, status: "SUCCESSFUL" },
+      data: { status: "ACTIVE" },
+    });
+    throw e;
+  }
 };

@@ -30,7 +30,7 @@ import {
   userLoggedInWithoutRedirect,
 } from "./auth/passport";
 import logger from "./logger";
-import parseIndex from "./parseIndex";
+import parseIndex, { parseIndexOptionsFor } from "./parseIndex";
 import { imageQueue } from "./queues/processImages";
 import { audioQueue } from "./queues/processTrackAudio";
 import { scheduledTasksQueue } from "./queues/scheduled-tasks-queue";
@@ -320,9 +320,13 @@ app.use(
         }
         // HTML pages must never be cached — they reference hashed asset filenames
         res.setHeader("Cache-Control", "no-store");
+        const options = parseIndexOptionsFor(req.get("user-agent"));
         const html = req.user
-          ? await parseIndex(req.path, req)
-          : await getCachedPage(req.path, () => parseIndex(req.path));
+          ? await parseIndex(req.path, req, options)
+          : await getCachedPage(
+              options.activityPubAlternate ? req.path : `no-ap:${req.path}`,
+              () => parseIndex(req.path, undefined, options)
+            );
         res.send(html);
       } else {
         // Vite hashes /assets/ filenames on every build — safe to cache permanently

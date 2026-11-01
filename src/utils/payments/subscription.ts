@@ -71,6 +71,26 @@ const resolveTierAndAmount = async (
   return { tier, resolvedAmount };
 };
 
+const refuseGuestWithPaidSubscription = async (
+  profileId: number,
+  userEmail: string
+) => {
+  const paidSubscription = await prisma.profileUserSubscription.findFirst({
+    where: {
+      user: { email: { equals: userEmail, mode: "insensitive" } },
+      profileSubscriptionTier: { profileId },
+      stripeSubscriptionKey: { not: null },
+    },
+  });
+  if (paidSubscription) {
+    throw new AppError({
+      httpCode: 409,
+      description:
+        "This email already has a subscription to this artist. Log in to Mirlo to change it.",
+    });
+  }
+};
+
 export const initiateSubscription = async ({
   readerId,
   profileId,
@@ -97,6 +117,10 @@ export const initiateSubscription = async ({
       httpCode: 400,
       description: "A subscription at a card reader needs the buyer's email",
     });
+  }
+
+  if (!userId) {
+    await refuseGuestWithPaidSubscription(profileId, userEmail);
   }
 
   const { stripeAccountId, currency } =
@@ -162,6 +186,10 @@ export const initiateOnlineSubscription = async ({
           })
         : null,
     ]);
+
+  if (!userId && userEmail) {
+    await refuseGuestWithPaidSubscription(profileId, userEmail);
+  }
 
   const isTierSwitch =
     !!existingSubscription &&
