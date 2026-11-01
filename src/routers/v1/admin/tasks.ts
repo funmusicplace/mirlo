@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import sendPostNotification from "../../../jobs/send-post-notification";
 import cleanUpFiles from "../../../jobs/tasks/clean-up-files";
 import initiateUserNotifcations from "../../../jobs/tasks/initiate-user-notifications";
 import syncPaymentAccountStatuses from "../../../jobs/tasks/sync-payment-account-statuses";
@@ -34,6 +35,12 @@ export default function () {
         }
         if (jobName === "syncPaymentAccountStatuses") {
           result[jobName] = await syncPaymentAccountStatuses();
+        }
+        if (jobName === "resendPostNotification" && Number(jobParam)) {
+          await sendPostNotification({
+            data: { postId: Number(jobParam), resend: true },
+          });
+          result[jobName] = "Success";
         }
       }
       res.status(200).json({ result });

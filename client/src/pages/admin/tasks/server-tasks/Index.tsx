@@ -62,6 +62,9 @@ export const Index: React.FC = () => {
             <option value="syncPaymentAccountStatuses">
               syncPaymentAccountStatuses
             </option>
+            <option value="resendPostNotification">
+              resendPostNotification
+            </option>
           </SelectEl>
         </FormComponent>
         <FormComponent direction="row">
