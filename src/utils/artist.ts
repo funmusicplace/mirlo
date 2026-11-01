@@ -647,9 +647,9 @@ export const singleInclude = (queryOptions?: {
         },
         releases: {
           where: {
-            trackGroup: {
-              deletedAt: null,
-            },
+            trackGroup: includePrivate
+              ? { deletedAt: null }
+              : trackGroupPublishedObject(),
           },
           orderBy: [
             { order: { sort: "asc", nulls: "last" } },

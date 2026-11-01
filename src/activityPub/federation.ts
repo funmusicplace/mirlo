@@ -243,6 +243,7 @@ const findAPReleaseById = async (id: number) => {
     },
     include: {
       profile: true,
+      cover: true,
       tags: { include: { tag: true } },
     },
   });

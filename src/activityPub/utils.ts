@@ -6,11 +6,13 @@ import {
   Audio,
   Create,
   Hashtag,
+  Image,
   Mention,
   PUBLIC_COLLECTION,
 } from "@fedify/fedify/vocab";
 import { Temporal } from "@js-temporal/polyfill";
 
+import { storedImageVariantUrl } from "../utils/images";
 import { ContentImage, resolvePostContent } from "../utils/postContent";
 
 const { API_DOMAIN } = process.env;
@@ -117,6 +119,7 @@ type APRelease = {
   urlSlug: string;
   releaseDate: Date | null;
   tags: string[];
+  cover?: Parameters<typeof storedImageVariantUrl>[0];
 };
 
 export function buildReleaseAudio(
@@ -125,6 +128,7 @@ export function buildReleaseAudio(
   release: APRelease,
   applicationUrl: string
 ): Audio {
+  const coverUrl = storedImageVariantUrl(release.cover, 600);
   return new Audio({
     id: ctx.getObjectUri(Audio, {
       identifier,
@@ -138,6 +142,9 @@ export function buildReleaseAudio(
     content: release.about ?? undefined,
     published: getTemporal(release.releaseDate),
     tags: buildHashtags(release.tags, applicationUrl),
+    image: coverUrl
+      ? new Image({ mediaType: "image/webp", url: new URL(coverUrl) })
+      : undefined,
   });
 }
 

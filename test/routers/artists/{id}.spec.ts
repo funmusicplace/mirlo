@@ -169,6 +169,50 @@ describe("artists", () => {
       assert.deepEqual(releasedTitles, ["Kept Album"]);
     });
 
+    it("should only show draft subscriptionTiers releases to the artist", async () => {
+      const { user, accessToken } = await createUser({
+        email: "tiered@test.com",
+      });
+      const profile = await createProfile(user.id, {
+        urlSlug: "tiered-artist",
+      });
+      const tier = await createTier(profile.id, { minAmount: 500 });
+      const published = await createTrackGroup(profile.id, {
+        title: "Published Album",
+        urlSlug: "published-album",
+      });
+      const draft = await createTrackGroup(profile.id, {
+        title: "Draft Album",
+        urlSlug: "draft-album",
+        publishedAt: null,
+      });
+      await prisma.subscriptionTierRelease.createMany({
+        data: [
+          { tierId: tier.id, trackGroupId: published.id },
+          { tierId: tier.id, trackGroupId: draft.id },
+        ],
+      });
+
+      const titles = async (token?: string) => {
+        const req = requestApp
+          .get(`artists/${profile.urlSlug}`)
+          .set("Accept", "application/json");
+        const response = await (token
+          ? req.set("Cookie", [`jwt=${token}`])
+          : req);
+        assert.equal(response.status, 200);
+        return response.body.result.subscriptionTiers[0].releases
+          .map((r: { trackGroup: { title: string } }) => r.trackGroup.title)
+          .sort();
+      };
+
+      assert.deepEqual(await titles(), ["Published Album"]);
+      assert.deepEqual(await titles(accessToken), [
+        "Draft Album",
+        "Published Album",
+      ]);
+    });
+
     it("should flag releases that are only available through a subscription tier", async () => {
       const { user } = await createUser({ email: "exclusive@test.com" });
       const profile = await createProfile(user.id, {
