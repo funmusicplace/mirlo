@@ -1,13 +1,14 @@
-import { Readable } from "node:stream";
+import { Readable, pipeline } from "node:stream";
 
 import prisma from "@mirlo/prisma";
 import cors from "cors";
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import { groupBy, shuffle } from "lodash";
 
+import logger from "../../logger";
 import {
   albumYear,
-  imageVariantUrl,
+  audioContentType,
   parseSubsonicId,
   serializeAlbum,
   serializeAlbumWithSongs,
@@ -15,6 +16,7 @@ import {
   serializeSong,
 } from "../../serializers/subsonic";
 import { whereForVisibleProfile } from "../../utils/artist";
+import { storedImageVariantUrl } from "../../utils/images";
 import {
   presignOriginalAudio,
   statAudioSegment,
@@ -25,17 +27,21 @@ import {
   LibraryAlbum,
   findOwnedTrack,
   loadLibrary,
+  whereForOwnedTrackGroup,
 } from "../../utils/subsonicLibrary";
-import { whereForPublishedTrackGroups } from "../../utils/trackGroup";
 
 import { SubsonicError, SubsonicParams, respond } from "./respond";
 
 type Context = { userId: number; params: SubsonicParams };
+type Redirect = { redirect: string };
 type AudioFile = { stream: Readable; extension: string };
-// A string result is a location to redirect to, an AudioFile is piped through
 type Handler = (
   context: Context
-) => Promise<Record<string, unknown> | string | AudioFile>;
+) => Promise<Record<string, unknown> | Redirect | AudioFile>;
+type PublicHandler = () => Promise<Record<string, unknown>>;
+
+const isRedirect = (result: object): result is Redirect =>
+  "redirect" in result && typeof result.redirect === "string";
 
 const isAudioFile = (result: object): result is AudioFile =>
   "stream" in result && result.stream instanceof Readable;
@@ -86,10 +92,12 @@ const sortAlbums = (
   switch (type) {
     case "newest":
     case "recent":
+      return [...library].sort(newestFirst);
+    // Mirlo has no favorites or play counts over Subsonic
     case "frequent":
     case "highest":
     case "starred":
-      return [...library].sort(newestFirst);
+      return [];
     case "alphabeticalByName":
       return [...library].sort(byTitle);
     case "alphabeticalByArtist":
@@ -115,10 +123,7 @@ const coverImage = async (id: string) => {
   const trackGroupId = parseSubsonicId("al", id);
   if (trackGroupId !== undefined) {
     const trackGroup = await prisma.trackGroup.findFirst({
-      where: {
-        id: trackGroupId,
-        ...whereForPublishedTrackGroups({ includePrivate: true }),
-      },
+      where: { id: trackGroupId, ...whereForOwnedTrackGroup() },
       select: { cover: true },
     });
     return trackGroup?.cover;
@@ -147,7 +152,7 @@ const audioLocation: Handler = async ({ userId, params }) => {
   const extension = audio.fileExtension;
   const url = await presignOriginalAudio(audio.id, extension);
   if (url) {
-    return url;
+    return { redirect: url };
   }
   const { minioStat, backblazeStat } = await statAudioSegment(
     audio.id,
@@ -168,13 +173,6 @@ const handlers: Record<string, Handler> = {
 
   getLicense: async () => ({ license: { valid: true } }),
 
-  getOpenSubsonicExtensions: async () => ({
-    openSubsonicExtensions: [
-      { name: "formPost", versions: [1] },
-      { name: "apiKeyAuthentication", versions: [1] },
-    ],
-  }),
-
   getMusicFolders: async () => ({
     musicFolders: { musicFolder: [{ id: 1, name: "Collection" }] },
   }),
@@ -192,11 +190,10 @@ const handlers: Record<string, Handler> = {
   },
 
   getArtist: async ({ userId, params }) => {
-    const id = parseSubsonicId("ar", required(params, "id"));
-    const library = (await loadLibrary(userId)).sort(newestFirst);
-    const found = artistGroups(library).find(
-      ({ profile }) => profile.id === id
-    );
+    const profileId = parseSubsonicId("ar", required(params, "id"));
+    const library =
+      profileId === undefined ? [] : await loadLibrary(userId, { profileId });
+    const [found] = artistGroups(library.sort(newestFirst));
     if (!found) {
       throw new SubsonicError(70);
     }
@@ -221,10 +218,11 @@ const handlers: Record<string, Handler> = {
   },
 
   getAlbum: async ({ userId, params }) => {
-    const id = parseSubsonicId("al", required(params, "id"));
-    const album = (await loadLibrary(userId)).find(
-      ({ trackGroup }) => trackGroup.id === id
-    );
+    const trackGroupId = parseSubsonicId("al", required(params, "id"));
+    const [album] =
+      trackGroupId === undefined
+        ? []
+        : await loadLibrary(userId, { trackGroupId });
     if (!album) {
       throw new SubsonicError(70);
     }
@@ -275,16 +273,27 @@ const handlers: Record<string, Handler> = {
 
   getCoverArt: async ({ params }) => {
     const image = await coverImage(required(params, "id"));
-    const url =
-      image && imageVariantUrl(image, intParam(params.size, 0) || undefined);
+    const url = storedImageVariantUrl(image, intParam(params.size, Infinity), {
+      atLeast: true,
+    });
     if (!url) {
       throw new SubsonicError(70, 404);
     }
-    return url;
+    return { redirect: url };
   },
 
   stream: audioLocation,
   download: audioLocation,
+};
+
+// Clients read the extension list before they have credentials
+const publicHandlers: Record<string, PublicHandler> = {
+  getOpenSubsonicExtensions: async () => ({
+    openSubsonicExtensions: [
+      { name: "formPost", versions: [1] },
+      { name: "apiKeyAuthentication", versions: [1] },
+    ],
+  }),
 };
 
 // Parameters come in the query string or, with the formPost extension, in a
@@ -309,40 +318,44 @@ const router = express.Router();
 router.use(cors());
 router.use(express.urlencoded({ extended: false }));
 
-router.all(
-  "/rest/:method",
-  async (req: Request, res: Response, next: NextFunction) => {
-    const params = requestParams(req);
-    try {
-      const method = req.params.method.replace(/\.view$/, "");
-      // Clients read the extension list before they have credentials
-      const auth =
-        method === "getOpenSubsonicExtensions"
-          ? { userId: 0 }
-          : await authenticateSubsonic(params);
-      if ("error" in auth) {
-        throw new SubsonicError(auth.error);
-      }
-      if (!Object.hasOwn(handlers, method)) {
-        throw new SubsonicError(0, 200, "Unsupported method.");
-      }
-      const result = await handlers[method]({ userId: auth.userId, params });
-      if (typeof result === "string") {
-        res.redirect(result);
-      } else if (isAudioFile(result)) {
-        res.type(result.extension);
-        result.stream.pipe(res);
-      } else {
-        respond(res, params, result);
-      }
-    } catch (e) {
-      if (e instanceof SubsonicError) {
-        respond(res, params, e);
-      } else {
-        next(e);
-      }
+router.all("/rest/:method", async (req: Request, res: Response) => {
+  const params = requestParams(req);
+  try {
+    const method = req.params.method.replace(/\.view$/, "");
+    if (Object.hasOwn(publicHandlers, method)) {
+      respond(res, params, await publicHandlers[method]());
+      return;
+    }
+    const auth = await authenticateSubsonic(params);
+    if ("error" in auth) {
+      throw new SubsonicError(auth.error);
+    }
+    if (!Object.hasOwn(handlers, method)) {
+      throw new SubsonicError(0, 200, "Unsupported method.");
+    }
+    const result = await handlers[method]({ userId: auth.userId, params });
+    if (isRedirect(result)) {
+      res.redirect(result.redirect);
+    } else if (isAudioFile(result)) {
+      res.type(
+        audioContentType(result.extension) ?? "application/octet-stream"
+      );
+      pipeline(result.stream, res, (e) => {
+        if (e) {
+          (req.logger ?? logger).warn(`subsonic ${method} ended early`, e);
+        }
+      });
+    } else {
+      respond(res, params, result);
+    }
+  } catch (e) {
+    if (e instanceof SubsonicError) {
+      respond(res, params, e);
+    } else {
+      (req.logger ?? logger).error(`subsonic ${req.params.method} failed`, e);
+      respond(res, params, new SubsonicError(0, 500));
     }
   }
-);
+});
 
 export default router;

@@ -8,10 +8,7 @@ import {
   TrackGroup,
 } from "@mirlo/prisma/client";
 
-import {
-  whereForPublishedTrackGroups,
-  whereForVisibleTrackGroup,
-} from "./trackGroup";
+import { whereForVisibleTrackGroup } from "./trackGroup";
 
 export type LibraryTrack = Track & { audio: TrackAudio | null };
 
@@ -29,14 +26,29 @@ const albumInclude = {
   cover: true,
 } satisfies Prisma.TrackGroupInclude;
 
+// What a buyer keeps seeing and playing: published, not disabled by an admin
+// and not deleted, even when the artist hid it from search or left out a cover
+export const whereForOwnedTrackGroup = (): Prisma.TrackGroupWhereInput => ({
+  ...whereForVisibleTrackGroup(),
+  publishedAt: { lte: new Date() },
+});
+
 // Everything the user bought, grouped by release: a whole-release purchase
-// brings every track, a single-track purchase only that track
-export const loadLibrary = async (userId: number): Promise<LibraryAlbum[]> => {
-  const published = whereForPublishedTrackGroups({ includePrivate: true });
+// brings every track, a single-track purchase only that track, and the filter
+// narrows both to one release or one artist
+export const loadLibrary = async (
+  userId: number,
+  filter?: { trackGroupId?: number; profileId?: number }
+): Promise<LibraryAlbum[]> => {
+  const owned: Prisma.TrackGroupWhereInput = {
+    ...whereForOwnedTrackGroup(),
+    id: filter?.trackGroupId,
+    profileId: filter?.profileId,
+  };
 
   const [albumPurchases, trackPurchases] = await Promise.all([
     prisma.userTrackGroupPurchase.findMany({
-      where: { userId, trackGroup: published },
+      where: { userId, trackGroup: owned },
       include: {
         transaction: true,
         trackGroup: {
@@ -52,7 +64,7 @@ export const loadLibrary = async (userId: number): Promise<LibraryAlbum[]> => {
       },
     }),
     prisma.userTrackPurchase.findMany({
-      where: { userId, track: { deletedAt: null, trackGroup: published } },
+      where: { userId, track: { deletedAt: null, trackGroup: owned } },
       include: {
         transaction: true,
         track: {
@@ -105,14 +117,13 @@ export const loadLibrary = async (userId: number): Promise<LibraryAlbum[]> => {
   }));
 };
 
-// Same visibility rule as the website's stream route, so a release an admin
-// disabled or an artist deleted stops playing for earlier buyers too
+// Plays under the same rule as the library, so a release that is unpublished,
+// disabled by an admin or deleted stops playing for earlier buyers too
 export const findOwnedTrack = (userId: number, trackId: number) =>
   prisma.track.findFirst({
     where: {
       id: trackId,
-      deletedAt: null,
-      trackGroup: whereForVisibleTrackGroup(),
+      trackGroup: whereForOwnedTrackGroup(),
       OR: [
         { userTrackPurchases: { some: { userId } } },
         { trackGroup: { userTrackGroupPurchases: { some: { userId } } } },

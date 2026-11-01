@@ -10057,6 +10057,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/mime-types@npm:^3":
+  version: 3.0.1
+  resolution: "@types/mime-types@npm:3.0.1"
+  checksum: 10/96534e23b2180e5396a1e6a44f51ec59e349bd43daed4b5cb4548493126e9641cdc65f8292477e80c5e6063cf625330dae8edaf31357553b60baa23c32a8bafd
+  languageName: node
+  linkType: hard
+
 "@types/min-document@npm:^2.19.0":
   version: 2.19.2
   resolution: "@types/min-document@npm:2.19.2"
@@ -22025,6 +22032,7 @@ __metadata:
     "@types/json2csv": "npm:^5.0.3"
     "@types/jsonwebtoken": "npm:^9.0.6"
     "@types/lodash": "npm:^4.14.191"
+    "@types/mime-types": "npm:^3"
     "@types/mocha": "npm:^10.0.1"
     "@types/node": "npm:22"
     "@types/nodemailer": "npm:^6.4.14"
@@ -22081,6 +22089,7 @@ __metadata:
     jsonwebtoken: "npm:^9.0.0"
     lint-staged: "npm:^15"
     lodash: "npm:^4.17.21"
+    mime-types: "npm:^3.0.1"
     minio: "npm:^8.0.7"
     mocha: "npm:^10.2.0"
     music-metadata: "npm:12.3.2"

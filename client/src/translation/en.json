@@ -365,7 +365,9 @@
     "subsonicPassword": "Password",
     "subsonicGenerate": "Generate credentials",
     "subsonicRegenerate": "Generate new password",
-    "subsonicRevoke": "Revoke"
+    "subsonicRevoke": "Revoke",
+    "subsonicRegenerateConfirm": "Generate a new password? Every app using the current one stops working until you enter the new one.",
+    "subsonicRevokeConfirm": "Revoke these credentials? Every app using them stops working."
   },
   "wishlist": {
     "addToWishlist": "Add to wishlist",

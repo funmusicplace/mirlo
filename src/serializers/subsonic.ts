@@ -1,6 +1,7 @@
 import { Image, Profile } from "@mirlo/prisma/client";
+import { lookup } from "mime-types";
 
-import { storedImageUrl, storedImageVariantUrl } from "../utils/images";
+import { storedImageVariantUrl } from "../utils/images";
 import { LibraryAlbum, LibraryTrack } from "../utils/subsonicLibrary";
 
 import { trackDuration } from "./track";
@@ -16,18 +17,8 @@ export const parseSubsonicId = (prefix: "al" | "tr" | "ar", id?: string) => {
   return /^\d{1,9}$/.test(rest) ? Number(rest) : undefined;
 };
 
-const CONTENT_TYPES: Record<string, string> = {
-  mp3: "audio/mpeg",
-  flac: "audio/flac",
-  wav: "audio/wav",
-  ogg: "audio/ogg",
-  opus: "audio/ogg",
-  m4a: "audio/mp4",
-  aac: "audio/aac",
-  aif: "audio/aiff",
-  aiff: "audio/aiff",
-  wma: "audio/x-ms-wma",
-};
+export const audioContentType = (extension?: string | null) =>
+  (extension && lookup(extension)) || undefined;
 
 export const albumYear = ({ trackGroup }: LibraryAlbum) =>
   trackGroup.releaseDate?.getUTCFullYear();
@@ -62,7 +53,7 @@ export const serializeSong = (track: LibraryTrack, album: LibraryAlbum) => {
     year: albumYear(album),
     coverArt: trackGroup.cover ? albumId(trackGroup.id) : undefined,
     size: track.audio?.size ?? undefined,
-    contentType: suffix ? CONTENT_TYPES[suffix.toLowerCase()] : undefined,
+    contentType: audioContentType(suffix),
     suffix,
     duration: songDuration(track),
     created: track.createdAt,
@@ -96,16 +87,3 @@ export const serializeAlbumWithSongs = (album: LibraryAlbum) => ({
   ...serializeAlbum(album),
   song: album.tracks.map((track) => serializeSong(track, album)),
 });
-
-// Picks the smallest stored variant at least `size` wide, else the largest
-// Variants are named "<id>-x<width>", entries without a width are the original
-export const imageVariantUrl = (image: Image, size = Infinity) => {
-  const sized = image.url
-    .map((name) => ({ name, width: Number(/-x(\d+)$/.exec(name)?.[1]) }))
-    .filter(({ width }) => width > 0)
-    .sort((a, b) => a.width - b.width);
-  const name =
-    (sized.find(({ width }) => width >= size) ?? sized.at(-1))?.name ??
-    image.url[0];
-  return name ? storedImageUrl(image, name) : undefined;
-};

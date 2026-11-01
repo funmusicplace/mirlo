@@ -1,6 +1,14 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { Response } from "express";
 
 export type SubsonicParams = Record<string, string | undefined>;
+
+// This file sits three levels below package.json, in src and in dist alike
+const serverVersion: string = JSON.parse(
+  readFileSync(join(__dirname, "../../../package.json"), "utf8")
+).version;
 
 const ERROR_MESSAGES = {
   0: "A generic error.",
@@ -83,7 +91,7 @@ export const respond = (
     status: failed ? "failed" : "ok",
     version: "1.16.1",
     type: "mirlo",
-    serverVersion: process.env.npm_package_version ?? "0.0.0",
+    serverVersion,
     openSubsonic: true,
     ...(failed
       ? { error: { code: result.code, message: result.message } }

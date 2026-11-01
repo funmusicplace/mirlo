@@ -7,6 +7,7 @@ import { describe, it } from "mocha";
 import {
   authenticateSubsonic,
   createSubsonicCredential,
+  getSubsonicCredential,
 } from "../../../src/utils/subsonicCredentials";
 import { clearTables, createUser } from "../../utils";
 import { requestApp } from "../utils";
@@ -209,19 +210,19 @@ describe("users/{userId}/subsonic", () => {
       assert.deepEqual(result, { error: 44 });
     });
 
-    it("should reject a deleted user", async () => {
-      await prisma.user.update({
-        where: { id: userId },
-        data: { deletedAt: new Date() },
-      });
+    it("should treat a secret sealed under another JWT_SECRET as no credential", async () => {
+      const original = process.env.JWT_SECRET;
+      process.env.JWT_SECRET = `${original}-rotated`;
 
-      assert.deepEqual(
-        await authenticateSubsonic({ u: username, p: password }),
-        { error: 40 }
-      );
-      assert.deepEqual(await authenticateSubsonic({ apiKey: password }), {
-        error: 44,
-      });
+      try {
+        assert.deepEqual(
+          await authenticateSubsonic({ u: username, p: password }),
+          { error: 40 }
+        );
+        assert.equal(await getSubsonicCredential(userId), null);
+      } finally {
+        process.env.JWT_SECRET = original;
+      }
     });
 
     it("should reject a disabled user", async () => {

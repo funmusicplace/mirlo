@@ -122,6 +122,7 @@ describe("subsonic", () => {
       assert.equal(envelope(response).status, "ok");
       assert.equal(envelope(response).version, "1.16.1");
       assert.equal(envelope(response).type, "mirlo");
+      assert.match(envelope(response).serverVersion, /^\d+\.\d+\.\d+/);
       assert.equal(envelope(response).openSubsonic, true);
     });
 
@@ -373,6 +374,17 @@ describe("subsonic", () => {
       );
     });
 
+    it("lists nothing for the types Mirlo has no data for", async () => {
+      const { credential } = await setupLibrary();
+
+      for (const type of ["starred", "frequent", "highest"]) {
+        const response = await call("getAlbumList2", credential, { type });
+
+        assert.equal(envelope(response).status, "ok", type);
+        assert.deepStrictEqual(envelope(response).albumList2.album, [], type);
+      }
+    });
+
     it("requires a type", async () => {
       const { credential } = await setupLibrary();
 
@@ -417,6 +429,31 @@ describe("subsonic", () => {
       });
 
       assert.deepStrictEqual(envelope(response).albumList2.album, []);
+    });
+
+    it("keeps a bought release the artist hid from search", async () => {
+      const { buyer, profile, credential } = await setup();
+      const hidden = await createAlbum(profile.id, "Hidden", ["H1"], {
+        hideFromSearch: true,
+      });
+      const [track] = await tracksOf(hidden.id);
+      await seedTrackAudio(track.id, "wav");
+      await createUserTrackGroupPurchase(buyer.id, hidden.id);
+
+      const list = await call("getAlbumList2", credential, {
+        type: "newest",
+      });
+      const stream = await withAudioBody(
+        call("stream", credential, { id: `tr-${track.id}` })
+      );
+
+      assert.deepStrictEqual(
+        envelope(list).albumList2.album.map(
+          (album: { id: string }) => album.id
+        ),
+        [`al-${hidden.id}`]
+      );
+      assertServesAudio(stream, "stream");
     });
 
     it("leaves out other people's purchases", async () => {
@@ -471,7 +508,8 @@ describe("subsonic", () => {
       assert.equal(song.duration, 100);
       assert.equal(song.size, 2048);
       assert.equal(song.suffix, "flac");
-      assert.equal(song.contentType, "audio/flac");
+      // mime-db files flac under its older audio/x-flac name
+      assert.match(song.contentType, /^audio\/(x-)?flac$/);
     });
 
     it("returns only the bought track of a single-track purchase", async () => {

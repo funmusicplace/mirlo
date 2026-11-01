@@ -9,6 +9,7 @@ import {
 import { useTranslation } from "react-i18next";
 import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
+import { useConfirm } from "utils/useConfirm";
 
 import ProfileSection from "./ProfileSection";
 
@@ -28,6 +29,7 @@ const CredentialRow: React.FC<{ label: string; value: string }> = ({
 const SubsonicCredentials: React.FC<{ userId: number }> = ({ userId }) => {
   const { t } = useTranslation("translation", { keyPrefix: "profile" });
   const errorHandler = useErrorHandler();
+  const { ask } = useConfirm();
   const { data: credential } = useQuery(querySubsonicCredential(userId));
   const { mutate: generate, isPending: isGenerating } =
     useCreateSubsonicCredentialMutation(userId);
@@ -35,6 +37,20 @@ const SubsonicCredentials: React.FC<{ userId: number }> = ({ userId }) => {
     useDeleteSubsonicCredentialMutation(userId);
   const isPending = isGenerating || isRevoking;
   const options = { onError: (e: unknown) => errorHandler(e) };
+
+  // Replacing existing credentials is what locks the apps out
+  const onGenerate = async () => {
+    if (credential && !(await ask(t("subsonicRegenerateConfirm")))) {
+      return;
+    }
+    generate(undefined, options);
+  };
+
+  const onRevoke = async () => {
+    if (await ask(t("subsonicRevokeConfirm"))) {
+      revoke(undefined, options);
+    }
+  };
 
   if (credential === undefined) {
     return null;
@@ -63,7 +79,7 @@ const SubsonicCredentials: React.FC<{ userId: number }> = ({ userId }) => {
       <div className="flex flex-wrap gap-2 mt-4">
         <Button
           variant="outlined"
-          onClick={() => generate(undefined, options)}
+          onClick={onGenerate}
           isLoading={isGenerating}
           disabled={isPending}
         >
@@ -73,7 +89,7 @@ const SubsonicCredentials: React.FC<{ userId: number }> = ({ userId }) => {
           <Button
             variant="outlined"
             buttonRole="warning"
-            onClick={() => revoke(undefined, options)}
+            onClick={onRevoke}
             isLoading={isRevoking}
             disabled={isPending}
           >

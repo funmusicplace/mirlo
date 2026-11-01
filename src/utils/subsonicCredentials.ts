@@ -53,11 +53,11 @@ const encrypt = (plaintext: string) => {
     .join(".");
 };
 
-const decrypt = (stored: string) => {
+const decrypt = (stored: string, key: Buffer) => {
   const [iv, authTag, ciphertext] = stored
     .split(".")
     .map((part) => Buffer.from(part, "base64url"));
-  const decipher = createDecipheriv("aes-256-gcm", encryptionKey(), iv, {
+  const decipher = createDecipheriv("aes-256-gcm", key, iv, {
     authTagLength: 16,
   });
   decipher.setAuthTag(authTag);
@@ -65,6 +65,17 @@ const decrypt = (stored: string) => {
     decipher.update(ciphertext),
     decipher.final(),
   ]).toString("utf8");
+};
+
+// Returns undefined for a secret sealed under a rotated JWT_SECRET, which
+// counts as no credential, and still throws when JWT_SECRET is missing
+const tryDecrypt = (stored: string) => {
+  const key = encryptionKey();
+  try {
+    return decrypt(stored, key);
+  } catch {
+    return undefined;
+  }
 };
 
 const sameString = (a: string, b: string) => {
@@ -95,12 +106,10 @@ const findActiveCredential = async (
 ) => {
   const credential = await prisma.subsonicCredential.findUnique({
     where,
-    include: { user: { select: { deletedAt: true, disabledAt: true } } },
+    include: { user: { select: { disabledAt: true } } },
   });
-  // The soft-delete extension skips nested includes, so check the user here
-  return credential && !credential.user.deletedAt && !credential.user.disabledAt
-    ? credential
-    : null;
+  // Deleting an account removes its credential, so only disabling needs a check
+  return credential && !credential.user.disabledAt ? credential : null;
 };
 
 const toView = (userId: number, password: string): SubsonicCredentialView => ({
@@ -113,7 +122,8 @@ export const getSubsonicCredential = async (userId: number) => {
   const credential = await prisma.subsonicCredential.findUnique({
     where: { userId },
   });
-  return credential ? toView(userId, decrypt(credential.secret)) : null;
+  const password = credential && tryDecrypt(credential.secret);
+  return password ? toView(userId, password) : null;
 };
 
 export const createSubsonicCredential = async (userId: number) => {
@@ -157,7 +167,8 @@ export const authenticateSubsonic = async (
   const credential = id
     ? await findActiveCredential({ userId: Number(id) })
     : null;
-  if (!credential || !proofMatches(decrypt(credential.secret), params)) {
+  const secret = credential && tryDecrypt(credential.secret);
+  if (!credential || !secret || !proofMatches(secret, params)) {
     return { error: 40 };
   }
   return { userId: credential.userId };
