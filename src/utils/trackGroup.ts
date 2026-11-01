@@ -16,7 +16,11 @@ import { Response } from "express";
 import { sendReleaseToActivityPubFollowers } from "../activityPub/federation";
 import { logger } from "../logger";
 
-import { findProfileIdForURLSlug, whereForVisibleProfile } from "./artist";
+import {
+  findProfileIdForURLSlug,
+  whereForAllProfilesUserCanEdit,
+  whereForVisibleProfile,
+} from "./artist";
 import { FormatOptions } from "./audioFormats";
 import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
@@ -131,6 +135,26 @@ export const whereForVisibleTrackGroup = (): Prisma.TrackGroupWhereInput => ({
   deletedAt: null,
   profile: whereForVisibleProfile(),
 });
+
+export const whereForTrackGroupVisibleTo = (user?: {
+  id: number;
+  isAdmin?: boolean | null;
+}): Prisma.TrackGroupWhereInput =>
+  user?.isAdmin
+    ? {}
+    : {
+        ...whereForVisibleTrackGroup(),
+        OR: [
+          { publishedAt: { lte: new Date() } },
+          { isHiddenTrackGroupForSongDrafts: true },
+          ...(user
+            ? [
+                { profile: whereForAllProfilesUserCanEdit(user.id) },
+                { paymentToUserId: user.id },
+              ]
+            : []),
+        ],
+      };
 
 export const whereForPurchasableTrackGroup =
   (): Prisma.TrackGroupWhereInput => ({

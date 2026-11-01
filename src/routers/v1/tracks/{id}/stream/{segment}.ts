@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import { getAudioSegmentBufferIfExists } from "../../../../../utils/minio";
 import { canUserListenToTrack } from "../../../../../utils/ownership";
-import { whereForVisibleTrackGroup } from "../../../../../utils/trackGroup";
+import { whereForTrackGroupVisibleTo } from "../../../../../utils/trackGroup";
 
 const STREAM_FILE = /^(playlist\.m3u8|segment-\d+\.ts)$/;
 
@@ -44,7 +44,7 @@ export default function () {
       const track = await prisma.track.findFirst({
         where: {
           id: Number(id),
-          ...(user?.isAdmin ? {} : { trackGroup: whereForVisibleTrackGroup() }),
+          trackGroup: whereForTrackGroupVisibleTo(user),
         },
         include: {
           trackGroup: {
