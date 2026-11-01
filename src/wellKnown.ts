@@ -25,37 +25,43 @@ const assetLinks = [
   },
 ];
 
-// Artist pages share the site root with routes like /login, so the app claims
-// the whole site (Android's single-segment pattern does the same) and asks the
-// API whether a segment is an artist, showing anything else in an in-app
-// browser sheet. That sheet has its own cookie jar on iOS and no download UI,
-// so the paths excluded here are the ones a sheet would break: auth, account,
-// admin, checkout, and download/redeem/unsubscribe links from emails. Content
-// routes are deliberately absent; a new one needs nothing here.
-const sheetBreaksRoots = [
+// The app opens only the links it can show itself: the home page, artist and
+// label profiles, release pages and track pages. Every other link stays in the
+// browser, where the user is logged in. Artist slugs share the site root with
+// routes like /login, so those roots are listed: a new single-segment route
+// needs a line here, a new route under an artist needs nothing. Entries match
+// in order, the first match wins, and `*` also matches slashes
+const notAppReleasePaths = [
+  "/*/release/*/download",
+  "/*/release/*/redeem",
+  "/*/release/*/tracks/*/download",
+];
+const siteRoots = [
   "account",
   "admin",
+  "artists",
   "auth",
   "checkout",
   "checkout-error",
   "confirm-email-change",
   "email-confirmation",
+  "flagged-content",
   "fulfillment",
+  "label",
   "login",
   "manage",
+  "pages",
   "password-reset",
+  "post",
   "profile",
+  "releases",
   "sales",
+  "search",
   "signup",
+  "tags",
+  "widget",
 ];
-const sheetBreaksArtistPaths = [
-  "checkout-complete",
-  "checkout-error",
-  "release/*/download",
-  "release/*/redeem",
-  "release/*/tracks/*/download",
-  "unsubscribe",
-];
+const appPaths = ["/", "/*/releases", "/*/release/*"];
 const appleAppSiteAssociation = {
   applinks: {
     details: [
@@ -65,14 +71,13 @@ const appleAppSiteAssociation = {
           "36XBM6EF7W.space.mirlo.mobile",
         ],
         components: [
-          ...sheetBreaksRoots.flatMap((root) => [
+          ...notAppReleasePaths.map((path) => ({ "/": path, exclude: true })),
+          ...siteRoots.flatMap((root) => [
             { "/": `/${root}`, exclude: true },
             { "/": `/${root}/*`, exclude: true },
           ]),
-          ...sheetBreaksArtistPaths.map((path) => ({
-            "/": `/*/${path}`,
-            exclude: true,
-          })),
+          ...appPaths.map((path) => ({ "/": path })),
+          { "/": "/*/*", exclude: true },
           { "/": "/*" },
         ],
       },
