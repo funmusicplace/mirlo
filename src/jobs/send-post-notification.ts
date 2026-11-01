@@ -47,9 +47,9 @@ async function findMentionedLocalArtistUserIds(
  * Idempotent: safe to retry on failure without creating duplicates
  */
 export default async function sendPostNotification(job: {
-  data: { postId: number };
+  data: { postId: number; resend?: boolean };
 }) {
-  const { postId } = job.data;
+  const { postId, resend } = job.data;
   logger.info(`sendPostNotification: processing post ${postId}`);
 
   try {
@@ -75,6 +75,7 @@ export default async function sendPostNotification(job: {
                     receiveEmail: true,
                     amount: true,
                     profileSubscriptionTierId: true,
+                    stripeSubscriptionKey: true,
                     user: {
                       select: {
                         id: true,
@@ -108,20 +109,29 @@ export default async function sendPostNotification(job: {
       return;
     }
 
-    // Atomically claim the post for sending. updateMany with the condition
-    // acts as a mutex — only one job execution (across retries or concurrent
-    // cron-queued duplicates) will get count=1 here. Any subsequent attempt
-    // sees count=0 and exits early, preventing duplicate emails.
-    const claim = await prisma.post.updateMany({
-      where: { id: postId, hasAnnounceEmailBeenSent: false },
-      data: { hasAnnounceEmailBeenSent: true },
-    });
+    if (resend) {
+      if (!post.hasAnnounceEmailBeenSent) {
+        logger.info(
+          `sendPostNotification: post ${postId} hasn't been sent yet, nothing to resend`
+        );
+        return;
+      }
+    } else {
+      // Atomically claim the post for sending. updateMany with the condition
+      // acts as a mutex — only one job execution (across retries or concurrent
+      // cron-queued duplicates) will get count=1 here. Any subsequent attempt
+      // sees count=0 and exits early, preventing duplicate emails.
+      const claim = await prisma.post.updateMany({
+        where: { id: postId, hasAnnounceEmailBeenSent: false },
+        data: { hasAnnounceEmailBeenSent: true },
+      });
 
-    if (claim.count === 0) {
-      logger.info(
-        `sendPostNotification: post ${postId} already claimed by another job, skipping`
-      );
-      return;
+      if (claim.count === 0) {
+        logger.info(
+          `sendPostNotification: post ${postId} already claimed by another job, skipping`
+        );
+        return;
+      }
     }
 
     const minimumAmount = post.minimumSubscriptionTier?.minAmount ?? 0;
@@ -142,18 +152,25 @@ export default async function sendPostNotification(job: {
           .filter(
             (us) =>
               us.user.deletedAt === null &&
-              us.user.emailConfirmationToken === null &&
+              (us.user.emailConfirmationToken === null ||
+                us.stripeSubscriptionKey !== null) &&
               isSubscriptionAddressed(us)
           )
           .map((us) => ({ ...us.user, receiveEmail: us.receiveEmail }))
       )
     );
-    const uniqueSubscribers = Object.values(
-      groupBy(flatSubscriptions, "id")
-    ).map((subs) => ({
-      ...subs[0],
-      receiveEmail: subs.some((s) => s.receiveEmail),
-    }));
+    const alreadyNotified = resend
+      ? await prisma.notification.findMany({
+          where: { postId, notificationType: "NEW_ARTIST_POST" },
+          select: { userId: true },
+        })
+      : [];
+    const uniqueSubscribers = Object.values(groupBy(flatSubscriptions, "id"))
+      .map((subs) => ({
+        ...subs[0],
+        receiveEmail: subs.some((s) => s.receiveEmail),
+      }))
+      .filter((s) => !alreadyNotified.some((n) => n.userId === s.id));
 
     logger.info(
       `sendPostNotification: found ${uniqueSubscribers.length} subscribers for post ${postId}`
@@ -191,7 +208,7 @@ export default async function sendPostNotification(job: {
     );
 
     try {
-      if (await sendPostToActivityPubFollowers(postId)) {
+      if (!resend && (await sendPostToActivityPubFollowers(postId))) {
         await prisma.notification.updateMany({
           where: {
             postId,
@@ -213,6 +230,7 @@ export default async function sendPostNotification(job: {
         where: {
           postId,
           deliveryMethod: { in: ["EMAIL", "BOTH"] },
+          userId: { in: uniqueSubscribers.map((s) => s.id) },
         },
         include: {
           user: { select: { email: true } },
@@ -287,9 +305,9 @@ export default async function sendPostNotification(job: {
     }
 
     // Create in-app notifications for mentioned local artists
-    const mentionedArtistUserIds = await findMentionedLocalArtistUserIds(
-      post.content || ""
-    );
+    const mentionedArtistUserIds = resend
+      ? []
+      : await findMentionedLocalArtistUserIds(post.content || "");
     if (mentionedArtistUserIds.length > 0) {
       await prisma.notification.createMany({
         data: mentionedArtistUserIds.map((userId) => ({
