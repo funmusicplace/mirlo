@@ -13,6 +13,81 @@ import { bp } from "../../constants";
 import BackingThisProject from "./BackingThisProject";
 import PurchaseAlbumModal from "./PurchaseAlbumModal";
 
+export const useReleasePurchaseState = ({
+  trackGroup,
+  track,
+  singleTrack: explicitSingleTrack,
+  hidePurchase,
+}: {
+  trackGroup: TrackGroup;
+  track?: Track;
+  singleTrack?: Track;
+  hidePurchase?: boolean;
+}) => {
+  const { user } = useAuthContext();
+  const { data: artist } = useQuery(
+    queryArtist({ artistSlug: trackGroup.artist.urlSlug })
+  );
+
+  const singleTrack = track
+    ? undefined
+    : (explicitSingleTrack ??
+      (trackGroup.totalTracks === 1 && trackGroup.tracks?.length === 1
+        ? trackGroup.tracks[0]
+        : undefined));
+  const pledge = user?.pledges?.find(
+    (p) => p.fundraiserId === trackGroup.fundraiserId
+  );
+  const showBacking =
+    trackGroup.isGettable &&
+    !!trackGroup.fundraiser?.isAllOrNothing &&
+    !!pledge;
+
+  const ownsWholeRelease = !!user?.userTrackGroupPurchases?.some(
+    (p) => p.trackGroupId === trackGroup.id
+  );
+  const ownsTrack = (candidate?: Track) =>
+    !!candidate &&
+    !!user?.userTrackPurchases?.some((p) => p.trackId === candidate.id);
+
+  const isOwned = track
+    ? ownsTrack(track) || ownsWholeRelease
+    : ownsWholeRelease || ownsTrack(singleTrack);
+
+  const canSeeActions =
+    !!artist &&
+    (isTrackGroupPublished(trackGroup) ||
+      (!!user &&
+        (canUserEditArtist(user, artist) ||
+          artist.paymentToUserId === user.id)));
+
+  const ownedTrack = track ?? singleTrack;
+  const showPurchase = trackGroup.isGettable && !hidePurchase && !isOwned;
+  const showPreOrdered =
+    isOwned && trackGroup.isPreorder && !ownedTrack?.isPreview;
+  const showDownload =
+    isOwned && (!trackGroup.isPreorder || !!ownedTrack?.isPreview);
+  const downloadTrack =
+    track ??
+    (singleTrack && (!ownsWholeRelease || trackGroup.isPreorder)
+      ? singleTrack
+      : undefined);
+
+  return {
+    artist,
+    pledge,
+    showBacking,
+    showPurchase,
+    showPreOrdered,
+    showDownload,
+    downloadTrack,
+    isVisible:
+      !!artist &&
+      (showBacking ||
+        (canSeeActions && (showPurchase || showPreOrdered || showDownload))),
+  };
+};
+
 const PurchaseOrDownloadAlbum: React.FC<{
   trackGroup: TrackGroup;
   track?: Track;
@@ -20,56 +95,40 @@ const PurchaseOrDownloadAlbum: React.FC<{
   fixed?: boolean;
   flex?: boolean;
   hidePurchase?: boolean;
-}> = ({ trackGroup, track, collapse, fixed, flex, hidePurchase }) => {
-  const { user } = useAuthContext();
+  singleTrack?: Track;
+}> = ({
+  trackGroup,
+  track,
+  collapse,
+  fixed,
+  flex,
+  hidePurchase,
+  singleTrack,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-  const [isOwned, setIsOwned] = React.useState(false);
-  const { data: artist } = useQuery(
-    queryArtist({ artistSlug: trackGroup.artist.urlSlug })
-  );
-
-  const userId = user?.id;
-  const trackGroupPurchases = user?.userTrackGroupPurchases;
-  const trackPurchases = user?.userTrackPurchases;
-
-  const checkForAlbumOwnership = React.useCallback(async () => {
-    try {
-      if (userId) {
-        const purchased = track
-          ? trackPurchases?.find((p) => p.trackId === track.id) ||
-            (track.isPreview &&
-              trackGroupPurchases?.find(
-                (p) => p.trackGroupId === trackGroup.id
-              ))
-          : trackGroupPurchases?.find((p) => p.trackGroupId === trackGroup.id);
-
-        setIsOwned(!!purchased);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, [trackPurchases, trackGroupPurchases, trackGroup.id, userId, track]);
-
-  React.useEffect(() => {
-    checkForAlbumOwnership();
-  }, [checkForAlbumOwnership]);
+  const {
+    artist,
+    pledge,
+    showBacking,
+    showPurchase,
+    showPreOrdered,
+    showDownload,
+    downloadTrack,
+    isVisible,
+  } = useReleasePurchaseState({ trackGroup, track, singleTrack, hidePurchase });
 
   if (!trackGroup || !artist) {
     return null;
   }
 
-  if (!trackGroup.isGettable) {
+  if (fixed && !showBacking && !showPurchase && !showPreOrdered) {
     return null;
   }
 
-  const hasPledge = user?.pledges?.find(
-    (p) => p.fundraiserId === trackGroup.fundraiserId
-  );
-
-  if (trackGroup.fundraiser?.isAllOrNothing && hasPledge) {
+  if (showBacking && pledge) {
     return (
       <BackingThisProject
-        amount={hasPledge.amount}
+        amount={pledge.amount}
         currency={trackGroup?.currency}
         collapse={collapse}
         trackGroup={trackGroup}
@@ -77,28 +136,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
     );
   }
 
-  const isPublished = isTrackGroupPublished(trackGroup);
-
-  if (!isPublished) {
-    if (
-      !(
-        user &&
-        (canUserEditArtist(user, artist) || artist.paymentToUserId === user.id)
-      )
-    ) {
-      return null;
-    }
-  }
-
-  const showPurchase = !isOwned && !hidePurchase;
-
-  const showPreOrdered =
-    isOwned && trackGroup.isPreorder && !(track?.isPreview ?? false);
-
-  const showDownload =
-    isOwned && (!trackGroup.isPreorder || (track?.isPreview ?? false));
-
-  if (!showPurchase && !showPreOrdered && !showDownload) {
+  if (!isVisible) {
     return null;
   }
 
@@ -144,7 +182,11 @@ const PurchaseOrDownloadAlbum: React.FC<{
           </ArtistButton>
         )}
         {showDownload && !fixed && (
-          <DownloadAlbumButton trackGroup={trackGroup} onlyIcon track={track} />
+          <DownloadAlbumButton
+            trackGroup={trackGroup}
+            onlyIcon={collapse}
+            track={downloadTrack}
+          />
         )}
       </div>
     </>
