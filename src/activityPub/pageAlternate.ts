@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 
 import { matchRoute, splitPathIntoSegments } from "../parseIndex/routeMatcher";
 import { whereForVisibleProfile } from "../utils/artist";
+import { trackGroupPublishedObject } from "../utils/trackGroup";
 
 const apArtistUrl = (artistSlug: string) =>
   `${process.env.API_DOMAIN}/v1/ap/artists/${encodeURIComponent(artistSlug)}`;
@@ -41,6 +42,7 @@ export const findActivityPubAlternate = async (
               }),
           isDraft: false,
           isPublic: true,
+          publishedAt: { lte: new Date() },
           profile: profileWhere,
         },
         select: { id: true },
@@ -51,7 +53,7 @@ export const findActivityPubAlternate = async (
       const trackGroup = await prisma.trackGroup.findFirst({
         where: {
           urlSlug: route.albumSlug as string,
-          isHiddenTrackGroupForSongDrafts: false,
+          ...trackGroupPublishedObject(),
           adminEnabled: true,
           profile: profileWhere,
         },

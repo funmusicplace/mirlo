@@ -47,7 +47,10 @@ import { getClient } from "../utils/getClient";
 import { storedImageUrl } from "../utils/images";
 import { postImagesForContent, resolvePostContent } from "../utils/postContent";
 import { getSiteSettings } from "../utils/settings";
-import { whereForVisibleTrackGroup } from "../utils/trackGroup";
+import {
+  trackGroupPublishedObject,
+  whereForVisibleTrackGroup,
+} from "../utils/trackGroup";
 import { isPost, isTrackGroup } from "../utils/typeguards";
 
 export async function ensureArtistHasApKeys(urlSlug: string) {
@@ -233,8 +236,7 @@ const findAPReleaseById = async (id: number) => {
   return await prisma.trackGroup.findFirst({
     where: {
       id,
-      deletedAt: null,
-      isHiddenTrackGroupForSongDrafts: false,
+      ...trackGroupPublishedObject(),
       adminEnabled: true,
       profile: {
         enabled: true,
@@ -280,6 +282,7 @@ const findAPPostById = async (id: number) => {
       deletedAt: null,
       isDraft: false,
       isPublic: true,
+      publishedAt: { lte: new Date() },
       profile: {
         enabled: true,
         activityPub: true,

@@ -90,6 +90,35 @@ describe("ActivityPub page alternates (#2400)", () => {
       );
     });
 
+    it("returns null for scheduled posts and unpublished releases", async () => {
+      const artist = await setup();
+      const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const scheduled = await createPost(artist.id, {
+        isDraft: false,
+        publishedAt: nextWeek,
+      });
+      await createTrackGroup(artist.id, {
+        urlSlug: "draft-album",
+        publishedAt: null,
+      });
+      await createTrackGroup(artist.id, {
+        urlSlug: "scheduled-album",
+        publishedAt: nextWeek,
+      });
+      assert.equal(
+        await findActivityPubAlternate(`/test-artist/posts/${scheduled.id}`),
+        null
+      );
+      assert.equal(
+        await findActivityPubAlternate("/test-artist/release/draft-album"),
+        null
+      );
+      assert.equal(
+        await findActivityPubAlternate("/test-artist/release/scheduled-album"),
+        null
+      );
+    });
+
     it("returns null for pages without an AP object", async () => {
       await setup();
       assert.equal(await findActivityPubAlternate("/test-artist/merch"), null);
@@ -114,5 +143,30 @@ describe("ActivityPub page alternates (#2400)", () => {
       .set("Accept", "application/activity+json");
     assert.equal(response.status, 303);
     assert.equal(response.header.location, `${apBase}/test-artist`);
+  });
+
+  it("does not serve scheduled posts or unpublished releases as AP objects", async () => {
+    const artist = await setup();
+    const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const published = await createTrackGroup(artist.id, {
+      urlSlug: "published-album",
+    });
+    const draft = await createTrackGroup(artist.id, {
+      urlSlug: "draft-album",
+      publishedAt: null,
+    });
+    const scheduledPost = await createPost(artist.id, {
+      isDraft: false,
+      publishedAt: nextWeek,
+    });
+
+    const get = (path: string) =>
+      request(process.env.API_DOMAIN)
+        .get(`/v1/ap/artists/test-artist/${path}`)
+        .set("Accept", "application/activity+json");
+
+    assert.equal((await get(`releases/${published.id}`)).status, 200);
+    assert.notEqual((await get(`releases/${draft.id}`)).status, 200);
+    assert.notEqual((await get(`posts/${scheduledPost.id}`)).status, 200);
   });
 });
