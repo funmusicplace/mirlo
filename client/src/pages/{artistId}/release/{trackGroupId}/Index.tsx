@@ -126,6 +126,23 @@ export const ImageAndDetailsWrapper = styled.div`
   }
 `;
 
+export const TitleAndContentColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  @media screen and (max-width: ${bp.small}px) {
+    padding-top: 0px;
+  }
+`;
+
+export const MerchWrapper = styled.div`
+  @media screen and (max-width: ${bp.small}px) {
+    order: 1;
+    padding: var(--mi-side-paddings-xsmall);
+  }
+`;
+
 const PurchaseNotes = styled.div`
   display: flex;
   flex-direction: column;
@@ -223,17 +240,7 @@ function Index() {
             </div>
           )}
           <Fundraiser />
-          <div
-            className={css`
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-
-              @media screen and (max-width: ${bp.small}px) {
-                padding-top: 0px;
-              }
-            `}
-          >
+          <TitleAndContentColumn>
             <TrackGroupTitle
               trackGroup={trackGroup}
               title={trackGroup.title ?? ""}
@@ -265,19 +272,12 @@ function Index() {
                     </div>
                   </UnderneathImage>
                   {trackGroup.merch && trackGroup.merch.length > 0 && (
-                    <div
-                      className={css`
-                        @media screen and (max-width: ${bp.small}px) {
-                          order: 1;
-                          padding: var(--mi-side-paddings-xsmall);
-                        }
-                      `}
-                    >
+                    <MerchWrapper>
                       <TrackGroupMerch
                         merch={trackGroup.merch}
                         releaseArtist={artist}
                       />
-                    </div>
+                    </MerchWrapper>
                   )}
                   <PurchaseNotes className="text-xs">
                     {trackGroup.isGettable && trackGroup.tracks.length > 0 && (
@@ -337,7 +337,7 @@ function Index() {
                 </div>
               )}
             </div>
-          </div>
+          </TitleAndContentColumn>
           <ReleaseInfos
             trackGroup={trackGroup}
             showAbout={!showAboutInsteadOfTrackListing}

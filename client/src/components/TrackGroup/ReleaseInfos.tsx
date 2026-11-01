@@ -31,8 +31,12 @@ const InfosGrid = styled.div`
   }
 `;
 
-const sectionLabelClass =
+const sectionLabelBaseClass =
   "mt-0! mx-0! leading-tight! tracking-wider uppercase text-(--mi-light-foreground-color)!";
+
+export const sectionLabelClass = `${sectionLabelBaseClass} mb-2! text-xs! font-bold!`;
+
+export const prominentSectionLabelClass = `${sectionLabelBaseClass} mb-3! text-base! font-normal!`;
 
 const ReleaseInfos: React.FC<{
   trackGroup: TrackGroup;
@@ -56,18 +60,12 @@ const ReleaseInfos: React.FC<{
     <InfosGrid>
       {hasAbout && (
         <div className="col-start-2 row-start-1 min-w-0 max-w-prose">
-          <h2 className={`${sectionLabelClass} mb-3! text-base! font-normal!`}>
-            {t("aboutTitle")}
-          </h2>
+          <h2 className={prominentSectionLabelClass}>{t("aboutTitle")}</h2>
           <MarkdownContent content={trackGroup.about} className="mt-0!" />
         </div>
       )}
       <div className="col-start-1 row-start-1 min-w-0">
-        {hasCredits && (
-          <h2 className={`${sectionLabelClass} mb-2! text-xs! font-bold!`}>
-            {t("credits")}
-          </h2>
-        )}
+        {hasCredits && <h2 className={sectionLabelClass}>{t("credits")}</h2>}
         <div className="flex flex-col gap-2 text-sm text-(--mi-light-foreground-color)">
           {hasMeta && (
             <div className="flex flex-wrap gap-x-1.5">
