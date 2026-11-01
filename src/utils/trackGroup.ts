@@ -828,13 +828,11 @@ export const findTrackPurchaseAndVoidToken = async (
     return purchase;
   }
 
-  // Fall back: allow download if the track is isPreview and the user has
-  // purchased the containing track group (covers pre-orders and regular purchases)
-  const previewTrack = await prisma.track.findFirst({
+  const trackFromPurchasedRelease = await prisma.track.findFirst({
     where: {
       id: Number(trackId),
-      isPreview: true,
       trackGroup: {
+        deletedAt: null,
         userTrackGroupPurchases: {
           some: { userId: Number(user.id) },
         },
@@ -845,9 +843,14 @@ export const findTrackPurchaseAndVoidToken = async (
     },
   });
 
-  if (previewTrack) {
-    assertDownloadable(previewTrack.trackGroup, previewTrack);
-    return { track: previewTrack };
+  if (trackFromPurchasedRelease) {
+    if (!isCreator) {
+      assertDownloadable(
+        trackFromPurchasedRelease.trackGroup,
+        trackFromPurchasedRelease
+      );
+    }
+    return { track: trackFromPurchasedRelease };
   }
 
   throw new AppError({
