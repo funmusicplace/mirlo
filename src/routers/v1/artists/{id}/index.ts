@@ -12,7 +12,7 @@ import {
 } from "../../../../utils/artist";
 import {
   canUserSeePostContent,
-  getUserSubscriptionsForProfile,
+  getUserSubscriptionsForProfiles,
 } from "../../../../utils/postAccess";
 
 export default function () {
@@ -51,15 +51,16 @@ export default function () {
           return res.status(404).json({ error: "Artist not found" });
         }
 
-        const subscriptions = await getUserSubscriptionsForProfile(
+        const subscriptions = await getUserSubscriptionsForProfiles(
           loggedInUser,
-          parsedId
+          [parsedId]
         );
+        const { posts, ...profileWithoutPosts } = profile as any;
 
         return res.json({
           result: {
-            ...serializeProfile(profile as any, loggedInUser?.id, canManage),
-            posts: (profile as any).posts?.map((post: any) =>
+            ...serializeProfile(profileWithoutPosts, loggedInUser?.id),
+            posts: posts?.map((post: any) =>
               serializePost(
                 post,
                 undefined,

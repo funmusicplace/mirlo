@@ -1,6 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
+import { compact, uniq } from "lodash";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import {
@@ -8,7 +9,10 @@ import {
   whereForVisiblePostTrack,
 } from "../../../serializers/post";
 import { getEditableProfileIds } from "../../../utils/artist";
-import { canUserSeePostContent } from "../../../utils/postAccess";
+import {
+  canUserSeePostContent,
+  getUserSubscriptionsForProfiles,
+} from "../../../utils/postAccess";
 import { postImagesForContent } from "../../../utils/postContent";
 
 export default function () {
@@ -99,16 +103,10 @@ export default function () {
       const editableProfileIds = user
         ? await getEditableProfileIds(user.id)
         : [];
-      const subscriptions = user
-        ? await prisma.profileUserSubscription.findMany({
-            where: { userId: user.id },
-            select: {
-              amount: true,
-              profileSubscriptionTierId: true,
-              profileSubscriptionTier: { select: { profileId: true } },
-            },
-          })
-        : [];
+      const subscriptions = await getUserSubscriptionsForProfiles(
+        user,
+        uniq(compact(posts.map((p) => p.profileId)))
+      );
 
       const processedPosts = posts.map((p) =>
         serializePost(
@@ -119,7 +117,7 @@ export default function () {
             canUserSeePostContent(p, {
               isProfileOwner: editableProfileIds.includes(p.profileId),
               subscriptions: subscriptions.filter(
-                (s) => s.profileSubscriptionTier.profileId === p.profileId
+                (s) => s.profileId === p.profileId
               ),
             })
         )

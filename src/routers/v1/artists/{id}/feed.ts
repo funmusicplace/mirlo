@@ -19,7 +19,7 @@ import {
 } from "../../../../utils/artist";
 import {
   canUserSeePostContent,
-  getUserSubscriptionsForProfile,
+  getUserSubscriptionsForProfiles,
 } from "../../../../utils/postAccess";
 import { postImagesForContent } from "../../../../utils/postContent";
 import { turnItemsIntoRSS } from "../../../../utils/rss";
@@ -74,7 +74,9 @@ export const getPostsVisibleToUser = async (
   });
 
   const isProfileOwner = await canUserEditProfile(profile.id, user);
-  const subscriptions = await getUserSubscriptionsForProfile(user, profile.id);
+  const subscriptions = await getUserSubscriptionsForProfiles(user, [
+    profile.id,
+  ]);
 
   const processedPosts = posts.map((post) =>
     serializePost(

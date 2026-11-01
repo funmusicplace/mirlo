@@ -9,7 +9,6 @@ import { AppError } from "../../../../utils/error";
 import { presignZip, streamZip, zipExists } from "../../../../utils/minio";
 import {
   FormatOptions,
-  assertDownloadable,
   basicTrackGroupInclude,
   findTrackPurchaseAndVoidToken,
   findTrackPurchaseBasedOnTokenAndUpdate,
@@ -66,10 +65,6 @@ export default function () {
           log.info(`trackId: ${trackId} no user found for ${email}`);
           throw purchaseLinkNotFound();
         }
-      }
-
-      if (track) {
-        assertDownloadable(track.trackGroup, track);
       }
 
       if (!track && req.user) {

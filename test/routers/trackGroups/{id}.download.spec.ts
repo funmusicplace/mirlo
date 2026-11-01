@@ -340,7 +340,9 @@ describe("trackGroups/{id}/download", () => {
 
     describe("unreleased", () => {
       const setup = async (data: Parameters<typeof createTrackGroup>[1]) => {
-        const { user } = await createUser({ email: "artist@artist.com" });
+        const { user, accessToken: artistToken } = await createUser({
+          email: "artist@artist.com",
+        });
         const profile = await createProfile(user.id);
         const trackGroup = await createTrackGroup(profile.id, data);
         await createBucketIfNotExists(getAudioBucket());
@@ -355,22 +357,24 @@ describe("trackGroups/{id}/download", () => {
             singleDownloadToken: token,
           },
         });
-        const viaToken = () =>
-          requestApp
+        const viaToken = (cookie?: string) => {
+          const req = requestApp
             .get(`trackGroups/${trackGroup.id}/download`)
             .query({ email: purchaser.email, token })
             .set("Accept", "application/json");
+          return cookie ? req.set("Cookie", [`jwt=${cookie}`]) : req;
+        };
         const viaSession = () =>
           requestApp
             .get(`trackGroups/${trackGroup.id}/download`)
             .set("Accept", "application/json")
             .set("Cookie", [`jwt=${accessToken}`]);
-        return { viaToken, viaSession };
+        return { viaToken, viaSession, artistToken };
       };
 
       it("should not download a draft release", async () => {
         const { viaToken, viaSession } = await setup({ publishedAt: null });
-        assert.equal((await viaToken()).statusCode, 404);
+        assert.equal((await viaToken()).statusCode, 403);
         assert.equal((await viaSession()).statusCode, 403);
       });
 
@@ -378,6 +382,13 @@ describe("trackGroups/{id}/download", () => {
         const { viaToken, viaSession } = await setup({ isPreorder: true });
         assert.equal((await viaToken()).statusCode, 403);
         assert.equal((await viaSession()).statusCode, 403);
+      });
+
+      it("should fall back to the artist's session for a pre-order token link", async () => {
+        const { viaToken, artistToken } = await setup({ isPreorder: true });
+        const response = await viaToken(artistToken);
+        assert.equal(response.statusCode, 200);
+        assert.notEqual(response.body.result.jobId, undefined);
       });
     });
   });

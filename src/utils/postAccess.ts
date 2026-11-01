@@ -3,19 +3,27 @@ import { User } from "@mirlo/prisma/client";
 
 import { canUserEditProfile } from "./artist";
 
-export const getUserSubscriptionsForProfile = async (
+export const getUserSubscriptionsForProfiles = async (
   user: User | undefined,
-  profileId: number
-): Promise<ProfileSubscription[]> => {
-  if (!user) return [];
-  return prisma.profileUserSubscription.findMany({
+  profileIds: number[]
+): Promise<(ProfileSubscription & { profileId: number })[]> => {
+  if (!user || profileIds.length === 0) return [];
+  const subscriptions = await prisma.profileUserSubscription.findMany({
     where: {
       userId: user.id,
-      profileSubscriptionTier: { profileId },
+      profileSubscriptionTier: { profileId: { in: profileIds } },
     },
     orderBy: { amount: "desc" },
-    select: { amount: true, profileSubscriptionTierId: true },
+    select: {
+      amount: true,
+      profileSubscriptionTierId: true,
+      profileSubscriptionTier: { select: { profileId: true } },
+    },
   });
+  return subscriptions.map(({ profileSubscriptionTier, ...subscription }) => ({
+    ...subscription,
+    profileId: profileSubscriptionTier.profileId,
+  }));
 };
 
 export type ProfileSubscription = {
@@ -67,7 +75,7 @@ export const getCanUserSeePostContent = async (
     allowAdmin: false,
   });
   const subscriptions = post.profileId
-    ? await getUserSubscriptionsForProfile(user, post.profileId)
+    ? await getUserSubscriptionsForProfiles(user, [post.profileId])
     : [];
   return canUserSeePostContent(post, { isProfileOwner, subscriptions });
 };

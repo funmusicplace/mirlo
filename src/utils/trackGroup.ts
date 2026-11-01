@@ -705,16 +705,7 @@ export const findTrackPurchaseAndVoidToken = async (
   const purchase = await prisma.userTrackPurchase.findFirst({
     where: {
       trackId: Number(trackId),
-      ...(!isCreator
-        ? {
-            userId: Number(user.id),
-            track: {
-              trackGroup: {
-                publishedAt: { lte: new Date() },
-              },
-            },
-          }
-        : {}),
+      ...(!isCreator ? { userId: Number(user.id) } : {}),
     },
     include: {
       track: {
@@ -746,7 +737,6 @@ export const findTrackPurchaseAndVoidToken = async (
       id: Number(trackId),
       isPreview: true,
       trackGroup: {
-        publishedAt: { lte: new Date() },
         userTrackGroupPurchases: {
           some: { userId: Number(user.id) },
         },
@@ -758,6 +748,7 @@ export const findTrackPurchaseAndVoidToken = async (
   });
 
   if (previewTrack) {
+    assertDownloadable(previewTrack.trackGroup, previewTrack);
     return { track: previewTrack };
   }
 
@@ -843,6 +834,8 @@ export const findTrackPurchaseBasedOnTokenAndUpdate = async (
     throw purchaseLinkNotFound();
   }
 
+  assertDownloadable(purchase.track.trackGroup, purchase.track);
+
   // TODO: do we want a token to be reset after download?
   // If so we probably want to do this once the download is
   // complete on the client otherwise there might be errors
@@ -870,9 +863,7 @@ export const findPurchaseBasedOnTokenAndUpdate = async (
       userId: userId,
       singleDownloadToken: token,
       trackGroupId: Number(trackGroupId),
-      trackGroup: {
-        ...trackGroupPublishedObject(),
-      },
+      trackGroup: { deletedAt: null },
     },
     include: {
       trackGroup: basicTrackGroupInclude,
@@ -882,6 +873,8 @@ export const findPurchaseBasedOnTokenAndUpdate = async (
   if (!purchase) {
     throw purchaseLinkNotFound();
   }
+
+  assertDownloadable(purchase.trackGroup);
 
   // TODO: do we want a token to be reset after download?
   // If so we probably want to do this once the download is
