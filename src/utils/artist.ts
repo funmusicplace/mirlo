@@ -16,6 +16,7 @@ import { getClient } from "./getClient";
 import { convertURLArrayToSizes, storedImageVariantUrl } from "./images";
 import { deleteMerch, merchImagesInclude } from "./merch";
 import { storedImagePrefix } from "./minio";
+import { resolvePayee } from "./payments/payee";
 import { clearImageSlot } from "./pendingImage";
 import { postImagesForContent } from "./postContent";
 import reservedProfileSlugs from "./reservedProfileSlugs";
@@ -519,25 +520,29 @@ export const deleteStripeSubscriptions = async (
   const stripeSubscriptions = await prisma.profileUserSubscription.findMany({
     where,
     include: {
-      profileSubscriptionTier: true,
+      profileSubscriptionTier: {
+        include: {
+          profile: {
+            include: {
+              user: { select: { stripeAccountId: true } },
+              paymentToUser: { select: { stripeAccountId: true } },
+            },
+          },
+        },
+      },
     },
   });
   await Promise.all(
     stripeSubscriptions.map(async (sub) => {
       if (sub.stripeSubscriptionKey) {
-        const profileOwner = await prisma.user.findFirst({
-          where: {
-            profiles: {
-              some: {
-                id: sub.profileSubscriptionTier.profileId,
-              },
-            },
-          },
-        });
+        const stripeAccountId =
+          sub.stripeAccountId ??
+          resolvePayee({ profile: sub.profileSubscriptionTier.profile })
+            .stripeAccountId;
         try {
-          if (profileOwner?.stripeAccountId) {
+          if (stripeAccountId) {
             await stripe.subscriptions.cancel(sub.stripeSubscriptionKey, {
-              stripeAccount: profileOwner?.stripeAccountId,
+              stripeAccount: stripeAccountId,
             });
           } else {
             await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);

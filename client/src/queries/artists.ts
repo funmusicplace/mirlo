@@ -273,6 +273,28 @@ export function queryManageArtistSubscribers(opts: { artistId?: number }) {
   });
 }
 
+export type SubscriptionPayouts = {
+  paidSubscriptions: number;
+  onOtherAccounts: number;
+};
+
+const fetchSubscriptionPayouts: QueryFunction<
+  SubscriptionPayouts,
+  ["fetchSubscriptionPayouts", { artistId: number }, ...any]
+> = ({ queryKey: [_, { artistId }], signal }) =>
+  api
+    .get<{
+      result: SubscriptionPayouts;
+    }>(`v1/manage/artists/${artistId}/subscriptionPayouts`, { signal })
+    .then((r) => r.result);
+
+export function querySubscriptionPayouts(artistId: number) {
+  return queryOptions({
+    queryKey: ["fetchSubscriptionPayouts", { artistId }, QUERY_KEY_ARTISTS],
+    queryFn: fetchSubscriptionPayouts,
+  });
+}
+
 async function cancelArtistSubscriber(opts: {
   artistId: number;
   subscriptionId: number;

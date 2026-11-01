@@ -24,6 +24,7 @@ import {
   type ResolvedItem,
 } from "../../src/utils/payments/purchase";
 import {
+  cancelUserSubscription,
   initiateOnlineSubscription,
   initiateSubscription,
   initiateSubscriptionPaymentMethodUpdate,
@@ -3149,6 +3150,37 @@ describe("purchase", () => {
         new Date(yearFromNow * 1000)
       );
     });
+
+    it("switches on the Stripe account the subscription lives on, not the artist's current payee", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_new_payee",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, { minAmount: 1000 });
+
+      const existing = await createExistingSubscription({
+        profileSubscriptionTierId: oldTier.id,
+        userId: buyer.id,
+        amount: 500,
+        stripeSubscriptionKey: "sub_on_old_account",
+        stripeAccountId: "acct_old_payee",
+      });
+      const updateStub = stubStripeSubscription();
+
+      await switchSubscriptionTier(existing, newTier.id);
+
+      assert.equal(
+        updateStub.getCall(0).args[2]?.stripeAccount,
+        "acct_old_payee"
+      );
+      const after = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id },
+      });
+      assert.equal(after?.stripeAccountId, "acct_old_payee");
+    });
   });
 
   describe("finalizeSubscriptionSetup (direct)", () => {
@@ -3695,6 +3727,108 @@ describe("purchase", () => {
         subscription?.stripeSubscriptionKey,
         "sub_same_tier_new",
         "the row now points at the new subscription"
+      );
+    });
+
+    it("starts the subscription on the new payee and cancels the one left on the old payee's account", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_new_payee",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, { minAmount: 1000 });
+
+      await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: oldTier.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_on_old_account",
+          stripeAccountId: "acct_old_payee",
+        },
+      });
+
+      const retrieveStub = stubExistingStripeSubscription("sub_on_old_account");
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      sinon.stub(stripeUtils.stripe.customers, "create").resolves({
+        id: "cus_new",
+      } as unknown as Stripe.Response<Stripe.Customer>);
+      sinon
+        .stub(stripeUtils.stripe.paymentMethods, "attach")
+        .resolves({} as unknown as Stripe.Response<Stripe.PaymentMethod>);
+      sinon.stub(stripeUtils.stripe.products, "create").resolves({
+        id: "prod_new_payee",
+      } as unknown as Stripe.Response<Stripe.Product>);
+      sinon.stub(stripeUtils.stripe.subscriptions, "create").resolves({
+        id: "sub_on_new_account",
+      } as unknown as Stripe.Response<Stripe.Subscription>);
+      const cancelStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "cancel")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+
+      await finalizeSubscriptionSetup({
+        stripeAccountId: "acct_new_payee",
+        paymentMethodId: "pm_test",
+        tierId: newTier.id,
+        amount: 1000,
+        currency: "usd",
+        userId: buyer.id,
+        userEmail: buyer.email,
+        oldStripeSubscriptionKey: "sub_on_old_account",
+      });
+
+      assert.equal(
+        retrieveStub.callCount,
+        0,
+        "a subscription on another account can't take a card from this one"
+      );
+      assert.equal(cancelStub.getCall(0).args[0], "sub_on_old_account");
+      assert.equal(
+        cancelStub.getCall(0).args[1]?.stripeAccount,
+        "acct_old_payee"
+      );
+      const after = await prisma.profileUserSubscription.findFirst({
+        where: { userId: buyer.id, profileSubscriptionTierId: newTier.id },
+      });
+      assert.equal(after?.stripeSubscriptionKey, "sub_on_new_account");
+      assert.equal(after?.stripeAccountId, "acct_new_payee");
+    });
+  });
+
+  describe("cancelUserSubscription (direct)", () => {
+    it("cancels on the Stripe account the subscription lives on, not the artist's current payee", async () => {
+      sinon.stub(sendMailQueue, "add").resolves();
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_new_payee",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id, { minAmount: 500 });
+      const subscription = await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: tier.id,
+          userId: buyer.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_on_old_account",
+          stripeAccountId: "acct_old_payee",
+        },
+        include: { profileSubscriptionTier: true },
+      });
+      const updateStub = sinon
+        .stub(stripeUtils.stripe.subscriptions, "update")
+        .resolves({} as unknown as Stripe.Response<Stripe.Subscription>);
+
+      await cancelUserSubscription(subscription, buyer.email);
+
+      assert.equal(updateStub.getCall(0).args[0], "sub_on_old_account");
+      assert.equal(
+        updateStub.getCall(0).args[2]?.stripeAccount,
+        "acct_old_payee"
       );
     });
   });

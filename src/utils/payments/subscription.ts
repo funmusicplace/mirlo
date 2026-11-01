@@ -16,6 +16,7 @@ import {
   retireOtherTierSubscriptions,
 } from "../subscriptionTier";
 
+import { resolvePayee } from "./payee";
 import {
   getPaymentProcessor,
   type DeferredQuote,
@@ -243,8 +244,10 @@ export const switchSubscriptionTier = async (
     });
   }
 
-  const { stripeAccountId, currency } =
-    await resolveProfilePaymentContext(profileId);
+  const { stripeAccountId, currency } = await resolveProfilePaymentContext(
+    profileId,
+    subscription.stripeAccountId ?? undefined
+  );
 
   const { nextBillingDate } =
     await getPaymentProcessor().updateSubscriptionTier({
@@ -264,6 +267,7 @@ export const switchSubscriptionTier = async (
     tierId: tier.id,
     amount: resolvedAmount,
     paymentProcessorKey: subscription.stripeSubscriptionKey,
+    stripeAccountId,
     platformCut: Math.round((resolvedAmount * platformPercent) / 100),
     shippingAddress: subscription.shippingAddress as object | null,
     nextBillingDate: nextBillingDate ?? subscription.nextBillingDate,
@@ -295,7 +299,8 @@ export const initiateSubscriptionPaymentMethodUpdate = async (
   }
 
   const { stripeAccountId } = await resolveProfilePaymentContext(
-    subscription.profileSubscriptionTier.profileId
+    subscription.profileSubscriptionTier.profileId,
+    subscription.stripeAccountId ?? undefined
   );
 
   const { clientSecret } =
@@ -327,7 +332,8 @@ export const cancelUserSubscription = async (
     },
   });
   const stripeAccountId =
-    profile?.paymentToUser?.stripeAccountId ?? profile?.user.stripeAccountId;
+    subscription.stripeAccountId ??
+    (profile ? resolvePayee({ profile }).stripeAccountId : null);
 
   if (subscription.stripeSubscriptionKey) {
     if (stripeAccountId) {

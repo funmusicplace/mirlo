@@ -7,6 +7,9 @@ import {
 } from "components/Artist/ArtistButtons";
 import SectionActionStrip from "components/common/SectionActionStrip";
 import { tipButtonStyle } from "components/common/TipArtist";
+import SubscriptionPayoutsWarning from "components/ManageArtist/ManageArtistDetails/SubscriptionPayoutsWarning";
+import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
+import ManageSubscriptionTierBox from "components/ManageArtist/ManageSubscriptionTierBox";
 import {
   queryManagedArtist,
   queryManagedArtistSubscriptionTiers,
@@ -22,9 +25,6 @@ import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import useSortableReorder from "utils/useSortableReorder";
-
-import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
-import ManageSubscriptionTierBox from "components/ManageArtist/ManageSubscriptionTierBox";
 
 const Index: React.FC<{}> = () => {
   const { t } = useTranslation("translation", {
@@ -146,6 +146,7 @@ const Index: React.FC<{}> = () => {
           {t("addNewTier")}
         </ArtistButton>
       </SectionActionStrip>
+      <SubscriptionPayoutsWarning artistId={artist.id} />
       {artist.properties?.showTipOnSupportPage && (
         <div className="mb-3">
           <div

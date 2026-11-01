@@ -8,6 +8,8 @@ import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { beforeEach, describe, it } from "mocha";
+import sinon from "sinon";
+import Stripe from "stripe";
 
 import {
   DataMigration,
@@ -23,6 +25,7 @@ import orphanedAudio from "../../src/dataMigrations/migrations/20261005000000_or
 import approveSelfOwnedLabelRows from "../../src/dataMigrations/migrations/20261006000000_approveSelfOwnedLabelRows";
 import defaultInstanceLogo from "../../src/dataMigrations/migrations/20261018120000_defaultInstanceLogo";
 import sanitizePostContent from "../../src/dataMigrations/migrations/20261022000000_sanitizePostContent";
+import subscriptionStripeAccounts from "../../src/dataMigrations/migrations/20261101120000_subscriptionStripeAccounts";
 import {
   DEFAULT_BUCKET_CONFIG,
   getImagesBucket,
@@ -34,12 +37,14 @@ import {
   uploadOptimizedImageByType,
   uploadWrapper,
 } from "../../src/utils/minio";
+import stripe from "../../src/utils/stripe";
 import {
   clearTables,
   createPost,
   createPostImage,
   createProfile,
   createSiteSettings,
+  createTier,
   createTrack,
   createTrackGroup,
   createUser,
@@ -170,6 +175,7 @@ describe("dataMigrations: loading", () => {
         approveSelfOwnedLabelRows,
         defaultInstanceLogo,
         sanitizePostContent,
+        subscriptionStripeAccounts,
       ].map((m) => m.name)
     );
     assert.equal(dataMigrations.length, files.length);
@@ -558,5 +564,104 @@ describe("dataMigrations: approveSelfOwnedLabelRows", () => {
     });
     assert.equal(otherRow.isArtistApproved, false);
     assert.equal(otherRow.isLabelApproved, true);
+  });
+});
+
+describe("dataMigrations: subscriptionStripeAccounts", () => {
+  beforeEach(async () => {
+    await clearTables();
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  const notFound = () =>
+    new Stripe.errors.StripeInvalidRequestError({
+      type: "invalid_request_error",
+      message: "No such subscription",
+    });
+
+  it("records the account each subscription is found on", async () => {
+    const { user: owner } = await createUser({
+      email: "artist@test.com",
+      stripeAccountId: "acct_owner",
+    });
+    const { user: label } = await createUser({
+      email: "label@test.com",
+      stripeAccountId: "acct_label",
+    });
+    const profile = await createProfile(owner.id);
+    await prisma.artistLabel.create({
+      data: { artistId: profile.id, labelUserId: label.id },
+    });
+    await prisma.profile.update({
+      where: { id: profile.id },
+      data: { paymentToUserId: label.id },
+    });
+    const tier = await createTier(profile.id, { minAmount: 500 });
+    const keys = ["sub_on_owner", "sub_on_label", "sub_nowhere"];
+    for (const key of keys) {
+      const { user } = await createUser({ email: `${key}@test.com` });
+      await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: tier.id,
+          userId: user.id,
+          amount: 500,
+          stripeSubscriptionKey: key,
+        },
+      });
+    }
+    const lives: Record<string, string> = {
+      sub_on_owner: "acct_owner",
+      sub_on_label: "acct_label",
+    };
+    sinon
+      .stub(stripe.subscriptions, "retrieve")
+      .callsFake(async (key: string, options?: unknown) => {
+        const account = (options as { stripeAccount?: string })?.stripeAccount;
+        if (lives[key] !== account) {
+          throw notFound();
+        }
+        return { id: key } as unknown as Stripe.Response<Stripe.Subscription>;
+      });
+
+    assert.equal(await subscriptionStripeAccounts.run(), true);
+
+    const rows = await prisma.profileUserSubscription.findMany({
+      select: { stripeSubscriptionKey: true, stripeAccountId: true },
+      orderBy: { stripeSubscriptionKey: "asc" },
+    });
+    assert.deepEqual(rows, [
+      { stripeSubscriptionKey: "sub_nowhere", stripeAccountId: null },
+      { stripeSubscriptionKey: "sub_on_label", stripeAccountId: "acct_label" },
+      { stripeSubscriptionKey: "sub_on_owner", stripeAccountId: "acct_owner" },
+    ]);
+  });
+
+  it("tries again on the next boot when Stripe can't be reached", async () => {
+    const { user: owner } = await createUser({
+      email: "artist@test.com",
+      stripeAccountId: "acct_owner",
+    });
+    const { user: fan } = await createUser({ email: "fan@test.com" });
+    const profile = await createProfile(owner.id);
+    const tier = await createTier(profile.id, { minAmount: 500 });
+    await prisma.profileUserSubscription.create({
+      data: {
+        profileSubscriptionTierId: tier.id,
+        userId: fan.id,
+        amount: 500,
+        stripeSubscriptionKey: "sub_unknown",
+      },
+    });
+    sinon.stub(stripe.subscriptions, "retrieve").rejects(
+      new Stripe.errors.StripeConnectionError({
+        type: "api_error",
+        message: "offline",
+      })
+    );
+
+    assert.equal(await subscriptionStripeAccounts.run(), false);
   });
 });
