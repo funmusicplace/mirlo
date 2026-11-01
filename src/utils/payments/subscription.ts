@@ -163,6 +163,24 @@ export const initiateOnlineSubscription = async ({
         : null,
     ]);
 
+  if (
+    !userId &&
+    userEmail &&
+    (await prisma.profileUserSubscription.findFirst({
+      where: {
+        user: { email: { equals: userEmail, mode: "insensitive" } },
+        profileSubscriptionTier: { profileId },
+        stripeSubscriptionKey: { not: null },
+      },
+    }))
+  ) {
+    throw new AppError({
+      httpCode: 409,
+      description:
+        "This email already has a subscription to this artist. Log in to Mirlo to change it.",
+    });
+  }
+
   const isTierSwitch =
     !!existingSubscription &&
     existingSubscription.profileSubscriptionTierId !== tier.id;

@@ -2578,6 +2578,67 @@ describe("purchase", () => {
   });
 
   describe("initiateOnlineSubscription (direct) — existing subscribers", () => {
+    it("refuses a guest checkout for an email that already has a paid subscription", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_guest_takeover",
+      });
+      const { user: subscriber } = await createUser({
+        email: "subscriber@test.com",
+      });
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, { minAmount: 1000 });
+      await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: oldTier.id,
+          userId: subscriber.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_someone_elses",
+        },
+      });
+      const createStub = sinon.stub(stripeUtils.stripe.setupIntents, "create");
+
+      await assert.rejects(
+        initiateOnlineSubscription({
+          profileId: profile.id,
+          tierId: newTier.id,
+          userEmail: "Subscriber@test.com",
+        }),
+        (e: AppError) => e.httpCode === 409
+      );
+      assert.equal(createStub.callCount, 0);
+    });
+
+    it("lets a guest subscribe with the email of an account that has only a free follow", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_guest_follower",
+      });
+      const { user: follower } = await createUser({
+        email: "follower@test.com",
+      });
+      const profile = await createProfile(artistUser.id);
+      const freeTier = await createTier(profile.id, { isDefaultTier: true });
+      const tier = await createTier(profile.id, { minAmount: 1000 });
+      await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: freeTier.id,
+          userId: follower.id,
+          amount: 0,
+        },
+      });
+
+      const result = await initiateOnlineSubscription({
+        profileId: profile.id,
+        tierId: tier.id,
+        userEmail: follower.email,
+        deferred: true,
+      });
+
+      assert.ok("deferred" in result);
+    });
+
     it("quotes a switch without touching the existing subscription", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
