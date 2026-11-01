@@ -281,6 +281,49 @@ describe("send-post-notification", () => {
     assert.strictEqual(jobData.message.to, "guest@test.com");
   });
 
+  // ── Resend ─────────────────────────────────────────────────────────────────
+
+  it("resend only emails subscribers who weren't notified the first time", async () => {
+    const { artist } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(artist.id);
+    await sendPostNotification({ data: { postId: post.id } });
+
+    const { user: late } = await createUser({
+      email: "late@test.com",
+      emailConfirmationToken: null,
+    });
+    await prisma.profileUserSubscription.create({
+      data: {
+        userId: late.id,
+        profileSubscriptionTierId: artist.subscriptionTiers[0].id,
+        amount: 5,
+      },
+    });
+    mailQueueStub.resetHistory();
+
+    await sendPostNotification({ data: { postId: post.id, resend: true } });
+    await sendPostNotification({ data: { postId: post.id, resend: true } });
+
+    assert.strictEqual(mailQueueStub.callCount, 1);
+    const [, jobData] = mailQueueStub.firstCall.args;
+    assert.strictEqual(jobData.message.to, "late@test.com");
+    const notifications = await prisma.notification.count({
+      where: { postId: post.id, notificationType: "NEW_ARTIST_POST" },
+    });
+    assert.strictEqual(notifications, 2);
+  });
+
+  it("resend does nothing for a post that hasn't been sent yet", async () => {
+    const { artist } = await createArtistWithSubscriber("sub@test.com");
+    const post = await createPublishedPost(artist.id);
+
+    await sendPostNotification({ data: { postId: post.id, resend: true } });
+
+    assert.strictEqual(mailQueueStub.callCount, 0);
+    const updated = await prisma.post.findUnique({ where: { id: post.id } });
+    assert.strictEqual(updated?.hasAnnounceEmailBeenSent, false);
+  });
+
   it("does not email deleted subscribers", async () => {
     const { artist } = await createArtistWithSubscriber("deleted@test.com", {
       deletedAt: new Date(),
