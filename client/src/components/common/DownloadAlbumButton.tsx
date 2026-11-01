@@ -39,7 +39,17 @@ const DownloadAlbumButton: React.FC<{
   track?: Track;
   fixed?: boolean;
   dropdownItem?: boolean;
-}> = ({ trackGroup, onlyIcon, email, token, track, fixed, dropdownItem }) => {
+  labelTarget?: "track" | "album";
+}> = ({
+  trackGroup,
+  onlyIcon,
+  email,
+  token,
+  track,
+  fixed,
+  dropdownItem,
+  labelTarget,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [chosenFormat, setChosenFormat] = React.useState("");
   const [isGeneratingAlbum, setIsGeneratingAlbum] = React.useState(0);
@@ -245,7 +255,15 @@ const DownloadAlbumButton: React.FC<{
             setIsPopupOpen(true);
           }}
         >
-          {onlyIcon ? "" : t("download")}
+          {onlyIcon
+            ? ""
+            : t(
+                labelTarget === "track"
+                  ? "downloadTrack"
+                  : labelTarget === "album"
+                    ? "downloadAlbum"
+                    : "download"
+              )}
         </ArtistButton>
       )}
     </>

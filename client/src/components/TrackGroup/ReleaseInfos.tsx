@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { bp, coverSizeMax } from "../../constants";
 
+import ReleaseCreditLines from "./ReleaseCreditLines";
 import ReleaseDate from "./ReleaseDate";
 import TrackGroupPills from "./TrackGroupPills";
 
@@ -78,17 +79,7 @@ const ReleaseInfos: React.FC<{
               )}
             </div>
           )}
-          {trackGroup.coverCredit && (
-            <p className="m-0">
-              {t("coverCredit", { credit: trackGroup.coverCredit })}
-            </p>
-          )}
-          {trackGroup.credits && (
-            <MarkdownContent
-              content={trackGroup.credits}
-              className="mt-0! opacity-100!"
-            />
-          )}
+          <ReleaseCreditLines trackGroup={trackGroup} />
         </div>
         <TrackGroupPills tags={trackGroup.tags} />
       </div>

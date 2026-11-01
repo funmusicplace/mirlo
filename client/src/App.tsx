@@ -106,7 +106,7 @@ function App() {
           <div className="hidden md:block">
             <PageBackground />
           </div>
-          <div className="grow flex flex-col pb-[65px] min-h-[calc(100vh-65px)]">
+          <div className="grow flex flex-col pb-(--player-reserved-height) min-h-[calc(100vh-var(--player-reserved-height))]">
             <ManageArtistButtons />
             <div className="w-full flex flex-col min-h-screen">
               <main

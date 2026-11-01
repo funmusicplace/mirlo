@@ -38,6 +38,7 @@ export default function () {
               cover: true,
               _count: subscriptionTierReleasesCount,
               tracks: {
+                where: { deletedAt: null },
                 orderBy: {
                   order: "asc",
                 },

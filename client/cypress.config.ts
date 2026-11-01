@@ -74,6 +74,13 @@ export default defineConfig({
           about?: string;
           credits?: string;
           coverCredit?: string;
+          tracks?: {
+            title: string;
+            order?: number;
+            lyrics?: string;
+            description?: string;
+            audio?: { create: { uploadState?: "SUCCESS" } };
+          }[];
         }) => {
           return pkg.createTrackGroup(query.artistId, query);
         },

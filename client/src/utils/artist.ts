@@ -27,6 +27,22 @@ export const canSupportArtist = (
   stripeAccountStatus?: { chargesEnabled?: boolean }
 ) => !!stripeAccountStatus?.chargesEnabled && getPaidTierCount(artist) > 0;
 
+export const isReleaseArtist = (
+  trackArtist: { artistId?: number; artistName?: string },
+  artist?: { id: number; name: string }
+) => {
+  if (!artist) {
+    return false;
+  }
+  if (trackArtist.artistId) {
+    return trackArtist.artistId === artist.id;
+  }
+  return (
+    trackArtist.artistName?.trim().toLowerCase() ===
+    artist.name.trim().toLowerCase()
+  );
+};
+
 export const isTipOnlyArtist = (artist: {
   subscriptionTiers: { isDefaultTier: boolean }[];
   properties?: { showTipOnSupportPage?: boolean };

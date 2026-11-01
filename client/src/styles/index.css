@@ -26,6 +26,7 @@ html {
   --mi-touch-target-min: 30px;
 
   --header-cover-sticky-height: 50px;
+  --player-reserved-height: 65px;
 
   --mi-font-family-stack:
     system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",

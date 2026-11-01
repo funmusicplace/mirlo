@@ -10,6 +10,7 @@ import { FaLock } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import { isTrackGroupPublished } from "utils/artist";
+import { isSingleTrackRelease } from "utils/tracks";
 
 import ImageWithPlaceholder from "./ImageWithPlaceholder";
 import Pill from "./Pill";
@@ -62,7 +63,7 @@ function ReleaseCard({
     return null;
   }
 
-  const isSingleTrackGroup = trackGroup.tracks?.length === 1;
+  const isSingleTrackGroup = isSingleTrackRelease(trackGroup);
   const trackIds = [...(trackGroup.tracks ?? [])]
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
     .filter((t) => t.isPlayable)

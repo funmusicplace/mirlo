@@ -124,14 +124,14 @@ describe("preview track downloads with album purchase", () => {
       cy.visit(
         `/${artistSlug}/release/${preOrderReleaseSlug}/tracks/${previewTrackId}`
       );
-      cy.findByRole("button", { name: "Download" }).should("exist");
+      cy.findByRole("button", { name: "Download track" }).should("exist");
     });
 
     it("does not show download button for a non-preview track without direct purchase", () => {
       cy.visit(
         `/${artistSlug}/release/${preOrderReleaseSlug}/tracks/${nonPreviewTrackId}`
       );
-      cy.findByRole("button", { name: "Download" }).should("not.exist");
+      cy.findByRole("button", { name: /^Download/ }).should("not.exist");
     });
   });
 

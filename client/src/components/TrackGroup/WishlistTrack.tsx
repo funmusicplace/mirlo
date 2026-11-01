@@ -1,3 +1,4 @@
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import Button from "components/common/Button";
 import LogInForm from "components/common/LogInForm";
 import Modal from "components/common/Modal";
@@ -11,7 +12,8 @@ import { useAuthContext } from "state/AuthContext";
 const WishlistTrack: React.FC<{
   track: { id: number };
   collapse?: boolean;
-}> = ({ track, collapse }) => {
+  inArtistPage?: boolean;
+}> = ({ track, collapse, inArtistPage }) => {
   const { user, refreshLoggedInUser } = useAuthContext();
   const errorHandler = useErrorHandler();
   const { t: tWishlist } = useTranslation("translation", {
@@ -82,24 +84,30 @@ const WishlistTrack: React.FC<{
     user,
   ]);
 
-  const buttonLabel = `${
-    isInWishlist ? tWishlist("removeFromWishlist") : tWishlist("addToWishlist")
-  }`;
+  const addKey = inArtistPage ? "wishlistThisTrack" : "addToWishlist";
+  const removeKey = inArtistPage
+    ? "removeTrackFromWishlist"
+    : "removeFromWishlist";
+  const buttonLabel = `${tWishlist(isInWishlist ? removeKey : addKey)}`;
+
+  const buttonProps = {
+    onClick,
+    "aria-label": buttonLabel,
+    className: "wishlist",
+    title: buttonLabel,
+    startIcon: isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />,
+    disabled: user === undefined || isSubmitting,
+  };
 
   return (
     <>
-      <Button
-        size="compact"
-        variant="transparent"
-        onClick={onClick}
-        aria-label={buttonLabel}
-        className="wishlist"
-        title={buttonLabel}
-        startIcon={isInWishlist ? <IoIosHeart /> : <IoIosHeartEmpty />}
-        disabled={user === undefined || isSubmitting}
-      >
-        {!collapse && buttonLabel}
-      </Button>
+      {inArtistPage ? (
+        <ArtistButton {...buttonProps} />
+      ) : (
+        <Button size="compact" variant="transparent" {...buttonProps}>
+          {!collapse && buttonLabel}
+        </Button>
+      )}
 
       {!user && (
         <Modal

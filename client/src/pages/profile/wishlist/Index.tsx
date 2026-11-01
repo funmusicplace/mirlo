@@ -1,16 +1,15 @@
 import { css } from "@emotion/css";
+import Box from "components/common/Box";
 import ReleaseCard from "components/common/ReleaseCard";
 import TrackCard from "components/common/TrackCard";
-import Box from "components/common/Box";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
 import WidthContainer from "components/common/WidthContainer";
+import FilterGroup from "components/Profile/UserNotificationFeed/FilterGroup";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useAuthContext } from "state/AuthContext";
-
 import api from "services/api";
-
-import FilterGroup from "components/Profile/UserNotificationFeed/FilterGroup";
+import { useAuthContext } from "state/AuthContext";
+import { isSingleTrackRelease } from "utils/tracks";
 
 type Filter = "all" | "albums" | "tracks";
 
@@ -73,7 +72,11 @@ function Index() {
 
   const filtered = React.useMemo(() => {
     if (filter === "albums") return items.filter((i) => i.kind === "album");
-    if (filter === "tracks") return items.filter((i) => i.kind === "track");
+    if (filter === "tracks") {
+      return items.filter(
+        (i) => i.kind === "track" || isSingleTrackRelease(i.trackGroup)
+      );
+    }
     return items;
   }, [items, filter]);
 

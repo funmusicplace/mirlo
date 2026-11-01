@@ -264,6 +264,8 @@ export const createTrackGroup = async (
       title: string;
       isPreview?: boolean;
       order?: number;
+      lyrics?: string;
+      description?: string;
       audio?: { create: { uploadState?: "SUCCESS" } };
     }[];
   } & Partial<Prisma.TrackGroupCreateArgs["data"]>

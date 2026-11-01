@@ -96,6 +96,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
   flex?: boolean;
   hidePurchase?: boolean;
   singleTrack?: Track;
+  labelTarget?: "track" | "album";
 }> = ({
   trackGroup,
   track,
@@ -104,6 +105,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
   flex,
   hidePurchase,
   singleTrack,
+  labelTarget,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const {
@@ -159,6 +161,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
             track={track}
             fixed={fixed}
             compact={collapse}
+            labelTarget={labelTarget}
           />
         )}
         {showPreOrdered && (
@@ -183,9 +186,11 @@ const PurchaseOrDownloadAlbum: React.FC<{
         )}
         {showDownload && !fixed && (
           <DownloadAlbumButton
+            key={downloadTrack?.id ?? "release"}
             trackGroup={trackGroup}
             onlyIcon={collapse}
             track={downloadTrack}
+            labelTarget={labelTarget}
           />
         )}
       </div>

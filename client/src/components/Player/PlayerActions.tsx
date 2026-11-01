@@ -228,12 +228,16 @@ const BuyTargetMenu: React.FC<{
         <ul>
           <BuyMenuItem
             show={!trackOwned}
-            label={t("buyThisTrack")}
+            label={t(
+              trackGroup.isPreorder ? "preOrderThisTrack" : "buyThisTrack"
+            )}
             onSelect={() => setBuyTarget("track")}
           />
           <BuyMenuItem
-            show={!albumOwned}
-            label={t("buyThisAlbum")}
+            show
+            label={t(
+              trackGroup.isPreorder ? "preOrderThisAlbum" : "buyThisAlbum"
+            )}
             onSelect={() => setBuyTarget("album")}
           />
         </ul>

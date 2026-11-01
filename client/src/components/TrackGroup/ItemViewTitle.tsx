@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -10,7 +11,39 @@ import { useParams } from "react-router-dom";
 import { between, bp, coverSizeMax } from "../../constants";
 import ClickToPlayTracks from "../common/ClickToPlayTracks";
 
-import ArtistByLine, { FromAlbum } from "./ArtistByLine";
+import ArtistByLine, {
+  FromAlbum,
+  getReleaseLabel,
+  OnLabel,
+} from "./ArtistByLine";
+
+const TitleHeading = styled.h1`
+  font-size: clamp(
+    1.25rem,
+    calc(var(--cover-size, ${coverSizeMax}) / 14),
+    2rem
+  );
+  font-weight: 600;
+  line-height: 1.1;
+  margin: 0;
+`;
+
+const CenteredTitleHeading = styled(TitleHeading)`
+  line-height: 1.15;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+
+  @media screen and (max-width: ${bp.small}px) {
+    font-size: 1.5rem;
+  }
+`;
+
+const ReleaseTitleHeading = styled(TitleHeading)`
+  @media screen and (max-width: ${bp.small}px) {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+`;
 
 export const ItemViewTitle: React.FC<{
   title: string;
@@ -51,20 +84,7 @@ export const ItemViewTitle: React.FC<{
         </div>
       )}
       <div>
-        <h1
-          className={css`
-            font-size: clamp(
-              1.25rem,
-              calc(var(--cover-size, ${coverSizeMax}) / 14),
-              2rem
-            );
-            font-weight: 600;
-            line-height: 1.1;
-            margin: 0;
-          `}
-        >
-          {title}
-        </h1>
+        <TitleHeading>{title}</TitleHeading>
       </div>
     </div>
   );
@@ -73,7 +93,10 @@ export const ItemViewTitle: React.FC<{
 const TrackGroupTitle: React.FC<{
   trackGroup: TrackGroup;
   title: string;
-}> = ({ trackGroup, title }) => {
+  centered?: boolean;
+  subtitle?: React.ReactNode;
+  coArtists?: React.ReactElement;
+}> = ({ trackGroup, title, centered, subtitle, coArtists }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
@@ -87,6 +110,40 @@ const TrackGroupTitle: React.FC<{
     return <LoadingBlocks rows={1} />;
   } else if (!artist) {
     return <FullPageLoadingSpinner />;
+  }
+
+  if (centered) {
+    const label = getReleaseLabel(artist, trackGroup);
+    const showFromAlbum = !!trackGroup.title && title !== trackGroup.title;
+
+    return (
+      <div className="flex flex-col items-center gap-1 max-w-2xl mx-auto text-center">
+        <CenteredTitleHeading>{title}</CenteredTitleHeading>
+        {subtitle && (
+          <div className="text-lg text-balance wrap-anywhere">{subtitle}</div>
+        )}
+        <ArtistByLine
+          artist={artist}
+          trackGroup={trackGroup}
+          hideLabel
+          coArtists={coArtists}
+        />
+        {(showFromAlbum || label) && (
+          <div className="text-base text-balance wrap-anywhere">
+            {showFromAlbum && (
+              <FromAlbum artist={artist} trackGroup={trackGroup} />
+            )}
+            {showFromAlbum && label && (
+              <>
+                {" "}
+                <span aria-hidden>·</span>{" "}
+              </>
+            )}
+            {label && <OnLabel label={label} standalone={!showFromAlbum} />}
+          </div>
+        )}
+      </div>
+    );
   }
 
   const playableTrackIds = trackGroup.tracks
@@ -141,37 +198,8 @@ const TrackGroupTitle: React.FC<{
           flex: 1;
         `}
       >
-        <div className="flex flex-wrap items-baseline gap-x-2">
-          <h1
-            className={css`
-              font-size: clamp(
-                1.25rem,
-                calc(var(--cover-size, ${coverSizeMax}) / 14),
-                2rem
-              );
-              font-weight: 600;
-              line-height: 1.1;
-              margin: 0;
-
-              @media screen and (max-width: ${bp.small}px) {
-                font-size: 1.5rem;
-                margin-bottom: 0.5rem;
-              }
-            `}
-          >
-            {title}
-          </h1>
-          {title !== trackGroup.title && (
-            <span className="hidden sm:inline text-base font-normal opacity-70">
-              <FromAlbum artist={artist} trackGroup={trackGroup} />
-            </span>
-          )}
-        </div>
-        <ArtistByLine
-          artist={artist}
-          trackGroup={trackGroup}
-          showFromAlbum={title !== trackGroup.title}
-        />
+        <ReleaseTitleHeading>{title}</ReleaseTitleHeading>
+        <ArtistByLine artist={artist} trackGroup={trackGroup} />
       </div>
     </div>
   );
