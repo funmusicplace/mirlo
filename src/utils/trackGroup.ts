@@ -671,6 +671,27 @@ export const basicTrackGroupInclude = {
   },
 };
 
+export const assertDownloadable = (
+  trackGroup: { publishedAt: Date | null; isPreorder: boolean },
+  track?: { isPreview: boolean }
+) => {
+  if (!trackGroup.publishedAt || trackGroup.publishedAt > new Date()) {
+    throw new AppError({
+      httpCode: 403,
+      description: trackGroup.publishedAt
+        ? `This release isn't available for download until ${trackGroup.publishedAt.toISOString()}`
+        : "This release isn't available for download yet",
+    });
+  }
+  if (trackGroup.isPreorder && !track?.isPreview) {
+    throw new AppError({
+      httpCode: 403,
+      description:
+        "This pre-order isn't available for download until it's released",
+    });
+  }
+};
+
 export const findTrackPurchaseAndVoidToken = async (
   trackId: number,
   user: User
@@ -705,6 +726,9 @@ export const findTrackPurchaseAndVoidToken = async (
   });
 
   if (purchase) {
+    if (!isCreator) {
+      assertDownloadable(purchase.track.trackGroup, purchase.track);
+    }
     // TODO: do we want a token to be reset after download?
     // If so we probably want to do this once the download is
     // complete on the client otherwise there might be errors
@@ -774,15 +798,8 @@ export const findPurchaseAndVoidToken = async (
     });
   }
 
-  if (
-    !isCreator &&
-    purchase.trackGroup?.publishedAt &&
-    purchase.trackGroup.publishedAt > new Date()
-  ) {
-    throw new AppError({
-      httpCode: 403,
-      description: `This release isn't available for download until ${purchase.trackGroup.publishedAt.toISOString()}`,
-    });
+  if (!isCreator) {
+    assertDownloadable(purchase.trackGroup);
   }
 
   // TODO: do we want a token to be reset after download?

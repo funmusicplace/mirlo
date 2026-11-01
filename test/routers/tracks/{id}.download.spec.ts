@@ -16,6 +16,7 @@ import {
   createTrackGroup,
   createUser,
   createUserTrackGroupPurchase,
+  createUserTrackPurchase,
 } from "../../utils";
 
 import prisma from "@mirlo/prisma";
@@ -261,6 +262,52 @@ describe("tracks/{id}/download", () => {
       );
       assert.equal(response.statusCode, 400);
       assert.equal(response.body.error, "Need to generate track folder first");
+    });
+
+    it("should not download a pre-order track bought on its own until release", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        isPreorder: true,
+        tracks: [],
+      });
+      const track = await createTrack(trackGroup.id, { isPreview: false });
+      await uploadZip("track", track.id, "flac", await generateMockArchive());
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+      await createUserTrackPurchase(purchaser.id, track.id);
+
+      const response = await requestApp
+        .get(`tracks/${track.id}/download`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 403);
+    });
+
+    it("should download a pre-order's preview track", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        isPreorder: true,
+        tracks: [],
+      });
+      const track = await createTrack(trackGroup.id, { isPreview: true });
+      await uploadZip("track", track.id, "flac", await generateMockArchive());
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+      await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+      const response = await requestApp
+        .get(`tracks/${track.id}/download`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 200);
     });
   });
 });
