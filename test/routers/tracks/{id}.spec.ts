@@ -213,4 +213,62 @@ describe("tracks/{id}", () => {
       assert.equal(response.body.result.isPlayable, true);
     });
   });
+
+  describe("unpublished releases", () => {
+    const setup = async (data: Parameters<typeof createTrackGroup>[1]) => {
+      const { user, accessToken } = await createUser({
+        email: "artist@artist.com",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, data);
+      const track = await createTrack(trackGroup.id, { isPreview: true });
+      const { accessToken: fanToken } = await createUser({
+        email: "fan@artist.com",
+      });
+      const get = (path: string, token?: string) => {
+        const req = requestApp.get(path).set("Accept", "application/json");
+        return token ? req.set("Cookie", [`jwt=${token}`]) : req;
+      };
+      return { track, accessToken, fanToken, get };
+    };
+
+    it("should 404 a draft release's track for anyone but its editors", async () => {
+      const { track, accessToken, fanToken, get } = await setup({
+        publishedAt: null,
+      });
+
+      for (const path of [
+        `tracks/${track.id}`,
+        `tracks/${track.id}/stream/playlist.m3u8`,
+      ]) {
+        assert.equal((await get(path)).statusCode, 404, path);
+        assert.equal((await get(path, fanToken)).statusCode, 404, path);
+      }
+      assert.equal(
+        (await get(`tracks/${track.id}`, accessToken)).statusCode,
+        200
+      );
+    });
+
+    it("should 404 a scheduled release's track", async () => {
+      const { track, get } = await setup({
+        publishedAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+
+      assert.equal((await get(`tracks/${track.id}`)).statusCode, 404);
+    });
+
+    it("should still serve song drafts used in posts", async () => {
+      const { track, get } = await setup({
+        publishedAt: null,
+        isHiddenTrackGroupForSongDrafts: true,
+      });
+
+      assert.equal((await get(`tracks/${track.id}`)).statusCode, 200);
+      assert.notEqual(
+        (await get(`tracks/${track.id}/stream/playlist.m3u8`)).statusCode,
+        404
+      );
+    });
+  });
 });

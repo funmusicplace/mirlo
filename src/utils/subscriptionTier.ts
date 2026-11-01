@@ -48,6 +48,7 @@ export const registerSubscription = async ({
   userId,
   amount,
   paymentProcessorKey,
+  stripeAccountId,
   platformCut = null,
   shippingAddress = null,
   nextBillingDate = null,
@@ -56,6 +57,7 @@ export const registerSubscription = async ({
   userId: number;
   amount: number;
   paymentProcessorKey: string;
+  stripeAccountId: string;
   platformCut?: number | null;
   shippingAddress?: object | null;
   nextBillingDate?: Date | null;
@@ -84,6 +86,7 @@ export const registerSubscription = async ({
     deleteReason: null, // Clear any stale reason from a prior cancellation of this same tier row
     platformCut,
     stripeSubscriptionKey: paymentProcessorKey,
+    stripeAccountId,
     shippingAddress,
     nextBillingDate,
   };
@@ -116,6 +119,7 @@ export const registerSubscription = async ({
         amount: amount,
         deletedAt: null,
         stripeSubscriptionKey: paymentProcessorKey,
+        stripeAccountId,
         platformCut,
         shippingAddress,
         nextBillingDate,

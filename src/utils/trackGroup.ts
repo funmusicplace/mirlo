@@ -16,7 +16,11 @@ import { Response } from "express";
 import { sendReleaseToActivityPubFollowers } from "../activityPub/federation";
 import { logger } from "../logger";
 
-import { findProfileIdForURLSlug, whereForVisibleProfile } from "./artist";
+import {
+  findProfileIdForURLSlug,
+  whereForAllProfilesUserCanEdit,
+  whereForVisibleProfile,
+} from "./artist";
 import { FormatOptions } from "./audioFormats";
 import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
@@ -131,6 +135,26 @@ export const whereForVisibleTrackGroup = (): Prisma.TrackGroupWhereInput => ({
   deletedAt: null,
   profile: whereForVisibleProfile(),
 });
+
+export const whereForTrackGroupVisibleTo = (user?: {
+  id: number;
+  isAdmin?: boolean | null;
+}): Prisma.TrackGroupWhereInput =>
+  user?.isAdmin
+    ? {}
+    : {
+        ...whereForVisibleTrackGroup(),
+        OR: [
+          { publishedAt: { lte: new Date() } },
+          { isHiddenTrackGroupForSongDrafts: true },
+          ...(user
+            ? [
+                { profile: whereForAllProfilesUserCanEdit(user.id) },
+                { paymentToUserId: user.id },
+              ]
+            : []),
+        ],
+      };
 
 export const whereForPurchasableTrackGroup =
   (): Prisma.TrackGroupWhereInput => ({
@@ -647,6 +671,27 @@ export const basicTrackGroupInclude = {
   },
 };
 
+export const assertDownloadable = (
+  trackGroup: { publishedAt: Date | null; isPreorder: boolean },
+  track?: { isPreview: boolean }
+) => {
+  if (!trackGroup.publishedAt || trackGroup.publishedAt > new Date()) {
+    throw new AppError({
+      httpCode: 403,
+      description: trackGroup.publishedAt
+        ? `This release isn't available for download until ${trackGroup.publishedAt.toISOString()}`
+        : "This release isn't available for download yet",
+    });
+  }
+  if (trackGroup.isPreorder && !track?.isPreview) {
+    throw new AppError({
+      httpCode: 403,
+      description:
+        "This pre-order isn't available for download until it's released",
+    });
+  }
+};
+
 export const findTrackPurchaseAndVoidToken = async (
   trackId: number,
   user: User
@@ -660,16 +705,7 @@ export const findTrackPurchaseAndVoidToken = async (
   const purchase = await prisma.userTrackPurchase.findFirst({
     where: {
       trackId: Number(trackId),
-      ...(!isCreator
-        ? {
-            userId: Number(user.id),
-            track: {
-              trackGroup: {
-                publishedAt: { lte: new Date() },
-              },
-            },
-          }
-        : {}),
+      ...(!isCreator ? { userId: Number(user.id) } : {}),
     },
     include: {
       track: {
@@ -681,6 +717,9 @@ export const findTrackPurchaseAndVoidToken = async (
   });
 
   if (purchase) {
+    if (!isCreator) {
+      assertDownloadable(purchase.track.trackGroup, purchase.track);
+    }
     // TODO: do we want a token to be reset after download?
     // If so we probably want to do this once the download is
     // complete on the client otherwise there might be errors
@@ -698,7 +737,6 @@ export const findTrackPurchaseAndVoidToken = async (
       id: Number(trackId),
       isPreview: true,
       trackGroup: {
-        publishedAt: { lte: new Date() },
         userTrackGroupPurchases: {
           some: { userId: Number(user.id) },
         },
@@ -710,6 +748,7 @@ export const findTrackPurchaseAndVoidToken = async (
   });
 
   if (previewTrack) {
+    assertDownloadable(previewTrack.trackGroup, previewTrack);
     return { track: previewTrack };
   }
 
@@ -750,15 +789,8 @@ export const findPurchaseAndVoidToken = async (
     });
   }
 
-  if (
-    !isCreator &&
-    purchase.trackGroup?.publishedAt &&
-    purchase.trackGroup.publishedAt > new Date()
-  ) {
-    throw new AppError({
-      httpCode: 403,
-      description: `This release isn't available for download until ${purchase.trackGroup.publishedAt.toISOString()}`,
-    });
+  if (!isCreator) {
+    assertDownloadable(purchase.trackGroup);
   }
 
   // TODO: do we want a token to be reset after download?
@@ -802,6 +834,8 @@ export const findTrackPurchaseBasedOnTokenAndUpdate = async (
     throw purchaseLinkNotFound();
   }
 
+  assertDownloadable(purchase.track.trackGroup, purchase.track);
+
   // TODO: do we want a token to be reset after download?
   // If so we probably want to do this once the download is
   // complete on the client otherwise there might be errors
@@ -829,9 +863,7 @@ export const findPurchaseBasedOnTokenAndUpdate = async (
       userId: userId,
       singleDownloadToken: token,
       trackGroupId: Number(trackGroupId),
-      trackGroup: {
-        ...trackGroupPublishedObject(),
-      },
+      trackGroup: { deletedAt: null },
     },
     include: {
       trackGroup: basicTrackGroupInclude,
@@ -841,6 +873,8 @@ export const findPurchaseBasedOnTokenAndUpdate = async (
   if (!purchase) {
     throw purchaseLinkNotFound();
   }
+
+  assertDownloadable(purchase.trackGroup);
 
   // TODO: do we want a token to be reset after download?
   // If so we probably want to do this once the download is

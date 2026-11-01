@@ -51,7 +51,9 @@ import {
 } from "./utils/postAccess";
 import { getSiteSettings, resolveInstanceName } from "./utils/settings";
 import {
+  trackGroupPublishedObject,
   whereForPublishedTrackGroups,
+  whereForTrackGroupVisibleTo,
   whereForVisibleTrackGroup,
 } from "./utils/trackGroup";
 import { getAvailableLanguages } from "./utils/transifexLanguages";
@@ -691,7 +693,7 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
   hydrations,
 }) => {
   const track = await prisma.track.findFirst({
-    where: { id: trackId, trackGroup: whereForVisibleTrackGroup() },
+    where: { id: trackId, trackGroup: whereForTrackGroupVisibleTo() },
     include: {
       trackGroup: {
         include: {
@@ -727,7 +729,11 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
   hydrations,
 }) => {
   const trackGroup = await prisma.trackGroup.findFirst({
-    where: { id: trackGroupId, ...whereForVisibleTrackGroup() },
+    where: {
+      id: trackGroupId,
+      ...whereForVisibleTrackGroup(),
+      ...trackGroupPublishedObject(),
+    },
     include: {
       tracks: {
         where: { deletedAt: null, audio: { uploadState: "SUCCESS" } },

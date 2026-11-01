@@ -2,7 +2,11 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
-import { subscriptionTierReleasesCount } from "../../../../utils/trackGroup";
+import {
+  subscriptionTierReleasesCount,
+  trackGroupPublishedObject,
+  whereForVisibleTrackGroup,
+} from "../../../../utils/trackGroup";
 
 type Params = {
   id: number;
@@ -30,6 +34,10 @@ export default function () {
       const recommendations = await prisma.recommendedTrackGroup.findMany({
         where: {
           trackGroupId: trackGroup.id,
+          recommendedTrackGroup: {
+            ...whereForVisibleTrackGroup(),
+            ...trackGroupPublishedObject(),
+          },
         },
         include: {
           recommendedTrackGroup: {

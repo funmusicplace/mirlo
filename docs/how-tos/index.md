@@ -7,6 +7,7 @@ If there's anything you notice that is out of date, please e-mail us at hi@mirlo
 ## Available Guides
 
 - [Setting Up an Artist Account](./setting-up-an-artist-account.md) - Getting started as an artist on Mirlo
+- [Subscriber-only releases](./subscriber-only-releases.md) - Releases only your subscribers can download
 - [Customizing Mirlo](./customizing-mirlo.md) - How to customize the appearance and functionality of your Mirlo instance
 - [Label Accounts](./label-accounts.md) - Setting up and managing label accounts
 - [Accepting more payment types](./accepting-more-payment-types.md) - Let fans pay with PayPal, digital wallets, and regional methods

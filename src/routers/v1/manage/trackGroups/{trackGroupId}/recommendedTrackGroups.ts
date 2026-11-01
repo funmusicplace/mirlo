@@ -10,7 +10,11 @@ import {
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { AppError } from "../../../../../utils/error";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
-import { subscriptionTierReleasesCount } from "../../../../../utils/trackGroup";
+import {
+  subscriptionTierReleasesCount,
+  trackGroupPublishedObject,
+  whereForVisibleTrackGroup,
+} from "../../../../../utils/trackGroup";
 
 type Params = {
   trackGroupId: number;
@@ -37,6 +41,10 @@ export default function () {
       const recommendations = await prisma.recommendedTrackGroup.findMany({
         where: {
           trackGroupId: trackGroup.id,
+          recommendedTrackGroup: {
+            ...whereForVisibleTrackGroup(),
+            ...trackGroupPublishedObject(),
+          },
         },
         include: {
           recommendedTrackGroup: {
@@ -92,8 +100,12 @@ export default function () {
         });
       }
 
-      const recommendedTrackGroup = await prisma.trackGroup.findUnique({
-        where: { id: Number(recommendedTrackGroupId) },
+      const recommendedTrackGroup = await prisma.trackGroup.findFirst({
+        where: {
+          id: Number(recommendedTrackGroupId),
+          ...whereForVisibleTrackGroup(),
+          ...trackGroupPublishedObject(),
+        },
       });
 
       if (!recommendedTrackGroup) {

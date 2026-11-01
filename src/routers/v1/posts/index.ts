@@ -1,16 +1,18 @@
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
+import { compact, uniq } from "lodash";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import {
   serializePost,
   whereForVisiblePostTrack,
 } from "../../../serializers/post";
+import { getEditableProfileIds } from "../../../utils/artist";
 import {
-  checkIsUserSubscriber,
-  getEditableProfileIds,
-} from "../../../utils/artist";
+  canUserSeePostContent,
+  getUserSubscriptionsForProfiles,
+} from "../../../utils/postAccess";
 import { postImagesForContent } from "../../../utils/postContent";
 
 export default function () {
@@ -51,6 +53,7 @@ export default function () {
                     userSubscriptions: {
                       some: {
                         userId: user.id,
+                        deletedAt: null,
                       },
                     },
                   },
@@ -62,6 +65,7 @@ export default function () {
                         userSubscriptions: {
                           some: {
                             userId: user.id,
+                            deletedAt: null,
                           },
                         },
                       },
@@ -80,6 +84,8 @@ export default function () {
           profile: true,
           featuredImage: true,
           images: postImagesForContent,
+          minimumSubscriptionTier: true,
+          postSubscriptionTiers: true,
           tracks: {
             where: whereForVisiblePostTrack(),
             orderBy: {
@@ -97,18 +103,23 @@ export default function () {
       const editableProfileIds = user
         ? await getEditableProfileIds(user.id)
         : [];
+      const subscriptions = await getUserSubscriptionsForProfiles(
+        user,
+        uniq(compact(posts.map((p) => p.profileId)))
+      );
 
-      const processedPosts = await Promise.all(
-        posts.map(async (p) =>
-          serializePost(
-            p,
-            undefined,
-            undefined,
-            (p.profileId
-              ? await checkIsUserSubscriber(user, p.profileId)
-              : false) ||
-              (!!p.profileId && editableProfileIds.includes(p.profileId))
-          )
+      const processedPosts = posts.map((p) =>
+        serializePost(
+          p,
+          undefined,
+          undefined,
+          !!p.profileId &&
+            canUserSeePostContent(p, {
+              isProfileOwner: editableProfileIds.includes(p.profileId),
+              subscriptions: subscriptions.filter(
+                (s) => s.profileId === p.profileId
+              ),
+            })
         )
       );
 

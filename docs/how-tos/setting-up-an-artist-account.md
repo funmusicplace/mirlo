@@ -77,7 +77,7 @@ Tracks in blog posts will be playable in the browser, and when sharing a URL on 
 Once your music is uploaded, you can control who sees it.
 
 - **Publication date** use this to define when your album becomes visible to the public. Before this date you'll be able to see it, but others won't.
-- **Pricing: No Payment** use this to make your release publicly visible but people can not buy or download it. This could be handy in combination with subscriber only releases!
+- **Pricing: No Payment** use this to make your release publicly visible but people can not buy or download it. This could be handy in combination with [subscriber only releases](./subscriber-only-releases.md)!
 
 ## Optional: Set Up Additional Features
 

@@ -53,6 +53,7 @@ describe("registerSubscription", () => {
       userId: follower.id,
       amount: 500,
       paymentProcessorKey: "sub_paid_new",
+      stripeAccountId: "acct_test",
     });
 
     const rows = await prisma.profileUserSubscription.findMany({
@@ -96,6 +97,7 @@ describe("registerSubscription", () => {
       userId: follower.id,
       amount: 500,
       paymentProcessorKey: "sub_paid_fresh",
+      stripeAccountId: "acct_test",
     });
 
     const rows = await prisma.profileUserSubscription.findMany({
@@ -150,6 +152,7 @@ describe("registerSubscription", () => {
       userId: follower.id,
       amount: 500,
       paymentProcessorKey: "sub_paid_unrelated",
+      stripeAccountId: "acct_test",
     });
 
     const unrelatedAfter = await prisma.profileUserSubscription.findFirst({

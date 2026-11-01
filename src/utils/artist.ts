@@ -1,10 +1,5 @@
 import prisma, { SafeUser } from "@mirlo/prisma";
-import {
-  User,
-  ProfileSubscriptionTier,
-  Profile,
-  Prisma,
-} from "@mirlo/prisma/client";
+import { ProfileSubscriptionTier, Profile, Prisma } from "@mirlo/prisma/client";
 import {
   DefaultArgs,
   PrismaClientKnownRequestError,
@@ -21,6 +16,7 @@ import { getClient } from "./getClient";
 import { convertURLArrayToSizes, storedImageVariantUrl } from "./images";
 import { deleteMerch, merchImagesInclude } from "./merch";
 import { storedImagePrefix } from "./minio";
+import { resolvePayee } from "./payments/payee";
 import { clearImageSlot } from "./pendingImage";
 import { postImagesForContent } from "./postContent";
 import reservedProfileSlugs from "./reservedProfileSlugs";
@@ -75,31 +71,6 @@ export const confirmProfileIdExists = async (
   } catch (e) {
     next(e);
   }
-};
-
-export const checkIsUserSubscriber = async (
-  user?: User,
-  profileId?: number | null
-) => {
-  let userSubscriber = false;
-
-  if (!profileId) {
-    return true;
-  }
-
-  if (user) {
-    const subscriber = await prisma.profileUserSubscription.findFirst({
-      where: {
-        userId: user.id,
-        profileSubscriptionTier: {
-          profileId,
-        },
-      },
-    });
-
-    userSubscriber = !!subscriber;
-  }
-  return userSubscriber;
 };
 
 export const getPlatformFeeForProfile = async (
@@ -549,25 +520,29 @@ export const deleteStripeSubscriptions = async (
   const stripeSubscriptions = await prisma.profileUserSubscription.findMany({
     where,
     include: {
-      profileSubscriptionTier: true,
+      profileSubscriptionTier: {
+        include: {
+          profile: {
+            include: {
+              user: { select: { stripeAccountId: true } },
+              paymentToUser: { select: { stripeAccountId: true } },
+            },
+          },
+        },
+      },
     },
   });
   await Promise.all(
     stripeSubscriptions.map(async (sub) => {
       if (sub.stripeSubscriptionKey) {
-        const profileOwner = await prisma.user.findFirst({
-          where: {
-            profiles: {
-              some: {
-                id: sub.profileSubscriptionTier.profileId,
-              },
-            },
-          },
-        });
+        const stripeAccountId =
+          sub.stripeAccountId ??
+          resolvePayee({ profile: sub.profileSubscriptionTier.profile })
+            .stripeAccountId;
         try {
-          if (profileOwner?.stripeAccountId) {
+          if (stripeAccountId) {
             await stripe.subscriptions.cancel(sub.stripeSubscriptionKey, {
-              stripeAccount: profileOwner?.stripeAccountId,
+              stripeAccount: stripeAccountId,
             });
           } else {
             await stripe.subscriptions.cancel(sub.stripeSubscriptionKey);
@@ -677,9 +652,9 @@ export const singleInclude = (queryOptions?: {
         },
         releases: {
           where: {
-            trackGroup: {
-              deletedAt: null,
-            },
+            trackGroup: includePrivate
+              ? { deletedAt: null }
+              : trackGroupPublishedObject(),
           },
           orderBy: [
             { order: { sort: "asc", nulls: "last" } },
@@ -765,6 +740,8 @@ export const singleInclude = (queryOptions?: {
       include: {
         featuredImage: true,
         images: postImagesForContent,
+        minimumSubscriptionTier: true,
+        postSubscriptionTiers: true,
       },
     },
     user: {

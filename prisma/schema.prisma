@@ -594,6 +594,7 @@ model ProfileUserSubscription {
   amount                         Int // In cents
   platformCut                    Int? // in cents
   stripeSubscriptionKey          String?
+  stripeAccountId                String?
   createdAt                      DateTime                        @default(now())
   updatedAt                      DateTime                        @default(now()) @updatedAt
   deletedAt                      DateTime?

@@ -97,6 +97,26 @@ describe("sending to ActivityPub followers", () => {
       assert.strictEqual(sendActivityStub.callCount, 1);
     });
 
+    it("should include the cover as the release image", async () => {
+      const artist = await createAPArtist();
+      const trackGroup = await createTrackGroup(artist.id, {
+        cover: {
+          create: {
+            url: ["cover-id-x600"],
+            dimensions: "artwork",
+            profileId: artist.id,
+          },
+        },
+      });
+
+      await notifyFollowersOfNewAlbum(trackGroup);
+
+      const activity = sendActivityStub.firstCall.args[2];
+      const object = await activity.getObject();
+      const image = await object.getImage();
+      assert(image?.url?.href.includes("cover-id-x600.webp"));
+    });
+
     it("should not send releases for artists with ActivityPub disabled", async () => {
       const artist = await createAPArtist(false);
       const trackGroup = await createTrackGroup(artist.id);

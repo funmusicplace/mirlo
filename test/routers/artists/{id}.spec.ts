@@ -169,6 +169,50 @@ describe("artists", () => {
       assert.deepEqual(releasedTitles, ["Kept Album"]);
     });
 
+    it("should only show draft subscriptionTiers releases to the artist", async () => {
+      const { user, accessToken } = await createUser({
+        email: "tiered@test.com",
+      });
+      const profile = await createProfile(user.id, {
+        urlSlug: "tiered-artist",
+      });
+      const tier = await createTier(profile.id, { minAmount: 500 });
+      const published = await createTrackGroup(profile.id, {
+        title: "Published Album",
+        urlSlug: "published-album",
+      });
+      const draft = await createTrackGroup(profile.id, {
+        title: "Draft Album",
+        urlSlug: "draft-album",
+        publishedAt: null,
+      });
+      await prisma.subscriptionTierRelease.createMany({
+        data: [
+          { tierId: tier.id, trackGroupId: published.id },
+          { tierId: tier.id, trackGroupId: draft.id },
+        ],
+      });
+
+      const titles = async (token?: string) => {
+        const req = requestApp
+          .get(`artists/${profile.urlSlug}`)
+          .set("Accept", "application/json");
+        const response = await (token
+          ? req.set("Cookie", [`jwt=${token}`])
+          : req);
+        assert.equal(response.status, 200);
+        return response.body.result.subscriptionTiers[0].releases
+          .map((r: { trackGroup: { title: string } }) => r.trackGroup.title)
+          .sort();
+      };
+
+      assert.deepEqual(await titles(), ["Published Album"]);
+      assert.deepEqual(await titles(accessToken), [
+        "Draft Album",
+        "Published Album",
+      ]);
+    });
+
     it("should flag releases that are only available through a subscription tier", async () => {
       const { user } = await createUser({ email: "exclusive@test.com" });
       const profile = await createProfile(user.id, {
@@ -445,6 +489,71 @@ describe("artists", () => {
 
       assert.equal(response.status, 200);
       assert.equal(response.body.result.user?.artistLabels?.length ?? 0, 0);
+    });
+  });
+
+  describe("/{id} posts", () => {
+    const setup = async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const freeTier = await createTier(profile.id, {
+        minAmount: 0,
+        isDefaultTier: true,
+      });
+      const paidTier = await createTier(profile.id, { minAmount: 500 });
+      await prisma.post.create({
+        data: {
+          title: "Paid post",
+          urlSlug: "paid-post",
+          profileId: profile.id,
+          isPublic: false,
+          isDraft: false,
+          publishedAt: new Date(),
+          content: "<p>teaser</p><p>supporters only</p>",
+          minimumSubscriptionTierId: paidTier.id,
+        },
+      });
+      const { user: fan, accessToken } = await createUser({
+        email: "fan@artist.com",
+      });
+      const getPost = async () => {
+        const response = await requestApp
+          .get(`artists/${profile.id}`)
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json");
+        assert.equal(response.status, 200);
+        return response.body.result.posts[0];
+      };
+      return { fan, freeTier, paidTier, getPost };
+    };
+
+    it("should hide paid post content from a free follower", async () => {
+      const { fan, freeTier, getPost } = await setup();
+      await createSubscription(fan.id, freeTier.id, 0);
+
+      const post = await getPost();
+      assert.equal(post.isContentHidden, true);
+      assert.ok(!post.content.includes("supporters only"));
+    });
+
+    it("should hide paid post content from a cancelled subscriber", async () => {
+      const { fan, paidTier, getPost } = await setup();
+      await createSubscription(fan.id, paidTier.id, 500, {
+        deletedAt: new Date(),
+      });
+
+      const post = await getPost();
+      assert.equal(post.isContentHidden, true);
+      assert.ok(!post.content.includes("supporters only"));
+    });
+
+    it("should show paid post content to a paying subscriber", async () => {
+      const { fan, paidTier, getPost } = await setup();
+      await createSubscription(fan.id, paidTier.id, 500);
+
+      const post = await getPost();
+      assert.equal(post.isContentHidden, false);
+      assert.ok(post.content.includes("supporters only"));
     });
   });
 });

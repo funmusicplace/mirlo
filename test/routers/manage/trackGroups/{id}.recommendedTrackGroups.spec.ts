@@ -4,12 +4,14 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
+
 import {
   clearTables,
   createProfile,
   createTrackGroup,
   createUser,
 } from "../../../utils";
+
 import prisma from "@mirlo/prisma";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
@@ -145,6 +147,33 @@ describe("manage/trackGroups/{trackGroupId}/recommendedTrackGroups", () => {
         recommendedTrackGroup.id
       );
       assert(response.body.trackGroupId === mainTrackGroup.id);
+    });
+
+    it("should not recommend another artist's unpublished release", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const profile = await createProfile(user.id);
+      const mainTrackGroup = await createTrackGroup(profile.id);
+      const { user: other } = await createUser({ email: "other@test.com" });
+      const otherProfile = await createProfile(other.id, {
+        urlSlug: "other-artist",
+      });
+      const draft = await createTrackGroup(otherProfile.id, {
+        title: "Secret draft",
+        urlSlug: "secret-draft",
+        publishedAt: null,
+      });
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${mainTrackGroup.id}/recommendedTrackGroups`)
+        .send({ recommendedTrackGroupId: draft.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 404);
+      assert.ok(!JSON.stringify(response.body).includes("Secret draft"));
+      assert.equal(await prisma.recommendedTrackGroup.count(), 0);
     });
 
     it("should not allow recommending the same track group", async () => {

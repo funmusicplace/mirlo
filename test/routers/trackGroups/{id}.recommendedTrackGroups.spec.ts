@@ -3,14 +3,15 @@ import assert from "node:assert";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
+
 import {
   clearTables,
   createProfile,
   createTrackGroup,
   createUser,
 } from "../../utils";
-
 import { requestApp } from "../utils";
+
 import prisma from "@mirlo/prisma";
 
 describe("trackGroups/{id}/recommendedTrackGroups", () => {
@@ -69,6 +70,29 @@ describe("trackGroups/{id}/recommendedTrackGroups", () => {
           (r: any) => r.id === recommendedTrackGroup2.id
         )
       );
+    });
+
+    it("should leave out recommendations that aren't published", async () => {
+      const { user } = await createUser({ email: "test@test.com" });
+      const profile = await createProfile(user.id);
+      const mainTrackGroup = await createTrackGroup(profile.id);
+      const draft = await createTrackGroup(profile.id, {
+        urlSlug: "draft-album",
+        publishedAt: null,
+      });
+      await prisma.recommendedTrackGroup.create({
+        data: {
+          trackGroupId: mainTrackGroup.id,
+          recommendedTrackGroupId: draft.id,
+        },
+      });
+
+      const response = await requestApp
+        .get(`trackGroups/${mainTrackGroup.id}/recommendedTrackGroups`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.results.length, 0);
     });
 
     it("should return empty array when no recommendations exist", async () => {

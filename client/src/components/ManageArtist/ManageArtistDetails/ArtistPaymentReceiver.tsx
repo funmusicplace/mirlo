@@ -1,18 +1,24 @@
+import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import Pill from "components/common/Pill";
 import { SelectEl } from "components/common/Select";
-import { useUpdateArtistMutation } from "queries";
+import { querySubscriptionPayouts, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaTimes } from "react-icons/fa";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import { useConfirm } from "utils/useConfirm";
+
+import SubscriptionPayoutsWarning from "./SubscriptionPayoutsWarning";
 
 const ArtistPaymentReceiver: React.FC<{ artist: Artist }> = ({ artist }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
+  const { ask } = useConfirm();
+  const { data: payouts } = useQuery(querySubscriptionPayouts(artist.id));
   const { mutateAsync: updateArtist, isPending } = useUpdateArtistMutation();
   const [chosenLabelUserId, setChosenLabelUserId] = React.useState("");
 
@@ -29,6 +35,16 @@ const ArtistPaymentReceiver: React.FC<{ artist: Artist }> = ({ artist }) => {
       if (!user) {
         return;
       }
+      if (
+        payouts?.paidSubscriptions &&
+        !(await ask(
+          t("confirmPaymentReceiverChange", {
+            count: payouts.paidSubscriptions,
+          })
+        ))
+      ) {
+        return;
+      }
       try {
         await updateArtist({
           userId: user.id,
@@ -41,7 +57,7 @@ const ArtistPaymentReceiver: React.FC<{ artist: Artist }> = ({ artist }) => {
         snackbar(t("paymentReceiverUpdateFailed"), { type: "warning" });
       }
     },
-    [artist.id, snackbar, t, updateArtist, user]
+    [artist.id, ask, payouts, snackbar, t, updateArtist, user]
   );
 
   if (approvedLabels.length === 0 || !user) {
@@ -54,6 +70,7 @@ const ArtistPaymentReceiver: React.FC<{ artist: Artist }> = ({ artist }) => {
         {t("artistPaymentReceiver")}
       </label>
       <small className="block mb-2">{t("artistPaymentReceiverHint")}</small>
+      <SubscriptionPayoutsWarning artistId={artist.id} />
       {currentReceiver && (
         <Pill variant="tint">
           {currentReceiver.labelUser.artists?.[0]?.name ??

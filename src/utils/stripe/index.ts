@@ -722,19 +722,24 @@ export const finalizeSubscriptionSetup = async ({
         stripeSubscriptionKey: { not: null },
         profileSubscriptionTier: { profileId: tier.profileId },
       },
-      select: { stripeSubscriptionKey: true },
+      select: { stripeSubscriptionKey: true, stripeAccountId: true },
     });
+  const accountFor = (key?: string | null) =>
+    existingPaidSubscriptions.find((sub) => sub.stripeSubscriptionKey === key)
+      ?.stripeAccountId ?? stripeAccountId;
 
   const platformPercent = await calculatePlatformPercent(
     currency || "usd",
     tier.platformPercent ?? tier.profile.defaultPlatformFee
   );
 
-  const subscriptionToMove = await findActiveSubscription(
-    stripeAccountId,
+  const keyToMove =
     oldStripeSubscriptionKey ??
-      existingPaidSubscriptions[0]?.stripeSubscriptionKey
-  );
+    existingPaidSubscriptions[0]?.stripeSubscriptionKey;
+  const subscriptionToMove =
+    accountFor(keyToMove) === stripeAccountId
+      ? await findActiveSubscription(stripeAccountId, keyToMove)
+      : null;
 
   let subscriptionId: string;
   let nextBillingDate: Date | undefined;
@@ -808,6 +813,7 @@ export const finalizeSubscriptionSetup = async ({
     tierId: tier.id,
     amount,
     paymentProcessorKey: subscriptionId,
+    stripeAccountId,
     platformCut: Math.round((amount * platformPercent) / 100),
     shippingAddress,
     nextBillingDate,
@@ -823,7 +829,7 @@ export const finalizeSubscriptionSetup = async ({
   for (const oldKey of oldStripeSubscriptionKeys) {
     try {
       await stripe.subscriptions.cancel(oldKey, {
-        stripeAccount: stripeAccountId,
+        stripeAccount: accountFor(oldKey),
       });
     } catch (e) {
       logger.error(
@@ -1192,6 +1198,7 @@ export const handleSubscriptionDeleted = async (
             amount: 0,
             platformCut: null,
             stripeSubscriptionKey: null,
+            stripeAccountId: null,
             nextBillingDate: null,
             keepFollowingOnCancel: false,
           },
