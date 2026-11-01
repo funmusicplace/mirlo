@@ -8,6 +8,7 @@ import WidthContainer from "components/common/WidthContainer";
 import CurrencySelect from "components/ManageArtist/CountrySelectForm";
 import ConnectedApps from "components/Profile/ConnectedApps";
 import DeleteAccount from "components/Profile/DeleteAccount";
+import SubsonicCredentials from "components/Profile/SubsonicCredentials";
 import { useProfileMutation } from "queries";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -213,6 +214,7 @@ const Index: React.FC = () => {
         </Link>
 
         <ConnectedApps />
+        <SubsonicCredentials />
         <DeleteAccount />
       </FormProvider>
     </WidthContainer>

@@ -62,6 +62,10 @@ export default defineConfig({
             text: "Customizing your profile",
             link: "/how-tos/customizing-mirlo",
           },
+          {
+            text: "Listening in Subsonic apps",
+            link: "/how-tos/listening-in-subsonic-apps",
+          },
         ],
       },
       {

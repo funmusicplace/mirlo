@@ -12,3 +12,4 @@ If there's anything you notice that is out of date, please e-mail us at hi@mirlo
 - [Accepting more payment types](./accepting-more-payment-types.md) - Let fans pay with PayPal, digital wallets, and regional methods
 - [The social web and discovery](./social-web-and-discovery.md) - Letting people follow you on the fediverse and find your music on FairPlayer
 - [Making your own album art](./making-your-own-album-art.md) - How to make your own album art and not use AI to do so.
+- [Listening in Subsonic apps](./listening-in-subsonic-apps.md) - Play the music you've bought in Subsonic apps like Feishin and Amperfy

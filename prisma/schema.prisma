@@ -109,6 +109,15 @@ model OAuthKey {
   createdAt DateTime @default(now())
 }
 
+model SubsonicCredential {
+  id         String   @id @default(uuid()) @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int      @unique
+  secret     String // AES-256-GCM, see src/utils/subsonicCredentials.ts
+  secretHash String   @unique
+  createdAt  DateTime @default(now())
+}
+
 model User {
   id                                  Int                              @id @default(autoincrement())
   email                               String                           @unique
@@ -175,6 +184,7 @@ model User {
   transactions                        UserTransaction[]
   trackGroupDownloads                 TrackGroupDownload[]
   clients                             Client[]
+  subsonicCredential                  SubsonicCredential?
   resolvedContentFlags                ContentFlag[]                    @relation("resolvedContentFlags")
   reportedContentFlags                ContentFlag[]                    @relation("reportedContentFlags")
   trustLevelChanges                   UserTrustLevelChange[]           @relation("trustLevelChangeUser")
