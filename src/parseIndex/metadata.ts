@@ -3,6 +3,7 @@ import prisma from "@mirlo/prisma";
 import { singleInclude, whereForVisibleProfile } from "../utils/artist";
 import { merchImagesInclude } from "../utils/merch";
 import { postImagesForContent } from "../utils/postContent";
+import { trackGroupPublishedObject } from "../utils/trackGroup";
 
 export async function fetchProfileMetadata(profileSlug: string): Promise<any> {
   const include = singleInclude({ includeDefaultTier: true });
@@ -26,7 +27,7 @@ export async function fetchAlbumMetadata(
   return await prisma.trackGroup.findFirst({
     where: {
       urlSlug: albumSlug,
-      deletedAt: null,
+      ...trackGroupPublishedObject(),
       adminEnabled: true,
       profile: { urlSlug: profileSlug, ...whereForVisibleProfile() },
     },
@@ -69,7 +70,7 @@ export async function fetchPostMetadata(
         };
 
   return await prisma.post.findFirst({
-    where,
+    where: { ...where, isDraft: false, publishedAt: { lte: new Date() } },
     include: {
       profile: true,
       featuredImage: true,
@@ -121,7 +122,7 @@ export async function fetchMerchMetadata(
         };
 
   return await prisma.merch.findFirst({
-    where,
+    where: { ...where, isPublic: true },
     include: { profile: true, images: merchImagesInclude },
   });
 }

@@ -189,6 +189,75 @@ describe("analyzePathAndGenerateHTML", () => {
       assert.equal($("script#__MIRLO_TRACKGROUP__").length, 0);
     });
 
+    it("should not describe or hydrate a draft or scheduled release", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createProfile(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      const draft = await createTrackGroup(artist.id, {
+        title: "Draft Album",
+        urlSlug: "draft-album",
+        publishedAt: null,
+      });
+      const draftTrack = await createTrack(draft.id, { title: "Draft Song" });
+      await createTrackGroup(artist.id, {
+        title: "Scheduled Album",
+        urlSlug: "scheduled-album",
+        publishedAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+
+      for (const [path, title] of [
+        ["/test-artist/release/draft-album", "Draft Album"],
+        ["/test-artist/release/scheduled-album", "Scheduled Album"],
+        [`/widget/trackGroup/${draft.id}`, "Draft Album"],
+        [`/widget/track/${draftTrack.id}`, "Draft Song"],
+      ]) {
+        const $ = cheerio.load("<html><head></head></html>");
+        await analyzePathAndGenerateHTML(path, $);
+
+        assert.notEqual($('meta[property="og:title"]').attr("content"), title);
+        assert.equal($("script#__MIRLO_TRACKGROUP__").length, 0, path);
+        assert.equal($("script#__MIRLO_TRACK__").length, 0, path);
+        assert.ok(!$.html().includes(title), path);
+      }
+    });
+
+    it("should not describe a draft post or private merch", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createProfile(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      await createPost(artist.id, {
+        title: "Draft Post",
+        urlSlug: "draft-post",
+        isDraft: true,
+      });
+      await createPost(artist.id, {
+        title: "Scheduled Post",
+        urlSlug: "scheduled-post",
+        isDraft: false,
+        publishedAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+      await createMerch(artist.id, {
+        title: "Secret Shirt",
+        urlSlug: "secret-shirt",
+        isPublic: false,
+      });
+
+      for (const [path, title] of [
+        ["/test-artist/posts/draft-post", "Draft Post"],
+        ["/test-artist/posts/scheduled-post", "Scheduled Post"],
+        ["/test-artist/merch/secret-shirt", "Secret Shirt"],
+      ]) {
+        const $ = cheerio.load("<html><head></head></html>");
+        await analyzePathAndGenerateHTML(path, $);
+
+        assert.ok(!$.html().includes(title), path);
+      }
+    });
+
     it("should handle artist/releases route with correct title", async () => {
       const { user } = await createUser({ email: "artist@example.com" });
       const artist = await createProfile(user.id, {
@@ -228,6 +297,7 @@ describe("analyzePathAndGenerateHTML", () => {
       const post = await createPost(artist.id, {
         title: "My Post Title",
         urlSlug: "my-post-slug",
+        isDraft: false,
       });
 
       const $ = cheerio.load("<html></html>");
@@ -258,7 +328,10 @@ describe("analyzePathAndGenerateHTML", () => {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      const merch = await createMerch(artist.id, { title: "Cool T-Shirt" });
+      const merch = await createMerch(artist.id, {
+        title: "Cool T-Shirt",
+        isPublic: true,
+      });
 
       const $ = cheerio.load("<html></html>");
       await analyzePathAndGenerateHTML(
@@ -540,6 +613,7 @@ describe("analyzePathAndGenerateHTML", () => {
       const post = await createPost(artist.id, {
         title: "My Post Title",
         urlSlug: "my-post-slug",
+        isDraft: false,
       });
 
       const $ = cheerio.load("<html></html>");
@@ -570,7 +644,10 @@ describe("analyzePathAndGenerateHTML", () => {
         name: "My Artist",
         urlSlug: "test-artist",
       });
-      const merch = await createMerch(artist.id, { title: "Cool T-Shirt" });
+      const merch = await createMerch(artist.id, {
+        title: "Cool T-Shirt",
+        isPublic: true,
+      });
 
       const $ = cheerio.load("<html></html>");
       await analyzePathAndGenerateHTML(

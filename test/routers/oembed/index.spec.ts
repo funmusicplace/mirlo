@@ -193,7 +193,7 @@ describe("oembed", () => {
       it("should return oEmbed data for a post by ID", async () => {
         const user = await createUser({ email: "test@test.com" });
         const profile = await createProfile(user.user.id);
-        const post = await createPost(profile.id);
+        const post = await createPost(profile.id, { isDraft: false });
 
         const url = encodeURIComponent(
           `${applicationUrl}/${profile.urlSlug}/posts/${post.id}`
@@ -219,7 +219,7 @@ describe("oembed", () => {
       it("should return oEmbed data for a post by slug", async () => {
         const user = await createUser({ email: "test@test.com" });
         const profile = await createProfile(user.user.id);
-        const post = await createPost(profile.id);
+        const post = await createPost(profile.id, { isDraft: false });
 
         const url = encodeURIComponent(
           `${applicationUrl}/${profile.urlSlug}/posts/${post.urlSlug}`
@@ -238,7 +238,7 @@ describe("oembed", () => {
       it("should return oEmbed data for merch by ID", async () => {
         const user = await createUser({ email: "test@test.com" });
         const profile = await createProfile(user.user.id);
-        const merch = await createMerch(profile.id);
+        const merch = await createMerch(profile.id, { isPublic: true });
 
         const url = encodeURIComponent(
           `${applicationUrl}/${profile.urlSlug}/merch/${merch.id}`
@@ -264,7 +264,7 @@ describe("oembed", () => {
       it("should return oEmbed data for merch by slug", async () => {
         const user = await createUser({ email: "test@test.com" });
         const profile = await createProfile(user.user.id);
-        const merch = await createMerch(profile.id);
+        const merch = await createMerch(profile.id, { isPublic: true });
 
         const url = encodeURIComponent(
           `${applicationUrl}/${profile.urlSlug}/merch/${merch.urlSlug}`
@@ -281,7 +281,7 @@ describe("oembed", () => {
       it("should include thumbnail for merch", async () => {
         const user = await createUser({ email: "test@test.com" });
         const profile = await createProfile(user.user.id);
-        const merch = await createMerch(profile.id);
+        const merch = await createMerch(profile.id, { isPublic: true });
 
         await prisma.image.create({
           data: {
