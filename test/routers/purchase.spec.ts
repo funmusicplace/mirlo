@@ -2536,6 +2536,39 @@ describe("purchase", () => {
       );
       assert.ok(createStub.notCalled);
     });
+
+    it("refuses a terminal subscription for an email that already has a paid subscription", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_sub_terminal_taken",
+      });
+      const { user: subscriber } = await createUser({
+        email: "subscriber@test.com",
+      });
+      const profile = await createProfile(artistUser.id);
+      const oldTier = await createTier(profile.id, { minAmount: 500 });
+      const newTier = await createTier(profile.id, { minAmount: 1000 });
+      await prisma.profileUserSubscription.create({
+        data: {
+          profileSubscriptionTierId: oldTier.id,
+          userId: subscriber.id,
+          amount: 500,
+          stripeSubscriptionKey: "sub_someone_elses",
+        },
+      });
+      const createStub = sinon.stub(stripeUtils.stripe.setupIntents, "create");
+
+      await assert.rejects(
+        initiateSubscription({
+          readerId: "tmr_test",
+          profileId: profile.id,
+          tierId: newTier.id,
+          userEmail: "Subscriber@test.com",
+        }),
+        (e: unknown) => e instanceof AppError && e.httpCode === 409
+      );
+      assert.ok(createStub.notCalled);
+    });
   });
 
   describe("resolveBuyer", () => {

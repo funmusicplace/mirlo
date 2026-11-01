@@ -55,33 +55,43 @@ export const chargeFundraiserPledges = async (fundraiserId: number) => {
     });
   }
 
-  const pledgesForFundraiser = await prisma.fundraiserPledge.findMany({
-    where: {
-      fundraiserId,
-      paidAt: null,
-      cancelledAt: null,
-      OR: [
-        { associatedTransactionId: null },
-        { associatedTransaction: { paymentStatus: "FAILED" } },
-      ],
-    },
-    include: pledgeChargeInclude,
-  });
-
-  for (const pledge of pledgesForFundraiser) {
-    // If the user already has a purchase for this track group, skip charging them
-    // likely a weird edge case.
-    const purchaseExists = await prisma.userTrackGroupPurchase.findFirst({
+  try {
+    const pledgesForFundraiser = await prisma.fundraiserPledge.findMany({
       where: {
-        userId: pledge.userId,
-        trackGroupId: { in: pledge.fundraiser.trackGroups.map((tg) => tg.id) },
+        fundraiserId,
+        paidAt: null,
+        cancelledAt: null,
+        OR: [
+          { associatedTransactionId: null },
+          { associatedTransaction: { paymentStatus: "FAILED" } },
+        ],
       },
+      include: pledgeChargeInclude,
     });
 
-    if (purchaseExists) {
-      continue;
-    }
+    for (const pledge of pledgesForFundraiser) {
+      // If the user already has a purchase for this track group, skip charging them
+      // likely a weird edge case.
+      const purchaseExists = await prisma.userTrackGroupPurchase.findFirst({
+        where: {
+          userId: pledge.userId,
+          trackGroupId: {
+            in: pledge.fundraiser.trackGroups.map((tg) => tg.id),
+          },
+        },
+      });
 
-    await chargePledgePayments(pledge);
+      if (purchaseExists) {
+        continue;
+      }
+
+      await chargePledgePayments(pledge);
+    }
+  } catch (e) {
+    await prisma.fundraiser.updateMany({
+      where: { id: fundraiserId, status: "SUCCESSFUL" },
+      data: { status: "ACTIVE" },
+    });
+    throw e;
   }
 };

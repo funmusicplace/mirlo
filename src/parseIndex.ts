@@ -887,6 +887,12 @@ const dispatchRoute = async (
 
 export type ParseIndexOptions = { activityPubAlternate?: boolean };
 
+// Discord treats pages with an activity+json alternate as Mastodon
+// statuses and drops the og:image preview
+export const parseIndexOptionsFor = (userAgent = ""): ParseIndexOptions => ({
+  activityPubAlternate: !/Discordbot/i.test(userAgent),
+});
+
 export const analyzePathAndGenerateHTML = async (
   pathname: string,
   $: cheerio.CheerioAPI,

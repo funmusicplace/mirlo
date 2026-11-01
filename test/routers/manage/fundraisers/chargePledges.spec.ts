@@ -8,6 +8,7 @@ import Stripe from "stripe";
 import prisma from "@mirlo/prisma";
 
 import * as sendMailQueueModule from "../../../../src/queues/send-mail-queue";
+import { AppError } from "../../../../src/utils/error";
 import { chargeFundraiserPledges } from "../../../../src/utils/fundraiser";
 import * as stripeUtils from "../../../../src/utils/stripe";
 import {
@@ -266,5 +267,37 @@ describe("manage/fundraisers/{fundraiserId}/chargePledges", () => {
 
     assert.equal(createStub.callCount, 1);
     assert.equal(createStub.firstCall.args[0].amount, 1002);
+  });
+
+  it("leaves the fundraiser ACTIVE when charging fails, so it can be retried", async () => {
+    const { user } = await createUser({
+      email: "fundraiser-owner@example.com",
+    });
+    const { user: backer } = await createUser({ email: "backer@example.com" });
+    const artist = await createArtist(user.id);
+    const fundraiser = await createFundraiser(artist.id, { goalAmount: 1000 });
+    await createFundraiserPledge(fundraiser.id, backer.id, { amount: 5000 });
+    const createStub = stubStripeForCharge();
+
+    await assert.rejects(
+      chargeFundraiserPledges(fundraiser.id),
+      (e: AppError) => e.httpCode === 400
+    );
+    const afterFailure = await prisma.fundraiser.findUnique({
+      where: { id: fundraiser.id },
+    });
+    assert.equal(afterFailure?.status, "ACTIVE");
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { stripeAccountId: "acct_owner" },
+    });
+    await chargeFundraiserPledges(fundraiser.id);
+
+    assert.equal(createStub.callCount, 1);
+    const afterRetry = await prisma.fundraiser.findUnique({
+      where: { id: fundraiser.id },
+    });
+    assert.equal(afterRetry?.status, "SUCCESSFUL");
   });
 });

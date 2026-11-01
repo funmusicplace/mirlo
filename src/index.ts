@@ -30,7 +30,7 @@ import {
   userLoggedInWithoutRedirect,
 } from "./auth/passport";
 import logger from "./logger";
-import parseIndex from "./parseIndex";
+import parseIndex, { parseIndexOptionsFor } from "./parseIndex";
 import { imageQueue } from "./queues/processImages";
 import { audioQueue } from "./queues/processTrackAudio";
 import { scheduledTasksQueue } from "./queues/scheduled-tasks-queue";
@@ -320,14 +320,11 @@ app.use(
         }
         // HTML pages must never be cached — they reference hashed asset filenames
         res.setHeader("Cache-Control", "no-store");
-        // Discord treats pages with an activity+json alternate as Mastodon
-        // statuses and drops the og:image preview
-        const isDiscord = /Discordbot/i.test(req.get("user-agent") ?? "");
-        const options = { activityPubAlternate: !isDiscord };
+        const options = parseIndexOptionsFor(req.get("user-agent"));
         const html = req.user
           ? await parseIndex(req.path, req, options)
           : await getCachedPage(
-              isDiscord ? `discord:${req.path}` : req.path,
+              options.activityPubAlternate ? req.path : `no-ap:${req.path}`,
               () => parseIndex(req.path, undefined, options)
             );
         res.send(html);

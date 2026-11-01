@@ -7,7 +7,10 @@ import { describe, it, beforeEach } from "mocha";
 import request from "supertest";
 
 import { findActivityPubAlternate } from "../../src/activityPub/pageAlternate";
-import { analyzePathAndGenerateHTML } from "../../src/parseIndex";
+import {
+  analyzePathAndGenerateHTML,
+  parseIndexOptionsFor,
+} from "../../src/parseIndex";
 import {
   clearTables,
   createArtist,
@@ -148,18 +151,22 @@ describe("ActivityPub page alternates (#2400)", () => {
     );
   });
 
-  it("does not send the alternate tag to Discord's crawler", async () => {
-    await setup();
-    const discord = await request(process.env.API_DOMAIN)
-      .get("/test-artist")
-      .set(
-        "User-Agent",
+  it("does not send the alternate tag to Discord's crawler", () => {
+    assert.deepEqual(
+      parseIndexOptionsFor(
         "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)"
-      );
-    const browser = await request(process.env.API_DOMAIN).get("/test-artist");
-    assert.equal(discord.status, 200);
-    assert(!discord.text.includes("application/activity+json"));
-    assert(browser.text.includes("application/activity+json"));
+      ),
+      { activityPubAlternate: false }
+    );
+    assert.deepEqual(
+      parseIndexOptionsFor(
+        "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0"
+      ),
+      { activityPubAlternate: true }
+    );
+    assert.deepEqual(parseIndexOptionsFor(undefined), {
+      activityPubAlternate: true,
+    });
   });
 
   it("redirects AP requests for a page to the AP object", async () => {
