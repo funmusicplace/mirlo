@@ -1,16 +1,21 @@
-import { css } from "@emotion/css";
+import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import Box from "components/common/Box";
 import ClickToPlayTracks from "components/common/ClickToPlayTracks";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { MetaCard } from "components/common/MetaCard";
-import SupportArtistPopUp from "components/common/SupportArtistPopUp";
-import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
+import StickyColumn from "components/common/StickyColumn";
 import WidthContainer from "components/common/WidthContainer";
+import FlagContent from "components/TrackGroup/FlagContent";
 import TrackGroupTitle from "components/TrackGroup/ItemViewTitle";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
-import ReleaseDate from "components/TrackGroup/ReleaseDate";
+import ReleaseArtistBlock from "components/TrackGroup/ReleaseArtistBlock";
+import {
+  prominentSectionLabelClass,
+  sectionLabelClass,
+} from "components/TrackGroup/ReleaseInfos";
+import TrackCredits from "components/TrackGroup/TrackCredits";
 import { TrackEmbed } from "components/TrackGroup/TrackGroupEmbed";
 import TrackGroupMerch from "components/TrackGroup/TrackGroupMerch";
 import {
@@ -18,7 +23,9 @@ import {
   ImageAndDetailsWrapper,
   ImageWrapper,
   ItemViewContentWrapper,
+  MerchWrapper,
   SmallScreenPlayWrapper,
+  TitleAndContentColumn,
   TrackListingWrapper,
   UnderneathImage,
 } from "pages/{artistId}/release/{trackGroupId}/Index";
@@ -26,16 +33,26 @@ import { queryArtist, queryTrackGroup } from "queries";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { getReleaseUrl } from "utils/artist";
-import { useMatchMedia } from "utils/useMatchMedia";
 
 import { bp } from "../../../../../../constants";
+
+const TrackSections = styled.div`
+  > * + * {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--mi-tint-x-color);
+  }
+
+  @media screen and (max-width: ${bp.small}px) {
+    padding: var(--mi-side-paddings-xsmall);
+  }
+`;
 
 function Index() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
   const navigate = useNavigate();
-  const isMobile = useMatchMedia(`screen and (max-width: ${bp.small}px)`);
   const { artistId, trackGroupId, trackId } = useParams();
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
@@ -74,114 +91,90 @@ function Index() {
       />
       <Container>
         <ItemViewContentWrapper>
-          <div
-            className={css`
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-
-              @media screen and (max-width: ${bp.small}px) {
-                padding-top: 0px;
-              }
-            `}
-          >
+          <TitleAndContentColumn>
             <TrackGroupTitle
               trackGroup={{ ...trackGroup, tracks: [filteredTrack] }}
               title={filteredTrack.title ?? ""}
             />
 
-            <div
-              className={css`
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-                flex-wrap: nowrap;
-                gap: 0.5rem;
-
-                @media screen and (max-width: ${bp.small}px) {
-                  flex-direction: column;
-                  align-items: stretch;
-                  gap: 0;
-                }
-              `}
-            >
+            <div className="flex flex-nowrap flex-col items-stretch gap-0 sm:flex-row sm:justify-center sm:gap-6">
               <ImageAndDetailsWrapper>
-                <ImageWrapper>
-                  <ImageWithPlaceholder
-                    src={trackGroup.cover?.sizes?.[960]}
-                    alt={trackGroup.coverImageAlt}
-                    size={960}
-                    square
-                    objectFit="contain"
-                  />
-                </ImageWrapper>
-                <UnderneathImage>
-                  <ReleaseDate releaseDate={trackGroup.releaseDate} />
-                  <TrackEmbed track={filteredTrack} trackGroup={trackGroup} />
-                  {filteredTrack.allowIndividualSale && (
-                    <div className="grow-0 max-md:grow min-w-0 flex justify-end">
-                      <PurchaseOrDownloadAlbum
-                        trackGroup={trackGroup}
-                        track={filteredTrack}
-                      />
+                <StickyColumn>
+                  <ImageWrapper>
+                    <ImageWithPlaceholder
+                      src={trackGroup.cover?.sizes?.[960]}
+                      alt={trackGroup.coverImageAlt}
+                      size={960}
+                      square
+                      objectFit="contain"
+                    />
+                  </ImageWrapper>
+                  <UnderneathImage className="justify-end!">
+                    <TrackEmbed track={filteredTrack} trackGroup={trackGroup} />
+                    <div className="min-w-0 flex justify-end items-center self-stretch">
+                      {filteredTrack.allowIndividualSale ? (
+                        <PurchaseOrDownloadAlbum
+                          trackGroup={trackGroup}
+                          track={filteredTrack}
+                        />
+                      ) : (
+                        <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+                      )}
                     </div>
+                  </UnderneathImage>
+                  {trackGroup.merch && trackGroup.merch.length > 0 && (
+                    <MerchWrapper>
+                      <TrackGroupMerch
+                        merch={trackGroup.merch}
+                        releaseArtist={artist}
+                      />
+                    </MerchWrapper>
                   )}
-                </UnderneathImage>
-                {trackGroup.merch && trackGroup.merch.length > 0 && (
-                  <TrackGroupMerch merch={trackGroup.merch} />
-                )}
-                <SmallScreenPlayWrapper>
-                  <ClickToPlayTracks
-                    trackIds={[filteredTrack.id]}
-                    playLabel="track"
-                  />
-                </SmallScreenPlayWrapper>
+                  <SmallScreenPlayWrapper>
+                    <ClickToPlayTracks
+                      trackIds={[filteredTrack.id]}
+                      playLabel="track"
+                    />
+                  </SmallScreenPlayWrapper>
+                </StickyColumn>
               </ImageAndDetailsWrapper>
-              <div
-                className={css`
-                  flex-grow: 1;
-                  min-width: 0;
-
-                  > div {
-                    max-width: 100%;
-                  }
-                `}
-              >
-                <TrackListingWrapper>
-                  <PublicTrackGroupListing
-                    tracks={[filteredTrack]}
-                    trackGroup={trackGroup}
-                    fluidText={!isMobile}
-                  />
-                </TrackListingWrapper>
-                {filteredTrack.lyrics && (
-                  <div className="pt-4 pb-8 pr-4 pl-9 whitespace-pre-line text-sm flex flex-col gap-2">
-                    <h3>{t("lyrics")}</h3>
-                    <span className="italic text-xs">
-                      {filteredTrack.lyrics}
-                    </span>
-                  </div>
-                )}
-                {filteredTrack.description && (
-                  <div className="border-t border-(--mi-tint-x-color) pt-8 pb-4 pr-4 pl-9 whitespace-pre-line text-sm flex flex-col gap-2">
-                    <h3>{t("aboutThisTrack")}</h3>
-                    <span>{filteredTrack.description}</span>
-                  </div>
-                )}
-              </div>
+              <TrackListingWrapper>
+                <TrackSections>
+                  {filteredTrack.lyrics && (
+                    <section>
+                      <h2 className={prominentSectionLabelClass}>
+                        {t("lyrics")}
+                      </h2>
+                      <p className="m-0 text-sm italic leading-relaxed whitespace-pre-line">
+                        {filteredTrack.lyrics}
+                      </p>
+                    </section>
+                  )}
+                  {filteredTrack.description && (
+                    <section>
+                      <h2 className={prominentSectionLabelClass}>
+                        {t("aboutThisTrack")}
+                      </h2>
+                      <p className="m-0 max-w-prose whitespace-pre-line">
+                        {filteredTrack.description}
+                      </p>
+                    </section>
+                  )}
+                  <section>
+                    <h2 className={sectionLabelClass}>{t("credits")}</h2>
+                    <TrackCredits
+                      track={filteredTrack}
+                      trackGroup={trackGroup}
+                    />
+                  </section>
+                </TrackSections>
+              </TrackListingWrapper>
             </div>
-          </div>
-
-          <div
-            className={css`
-              margin-top: 2rem;
-              text-align: center;
-            `}
-          >
-            {trackGroup.artist && (
-              <SupportArtistPopUp artist={trackGroup.artist} />
-            )}
-          </div>
+          </TitleAndContentColumn>
+          <ReleaseArtistBlock artist={artist} trackGroupId={trackGroup.id} />
+          <footer className="flex justify-end mt-6">
+            <FlagContent trackGroupId={trackGroup.id} />
+          </footer>
         </ItemViewContentWrapper>
       </Container>
     </WidthContainer>

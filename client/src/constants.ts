@@ -11,6 +11,9 @@ export const bp = {
 export const between = (min: string, max: string) =>
   `screen and (min-width: ${Number(min) + 1}px) and (max-width: ${max}px)`;
 
+export const coverSizeMin = "280px";
+export const coverSizeMax = "470px";
+
 export const pageScaleBp = {
   full: "1500",
   medium: bp.xlarge,

@@ -106,6 +106,19 @@ const LI = styled.li<{
   ${(p) => (p.isPlaying ? `font-weight: 600;` : "")}
 `;
 
+const TrackOptions = styled.div`
+  @media (hover: hover) and (pointer: fine) {
+    opacity: 0;
+    transition: opacity 0.25s;
+
+    li:hover > &,
+    li:focus-within > &,
+    &:has([aria-expanded="true"]) {
+      opacity: 1;
+    }
+  }
+`;
+
 const licenseSpanClass =
   "whitespace-nowrap max-w-16 block text-ellipsis overflow-hidden";
 
@@ -371,7 +384,9 @@ const TrackRow: React.FC<{
       </div>
 
       {showDropdownCell && (
-        <TrackDropdown track={track} trackGroup={trackGroup} user={user} />
+        <TrackOptions>
+          <TrackDropdown track={track} trackGroup={trackGroup} user={user} />
+        </TrackOptions>
       )}
     </LI>
   );

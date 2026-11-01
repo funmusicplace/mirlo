@@ -64,8 +64,9 @@ export const calculateDateWithTimezoneOffset = (dateString: string) => {
   return new Date(date.getTime() + userTimezoneOffset);
 };
 
-const ReleaseDate: React.FC<{ releaseDate?: string }> = ({
+const ReleaseDate: React.FC<{ releaseDate?: string; inline?: boolean }> = ({
   releaseDate: releaseDateString,
+  inline,
 }) => {
   const { t, i18n } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
@@ -87,7 +88,13 @@ const ReleaseDate: React.FC<{ releaseDate?: string }> = ({
   });
 
   return (
-    <div className="flex-1 min-w-0 max-md:grow-0 max-md:basis-auto text-sm opacity-80 max-xl:text-xs text-(--mi-secondary-text-color)">
+    <div
+      className={
+        inline
+          ? undefined
+          : "flex-1 min-w-0 max-md:grow-0 max-md:basis-auto text-sm opacity-80 max-xl:text-xs text-(--mi-secondary-text-color)"
+      }
+    >
       {t(beforeReleaseDate ? "futureRelease" : "pastRelease", {
         date: releaseFormat,
       })}

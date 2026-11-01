@@ -2,13 +2,12 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import { coverSizeMax } from "pages/{artistId}/release/{trackGroupId}/Index";
 import { queryArtist } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
-import { between, bp } from "../../constants";
+import { between, bp, coverSizeMax } from "../../constants";
 import ClickToPlayTracks from "../common/ClickToPlayTracks";
 
 import ArtistByLine, { FromAlbum } from "./ArtistByLine";
@@ -112,8 +111,23 @@ const TrackGroupTitle: React.FC<{
         <ClickToPlayTracks
           trackIds={playableTrackIds}
           className={css`
-            width: 64px !important;
+            --play-size: clamp(
+              2.75rem,
+              calc(var(--cover-size, ${coverSizeMax}) / 7.5),
+              3.75rem
+            );
+
             flex-shrink: 0;
+            margin-right: 0.5rem;
+
+            && button {
+              width: var(--play-size);
+              height: var(--play-size);
+            }
+
+            && .startIcon {
+              font-size: calc(var(--play-size) * 0.45) !important;
+            }
 
             @media screen and (max-width: ${bp.small}px) {
               display: none;

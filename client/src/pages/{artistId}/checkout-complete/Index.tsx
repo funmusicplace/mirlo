@@ -160,11 +160,7 @@ function Index() {
       </ItemTransactionCard>
 
       {purchaseType === "trackGroup" && trackGroup && (
-        <RecommendedAlbums
-          trackGroupId={trackGroup.id}
-          artist={artist}
-          centered
-        />
+        <RecommendedAlbums trackGroupId={trackGroup.id} artist={artist} />
       )}
     </WidthWrapper>
   );

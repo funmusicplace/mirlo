@@ -723,6 +723,8 @@
     "supportArtist": "Support {{artist}}!",
     "updatedBio": "Updated bio",
     "support": "Support",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right",
     "doesNotExist": "This artist page does not exist or does not have any public presence yet.",
     "edit": "Edit page",
     "updates": "Posts",
@@ -2138,7 +2140,16 @@
     "artistDoesNotExist": "This artist does not exist or does not have a public presence.",
     "redeemForArtist": "Redeem a download code for a release by {{artistName}}",
     "redeemAnyReleaseByArtist": "Your code will unlock the release it was made for.",
-    "coverCredit": "Cover art: {{credit}}"
+    "coverCredit": "Cover art: {{credit}}",
+    "otherReleasesBy": "Other releases by {{artistName}}",
+    "seeAllReleases": "See all",
+    "seeAllReleasesBy": "See all releases by {{artistName}}",
+    "downloadFile": "Download {{filename}}",
+    "credits": "Credits",
+    "aboutTitle": "About",
+    "trackPosition": "Track {{position}} of {{count}}",
+    "trackLicense": "License: <licenseLink>{{license}}</licenseLink>",
+    "isrc": "ISRC: {{isrc}}"
   },
   "manageSubscriptionTierBox": {
     "edit": "Edit",

@@ -7,7 +7,7 @@ import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import MarkdownContent from "components/common/MarkdownContent";
 import { MetaCard } from "components/common/MetaCard";
-import SupportArtistPopUp from "components/common/SupportArtistPopUp";
+import StickyColumn from "components/common/StickyColumn";
 import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGroupListing";
 import WidthContainer from "components/common/WidthContainer";
 import FlagContent from "components/TrackGroup/FlagContent";
@@ -15,12 +15,12 @@ import Fundraiser from "components/TrackGroup/Fundraiser";
 import TrackGroupTitle from "components/TrackGroup/ItemViewTitle";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
 import RecommendedAlbums from "components/TrackGroup/RecommendedAlbums";
-import ReleaseDate from "components/TrackGroup/ReleaseDate";
+import ReleaseArtistBlock from "components/TrackGroup/ReleaseArtistBlock";
 import ReleaseDownloadableContent from "components/TrackGroup/ReleaseDownloadableContent";
+import ReleaseInfos from "components/TrackGroup/ReleaseInfos";
 import SubscriberExclusivePill from "components/TrackGroup/SubscriberExclusivePill";
 import TrackGroupEmbed from "components/TrackGroup/TrackGroupEmbed";
 import TrackGroupMerch from "components/TrackGroup/TrackGroupMerch";
-import TrackGroupPills from "components/TrackGroup/TrackGroupPills";
 import Wishlist from "components/TrackGroup/Wishlist";
 import { queryArtist, queryTrackGroup } from "queries";
 import { useTranslation } from "react-i18next";
@@ -29,10 +29,7 @@ import { useAuthContext } from "state/AuthContext";
 import { canUserEditArtist, isTrackGroupPublished } from "utils/artist";
 import { useMatchMedia } from "utils/useMatchMedia";
 
-import { between, bp } from "../../../../constants";
-
-export const coverSizeMin = "280px";
-export const coverSizeMax = "470px";
+import { between, bp, coverSizeMax, coverSizeMin } from "../../../../constants";
 
 export const Container = styled.div`
   --cover-size: clamp(
@@ -129,71 +126,41 @@ export const ImageAndDetailsWrapper = styled.div`
   }
 `;
 
-export const AboutWrapper = styled.div<{
-  trackGroupCredits: boolean;
-}>`
-  margin: 1.25rem 0;
-  padding: 0.25rem;
-  ${(props) =>
-    props.trackGroupCredits
-      ? "padding: 0.5rem 3rem 0.25rem 0rem;"
-      : "padding: 0.5rem 2rem 0.25rem 0rem;"}
+export const TitleAndContentColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 
-  p {
-    line-height: 1.5rem;
-  }
-
-  @media screen and (max-width: ${bp.medium}px) {
-    max-width: 100%;
-    padding: 0.5rem 0.25rem 0.5rem 0rem;
-    margin: var(--mi-side-paddings-xsmall);
-    margin-bottom: 0.5rem;
-    border-right: 0;
+  @media screen and (max-width: ${bp.small}px) {
+    padding-top: 0px;
   }
 `;
 
-export const CreditsWrapper = styled.div<{
-  trackGroupCredits: boolean;
-  trackGroupAbout: boolean;
-  showAboutInsteadOfTrackListing?: boolean;
-}>`
-  font-size: var(--mi-font-size-small);
-  opacity: 0.5;
-  height: auto;
-  p {
-    line-height: 1.3rem;
-  }
-  ${(props) =>
-    props.trackGroupCredits ? "border-left: 1px solid; " : "display: none;"}
-
-  ${(props) =>
-    props.trackGroupAbout
-      ? "margin: 1.25rem 1.25rem; padding: 0.5rem 0rem 0.5rem 2rem;"
-      : "margin: .25rem 0 1.25rem 0; border-left: none; padding: 0.5rem 0.25rem 0.5rem 0;"}
-
-  ${(props) =>
-    props.showAboutInsteadOfTrackListing
-      ? "border-left: 0px solid !important; padding-left: 0 !important; margin-left: 0 !important;"
-      : ""}
-
-  @media screen and (max-width: ${bp.medium}px) {
-    display: block;
-    ${(props) => (props.trackGroupCredits ? "border-top: 1px solid;" : "")}
-    max-width: 100%;
-    padding: 0.5rem 0.25rem 0.5rem 0rem;
-    margin: var(--mi-side-paddings-xsmall);
-    margin-top: 0;
-    border-left: 0;
+export const MerchWrapper = styled.div`
+  @media screen and (max-width: ${bp.small}px) {
+    order: 1;
+    padding: var(--mi-side-paddings-xsmall);
   }
 `;
 
-export const TrackgroupInfosWrapper = styled.div`
-  display: grid;
-  grid-template-columns: 63% 37%;
+const PurchaseNotes = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  color: var(--mi-light-foreground-color);
 
-  @media screen and (max-width: ${bp.medium}px) {
-    display: flex;
-    flex-direction: column;
+  p {
+    margin: 0;
+  }
+
+  @media screen and (max-width: ${bp.small}px) {
+    order: 1;
+    padding: var(--mi-side-paddings-xsmall);
+  }
+
+  &:empty {
+    display: none;
   }
 `;
 
@@ -214,11 +181,8 @@ function Index() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
-  const isCompactLayout = useMatchMedia(between(bp.medium, bp.xlarge));
+  const isCompactLayout = useMatchMedia(between(bp.small, bp.xlarge));
   const isMobile = useMatchMedia(`screen and (max-width: ${bp.small}px)`);
-  const isSingleColumn = useMatchMedia(
-    `screen and (max-width: ${bp.medium}px)`
-  );
 
   const { user } = useAuthContext();
 
@@ -246,7 +210,6 @@ function Index() {
   const isPublished = isTrackGroupPublished(trackGroup);
   const userCanSeeUnpublished = canUserEditArtist(user, artist);
 
-  const trackGroupCredits = trackGroup.credits;
   const trackGroupAbout = trackGroup.about;
 
   const showAboutInsteadOfTrackListing = trackGroup.tracks.length === 0;
@@ -277,73 +240,63 @@ function Index() {
             </div>
           )}
           <Fundraiser />
-          <div
-            className={css`
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-
-              @media screen and (max-width: ${bp.small}px) {
-                padding-top: 0px;
-              }
-            `}
-          >
+          <TitleAndContentColumn>
             <TrackGroupTitle
               trackGroup={trackGroup}
               title={trackGroup.title ?? ""}
             />
 
-            <div className="flex flex-nowrap flex-col items-stretch gap-0 sm:flex-row sm:justify-center sm:items-start sm:gap-6">
+            <div className="flex flex-nowrap flex-col items-stretch gap-0 sm:flex-row sm:justify-center sm:gap-6">
               <ImageAndDetailsWrapper>
-                <ImageWrapper>
-                  <ImageWithPlaceholder
-                    src={trackGroup.cover?.sizes?.[600]}
-                    alt={trackGroup.coverImageAlt}
-                    size={600}
-                    square
-                    objectFit="contain"
-                  />
-                </ImageWrapper>
-                {trackGroup.coverCredit && (
-                  <p className="mt-1 mb-0 text-xs opacity-75">
-                    {t("coverCredit", { credit: trackGroup.coverCredit })}
-                  </p>
-                )}
-                <UnderneathImage>
-                  {!isSingleColumn && (
-                    <ReleaseDate releaseDate={trackGroup.releaseDate} />
-                  )}
-                  <TrackGroupEmbed trackGroup={trackGroup} />
-                  <Wishlist trackGroup={trackGroup} inArtistPage />
-                  <div className="grow-0 max-md:grow min-w-0 flex justify-end items-center self-stretch">
-                    {trackGroup.isSubscriberExclusive && (
-                      <SubscriberExclusivePill
-                        artist={artist}
-                        trackGroup={trackGroup}
-                      />
-                    )}
-                    <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
-                  </div>
-                </UnderneathImage>
-                {trackGroup.merch && trackGroup.merch.length > 0 && (
-                  <div
-                    className={css`
-                      @media screen and (max-width: ${bp.small}px) {
-                        order: 1;
-                      }
-                    `}
-                  >
-                    <TrackGroupMerch merch={trackGroup.merch} />
-                  </div>
-                )}
-                {playableTrackIds.length > 0 && (
-                  <SmallScreenPlayWrapper>
-                    <ClickToPlayTracks
-                      trackIds={playableTrackIds}
-                      playLabel="album"
+                <StickyColumn>
+                  <ImageWrapper>
+                    <ImageWithPlaceholder
+                      src={trackGroup.cover?.sizes?.[600]}
+                      alt={trackGroup.coverImageAlt}
+                      size={600}
+                      square
+                      objectFit="contain"
                     />
-                  </SmallScreenPlayWrapper>
-                )}
+                  </ImageWrapper>
+                  <UnderneathImage className="justify-end!">
+                    <TrackGroupEmbed trackGroup={trackGroup} />
+                    <Wishlist trackGroup={trackGroup} inArtistPage />
+                    <div className="min-w-0 flex justify-end items-center self-stretch">
+                      {trackGroup.isSubscriberExclusive && (
+                        <SubscriberExclusivePill
+                          artist={artist}
+                          trackGroup={trackGroup}
+                        />
+                      )}
+                      <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+                    </div>
+                  </UnderneathImage>
+                  {trackGroup.merch && trackGroup.merch.length > 0 && (
+                    <MerchWrapper>
+                      <TrackGroupMerch
+                        merch={trackGroup.merch}
+                        releaseArtist={artist}
+                      />
+                    </MerchWrapper>
+                  )}
+                  <PurchaseNotes className="text-xs">
+                    {trackGroup.isGettable && trackGroup.tracks.length > 0 && (
+                      <p>{t("downloadCodecsInfo")}</p>
+                    )}
+                    <ReleaseDownloadableContent
+                      trackGroup={trackGroup}
+                      artist={artist}
+                    />
+                  </PurchaseNotes>
+                  {playableTrackIds.length > 0 && (
+                    <SmallScreenPlayWrapper>
+                      <ClickToPlayTracks
+                        trackIds={playableTrackIds}
+                        playLabel="album"
+                      />
+                    </SmallScreenPlayWrapper>
+                  )}
+                </StickyColumn>
               </ImageAndDetailsWrapper>
               {trackGroup.tracks.length > 0 && (
                 <TrackListingWrapper>
@@ -354,20 +307,6 @@ function Index() {
                     size={isCompactLayout ? "compact" : undefined}
                     keepDropdownInCompact
                   />
-                  {trackGroup.isGettable && (
-                    <p
-                      className={css`
-                        padding: var(--mi-side-paddings-xsmall);
-                        padding-bottom: 1rem !important;
-
-                        @media screen and (min-width: ${bp.medium}px) {
-                          margin-top: 1rem;
-                        }
-                      `}
-                    >
-                      <small>{t("downloadCodecsInfo")}</small>
-                    </p>
-                  )}
                 </TrackListingWrapper>
               )}
               {showAboutInsteadOfTrackListing && (
@@ -398,53 +337,16 @@ function Index() {
                 </div>
               )}
             </div>
-            {trackGroup.downloadableContent &&
-              trackGroup.downloadableContent.length > 0 && (
-                <ReleaseDownloadableContent
-                  trackGroup={trackGroup}
-                  artist={artist}
-                />
-              )}
-          </div>
-          <TrackgroupInfosWrapper>
-            {!showAboutInsteadOfTrackListing && trackGroupAbout && (
-              <AboutWrapper trackGroupCredits={Boolean(trackGroupCredits)}>
-                <MarkdownContent content={trackGroup.about} />
-              </AboutWrapper>
-            )}
-
-            <CreditsWrapper
-              showAboutInsteadOfTrackListing={showAboutInsteadOfTrackListing}
-              trackGroupCredits={Boolean(trackGroupCredits)}
-              trackGroupAbout={Boolean(trackGroupAbout)}
-            >
-              {isSingleColumn && (
-                <ReleaseDate releaseDate={trackGroup.releaseDate} />
-              )}
-              <MarkdownContent content={trackGroup.credits} />
-            </CreditsWrapper>
-          </TrackgroupInfosWrapper>
-
-          <div
-            className={css`
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 2rem;
-
-              @media screen and (max-width: ${bp.medium}px) {
-                max-width: 100%;
-                margin: var(--mi-side-paddings-xsmall);
-                margin-bottom: 1.5rem;
-              }
-            `}
-          >
-            <TrackGroupPills tags={trackGroup.tags} />
-          </div>
+          </TitleAndContentColumn>
+          <ReleaseInfos
+            trackGroup={trackGroup}
+            showAbout={!showAboutInsteadOfTrackListing}
+          />
           <RecommendedAlbums trackGroupId={trackGroup.id} artist={artist} />
-          {trackGroup.artist && (
-            <SupportArtistPopUp artist={trackGroup.artist} />
-          )}
-          <FlagContent trackGroupId={trackGroup.id} />
+          <ReleaseArtistBlock artist={artist} trackGroupId={trackGroup.id} />
+          <footer className="flex justify-end mt-6">
+            <FlagContent trackGroupId={trackGroup.id} />
+          </footer>
         </ItemViewContentWrapper>
       </Container>
     </WidthContainer>
