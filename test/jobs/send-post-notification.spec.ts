@@ -37,6 +37,7 @@ describe("send-post-notification", () => {
     subscriberOverrides: {
       emailConfirmationToken?: typeof UNCONFIRMED | null;
       deletedAt?: Date | null;
+      stripeSubscriptionKey?: string;
     } = {}
   ) {
     const { user: artistUser } = await createUser({
@@ -71,6 +72,7 @@ describe("send-post-notification", () => {
         userId: subscriber.id,
         profileSubscriptionTierId: artist.subscriptionTiers[0].id,
         amount: 5,
+        stripeSubscriptionKey: subscriberOverrides.stripeSubscriptionKey,
       },
     });
 
@@ -263,6 +265,20 @@ describe("send-post-notification", () => {
     await sendPostNotification({ data: { postId: post.id } });
 
     assert.strictEqual(mailQueueStub.callCount, 0);
+  });
+
+  it("emails unconfirmed subscribers with a paid subscription", async () => {
+    const { artist } = await createArtistWithSubscriber("guest@test.com", {
+      emailConfirmationToken: UNCONFIRMED,
+      stripeSubscriptionKey: "sub_test",
+    });
+    const post = await createPublishedPost(artist.id);
+
+    await sendPostNotification({ data: { postId: post.id } });
+
+    assert.strictEqual(mailQueueStub.callCount, 1);
+    const [, jobData] = mailQueueStub.firstCall.args;
+    assert.strictEqual(jobData.message.to, "guest@test.com");
   });
 
   it("does not email deleted subscribers", async () => {

@@ -75,6 +75,7 @@ export default async function sendPostNotification(job: {
                     receiveEmail: true,
                     amount: true,
                     profileSubscriptionTierId: true,
+                    stripeSubscriptionKey: true,
                     user: {
                       select: {
                         id: true,
@@ -142,7 +143,8 @@ export default async function sendPostNotification(job: {
           .filter(
             (us) =>
               us.user.deletedAt === null &&
-              us.user.emailConfirmationToken === null &&
+              (us.user.emailConfirmationToken === null ||
+                us.stripeSubscriptionKey !== null) &&
               isSubscriptionAddressed(us)
           )
           .map((us) => ({ ...us.user, receiveEmail: us.receiveEmail }))
