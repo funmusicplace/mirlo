@@ -103,6 +103,13 @@ vi.mock("components/ManageArtist/ManageSubscriptionTierBox", () => ({
   default: ({ tier }: any) => <div data-testid="tier-box">{tier.name}</div>,
 }));
 
+vi.mock(
+  "components/ManageArtist/ManageArtistDetails/SubscriptionPayoutsWarning",
+  () => ({
+    default: () => null,
+  })
+);
+
 import Index from "./Index";
 
 describe("Manage Tiers Index", () => {
