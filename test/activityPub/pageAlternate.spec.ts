@@ -136,6 +136,32 @@ describe("ActivityPub page alternates (#2400)", () => {
     );
   });
 
+  it("leaves the alternate tag out when asked to", async () => {
+    await setup();
+    const $ = cheerio.load("<html><head></head></html>");
+    await analyzePathAndGenerateHTML("/test-artist", $, undefined, {
+      activityPubAlternate: false,
+    });
+    assert.equal(
+      $('link[rel="alternate"][type="application/activity+json"]').length,
+      0
+    );
+  });
+
+  it("does not send the alternate tag to Discord's crawler", async () => {
+    await setup();
+    const discord = await request(process.env.API_DOMAIN)
+      .get("/test-artist")
+      .set(
+        "User-Agent",
+        "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)"
+      );
+    const browser = await request(process.env.API_DOMAIN).get("/test-artist");
+    assert.equal(discord.status, 200);
+    assert(!discord.text.includes("application/activity+json"));
+    assert(browser.text.includes("application/activity+json"));
+  });
+
   it("redirects AP requests for a page to the AP object", async () => {
     await setup();
     const response = await request(process.env.API_DOMAIN)

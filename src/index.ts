@@ -320,9 +320,16 @@ app.use(
         }
         // HTML pages must never be cached — they reference hashed asset filenames
         res.setHeader("Cache-Control", "no-store");
+        // Discord treats pages with an activity+json alternate as Mastodon
+        // statuses and drops the og:image preview
+        const isDiscord = /Discordbot/i.test(req.get("user-agent") ?? "");
+        const options = { activityPubAlternate: !isDiscord };
         const html = req.user
-          ? await parseIndex(req.path, req)
-          : await getCachedPage(req.path, () => parseIndex(req.path));
+          ? await parseIndex(req.path, req, options)
+          : await getCachedPage(
+              isDiscord ? `discord:${req.path}` : req.path,
+              () => parseIndex(req.path, undefined, options)
+            );
         res.send(html);
       } else {
         // Vite hashes /assets/ filenames on every build — safe to cache permanently

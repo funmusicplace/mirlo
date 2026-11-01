@@ -885,10 +885,13 @@ const dispatchRoute = async (
   });
 };
 
+export type ParseIndexOptions = { activityPubAlternate?: boolean };
+
 export const analyzePathAndGenerateHTML = async (
   pathname: string,
   $: cheerio.CheerioAPI,
-  req?: Request
+  req?: Request,
+  { activityPubAlternate = true }: ParseIndexOptions = {}
 ) => {
   const segments = splitPathIntoSegments(pathname);
   const settings = await getSiteSettings();
@@ -948,7 +951,9 @@ export const analyzePathAndGenerateHTML = async (
       });
     }
 
-    const activityPubUrl = await findActivityPubAlternate(pathname);
+    const activityPubUrl = activityPubAlternate
+      ? await findActivityPubAlternate(pathname)
+      : null;
     if (activityPubUrl) {
       $("head").append(
         $("<link>").attr({
@@ -1015,13 +1020,17 @@ const readIndexHtml = () => {
  * @param pathname
  * @returns
  */
-const parseIndex = async (pathname: string, req?: Request) => {
+const parseIndex = async (
+  pathname: string,
+  req?: Request,
+  options?: ParseIndexOptions
+) => {
   const indexHtml = readIndexHtml();
   if (indexHtml === undefined) {
     return "<html>No built client</html>";
   }
   const $ = cheerio.load(indexHtml);
-  await analyzePathAndGenerateHTML(pathname, $, req);
+  await analyzePathAndGenerateHTML(pathname, $, req, options);
   return $.html();
 };
 
