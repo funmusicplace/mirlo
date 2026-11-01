@@ -207,4 +207,64 @@ describe("manage/fundraisers/{fundraiserId}/chargePledges", () => {
     });
     assert.equal(refreshed?.status, "ACTIVE");
   });
+
+  it("charges each pledge once when two charge requests overlap", async () => {
+    const { user } = await createUser({
+      email: "fundraiser-owner@example.com",
+      stripeAccountId: "acct_owner",
+    });
+    const { user: backer } = await createUser({ email: "backer@example.com" });
+    const artist = await createArtist(user.id);
+    const fundraiser = await createFundraiser(artist.id, { goalAmount: 1000 });
+    await createFundraiserPledge(fundraiser.id, backer.id, { amount: 5000 });
+    const createStub = stubStripeForCharge();
+
+    const results = await Promise.allSettled([
+      chargeFundraiserPledges(fundraiser.id),
+      chargeFundraiserPledges(fundraiser.id),
+    ]);
+
+    assert.equal(createStub.callCount, 1);
+    assert.deepEqual(results.map((r) => r.status).sort(), [
+      "fulfilled",
+      "rejected",
+    ]);
+  });
+
+  it("skips pledges that already have a pending or completed charge, and retries failed ones", async () => {
+    const { user } = await createUser({
+      email: "fundraiser-owner@example.com",
+      stripeAccountId: "acct_owner",
+    });
+    const artist = await createArtist(user.id);
+    const fundraiser = await createFundraiser(artist.id, {
+      goalAmount: 1000,
+      isAllOrNothing: false,
+    });
+    for (const [i, paymentStatus] of (
+      ["PENDING", "COMPLETED", "FAILED"] as const
+    ).entries()) {
+      const { user: backer } = await createUser({
+        email: `backer${i}@example.com`,
+      });
+      const pledge = await createFundraiserPledge(fundraiser.id, backer.id, {
+        amount: 1000 + i,
+      });
+      await prisma.userTransaction.create({
+        data: {
+          userId: backer.id,
+          amount: pledge.amount,
+          currency: "usd",
+          paymentStatus,
+          associatedPledge: { connect: { id: pledge.id } },
+        },
+      });
+    }
+    const createStub = stubStripeForCharge();
+
+    await chargeFundraiserPledges(fundraiser.id);
+
+    assert.equal(createStub.callCount, 1);
+    assert.equal(createStub.firstCall.args[0].amount, 1002);
+  });
 });

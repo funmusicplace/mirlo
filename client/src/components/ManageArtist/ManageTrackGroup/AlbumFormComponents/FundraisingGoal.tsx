@@ -15,6 +15,7 @@ import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FaTrash } from "react-icons/fa";
 import api from "services/api";
+import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 
@@ -31,6 +32,7 @@ const FundraisingGoal: React.FC<{
   } | null;
 }> = ({ artistId, trackGroupId, fundraiser }) => {
   const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { register } = useFormContext<TrackGroupFormData>();
   const { user } = useAuthContext();
@@ -72,10 +74,10 @@ const FundraisingGoal: React.FC<{
         message: `Fundraiser successfully funded!`,
       });
       snackbar(t("chargePledgesSuccess"), { type: "success" });
-      refetch();
     } catch (e) {
-      console.error(e);
+      errorHandler(e);
     } finally {
+      refetch();
       setIsLoading(false);
     }
   };
@@ -187,6 +189,7 @@ const FundraisingGoal: React.FC<{
               type="button"
               onClick={onChargePledges}
               isLoading={isLoading}
+              disabled={isLoading}
             >
               {t(isAllOrNothing ? "chargePledges" : "markFundraiserDone")}
             </ArtistButton>

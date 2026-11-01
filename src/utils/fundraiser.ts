@@ -41,11 +41,29 @@ export const chargeFundraiserPledges = async (fundraiserId: number) => {
     }
   }
 
+  // Mark the fundraiser SUCCESSFUL before charging, so a second request
+  // can't charge the same pledges, and so future visitors get the regular
+  // buy flow instead of the pledge flow (#1681).
+  const claimed = await prisma.fundraiser.updateMany({
+    where: { id: fundraiserId, status: "ACTIVE" },
+    data: { status: "SUCCESSFUL" },
+  });
+  if (claimed.count === 0) {
+    throw new AppError({
+      httpCode: 409,
+      description: "This fundraiser's pledges are already being charged",
+    });
+  }
+
   const pledgesForFundraiser = await prisma.fundraiserPledge.findMany({
     where: {
       fundraiserId,
       paidAt: null,
       cancelledAt: null,
+      OR: [
+        { associatedTransactionId: null },
+        { associatedTransaction: { paymentStatus: "FAILED" } },
+      ],
     },
     include: pledgeChargeInclude,
   });
@@ -66,11 +84,4 @@ export const chargeFundraiserPledges = async (fundraiserId: number) => {
 
     await chargePledgePayments(pledge);
   }
-
-  // Mark the fundraiser SUCCESSFUL so future visitors get the regular
-  // buy flow instead of the pledge flow (#1681).
-  await prisma.fundraiser.update({
-    where: { id: fundraiserId },
-    data: { status: "SUCCESSFUL" },
-  });
 };
