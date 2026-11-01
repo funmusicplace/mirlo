@@ -1,10 +1,5 @@
 import prisma, { SafeUser } from "@mirlo/prisma";
-import {
-  User,
-  ProfileSubscriptionTier,
-  Profile,
-  Prisma,
-} from "@mirlo/prisma/client";
+import { ProfileSubscriptionTier, Profile, Prisma } from "@mirlo/prisma/client";
 import {
   DefaultArgs,
   PrismaClientKnownRequestError,
@@ -75,31 +70,6 @@ export const confirmProfileIdExists = async (
   } catch (e) {
     next(e);
   }
-};
-
-export const checkIsUserSubscriber = async (
-  user?: User,
-  profileId?: number | null
-) => {
-  let userSubscriber = false;
-
-  if (!profileId) {
-    return true;
-  }
-
-  if (user) {
-    const subscriber = await prisma.profileUserSubscription.findFirst({
-      where: {
-        userId: user.id,
-        profileSubscriptionTier: {
-          profileId,
-        },
-      },
-    });
-
-    userSubscriber = !!subscriber;
-  }
-  return userSubscriber;
 };
 
 export const getPlatformFeeForProfile = async (
@@ -765,6 +735,8 @@ export const singleInclude = (queryOptions?: {
       include: {
         featuredImage: true,
         images: postImagesForContent,
+        minimumSubscriptionTier: true,
+        postSubscriptionTiers: true,
       },
     },
     user: {

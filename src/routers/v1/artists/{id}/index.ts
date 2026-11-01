@@ -3,13 +3,17 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { serializeProfile } from "../../../../serializers/artist";
+import { serializePost } from "../../../../serializers/post";
 import {
   canUserEditProfile,
-  checkIsUserSubscriber,
   findProfileIdForURLSlug,
   singleInclude,
   whereForVisibleProfile,
 } from "../../../../utils/artist";
+import {
+  canUserSeePostContent,
+  getUserSubscriptionsForProfile,
+} from "../../../../utils/postAccess";
 
 export default function () {
   const operations = {
@@ -28,7 +32,6 @@ export default function () {
     }
     try {
       const parsedId = await findProfileIdForURLSlug(id);
-      let isUserSubscriber = false;
       if (parsedId) {
         const canManage = await canUserEditProfile(parsedId, loggedInUser);
 
@@ -48,14 +51,26 @@ export default function () {
           return res.status(404).json({ error: "Artist not found" });
         }
 
-        isUserSubscriber = await checkIsUserSubscriber(loggedInUser, parsedId);
+        const subscriptions = await getUserSubscriptionsForProfile(
+          loggedInUser,
+          parsedId
+        );
 
         return res.json({
-          result: serializeProfile(
-            profile as any,
-            loggedInUser?.id,
-            isUserSubscriber || canManage
-          ),
+          result: {
+            ...serializeProfile(profile as any, loggedInUser?.id, canManage),
+            posts: (profile as any).posts?.map((post: any) =>
+              serializePost(
+                post,
+                undefined,
+                undefined,
+                canUserSeePostContent(post, {
+                  isProfileOwner: canManage,
+                  subscriptions,
+                })
+              )
+            ),
+          },
         });
       } else {
         return res.status(404).json({ error: "Artist not found" });
