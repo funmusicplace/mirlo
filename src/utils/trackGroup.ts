@@ -15,6 +15,8 @@ import { Response } from "express";
 
 import { sendReleaseToActivityPubFollowers } from "../activityPub/federation";
 import { logger } from "../logger";
+import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
+import { processSingleTrackGroup } from "../serializers/trackGroup";
 
 import {
   findProfileIdForURLSlug,
@@ -25,11 +27,99 @@ import { FormatOptions } from "./audioFormats";
 import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
+import { getClient } from "./getClient";
 import { merchImagesInclude } from "./merch";
 import { streamOriginalAudio } from "./minio";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { clearImageSlot } from "./pendingImage";
+import { grantReleaseToExistingSubscribers } from "./subscriptionTier";
 import { deleteTrack } from "./tracks";
+
+export type AutomaticallyReceivedAlbumEmailType = {
+  trackGroup: {
+    id: number;
+    title: string | null;
+    urlSlug: string;
+    artist: {
+      urlSlug: string;
+    };
+  };
+  artist: {
+    id: number;
+    name: string;
+  };
+  host: string;
+  client: string;
+};
+
+export const grantReleaseToAutoPurchaseTiers = async (trackGroupId: number) => {
+  const trackGroup = await prisma.trackGroup.findFirst({
+    where: {
+      id: trackGroupId,
+      ...whereForPublishedTrackGroups(),
+      hideFromSearch: undefined,
+    },
+    include: { profile: true },
+  });
+  if (!trackGroup) return;
+
+  const tiers = await prisma.profileSubscriptionTier.findMany({
+    where: {
+      autoPurchaseAlbums: true,
+      OR: [
+        { profileId: trackGroup.profileId },
+        {
+          profile: {
+            user: {
+              artistLabels: {
+                some: {
+                  artistId: trackGroup.profileId,
+                  isLabelApproved: true,
+                  isArtistApproved: true,
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+    include: { profile: true },
+  });
+
+  const client = await getClient();
+
+  for (const tier of tiers) {
+    const granted = await grantReleaseToExistingSubscribers({
+      tierId: tier.id,
+      trackGroupId,
+    });
+    const users = await prisma.user.findMany({
+      where: { id: { in: granted.map((purchase) => purchase.userId) } },
+      select: { email: true },
+    });
+
+    logger.info(
+      `grantReleaseToAutoPurchaseTiers: granted trackGroup ${trackGroupId} to ${users.length} subscribers of tier ${tier.id}`
+    );
+
+    for (const user of users) {
+      await sendMailQueue.add(
+        "send-mail",
+        {
+          template: "automatically-received-album",
+          message: { to: user.email },
+          locals: {
+            trackGroup: processSingleTrackGroup(trackGroup),
+            artist: { id: tier.profile.id, name: tier.profile.name },
+            host: process.env.API_DOMAIN,
+            client: client.applicationUrl,
+          } as AutomaticallyReceivedAlbumEmailType,
+        },
+        { priority: BULK_MAIL_PRIORITY }
+      );
+    }
+  }
+};
 
 export const notifyFollowersOfNewAlbum = async (trackGroup: {
   id: number;
@@ -49,6 +139,14 @@ export const notifyFollowersOfNewAlbum = async (trackGroup: {
   } catch (e) {
     logger.error(
       `notifyFollowersOfNewAlbum: failed to send trackGroup ${trackGroup.id} to ActivityPub followers: ${e}`
+    );
+  }
+
+  try {
+    await grantReleaseToAutoPurchaseTiers(trackGroup.id);
+  } catch (e) {
+    logger.error(
+      `notifyFollowersOfNewAlbum: failed to grant trackGroup ${trackGroup.id} to auto-purchase tiers: ${e}`
     );
   }
 

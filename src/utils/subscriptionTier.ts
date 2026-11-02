@@ -223,14 +223,13 @@ export const grantReleaseToExistingSubscribers = async (
     select: { userId: true },
   });
 
-  await tx.userTrackGroupPurchase.createMany({
+  return tx.userTrackGroupPurchase.createManyAndReturn({
     data: subscriptions.map((subscription) => ({
       userId: subscription.userId,
       trackGroupId,
       proGratis: true,
     })),
     skipDuplicates: true,
+    select: { userId: true },
   });
-
-  return subscriptions.length;
 };
