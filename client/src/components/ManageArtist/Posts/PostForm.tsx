@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import Box from "components/common/Box";
 import DraftRestoredBanner from "components/common/DraftRestoredBanner";
-import { CheckBoxLabel } from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import TextEditor from "components/common/TextEditor";
@@ -22,6 +21,7 @@ import api from "../../../services/api";
 
 import EditPostHeader from "./EditPostHeader";
 import PostSlugField from "./PostSlugField";
+import PostTierSelector from "./PostTierSelector";
 
 export type PostFormData = {
   title: string;
@@ -321,21 +321,17 @@ const PostForm: React.FC<{
               >
                 {t("ifNotPublic")}
               </legend>
-              {tiers?.results.map((tier) => (
-                <CheckBoxLabel
-                  key={tier.id}
-                  htmlFor={`subscription-tier-${tier.id}`}
-                >
-                  <InputEl
-                    id={`subscription-tier-${tier.id}`}
-                    type="checkbox"
-                    value={tier.id}
-                    {...register("subscriptionTierIds")}
+              <Controller
+                name="subscriptionTierIds"
+                render={({ field: { value, onChange } }) => (
+                  <PostTierSelector
+                    tiers={tiers?.results ?? []}
+                    value={value ?? []}
+                    onChange={onChange}
+                    currency={artist.user?.currency}
                   />
-                  {tier.name}
-                </CheckBoxLabel>
-              ))}
-              <small className="block mt-1">{t("tiersHint")}</small>
+                )}
+              />
             </fieldset>
           </FormComponent>
         )}
