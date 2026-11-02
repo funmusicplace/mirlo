@@ -8,7 +8,6 @@ import yargs from "yargs";
 
 import { REDIS_CONFIG } from "../config/redis";
 import { runPendingDataMigrations } from "../dataMigrations";
-import { autoPurchaseNewAlbumsProcessor } from "../queues/auto-purchase-new-albums-queue";
 import { setBucketConfig, ensureAllBucketsExist } from "../utils/minio";
 import { getSiteSettings } from "../utils/settings";
 
@@ -26,7 +25,6 @@ import verifyAudioJob from "./verify-audio";
 
 import "../queues/send-mail-queue";
 import "../queues/send-post-notification-queue";
-import "../queues/auto-purchase-new-albums-queue";
 
 export const logger = winston.createLogger({
   level: "info",
@@ -167,7 +165,6 @@ yargs
     generateAlbumQueueWorker();
     sendMailQueue();
     sendPostNotificationQueue();
-    autoPurchaseNewAlbumsQueue();
     scheduledTasksQueueWorker();
   })
   .help().argv;
@@ -238,15 +235,6 @@ async function sendPostNotificationQueue() {
     sendPostNotification,
     workerOptions,
     "Send post notification worker started"
-  );
-}
-
-async function autoPurchaseNewAlbumsQueue() {
-  createWorkerWithLogging(
-    "auto-purchase-new-albums",
-    autoPurchaseNewAlbumsProcessor,
-    workerOptions,
-    "Auto-purchase new albums worker started"
   );
 }
 

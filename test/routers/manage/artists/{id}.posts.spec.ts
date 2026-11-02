@@ -4,11 +4,13 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 import request from "supertest";
+import prisma from "@mirlo/prisma";
 
 import {
   clearTables,
   createArtist,
   createPost,
+  createTier,
   createUser,
 } from "../../../utils";
 
@@ -166,6 +168,49 @@ describe("manage/artists/{artistId}/posts", () => {
 
       assert.equal(response.status, 200);
       assert.equal(response.body.result.shouldSendEmail, false);
+    });
+
+    it("should copy the audience of the most recent sent post", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const artist = await createArtist(user.id);
+      const paidTier = await createTier(artist.id, { minAmount: 500 });
+      const otherTier = await createTier(artist.id, { minAmount: 1000 });
+
+      const sent = await createPost(artist.id, {
+        isPublic: false,
+        isDraft: false,
+        publishedAt: new Date("2026-01-01"),
+      });
+      await prisma.postSubscriptionTier.create({
+        data: { postId: sent.id, profileSubscriptionTierId: paidTier.id },
+      });
+      const draft = await createPost(artist.id, {
+        title: "draft",
+        isPublic: true,
+        isDraft: true,
+      });
+      await prisma.postSubscriptionTier.create({
+        data: { postId: draft.id, profileSubscriptionTierId: otherTier.id },
+      });
+
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/posts`)
+        .send({ title: "", content: "" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const created = await prisma.post.findFirstOrThrow({
+        where: { id: response.body.result.id },
+        include: { postSubscriptionTiers: true },
+      });
+      assert.equal(created.isPublic, false);
+      assert.deepEqual(
+        created.postSubscriptionTiers.map((t) => t.profileSubscriptionTierId),
+        [paidTier.id]
+      );
     });
 
     it("should create a post with an empty title", async () => {

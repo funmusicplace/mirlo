@@ -134,7 +134,7 @@ export function queryManagedArtistPosts(
 async function createPost(opts: { artistId: number }) {
   return api.post<Partial<Post>, { result: Post }>(
     `v1/manage/artists/${opts.artistId}/posts`,
-    { title: "", content: "", isPublic: false }
+    { title: "", content: "" }
   );
 }
 

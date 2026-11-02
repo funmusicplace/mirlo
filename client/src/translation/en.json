@@ -2444,7 +2444,11 @@
     "urlSlug": "Post URL slug",
     "slugTaken": "This URL is taken, try something else.",
     "slugWarning": "Changes to this value will break existing links to this post.",
-    "tiersHint": "Leave all of them unchecked to send this post to every subscriber.",
+    "audienceLegend": "Post audience",
+    "audienceAll": "All",
+    "audiencePaid": "Paid only",
+    "audienceFree": "Free only",
+    "free": "Free",
     "featuredImageCredit": "Featured image credit",
     "featuredImageCreditHint": "Credit the artist or photographer who made the featured image. Shown as a footnote at the end of the post."
   },

@@ -157,8 +157,11 @@ describe("blog post subscriber visibility", () => {
         .click()
         .type("This is exclusive content only for paying subscribers.");
 
-      // The post is created with isPublic: false (subscribers-only is checked by default).
-      cy.findByRole("checkbox", { name: "Supporter" }).check();
+      // New posts copy the audience of the most recent post, which is public here.
+      cy.findByRole("checkbox", { name: /Subscribers only\?/ }).check();
+      cy.findByText("Paid only").click();
+      cy.findByRole("checkbox", { name: /Supporter/ }).should("be.checked");
+      cy.findByRole("checkbox", { name: /follow/ }).should("not.be.checked");
 
       // Publish the post — this saves title + content + tier then publishes.
       cy.findByRole("button", { name: "Publish post" }).click();

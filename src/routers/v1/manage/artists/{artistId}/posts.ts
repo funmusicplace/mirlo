@@ -98,9 +98,17 @@ export default function () {
       }
 
       const mostRecentPost = await prisma.post.findFirst({
-        where: { profileId: Number(artistId), deletedAt: null },
-        orderBy: { createdAt: "desc" },
-        select: { minimumSubscriptionTierId: true, shouldSendEmail: true },
+        where: { profileId: Number(artistId), deletedAt: null, isDraft: false },
+        orderBy: { publishedAt: "desc" },
+        select: {
+          minimumSubscriptionTierId: true,
+          shouldSendEmail: true,
+          isPublic: true,
+          postSubscriptionTiers: {
+            where: { profileSubscriptionTier: { deletedAt: null } },
+            select: { profileSubscriptionTierId: true },
+          },
+        },
       });
 
       const resolvedTierId =
@@ -141,13 +149,19 @@ export default function () {
               typeof content === "string"
                 ? await preparePostContent(content)
                 : content,
-            isPublic,
+            isPublic: isPublic ?? mostRecentPost?.isPublic,
             publishedAt,
             shouldSendEmail: resolvedShouldSendEmail,
             profile: { connect: { id: Number(artistId) } },
             minimumSubscriptionTier: { connect: { id: validTier.id } },
+            postSubscriptionTiers: {
+              create: mostRecentPost?.postSubscriptionTiers ?? [],
+            },
           },
-          include: { images: postImagesForContent },
+          include: {
+            images: postImagesForContent,
+            postSubscriptionTiers: true,
+          },
         });
         res.json({
           result: serializePost(result, undefined, undefined, true),
