@@ -197,6 +197,51 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
       );
     });
 
+    it("accepts a repeated follow without notifying the artist again", async () => {
+      const user = await prisma.user.create({
+        data: { email: "target@test.com" },
+      });
+      const targetArtist = await prisma.profile.create({
+        data: {
+          name: "Target artist",
+          urlSlug: "target-artist",
+          userId: user.id,
+          enabled: true,
+          activityPub: true,
+        },
+      });
+
+      remote = await startFakeRemoteActor();
+      const { actorUrl } = remote;
+      const objectUrl = `https://${domain}/v1/artists/${targetArtist.urlSlug}`;
+
+      for (const attempt of [1, 2]) {
+        const response = await requestApp
+          .post(`ap/artists/${targetArtist.urlSlug}/inbox`)
+          .set("Content-Type", "application/activity+json")
+          .send(
+            followActivity({
+              id: `${actorUrl}#follows/${targetArtist.urlSlug}-${uid}-${attempt}`,
+              actorUrl,
+              objectUrl,
+            })
+          );
+        assert.equal(response.statusCode, 202);
+
+        await waitFor(async () =>
+          remote &&
+          remote.received.filter((a) => a.type === "Accept").length >= attempt
+            ? true
+            : null
+        );
+      }
+
+      const notifications = await prisma.notification.count({
+        where: { userId: targetArtist.userId, notificationType: "AP_FOLLOW" },
+      });
+      assert.equal(notifications, 1);
+    });
+
     it("returns 404 when the target artist does not exist", async () => {
       const actorUrl = `https://${domain}/v1/artists/nobody`;
       const response = await requestApp

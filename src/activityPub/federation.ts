@@ -499,20 +499,30 @@ federation
       throw new Error(`No inbox found for follower ${actorHref}`);
     }
     const inboxUrl = followerActor.inboxId.href;
+    const followerKey = {
+      actor_profileId: { profileId: artist.id, actor: actorHref },
+    };
+
+    const existingFollower =
+      await prisma.activityPubProfileFollowers.findUnique({
+        where: followerKey,
+      });
 
     await prisma.activityPubProfileFollowers.upsert({
-      where: { actor_profileId: { profileId: artist.id, actor: actorHref } },
+      where: followerKey,
       create: { profileId: artist.id, actor: actorHref, inboxUrl },
       update: { inboxUrl },
     });
 
-    await prisma.notification.create({
-      data: {
-        notificationType: "AP_FOLLOW",
-        userId: artist.userId,
-        metadata: { ap: { actor: actorHref } },
-      },
-    });
+    if (!existingFollower) {
+      await prisma.notification.create({
+        data: {
+          notificationType: "AP_FOLLOW",
+          userId: artist.userId,
+          metadata: { ap: { actor: actorHref } },
+        },
+      });
+    }
 
     const guid = crypto.randomBytes(16).toString("hex");
     await ctx.sendActivity(
