@@ -558,6 +558,7 @@ federation
   .on(Delete, async (ctx, del) => {
     const identifier = ctx.recipient;
     if (!identifier || !del.actorId) return;
+    if (del.objectId?.href !== del.actorId.href) return;
 
     const parsedId = await findArtistIdForURLSlug(identifier);
     if (!parsedId) return;

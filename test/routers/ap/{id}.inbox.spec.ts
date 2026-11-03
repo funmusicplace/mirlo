@@ -61,13 +61,17 @@ function undoFollowActivity(opts: {
   };
 }
 
-function deleteActivity(opts: { id: string; actorUrl: string }) {
+function deleteActivity(opts: {
+  id: string;
+  actorUrl: string;
+  object?: unknown;
+}) {
   return {
     "@context": "https://www.w3.org/ns/activitystreams",
     id: opts.id,
     type: "Delete",
     actor: opts.actorUrl,
-    object: opts.actorUrl,
+    object: opts.object ?? opts.actorUrl,
   };
 }
 
@@ -246,6 +250,74 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
         });
         return r === null ? true : null;
       });
+    });
+
+    it("keeps a follower who deleted one of their own posts", async () => {
+      const user = await prisma.user.create({
+        data: { email: "target@test.com" },
+      });
+      const targetArtist = await prisma.profile.create({
+        data: {
+          name: "Target artist",
+          urlSlug: "target-artist",
+          userId: user.id,
+          enabled: true,
+          activityPub: true,
+        },
+      });
+
+      const actorUrl = "https://mastodon.social/users/postdeleter";
+      const deletedAccountUrl = "https://mastodon.social/users/gone";
+
+      await prisma.activityPubProfileFollowers.createMany({
+        data: [
+          {
+            profileId: targetArtist.id,
+            actor: actorUrl,
+            inboxUrl: `${actorUrl}/inbox`,
+          },
+          {
+            profileId: targetArtist.id,
+            actor: deletedAccountUrl,
+            inboxUrl: `${deletedAccountUrl}/inbox`,
+          },
+        ],
+      });
+
+      const postDelete = await requestApp
+        .post(`ap/artists/${targetArtist.urlSlug}/inbox`)
+        .set("Content-Type", "application/activity+json")
+        .send(
+          deleteActivity({
+            id: `${actorUrl}/statuses/1#delete-${uid}`,
+            actorUrl,
+            object: { id: `${actorUrl}/statuses/1`, type: "Tombstone" },
+          })
+        );
+      assert.equal(postDelete.statusCode, 202);
+
+      const accountDelete = await requestApp
+        .post(`ap/artists/${targetArtist.urlSlug}/inbox`)
+        .set("Content-Type", "application/activity+json")
+        .send(
+          deleteActivity({
+            id: `${deletedAccountUrl}#delete-${uid}`,
+            actorUrl: deletedAccountUrl,
+          })
+        );
+      assert.equal(accountDelete.statusCode, 202);
+
+      await waitFor(async () => {
+        const r = await prisma.activityPubProfileFollowers.findFirst({
+          where: { profileId: targetArtist.id, actor: deletedAccountUrl },
+        });
+        return r === null ? true : null;
+      });
+
+      const follower = await prisma.activityPubProfileFollowers.findFirst({
+        where: { profileId: targetArtist.id, actor: actorUrl },
+      });
+      assert.ok(follower);
     });
 
     it("is idempotent when the actor was never a follower", async () => {
