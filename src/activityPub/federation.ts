@@ -85,6 +85,9 @@ export const federation = createFederation<void>({
   skipSignatureVerification: process.env.NODE_ENV === "test",
 });
 
+export const createApContext = () =>
+  federation.createContext(new Request(`https://${root}`), undefined);
+
 federation
   .setActorDispatcher(
     "/v1/ap/artists/{identifier}",
@@ -258,10 +261,7 @@ export const sendReleaseToActivityPubFollowers = async (
   if (!trackGroup) return;
 
   const identifier = trackGroup.profile.urlSlug;
-  const ctx = federation.createContext(
-    new Request(`https://${root}`),
-    undefined
-  );
+  const ctx = createApContext();
   const client = await getClient();
   await ctx.sendActivity(
     { identifier },
@@ -302,10 +302,7 @@ export const sendPostToActivityPubFollowers = async (postId: number) => {
   if (!post?.profile) return false;
 
   const identifier = post.profile.urlSlug;
-  const ctx = federation.createContext(
-    new Request(`https://${root}`),
-    undefined
-  );
+  const ctx = createApContext();
   const client = await getClient();
   const mentions = parseMentionsFromContent(post.content ?? "");
   const activity = buildPostCreateActivity(

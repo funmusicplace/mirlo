@@ -7,6 +7,7 @@ import { Request, Response } from "express";
 import { describe, it } from "mocha";
 import sinon from "sinon";
 
+import { federation } from "../../../src/activityPub/federation";
 import { root } from "../../../src/activityPub/utils";
 import remoteFollow from "../../../src/routers/v1/artists/{id}/remoteFollow";
 import { clearTables, createProfile, createUser } from "../../utils";
@@ -21,7 +22,7 @@ describe("artists/{id}/remoteFollow", () => {
   let jsonStub: sinon.SinonStub;
   let mockRes: Response;
   let mockNext: sinon.SinonStub;
-  let fetchStub: sinon.SinonStub;
+  let lookupWebFingerStub: sinon.SinonStub;
 
   beforeEach(async () => {
     try {
@@ -34,10 +35,15 @@ describe("artists/{id}/remoteFollow", () => {
     jsonStub = sinon.stub();
     mockRes = { status: statusStub, json: jsonStub } as unknown as Response;
     mockNext = sinon.stub();
-    // Reject network by default; happy-path tests opt in with their own stub.
-    fetchStub = sinon
-      .stub(global, "fetch" as any)
-      .rejects(new Error("Network disabled in tests"));
+    lookupWebFingerStub = sinon.stub().resolves(null);
+    const originalCreateContext = federation.createContext.bind(federation);
+    sinon
+      .stub(federation as any, "createContext")
+      .callsFake((...args: unknown[]) => {
+        const ctx = (originalCreateContext as any)(...args);
+        ctx.lookupWebFinger = lookupWebFingerStub;
+        return ctx;
+      });
   });
 
   afterEach(() => {
@@ -65,7 +71,7 @@ describe("artists/{id}/remoteFollow", () => {
 
     const error = mockNext.getCall(0).args[0];
     assert.equal(error.httpCode, 400);
-    assert.equal(fetchStub.called, false);
+    assert.equal(lookupWebFingerStub.called, false);
   });
 
   it("should error when handle is not in user@server format", async () => {
@@ -75,7 +81,7 @@ describe("artists/{id}/remoteFollow", () => {
 
     const error = mockNext.getCall(0).args[0];
     assert.equal(error.httpCode, 400);
-    assert.equal(fetchStub.called, false);
+    assert.equal(lookupWebFingerStub.called, false);
   });
 
   it("should 404 when the artist doesn't exist", async () => {
@@ -83,7 +89,7 @@ describe("artists/{id}/remoteFollow", () => {
 
     const error = mockNext.getCall(0).args[0];
     assert.equal(error.httpCode, 404);
-    assert.equal(fetchStub.called, false);
+    assert.equal(lookupWebFingerStub.called, false);
   });
 
   it("should error when the artist is not on the fediverse", async () => {
@@ -100,15 +106,14 @@ describe("artists/{id}/remoteFollow", () => {
 
     const error = mockNext.getCall(0).args[0];
     assert.equal(error.httpCode, 400);
-    assert.equal(fetchStub.called, false);
+    assert.equal(lookupWebFingerStub.called, false);
   });
 
   it("should error when the follower's server has no remote-follow template", async () => {
     const profile = await createApProfile();
-    fetchStub.resolves({
-      ok: true,
-      json: async () => ({ links: [{ rel: "self", href: "https://x" }] }),
-    } as unknown as Response);
+    lookupWebFingerStub.resolves({
+      links: [{ rel: "self", href: "https://x" }],
+    });
 
     await callHandler(
       { id: `${profile.id}` },
@@ -119,9 +124,24 @@ describe("artists/{id}/remoteFollow", () => {
     assert.equal(error.httpCode, 400);
   });
 
+  it("should error when the remote-follow template isn't https", async () => {
+    const profile = await createApProfile();
+    lookupWebFingerStub.resolves({
+      links: [{ rel: SUBSCRIBE_REL, template: "javascript:alert(1)//{uri}" }],
+    });
+
+    await callHandler(
+      { id: `${profile.id}` },
+      { handle: "@me@mastodon.social" }
+    );
+
+    const error = mockNext.getCall(0).args[0];
+    assert.equal(error.httpCode, 400);
+    assert.equal(jsonStub.called, false);
+  });
+
   it("should 404 when the follower can't be found on their server", async () => {
     const profile = await createApProfile();
-    fetchStub.resolves({ ok: false } as unknown as Response);
 
     await callHandler(
       { id: `${profile.id}` },
@@ -134,12 +154,9 @@ describe("artists/{id}/remoteFollow", () => {
 
   it("should resolve the remote-follow redirect for the artist", async () => {
     const profile = await createApProfile();
-    fetchStub.resolves({
-      ok: true,
-      json: async () => ({
-        links: [{ rel: SUBSCRIBE_REL, template: TEMPLATE }],
-      }),
-    } as unknown as Response);
+    lookupWebFingerStub.resolves({
+      links: [{ rel: SUBSCRIBE_REL, template: TEMPLATE }],
+    });
 
     await callHandler(
       { id: `${profile.id}` },
@@ -148,11 +165,9 @@ describe("artists/{id}/remoteFollow", () => {
 
     assert.equal(mockNext.called, false);
 
-    // It WebFingers the follower's own server, not ours.
-    const webfingerUrl = fetchStub.getCall(0).args[0] as string;
     assert.equal(
-      webfingerUrl,
-      "https://mastodon.social/.well-known/webfinger?resource=acct:me@mastodon.social"
+      lookupWebFingerStub.getCall(0).args[0],
+      "acct:me@mastodon.social"
     );
 
     const expectedUri = encodeURIComponent(`${profile.urlSlug}@${root}`);

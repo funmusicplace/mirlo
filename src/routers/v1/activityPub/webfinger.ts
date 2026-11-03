@@ -1,9 +1,16 @@
+import { isActor, Link } from "@fedify/fedify/vocab";
 import { NextFunction, Request, Response } from "express";
+
+import { createApContext } from "../../../activityPub/federation";
+import { userAuthenticated } from "../../../auth/passport";
 import { AppError } from "../../../utils/error";
+
+const hrefOf = (url: URL | Link | null | undefined) =>
+  url instanceof Link ? url.href?.href : url?.href;
 
 export default function () {
   const operations = {
-    GET: [GET],
+    GET: [userAuthenticated, GET],
   };
 
   /**
@@ -33,66 +40,29 @@ export default function () {
         });
       }
 
-      const server = acct.slice(atIndex + 1);
+      const actor = await createApContext().lookupObject(`acct:${acct}`);
 
-      // Step 1: WebFinger lookup
-      const webfingerUrl = `https://${server}/.well-known/webfinger?resource=acct:${acct}`;
-      const webfingerRes = await fetch(webfingerUrl, {
-        headers: { Accept: "application/json" },
-      });
-
-      if (!webfingerRes.ok) {
-        throw new AppError({
-          httpCode: 404,
-          description: `Could not find user ${acct}`,
-        });
-      }
-
-      const webfingerData = (await webfingerRes.json()) as {
-        links?: { rel: string; type?: string; href?: string }[];
-      };
-
-      const selfLink = webfingerData.links?.find(
-        (l) => l.rel === "self" && l.type === "application/activity+json"
-      );
-
-      if (!selfLink?.href) {
+      if (!isActor(actor) || !actor.id) {
         throw new AppError({
           httpCode: 404,
           description: `No ActivityPub actor found for ${acct}`,
         });
       }
 
-      // Step 2: Fetch actor object
-      const actorRes = await fetch(selfLink.href, {
-        headers: { Accept: "application/activity+json" },
-      });
-
-      if (!actorRes.ok) {
-        throw new AppError({
-          httpCode: 404,
-          description: `Could not fetch actor for ${acct}`,
-        });
-      }
-
-      const actor = (await actorRes.json()) as {
-        id: string;
-        type: string;
-        name?: string;
-        preferredUsername?: string;
-        url?: string;
-        inbox?: string;
-        icon?: { url?: string };
-      };
+      const icon = await actor.getIcon({ suppressError: true });
 
       return res.json({
         result: {
-          id: actor.id,
-          name: actor.name ?? actor.preferredUsername ?? acct,
-          preferredUsername: actor.preferredUsername ?? acct.slice(0, atIndex),
-          url: actor.url ?? actor.id,
-          inbox: actor.inbox,
-          iconUrl: actor.icon?.url,
+          id: actor.id.href,
+          name:
+            actor.name?.toString() ??
+            actor.preferredUsername?.toString() ??
+            acct,
+          preferredUsername:
+            actor.preferredUsername?.toString() ?? acct.slice(0, atIndex),
+          url: hrefOf(actor.url) ?? actor.id.href,
+          inbox: actor.inboxId?.href,
+          iconUrl: hrefOf(icon?.url),
         },
       });
     } catch (error) {
@@ -117,6 +87,9 @@ export default function () {
       },
       400: {
         description: "Bad request",
+      },
+      401: {
+        description: "Not logged in",
       },
       404: {
         description: "Actor not found",
