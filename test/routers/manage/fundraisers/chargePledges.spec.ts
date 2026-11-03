@@ -39,12 +39,12 @@ describe("manage/fundraisers/{fundraiserId}/chargePledges", () => {
       default_currency: "usd",
       country: "US",
     } as unknown as Stripe.Response<Stripe.Account>);
-    sinon.stub(stripeUtils.stripe.customers, "list").resolves({
-      data: [{ id: "cus_backer" }],
-    } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
-    sinon.stub(stripeUtils.stripe.paymentMethods, "list").resolves({
-      data: [{ id: "pm_backer" }],
-    } as unknown as Stripe.Response<Stripe.ApiList<Stripe.PaymentMethod>>);
+    sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
+      id: "seti_pledge",
+      status: "succeeded",
+      customer: "cus_backer",
+      payment_method: "pm_backer",
+    } as unknown as Stripe.Response<Stripe.SetupIntent>);
     sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
     return sinon.stub(stripeUtils.stripe.paymentIntents, "create").resolves({
       id: "pi_pledge_charge",

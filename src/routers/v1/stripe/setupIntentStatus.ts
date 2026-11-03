@@ -60,6 +60,7 @@ export default function () {
               message: intent.metadata?.message,
               amount: Number(intent.metadata?.paymentIntentAmount),
               stripeSetupIntentId: intent.id,
+              stripeAccountId,
             });
             const profile = await prisma.profile.findFirst({
               where: {
