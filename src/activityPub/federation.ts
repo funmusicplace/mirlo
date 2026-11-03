@@ -83,6 +83,7 @@ export const federation = createFederation<void>({
   kv: kvStore,
   queue: messageQueue,
   skipSignatureVerification: process.env.NODE_ENV === "test",
+  allowPrivateAddress: process.env.NODE_ENV === "test",
 });
 
 export const createApContext = () =>
@@ -493,10 +494,16 @@ federation
 
     const actorHref = follow.actorId.href;
 
+    const followerActor = await follow.getActor(ctx);
+    if (!followerActor?.inboxId) {
+      throw new Error(`No inbox found for follower ${actorHref}`);
+    }
+    const inboxUrl = followerActor.inboxId.href;
+
     await prisma.activityPubProfileFollowers.upsert({
       where: { actor_profileId: { profileId: artist.id, actor: actorHref } },
-      create: { profileId: artist.id, actor: actorHref, inboxUrl: null },
-      update: {},
+      create: { profileId: artist.id, actor: actorHref, inboxUrl },
+      update: { inboxUrl },
     });
 
     await prisma.notification.create({
@@ -507,35 +514,18 @@ federation
       },
     });
 
-    (async () => {
-      try {
-        const followerActor = await follow.getActor(ctx);
-        if (!followerActor?.inboxId) return;
+    const guid = crypto.randomBytes(16).toString("hex");
+    await ctx.sendActivity(
+      { identifier },
+      followerActor,
+      new Accept({
+        id: new URL(`https://${root}/v1/artists/${identifier}#accept-${guid}`),
+        actor: ctx.getActorUri(identifier),
+        object: follow,
+      })
+    );
 
-        await prisma.activityPubProfileFollowers.updateMany({
-          where: { profileId: artist.id, actor: actorHref },
-          data: { inboxUrl: followerActor.inboxId.href },
-        });
-
-        const guid = crypto.randomBytes(16).toString("hex");
-        await ctx.sendActivity(
-          { identifier },
-          followerActor,
-          new Accept({
-            id: new URL(
-              `https://${root}/v1/artists/${identifier}#accept-${guid}`
-            ),
-            actor: ctx.getActorUri(identifier),
-            object: follow,
-          }),
-          { immediate: true }
-        );
-
-        logger.info(`ActivityPub Accept sent for ${actorHref} → ${identifier}`);
-      } catch (e) {
-        logger.warn(`ActivityPub Accept failed for ${actorHref}: ${e}`);
-      }
-    })();
+    logger.info(`ActivityPub Accept sent for ${actorHref} → ${identifier}`);
 
     logger.info(`ActivityPub Follow stored for ${actorHref} → ${identifier}`);
   })

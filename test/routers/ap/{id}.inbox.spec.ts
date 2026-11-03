@@ -1,10 +1,13 @@
 import assert from "node:assert";
 import crypto from "node:crypto";
+import http from "node:http";
+import { AddressInfo } from "node:net";
+import os from "node:os";
 
 import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
-import { describe, it, beforeEach } from "mocha";
+import { describe, it, beforeEach, afterEach } from "mocha";
 
 import { clearTables } from "../../utils";
 import { requestApp } from "../utils";
@@ -26,6 +29,44 @@ async function waitFor<T>(
 }
 
 const domain = new URL(process.env.API_DOMAIN || "http://localhost:3000").host;
+
+async function startFakeRemoteActor() {
+  const received: { type?: string }[] = [];
+  const server = http.createServer((req, res) => {
+    if (req.method === "POST") {
+      let body = "";
+      req.on("data", (chunk) => (body += chunk));
+      req.on("end", () => {
+        received.push(JSON.parse(body));
+        res.writeHead(202).end();
+      });
+      return;
+    }
+    res.writeHead(200, { "Content-Type": "application/activity+json" });
+    res.end(
+      JSON.stringify({
+        "@context": "https://www.w3.org/ns/activitystreams",
+        id: actorUrl,
+        type: "Person",
+        preferredUsername: "follower",
+        inbox: `${actorUrl}/inbox`,
+      })
+    );
+  });
+  await new Promise<void>((resolve) => server.listen(0, "0.0.0.0", resolve));
+
+  const host = Object.values(os.networkInterfaces())
+    .flat()
+    .find((i) => i?.family === "IPv4" && !i.internal)?.address;
+  const { port } = server.address() as AddressInfo;
+  const actorUrl = `http://${host}:${port}/users/follower`;
+
+  return {
+    actorUrl,
+    received,
+    close: () => new Promise<void>((resolve) => server.close(() => resolve())),
+  };
+}
 
 function followActivity(opts: {
   id: string;
@@ -87,6 +128,13 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
   });
 
   describe("Follow", function () {
+    let remote: Awaited<ReturnType<typeof startFakeRemoteActor>> | undefined;
+
+    afterEach(async () => {
+      await remote?.close();
+      remote = undefined;
+    });
+
     it("stores the follower and creates a notification", async function () {
       // Allow time for Fedify's async queue to process activities + waitFor polling.
       const user = await prisma.user.create({
@@ -102,7 +150,8 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
         },
       });
 
-      const actorUrl = "https://mastodon.social/users/testfollower";
+      remote = await startFakeRemoteActor();
+      const { actorUrl } = remote;
       const objectUrl = `https://${domain}/v1/artists/${targetArtist.urlSlug}`;
 
       const response = await requestApp
@@ -127,6 +176,11 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
         })
       );
       assert(stored, "follower record should be stored in DB");
+      assert.equal(stored.inboxUrl, `${actorUrl}/inbox`);
+
+      await waitFor(async () =>
+        remote?.received.some((a) => a.type === "Accept") ? true : null
+      );
 
       const notification = await waitFor(() =>
         prisma.notification.findFirst({
