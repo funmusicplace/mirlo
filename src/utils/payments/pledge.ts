@@ -84,6 +84,7 @@ export const initiateFundraiserPledge = async ({
       profileId,
       accountId: stripeAccountId,
       amount: priceNumber,
+      currency,
       userEmail,
       userId: userId ? String(userId) : undefined,
       message,

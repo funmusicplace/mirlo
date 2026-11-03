@@ -991,6 +991,7 @@ model FundraiserPledge {
   updatedAt               DateTime         @updatedAt
   stripeSetupIntentId     String
   stripeAccountId         String?
+  currency                String?
   message                 String?
   paidAt                  DateTime?
   cancelledAt             DateTime?

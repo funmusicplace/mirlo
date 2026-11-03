@@ -1202,11 +1202,13 @@ describe("Stripe Webhooks - Failed Payments", () => {
       withRelease = true,
       artistCurrency,
       pledgeStripeAccountId,
+      pledgeCurrency,
       setupIntent = {},
     }: {
       withRelease?: boolean;
       artistCurrency?: string;
       pledgeStripeAccountId?: string;
+      pledgeCurrency?: string;
       setupIntent?: Partial<Stripe.SetupIntent>;
     } = {}) => {
       const { user: artistUser } = await createUser({
@@ -1229,6 +1231,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
           amount: 5000,
           stripeSetupIntentId: "seti_pledge",
           stripeAccountId: pledgeStripeAccountId,
+          currency: pledgeCurrency,
         }
       );
       const pledge = await prisma.fundraiserPledge.findUniqueOrThrow({
@@ -1421,7 +1424,19 @@ describe("Stripe Webhooks - Failed Payments", () => {
       });
     });
 
-    it("charges in the artist's currency, the one the pledge was quoted in", async () => {
+    it("charges in the currency the pledge was quoted in, after the artist's changed", async () => {
+      const { pledge } = await setUpPledge({
+        artistCurrency: "eur",
+        pledgeCurrency: "cad",
+      });
+      const createStub = stubCharge();
+
+      await stripeUtils.chargePledgePayments(pledge);
+
+      assert.equal(createStub.firstCall.args[0].currency, "cad");
+    });
+
+    it("charges an older pledge with no saved currency in the artist's currency", async () => {
       const { pledge } = await setUpPledge({ artistCurrency: "eur" });
       const createStub = stubCharge();
 

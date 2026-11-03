@@ -29,6 +29,7 @@ export type CreatePledgeSetupArgs = {
   profileId: number;
   accountId: string;
   amount: number;
+  currency: string;
   userEmail: string;
   userId?: string;
   message?: string;

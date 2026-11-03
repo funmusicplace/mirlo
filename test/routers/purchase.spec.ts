@@ -1956,6 +1956,44 @@ describe("purchase", () => {
         "the pledge SetupIntent must be attached to a Customer, or chargePledgePayments has no payment method to find later"
       );
     });
+
+    it("records the quoted currency on the pledge SetupIntent", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_currency",
+        currency: "EUR",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        isAllOrNothing: true,
+      });
+
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [{ id: "cus_pledge_currency" }],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      const createSetupIntentStub = sinon
+        .stub(stripeUtils.stripe.setupIntents, "create")
+        .resolves({
+          id: "seti_pledge_currency",
+          client_secret: "seti_pledge_currency_secret",
+        } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      await initiateFundraiserPledge({
+        profileId: profile.id,
+        fundraiserId: fundraiser.id,
+        trackGroupId: trackGroup.id,
+        price: "2000",
+        userEmail: buyer.email,
+        userId: buyer.id,
+      });
+
+      const setupIntentParams = createSetupIntentStub.firstCall
+        .args[0] as Stripe.SetupIntentCreateParams;
+      assert.equal(setupIntentParams.metadata?.currency, "eur");
+    });
   });
 
   describe("initiatePayment (direct)", () => {

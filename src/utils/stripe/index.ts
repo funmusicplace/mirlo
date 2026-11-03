@@ -562,6 +562,7 @@ export const handleSetupIntentSucceeded = async (
         amount: Number(intent.metadata?.paymentIntentAmount),
         stripeSetupIntentId: intent.id,
         stripeAccountId: metadata.stripeAccountId,
+        currency: metadata.currency,
       });
       await subscribeUserToProfile(fundraiser.profile, user);
     }
@@ -890,7 +891,8 @@ export const chargePledgePayments = async (
     });
   }
 
-  const currency = await getCurrency(profile.id, stripeAccountId);
+  const currency =
+    pledge.currency ?? (await getCurrency(profile.id, stripeAccountId));
   // The charge confirms immediately, so its webhook can arrive before
   // create() returns. The transaction has to exist first.
   const transaction = await handleFundraiserPledge(pledge, currency);
