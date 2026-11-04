@@ -1030,12 +1030,16 @@ export const createOrUpdatePledge = async ({
   fundraiserId,
   amount,
   stripeSetupIntentId,
+  stripeAccountId,
+  currency,
 }: {
   userId: number;
   fundraiserId: number;
   message?: string;
   amount: number;
   stripeSetupIntentId: string;
+  stripeAccountId: string;
+  currency?: string;
 }) => {
   logger.info(
     `Creating or updating pledge for userId: ${userId}, fundraiserId: ${fundraiserId}`
@@ -1062,11 +1066,15 @@ export const createOrUpdatePledge = async ({
         message,
         amount: Number(amount),
         stripeSetupIntentId: stripeSetupIntentId,
+        stripeAccountId,
+        currency,
       },
       update: {
         message: message,
         amount: Number(amount),
         stripeSetupIntentId: stripeSetupIntentId,
+        stripeAccountId,
+        currency,
         cancelledAt: null, // in case they are re-pledging after cancelling
       },
     });

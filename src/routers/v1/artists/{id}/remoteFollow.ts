@@ -1,6 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
+import { createApContext } from "../../../../activityPub/federation";
 import { root } from "../../../../activityPub/utils";
 import { AppError } from "../../../../utils/error";
 
@@ -67,27 +68,22 @@ export default function () {
 
       // WebFinger the follower's account to discover their server's
       // remote-follow (OStatus subscribe) template.
-      const webfingerUrl = `https://${server}/.well-known/webfinger?resource=acct:${cleaned}`;
-      const webfingerRes = await fetch(webfingerUrl, {
-        headers: { Accept: "application/json" },
-      });
+      const webfinger = await createApContext().lookupWebFinger(
+        `acct:${cleaned}`
+      );
 
-      if (!webfingerRes.ok) {
+      if (!webfinger) {
         throw new AppError({
           httpCode: 404,
           description: `Could not find ${cleaned}`,
         });
       }
 
-      const webfingerData = (await webfingerRes.json()) as {
-        links?: { rel: string; template?: string }[];
-      };
-
-      const subscribeLink = webfingerData.links?.find(
+      const subscribeLink = webfinger.links?.find(
         (l) => l.rel === SUBSCRIBE_REL && !!l.template
       );
 
-      if (!subscribeLink?.template) {
+      if (!subscribeLink?.template?.startsWith("https://")) {
         throw new AppError({
           httpCode: 400,
           description: `${server} does not support remote follows`,

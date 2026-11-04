@@ -1,10 +1,13 @@
 import assert from "node:assert";
 import crypto from "node:crypto";
+import http from "node:http";
+import { AddressInfo } from "node:net";
+import os from "node:os";
 
 import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
-import { describe, it, beforeEach } from "mocha";
+import { describe, it, beforeEach, afterEach } from "mocha";
 
 import { clearTables } from "../../utils";
 import { requestApp } from "../utils";
@@ -26,6 +29,44 @@ async function waitFor<T>(
 }
 
 const domain = new URL(process.env.API_DOMAIN || "http://localhost:3000").host;
+
+async function startFakeRemoteActor() {
+  const received: { type?: string }[] = [];
+  const server = http.createServer((req, res) => {
+    if (req.method === "POST") {
+      let body = "";
+      req.on("data", (chunk) => (body += chunk));
+      req.on("end", () => {
+        received.push(JSON.parse(body));
+        res.writeHead(202).end();
+      });
+      return;
+    }
+    res.writeHead(200, { "Content-Type": "application/activity+json" });
+    res.end(
+      JSON.stringify({
+        "@context": "https://www.w3.org/ns/activitystreams",
+        id: actorUrl,
+        type: "Person",
+        preferredUsername: "follower",
+        inbox: `${actorUrl}/inbox`,
+      })
+    );
+  });
+  await new Promise<void>((resolve) => server.listen(0, "0.0.0.0", resolve));
+
+  const host = Object.values(os.networkInterfaces())
+    .flat()
+    .find((i) => i?.family === "IPv4" && !i.internal)?.address;
+  const { port } = server.address() as AddressInfo;
+  const actorUrl = `http://${host}:${port}/users/follower`;
+
+  return {
+    actorUrl,
+    received,
+    close: () => new Promise<void>((resolve) => server.close(() => resolve())),
+  };
+}
 
 function followActivity(opts: {
   id: string;
@@ -61,13 +102,17 @@ function undoFollowActivity(opts: {
   };
 }
 
-function deleteActivity(opts: { id: string; actorUrl: string }) {
+function deleteActivity(opts: {
+  id: string;
+  actorUrl: string;
+  object?: unknown;
+}) {
   return {
     "@context": "https://www.w3.org/ns/activitystreams",
     id: opts.id,
     type: "Delete",
     actor: opts.actorUrl,
-    object: opts.actorUrl,
+    object: opts.object ?? opts.actorUrl,
   };
 }
 
@@ -83,6 +128,13 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
   });
 
   describe("Follow", function () {
+    let remote: Awaited<ReturnType<typeof startFakeRemoteActor>> | undefined;
+
+    afterEach(async () => {
+      await remote?.close();
+      remote = undefined;
+    });
+
     it("stores the follower and creates a notification", async function () {
       // Allow time for Fedify's async queue to process activities + waitFor polling.
       const user = await prisma.user.create({
@@ -98,7 +150,8 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
         },
       });
 
-      const actorUrl = "https://mastodon.social/users/testfollower";
+      remote = await startFakeRemoteActor();
+      const { actorUrl } = remote;
       const objectUrl = `https://${domain}/v1/artists/${targetArtist.urlSlug}`;
 
       const response = await requestApp
@@ -123,6 +176,11 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
         })
       );
       assert(stored, "follower record should be stored in DB");
+      assert.equal(stored.inboxUrl, `${actorUrl}/inbox`);
+
+      await waitFor(async () =>
+        remote?.received.some((a) => a.type === "Accept") ? true : null
+      );
 
       const notification = await waitFor(() =>
         prisma.notification.findFirst({
@@ -137,6 +195,51 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
         (notification.metadata as { ap: { actor: string } }).ap.actor,
         actorUrl
       );
+    });
+
+    it("accepts a repeated follow without notifying the artist again", async () => {
+      const user = await prisma.user.create({
+        data: { email: "target@test.com" },
+      });
+      const targetArtist = await prisma.profile.create({
+        data: {
+          name: "Target artist",
+          urlSlug: "target-artist",
+          userId: user.id,
+          enabled: true,
+          activityPub: true,
+        },
+      });
+
+      remote = await startFakeRemoteActor();
+      const { actorUrl } = remote;
+      const objectUrl = `https://${domain}/v1/artists/${targetArtist.urlSlug}`;
+
+      for (const attempt of [1, 2]) {
+        const response = await requestApp
+          .post(`ap/artists/${targetArtist.urlSlug}/inbox`)
+          .set("Content-Type", "application/activity+json")
+          .send(
+            followActivity({
+              id: `${actorUrl}#follows/${targetArtist.urlSlug}-${uid}-${attempt}`,
+              actorUrl,
+              objectUrl,
+            })
+          );
+        assert.equal(response.statusCode, 202);
+
+        await waitFor(async () =>
+          remote &&
+          remote.received.filter((a) => a.type === "Accept").length >= attempt
+            ? true
+            : null
+        );
+      }
+
+      const notifications = await prisma.notification.count({
+        where: { userId: targetArtist.userId, notificationType: "AP_FOLLOW" },
+      });
+      assert.equal(notifications, 1);
     });
 
     it("returns 404 when the target artist does not exist", async () => {
@@ -246,6 +349,74 @@ describe("ap/artists/{id}/inbox (ActivityPub)", function () {
         });
         return r === null ? true : null;
       });
+    });
+
+    it("keeps a follower who deleted one of their own posts", async () => {
+      const user = await prisma.user.create({
+        data: { email: "target@test.com" },
+      });
+      const targetArtist = await prisma.profile.create({
+        data: {
+          name: "Target artist",
+          urlSlug: "target-artist",
+          userId: user.id,
+          enabled: true,
+          activityPub: true,
+        },
+      });
+
+      const actorUrl = "https://mastodon.social/users/postdeleter";
+      const deletedAccountUrl = "https://mastodon.social/users/gone";
+
+      await prisma.activityPubProfileFollowers.createMany({
+        data: [
+          {
+            profileId: targetArtist.id,
+            actor: actorUrl,
+            inboxUrl: `${actorUrl}/inbox`,
+          },
+          {
+            profileId: targetArtist.id,
+            actor: deletedAccountUrl,
+            inboxUrl: `${deletedAccountUrl}/inbox`,
+          },
+        ],
+      });
+
+      const postDelete = await requestApp
+        .post(`ap/artists/${targetArtist.urlSlug}/inbox`)
+        .set("Content-Type", "application/activity+json")
+        .send(
+          deleteActivity({
+            id: `${actorUrl}/statuses/1#delete-${uid}`,
+            actorUrl,
+            object: { id: `${actorUrl}/statuses/1`, type: "Tombstone" },
+          })
+        );
+      assert.equal(postDelete.statusCode, 202);
+
+      const accountDelete = await requestApp
+        .post(`ap/artists/${targetArtist.urlSlug}/inbox`)
+        .set("Content-Type", "application/activity+json")
+        .send(
+          deleteActivity({
+            id: `${deletedAccountUrl}#delete-${uid}`,
+            actorUrl: deletedAccountUrl,
+          })
+        );
+      assert.equal(accountDelete.statusCode, 202);
+
+      await waitFor(async () => {
+        const r = await prisma.activityPubProfileFollowers.findFirst({
+          where: { profileId: targetArtist.id, actor: deletedAccountUrl },
+        });
+        return r === null ? true : null;
+      });
+
+      const follower = await prisma.activityPubProfileFollowers.findFirst({
+        where: { profileId: targetArtist.id, actor: actorUrl },
+      });
+      assert.ok(follower);
     });
 
     it("is idempotent when the actor was never a follower", async () => {

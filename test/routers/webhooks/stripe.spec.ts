@@ -1198,10 +1198,23 @@ describe("Stripe Webhooks - Failed Payments", () => {
   });
 
   describe("chargePledgePayments", () => {
-    const setUpPledge = async ({ withRelease = true } = {}) => {
+    const setUpPledge = async ({
+      withRelease = true,
+      artistCurrency,
+      pledgeStripeAccountId,
+      pledgeCurrency,
+      setupIntent = {},
+    }: {
+      withRelease?: boolean;
+      artistCurrency?: string;
+      pledgeStripeAccountId?: string;
+      pledgeCurrency?: string;
+      setupIntent?: Partial<Stripe.SetupIntent>;
+    } = {}) => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_pledge",
+        currency: artistCurrency,
       });
       const { user: backer } = await createUser({ email: "backer@test.com" });
       const profile = await createProfile(artistUser.id);
@@ -1214,7 +1227,12 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const { id: pledgeId } = await createFundraiserPledge(
         fundraiser.id,
         backer.id,
-        { amount: 5000, stripeSetupIntentId: "seti_pledge" }
+        {
+          amount: 5000,
+          stripeSetupIntentId: "seti_pledge",
+          stripeAccountId: pledgeStripeAccountId,
+          currency: pledgeCurrency,
+        }
       );
       const pledge = await prisma.fundraiserPledge.findUniqueOrThrow({
         where: { id: pledgeId },
@@ -1226,16 +1244,19 @@ describe("Stripe Webhooks - Failed Payments", () => {
         default_currency: "usd",
         country: "US",
       } as unknown as Stripe.Response<Stripe.Account>);
-      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
-        data: [{ id: "cus_backer" }],
-      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
-      sinon.stub(stripeUtils.stripe.paymentMethods, "list").resolves({
-        data: [{ id: "pm_backer" }],
-      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.PaymentMethod>>);
+      const setupIntentStub = sinon
+        .stub(stripeUtils.stripe.setupIntents, "retrieve")
+        .resolves({
+          id: "seti_pledge",
+          status: "succeeded",
+          customer: "cus_backer",
+          payment_method: "pm_backer",
+          ...setupIntent,
+        } as unknown as Stripe.Response<Stripe.SetupIntent>);
       const mailStub = sinon
         .stub(sendMailQueueModule.sendMailQueue, "add")
         .resolves({} as any);
-      return { pledge, backer, trackGroup, profile, mailStub };
+      return { pledge, backer, trackGroup, profile, mailStub, setupIntentStub };
     };
 
     const chargeAndComplete = async (
@@ -1365,6 +1386,81 @@ describe("Stripe Webhooks - Failed Payments", () => {
       });
       assert.equal(transaction?.paymentStatus, "FAILED");
       assert.equal(transaction?.stripeId, "pi_pledge_declined");
+    });
+
+    const stubCharge = () =>
+      sinon.stub(stripeUtils.stripe.paymentIntents, "create").resolves({
+        id: "pi_pledge_charge",
+        status: "succeeded",
+      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+
+    it("charges the card the backer saved for this pledge", async () => {
+      const { pledge, setupIntentStub } = await setUpPledge({
+        setupIntent: { customer: "cus_pledge", payment_method: "pm_pledge" },
+      });
+      const createStub = stubCharge();
+
+      await stripeUtils.chargePledgePayments(pledge);
+
+      assert.equal(setupIntentStub.firstCall.args[0], "seti_pledge");
+      const params = createStub.firstCall.args[0];
+      assert.equal(params.customer, "cus_pledge");
+      assert.equal(params.payment_method, "pm_pledge");
+    });
+
+    it("charges on the account the pledge was saved on, after the payee changed", async () => {
+      const { pledge, setupIntentStub } = await setUpPledge({
+        pledgeStripeAccountId: "acct_pledge_before",
+      });
+      const createStub = stubCharge();
+
+      await stripeUtils.chargePledgePayments(pledge);
+
+      assert.deepEqual(setupIntentStub.firstCall.args[1], {
+        stripeAccount: "acct_pledge_before",
+      });
+      assert.deepEqual(createStub.firstCall.args[1], {
+        stripeAccount: "acct_pledge_before",
+      });
+    });
+
+    it("charges in the currency the pledge was quoted in, after the artist's changed", async () => {
+      const { pledge } = await setUpPledge({
+        artistCurrency: "eur",
+        pledgeCurrency: "cad",
+      });
+      const createStub = stubCharge();
+
+      await stripeUtils.chargePledgePayments(pledge);
+
+      assert.equal(createStub.firstCall.args[0].currency, "cad");
+    });
+
+    it("charges an older pledge with no saved currency in the artist's currency", async () => {
+      const { pledge } = await setUpPledge({ artistCurrency: "eur" });
+      const createStub = stubCharge();
+
+      await stripeUtils.chargePledgePayments(pledge);
+
+      assert.equal(createStub.firstCall.args[0].currency, "eur");
+    });
+
+    it("records a failed charge when the pledge has no saved card", async () => {
+      const { pledge } = await setUpPledge({
+        setupIntent: {
+          status: "requires_payment_method",
+          payment_method: null,
+        },
+      });
+      const createStub = stubCharge();
+
+      await stripeUtils.chargePledgePayments(pledge);
+
+      assert.equal(createStub.callCount, 0);
+      const transaction = await prisma.userTransaction.findFirst({
+        where: { associatedPledge: { id: pledge.id } },
+      });
+      assert.equal(transaction?.paymentStatus, "FAILED");
     });
   });
 });

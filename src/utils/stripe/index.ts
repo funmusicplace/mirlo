@@ -35,6 +35,7 @@ import {
   getFeesFromPaymentIntent,
   getPlatformCurrencyValueFromIntent,
 } from "./completedPayment";
+import { getCurrency } from "./currency";
 
 export const OPTION_JOINER = ";;";
 
@@ -560,6 +561,8 @@ export const handleSetupIntentSucceeded = async (
         message: intent.metadata?.message,
         amount: Number(intent.metadata?.paymentIntentAmount),
         stripeSetupIntentId: intent.id,
+        stripeAccountId: metadata.stripeAccountId,
+        currency: metadata.currency,
       });
       await subscribeUserToProfile(fundraiser.profile, user);
     }
@@ -878,7 +881,8 @@ export const chargePledgePayments = async (
   const { profile } = pledge.fundraiser;
   const trackGroup = pledge.fundraiser.trackGroups[0];
 
-  const { stripeAccountId } = resolvePayee({ profile });
+  const stripeAccountId =
+    pledge.stripeAccountId ?? resolvePayee({ profile }).stripeAccountId;
 
   if (!stripeAccountId) {
     throw new AppError({
@@ -887,87 +891,79 @@ export const chargePledgePayments = async (
     });
   }
 
-  const stripeAccount = await stripe.accounts.retrieve(stripeAccountId);
-  let transactionId: string | undefined;
+  const currency =
+    pledge.currency ?? (await getCurrency(profile.id, stripeAccountId));
+  // The charge confirms immediately, so its webhook can arrive before
+  // create() returns. The transaction has to exist first.
+  const transaction = await handleFundraiserPledge(pledge, currency);
   try {
     logger.info(
       `Charging pledge payments for fundraiser ${pledge.fundraiser.id} and user ${pledge.userId}`
     );
-    const customersForEmail = await stripe.customers.list(
+    const [stripeAccount, setupIntent] = await Promise.all([
+      stripe.accounts.retrieve(stripeAccountId),
+      stripe.setupIntents.retrieve(pledge.stripeSetupIntentId, {
+        stripeAccount: stripeAccountId,
+      }),
+    ]);
+    const customerId =
+      typeof setupIntent.customer === "string"
+        ? setupIntent.customer
+        : setupIntent.customer?.id;
+    const paymentMethodId =
+      typeof setupIntent.payment_method === "string"
+        ? setupIntent.payment_method
+        : setupIntent.payment_method?.id;
+    if (setupIntent.status !== "succeeded" || !customerId || !paymentMethodId) {
+      throw new Error(
+        `Pledge ${pledge.id} has no saved card: setup intent ${setupIntent.id} is ${setupIntent.status}`
+      );
+    }
+    logger.info(
+      `Charging pledge ${pledge.id} to customer ${customerId}, payment method ${paymentMethodId}`
+    );
+
+    const paymentIntent = await stripe.paymentIntents.create(
       {
-        email: pledge.user.email,
+        amount: pledge.amount,
+        currency: currency,
+        // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+        automatic_payment_methods: { enabled: true },
+        customer: customerId,
+        payment_method: paymentMethodId,
+        return_url: encodeURI(
+          trackGroup
+            ? `${client.applicationUrl}/${profile.urlSlug}/release/${trackGroup.urlSlug}`
+            : `${client.applicationUrl}/${profile.urlSlug}`
+        ),
+        off_session: true,
+        confirm: true,
+        application_fee_amount: await calculateAppFee(
+          pledge.amount,
+          currency,
+          trackGroup?.platformPercent ?? profile.defaultPlatformFee,
+          stripeAccount.country
+        ),
+        metadata: {
+          userId: pledge.userId,
+          fundraiserId: pledge.fundraiserId,
+          pledgeId: pledge.id,
+          purchaseType: "fundraiserPledge",
+          transactionId: transaction.id,
+        },
       },
       {
         stripeAccount: stripeAccountId,
       }
     );
-    const customerId = customersForEmail.data[0]?.id;
     logger.info(
-      `Found e-mail: ${pledge.user.email}, stripe customerId: ${customerId}`
+      `Created payment intent ${paymentIntent.id} for pledge ${pledge.id}`
     );
 
-    if (customerId) {
-      const paymentMethods = await stripe.paymentMethods.list(
-        {
-          customer: customerId,
-        },
-        {
-          stripeAccount: stripeAccountId,
-        }
-      );
-      logger.info(
-        "Found stripe paymentMethodId: " + paymentMethods.data[0]?.id
-      );
-      const currency = stripeAccount.default_currency ?? "usd";
-
-      if (paymentMethods.data[0]?.id) {
-        // The charge confirms immediately, so its webhook can arrive before
-        // create() returns. The transaction has to exist first.
-        const transaction = await handleFundraiserPledge(pledge, currency);
-        transactionId = transaction.id;
-        const paymentIntent = await stripe.paymentIntents.create(
-          {
-            amount: pledge.amount,
-            currency: currency,
-            // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
-            automatic_payment_methods: { enabled: true },
-            customer: customerId,
-            payment_method: paymentMethods.data[0]?.id,
-            return_url: encodeURI(
-              trackGroup
-                ? `${client.applicationUrl}/${profile.urlSlug}/release/${trackGroup.urlSlug}`
-                : `${client.applicationUrl}/${profile.urlSlug}`
-            ),
-            off_session: true,
-            confirm: true,
-            application_fee_amount: await calculateAppFee(
-              pledge.amount,
-              currency,
-              trackGroup?.platformPercent ?? profile.defaultPlatformFee,
-              stripeAccount.country
-            ),
-            metadata: {
-              userId: pledge.userId,
-              fundraiserId: pledge.fundraiserId,
-              pledgeId: pledge.id,
-              purchaseType: "fundraiserPledge",
-              transactionId: transaction.id,
-            },
-          },
-          {
-            stripeAccount: stripeAccountId,
-          }
-        );
-        logger.info(
-          `Created payment intent ${paymentIntent.id} for pledge ${pledge.id}`
-        );
-
-        await prisma.userTransaction.update({
-          where: { id: transaction.id },
-          data: { stripeId: paymentIntent.id },
-        });
-      }
-    }
+    await prisma.userTransaction.update({
+      where: { id: transaction.id },
+      data: { stripeId: paymentIntent.id },
+    });
   } catch (err) {
     if (err instanceof Stripe.errors.StripeError) {
       console.log("Error code is: ", err.code);
@@ -988,20 +984,20 @@ export const chargePledgePayments = async (
       console.log("Error code:", err.code);
       console.log("Error message: ", err.message);
       console.log("Full error: ", err);
+    } else {
+      logger.error(`chargePledgePayments: pledge ${pledge.id} failed`, err);
     }
-    if (transactionId) {
-      const failedIntentId =
-        err instanceof Stripe.errors.StripeError
-          ? err.payment_intent?.id
-          : undefined;
-      await prisma.userTransaction.updateMany({
-        where: { id: transactionId, paymentStatus: "PENDING" },
-        data: {
-          paymentStatus: "FAILED",
-          ...(failedIntentId && { stripeId: failedIntentId }),
-        },
-      });
-    }
+    const failedIntentId =
+      err instanceof Stripe.errors.StripeError
+        ? err.payment_intent?.id
+        : undefined;
+    await prisma.userTransaction.updateMany({
+      where: { id: transaction.id, paymentStatus: "PENDING" },
+      data: {
+        paymentStatus: "FAILED",
+        ...(failedIntentId && { stripeId: failedIntentId }),
+      },
+    });
   }
 };
 

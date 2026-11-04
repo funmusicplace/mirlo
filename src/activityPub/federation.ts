@@ -83,7 +83,11 @@ export const federation = createFederation<void>({
   kv: kvStore,
   queue: messageQueue,
   skipSignatureVerification: process.env.NODE_ENV === "test",
+  allowPrivateAddress: process.env.NODE_ENV === "test",
 });
+
+export const createApContext = () =>
+  federation.createContext(new Request(`https://${root}`), undefined);
 
 federation
   .setActorDispatcher(
@@ -258,10 +262,7 @@ export const sendReleaseToActivityPubFollowers = async (
   if (!trackGroup) return;
 
   const identifier = trackGroup.profile.urlSlug;
-  const ctx = federation.createContext(
-    new Request(`https://${root}`),
-    undefined
-  );
+  const ctx = createApContext();
   const client = await getClient();
   await ctx.sendActivity(
     { identifier },
@@ -302,10 +303,7 @@ export const sendPostToActivityPubFollowers = async (postId: number) => {
   if (!post?.profile) return false;
 
   const identifier = post.profile.urlSlug;
-  const ctx = federation.createContext(
-    new Request(`https://${root}`),
-    undefined
-  );
+  const ctx = createApContext();
   const client = await getClient();
   const mentions = parseMentionsFromContent(post.content ?? "");
   const activity = buildPostCreateActivity(
@@ -496,49 +494,48 @@ federation
 
     const actorHref = follow.actorId.href;
 
+    const followerActor = await follow.getActor(ctx);
+    if (!followerActor?.inboxId) {
+      throw new Error(`No inbox found for follower ${actorHref}`);
+    }
+    const inboxUrl = followerActor.inboxId.href;
+    const followerKey = {
+      actor_profileId: { profileId: artist.id, actor: actorHref },
+    };
+
+    const existingFollower =
+      await prisma.activityPubProfileFollowers.findUnique({
+        where: followerKey,
+      });
+
     await prisma.activityPubProfileFollowers.upsert({
-      where: { actor_profileId: { profileId: artist.id, actor: actorHref } },
-      create: { profileId: artist.id, actor: actorHref, inboxUrl: null },
-      update: {},
+      where: followerKey,
+      create: { profileId: artist.id, actor: actorHref, inboxUrl },
+      update: { inboxUrl },
     });
 
-    await prisma.notification.create({
-      data: {
-        notificationType: "AP_FOLLOW",
-        userId: artist.userId,
-        metadata: { ap: { actor: actorHref } },
-      },
-    });
+    if (!existingFollower) {
+      await prisma.notification.create({
+        data: {
+          notificationType: "AP_FOLLOW",
+          userId: artist.userId,
+          metadata: { ap: { actor: actorHref } },
+        },
+      });
+    }
 
-    (async () => {
-      try {
-        const followerActor = await follow.getActor(ctx);
-        if (!followerActor?.inboxId) return;
+    const guid = crypto.randomBytes(16).toString("hex");
+    await ctx.sendActivity(
+      { identifier },
+      followerActor,
+      new Accept({
+        id: new URL(`https://${root}/v1/artists/${identifier}#accept-${guid}`),
+        actor: ctx.getActorUri(identifier),
+        object: follow,
+      })
+    );
 
-        await prisma.activityPubProfileFollowers.updateMany({
-          where: { profileId: artist.id, actor: actorHref },
-          data: { inboxUrl: followerActor.inboxId.href },
-        });
-
-        const guid = crypto.randomBytes(16).toString("hex");
-        await ctx.sendActivity(
-          { identifier },
-          followerActor,
-          new Accept({
-            id: new URL(
-              `https://${root}/v1/artists/${identifier}#accept-${guid}`
-            ),
-            actor: ctx.getActorUri(identifier),
-            object: follow,
-          }),
-          { immediate: true }
-        );
-
-        logger.info(`ActivityPub Accept sent for ${actorHref} → ${identifier}`);
-      } catch (e) {
-        logger.warn(`ActivityPub Accept failed for ${actorHref}: ${e}`);
-      }
-    })();
+    logger.info(`ActivityPub Accept sent for ${actorHref} → ${identifier}`);
 
     logger.info(`ActivityPub Follow stored for ${actorHref} → ${identifier}`);
   })
@@ -561,6 +558,7 @@ federation
   .on(Delete, async (ctx, del) => {
     const identifier = ctx.recipient;
     if (!identifier || !del.actorId) return;
+    if (del.objectId?.href !== del.actorId.href) return;
 
     const parsedId = await findArtistIdForURLSlug(identifier);
     if (!parsedId) return;
