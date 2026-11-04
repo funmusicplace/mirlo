@@ -1,8 +1,14 @@
 import assert from "assert";
 
 import prisma from "@mirlo/prisma";
+import { Request, Response } from "express";
+import pug from "pug";
+import sinon from "sinon";
 import request from "supertest";
 
+import { sendMailQueue } from "../../src/queues/send-mail-queue";
+import { passwordResetInitiate } from "../../src/routers/auth/passwordReset";
+import { getClient } from "../../src/utils/getClient";
 import { clearTables, createUser } from "../utils";
 
 const authRequestApp = request(`${process.env.API_DOMAIN}/auth/`);
@@ -61,5 +67,63 @@ describe("auth/password-reset/set-password", () => {
       .post("password-reset/set-password")
       .send({ id: user.id, token: "reset-token", password: "a-new-password" });
     assert.equal(response.status, 200);
+  });
+});
+
+describe("auth/password-reset/initiate", () => {
+  beforeEach(async () => {
+    await clearTables();
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  const initiate = async (email: string, redirectClient: string) => {
+    const add = sinon.stub(sendMailQueue, "add").resolves();
+    const res = {
+      status: sinon.stub().returnsThis(),
+      send: sinon.stub(),
+      json: sinon.stub(),
+    };
+    await passwordResetInitiate(
+      { body: { email, redirectClient } } as Request,
+      res as unknown as Response,
+      () => {}
+    );
+    return add.firstCall.args[1].locals;
+  };
+
+  it("should keep a redirect on the client's origin", async () => {
+    const { user } = await createUser({ email: "test@test.com" });
+    const { applicationUrl } = await getClient();
+    const redirectClient = `${new URL(applicationUrl).origin}/password-reset`;
+
+    const locals = await initiate(user.email, redirectClient);
+    assert.equal(locals.redirectClient, redirectClient);
+  });
+
+  it("should not put a foreign redirect into the email", async () => {
+    const { user } = await createUser({ email: "test@test.com" });
+    const { applicationUrl } = await getClient();
+    const crafted = `"><a href="https://evil.example">Unlock</a><a x="`;
+
+    for (const redirectClient of [crafted, "https://evil.example/reset"]) {
+      const locals = await initiate(user.email, redirectClient);
+      assert.equal(
+        locals.redirectClient,
+        new URL("/password-reset", applicationUrl).toString()
+      );
+      sinon.restore();
+    }
+
+    const html = pug.renderFile("emails/password-reset/html.pug", {
+      t: (key: string) => key,
+      user,
+      host: "http://api",
+      token: "tok",
+      redirectClient: crafted,
+    });
+    assert(!html.includes('href="https://evil.example"'));
   });
 });

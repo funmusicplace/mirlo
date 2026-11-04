@@ -10,5 +10,5 @@ block content
 
     p #{user.email}
     p 
-      a(href!=`${host}/auth/password-reset/confirmation/${token}?id=${user.id}&redirectClient=${redirectClient}&accountIncomplete=${accountIncomplete}`)= t("emails.passwordReset.confirm")
+      a(href=`${host}/auth/password-reset/confirmation/${token}?id=${user.id}&redirectClient=${redirectClient}&accountIncomplete=${accountIncomplete}`)= t("emails.passwordReset.confirm")
     p= t("emails.common.ignore")

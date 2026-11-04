@@ -116,6 +116,65 @@ describe("subscription", () => {
       assert.equal(locals.currency, "usd");
     });
 
+    it("records a redelivered invoice.paid only once", async () => {
+      const sendMailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
+      const { user: artistUser } = await createUser({
+        email: "artist@artist.com",
+      });
+      const { user: subscriber } = await createUser({
+        email: "follower@follower.com",
+      });
+      const artist = await prisma.profile.create({
+        data: {
+          name: "Test artist",
+          urlSlug: "test-artist",
+          userId: artistUser.id,
+          enabled: true,
+        },
+      });
+      const tier = await prisma.profileSubscriptionTier.create({
+        data: { profileId: artist.id, name: "Tier" },
+      });
+      await prisma.profileUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub_redelivered",
+          userId: subscriber.id,
+          profileSubscriptionTierId: tier.id,
+          amount: 10,
+        },
+      });
+      const receipt = {
+        processorPaymentReferenceId: "in_redelivered",
+        processorSubscriptionReferenceId: "sub_redelivered",
+        amountPaid: 10,
+        currency: "usd",
+        platformCut: 2,
+        paymentProcessorFee: 0,
+        billingReason: "subscription_cycle",
+        status: "COMPLETED" as const,
+      };
+
+      await manageSubscriptionReceipt(receipt);
+      await manageSubscriptionReceipt(receipt);
+
+      assert.equal(
+        await prisma.userTransaction.count({
+          where: { stripeId: "in_redelivered" },
+        }),
+        1
+      );
+      assert.equal(await prisma.profileUserSubscriptionCharge.count(), 1);
+      assert.equal(
+        sendMailStub
+          .getCalls()
+          .filter((c) => c.args[1].template === "artist-subscription-receipt")
+          .length,
+        1
+      );
+    });
+
     it("should store nextBillingDate when provided", async () => {
       sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
 
