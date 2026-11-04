@@ -72,6 +72,7 @@ describe("manage/artists/{artistId}/subscribers/active", () => {
       "cancelling@example.com",
     ]);
     assert.equal(byEmail["active@example.com"].id, active.id);
+    assert.equal(byEmail["active@example.com"].userId, active.userId);
     assert.equal(byEmail["active@example.com"].status, "active");
     assert.equal(byEmail["cancelling@example.com"].id, cancelling.id);
     assert.equal(byEmail["cancelling@example.com"].status, "cancelling");
@@ -80,6 +81,34 @@ describe("manage/artists/{artistId}/subscribers/active", () => {
     assert.equal(byEmail["active@example.com"].amount, 500);
     assert.equal(byEmail["active@example.com"].currency, "eur");
     assert.equal(byEmail["active@example.com"].shippingAddress, undefined);
+  });
+
+  it("includes shipping addresses only for tiers that collect them", async () => {
+    const { ownerSession, profile, tier, active, client } = await setup();
+    const shippingAddress = {
+      name: "Active Fan",
+      address: { line1: "1 Main St", city: "Montreal", country: "CA" },
+    };
+    await prisma.profileUserSubscription.update({
+      where: { id: active.id },
+      data: { shippingAddress },
+    });
+    const tokens = await tokensFor(ownerSession, client, "subscribers:read");
+    const addressOf = async () => {
+      const response = await get(profile.id, tokens.access_token);
+      assert.equal(response.status, 200, response.text);
+      return response.body.results.find(
+        (r: { id: number }) => r.id === active.id
+      ).shippingAddress;
+    };
+
+    assert.equal(await addressOf(), undefined);
+
+    await prisma.profileSubscriptionTier.update({
+      where: { id: tier.id },
+      data: { collectAddress: true },
+    });
+    assert.deepEqual(await addressOf(), shippingAddress);
   });
 
   it("marks followers as unpaid and filters on paid", async () => {

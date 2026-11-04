@@ -57,9 +57,15 @@ export default function () {
           nextBillingDate: true,
           createdAt: true,
           updatedAt: true,
-          user: { select: { email: true, name: true } },
+          shippingAddress: true,
+          user: { select: { id: true, email: true, name: true } },
           profileSubscriptionTier: {
-            select: { id: true, name: true, isDefaultTier: true },
+            select: {
+              id: true,
+              name: true,
+              isDefaultTier: true,
+              collectAddress: true,
+            },
           },
         },
         orderBy: { createdAt: "asc" },
@@ -68,6 +74,7 @@ export default function () {
       res.json({
         results: subscriptions.map((sub) => ({
           id: sub.id,
+          userId: sub.user.id,
           email: sub.user.email,
           name: sub.user.name,
           tierId: sub.profileSubscriptionTier.id,
@@ -77,6 +84,9 @@ export default function () {
           currency,
           status: sub.deleteReason ? "cancelling" : "active",
           currentPeriodEnd: sub.nextBillingDate,
+          shippingAddress: sub.profileSubscriptionTier.collectAddress
+            ? sub.shippingAddress
+            : undefined,
           createdAt: sub.createdAt,
           updatedAt: sub.updatedAt,
         })),
@@ -89,7 +99,7 @@ export default function () {
   GET.apiDoc = {
     summary: "Lists an artist's current subscribers",
     description:
-      "The complete current membership, for syncing to another site. Anyone missing from the list is no longer a subscriber. A `cancelling` subscription is still active until `currentPeriodEnd`. People who only follow the artist are on the free follow tier and have `paid: false`; filter with `?paid=true` or `?paid=false`. Accepts the signed-in session or an OAuth token with the `subscribers:read` scope, for users who can edit the artist.",
+      "The complete current membership, for syncing to another site. Anyone missing from the list is no longer a subscriber. A `cancelling` subscription is still active until `currentPeriodEnd`. `id` is the subscription and changes if someone leaves and rejoins; match people on `userId`. `shippingAddress` is only included for tiers that collect one. People who only follow the artist are on the free follow tier and have `paid: false`; filter with `?paid=true` or `?paid=false`. Accepts the signed-in session or an OAuth token with the `subscribers:read` scope, for users who can edit the artist.",
     parameters: [
       { in: "path", name: "artistId", required: true, type: "string" },
       {
@@ -114,6 +124,7 @@ export default function () {
                 type: "object",
                 properties: {
                   id: { type: "number" },
+                  userId: { type: "number" },
                   email: { type: "string" },
                   name: { type: "string" },
                   tierId: { type: "number" },
@@ -123,6 +134,13 @@ export default function () {
                   currency: { type: "string" },
                   status: { type: "string", enum: ["active", "cancelling"] },
                   currentPeriodEnd: { type: "string" },
+                  shippingAddress: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      address: { type: "object" },
+                    },
+                  },
                   createdAt: { type: "string" },
                   updatedAt: { type: "string" },
                 },
