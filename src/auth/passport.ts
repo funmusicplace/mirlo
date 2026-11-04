@@ -59,7 +59,11 @@ passport.use(
         },
       });
 
-      if (!foundUser || foundUser.disabledAt) {
+      if (
+        !foundUser ||
+        foundUser.disabledAt ||
+        (jwtPayload.tokenVersion ?? 0) !== foundUser.tokenVersion
+      ) {
         return done(null, false);
       }
       return done(null, {

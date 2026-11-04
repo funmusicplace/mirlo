@@ -11,6 +11,14 @@ import { getClient } from "../../utils/getClient";
 
 import { hashPassword, setTokens } from "./utils";
 
+const isSameOrigin = (url: string, allowedUrl: string) => {
+  try {
+    return new URL(url).origin === new URL(allowedUrl).origin;
+  } catch {
+    return false;
+  }
+};
+
 /**
  * This endpoint is pretty much only ever accessed from an external link,
  * so it should redirect to the client.
@@ -36,13 +44,7 @@ export const passwordResetConfirmation = async (
     };
 
     const allowedClient = await getClient();
-    try {
-      const redirectUrl = new URL(redirectClient);
-      const allowedUrl = new URL(allowedClient.applicationUrl);
-      if (redirectUrl.origin !== allowedUrl.origin) {
-        return res.status(400).json({ error: "Invalid redirect URL" });
-      }
-    } catch {
+    if (!isSameOrigin(redirectClient, allowedClient.applicationUrl)) {
       return res.status(400).json({ error: "Invalid redirect URL" });
     }
 
@@ -117,6 +119,7 @@ export const passwordResetInitiate = async (
           id: true,
         },
       });
+      const clientDomain = (await getClient()).applicationUrl;
       await sendMailQueue.add("send-mail", {
         template: "password-reset",
         message: {
@@ -125,8 +128,10 @@ export const passwordResetInitiate = async (
         locals: {
           user: result,
           host: process.env.API_DOMAIN,
-          clientDomain: (await getClient()).applicationUrl,
-          redirectClient,
+          clientDomain,
+          redirectClient: isSameOrigin(redirectClient, clientDomain)
+            ? redirectClient
+            : new URL("/password-reset", clientDomain).toString(),
           accountIncomplete,
           token,
         },
@@ -191,6 +196,7 @@ export const passwordResetSetPassword = async (
           emailBouncedAt: null,
           emailBounceReason: null,
           password: await hashPassword(newPassword),
+          tokenVersion: { increment: 1 },
         },
         where: {
           id: user.id,
@@ -198,6 +204,7 @@ export const passwordResetSetPassword = async (
         select: {
           email: true,
           id: true,
+          tokenVersion: true,
         },
       });
       await revokeAllConnectedApps(updatedUser.id);

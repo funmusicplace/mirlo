@@ -172,22 +172,25 @@ export const retireOtherTierSubscriptions = async ({
   await prisma.profileUserSubscription.deleteMany({ where });
 };
 
-export const grantSubscriptionTierReleases = async ({
-  userId,
-  tierId,
-  userTransactionId = null,
-}: {
-  userId: number;
-  tierId: number;
-  userTransactionId?: string | null;
-}) => {
-  const releases = await prisma.subscriptionTierRelease.findMany({
+export const grantSubscriptionTierReleases = async (
+  {
+    userId,
+    tierId,
+    userTransactionId = null,
+  }: {
+    userId: number;
+    tierId: number;
+    userTransactionId?: string | null;
+  },
+  tx: PrismaTransactionClient = prisma
+) => {
+  const releases = await tx.subscriptionTierRelease.findMany({
     where: { tierId },
   });
 
   await Promise.all(
     releases.map((release) =>
-      prisma.userTrackGroupPurchase.upsert({
+      tx.userTrackGroupPurchase.upsert({
         where: {
           userId_trackGroupId: {
             userId,

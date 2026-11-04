@@ -128,7 +128,7 @@ export const SubscriberSync: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByText(
-      "See the names and email addresses of the supporters of the artists you manage"
+      "See the names, email addresses and, for tiers that ship something, postal addresses of the supporters of the artists you manage"
     );
   },
 };

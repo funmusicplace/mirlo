@@ -21,7 +21,7 @@ export default function () {
       assertLoggedIn(req);
       const user = await prisma.user.findUnique({
         where: { id: Number(id) },
-        select: { id: true, email: true },
+        select: { id: true, email: true, tokenVersion: true },
       });
       if (!user) {
         return res.status(404).json({ message: "User not found" });

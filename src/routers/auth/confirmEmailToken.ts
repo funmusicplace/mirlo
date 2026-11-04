@@ -92,6 +92,7 @@ const confirmEmailToken = async (
       select: {
         email: true,
         id: true,
+        tokenVersion: true,
       },
     });
 
