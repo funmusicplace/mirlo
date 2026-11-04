@@ -196,6 +196,7 @@ export const passwordResetSetPassword = async (
           emailBouncedAt: null,
           emailBounceReason: null,
           password: await hashPassword(newPassword),
+          tokenVersion: { increment: 1 },
         },
         where: {
           id: user.id,
@@ -203,6 +204,7 @@ export const passwordResetSetPassword = async (
         select: {
           email: true,
           id: true,
+          tokenVersion: true,
         },
       });
       await revokeAllConnectedApps(updatedUser.id);

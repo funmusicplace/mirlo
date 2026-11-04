@@ -109,7 +109,7 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
             });
           }
 
-          setTokens(res, { email: user.email, id: user.id });
+          setTokens(res, user);
           res.json({
             message: "Success! Email verified.",
             userId: user?.id,

@@ -2,12 +2,14 @@ import assert from "assert";
 
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import pug from "pug";
 import sinon from "sinon";
 import request from "supertest";
 
 import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import { passwordResetInitiate } from "../../src/routers/auth/passwordReset";
+import { buildTokens } from "../../src/routers/auth/utils";
 import { getClient } from "../../src/utils/getClient";
 import { clearTables, createUser } from "../utils";
 
@@ -67,6 +69,50 @@ describe("auth/password-reset/set-password", () => {
       .post("password-reset/set-password")
       .send({ id: user.id, token: "reset-token", password: "a-new-password" });
     assert.equal(response.status, 200);
+  });
+
+  it("should log out other sessions", async () => {
+    const { user, accessToken } = await createUser({ email: "test@test.com" });
+    const { refreshToken } = buildTokens(user);
+    const legacyToken = jwt.sign(
+      { email: user.email, id: user.id },
+      process.env.JWT_SECRET ?? ""
+    );
+    for (const token of [accessToken, legacyToken]) {
+      const before = await authRequestApp
+        .get("profile")
+        .set("Cookie", [`jwt=${token}`]);
+      assert.equal(before.status, 200);
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordResetConfirmationToken: "reset-token",
+        passwordResetConfirmationExpiration: new Date(Date.now() + 60_000),
+      },
+    });
+    const reset = await authRequestApp
+      .post("password-reset/set-password")
+      .send({ id: user.id, token: "reset-token", password: "a-new-password" });
+    assert.equal(reset.status, 200);
+
+    for (const token of [accessToken, legacyToken]) {
+      const old = await authRequestApp
+        .get("profile")
+        .set("Cookie", [`jwt=${token}`]);
+      assert.equal(old.status, 401);
+    }
+
+    const oldRefresh = await authRequestApp
+      .post("refresh")
+      .set("Cookie", [`refresh=${refreshToken}`]);
+    assert.equal(oldRefresh.status, 401);
+
+    const current = await authRequestApp
+      .get("profile")
+      .set("Cookie", reset.header["set-cookie"]);
+    assert.equal(current.status, 200);
   });
 });
 
