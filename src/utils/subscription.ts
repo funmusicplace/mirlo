@@ -91,6 +91,21 @@ export const manageSubscriptionReceipt = async ({
   platformCurrencyValue?: PlatformCurrencyValue;
   tierId?: number;
 }) => {
+  if (status === "COMPLETED") {
+    const existing = await prisma.userTransaction.findFirst({
+      where: {
+        stripeId: processorPaymentReferenceId,
+        paymentStatus: "COMPLETED",
+      },
+    });
+    if (existing) {
+      logger.info(
+        `invoice.paid: ${processorPaymentReferenceId} already recorded as transaction ${existing.id}, skipping`
+      );
+      return;
+    }
+  }
+
   const isNewSubscription = billingReason === "subscription_create";
   const profileUserSubscription =
     await prisma.profileUserSubscription.findFirst({
