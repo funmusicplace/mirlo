@@ -47,7 +47,7 @@ type TrackGroupInput = TrackGroup & {
     downloadableContent: Record<string, unknown>;
     downloadableContentId: string;
   }[];
-  trackGroupPurchases?: { userId: number }[];
+  userTrackGroupPurchases?: { userId: number }[];
   _count?: {
     tracks?: number;
     userTrackGroupPurchases?: number;
@@ -77,7 +77,7 @@ const findSubscriptionArtist = (
 
 export const processSingleTrackGroup = <T extends TrackGroupInput>(
   tg: T,
-  options?: { loggedInUserId?: number }
+  options?: { loggedInUserId?: number; canEdit?: boolean }
 ): Serialized<T> & {
   currency: string;
   totalTracks?: number;
@@ -120,12 +120,17 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
     ),
     tracks: tg.tracks?.map((track) => ({
       ...track,
-      isPlayable: isTrackPlayableNested({
-        isPreview: track.isPreview,
-        trackGroupPurchases: tg.trackGroupPurchases,
-        trackPurchases: track.userTrackPurchases,
-        userId: options?.loggedInUserId,
-      }),
+      isPlayable:
+        !!options?.canEdit ||
+        (!!options?.loggedInUserId &&
+          owner?.userId === options.loggedInUserId) ||
+        ((track.isPreview || !tg.isPreorder) &&
+          isTrackPlayableNested({
+            isPreview: track.isPreview,
+            trackGroupPurchases: tg.userTrackGroupPurchases,
+            trackPurchases: track.userTrackPurchases,
+            userId: options?.loggedInUserId,
+          })),
     })),
     merch: tg.merch?.map((m) =>
       serializeMerch(m, {
