@@ -134,46 +134,52 @@ export const manageSubscriptionReceipt = async ({
     );
   }
   if (profileUserSubscription) {
-    const transaction = await prisma.userTransaction.create({
-      data: {
-        userId: profileUserSubscription.userId,
-        amount: amountPaid,
-        currency,
-        platformCut,
-        stripeId: processorPaymentReferenceId,
-        stripeCut: paymentProcessorFee,
-        ...withPlatformCurrency(platformCurrencyValue),
-        paymentStatus: status,
-      },
-    });
-    const created = await prisma.profileUserSubscriptionCharge.create({
-      data: {
-        profileUserSubscriptionId: profileUserSubscription.id,
-        transactionId: transaction.id,
-      },
-    });
-    logger.info(
-      `invoice.paid: ${processorPaymentReferenceId} created subscription charge: ${created.id}`
-    );
-
-    // Update next billing date if provided
-    if (status === "COMPLETED" && nextBillingDate) {
-      await prisma.profileUserSubscription.update({
-        where: { id: profileUserSubscription.id },
-        data: { nextBillingDate },
+    const transaction = await prisma.$transaction(async (tx) => {
+      const transaction = await tx.userTransaction.create({
+        data: {
+          userId: profileUserSubscription.userId,
+          amount: amountPaid,
+          currency,
+          platformCut,
+          stripeId: processorPaymentReferenceId,
+          stripeCut: paymentProcessorFee,
+          ...withPlatformCurrency(platformCurrencyValue),
+          paymentStatus: status,
+        },
       });
-
-      const grantedCount = await grantSubscriptionTierReleases({
-        userId: profileUserSubscription.userId,
-        tierId: profileUserSubscription.profileSubscriptionTierId,
-        userTransactionId: transaction.id,
+      const created = await tx.profileUserSubscriptionCharge.create({
+        data: {
+          profileUserSubscriptionId: profileUserSubscription.id,
+          transactionId: transaction.id,
+        },
       });
-      if (grantedCount > 0) {
-        logger.info(
-          `invoice.paid: ${processorPaymentReferenceId} has ${grantedCount} pro grata track groups, granting access`
+      logger.info(
+        `invoice.paid: ${processorPaymentReferenceId} created subscription charge: ${created.id}`
+      );
+
+      // Update next billing date if provided
+      if (status === "COMPLETED" && nextBillingDate) {
+        await tx.profileUserSubscription.update({
+          where: { id: profileUserSubscription.id },
+          data: { nextBillingDate },
+        });
+
+        const grantedCount = await grantSubscriptionTierReleases(
+          {
+            userId: profileUserSubscription.userId,
+            tierId: profileUserSubscription.profileSubscriptionTierId,
+            userTransactionId: transaction.id,
+          },
+          tx
         );
+        if (grantedCount > 0) {
+          logger.info(
+            `invoice.paid: ${processorPaymentReferenceId} has ${grantedCount} pro grata track groups, granting access`
+          );
+        }
       }
-    }
+      return transaction;
+    });
 
     logger.info(
       `invoice.paid: ${processorPaymentReferenceId} found subscription, sending receipt`

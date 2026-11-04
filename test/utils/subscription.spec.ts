@@ -11,6 +11,7 @@ import {
   ArtistSubscriptionReceiptEmailType,
   ArtistNewSubscriberAnnounceEmailType,
 } from "../../src/utils/subscription";
+import * as subscriptionTierModule from "../../src/utils/subscriptionTier";
 import { clearTables, createTrackGroup, createUser } from "../utils";
 
 import prisma from "@mirlo/prisma";
@@ -116,10 +117,7 @@ describe("subscription", () => {
       assert.equal(locals.currency, "usd");
     });
 
-    it("records a redelivered invoice.paid only once", async () => {
-      const sendMailStub = sinon
-        .stub(sendMailQueueModule.sendMailQueue, "add")
-        .resolves({} as any);
+    const setupRedelivery = async () => {
       const { user: artistUser } = await createUser({
         email: "artist@artist.com",
       });
@@ -155,6 +153,14 @@ describe("subscription", () => {
         billingReason: "subscription_cycle",
         status: "COMPLETED" as const,
       };
+      return { artist, tier, subscriber, receipt };
+    };
+
+    it("records a redelivered invoice.paid only once", async () => {
+      const sendMailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves({} as any);
+      const { receipt } = await setupRedelivery();
 
       await manageSubscriptionReceipt(receipt);
       await manageSubscriptionReceipt(receipt);
@@ -172,6 +178,34 @@ describe("subscription", () => {
           .filter((c) => c.args[1].template === "artist-subscription-receipt")
           .length,
         1
+      );
+    });
+
+    it("finishes an invoice.paid redelivered after a failed attempt", async () => {
+      sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
+      const { artist, tier, subscriber, receipt } = await setupRedelivery();
+      const trackGroup = await createTrackGroup(artist.id);
+      await prisma.subscriptionTierRelease.create({
+        data: { tierId: tier.id, trackGroupId: trackGroup.id },
+      });
+      const grant = sinon.stub(
+        subscriptionTierModule,
+        "grantSubscriptionTierReleases"
+      );
+      grant.onFirstCall().rejects(new Error("grant failed"));
+      grant.callThrough();
+      const delivery = { ...receipt, nextBillingDate: new Date("2030-01-01") };
+
+      await assert.rejects(manageSubscriptionReceipt(delivery));
+      assert.equal(await prisma.userTransaction.count(), 0);
+
+      await manageSubscriptionReceipt(delivery);
+      assert.equal(await prisma.userTransaction.count(), 1);
+      assert.equal(await prisma.profileUserSubscriptionCharge.count(), 1);
+      assert(
+        await prisma.userTrackGroupPurchase.findFirst({
+          where: { userId: subscriber.id, trackGroupId: trackGroup.id },
+        })
       );
     });
 
