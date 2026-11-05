@@ -81,18 +81,22 @@ export const getStripeShippableCountries = (exclude: string[] = []) =>
         !stripeBannedDestinations.includes(code) && !exclude.includes(code)
     );
 
-const SCHENGEN_COUNTRY_CODES = [
+const EU_COUNTRY_CODES = [
   "AT",
   "BE",
   "BG",
+  "CY",
   "CZ",
   "DE",
+  "DK",
   "EE",
   "ES",
   "FI",
+  "FR",
   "GR",
   "HR",
   "HU",
+  "IE",
   "IT",
   "LT",
   "LU",
@@ -180,7 +184,7 @@ export const calculateMerchShippingCost = (
   allowedCountries: string[];
   destinationCountry: string | null;
 } => {
-  const isShippingToSchengen = SCHENGEN_COUNTRY_CODES.includes(
+  const isShippingToEU = EU_COUNTRY_CODES.includes(
     shippingDestinationId.toUpperCase()
   );
 
@@ -188,7 +192,7 @@ export const calculateMerchShippingCost = (
     (s) => s.destinationCountry === "EU"
   );
 
-  const destination = isShippingToSchengen
+  const destination = isShippingToEU
     ? euCosts && { ...euCosts, destinationCountry: shippingDestinationId }
     : shippingDestinations.find((s) => s.id === shippingDestinationId);
 

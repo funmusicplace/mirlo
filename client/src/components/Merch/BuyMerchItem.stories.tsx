@@ -86,6 +86,9 @@ export const EUCountry: Story = {
     const canvas = await chooseDestination(canvasElement, "FR");
     await expect(canvas.getByText(/Order total: \$33\.00/)).toBeVisible();
     await expect(
+      canvas.getByRole("option", { name: /Ireland \(IE\)/ })
+    ).toBeInTheDocument();
+    await expect(
       args.merch.shippingDestinations.map((d) => d.destinationCountry)
     ).toEqual(["CA", "DE", "EU", null]);
   },

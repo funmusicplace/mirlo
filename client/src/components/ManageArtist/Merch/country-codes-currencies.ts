@@ -436,6 +436,7 @@ export default [
   },
   {
     countryCode: "CY",
+    isEU: true,
     countryName: "Cyprus",
     currencyCode: "EUR",
     population: "1102677",
@@ -827,6 +828,7 @@ export default [
   },
   {
     countryCode: "IE",
+    isEU: true,
     countryName: "Ireland",
     currencyCode: "EUR",
     population: "4622917",
