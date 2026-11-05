@@ -40,3 +40,15 @@ export const completeCheckout = async (id?: string) => {
     });
   }
 };
+
+export const findCheckoutMessages = async (id?: string) => {
+  const checkout = id
+    ? await prisma.checkout.findUnique({
+        where: { id },
+        select: { items: true },
+      })
+    : null;
+  return ((checkout?.items ?? []) as { message?: string }[]).map(
+    (item) => item?.message
+  );
+};

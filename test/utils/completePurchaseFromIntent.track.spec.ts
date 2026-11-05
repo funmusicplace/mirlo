@@ -73,6 +73,49 @@ describe("completePurchaseFromIntent - track routing", () => {
     assert.equal(purchase?.transaction?.amount, 500);
   });
 
+  it("takes the track's message from its checkout", async () => {
+    sinon.stub(sendMailQueue, "add").resolves();
+
+    const { user: artistUser } = await createUser({
+      email: "artist@test.com",
+    });
+    const { user: buyer } = await createUser({ email: "buyer@test.com" });
+    const profile = await createProfile(artistUser.id);
+    const tg = await createTrackGroup(profile.id, { minPrice: 0 });
+    const track = await createTrack(tg.id, { minPrice: 500 });
+    const message = "x".repeat(600);
+    const checkout = await prisma.checkout.create({
+      data: {
+        profileId: profile.id,
+        items: [{ type: "track", id: track.id, message }],
+      },
+    });
+
+    const intent = {
+      id: "pi_track_checkout_message",
+      amount_received: 500,
+      currency: "usd",
+      metadata: {
+        purchaseType: "track",
+        trackId: String(track.id),
+        items: JSON.stringify([
+          { type: "track", id: String(track.id), quantity: 1, amount: 500 },
+        ]),
+        artistId: String(profile.id),
+        userId: String(buyer.id),
+        userEmail: buyer.email,
+        checkoutId: checkout.id,
+      },
+    } as unknown as Stripe.PaymentIntent;
+
+    await completePurchaseFromIntent(intent, "acct_track_webhook");
+
+    const purchase = await prisma.userTrackPurchase.findFirst({
+      where: { userId: buyer.id, trackId: track.id },
+    });
+    assert.equal(purchase?.message, message);
+  });
+
   it("does nothing when purchaseType is 'track' but trackId is missing", async () => {
     const { user: artistUser } = await createUser({
       email: "artist@test.com",

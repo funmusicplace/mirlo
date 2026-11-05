@@ -199,7 +199,7 @@ export class StripePaymentProcessor implements PaymentProcessor {
           paymentIntentAmount: String(amount),
           currency,
           ...(userId && { userId }),
-          ...(message && { message }),
+          ...(message && !checkoutId && { message }),
           ...(checkoutId && { checkoutId }),
         },
       },

@@ -1994,6 +1994,47 @@ describe("purchase", () => {
         .args[0] as Stripe.SetupIntentCreateParams;
       assert.equal(setupIntentParams.metadata?.currency, "eur");
     });
+
+    it("leaves the pledge message out of the metadata when there's a checkout to read it from", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_message",
+        currency: "usd",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        isAllOrNothing: true,
+      });
+
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [{ id: "cus_pledge_message" }],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      const createSetupIntentStub = sinon
+        .stub(stripeUtils.stripe.setupIntents, "create")
+        .resolves({
+          id: "seti_pledge_message",
+          client_secret: "seti_pledge_message_secret",
+        } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      await initiateFundraiserPledge({
+        profileId: profile.id,
+        fundraiserId: fundraiser.id,
+        trackGroupId: trackGroup.id,
+        price: "2000",
+        message: "x".repeat(600),
+        userEmail: buyer.email,
+        userId: buyer.id,
+        checkoutId: "checkout-1",
+      });
+
+      const setupIntentParams = createSetupIntentStub.firstCall
+        .args[0] as Stripe.SetupIntentCreateParams;
+      assert.equal(setupIntentParams.metadata?.message, undefined);
+      assert.equal(setupIntentParams.metadata?.checkoutId, "checkout-1");
+    });
   });
 
   describe("initiatePayment (direct)", () => {
@@ -2281,6 +2322,40 @@ describe("purchase", () => {
         (result as { paymentIntentId: string }).paymentIntentId,
         "pi_online_test"
       );
+    });
+
+    it("leaves messages out of the metadata when there's a checkout to read them from", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_meta_checkout",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+
+      const createStub = stubStripeForOnline();
+
+      await initiatePayment({
+        profileId: profile.id,
+        items: [
+          {
+            type: "trackGroup",
+            id: String(tg.id),
+            quantity: 1,
+            amount: 1200,
+            message: "x".repeat(600),
+          },
+        ],
+        userEmail: buyer.email,
+        userId: String(buyer.id),
+        checkoutId: "checkout-1",
+      });
+
+      const metadata = metadataOf(createStub);
+      assert.deepEqual(JSON.parse(metadata.items), [
+        { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1200 },
+      ]);
+      assert.equal(metadata.checkoutId, "checkout-1");
     });
 
     describe("platform fee inheritance (album -> artist -> platform)", () => {
@@ -4100,6 +4175,62 @@ describe("purchase", () => {
         (updateStub.getCall(0).args[1] as any)?.default_payment_method,
         "pm_route"
       );
+    });
+  });
+
+  describe("handleSetupIntentSucceeded (direct) — fundraiser pledge", () => {
+    it("takes the pledge message from its checkout", async () => {
+      sinon.stub(sendMailQueue, "add").resolves();
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_checkout",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(profile.id, {
+        trackGroupId: trackGroup.id,
+      });
+      const message = "x".repeat(600);
+      const checkout = await prisma.checkout.create({
+        data: {
+          profileId: profile.id,
+          items: [
+            {
+              type: "fundraiserPledge",
+              fundraiserId: fundraiser.id,
+              trackGroupId: trackGroup.id,
+              price: "2000",
+              message,
+            },
+          ],
+        },
+      });
+      const metadata = {
+        fundraiserId: String(fundraiser.id),
+        trackGroupId: String(trackGroup.id),
+        artistId: String(profile.id),
+        stripeAccountId: "acct_pledge_checkout",
+        userEmail: buyer.email,
+        userId: String(buyer.id),
+        paymentIntentAmount: "2000",
+        currency: "usd",
+        checkoutId: checkout.id,
+      };
+      sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
+        id: "seti_pledge_checkout",
+        metadata,
+      } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      await stripeUtils.handleSetupIntentSucceeded({
+        id: "seti_pledge_checkout",
+        metadata,
+      } as unknown as Stripe.SetupIntent);
+
+      const pledge = await prisma.fundraiserPledge.findFirstOrThrow({
+        where: { fundraiserId: fundraiser.id, userId: buyer.id },
+      });
+      assert.equal(pledge.message, message);
     });
   });
 
