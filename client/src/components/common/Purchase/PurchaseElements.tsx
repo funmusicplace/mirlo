@@ -27,8 +27,10 @@ const PurchaseElements: React.FC<{
   );
 
   // <Elements> compares options deeply, so this needn't be memoized.
-  const options: StripeElementsOptions =
-    checkout.kind === "intent"
+  const options: StripeElementsOptions = {
+    loader: "never",
+    appearance: { variables: { gridRowSpacing: "24px" } },
+    ...(checkout.kind === "intent"
       ? { clientSecret: checkout.clientSecret }
       : checkout.quote.mode === "setup"
         ? { mode: "setup", currency: checkout.quote.currency }
@@ -36,7 +38,8 @@ const PurchaseElements: React.FC<{
             mode: "payment",
             amount: checkout.quote.amount ?? 0,
             currency: checkout.quote.currency,
-          };
+          }),
+  };
 
   if (!stripePromise) {
     return null;

@@ -10,7 +10,7 @@ import {
   StripeError,
   StripePaymentElementChangeEvent,
 } from "@stripe/stripe-js";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
+import Skeleton from "components/common/Skeleton";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
@@ -212,7 +212,6 @@ const PurchasePaymentForm: React.FC<{
 
   return (
     <div className="p-4 m-auto">
-      {!showButton && <LoadingBlocks rows={1} />}
       {needsEmail && (
         <FormComponent>
           <label htmlFor="purchase-buyer-email">{t("email")}</label>
@@ -241,8 +240,10 @@ const PurchasePaymentForm: React.FC<{
             ...(allowedCountries?.length ? { allowedCountries } : {}),
           }}
           onChange={handleAddressOnChange}
+          className="mb-6"
         />
       )}
+      {!showButton && <Skeleton className="h-44 mb-4" />}
       <PaymentElement
         options={{ layout: "accordion" }}
         onReady={() => setShowButton(true)}
