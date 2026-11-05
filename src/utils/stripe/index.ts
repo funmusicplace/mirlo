@@ -1104,15 +1104,7 @@ export const handleInvoicePaymentFailed = async (
   const subscription = invoice.subscription;
   logger.info(`invoice.failed: ${invoice.id} for ${subscription}`);
 
-  const metadata = invoice.metadata as unknown as SessionMetaData;
-
-  if (
-    typeof subscription === "string" &&
-    metadata.purchaseType === "subscription" &&
-    metadata.tierId &&
-    metadata.userId &&
-    Number.isFinite(+metadata.userId)
-  ) {
+  if (typeof subscription === "string") {
     const { intent, paymentProcessorFee } = await getFeeDetailsFromInvoice(
       invoice,
       accountId
