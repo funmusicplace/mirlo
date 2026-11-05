@@ -1,12 +1,8 @@
-import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
-import { logger } from "../../../logger";
-import { subscribeUserToProfile } from "../../../utils/artist";
+import { AppError } from "../../../utils/error";
 import stripe from "../../../utils/stripe";
-import { createOrUpdatePledge } from "../../../utils/trackGroup";
-import { findOrCreateUserBasedOnEmail } from "../../../utils/user";
 
 export default function () {
   const operations = {
@@ -14,86 +10,28 @@ export default function () {
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
-    const log = req.logger ?? logger;
     const { setupIntent, stripeAccountId } = req.query;
     try {
       if (
-        typeof setupIntent === "string" &&
-        typeof stripeAccountId === "string"
+        typeof setupIntent !== "string" ||
+        typeof stripeAccountId !== "string"
       ) {
-        const intent = await stripe.setupIntents.retrieve(setupIntent, {
-          stripeAccount: stripeAccountId as string | undefined,
+        throw new AppError({
+          httpCode: 404,
+          description: "SetupIntent not found",
         });
-
-        if (intent) {
-          let userId = intent.metadata?.userId
-            ? Number(intent.metadata?.userId)
-            : undefined;
-
-          if (typeof intent.customer === "string" && !userId) {
-            const customer = await stripe.customers.retrieve(intent.customer, {
-              stripeAccount: stripeAccountId,
-            });
-            if (
-              customer &&
-              typeof customer === "object" &&
-              "email" in customer &&
-              customer.email
-            ) {
-              let response = await findOrCreateUserBasedOnEmail(customer.email);
-
-              userId = Number(response.userId);
-            }
-          }
-          if (
-            intent.status === "succeeded" &&
-            userId &&
-            intent.metadata?.fundraiserId &&
-            intent.metadata?.paymentIntentAmount
-          ) {
-            log.info(
-              `Setting up succeeded intent: ${userId}, fundraiserId: ${intent.metadata?.fundraiserId}`
-            );
-            await createOrUpdatePledge({
-              userId,
-              fundraiserId: Number(intent.metadata?.fundraiserId),
-              message: intent.metadata?.message,
-              amount: Number(intent.metadata?.paymentIntentAmount),
-              stripeSetupIntentId: intent.id,
-              stripeAccountId,
-              currency: intent.metadata?.currency,
-            });
-            const profile = await prisma.profile.findFirst({
-              where: {
-                trackGroups: {
-                  some: {
-                    id: Number(intent.metadata.trackGroupId),
-                  },
-                },
-              },
-              include: { user: true, subscriptionTiers: true },
-            });
-            const user = await prisma.user.findUnique({
-              where: { id: userId },
-            });
-            if (profile && user) {
-              await subscribeUserToProfile(profile, user);
-            }
-          }
-
-          return res.status(200).json({
-            result: {
-              status: intent.status,
-              paymentIntentAmount: intent.metadata?.paymentIntentAmount,
-              trackGroupId: intent.metadata?.trackGroupId,
-            },
-          });
-        } else {
-          res.status(404).json({ error: "SetupIntent not found" });
-        }
-      } else {
-        res.status(404);
       }
+      const intent = await stripe.setupIntents.retrieve(setupIntent, {
+        stripeAccount: stripeAccountId,
+      });
+
+      return res.status(200).json({
+        result: {
+          status: intent.status,
+          paymentIntentAmount: intent.metadata?.paymentIntentAmount,
+          trackGroupId: intent.metadata?.trackGroupId,
+        },
+      });
     } catch (e) {
       console.error(e);
       next(e);
