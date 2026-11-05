@@ -2453,6 +2453,56 @@ describe("purchase", () => {
         );
       });
 
+      it("takes the platform fee on merch but not on its shipping", async () => {
+        const { user: artistUser } = await createUser({
+          email: "artist@test.com",
+          stripeAccountId: "acct_fee_shipping",
+        });
+        const { user: buyer } = await createUser({ email: "buyer@test.com" });
+        const profile = await createProfile(artistUser.id, {
+          defaultPlatformFee: 10,
+        });
+        const merch = await createMerch(profile.id, {
+          isPublic: true,
+          minPrice: 1000,
+          quantityRemaining: 10,
+          platformPercent: 10,
+        });
+        const destination = await createMerchShippingDestination({
+          merchId: merch.id,
+          costUnit: 500,
+          costExtraUnit: 100,
+        });
+        const fullMerch = await prisma.merch.findFirstOrThrow({
+          where: { id: merch.id },
+          include: {
+            optionTypes: { include: { options: true } },
+            shippingDestinations: true,
+          },
+        });
+        const { item } = resolveMerchPurchaseItem(fullMerch, {
+          type: "merch",
+          id: merch.id,
+          quantity: 2,
+          shippingDestinationId: destination.id,
+        });
+
+        const createStub = stubStripeForOnline();
+
+        await initiatePayment({
+          profileId: profile.id,
+          items: [item],
+          userEmail: buyer.email,
+          userId: String(buyer.id),
+        });
+
+        const params = createStub.firstCall
+          .args[0] as Stripe.PaymentIntentCreateParams;
+        assert.equal(params.amount, 2000 + 600);
+        assert.equal(params.application_fee_amount, 200);
+        assert.ok(!String(params.metadata?.items).includes("shippingAmount"));
+      });
+
       it("falls back to the artist's defaultPlatformFee when the trackGroup has no platformPercent override", async () => {
         const { user: artistUser } = await createUser({
           email: "artist@test.com",

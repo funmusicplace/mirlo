@@ -241,6 +241,7 @@ export const resolveMerchPurchaseItem = (
       message: item.message,
       optionIds: options.map((o) => o.id),
       shippingDestinationId: item.shippingDestinationId,
+      shippingAmount: shippingCostCents,
       platformPercent: merch.platformPercent,
     },
     requiresShipping,
