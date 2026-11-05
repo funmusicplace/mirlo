@@ -255,7 +255,7 @@ const assertAllowedSuccessUrl = (
   client?: { applicationUrl: string; allowedCorsOrigins: string[] }
 ) => {
   const target = originOf(successUrl);
-  if (!target) {
+  if (!target || !/^https?:\/\//i.test(target)) {
     throw new AppError({ httpCode: 400, description: "Invalid successUrl" });
   }
 

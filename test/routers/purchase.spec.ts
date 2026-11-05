@@ -809,6 +809,33 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 400);
     });
 
+    it("should reject a successUrl that isn't a web address", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_tg_jsurl",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const apiClient = await createClient("opaque-origin-key");
+      await prisma.client.update({
+        where: { id: apiClient.id },
+        data: { allowedCorsOrigins: ["data:text/html,hi"] },
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: profile.id,
+          items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
+          hosted: true,
+          successUrl: "javascript:alert(document.cookie)",
+        })
+        .set("mirlo-api-key", apiClient.key ?? "")
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+    });
+
     it("should accept a successUrl on Mirlo's own origin", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
