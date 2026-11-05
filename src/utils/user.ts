@@ -12,6 +12,7 @@ import {
   getEditableProfileIds,
 } from "./artist";
 import countries from "./country-codes-currencies";
+import { deleteSubsonicCredential } from "./subsonicCredentials";
 
 export const userSelect = {
   email: true,
@@ -146,6 +147,7 @@ export const deleteUser = async (userId: number) => {
   await prisma.profileManager.deleteMany({ where: { userId } });
 
   await revokeAllConnectedApps(userId);
+  await deleteSubsonicCredential(userId);
   await anonymiseDeletedUser(userId);
   await prisma.user.delete({ where: { id: userId } });
 };

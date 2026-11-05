@@ -1,11 +1,12 @@
 # Developers: Using the API
 
-Mirlo offers two integration paths depending on what you want to build:
+Mirlo offers a few integration paths depending on what you want to build:
 
-| Goal                                                                 | Use                                             |
-| -------------------------------------------------------------------- | ----------------------------------------------- |
-| Build a music player that discovers and plays Mirlo content          | [Fairplayer / Canimus federation](./canimus.md) |
-| Build a deeper integration (purchases, user accounts, uploads, etc.) | [REST API](#rest-api)                           |
+| Goal                                                                 | Use                                                      |
+| -------------------------------------------------------------------- | -------------------------------------------------------- |
+| Build a music player that discovers and plays Mirlo content          | [Fairplayer / Canimus federation](./canimus.md)          |
+| Build a deeper integration (purchases, user accounts, uploads, etc.) | [REST API](#rest-api)                                    |
+| Play a listener's purchases in a Subsonic app                        | [Subsonic API](../how-tos/listening-in-subsonic-apps.md) |
 
 ---
 

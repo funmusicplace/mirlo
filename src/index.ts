@@ -36,6 +36,7 @@ import { audioQueue } from "./queues/processTrackAudio";
 import { scheduledTasksQueue } from "./queues/scheduled-tasks-queue";
 import { sendMailQueue } from "./queues/send-mail-queue";
 import auth from "./routers/auth";
+import subsonicRouter from "./routers/subsonic";
 import { serveStatic } from "./static";
 import errorHandler from "./utils/error";
 import { denyFramingExceptWidgets } from "./utils/framing";
@@ -121,6 +122,10 @@ app.get(
   ],
   discoveryAlias
 );
+
+// Subsonic apps authenticate with request parameters and have no cookies, so
+// the router answers CORS itself and never reaches the cookie stack below
+app.use("/subsonic", subsonicRouter);
 
 app.use(corsMiddleware);
 app.use(cookieParser());

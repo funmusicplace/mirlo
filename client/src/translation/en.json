@@ -357,7 +357,17 @@
     "connectedAppsDescription": "These apps can use your account. Disconnecting an app signs it out right away.",
     "connectedAppDetails": "Access: {{scopes}} · Last used: {{lastUsed}}",
     "never": "never",
-    "disconnectApp": "Disconnect"
+    "disconnectApp": "Disconnect",
+    "subsonicApps": "Subsonic apps",
+    "subsonicAppsDescription": "Play the music you've bought in apps that speak the Subsonic API, such as Feishin, Amperfy and Symfonium. Generate credentials here, then add a server in the app with this address, username and password. These credentials only give access to your collection and you can revoke them at any time.",
+    "subsonicServerUrl": "Server address",
+    "subsonicUsername": "Username",
+    "subsonicPassword": "Password",
+    "subsonicGenerate": "Generate credentials",
+    "subsonicRegenerate": "Generate new password",
+    "subsonicRevoke": "Revoke",
+    "subsonicRegenerateConfirm": "Generate a new password? Every app using the current one stops working until you enter the new one.",
+    "subsonicRevokeConfirm": "Revoke these credentials? Every app using them stops working."
   },
   "wishlist": {
     "addToWishlist": "Add to wishlist",

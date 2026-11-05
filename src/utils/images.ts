@@ -71,14 +71,28 @@ export const storedImageUrl = (
   extension?: string
 ) => generateFullStaticImageUrl(fileName, storedImagePrefix(image), extension);
 
+// Variants are named "<id>-x<width>", entries without a width are the original
+const variantWidth = (name: string) => Number(/-x(\d+)$/.exec(name)?.[1]);
+
+// The smallest variant at least `size` wide, else the largest
+const smallestAtLeast = (names: string[], size: number) => {
+  const sized = names
+    .filter((name) => variantWidth(name) > 0)
+    .sort((a, b) => variantWidth(a) - variantWidth(b));
+  return sized.find((name) => variantWidth(name) >= size) ?? sized.at(-1);
+};
+
 export const storedImageVariantUrl = (
   image:
     | (Pick<StoredImage, "url" | "keyPrefix"> & { updatedAt?: Date | string })
     | null
     | undefined,
-  size: number
+  size: number,
+  options?: { atLeast?: boolean }
 ) => {
-  const variant = image?.url.find((u) => u.endsWith(`-x${size}`));
+  const variant = options?.atLeast
+    ? smallestAtLeast(image?.url ?? [], size)
+    : image?.url.find((u) => u.endsWith(`-x${size}`));
   if (!image || !variant) {
     return undefined;
   }
