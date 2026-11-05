@@ -10,6 +10,7 @@ import { usePurchase } from "components/common/Purchase/usePurchase";
 import { SelectEl } from "components/common/Select";
 import TextArea from "components/common/TextArea";
 import PaymentInputElement from "components/TrackGroup/PaymentInputElement";
+import useSubscriberDiscountPercent from "components/TrackGroup/useSubscriberDiscountPercent";
 import { flatten } from "lodash";
 import { queryUserStripeStatus } from "queries";
 import React from "react";
@@ -66,6 +67,7 @@ const BuyMerchItem: React.FC<{
   const shippingDestination = methods.watch("shippingDestinationId");
   const merchOptionIds = methods.watch("merchOptionIds");
   const navigate = useNavigate();
+  const discountPercent = useSubscriberDiscountPercent(artist.id);
   const { checkout, isLoading: isLoadingStripe, startPurchase } = usePurchase();
   const destinations = React.useMemo(
     () => expandEUDestination(merch.shippingDestinations),
@@ -152,6 +154,8 @@ const BuyMerchItem: React.FC<{
       }
     });
   });
+
+  price *= 1 - discountPercent / 100;
 
   destinations.forEach((sd) => {
     if (sd.id === shippingDestination) {

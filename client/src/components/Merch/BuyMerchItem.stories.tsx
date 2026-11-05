@@ -8,6 +8,10 @@ import {
   paymentsEnabled,
 } from "../../showcase/artistPage/artistPageData";
 import { authAs } from "../../showcase/shared/helpers";
+import {
+  subscribedFan,
+  TIDE_POOL_TIER,
+} from "../../showcase/subscriptions/subscriptionsFixtures";
 
 import BuyMerchItem from "./BuyMerchItem";
 
@@ -105,5 +109,30 @@ export const EUCountryWithItsOwnRate: Story = {
     await expect(
       canvas.getAllByRole("option", { name: /\(DE\)/ })
     ).toHaveLength(1);
+  },
+};
+
+/**
+ * A subscriber whose tier gives 50% off merch pays $9 for the $18 tote, plus
+ * the full $5 shipping to Canada.
+ */
+export const SubscriberDiscount: Story = {
+  parameters: {
+    msw: {
+      handlers: {
+        auth: authAs(
+          subscribedFan({ ...TIDE_POOL_TIER, merchDiscountPercent: 50 })
+        ),
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = await chooseDestination(
+      canvasElement,
+      `${MERCH_TOTE.id}-ship-0`
+    );
+    await expect(
+      await canvas.findByText(/Order total: \$14\.00/)
+    ).toBeVisible();
   },
 };
