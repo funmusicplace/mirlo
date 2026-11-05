@@ -1,3 +1,5 @@
+import { randomInt } from "crypto";
+
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
@@ -9,34 +11,11 @@ import { findOrCreateUserBasedOnEmail } from "../../utils/user";
 
 import { setTokens } from "./utils";
 
-const generate = (n: number, chunks = 0, separator = " "): string => {
-  var add = 1,
-    max = 12 - add; // 12 is the min safe number Math.random() can generate without it starting to pad the end with zeros.
-
-  var out;
-  if (n > max) {
-    out = generate(max) + generate(n - max);
-  } else {
-    max = Math.pow(10, n + add);
-    var min = max / 10; // Math.pow(10, n) basically
-    var number = Math.floor(Math.random() * (max - min + 1)) + min;
-
-    out = ("" + number).substring(add);
-  }
-
-  if (chunks > 0 && n > chunks) {
-    // Insert separator every chunks characters
-    const instead = [];
-    for (let i = 0; i < out.length; i++) {
-      if (i > 0 && i % chunks === 0) instead.push(separator);
-      instead.push(out[i]);
-    }
-
-    return instead.join("");
-  }
-
-  return out;
-};
+const generateCode = () =>
+  randomInt(0, 1_000_000)
+    .toString()
+    .padStart(6, "0")
+    .replace(/(\d{2})(?=\d)/g, "$1 ");
 
 const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
   const log = req.logger ?? logger;
@@ -123,7 +102,7 @@ const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
       }
     } else {
       // If no code is provided, we send a verification email to the provided email
-      const generatedCode = generate(6, 2, " ");
+      const generatedCode = generateCode();
       await prisma.emailVerification.upsert({
         where: { email },
         create: {

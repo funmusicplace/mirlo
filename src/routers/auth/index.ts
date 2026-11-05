@@ -32,7 +32,24 @@ const verifyEmailLimiter = rateLimit({
   skip: (req) => !!req.body?.code, // only limit email-sending, not code verification
 });
 
-router.post(`/verify-email`, verifyEmailLimiter, verifyEmail);
+const verifyCodeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  skipSuccessfulRequests: true,
+  skip: (req) => !req.body?.code,
+  keyGenerator: (req) =>
+    String(req.body?.email ?? "")
+      .toLowerCase()
+      .trim(),
+});
+
+router.post(
+  `/verify-email`,
+  verifyEmailLimiter,
+  verifyCodeLimiter,
+  verifyEmail
+);
 
 router.post(`/confirm-email-token`, confirmEmailToken);
 
@@ -48,7 +65,7 @@ const isDev = process.env.NODE_ENV === "development";
 
 const loginLimiter = rateLimit({
   windowMs: 60 * 1000,
-  limit: 10,
+  limit: 5,
   standardHeaders: true,
   skip: () => isDev || process.env.NODE_ENV === "test",
 });
