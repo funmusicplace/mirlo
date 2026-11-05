@@ -21,7 +21,9 @@ import { buildCheckoutCompletePath } from "utils/artist";
 
 import { bp } from "../../constants";
 
-import BuyMerchItemDestinations from "./BuyMerchItemDestinations";
+import BuyMerchItemDestinations, {
+  expandEUDestination,
+} from "./BuyMerchItemDestinations";
 import IncludesDigitalDownload from "./IncludesDigitalDownload";
 
 export type BuyMerchFormData = {
@@ -65,6 +67,10 @@ const BuyMerchItem: React.FC<{
   const merchOptionIds = methods.watch("merchOptionIds");
   const navigate = useNavigate();
   const { checkout, isLoading: isLoadingStripe, startPurchase } = usePurchase();
+  const destinations = React.useMemo(
+    () => expandEUDestination(merch.shippingDestinations),
+    [merch.shippingDestinations]
+  );
 
   const checkoutCompletePath = (buyerEmail?: string) =>
     buildCheckoutCompletePath(artist, {
@@ -147,7 +153,7 @@ const BuyMerchItem: React.FC<{
     });
   });
 
-  merch.shippingDestinations.forEach((sd) => {
+  destinations.forEach((sd) => {
     if (sd.id === shippingDestination) {
       const otherUnitCount = Number(quantity) - 1;
       const costUnit = sd.costUnit / 100;
@@ -295,7 +301,10 @@ const BuyMerchItem: React.FC<{
                 </FormComponent>
               ))}
             </div>
-            <BuyMerchItemDestinations merch={merch} />
+            <BuyMerchItemDestinations
+              merch={merch}
+              destinations={destinations}
+            />
             <div
               className={css`
                 border-bottom: 1px solid var(--mi-tint-x-color);
