@@ -3,7 +3,7 @@ import { Merch } from "@mirlo/prisma/client";
 import { addSizesToStoredImage } from "../utils/artist";
 import { MerchImageWithImage } from "../utils/merch";
 
-import { omitApPrivateKey, Serialized } from "./utils";
+import { omitPrivateProfileFields, Serialized } from "./utils";
 
 export const serializeMerchImage = (merchImage: MerchImageWithImage) => {
   return {
@@ -48,7 +48,7 @@ export const serializeMerch = <T extends object>(
           artistId: iPid,
           artist:
             iProf && typeof iProf === "object"
-              ? omitApPrivateKey(iProf)
+              ? omitPrivateProfileFields(iProf)
               : iProf,
         };
       })()
@@ -57,7 +57,7 @@ export const serializeMerch = <T extends object>(
   return {
     ...rest,
     artistId: profileId,
-    artist: profile ? omitApPrivateKey(profile) : profile,
+    artist: profile ? omitPrivateProfileFields(profile) : profile,
     currency: profile?.user?.currency ?? options?.fallbackCurrency ?? "usd",
     downloadableContent: (
       merch as {

@@ -7,6 +7,7 @@ import { sendMailQueue } from "../queues/send-mail-queue";
 import { serializeProfile } from "../serializers/artist";
 import { processSingleTrackGroup } from "../serializers/trackGroup";
 import { serializeUserTransaction } from "../serializers/userTransaction";
+import { withEmailMessages } from "../serializers/utils";
 
 import { subscribeUserToProfile } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
@@ -318,7 +319,8 @@ export const sendPurchaseReceipt = async (
       to: purchaser.email,
     },
     locals: {
-      artist: serializeProfile(
+      artist: withEmailMessages(
+        serializeProfile(artist),
         artist
       ) as unknown as PurchaseReceiptEmailType["artist"],
       transactions: transactions.map(
@@ -446,9 +448,13 @@ const attachTrackGroup = async (
         to: user.email,
       },
       locals: {
-        trackGroup: processSingleTrackGroup(
-          trackGroup
-        ) as unknown as AlbumPurchaseEmailType["trackGroup"],
+        trackGroup: (() => {
+          const serialized = processSingleTrackGroup(trackGroup);
+          return {
+            ...serialized,
+            artist: withEmailMessages(serialized.artist, trackGroup.profile),
+          };
+        })() as unknown as AlbumPurchaseEmailType["trackGroup"],
         purchase: purchaseForAlbumPurchaseEmail(purchase),
         isBeforeReleaseDate,
         token: purchase.singleDownloadToken,
@@ -653,7 +659,10 @@ const attachCatalogue = async (
 
   if (user && profileTrackGroups.length > 0) {
     const { applicationUrl } = await getClient();
-    const serializedProfile = serializeProfile(profile);
+    const serializedProfile = withEmailMessages(
+      serializeProfile(profile),
+      profile
+    );
     await sendMailQueue.add("send-mail", {
       template: "catalogue-receipt",
       message: {

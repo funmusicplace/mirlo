@@ -1,4 +1,4 @@
-import { omitApPrivateKey, Serialized } from "./utils";
+import { omitPrivateProfileFields, Serialized } from "./utils";
 
 export const serializeContentFlag = <T extends object>(
   flag: T
@@ -12,7 +12,7 @@ export const serializeContentFlag = <T extends object>(
     ...rest,
     ...(profileId !== undefined ? { artistId: profileId } : {}),
     ...(profile !== undefined
-      ? { artist: profile ? omitApPrivateKey(profile) : profile }
+      ? { artist: profile ? omitPrivateProfileFields(profile) : profile }
       : {}),
   } as Serialized<T>;
 };

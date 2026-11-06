@@ -20,7 +20,25 @@ import {
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
 import { merchImagesInclude } from "../../../../../utils/merch";
+import { sanitizePostContent } from "../../../../../utils/postContent";
 import { canProfileImportSubscribers } from "../../../../../utils/trustLevel";
+
+const sanitizeEmailMessages = (properties: unknown) => {
+  const emails = (properties as { emails?: Record<string, unknown> } | null)
+    ?.emails;
+  if (!emails || typeof emails !== "object") {
+    return properties;
+  }
+  return {
+    ...(properties as object),
+    emails: Object.fromEntries(
+      Object.entries(emails).map(([key, value]) => [
+        key,
+        typeof value === "string" ? sanitizePostContent(value) : value,
+      ])
+    ),
+  };
+};
 
 type Params = {
   artistId: string;
@@ -220,7 +238,7 @@ export default function () {
                   urlSlug: generateSlug(urlSlug),
                 }
               : {}),
-            properties: merge(oldProperties, properties),
+            properties: merge(oldProperties, sanitizeEmailMessages(properties)),
           },
         });
 
@@ -248,7 +266,12 @@ export default function () {
           where: { id: Number(profileId) },
         });
         res.json({
-          result: artist ? serializeProfile(artist, Number(user.id)) : artist,
+          result: artist
+            ? {
+                ...serializeProfile(artist, Number(user.id)),
+                properties: artist.properties,
+              }
+            : artist,
         });
       } else {
         res.json({
@@ -326,6 +349,7 @@ export default function () {
         return res.json({
           result: {
             ...serializeProfile(artist, Number(user.id), true),
+            properties: artist.properties,
             canImportSubscribers: await canProfileImportSubscribers(
               artist.id,
               user

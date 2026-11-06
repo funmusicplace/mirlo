@@ -4,6 +4,7 @@ import { Profile } from "@mirlo/prisma/client";
 import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
 import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
+import { withEmailMessages } from "../serializers/utils";
 
 import { getClient } from "./getClient";
 import {
@@ -209,7 +210,10 @@ export const manageSubscriptionReceipt = async ({
         locals: {
           isNewSubscription,
           interval: serializedTier.interval,
-          artist: serializedTier.artist,
+          artist: withEmailMessages(
+            serializedTier.artist,
+            profileUserSubscription.profileSubscriptionTier.profile
+          ),
           artistUserSubscription: artistUserSubscriptionForEmail,
           host: process.env.API_DOMAIN,
           client: client.applicationUrl,

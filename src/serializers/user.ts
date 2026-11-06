@@ -2,7 +2,7 @@ import { addSizesToStoredImage } from "../utils/artist";
 import { UserSelectPayload } from "../utils/user";
 
 import { serializeProfileUserSubscription } from "./profileUserSubscription";
-import { omitApPrivateKey, Serialized } from "./utils";
+import { omitPrivateProfileFields, Serialized } from "./utils";
 
 type TrackFavorite = UserSelectPayload["trackFavorites"][number];
 type ProfileUserSubscription =
@@ -24,7 +24,7 @@ export const serializeUser = <T extends object>(user: T): Serialized<T> => {
   return {
     ...rest,
     ...(profiles !== undefined
-      ? { artists: profiles.map(omitApPrivateKey) }
+      ? { artists: profiles.map(omitPrivateProfileFields) }
       : {}),
     ...(trackFavorites !== undefined
       ? {
@@ -37,7 +37,7 @@ export const serializeUser = <T extends object>(user: T): Serialized<T> => {
                 trackGroup: {
                   ...tgRest,
                   artistId: profileId,
-                  artist: profile ? omitApPrivateKey(profile) : profile,
+                  artist: profile ? omitPrivateProfileFields(profile) : profile,
                   cover: addSizesToStoredImage(tf.track.trackGroup.cover),
                 },
               },

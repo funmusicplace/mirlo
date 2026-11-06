@@ -4,6 +4,7 @@ import { Profile } from "@mirlo/prisma/client";
 import logger from "../logger";
 import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
 import { serializeProfileUserSubscription } from "../serializers/profileUserSubscription";
+import { withEmailMessages } from "../serializers/utils";
 import { getClient } from "../utils/getClient";
 
 export type SubscriptionRenewalReminderEmailType = {
@@ -109,7 +110,10 @@ const sendSubscriptionRenewalReminders = async () => {
               locals: {
                 interval:
                   serializedSubscription.artistSubscriptionTier.interval,
-                artist: serializedSubscription.artistSubscriptionTier.artist,
+                artist: withEmailMessages(
+                  serializedSubscription.artistSubscriptionTier.artist,
+                  subscription.profileSubscriptionTier.profile
+                ),
                 artistUserSubscription: {
                   id: serializedSubscription.id,
                   amount: serializedSubscription.amount,

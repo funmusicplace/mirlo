@@ -4,7 +4,7 @@ import { addSizesToStoredImage } from "../utils/artist";
 import { isTrackPlayableNested } from "../utils/trackPlayability";
 
 import { isSubscriberExclusive } from "./trackGroup";
-import { omitApPrivateKey, Serialized } from "./utils";
+import { omitPrivateProfileFields, Serialized } from "./utils";
 
 /**
  * Enrich a subscription tier and emit artist* wire shape.
@@ -71,7 +71,7 @@ export const serializeProfileSubscriptionTier = <T extends object>(
           artistId: tgPid ?? tgProf?.id,
           artist:
             tgProf && typeof tgProf === "object"
-              ? omitApPrivateKey(tgProf)
+              ? omitPrivateProfileFields(tgProf)
               : tgProf,
           cover: addSizesToStoredImage(rel.trackGroup?.cover),
         },

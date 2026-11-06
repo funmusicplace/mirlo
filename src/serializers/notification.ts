@@ -2,7 +2,7 @@ import { addSizesToStoredImage } from "../utils/artist";
 import { storedImageFileUrl } from "../utils/images";
 
 import {
-  omitApPrivateKey,
+  omitPrivateProfileFields,
   renameProfileIdToArtistId,
   Serialized,
 } from "./utils";
@@ -78,7 +78,7 @@ export const serializeNotification = <T extends object>(
     artistId: profileId ?? undefined,
     artist:
       profile && typeof profile === "object"
-        ? omitApPrivateKey(profile)
+        ? omitPrivateProfileFields(profile)
         : profile,
     subscription: subscription
       ? {
@@ -96,7 +96,7 @@ export const serializeNotification = <T extends object>(
                   artistId: tierProfileId,
                   artist:
                     tierProfile && typeof tierProfile === "object"
-                      ? omitApPrivateKey(tierProfile)
+                      ? omitPrivateProfileFields(tierProfile)
                       : tierProfile,
                 };
               })()
@@ -113,7 +113,7 @@ export const serializeNotification = <T extends object>(
           return {
             ...tgRest,
             artistId: tgProfileId,
-            artist: tgProfile ? omitApPrivateKey(tgProfile) : tgProfile,
+            artist: tgProfile ? omitPrivateProfileFields(tgProfile) : tgProfile,
             currency: tgProfile?.user?.currency ?? "usd",
             cover: addSizesToStoredImage(trackGroup.cover),
           };
@@ -133,7 +133,7 @@ export const serializeNotification = <T extends object>(
               ? (() => {
                   const { avatar, ...profileRest } = postProfile;
                   return {
-                    ...omitApPrivateKey(profileRest),
+                    ...omitPrivateProfileFields(profileRest),
                     avatar: remapAvatar(avatar),
                   };
                 })()
@@ -155,7 +155,7 @@ export const serializeNotification = <T extends object>(
             artists: (profiles ?? []).map((profile) => {
               const { avatar, ...profileRest } = profile;
               return {
-                ...omitApPrivateKey(profileRest),
+                ...omitPrivateProfileFields(profileRest),
                 avatar: remapAvatar(avatar),
               };
             }),
