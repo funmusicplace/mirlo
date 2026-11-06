@@ -133,3 +133,17 @@ export const applyTrustPenalty = (
       options
     );
   });
+
+export const canProfileImportSubscribers = async (
+  profileId: number,
+  user?: { isAdmin?: boolean | null }
+) => {
+  if (user?.isAdmin) {
+    return true;
+  }
+  const profile = await prisma.profile.findFirst({
+    where: { id: profileId },
+    select: { user: { select: { trustLevel: true } } },
+  });
+  return (profile?.user.trustLevel ?? 0) >= TRUST_LEVELS.VERIFIED;
+};

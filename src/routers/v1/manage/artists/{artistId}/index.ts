@@ -20,6 +20,7 @@ import {
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
 import { merchImagesInclude } from "../../../../../utils/merch";
+import { canProfileImportSubscribers } from "../../../../../utils/trustLevel";
 
 type Params = {
   artistId: string;
@@ -323,7 +324,13 @@ export default function () {
         });
       } else {
         return res.json({
-          result: serializeProfile(artist, Number(user.id), true),
+          result: {
+            ...serializeProfile(artist, Number(user.id), true),
+            canImportSubscribers: await canProfileImportSubscribers(
+              artist.id,
+              user
+            ),
+          },
         });
       }
     } catch (e) {

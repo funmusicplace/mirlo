@@ -252,7 +252,7 @@ const Index = () => {
               .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1))
               .map((r) => (
                 <tr key={r.user.id}>
-                  <td>{r.user.name ?? r.shippingAddress?.name ?? "-"}</td>
+                  <td>{r.shippingAddress?.name ?? "-"}</td>
                   <td>{r.user.email}</td>
                   <td>
                     {r.artistSubscriptionTier.name}
@@ -303,7 +303,7 @@ const Index = () => {
                       <CancelSupporterButton
                         artistId={artistId}
                         subscriptionId={r.id}
-                        supporterName={r.user.name ?? r.user.email}
+                        supporterName={r.shippingAddress?.name ?? r.user.email}
                       />
                     )}
                   </td>
@@ -331,14 +331,12 @@ const Index = () => {
         <SupporterTable>
           <thead>
             <tr>
-              <th>{t("name")}</th>
               <th>{t("email")}</th>
             </tr>
           </thead>
           <tbody>
             {followers.map((r) => (
               <tr key={r.user.id}>
-                <td>{r.user.name}</td>
                 <td>{r.user.email}</td>
               </tr>
             ))}

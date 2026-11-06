@@ -370,6 +370,7 @@ interface LocationTag {
 
 interface Artist {
   name: string;
+  canImportSubscribers?: boolean;
   maxFreePlays?: number;
   shortDescription?: string;
   bio: string;

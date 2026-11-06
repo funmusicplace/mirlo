@@ -158,7 +158,7 @@ describe("manage/fundraisers/{fundraiserId}/pledges", () => {
       assert(response.body.results[0].user);
       assert.equal(response.body.results[0].user.id, pledger.user.id);
       assert.equal(response.body.results[0].user.email, "pledger@test.com");
-      assert.equal(response.body.results[0].user.name, "John Pledger");
+      assert.equal(response.body.results[0].user.name, undefined);
     });
 
     it("should require authentication", async () => {

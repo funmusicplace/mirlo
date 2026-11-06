@@ -122,7 +122,6 @@ const Index: React.FC = () => {
           <Table>
             <thead>
               <tr>
-                <th>{t("name")}</th>
                 <th>{t("email")}</th>
                 <th>{t("amount")}</th>
                 <th>{t("createdAt")}</th>
@@ -135,7 +134,6 @@ const Index: React.FC = () => {
                   key={pledge.id}
                   className={pledge.cancelledAt ? "opacity-60" : ""}
                 >
-                  <td>{pledge.user.name || pledge.user.email}</td>
                   <td>{pledge.user.email}</td>
                   <td>
                     {moneyDisplay({ amount: pledge.amount / 100, currency })}
