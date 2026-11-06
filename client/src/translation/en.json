@@ -392,12 +392,19 @@
     "notLoggedIn": "We'll need your email address to send you a one-time download link of the album. In the future you'll be able to create an account and access what you've bought.",
     "albumExists": "An album has already been bought using this email address, you can finish creating an account to see it in your collection. Do you want to proceed anyway?",
     "download": "Download",
+    "downloadTrack": "Download track",
+    "downloadAlbum": "Download album",
     "downloadDisclaimer": "We strongly encourage you to download purchases; we're not always in control of what might be required of us legally to keep the platform and releases up. We think people should try, as much as possible, to keep a local archive of the art that they buy online.",
     "error": "Something went wrong",
     "verificationInvalidCode": "That code doesn't match. Double check the email and try again.",
     "verificationCodeExpired": "This verification code has expired. Request a new one below.",
     "verificationTooManyRequests": "Too many attempts. Please wait a minute and try again.",
     "buy": "Buy",
+    "buyTrack": "Buy track",
+    "buyAlbum": "Buy album",
+    "preOrderTrack": "Pre-order track",
+    "preOrderAlbum": "Pre-order album",
+    "addTrackToCollection": "Add track to collection",
     "completePayment": "Complete payment",
     "emailVerified": "Email verified",
     "verifyEmailCode": "Verify email code",
@@ -858,7 +865,6 @@
     "play": "Play",
     "pause": "Pause",
     "playAlbum": "Play album",
-    "playTrack": "Play track",
     "overlayActions": "Release actions",
     "byArtist": "by {{artist}}"
   },
@@ -881,7 +887,9 @@
     "muteVolume": "Mute volume",
     "nowPlayingAnnouncement": "Now playing: {{title}} by {{artist}}",
     "buyThisTrack": "Buy this track",
-    "buyThisAlbum": "Buy this album"
+    "buyThisAlbum": "Buy this album",
+    "preOrderThisTrack": "Pre-order this track",
+    "preOrderThisAlbum": "Pre-order this album"
   },
   "post": {
     "postByArtist": "by <link></link>",
@@ -2153,7 +2161,11 @@
     "aboutTitle": "About",
     "trackPosition": "Track {{position}} of {{count}}",
     "trackLicense": "License: <licenseLink>{{license}}</licenseLink>",
-    "isrc": "ISRC: {{isrc}}"
+    "isrc": "ISRC: {{isrc}}",
+    "onThisPage": "On this page",
+    "merch": "Merch",
+    "byArtistWithArtists": "by <artistLink>{{artist}}</artistLink> with <artists/>",
+    "onLabelStandalone": "On <labelLink>{{label}}</labelLink>"
   },
   "manageSubscriptionTierBox": {
     "edit": "Edit",

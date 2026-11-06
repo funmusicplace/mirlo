@@ -35,20 +35,21 @@ export default function () {
 
         if (purchase) {
           exists = true;
-        } else {
-          const previewTrack = await prisma.track.findFirst({
+        } else if (user) {
+          const trackFromPurchasedRelease = await prisma.track.findFirst({
             where: {
               id: Number(id),
-              isPreview: true,
+              OR: [{ isPreview: true }, { trackGroup: { isPreorder: false } }],
               trackGroup: {
+                deletedAt: null,
                 publishedAt: { lte: new Date() },
                 userTrackGroupPurchases: {
-                  some: { OR: identities },
+                  some: { userId: user.id },
                 },
               },
             },
           });
-          exists = !!previewTrack;
+          exists = !!trackFromPurchasedRelease;
         }
       }
       res.status(200);

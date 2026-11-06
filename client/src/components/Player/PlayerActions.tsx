@@ -70,7 +70,11 @@ const PlayerActions: React.FC = () => {
         (isMultiTrack ? (
           <BuyTargetMenu track={currentTrack} trackGroup={trackGroup} />
         ) : (
-          <PurchaseOrDownloadAlbum trackGroup={trackGroup} fixed />
+          <PurchaseOrDownloadAlbum
+            trackGroup={trackGroup}
+            singleTrack={currentTrack}
+            fixed
+          />
         ))}
     </div>
   );
@@ -185,13 +189,13 @@ const BuyTargetMenu: React.FC<{
   const albumOwned = !!user?.userTrackGroupPurchases?.find(
     (p) => p.trackGroupId === trackGroup.id
   );
-  const trackOwned =
-    !!user?.userTrackPurchases?.find((p) => p.trackId === track.id) ||
-    (track.isPreview && albumOwned);
-
-  if (albumOwned && trackOwned) {
+  if (albumOwned) {
     return null;
   }
+
+  const trackOwned = !!user?.userTrackPurchases?.find(
+    (p) => p.trackId === track.id
+  );
 
   const payOrNameYourPrice =
     trackGroup.minPrice === 0 ? "nameYourPriceLabel" : "buy";
@@ -224,12 +228,16 @@ const BuyTargetMenu: React.FC<{
         <ul>
           <BuyMenuItem
             show={!trackOwned}
-            label={t("buyThisTrack")}
+            label={t(
+              trackGroup.isPreorder ? "preOrderThisTrack" : "buyThisTrack"
+            )}
             onSelect={() => setBuyTarget("track")}
           />
           <BuyMenuItem
-            show={!albumOwned}
-            label={t("buyThisAlbum")}
+            show
+            label={t(
+              trackGroup.isPreorder ? "preOrderThisAlbum" : "buyThisAlbum"
+            )}
             onSelect={() => setBuyTarget("album")}
           />
         </ul>

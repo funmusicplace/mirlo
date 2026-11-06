@@ -408,10 +408,12 @@ const downloadAndZipTracks = async ({
 
     logger.info(`Downloaded tracks ${tempFolder}`);
 
-    await downloadTrackGroupContent({
-      trackGroupId: trackGroup.id,
-      contentDestination: tempFolder,
-    });
+    if (destinationType !== "track") {
+      await downloadTrackGroupContent({
+        trackGroupId: trackGroup.id,
+        contentDestination: tempFolder,
+      });
+    }
 
     logger.info(`trackGroupId ${trackGroup.id}: Building zip`);
 

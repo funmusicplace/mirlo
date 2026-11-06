@@ -12,6 +12,7 @@ import {
   getReleaseUrl,
   getTrackUrl,
 } from "utils/artist";
+import { isSingleTrackRelease } from "utils/tracks";
 
 type Item =
   | (Merch & { artist?: Artist })
@@ -47,7 +48,7 @@ const ArtistItemLink: React.FC<{
   const url = determineItemLink(artist, item);
 
   const labelKey =
-    isTrack(item) || (isTrackgroup(item) && item.tracks?.length === 1)
+    isTrack(item) || (isTrackgroup(item) && isSingleTrackRelease(item))
       ? "goToTrack"
       : "goToAlbum";
 

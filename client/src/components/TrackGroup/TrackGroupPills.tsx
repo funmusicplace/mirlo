@@ -3,7 +3,10 @@ import Pill from "components/common/Pill";
 import React from "react";
 import { Link } from "react-router-dom";
 
-const TrackGroupPills: React.FC<{ tags?: string[] }> = ({ tags }) => {
+const TrackGroupPills: React.FC<{ tags?: string[]; centered?: boolean }> = ({
+  tags,
+  centered,
+}) => {
   if (!tags?.length) {
     return null;
   }
@@ -14,6 +17,7 @@ const TrackGroupPills: React.FC<{ tags?: string[] }> = ({ tags }) => {
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
+        ${centered ? "justify-content: center;" : ""}
       `}
     >
       {tags?.map((tag) => (

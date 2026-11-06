@@ -109,11 +109,35 @@ describe("tracks/{id}/testOwns", () => {
       assert.equal(response.body.result.exists, true);
     });
 
-    it("should return exists=false for non-preview track when user only has album purchase", async () => {
+    it("should return exists=true for non-preview track when user has purchased the released album", async () => {
       const { user } = await createUser({ email: "artist@artist.com" });
       const profile = await createProfile(user.id);
       const trackGroup = await createTrackGroup(profile.id, {
         publishedAt: new Date(),
+        tracks: [],
+      });
+      const track = await createTrack(trackGroup.id, { isPreview: false });
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+      await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+      const response = await requestApp
+        .get(`tracks/${track.id}/testOwns`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.exists, true);
+    });
+
+    it("should return exists=false for a pre-order's non-preview track when user only has album purchase", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        publishedAt: new Date(),
+        isPreorder: true,
         tracks: [],
       });
       const track = await createTrack(trackGroup.id, { isPreview: false });

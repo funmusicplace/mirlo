@@ -95,7 +95,7 @@ export function queryTopSoldTrackGroups(opts: TopSoldQueryOptions) {
 
 const fetchTrackGroup: QueryFunction<
   TrackGroup,
-  ["fetchTrackGroup", { albumSlug?: string | null; artistId?: string }]
+  ["fetchTrackGroup", { albumSlug?: string | null; artistId?: string }, ...any]
 > = ({ queryKey: [_, { albumSlug, artistId }], signal }) => {
   return api
     .get<{
@@ -120,9 +120,11 @@ export function queryTrackGroup(opts: {
         albumSlug: opts.albumSlug,
         artistId: opts.artistId,
       },
+      QUERY_KEY_AUTH,
     ],
     queryFn: fetchTrackGroup,
     initialData: () => getInjectedTrackGroup(opts.albumSlug || ""),
+    initialDataUpdatedAt: 0,
     enabled: !!opts.albumSlug,
   });
 }

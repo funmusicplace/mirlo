@@ -313,14 +313,14 @@ describe("pre-order flow", () => {
       cy.visit(
         `/${artistSlug}/release/download-block-album/tracks/${previewTrackId}`
       );
-      cy.findByRole("button", { name: "Download" }).should("exist");
+      cy.findByRole("button", { name: "Download track" }).should("exist");
     });
 
     it("does not show download button for non-preview track during pre-order", () => {
       cy.visit(
         `/${artistSlug}/release/download-block-album/tracks/${nonPreviewTrackId}`
       );
-      cy.findByRole("button", { name: "Download" }).should("not.exist");
+      cy.findByRole("button", { name: /^Download/ }).should("not.exist");
     });
   });
 

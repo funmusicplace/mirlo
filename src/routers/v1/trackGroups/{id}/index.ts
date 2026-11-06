@@ -52,14 +52,12 @@ export default function () {
       const isPublished =
         trackGroup?.publishedAt && trackGroup.publishedAt < new Date();
 
-      if (trackGroup && !isPublished) {
-        const canSeeUnpublished = await canUserEditProfile(
-          trackGroup.profileId,
-          loggedInUser
-        );
-        if (!canSeeUnpublished) {
-          trackGroup = null;
-        }
+      const canEdit = trackGroup
+        ? await canUserEditProfile(trackGroup.profileId, loggedInUser)
+        : false;
+
+      if (trackGroup && !isPublished && !canEdit) {
+        trackGroup = null;
       }
 
       if (!trackGroup) {
@@ -71,6 +69,7 @@ export default function () {
       res.json({
         result: processSingleTrackGroup(trackGroup, {
           loggedInUserId: loggedInUser?.id,
+          canEdit,
         }),
       });
     } catch (e) {

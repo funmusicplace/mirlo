@@ -116,7 +116,7 @@ describe("single track download", () => {
     }).as("downloadTrack");
 
     cy.visit(`/${artistSlug}/release/${albumSlug}/tracks/${purchasedTrackId}`);
-    cy.findByRole("button", { name: "Download", timeout: 10000 }).click();
+    cy.findByRole("button", { name: "Download track", timeout: 10000 }).click();
 
     cy.findByRole("dialog").within(() => {
       cy.findByText("What file type do you want to download?").should(
@@ -159,7 +159,7 @@ describe("single track download", () => {
     }).as("downloadTrack");
 
     cy.visit(`/${artistSlug}/release/${albumSlug}/tracks/${purchasedTrackId}`);
-    cy.findByRole("button", { name: "Download", timeout: 10000 }).click();
+    cy.findByRole("button", { name: "Download track", timeout: 10000 }).click();
     cy.findByRole("dialog")
       .findByRole("button", { name: "MP3 320kbps" })
       .click();
@@ -211,6 +211,6 @@ describe("single track download", () => {
       `/${artistSlug}/release/${albumSlug}/tracks/${unpurchasedTrackId}`
     );
     cy.findByRole("heading", { name: new RegExp(unpurchasedTrackTitle) });
-    cy.findByRole("button", { name: "Download" }).should("not.exist");
+    cy.findByRole("button", { name: /^Download/ }).should("not.exist");
   });
 });

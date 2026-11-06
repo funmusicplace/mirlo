@@ -47,7 +47,7 @@ export const AppChrome: React.FC<{ player?: boolean }> = ({ player }) => {
       <div className="hidden md:block">
         <PageBackground />
       </div>
-      <div className="grow flex flex-col pb-[65px] min-h-[calc(100vh-65px)]">
+      <div className="grow flex flex-col pb-(--player-reserved-height) min-h-[calc(100vh-var(--player-reserved-height))]">
         <div className="w-full flex flex-col min-h-screen">
           <main
             className="mx-auto w-full rounded-[var(--mi-border-radius)] flex justify-center z-[1] grow"

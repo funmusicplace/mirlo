@@ -69,7 +69,8 @@ export const startGeneratingZip = async (
   destinationType: "track" | "trackGroup" = "trackGroup",
   requestedByUserId?: number
 ) => {
-  const jobKey = `${trackGroup.id}-${format}`;
+  const trackId = destinationType === "track" ? tracks[0]?.id : undefined;
+  const jobKey = `${trackGroup.id}-${format}-${destinationType}-${trackId ?? "all"}`;
 
   // Check if a job for this trackGroup/format combination is already pending or active
   const existingJobs = await generateAlbumQueue.getJobs(
@@ -81,7 +82,10 @@ export const startGeneratingZip = async (
   const duplicateJob = existingJobs.find((job) => {
     const jobData = job.data as any;
     return (
-      jobData.trackGroup?.id === trackGroup.id && jobData.format === format
+      jobData.trackGroup?.id === trackGroup.id &&
+      jobData.format === format &&
+      jobData.destinationType === destinationType &&
+      (trackId === undefined || jobData.tracks?.[0]?.id === trackId)
     );
   });
 

@@ -6,6 +6,8 @@ const otherArtistName = "Recommended Artist";
 const otherArtistSlug = "recommended-artist";
 const loneArtistName = "Lone Artist";
 const loneArtistSlug = "lone-artist";
+const singleArtistName = "Single Artist";
+const singleArtistSlug = "single-artist";
 
 const mainAlbum = { title: "Main Album", urlSlug: "main-album" };
 const otherAlbum = { title: "Other Album", urlSlug: "other-album" };
@@ -14,10 +16,27 @@ const recommendedAlbum = {
   urlSlug: "recommended-album",
 };
 const loneAlbum = { title: "Lone Album", urlSlug: "lone-album" };
+const singleRelease = { title: "Single Release", urlSlug: "single-release" };
+
+const singleLyrics = "Gulls at low tide";
+const singleDescription = "Recorded on the harbour wall. ".repeat(60).trim();
 
 const pastReleaseDate = new Date(
   Date.now() - 24 * 60 * 60 * 1000
 ).toISOString();
+
+const twoTracks = [
+  {
+    title: "First Song",
+    order: 1,
+    audio: { create: { uploadState: "SUCCESS" } },
+  },
+  {
+    title: "Second Song",
+    order: 2,
+    audio: { create: { uploadState: "SUCCESS" } },
+  },
+];
 
 const createArtistWithOwner = (email: string, name: string, slug: string) =>
   cy
@@ -58,6 +77,7 @@ describe("release page", () => {
           about: "Recorded over one winter by the sea.",
           credits: "Mixed by Haru Ito",
           coverCredit: "Mira Holt",
+          tracks: twoTracks,
         });
       })
       .then((tg: any) => {
@@ -103,6 +123,32 @@ describe("release page", () => {
           ...loneAlbum,
           published: true,
           releaseDate: pastReleaseDate,
+          tracks: twoTracks,
+        })
+      )
+      .then(() =>
+        createArtistWithOwner(
+          "single-artist@example.com",
+          singleArtistName,
+          singleArtistSlug
+        )
+      )
+      .then((singleArtist: any) =>
+        cy.task("createTrackGroup", {
+          artistId: singleArtist.id,
+          ...singleRelease,
+          published: true,
+          releaseDate: pastReleaseDate,
+          coverCredit: "Mira Holt",
+          tracks: [
+            {
+              title: singleRelease.title,
+              order: 1,
+              lyrics: singleLyrics,
+              description: singleDescription,
+              audio: { create: { uploadState: "SUCCESS" } },
+            },
+          ],
         })
       );
   });
@@ -114,7 +160,7 @@ describe("release page", () => {
       "be.visible"
     );
     cy.findByText(/Released on/).should("be.visible");
-    cy.findByText("1 track").should("be.visible");
+    cy.findByText("2 tracks").should("be.visible");
     cy.findByText("Cover art: Mira Holt").should("be.visible");
     cy.findByText("Mixed by Haru Ito").should("be.visible");
 
@@ -169,7 +215,7 @@ describe("release page", () => {
     cy.findByRole("button", { name: "Follow", timeout: 10000 }).should(
       "be.visible"
     );
-    cy.findByText("1 track").should("be.visible");
+    cy.findByText("2 tracks").should("be.visible");
 
     cy.findByRole("heading", { name: "Credits" }).should("not.exist");
     cy.findByRole("heading", { name: "About" }).should("not.exist");
@@ -179,5 +225,40 @@ describe("release page", () => {
     cy.findByRole("region", {
       name: `Other releases by ${loneArtistName}`,
     }).should("not.exist");
+  });
+
+  it("shows a single-track release in the centered view, with anchors to its sections", () => {
+    cy.visit(`/${singleArtistSlug}/release/${singleRelease.urlSlug}`);
+
+    cy.findByRole("heading", {
+      level: 1,
+      name: singleRelease.title,
+      timeout: 10000,
+    }).should("be.visible");
+    cy.findByText("2 tracks").should("not.exist");
+    cy.findByText("1 track").should("not.exist");
+
+    cy.findByRole("navigation", { name: "On this page" }).within(() => {
+      cy.findByRole("link", { name: /Lyrics/ }).should(
+        "have.attr",
+        "href",
+        "#lyrics"
+      );
+      cy.findByRole("link", { name: /About/ }).should(
+        "have.attr",
+        "href",
+        "#about"
+      );
+      cy.findByRole("link", { name: /Credits/ }).should(
+        "have.attr",
+        "href",
+        "#credits"
+      );
+    });
+
+    cy.findByText(singleLyrics).should("exist");
+    cy.findByText(singleDescription).should("exist");
+    cy.findByRole("heading", { name: "Credits" }).should("exist");
+    cy.findByText("Cover art: Mira Holt").should("exist");
   });
 });

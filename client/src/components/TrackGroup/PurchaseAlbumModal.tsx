@@ -11,12 +11,25 @@ import { useSearchParams } from "react-router-dom";
 
 import { bp } from "../../constants";
 
+const LABELS_BY_TARGET: Record<
+  "track" | "album",
+  Partial<Record<string, string>>
+> = {
+  track: {
+    buy: "buyTrack",
+    preOrder: "preOrderTrack",
+    addToCollection: "addTrackToCollection",
+  },
+  album: { buy: "buyAlbum", preOrder: "preOrderAlbum" },
+};
+
 const PurchaseAlbumModal: React.FC<{
   trackGroup: TrackGroup;
   track?: Track;
   fixed?: boolean;
   compact?: boolean;
-}> = ({ trackGroup, track, fixed, compact }) => {
+  labelTarget?: "track" | "album";
+}> = ({ trackGroup, track, fixed, compact, labelTarget }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
@@ -48,17 +61,20 @@ const PurchaseAlbumModal: React.FC<{
     return null;
   }
 
-  const payOrNameYourPrice =
-    trackGroup.minPrice === 0 ? "nameYourPriceLabel" : "buy";
+  const minPrice = track?.minPrice ?? trackGroup.minPrice;
+  const payOrNameYourPrice = minPrice === 0 ? "nameYourPriceLabel" : "buy";
 
   const preOrderOrBuyText =
-    trackGroup.minPrice === null
+    minPrice === null
       ? "addToCollection"
       : trackGroup.fundraiser?.isAllOrNothing
         ? "backThisProject"
         : trackGroup.isPreorder
           ? "preOrder"
           : payOrNameYourPrice;
+  const buttonLabel =
+    (labelTarget && LABELS_BY_TARGET[labelTarget][preOrderOrBuyText]) ??
+    preOrderOrBuyText;
   const isAddToCollection = preOrderOrBuyText === "addToCollection";
   const isNameYourPrice = preOrderOrBuyText === "nameYourPriceLabel";
   const isLongLabel = isAddToCollection || isNameYourPrice;
@@ -72,7 +88,7 @@ const PurchaseAlbumModal: React.FC<{
       rounded
       size="compact"
     >
-      {t(preOrderOrBuyText)}
+      {t(buttonLabel)}
     </FixedButton>
   ) : (
     <ArtistButton
@@ -113,7 +129,7 @@ const PurchaseAlbumModal: React.FC<{
         `}
       `}
     >
-      {t(preOrderOrBuyText)}
+      {t(buttonLabel)}
     </ArtistButton>
   );
 

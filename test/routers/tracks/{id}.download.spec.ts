@@ -206,7 +206,7 @@ describe("tracks/{id}/download", () => {
       assert.equal(response.header["content-type"], "application/zip");
     });
 
-    it("should GET / 404 for non-preview track when user only has album purchase", async () => {
+    it("should GET / success for non-preview track when user has purchased the released album", async () => {
       const { user } = await createUser({ email: "artist@artist.com" });
       const profile = await createProfile(user.id);
       const trackGroup = await createTrackGroup(profile.id, {
@@ -214,6 +214,7 @@ describe("tracks/{id}/download", () => {
         tracks: [],
       });
       const track = await createTrack(trackGroup.id, { isPreview: false });
+      await uploadZip("track", track.id, "flac", await generateMockArchive());
 
       const { user: purchaser, accessToken } = await createUser({
         email: "purchaser@artist.com",
@@ -225,7 +226,31 @@ describe("tracks/{id}/download", () => {
         .set("Accept", "application/json")
         .set("Cookie", [`jwt=${accessToken}`]);
 
-      assert.equal(response.statusCode, 404);
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.header["content-type"], "application/zip");
+    });
+
+    it("should not download a pre-order's non-preview track for an album buyer until release", async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        isPreorder: true,
+        tracks: [],
+      });
+      const track = await createTrack(trackGroup.id, { isPreview: false });
+      await uploadZip("track", track.id, "flac", await generateMockArchive());
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+      await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+      const response = await requestApp
+        .get(`tracks/${track.id}/download`)
+        .set("Accept", "application/json")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 403);
     });
 
     it("should GET / fail if not generated with logged in user", async () => {

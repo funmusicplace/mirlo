@@ -45,8 +45,8 @@ const Wrapper = styled.div`
 const ClickToPlayTracks: React.FC<{
   trackIds: number[];
   className?: string;
-  playLabel?: "album" | "track";
-}> = ({ trackIds, className, playLabel }) => {
+  showLabel?: boolean;
+}> = ({ trackIds, className, showLabel }) => {
   const {
     state: { playing, playerQueueIds, currentlyPlayingIndex },
     dispatch,
@@ -78,7 +78,7 @@ const ClickToPlayTracks: React.FC<{
     return null;
   }
 
-  if (playLabel) {
+  if (showLabel) {
     return (
       <ArtistButton
         startIcon={currentlyPlaying ? <TfiControlPause /> : <VscPlay />}
@@ -92,9 +92,7 @@ const ClickToPlayTracks: React.FC<{
           ` + (className ? ` ${className}` : "")
         }
       >
-        {currentlyPlaying
-          ? t("pause")
-          : t(playLabel === "album" ? "playAlbum" : "playTrack")}
+        {currentlyPlaying ? t("pause") : t("playAlbum")}
       </ArtistButton>
     );
   }

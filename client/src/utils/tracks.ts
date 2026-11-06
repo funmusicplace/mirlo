@@ -41,6 +41,10 @@ export const fmtMSS = (sec_num: number) => {
     .join(":");
 };
 
+export const isSingleTrackRelease = (trackGroup: {
+  tracks?: unknown[] | null;
+}) => trackGroup.tracks?.length === 1;
+
 export const isTrackOwnedOrPreview = (
   track: Track,
   user?: LoggedInUser | null,
@@ -48,12 +52,6 @@ export const isTrackOwnedOrPreview = (
 ): boolean => {
   if (track.isPreview) {
     return true;
-  }
-  if (
-    trackGroup?.releaseDate &&
-    new Date(trackGroup.releaseDate) > new Date()
-  ) {
-    return false;
   }
   if (!user) {
     return false;
@@ -63,10 +61,19 @@ export const isTrackOwnedOrPreview = (
     id: lookInTrackGroup.artistId ?? lookInTrackGroup.artist?.id,
     userId: lookInTrackGroup.artist?.userId,
   });
+  if (ownsTrack) {
+    return true;
+  }
+  if (lookInTrackGroup.isPreorder) {
+    return false;
+  }
   const boughtTrack = !!lookInTrackGroup.userTrackGroupPurchases?.find(
     (utgp) => utgp.userId === user.id
   );
-  return ownsTrack || boughtTrack;
+  const boughtSingleTrack = !!user.userTrackPurchases?.some(
+    (purchase) => purchase.trackId === track.id
+  );
+  return boughtTrack || boughtSingleTrack;
 };
 
 export const widgetPath = (trackId: number, type: "track" | "trackGroup") =>

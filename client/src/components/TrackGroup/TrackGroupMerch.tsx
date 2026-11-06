@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { useTranslation } from "react-i18next";
 
+import { sectionLabelClass } from "./ReleaseInfos";
 import TrackGroupMerchItem from "./TrackGroupMerchItem";
 
 const MerchList = styled.ul`
@@ -14,17 +15,22 @@ const MerchList = styled.ul`
   }
 `;
 
-const TrackGroupMerch: React.FC<{ merch: Merch[]; releaseArtist: Artist }> = ({
-  merch,
-  releaseArtist,
-}) => {
+const TrackGroupMerch: React.FC<{
+  merch: Merch[];
+  releaseArtist: Artist;
+  centeredTitle?: boolean;
+}> = ({ merch, releaseArtist, centeredTitle }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
 
   return (
     <div className="mt-4">
-      <p className="mb-1.5 text-sm">{t("relatedMerch")}</p>
+      <h2
+        className={`${sectionLabelClass} ${centeredTitle ? "text-center" : ""}`}
+      >
+        {t("relatedMerch")}
+      </h2>
       <MerchList>
         {merch?.map((item) => (
           <TrackGroupMerchItem

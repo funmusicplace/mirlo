@@ -161,22 +161,28 @@ describe("auto-purchase-new-albums", () => {
     assert.equal(await findPurchase(followerUser.id, tg.id), null);
   });
 
-  const ineligible: [string, Parameters<typeof createTrackGroup>[1]][] = [
-    ["scheduled in the future", { publishedAt: new Date(Date.now() + 60_000) }],
-    ["unpublished", { publishedAt: null }],
-    ["private", { isPublic: false }],
+  const ineligible: [string, () => Parameters<typeof createTrackGroup>[1]][] = [
+    [
+      "scheduled in the future",
+      () => ({ publishedAt: new Date(Date.now() + 60_000) }),
+    ],
+    ["unpublished", () => ({ publishedAt: null })],
+    ["private", () => ({ isPublic: false })],
     [
       "without a cover",
-      { cover: { create: { url: [], dimensions: "artwork" } } },
+      () => ({ cover: { create: { url: [], dimensions: "artwork" } } }),
     ],
-    ["the hidden song-drafts album", { isHiddenTrackGroupForSongDrafts: true }],
-    ["admin-disabled", { adminEnabled: false }],
+    [
+      "the hidden song-drafts album",
+      () => ({ isHiddenTrackGroupForSongDrafts: true }),
+    ],
+    ["admin-disabled", () => ({ adminEnabled: false })],
   ];
 
-  for (const [label, data] of ineligible) {
+  for (const [label, makeData] of ineligible) {
     it(`should not grant albums that are ${label}`, async () => {
       const { artist, followerUser } = await setupArtistWithSubscriber();
-      const tg = await createTrackGroup(artist.id, data);
+      const tg = await createTrackGroup(artist.id, makeData());
 
       await grantReleaseToAutoPurchaseTiers(tg.id);
 

@@ -265,6 +265,185 @@ describe("trackGroups/{id}", () => {
       assert.equal(response.body.result.tracks[0].isPlayable, true);
     });
 
+    it("should GET / 200 with isPlayable true on a non-preview track when user purchased trackGroup", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        tracks: [
+          {
+            title: "must own",
+            isPreview: false,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+        ],
+      });
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+
+      await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${profile.urlSlug}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.tracks[0].isPlayable, true);
+    });
+
+    it("should GET / 200 with isPlayable true on a non-preview track for the artist owner", async () => {
+      const { user, accessToken } = await createUser({
+        email: "artist@artist.com",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        tracks: [
+          {
+            title: "must own",
+            isPreview: false,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+        ],
+      });
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${profile.urlSlug}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.tracks[0].isPlayable, true);
+    });
+
+    it("should GET / 200 with isPlayable false for a buyer while a pre-order runs past its release date", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        isPreorder: true,
+        releaseDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        tracks: [
+          {
+            title: "must own",
+            isPreview: false,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+        ],
+      });
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+
+      await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${profile.urlSlug}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.tracks[0].isPlayable, false);
+    });
+
+    it("should GET / 200 with isPlayable false on a non-preview track of a pre-order without a release date, even for a buyer", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        isPreorder: true,
+        releaseDate: null,
+        tracks: [
+          {
+            title: "must own",
+            isPreview: false,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+        ],
+      });
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+
+      await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${profile.urlSlug}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.tracks[0].isPlayable, false);
+    });
+
+    it("should GET / 200 with isPlayable true for a buyer with a future release date when it is not a pre-order", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        releaseDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        tracks: [
+          {
+            title: "must own",
+            isPreview: false,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+        ],
+      });
+
+      const { user: purchaser, accessToken } = await createUser({
+        email: "purchaser@artist.com",
+      });
+
+      await createUserTrackGroupPurchase(purchaser.id, trackGroup.id);
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${profile.urlSlug}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.tracks[0].isPlayable, true);
+    });
+
+    it("should GET / 200 with isPlayable true on a pre-order's non-preview track for an admin", async () => {
+      const { user } = await createUser({
+        email: "artist@artist.com",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id, {
+        isPreorder: true,
+        tracks: [
+          {
+            title: "must own",
+            isPreview: false,
+            audio: { create: { uploadState: "SUCCESS" } },
+          },
+        ],
+      });
+
+      const { accessToken } = await createUser({
+        email: "admin@artist.com",
+        isAdmin: true,
+      });
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.urlSlug}?artistId=${profile.urlSlug}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.tracks[0].isPlayable, true);
+    });
+
     it("should GET / 200 with isPlayable true when user purchased individual track", async () => {
       const { user } = await createUser({
         email: "artist@artist.com",

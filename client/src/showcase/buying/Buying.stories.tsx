@@ -141,7 +141,7 @@ const openBuyModal = async (canvasElement: HTMLElement) => {
   const canvas = within(canvasElement);
   const button = await canvas.findByRole(
     "button",
-    { name: /^(buy|name your price)$/i },
+    { name: /^(buy|buy track|name your price)$/i },
     { timeout: 5000 }
   );
   await userEvent.click(button);

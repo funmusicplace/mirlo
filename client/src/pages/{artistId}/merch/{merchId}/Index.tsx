@@ -12,11 +12,9 @@ import WidthContainer from "components/common/WidthContainer";
 import MerchButtonPopUp from "components/Merch/MerchButtonPopUp";
 import MerchDownloadableContent from "components/Merch/MerchDownloadableContent";
 import MerchImageGallery from "components/Merch/MerchImageGallery";
+import ImageWrapper from "components/TrackGroup/ImageWrapper";
 import { ItemViewTitle } from "components/TrackGroup/ItemViewTitle";
-import {
-  ImageAndDetailsWrapper,
-  ImageWrapper,
-} from "pages/{artistId}/release/{trackGroupId}/Index";
+import { ImageAndDetailsWrapper } from "pages/{artistId}/release/{trackGroupId}/Index";
 import { queryArtist, queryMerch, queryUserStripeStatus } from "queries";
 import { useTranslation } from "react-i18next";
 import { FaPen } from "react-icons/fa";

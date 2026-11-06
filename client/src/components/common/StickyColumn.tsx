@@ -11,7 +11,12 @@ const StickyWrapper = styled.div<{ headerHidden: boolean }>`
       props.headerHidden
         ? "1rem"
         : "calc(var(--header-cover-sticky-height) + 1rem)"},
-    calc(100dvh - var(--sticky-column-height, 0px) - 1rem)
+    calc(
+      100dvh - var(--sticky-column-height, 0px) - var(
+          --player-reserved-height
+        ) -
+        1rem
+    )
   );
   transition: top 0.4s ease-out;
 
