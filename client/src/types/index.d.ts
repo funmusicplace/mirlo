@@ -78,14 +78,17 @@ interface SettingsFromAPI {
       fromEmail?: string;
       sendgrid?: {
         apiKey?: string;
+        apiKeyConfigured?: boolean;
         webhookPublicKey?: string;
       };
       mailgun?: {
         apiKey?: string;
+        apiKeyConfigured?: boolean;
         domain?: string;
       };
       postmark?: {
         apiKey?: string;
+        apiKeyConfigured?: boolean;
       };
       smtp?: {
         host?: string;
@@ -93,6 +96,7 @@ interface SettingsFromAPI {
         secure?: boolean;
         user?: string;
         password?: string;
+        passwordConfigured?: boolean;
       };
     };
     cloudflareTurnstileSecret?: string;

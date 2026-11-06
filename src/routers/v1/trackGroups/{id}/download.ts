@@ -42,7 +42,7 @@ export default function () {
 
       if (token && email) {
         log.info(
-          `trackGroupId: ${trackGroupId} being downloaded with a purchase token, ${email}, ${token}`
+          `trackGroupId: ${trackGroupId} being downloaded with a purchase token`
         );
         const tokenUser = await prisma.user.findFirst({
           where: { email },
@@ -61,11 +61,13 @@ export default function () {
               throw e;
             }
             log.info(
-              `trackGroupId: ${trackGroupId} purchase token didn't resolve for ${email}, falling back to the session`
+              `trackGroupId: ${trackGroupId} purchase token didn't resolve, falling back to the session`
             );
           }
         } else if (!req.user) {
-          log.info(`trackGroupId: ${trackGroupId} no user found for ${email}`);
+          log.info(
+            `trackGroupId: ${trackGroupId} no user found for the download link email`
+          );
           throw purchaseLinkNotFound();
         }
       }

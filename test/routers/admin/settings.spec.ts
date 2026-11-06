@@ -153,6 +153,122 @@ describe("admin/settings", () => {
       assert.ok(!JSON.stringify(response.body).includes("turnstile-secret"));
     });
 
+    it("should mask email provider secrets and the instance private key", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        emailProvider: {
+          provider: "smtp",
+          sendgrid: { apiKey: "sendgrid-secret" },
+          mailgun: { apiKey: "mailgun-secret", domain: "mg.example.com" },
+          postmark: { apiKey: "postmark-secret" },
+          smtp: { host: "smtp.example.com", password: "smtp-secret" },
+        },
+      });
+      await prisma.settings.updateMany({
+        data: { privateKey: "instance-private-key" },
+      });
+
+      const response = await requestApp
+        .get("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 200);
+      for (const secret of [
+        "sendgrid-secret",
+        "mailgun-secret",
+        "postmark-secret",
+        "smtp-secret",
+        "instance-private-key",
+      ]) {
+        assert.ok(!response.text.includes(secret), secret);
+      }
+      const { emailProvider } = response.body.result.settings;
+      assert.equal(emailProvider.sendgrid.apiKeyConfigured, true);
+      assert.equal(emailProvider.mailgun.domain, "mg.example.com");
+      assert.equal(emailProvider.smtp.host, "smtp.example.com");
+      assert.equal(emailProvider.smtp.passwordConfigured, true);
+    });
+
+    it("should keep saved email provider secrets when blank ones are submitted", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        emailProvider: {
+          provider: "smtp",
+          sendgrid: { apiKey: "sendgrid-secret" },
+          smtp: { host: "smtp.example.com", password: "smtp-secret" },
+        },
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .send({
+          settings: {
+            platformPercent: 7,
+            emailProvider: {
+              provider: "smtp",
+              sendgrid: { apiKey: "", apiKeyConfigured: true },
+              smtp: {
+                host: "smtp2.example.com",
+                password: "",
+                passwordConfigured: true,
+              },
+            },
+          },
+        });
+
+      assert.equal(response.statusCode, 200);
+      const row = await prisma.settings.findFirst();
+      const emailProvider = (row?.settings as Record<string, any>)
+        .emailProvider;
+      assert.equal(emailProvider.sendgrid.apiKey, "sendgrid-secret");
+      assert.equal(emailProvider.smtp.password, "smtp-secret");
+      assert.equal(emailProvider.smtp.host, "smtp2.example.com");
+      assert.equal(emailProvider.smtp.passwordConfigured, undefined);
+      assert.ok(!response.text.includes("smtp-secret"));
+    });
+
+    it("should replace an email provider secret when a new one is submitted", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        platformPercent: 7,
+        emailProvider: {
+          provider: "postmark",
+          postmark: { apiKey: "old-key" },
+        },
+      });
+
+      await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .send({
+          settings: {
+            platformPercent: 7,
+            emailProvider: {
+              provider: "postmark",
+              postmark: { apiKey: "new-key" },
+            },
+          },
+        });
+
+      const row = await prisma.settings.findFirst();
+      assert.equal(
+        (row?.settings as Record<string, any>).emailProvider.postmark.apiKey,
+        "new-key"
+      );
+    });
+
     it("should keep the saved Turnstile secret when a blank one is submitted", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",

@@ -1955,6 +1955,7 @@
     "security": "Security",
     "cloudflareTurnstileSecret": "Cloudflare Turnstile secret",
     "cloudflareTurnstileSecretPlaceholderConfigured": "Secret saved (leave blank to keep)",
+    "secretPlaceholderConfigured": "Saved (leave blank to keep)",
     "cloudflareTurnstileSecretPlaceholderEmpty": "No secret set",
     "defconLevel": "Defcon level",
     "defconLevelOption0": "Normal",
