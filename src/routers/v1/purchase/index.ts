@@ -38,7 +38,10 @@ import {
   initiateOnlineSubscription,
   initiateSubscription,
 } from "../../../utils/payments/subscription";
-import { determinePrice } from "../../../utils/purchasing";
+import {
+  calculateDiscountedPrice,
+  determinePrice,
+} from "../../../utils/purchasing";
 import { whereForPurchasableTrackGroup } from "../../../utils/trackGroup";
 import { findUserDiscountPercentsForProfile } from "../../../utils/user";
 
@@ -166,9 +169,10 @@ export const resolveDigitalPurchaseItem = async <
     };
   }
 
-  const discountedAmount = discountPercent
-    ? Math.round(priceNumber * (1 - discountPercent / 100))
-    : priceNumber;
+  const { discountedPriceNumber: discountedAmount } = calculateDiscountedPrice(
+    priceNumber,
+    discountPercent
+  );
 
   return {
     kind: "paid",
@@ -233,11 +237,10 @@ export const resolveMerchPurchaseItem = (
       id: merch.id,
       quantity: qty,
       amount:
-        Math.round(
-          (priceNumber + additionalPricePerUnit) *
-            qty *
-            (1 - discountPercent / 100)
-        ) + shippingCostCents,
+        calculateDiscountedPrice(
+          (priceNumber + additionalPricePerUnit) * qty,
+          discountPercent
+        ).discountedPriceNumber + shippingCostCents,
       message: item.message,
       optionIds: options.map((o) => o.id),
       shippingDestinationId: item.shippingDestinationId,

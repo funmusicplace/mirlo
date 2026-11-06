@@ -57,6 +57,31 @@ describe("manage/artists/{artistId}/subscriptionTiers", () => {
       assert.equal(response.statusCode, 200);
     });
 
+    it("should keep discount percents between 0 and 100", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const artist = await createArtist(user.id);
+
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/subscriptionTiers`)
+        .send({
+          name: "Discounted",
+          minAmount: 500,
+          digitalDiscountPercent: -20,
+          merchDiscountPercent: 150,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const tier = await prisma.profileSubscriptionTier.findUnique({
+        where: { id: response.body.result.id },
+      });
+      assert.equal(tier?.digitalDiscountPercent, 0);
+      assert.equal(tier?.merchDiscountPercent, 100);
+    });
+
     it("should derive a urlSlug from the name and suffix duplicates", async () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",

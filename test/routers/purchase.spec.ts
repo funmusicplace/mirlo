@@ -1386,6 +1386,101 @@ describe("purchase", () => {
       assert.equal(response.body.deferred.amount, 1000 + 600);
     });
 
+    it("never takes more than the goods off for a merch discount over 100%", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_merch_overdiscount",
+        currency: "usd",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id);
+      await prisma.profileSubscriptionTier.update({
+        where: { id: tier.id },
+        data: { merchDiscountPercent: 150 },
+      });
+      await prisma.profileUserSubscription.create({
+        data: {
+          userId: buyer.id,
+          profileSubscriptionTierId: tier.id,
+          amount: 500,
+        },
+      });
+      const merch = await createMerch(profile.id, {
+        isPublic: true,
+        minPrice: 1000,
+        quantityRemaining: 10,
+      });
+      const destination = await createMerchShippingDestination({
+        merchId: merch.id,
+        destinationCountry: "US",
+        costUnit: 500,
+        costExtraUnit: 100,
+      });
+
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          items: [
+            {
+              type: "merch",
+              id: merch.id,
+              quantity: 1,
+              shippingDestinationId: destination.id,
+            },
+            { type: "tip", amount: 300 },
+          ],
+          deferred: true,
+        },
+        accessToken
+      );
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.deferred.amount, 500 + 300);
+    });
+
+    it("never takes more than the price off for a digital discount over 100%", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_digital_overdiscount",
+        currency: "usd",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id);
+      await prisma.profileSubscriptionTier.update({
+        where: { id: tier.id },
+        data: { digitalDiscountPercent: 150 },
+      });
+      await prisma.profileUserSubscription.create({
+        data: {
+          userId: buyer.id,
+          profileSubscriptionTierId: tier.id,
+          amount: 500,
+        },
+      });
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          items: [
+            { type: "trackGroup", id: tg.id, price: "1500" },
+            { type: "tip", amount: 300 },
+          ],
+          deferred: true,
+        },
+        accessToken
+      );
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.deferred.amount, 300);
+    });
+
     it("knows the buyer's email for a logged-in quote", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
