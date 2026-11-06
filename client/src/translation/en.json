@@ -1597,6 +1597,7 @@
   },
   "artistSupporters": {
     "supporters": "Supporters",
+    "new": "New",
     "totalComingInMonthly": "Total coming in monthly",
     "totalComingInAnnually": "Total coming in annually",
     "totalProjectedAnnual": "Projected annual total",
@@ -1622,7 +1623,17 @@
     "cancelSupporterConfirm": "Cancel {{ name }}'s subscription? They won't be charged again and will keep access until the end of the period they've already paid for. We'll email them to let them know.",
     "cancelSupporterSubmit": "Cancel subscription",
     "supporterCancelled": "Subscription cancelled",
-    "nevermind": "Never mind"
+    "nevermind": "Never mind",
+    "joinedInPastMonth": "Joined in the past month",
+    "sortBy": "Sort by",
+    "sortOptions": {
+      "createdAt": "Newest first",
+      "name": "Name",
+      "email": "Email",
+      "tier": "Tier",
+      "interval": "Interval",
+      "amount": "Amount (highest first)"
+    }
   },
   "share": {
     "copied": "Copied!",
