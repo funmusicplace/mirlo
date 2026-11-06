@@ -107,6 +107,23 @@ const postContentSanitizeOptions: sanitizeHtml.IOptions = {
 export const sanitizePostContent = (content: string) =>
   sanitizeHtml(content, postContentSanitizeOptions);
 
+export const sanitizeProfileEmailMessages = <T>(properties: T): T => {
+  const emails = (properties as { emails?: Record<string, unknown> } | null)
+    ?.emails;
+  if (!emails || typeof emails !== "object") {
+    return properties;
+  }
+  return {
+    ...properties,
+    emails: Object.fromEntries(
+      Object.entries(emails).map(([key, value]) => [
+        key,
+        typeof value === "string" ? sanitizePostContent(value) : value,
+      ])
+    ),
+  };
+};
+
 export const preparePostContent = async (
   content: string,
   imageIds: string[] = []

@@ -20,25 +20,8 @@ import {
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
 import { merchImagesInclude } from "../../../../../utils/merch";
-import { sanitizePostContent } from "../../../../../utils/postContent";
+import { sanitizeProfileEmailMessages } from "../../../../../utils/postContent";
 import { canProfileImportSubscribers } from "../../../../../utils/trustLevel";
-
-const sanitizeEmailMessages = (properties: unknown) => {
-  const emails = (properties as { emails?: Record<string, unknown> } | null)
-    ?.emails;
-  if (!emails || typeof emails !== "object") {
-    return properties;
-  }
-  return {
-    ...(properties as object),
-    emails: Object.fromEntries(
-      Object.entries(emails).map(([key, value]) => [
-        key,
-        typeof value === "string" ? sanitizePostContent(value) : value,
-      ])
-    ),
-  };
-};
 
 type Params = {
   artistId: string;
@@ -238,7 +221,10 @@ export default function () {
                   urlSlug: generateSlug(urlSlug),
                 }
               : {}),
-            properties: merge(oldProperties, sanitizeEmailMessages(properties)),
+            properties: merge(
+              oldProperties,
+              sanitizeProfileEmailMessages(properties)
+            ),
           },
         });
 

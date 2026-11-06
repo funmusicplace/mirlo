@@ -26,6 +26,7 @@ import approveSelfOwnedLabelRows from "../../src/dataMigrations/migrations/20261
 import defaultInstanceLogo from "../../src/dataMigrations/migrations/20261018120000_defaultInstanceLogo";
 import sanitizePostContent from "../../src/dataMigrations/migrations/20261022000000_sanitizePostContent";
 import subscriptionStripeAccounts from "../../src/dataMigrations/migrations/20261101120000_subscriptionStripeAccounts";
+import sanitizeProfileEmailMessages from "../../src/dataMigrations/migrations/20261106120000_sanitizeProfileEmailMessages";
 import {
   DEFAULT_BUCKET_CONFIG,
   getImagesBucket,
@@ -176,6 +177,7 @@ describe("dataMigrations: loading", () => {
         defaultInstanceLogo,
         sanitizePostContent,
         subscriptionStripeAccounts,
+        sanitizeProfileEmailMessages,
       ].map((m) => m.name)
     );
     assert.equal(dataMigrations.length, files.length);
@@ -663,5 +665,39 @@ describe("dataMigrations: subscriptionStripeAccounts", () => {
     );
 
     assert.equal(await subscriptionStripeAccounts.run(), false);
+  });
+});
+
+describe("dataMigrations: sanitizeProfileEmailMessages", () => {
+  beforeEach(async () => {
+    await clearTables();
+  });
+
+  it("sanitises saved thank-you notes and leaves other properties alone", async () => {
+    const { user } = await createUser({ email: "artist@test.com" });
+    const profile = await createProfile(user.id);
+    await prisma.profile.update({
+      where: { id: profile.id },
+      data: {
+        properties: {
+          colors: { button: "#123456" },
+          emails: { purchase: '<p>Thanks</p><img src="x" onerror="alert(1)">' },
+        },
+      },
+    });
+
+    await sanitizeProfileEmailMessages.run();
+    await sanitizeProfileEmailMessages.run();
+
+    const saved = await prisma.profile.findFirstOrThrow({
+      where: { id: profile.id },
+    });
+    const properties = saved.properties as {
+      colors: { button: string };
+      emails: { purchase: string };
+    };
+    assert(properties.emails.purchase.startsWith("<p>Thanks</p>"));
+    assert(!properties.emails.purchase.includes("onerror"));
+    assert.equal(properties.colors.button, "#123456");
   });
 });
