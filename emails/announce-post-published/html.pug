@@ -18,4 +18,4 @@ block content
     p.email-unsubscribe
       | #{t("emails.announcePostPublished.unsubscribePrompt", { artistName: artist.name })}
       |
-      a(href!=`${client}/${artist.urlSlug || artist.id}/unsubscribe?email=${encodeURIComponent(email)}`)= t("emails.announcePostPublished.unsubscribe")
+      a(href=`${client}/${artist.urlSlug || artist.id}/unsubscribe?email=${encodeURIComponent(email)}&token=${unfollowToken}`)= t("emails.announcePostPublished.unsubscribe")

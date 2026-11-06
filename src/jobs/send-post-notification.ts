@@ -9,6 +9,7 @@ import { serializePost } from "../serializers/post";
 import { getClient } from "../utils/getClient";
 import { getSafeErrorContext } from "../utils/logging";
 import { postImagesForContent, resolveImageRefs } from "../utils/postContent";
+import { unfollowToken } from "../utils/unfollowToken";
 
 import { parseOutIframes } from "./parse-out-iframes";
 
@@ -288,6 +289,9 @@ export default async function sendPostNotification(job: {
                 htmlContent,
               },
               email: encodeURIComponent(notification.user.email),
+              unfollowToken: post.profileId
+                ? unfollowToken(notification.user.email, post.profileId)
+                : undefined,
               host: process.env.API_DOMAIN,
               client: (await getClient()).applicationUrl,
             },

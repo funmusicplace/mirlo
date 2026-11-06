@@ -19,6 +19,7 @@ function Index() {
   const navigate = useNavigate();
   const snackbar = useSnackbar();
   const email = params.get("email");
+  const token = params.get("token");
   const errorHandler = useErrorHandler();
 
   const { register, handleSubmit } = useForm({
@@ -34,6 +35,7 @@ function Index() {
         try {
           await api.post(`artists/${artistId}/unfollow`, {
             email: email?.replaceAll(" ", ""),
+            token,
           });
           snackbar(t("successfullyUnsubscribed"), { type: "success" });
           navigate(getArtistUrl(artist));
@@ -42,7 +44,7 @@ function Index() {
         }
       }
     },
-    [artist, artistId, email, snackbar, navigate]
+    [artist, artistId, email, token, snackbar, navigate]
   );
 
   if (isPending) {
