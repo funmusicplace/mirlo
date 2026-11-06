@@ -10,6 +10,7 @@ import {
   userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeProfile } from "../../../../../serializers/artist";
+import { withPrivateProperties } from "../../../../../serializers/utils";
 import {
   asSlugConflictError,
   deleteProfile,
@@ -253,10 +254,10 @@ export default function () {
         });
         res.json({
           result: artist
-            ? {
-                ...serializeProfile(artist, Number(user.id)),
-                properties: artist.properties,
-              }
+            ? withPrivateProperties(
+                serializeProfile(artist, Number(user.id)),
+                artist
+              )
             : artist,
         });
       } else {
@@ -334,8 +335,10 @@ export default function () {
       } else {
         return res.json({
           result: {
-            ...serializeProfile(artist, Number(user.id), true),
-            properties: artist.properties,
+            ...withPrivateProperties(
+              serializeProfile(artist, Number(user.id), true),
+              artist
+            ),
             canImportSubscribers: await canProfileImportSubscribers(
               artist.id,
               user

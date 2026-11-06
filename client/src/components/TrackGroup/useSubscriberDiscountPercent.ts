@@ -5,14 +5,23 @@ const useSubscriberDiscountPercent = (
   isDigital?: boolean
 ) => {
   const { user } = useAuthContext();
-  const subscription = user?.artistUserSubscriptions?.find(
-    (subscription) => subscription.artistSubscriptionTier.artistId === artistId
+  const discountPercent = Math.max(
+    0,
+    ...(user?.artistUserSubscriptions ?? [])
+      .filter(
+        (subscription) =>
+          subscription.artistSubscriptionTier.artistId === artistId
+      )
+      .map(
+        (subscription) =>
+          Number(
+            subscription.artistSubscriptionTier[
+              isDigital ? "digitalDiscountPercent" : "merchDiscountPercent"
+            ]
+          ) || 0
+      )
   );
-  const discountPercent =
-    subscription?.artistSubscriptionTier[
-      isDigital ? "digitalDiscountPercent" : "merchDiscountPercent"
-    ] ?? 0;
-  return Math.min(100, Math.max(0, Number(discountPercent) || 0));
+  return Math.min(100, discountPercent);
 };
 
 export default useSubscriberDiscountPercent;

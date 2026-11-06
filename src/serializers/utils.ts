@@ -75,7 +75,7 @@ export type Serialized<T> = T extends Builtin
         }
       : T;
 
-export const withEmailMessages = <T extends object>(
+export const withPrivateProperties = <T extends object>(
   serializedProfile: T,
   profile?: { properties?: unknown } | null
 ) => ({ ...serializedProfile, properties: profile?.properties });

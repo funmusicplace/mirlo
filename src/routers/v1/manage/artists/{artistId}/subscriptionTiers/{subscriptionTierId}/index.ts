@@ -10,21 +10,9 @@ import {
 import { serializeProfileSubscriptionTier } from "../../../../../../../serializers/profileSubscriptionTier";
 import { AppError } from "../../../../../../../utils/error";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
+import { normalizeDiscountPercent } from "../../../../../../../utils/purchasing";
 import { getSiteSettings } from "../../../../../../../utils/settings";
 import { generateUniqueTierSlug } from "../../../../../../../utils/subscriptionTier";
-
-const normalizeDiscountPercent = (value: unknown): number | undefined => {
-  if (value === undefined || value === null || value === "") {
-    return undefined;
-  }
-
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) {
-    return undefined;
-  }
-
-  return Math.min(100, Math.max(0, Math.round(parsed)));
-};
 
 export default function () {
   const operations = {
