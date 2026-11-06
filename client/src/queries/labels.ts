@@ -33,6 +33,49 @@ const fetchLabelArtists: QueryFunction<
   }>(`v1/manage/label/`, { signal });
 };
 
+export type LabelRemovalImpact = {
+  trackGroups: { id: number; title: string }[];
+  isArtistPayee: boolean;
+  activeSubscriptionCount: number;
+  newPayeeName: string;
+};
+
+export type LabelRemovalSide = "artist" | "label";
+
+export const labelRemovalUrl = (
+  side: LabelRemovalSide,
+  artistId: number,
+  labelUserId: number
+) =>
+  side === "artist"
+    ? `manage/artists/${artistId}/labels/${labelUserId}`
+    : `manage/label/artists/${artistId}`;
+
+const fetchLabelRemovalImpact: QueryFunction<
+  LabelRemovalImpact,
+  [
+    "fetchLabelRemovalImpact",
+    { side: LabelRemovalSide; artistId: number; labelUserId: number },
+    ...any,
+  ]
+> = ({ queryKey: [_, { side, artistId, labelUserId }], signal }) =>
+  api
+    .get<{
+      result: LabelRemovalImpact;
+    }>(`v1/${labelRemovalUrl(side, artistId, labelUserId)}`, { signal })
+    .then((r) => r.result);
+
+export function queryLabelRemovalImpact(opts: {
+  side: LabelRemovalSide;
+  artistId: number;
+  labelUserId: number;
+}) {
+  return queryOptions({
+    queryKey: ["fetchLabelRemovalImpact", opts, QUERY_KEY_LABELS],
+    queryFn: fetchLabelRemovalImpact,
+  });
+}
+
 export function queryLabelArtists() {
   return queryOptions({
     queryKey: ["fetchLabelArtists"],

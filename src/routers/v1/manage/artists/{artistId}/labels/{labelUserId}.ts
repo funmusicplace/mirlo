@@ -6,12 +6,39 @@ import {
   userAuthenticated,
 } from "../../../../../../auth/passport";
 import { AppError } from "../../../../../../utils/error";
+import {
+  labelRemovalImpact,
+  removeLabelFromArtist,
+} from "../../../../../../utils/labelRemoval";
 
 export default function () {
   const operations = {
+    GET: [userAuthenticated, profileOwnedByLoggedInUser, GET],
     DELETE: [userAuthenticated, profileOwnedByLoggedInUser, DELETE],
     PUT: [userAuthenticated, profileOwnedByLoggedInUser, PUT],
   };
+  async function GET(req: Request, res: Response, next: NextFunction) {
+    const { artistId, labelUserId } = req.params;
+    try {
+      res.json({
+        result: await labelRemovalImpact(Number(artistId), Number(labelUserId)),
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  GET.apiDoc = {
+    summary: "What removing this label would change for the artist",
+    responses: {
+      200: { description: "Releases, payee and subscriptions affected" },
+      default: {
+        description: "An error occurred",
+        schema: { additionalProperties: true },
+      },
+    },
+  };
+
   async function PUT(req: Request, res: Response, next: NextFunction) {
     let { artistId, labelUserId }: { artistId?: string; labelUserId?: string } =
       req.params;
@@ -53,12 +80,7 @@ export default function () {
         throw new AppError({ httpCode: 400, description: "Need labelUserId" });
       }
 
-      await prisma.artistLabel.deleteMany({
-        where: {
-          labelUserId: Number(labelUserId),
-          artistId: Number(artistId),
-        },
-      });
+      await removeLabelFromArtist(Number(artistId), Number(labelUserId));
 
       const labels = await prisma.artistLabel.findMany({
         where: {

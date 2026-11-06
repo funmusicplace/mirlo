@@ -2,16 +2,16 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Box from "components/common/Box";
+import Button from "components/common/Button";
 import Table from "components/common/Table";
-import { Toggle } from "components/common/Toggle";
 import { queryArtistLabels, queryManagedArtist } from "queries";
 import React from "react";
-import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import api from "services/api";
 
 import ArtistLabels from "./ArtistLabels";
+import RemoveLabelButton from "./RemoveLabelButton";
 
 const LabelConfirmation: React.FC = () => {
   const { artistId } = useParams();
@@ -28,44 +28,9 @@ const LabelConfirmation: React.FC = () => {
     queryArtistLabels(Number(artistId))
   );
 
-  const { control, setValue } = useForm<{
-    relationships: {
-      labelUser: {
-        id: number;
-        name: string;
-        email?: string;
-      };
-      isLabelApproved: boolean;
-      isArtistApproved: boolean;
-      canLabelManageArtist: boolean;
-      canLabelAddReleases: boolean;
-      labelUserId: number;
-    }[];
-  }>({
-    defaultValues: {
-      relationships: labelRelationships,
-    },
-  });
-  const { fields } = useFieldArray({
-    control,
-    name: "relationships",
-  });
-
-  React.useEffect(() => {
-    if (labelRelationships) {
-      setValue("relationships", labelRelationships);
-    }
-  }, [labelRelationships, setValue]);
-
-  React.useEffect(() => {
-    if (labelRelationships) {
-      setValue("relationships", labelRelationships);
-    }
-  }, [labelRelationships, setValue]);
-
-  const handleConfirm = async (labelUserId: number, newValue: boolean) => {
+  const acceptLabel = async (labelUserId: number) => {
     await api.put(`manage/artists/${artistId}/labels/${labelUserId}`, {
-      isArtistApproved: newValue,
+      isArtistApproved: true,
     });
     refetch();
     refetchLabels();
@@ -97,12 +62,12 @@ const LabelConfirmation: React.FC = () => {
         }
       `}
     >
-      {fields && (
+      {labelRelationships && (
         <>
           <h2 id="labels">{t("labelsAndCollectives")}</h2>
           <p>{t("labelsAndCollectivesDescription")}</p>
 
-          {fields.length > 0 && (
+          {labelRelationships.length > 0 && (
             <div
               className={css`
                 overflow-x: auto;
@@ -114,38 +79,47 @@ const LabelConfirmation: React.FC = () => {
                     <th>{t("name")}</th>
                     <th>{t("email")}</th>
                     <th>{t("isLabelConfirmed")}</th>
-                    <th>{t("isArtistConfirmed")}</th>
                     <th>{t("canLabelManageArtist")}</th>
                     <th>{t("canLabelAddReleases")}</th>
+                    <th>{t("actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {fields?.map((relationship, idx) => (
-                    <tr key={relationship.id}>
+                  {labelRelationships.map((relationship) => (
+                    <tr key={relationship.labelUserId}>
                       <td>{relationship.labelUser.name}</td>
                       <td>{relationship.labelUser.email}</td>
                       <td>
                         {relationship.isLabelApproved ? t("yes") : t("no")}
                       </td>
                       <td>
-                        <Toggle
-                          toggled={fields[idx].isArtistApproved}
-                          onClick={() => {
-                            const newValue = !fields[idx].isArtistApproved;
-                            setValue(
-                              `relationships.${idx}.isArtistApproved`,
-                              newValue
-                            );
-                            handleConfirm(fields[idx].labelUserId, newValue);
-                          }}
-                          label={t("confirmRelationship")}
-                        />
-                      </td>
-                      <td>
                         {relationship.canLabelManageArtist ? t("yes") : t("no")}
                       </td>
                       <td>
                         {relationship.canLabelAddReleases ? t("yes") : t("no")}
+                      </td>
+                      <td className="flex gap-2">
+                        {!relationship.isArtistApproved && (
+                          <Button
+                            size="compact"
+                            onClick={() =>
+                              acceptLabel(relationship.labelUserId)
+                            }
+                          >
+                            {t("acceptLabel")}
+                          </Button>
+                        )}
+                        <RemoveLabelButton
+                          side="artist"
+                          artistId={artist.id}
+                          labelUserId={relationship.labelUserId}
+                          artistName={artist.name}
+                          labelName={relationship.labelUser.name}
+                          onRemoved={() => {
+                            refetch();
+                            refetchLabels();
+                          }}
+                        />
                       </td>
                     </tr>
                   ))}
