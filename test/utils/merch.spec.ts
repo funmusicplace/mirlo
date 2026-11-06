@@ -116,6 +116,24 @@ describe("utils/merch", () => {
       assert.equal(result.destinationCountry, "US");
     });
 
+    it("uses the EU rate for every EU country", () => {
+      const euDestination = {
+        id: "dest-eu",
+        destinationCountry: "EU",
+        costUnit: 1500,
+        costExtraUnit: 400,
+      };
+      for (const country of ["FR", "DK", "IE", "CY", "DE"]) {
+        const result = calculateMerchShippingCost(
+          [usDestination, euDestination],
+          country,
+          1
+        );
+        assert.equal(result.costCents, 1500);
+        assert.deepEqual(result.allowedCountries, [country]);
+      }
+    });
+
     it("throws 400 for a destination id that isn't valid for this seller", () => {
       assert.throws(
         () =>

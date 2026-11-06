@@ -58,7 +58,7 @@ export default function () {
           createdAt: true,
           updatedAt: true,
           shippingAddress: true,
-          user: { select: { id: true, email: true, name: true } },
+          user: { select: { id: true, email: true } },
           profileSubscriptionTier: {
             select: {
               id: true,
@@ -76,7 +76,6 @@ export default function () {
           id: sub.id,
           userId: sub.user.id,
           email: sub.user.email,
-          name: sub.user.name,
           tierId: sub.profileSubscriptionTier.id,
           tierName: sub.profileSubscriptionTier.name,
           paid: !sub.profileSubscriptionTier.isDefaultTier,
@@ -126,7 +125,6 @@ export default function () {
                   id: { type: "number" },
                   userId: { type: "number" },
                   email: { type: "string" },
-                  name: { type: "string" },
                   tierId: { type: "number" },
                   tierName: { type: "string" },
                   paid: { type: "boolean" },

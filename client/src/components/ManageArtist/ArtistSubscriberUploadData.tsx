@@ -6,8 +6,12 @@ import Modal from "components/common/Modal";
 import { Select } from "components/common/Select";
 import Table from "components/common/Table";
 import TextArea from "components/common/TextArea";
+import { Toggle } from "components/common/Toggle";
 import { uniqBy } from "lodash";
-import { queryManagedArtistSubscriptionTiers } from "queries";
+import {
+  queryManagedArtist,
+  queryManagedArtistSubscriptionTiers,
+} from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaUpload } from "react-icons/fa";
@@ -61,6 +65,11 @@ const ArtistSubscriberUploadData: React.FC<{
   const artistId = artist?.id;
   const artistUserId = artist?.userId;
   const [emailText, setEmailText] = React.useState<string>();
+  const [confirmedNoSpam, setConfirmedNoSpam] = React.useState(false);
+  const { data: managedArtist } = useQuery(
+    queryManagedArtist(Number(artistId))
+  );
+  const canImport = !!managedArtist?.canImportSubscribers;
 
   const { data: tiersData } = useQuery(
     queryManagedArtistSubscriptionTiers({ artistId, includeDefault: true })
@@ -123,6 +132,7 @@ const ArtistSubscriberUploadData: React.FC<{
             artistSubscriptionTierId: selectedTierId
               ? Number(selectedTierId)
               : undefined,
+            confirmedNoSpam,
           });
         }
         snackbar(t("uploadedNewEmails"), { type: "success" });
@@ -137,7 +147,16 @@ const ArtistSubscriberUploadData: React.FC<{
         setIsLoadingSubscriberData(false);
       }
     },
-    [artistUserId, artistId, selectedTierId, snackbar, onDone, setIsMenuOpen, t]
+    [
+      artistUserId,
+      artistId,
+      selectedTierId,
+      confirmedNoSpam,
+      snackbar,
+      onDone,
+      setIsMenuOpen,
+      t,
+    ]
   );
 
   const processTextArea = React.useCallback(() => {
@@ -162,122 +181,143 @@ const ArtistSubscriberUploadData: React.FC<{
         open={isOpen}
         onClose={() => setIsOpen(false)}
       >
-        {uploadedUsers.length > 0 && (
-          <div
-            className={css`
-              p {
-                margin-top: 1rem;
-              }
-              button {
-                margin-top: 1rem;
-                margin-bottom: 1rem;
-              }
-            `}
-          >
-            <Table>
-              <thead>
-                <tr>
-                  <th>{t("email")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {uploadedUsers.map((user) => (
-                  <tr key={user.email}>
-                    <td>{user.email}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-            <p>{t("rightToUpload")}</p>
-            <Button onClick={() => uploadSubscriberData(uploadedUsers)}>
-              {t("looksGood")}
-            </Button>
-          </div>
-        )}
-        {tiers && tiers.length > 0 && (
-          <div
-            className={css`
-              margin-bottom: 1rem;
-              label {
-                display: block;
-                margin-bottom: 0.5rem;
-              }
-            `}
-          >
-            <label>{t("addToTier")}</label>
-            <Select
-              value={selectedTierId}
-              onChange={(e) => setSelectedTierId(e.target.value)}
-              options={tiers.map((tier) => ({
-                label: tier.isDefaultTier
-                  ? t("tierFollowLabel", { name: tier.name })
-                  : tier.name,
-                value: String(tier.id),
-              }))}
-            />
-          </div>
-        )}
-        <h3
-          className={css`
-            width: 100%;
-            font-weight: normal;
-          `}
-        >
-          {t("waysToAddEmails")}
-        </h3>
-
-        <div>
-          <p
-            className={css`
-              margin-top: 1rem;
-              margin-bottom: 0.5rem;
-            `}
-          >
-            {t("fileUploadDescription")}
-          </p>
-          <CSVReader onUploadAccepted={processData}>
-            {({
-              getRootProps,
-              acceptedFile,
-              ProgressBar,
-              getRemoveFileProps,
-            }: any) => (
-              <>
-                <CSVReaderWrapper>
-                  <Button
-                    className="text-sm!"
-                    type="button"
-                    {...getRootProps()}
-                  >
-                    {t("uploadACSV")}
-                  </Button>
-                  <AcceptedFiles>
-                    {acceptedFile && acceptedFile.name}
-                  </AcceptedFiles>
-                  <RemoveButton {...getRemoveFileProps()}>
-                    {t("remove")}
-                  </RemoveButton>
-                </CSVReaderWrapper>
-                <ProgressBar style={{ background: "red" }} />
-              </>
+        {!canImport ? (
+          <p>{t("importNeedsVerifiedPayments")}</p>
+        ) : (
+          <>
+            <div className="mb-4">
+              <Toggle
+                id="confirm-no-spam"
+                label={t("confirmNoSpam")}
+                toggled={confirmedNoSpam}
+                onClick={setConfirmedNoSpam}
+              />
+            </div>
+            {uploadedUsers.length > 0 && (
+              <div
+                className={css`
+                  p {
+                    margin-top: 1rem;
+                  }
+                  button {
+                    margin-top: 1rem;
+                    margin-bottom: 1rem;
+                  }
+                `}
+              >
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>{t("email")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {uploadedUsers.map((user) => (
+                      <tr key={user.email}>
+                        <td>{user.email}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+                <Button
+                  disabled={!confirmedNoSpam}
+                  onClick={() => uploadSubscriberData(uploadedUsers)}
+                >
+                  {t("looksGood")}
+                </Button>
+              </div>
             )}
-          </CSVReader>
-        </div>
-        <hr
-          className={css`
-            margin-bottom: 1rem;
-            margin-top: 1rem;
-          `}
-        />
-        <div>
-          <p>{t("pasteEmailsHere")}</p>
-          <TextArea
-            placeholder="email1@example.com, email2@example.com"
-            onChange={(e) => setEmailText(e.target.value)}
-            value={emailText}
-          />
-          <Button onClick={() => processTextArea()}>{t("next")}</Button>
-        </div>
+            {tiers && tiers.length > 0 && (
+              <div
+                className={css`
+                  margin-bottom: 1rem;
+                  label {
+                    display: block;
+                    margin-bottom: 0.5rem;
+                  }
+                `}
+              >
+                <label>{t("addToTier")}</label>
+                <Select
+                  value={selectedTierId}
+                  onChange={(e) => setSelectedTierId(e.target.value)}
+                  options={tiers.map((tier) => ({
+                    label: tier.isDefaultTier
+                      ? t("tierFollowLabel", { name: tier.name })
+                      : tier.name,
+                    value: String(tier.id),
+                  }))}
+                />
+              </div>
+            )}
+            <h3
+              className={css`
+                width: 100%;
+                font-weight: normal;
+              `}
+            >
+              {t("waysToAddEmails")}
+            </h3>
+
+            <div>
+              <p
+                className={css`
+                  margin-top: 1rem;
+                  margin-bottom: 0.5rem;
+                `}
+              >
+                {t("fileUploadDescription")}
+              </p>
+              <CSVReader onUploadAccepted={processData}>
+                {({
+                  getRootProps,
+                  acceptedFile,
+                  ProgressBar,
+                  getRemoveFileProps,
+                }: any) => (
+                  <>
+                    <CSVReaderWrapper>
+                      <Button
+                        className="text-sm!"
+                        type="button"
+                        {...getRootProps()}
+                      >
+                        {t("uploadACSV")}
+                      </Button>
+                      <AcceptedFiles>
+                        {acceptedFile && acceptedFile.name}
+                      </AcceptedFiles>
+                      <RemoveButton {...getRemoveFileProps()}>
+                        {t("remove")}
+                      </RemoveButton>
+                    </CSVReaderWrapper>
+                    <ProgressBar style={{ background: "red" }} />
+                  </>
+                )}
+              </CSVReader>
+            </div>
+            <hr
+              className={css`
+                margin-bottom: 1rem;
+                margin-top: 1rem;
+              `}
+            />
+            <div>
+              <p>{t("pasteEmailsHere")}</p>
+              <TextArea
+                placeholder="email1@example.com, email2@example.com"
+                onChange={(e) => setEmailText(e.target.value)}
+                value={emailText}
+              />
+              <Button
+                disabled={!confirmedNoSpam}
+                onClick={() => processTextArea()}
+              >
+                {t("next")}
+              </Button>
+            </div>
+          </>
+        )}
       </Modal>
       <li>
         <Button

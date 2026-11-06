@@ -257,7 +257,7 @@ button {
   font-size: var(--mi-font-size-small);
 }
 .mi-table td {
-  padding: 0.4rem 0.5rem;
+  padding: 0.1rem 0.4rem;
   margin: 0;
   line-height: 1.5;
   font-size: var(--mi-font-size-small);

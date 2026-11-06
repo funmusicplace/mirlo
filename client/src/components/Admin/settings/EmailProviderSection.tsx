@@ -40,6 +40,8 @@ const EmailProviderSection: React.FC<{ hideTitle?: boolean }> = ({
     formState: { errors },
   } = useFormContext<FormSettings>();
   const provider = watch("emailProvider.provider");
+  const savedPlaceholder = (configured?: boolean) =>
+    configured ? t("secretPlaceholderConfigured") : undefined;
   const fromEmailError = errors.emailProvider?.fromEmail?.message;
 
   return (
@@ -139,6 +141,9 @@ const EmailProviderSection: React.FC<{ hideTitle?: boolean }> = ({
                 id="input-sendgrid-api-key"
                 type="password"
                 className="max-w-md"
+                placeholder={savedPlaceholder(
+                  watch("emailProvider.sendgrid.apiKeyConfigured")
+                )}
                 {...register("emailProvider.sendgrid.apiKey")}
               />
             </FormComponent>
@@ -171,6 +176,9 @@ const EmailProviderSection: React.FC<{ hideTitle?: boolean }> = ({
                 id="input-mailgun-api-key"
                 type="password"
                 className="max-w-md"
+                placeholder={savedPlaceholder(
+                  watch("emailProvider.mailgun.apiKeyConfigured")
+                )}
                 {...register("emailProvider.mailgun.apiKey")}
               />
             </FormComponent>
@@ -193,8 +201,11 @@ const EmailProviderSection: React.FC<{ hideTitle?: boolean }> = ({
               <label htmlFor="input-postmark-api-key">{t("apiKey")}</label>
               <InputEl
                 id="input-postmark-api-key"
-                type="text"
+                type="password"
                 className="max-w-md"
+                placeholder={savedPlaceholder(
+                  watch("emailProvider.postmark.apiKeyConfigured")
+                )}
                 {...register("emailProvider.postmark.apiKey")}
               />
             </FormComponent>
@@ -261,6 +272,9 @@ const EmailProviderSection: React.FC<{ hideTitle?: boolean }> = ({
                 type="password"
                 className="max-w-md"
                 autoComplete="new-password"
+                placeholder={savedPlaceholder(
+                  watch("emailProvider.smtp.passwordConfigured")
+                )}
                 {...register("emailProvider.smtp.password")}
               />
             </FormComponent>

@@ -1,5 +1,5 @@
 import {
-  omitApPrivateKey,
+  omitPrivateProfileFields,
   renameProfileIdToArtistId,
   Serialized,
 } from "./utils";
@@ -40,7 +40,7 @@ export const serializeProfileUserSubscription = <T extends object>(
             artist:
               profile && typeof profile === "object"
                 ? (() => {
-                    const publicProfile = omitApPrivateKey(profile) as {
+                    const publicProfile = omitPrivateProfileFields(profile) as {
                       avatar?: object | null;
                       background?: object | null;
                     };

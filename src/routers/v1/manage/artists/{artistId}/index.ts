@@ -10,6 +10,7 @@ import {
   userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeProfile } from "../../../../../serializers/artist";
+import { withPrivateProperties } from "../../../../../serializers/utils";
 import {
   asSlugConflictError,
   deleteProfile,
@@ -20,6 +21,8 @@ import {
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
 import { merchImagesInclude } from "../../../../../utils/merch";
+import { sanitizeProfileEmailMessages } from "../../../../../utils/postContent";
+import { canProfileImportSubscribers } from "../../../../../utils/trustLevel";
 
 type Params = {
   artistId: string;
@@ -219,7 +222,10 @@ export default function () {
                   urlSlug: generateSlug(urlSlug),
                 }
               : {}),
-            properties: merge(oldProperties, properties),
+            properties: merge(
+              oldProperties,
+              sanitizeProfileEmailMessages(properties)
+            ),
           },
         });
 
@@ -247,7 +253,12 @@ export default function () {
           where: { id: Number(profileId) },
         });
         res.json({
-          result: artist ? serializeProfile(artist, Number(user.id)) : artist,
+          result: artist
+            ? withPrivateProperties(
+                serializeProfile(artist, Number(user.id)),
+                artist
+              )
+            : artist,
         });
       } else {
         res.json({
@@ -323,7 +334,16 @@ export default function () {
         });
       } else {
         return res.json({
-          result: serializeProfile(artist, Number(user.id), true),
+          result: {
+            ...withPrivateProperties(
+              serializeProfile(artist, Number(user.id), true),
+              artist
+            ),
+            canImportSubscribers: await canProfileImportSubscribers(
+              artist.id,
+              user
+            ),
+          },
         });
       }
     } catch (e) {

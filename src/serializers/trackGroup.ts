@@ -15,7 +15,7 @@ import { isTrackPlayableNested } from "../utils/trackPlayability";
 import { serializeMerch } from "./merch";
 import { serializeSingleTrackIntoCanimus, CanimusTrack } from "./track";
 import {
-  omitApPrivateKey,
+  omitPrivateProfileFields,
   renameProfileIdToArtistId,
   Serialized,
 } from "./utils";
@@ -103,7 +103,7 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
     artistId: profileId ?? owner?.id,
     artist: owner
       ? {
-          ...omitApPrivateKey(owner),
+          ...omitPrivateProfileFields(owner),
           avatar: owner.avatar
             ? renameProfileIdToArtistId(addSizesToStoredImage(owner.avatar))
             : undefined,

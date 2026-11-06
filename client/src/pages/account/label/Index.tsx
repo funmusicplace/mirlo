@@ -18,6 +18,7 @@ import Button, { ButtonLink } from "components/common/Button";
 import StripeStatus from "components/common/stripe/StripeStatusAndButton";
 import { Toggle } from "components/common/Toggle";
 import WidthContainer from "components/common/WidthContainer";
+import RemoveLabelButton from "components/ManageArtist/ManageArtistDetails/RemoveLabelButton";
 import { NewAlbumButton } from "components/ManageArtist/NewAlbumButton";
 import AddArtistToRoster from "components/Profile/ManageLabel/AddArtistToRoster";
 import ProfileSection from "components/Profile/ProfileSection";
@@ -98,6 +99,8 @@ const RelationshipsTable: React.FC = () => {
   const { data, refetch } = useQuery(queryLabelArtists());
   const relations = React.useMemo(() => data?.results ?? [], [data?.results]);
   const { user } = useAuthContext();
+  const labelName =
+    user?.artists?.find((a) => a.isLabelProfile)?.name ?? user?.name ?? "";
   const { t } = useTranslation("translation", { keyPrefix: "label" });
   const [orderedRelationships, setOrderedRelationships] =
     React.useState<Relationship[]>(relations);
@@ -279,6 +282,16 @@ const RelationshipsTable: React.FC = () => {
                         >
                           {t("viewPage")}
                         </ButtonLink>
+                        {user && (
+                          <RemoveLabelButton
+                            side="label"
+                            artistId={relationship.artist.id}
+                            labelUserId={user.id}
+                            artistName={relationship.artist.name}
+                            labelName={labelName}
+                            onRemoved={refetch}
+                          />
+                        )}
                       </div>
                     </div>
                   </SortableRelationshipRow>

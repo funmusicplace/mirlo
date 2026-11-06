@@ -1,9 +1,10 @@
+import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+
 import {
   fundraiserBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import prisma from "@mirlo/prisma";
 
 type Query = {
   includeCancelled?: string;
@@ -37,7 +38,6 @@ export default function () {
           user: {
             select: {
               id: true,
-              name: true,
               email: true,
             },
           },
@@ -94,7 +94,6 @@ export default function () {
                     type: "object",
                     properties: {
                       id: { type: "number" },
-                      name: { type: "string" },
                       email: { type: "string" },
                       urlSlug: { type: "string" },
                     },

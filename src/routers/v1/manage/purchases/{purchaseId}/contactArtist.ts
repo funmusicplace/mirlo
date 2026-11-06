@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 import { userOrAppAuthenticated } from "../../../../../auth/passport";
 import { sendMailQueue } from "../../../../../queues/send-mail-queue";
 import { serializeMerchPurchase } from "../../../../../serializers/merchPurchase";
-import { omitApPrivateKey } from "../../../../../serializers/utils";
+import { omitPrivateProfileFields } from "../../../../../serializers/utils";
 import { getClient } from "../../../../../utils/getClient";
 
 export default function () {
@@ -53,7 +53,7 @@ export default function () {
           },
           locals: {
             purchase: serializeMerchPurchase(purchase),
-            artist: omitApPrivateKey(profile),
+            artist: omitPrivateProfileFields(profile),
             message,
             host: process.env.API_DOMAIN,
             client: (await getClient()).applicationUrl,

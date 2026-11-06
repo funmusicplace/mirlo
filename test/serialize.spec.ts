@@ -23,7 +23,7 @@ import { serializeUserProfileTip } from "../src/serializers/userProfileTip";
 import { serializeUserTransaction } from "../src/serializers/userTransaction";
 import {
   renameProfileIdToArtistId,
-  omitApPrivateKey,
+  omitPrivateProfileFields,
 } from "../src/serializers/utils";
 
 /**
@@ -159,9 +159,9 @@ const artistFixture = (
 });
 
 describe("outbound serializers", () => {
-  describe("omitApPrivateKey / renameProfileIdToArtistId", () => {
+  describe("omitPrivateProfileFields / renameProfileIdToArtistId", () => {
     it("removes private profile data from artist references", () => {
-      const artist = omitApPrivateKey(artistFixture(1));
+      const artist = omitPrivateProfileFields(artistFixture(1));
 
       assert.equal("apPrivateKey" in artist, false);
       assert.equal(artist.apPublicKey, "public-key");

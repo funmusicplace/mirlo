@@ -38,7 +38,10 @@ import {
   initiateOnlineSubscription,
   initiateSubscription,
 } from "../../../utils/payments/subscription";
-import { determinePrice } from "../../../utils/purchasing";
+import {
+  calculateDiscountedPrice,
+  determinePrice,
+} from "../../../utils/purchasing";
 import { whereForPurchasableTrackGroup } from "../../../utils/trackGroup";
 import { findUserDiscountPercentsForProfile } from "../../../utils/user";
 
@@ -166,9 +169,10 @@ export const resolveDigitalPurchaseItem = async <
     };
   }
 
-  const discountedAmount = discountPercent
-    ? Math.round(priceNumber * (1 - discountPercent / 100))
-    : priceNumber;
+  const { discountedPriceNumber: discountedAmount } = calculateDiscountedPrice(
+    priceNumber,
+    discountPercent
+  );
 
   return {
     kind: "paid",
@@ -186,7 +190,8 @@ export const resolveDigitalPurchaseItem = async <
 
 export const resolveMerchPurchaseItem = (
   merch: MerchWithOptionsAndShipping,
-  item: Extract<PurchaseItem, { type: "merch" }>
+  item: Extract<PurchaseItem, { type: "merch" }>,
+  discountPercent = 0
 ): {
   item: ResolvedItem;
   requiresShipping: boolean;
@@ -231,10 +236,15 @@ export const resolveMerchPurchaseItem = (
       type: "merch",
       id: merch.id,
       quantity: qty,
-      amount: (priceNumber + additionalPricePerUnit) * qty + shippingCostCents,
+      amount:
+        calculateDiscountedPrice(
+          (priceNumber + additionalPricePerUnit) * qty,
+          discountPercent
+        ).discountedPriceNumber + shippingCostCents,
       message: item.message,
       optionIds: options.map((o) => o.id),
       shippingDestinationId: item.shippingDestinationId,
+      shippingAmount: shippingCostCents,
       platformPercent: merch.platformPercent,
     },
     requiresShipping,
@@ -248,7 +258,7 @@ const assertAllowedSuccessUrl = (
   client?: { applicationUrl: string; allowedCorsOrigins: string[] }
 ) => {
   const target = originOf(successUrl);
-  if (!target) {
+  if (!target || !/^https?:\/\//i.test(target)) {
     throw new AppError({ httpCode: 400, description: "Invalid successUrl" });
   }
 
@@ -683,7 +693,17 @@ export default function () {
             });
           }
 
-          const resolved = resolveMerchPurchaseItem(merch, item);
+          const discounts = loggedInUser
+            ? await findUserDiscountPercentsForProfile(
+                loggedInUser.id,
+                profileId
+              )
+            : [];
+          const resolved = resolveMerchPurchaseItem(
+            merch,
+            item,
+            Math.max(0, ...discounts.map((d) => d.merchDiscountPercent))
+          );
           payeeAccountIds.push(await resolveProfilePayeeAccountId());
           resolvedItems.push(resolved.item);
           requiresShipping = requiresShipping || resolved.requiresShipping;

@@ -183,6 +183,10 @@ export default function () {
         },
         cloudflareTurnstileSecret:
           incomingTurnstileSecret || storedSettings.cloudflareTurnstileSecret,
+        emailProvider: mergeEmailProvider(
+          settings?.emailProvider,
+          storedSettings.emailProvider as EmailProvider | undefined
+        ),
       };
       await prisma.settings.update({
         data: {
@@ -242,6 +246,58 @@ function withResolvedSender(settings: SettingsType): SettingsType {
   };
 }
 
+type EmailProvider = Record<string, Record<string, unknown> | undefined>;
+
+const EMAIL_PROVIDER_SECRETS = [
+  ["sendgrid", "apiKey"],
+  ["mailgun", "apiKey"],
+  ["postmark", "apiKey"],
+  ["smtp", "password"],
+] as const;
+
+const maskEmailProvider = (emailProvider?: EmailProvider) => {
+  if (!emailProvider) {
+    return emailProvider;
+  }
+  const masked: EmailProvider = { ...emailProvider };
+  for (const [provider, field] of EMAIL_PROVIDER_SECRETS) {
+    const config = emailProvider[provider];
+    if (config) {
+      masked[provider] = {
+        ...config,
+        [field]: undefined,
+        [`${field}Configured`]: !!config[field],
+      };
+    }
+  }
+  return masked;
+};
+
+const mergeEmailProvider = (
+  incoming: EmailProvider | undefined,
+  stored: EmailProvider | undefined
+) => {
+  if (!incoming) {
+    return stored;
+  }
+  const merged: EmailProvider = { ...stored, ...incoming };
+  for (const [provider, field] of EMAIL_PROVIDER_SECRETS) {
+    if (!incoming[provider] && !stored?.[provider]) {
+      continue;
+    }
+    const value = incoming[provider]?.[field];
+    const config = { ...stored?.[provider], ...incoming[provider] };
+    delete config[`${field}Configured`];
+    merged[provider] = {
+      ...config,
+      [field]:
+        (typeof value === "string" && value.trim()) ||
+        stored?.[provider]?.[field],
+    };
+  }
+  return merged;
+};
+
 function maskSecrets(settings: object) {
   const s = settings as Record<string, unknown>;
   const settingsJson = s.settings as Record<string, unknown> | null | undefined;
@@ -253,6 +309,8 @@ function maskSecrets(settings: object) {
     ...s,
     stripe: undefined,
     cloudflareTurnstileSecret: undefined,
+    emailProvider: undefined,
+    privateKey: undefined,
     logo: undefined,
     mobileLogo: undefined,
     splashImage: undefined,
@@ -270,6 +328,9 @@ function maskSecrets(settings: object) {
           cloudflareTurnstileSecret: undefined,
           cloudflareTurnstileSecretConfigured:
             !!settingsJson.cloudflareTurnstileSecret,
+          emailProvider: maskEmailProvider(
+            settingsJson.emailProvider as EmailProvider | undefined
+          ),
         }
       : settingsJson,
   };

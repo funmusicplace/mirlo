@@ -5,7 +5,9 @@ import PlatformPercent from "components/common/PlatformPercent";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useAuthContext } from "state/AuthContext";
+
+import useSubscriberDiscountPercent from "./useSubscriberDiscountPercent";
+
 interface FormData {
   chosenPrice: string;
   userEmail: string;
@@ -35,18 +37,9 @@ const PaymentInputElement: React.FC<{
 
   const chosenPrice = watch("chosenPrice");
   const numericChosenPrice = Number(chosenPrice);
-  const { user } = useAuthContext();
-  const activeSubscriptionForArtist = user?.artistUserSubscriptions?.find(
-    (subscription) => subscription.artistSubscriptionTier.artistId === artistId
-  );
-
-  const discountPercent =
-    activeSubscriptionForArtist?.artistSubscriptionTier[
-      isDigital ? "digitalDiscountPercent" : "merchDiscountPercent"
-    ] ?? 0;
-  const normalizedDiscountPercent = Math.min(
-    100,
-    Math.max(0, Number(discountPercent) || 0)
+  const normalizedDiscountPercent = useSubscriberDiscountPercent(
+    artistId,
+    isDigital
   );
   const discountAmount =
     isFinite(numericChosenPrice) &&

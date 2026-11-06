@@ -809,6 +809,33 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 400);
     });
 
+    it("should reject a successUrl that isn't a web address", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_tg_jsurl",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const apiClient = await createClient("opaque-origin-key");
+      await prisma.client.update({
+        where: { id: apiClient.id },
+        data: { allowedCorsOrigins: ["data:text/html,hi"] },
+      });
+
+      const response = await requestApp
+        .post("purchase")
+        .send({
+          artistId: profile.id,
+          items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
+          hosted: true,
+          successUrl: "javascript:alert(document.cookie)",
+        })
+        .set("mirlo-api-key", apiClient.key ?? "")
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+    });
+
     it("should accept a successUrl on Mirlo's own origin", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
@@ -1303,6 +1330,155 @@ describe("purchase", () => {
       assert.equal(response.body.deferred.stripeAccountId, "acct_deferred_tg");
       assert.equal(response.body.deferred.buyerEmailKnown, false);
       assert.equal(response.body.clientSecret, undefined);
+    });
+
+    it("takes a subscriber's merch discount off the goods but not the shipping", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_merch_discount",
+        currency: "usd",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id);
+      await prisma.profileSubscriptionTier.update({
+        where: { id: tier.id },
+        data: { merchDiscountPercent: 50 },
+      });
+      await prisma.profileUserSubscription.create({
+        data: {
+          userId: buyer.id,
+          profileSubscriptionTierId: tier.id,
+          amount: 500,
+        },
+      });
+      const merch = await createMerch(profile.id, {
+        isPublic: true,
+        minPrice: 1000,
+        quantityRemaining: 10,
+      });
+      const destination = await createMerchShippingDestination({
+        merchId: merch.id,
+        destinationCountry: "US",
+        costUnit: 500,
+        costExtraUnit: 100,
+      });
+
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          items: [
+            {
+              type: "merch",
+              id: merch.id,
+              quantity: 2,
+              shippingDestinationId: destination.id,
+            },
+          ],
+          deferred: true,
+        },
+        accessToken
+      );
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.deferred.amount, 1000 + 600);
+    });
+
+    it("never takes more than the goods off for a merch discount over 100%", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_merch_overdiscount",
+        currency: "usd",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id);
+      await prisma.profileSubscriptionTier.update({
+        where: { id: tier.id },
+        data: { merchDiscountPercent: 150 },
+      });
+      await prisma.profileUserSubscription.create({
+        data: {
+          userId: buyer.id,
+          profileSubscriptionTierId: tier.id,
+          amount: 500,
+        },
+      });
+      const merch = await createMerch(profile.id, {
+        isPublic: true,
+        minPrice: 1000,
+        quantityRemaining: 10,
+      });
+      const destination = await createMerchShippingDestination({
+        merchId: merch.id,
+        destinationCountry: "US",
+        costUnit: 500,
+        costExtraUnit: 100,
+      });
+
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          items: [
+            {
+              type: "merch",
+              id: merch.id,
+              quantity: 1,
+              shippingDestinationId: destination.id,
+            },
+            { type: "tip", amount: 300 },
+          ],
+          deferred: true,
+        },
+        accessToken
+      );
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.deferred.amount, 500 + 300);
+    });
+
+    it("never takes more than the price off for a digital discount over 100%", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_digital_overdiscount",
+        currency: "usd",
+      });
+      const { user: buyer, accessToken } = await createUser({
+        email: "buyer@test.com",
+      });
+      const profile = await createProfile(artistUser.id);
+      const tier = await createTier(profile.id);
+      await prisma.profileSubscriptionTier.update({
+        where: { id: tier.id },
+        data: { digitalDiscountPercent: 150 },
+      });
+      await prisma.profileUserSubscription.create({
+        data: {
+          userId: buyer.id,
+          profileSubscriptionTierId: tier.id,
+          amount: 500,
+        },
+      });
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          items: [
+            { type: "trackGroup", id: tg.id, price: "1500" },
+            { type: "tip", amount: 300 },
+          ],
+          deferred: true,
+        },
+        accessToken
+      );
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.deferred.amount, 300);
     });
 
     it("knows the buyer's email for a logged-in quote", async () => {
@@ -1994,6 +2170,47 @@ describe("purchase", () => {
         .args[0] as Stripe.SetupIntentCreateParams;
       assert.equal(setupIntentParams.metadata?.currency, "eur");
     });
+
+    it("leaves the pledge message out of the metadata when there's a checkout to read it from", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_message",
+        currency: "usd",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+        isAllOrNothing: true,
+      });
+
+      sinon.stub(stripeUtils.stripe.customers, "list").resolves({
+        data: [{ id: "cus_pledge_message" }],
+      } as unknown as Stripe.Response<Stripe.ApiList<Stripe.Customer>>);
+      const createSetupIntentStub = sinon
+        .stub(stripeUtils.stripe.setupIntents, "create")
+        .resolves({
+          id: "seti_pledge_message",
+          client_secret: "seti_pledge_message_secret",
+        } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      await initiateFundraiserPledge({
+        profileId: profile.id,
+        fundraiserId: fundraiser.id,
+        trackGroupId: trackGroup.id,
+        price: "2000",
+        message: "x".repeat(600),
+        userEmail: buyer.email,
+        userId: buyer.id,
+        checkoutId: "checkout-1",
+      });
+
+      const setupIntentParams = createSetupIntentStub.firstCall
+        .args[0] as Stripe.SetupIntentCreateParams;
+      assert.equal(setupIntentParams.metadata?.message, undefined);
+      assert.equal(setupIntentParams.metadata?.checkoutId, "checkout-1");
+    });
   });
 
   describe("initiatePayment (direct)", () => {
@@ -2283,6 +2500,40 @@ describe("purchase", () => {
       );
     });
 
+    it("leaves messages out of the metadata when there's a checkout to read them from", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_meta_checkout",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+
+      const createStub = stubStripeForOnline();
+
+      await initiatePayment({
+        profileId: profile.id,
+        items: [
+          {
+            type: "trackGroup",
+            id: String(tg.id),
+            quantity: 1,
+            amount: 1200,
+            message: "x".repeat(600),
+          },
+        ],
+        userEmail: buyer.email,
+        userId: String(buyer.id),
+        checkoutId: "checkout-1",
+      });
+
+      const metadata = metadataOf(createStub);
+      assert.deepEqual(JSON.parse(metadata.items), [
+        { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1200 },
+      ]);
+      assert.equal(metadata.checkoutId, "checkout-1");
+    });
+
     describe("platform fee inheritance (album -> artist -> platform)", () => {
       it("charges the full amount as the application fee for a trackGroup set to 100% platform", async () => {
         const { user: artistUser } = await createUser({
@@ -2322,6 +2573,56 @@ describe("purchase", () => {
           1000,
           "a trackGroup with platformPercent 100 should send the entire charge to the platform"
         );
+      });
+
+      it("takes the platform fee on merch but not on its shipping", async () => {
+        const { user: artistUser } = await createUser({
+          email: "artist@test.com",
+          stripeAccountId: "acct_fee_shipping",
+        });
+        const { user: buyer } = await createUser({ email: "buyer@test.com" });
+        const profile = await createProfile(artistUser.id, {
+          defaultPlatformFee: 10,
+        });
+        const merch = await createMerch(profile.id, {
+          isPublic: true,
+          minPrice: 1000,
+          quantityRemaining: 10,
+          platformPercent: 10,
+        });
+        const destination = await createMerchShippingDestination({
+          merchId: merch.id,
+          costUnit: 500,
+          costExtraUnit: 100,
+        });
+        const fullMerch = await prisma.merch.findFirstOrThrow({
+          where: { id: merch.id },
+          include: {
+            optionTypes: { include: { options: true } },
+            shippingDestinations: true,
+          },
+        });
+        const { item } = resolveMerchPurchaseItem(fullMerch, {
+          type: "merch",
+          id: merch.id,
+          quantity: 2,
+          shippingDestinationId: destination.id,
+        });
+
+        const createStub = stubStripeForOnline();
+
+        await initiatePayment({
+          profileId: profile.id,
+          items: [item],
+          userEmail: buyer.email,
+          userId: String(buyer.id),
+        });
+
+        const params = createStub.firstCall
+          .args[0] as Stripe.PaymentIntentCreateParams;
+        assert.equal(params.amount, 2000 + 600);
+        assert.equal(params.application_fee_amount, 200);
+        assert.ok(!String(params.metadata?.items).includes("shippingAmount"));
       });
 
       it("falls back to the artist's defaultPlatformFee when the trackGroup has no platformPercent override", async () => {
@@ -4100,6 +4401,62 @@ describe("purchase", () => {
         (updateStub.getCall(0).args[1] as any)?.default_payment_method,
         "pm_route"
       );
+    });
+  });
+
+  describe("handleSetupIntentSucceeded (direct) — fundraiser pledge", () => {
+    it("takes the pledge message from its checkout", async () => {
+      sinon.stub(sendMailQueue, "add").resolves();
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_checkout",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const fundraiser = await createFundraiser(profile.id, {
+        trackGroupId: trackGroup.id,
+      });
+      const message = "x".repeat(600);
+      const checkout = await prisma.checkout.create({
+        data: {
+          profileId: profile.id,
+          items: [
+            {
+              type: "fundraiserPledge",
+              fundraiserId: fundraiser.id,
+              trackGroupId: trackGroup.id,
+              price: "2000",
+              message,
+            },
+          ],
+        },
+      });
+      const metadata = {
+        fundraiserId: String(fundraiser.id),
+        trackGroupId: String(trackGroup.id),
+        artistId: String(profile.id),
+        stripeAccountId: "acct_pledge_checkout",
+        userEmail: buyer.email,
+        userId: String(buyer.id),
+        paymentIntentAmount: "2000",
+        currency: "usd",
+        checkoutId: checkout.id,
+      };
+      sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
+        id: "seti_pledge_checkout",
+        metadata,
+      } as unknown as Stripe.Response<Stripe.SetupIntent>);
+
+      await stripeUtils.handleSetupIntentSucceeded({
+        id: "seti_pledge_checkout",
+        metadata,
+      } as unknown as Stripe.SetupIntent);
+
+      const pledge = await prisma.fundraiserPledge.findFirstOrThrow({
+        where: { fundraiserId: fundraiser.id, userId: buyer.id },
+      });
+      assert.equal(pledge.message, message);
     });
   });
 

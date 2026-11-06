@@ -1,4 +1,4 @@
-import { omitApPrivateKey, Serialized } from "./utils";
+import { omitPrivateProfileFields, Serialized } from "./utils";
 
 /**
  * Emit artist* wire shape for a tip / user profile tip row.
@@ -18,7 +18,7 @@ export const serializeUserProfileTip = <T extends object>(
       ? {
           artist:
             profile && typeof profile === "object"
-              ? omitApPrivateKey(profile)
+              ? omitPrivateProfileFields(profile)
               : profile,
         }
       : {}),

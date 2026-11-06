@@ -11,6 +11,7 @@ import {
 import { serializeProfileSubscriptionTier } from "../../../../../../serializers/profileSubscriptionTier";
 import { getPlatformFeeForArtist } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
+import { normalizeDiscountPercent } from "../../../../../../utils/purchasing";
 import {
   generateUniqueTierSlug,
   subscriptionTierOrderBy,
@@ -126,8 +127,10 @@ export default function () {
           platformPercent: await getPlatformFeeForArtist(artistId),
           allowVariable,
           defaultAmount,
-          digitalDiscountPercent,
-          merchDiscountPercent,
+          digitalDiscountPercent: normalizeDiscountPercent(
+            digitalDiscountPercent
+          ),
+          merchDiscountPercent: normalizeDiscountPercent(merchDiscountPercent),
         },
       });
       if (imageId) {

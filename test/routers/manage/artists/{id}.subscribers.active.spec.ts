@@ -81,6 +81,7 @@ describe("manage/artists/{artistId}/subscribers/active", () => {
     assert.equal(byEmail["active@example.com"].amount, 500);
     assert.equal(byEmail["active@example.com"].currency, "eur");
     assert.equal(byEmail["active@example.com"].shippingAddress, undefined);
+    assert.equal(byEmail["active@example.com"].name, undefined);
   });
 
   it("includes shipping addresses only for tiers that collect them", async () => {

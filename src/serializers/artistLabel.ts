@@ -1,7 +1,7 @@
 import { Profile } from "@mirlo/prisma/client";
 
 import { serializeProfileUserSubscription } from "./profileUserSubscription";
-import { omitApPrivateKey } from "./utils";
+import { omitPrivateProfileFields } from "./utils";
 
 export interface LocalArtistLabel {
   artistId: number;
@@ -34,7 +34,7 @@ export const serializeArtistLabel = (
   return {
     ...rest,
     artistId,
-    artist: artist ? omitApPrivateKey(artist) : undefined,
+    artist: artist ? omitPrivateProfileFields(artist) : undefined,
     labelUser: labelUser
       ? {
           ...labelUserRest,

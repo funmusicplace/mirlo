@@ -47,6 +47,7 @@ import {
   attachRequestId,
   logHeavyRequests,
   sanitizeHeadersForLogs,
+  sanitizeQueryForLogs,
 } from "./utils/requestLogging";
 import { securityHeaders } from "./utils/securityHeaders";
 import { getSiteSettings } from "./utils/settings";
@@ -232,7 +233,7 @@ app.use((req, res, next) => {
     // Don't log requests to static assets
     const sanitizedHeaders = sanitizeHeadersForLogs(req.headers);
     logger.info(
-      `front-end request: ${req.method} ${req.path} - ${JSON.stringify(req.query)} - ${JSON.stringify(sanitizedHeaders)}`
+      `front-end request: ${req.method} ${req.path} - ${JSON.stringify(sanitizeQueryForLogs(req.query))} - ${JSON.stringify(sanitizedHeaders)}`
     );
   }
   next();

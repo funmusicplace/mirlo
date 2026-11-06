@@ -39,6 +39,24 @@ describe("manage/artists/{artistId}", () => {
       assert.equal(response.statusCode, 200);
     });
 
+    it("should say whether the owner can import subscribers", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const profile = await createProfile(user.id);
+      const canImport = async () =>
+        (
+          await requestApp
+            .get(`manage/artists/${profile.id}`)
+            .set("Cookie", [`jwt=${accessToken}`])
+        ).body.result.canImportSubscribers;
+
+      assert.equal(await canImport(), false);
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { trustLevel: 1 },
+      });
+      assert.equal(await canImport(), true);
+    });
+
     it("should not return artist for logged in user if not owned", async () => {
       const { user } = await createUser({ email: "test@testcom" });
       const { accessToken: otherAccessToken } = await createUser({

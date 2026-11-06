@@ -79,11 +79,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
         amount_paid: 1000,
         currency: "usd",
         application_fee_amount: 100,
-        metadata: {
-          userId: `${user.id}`,
-          tierId: `${tier.id}`,
-          purchaseType: "subscription",
-        },
+        metadata: {},
         status: "open",
       } as unknown as Stripe.Invoice;
 
@@ -109,60 +105,27 @@ describe("Stripe Webhooks - Failed Payments", () => {
       assert.ok(callArgs.urlParams?.includes("clientSecret")); // urlParams
     });
 
-    it("should not handle failed invoice payment for non-subscription types", async () => {
-      const { user } = await createUser({
-        email: "purchaser@test.com",
-      });
-
-      // Mock manageSubscriptionReceipt
+    it("should ignore a failed invoice that isn't for a subscription", async () => {
       const manageSubscriptionReceiptStub = sinon.stub(
         subscriptionModule,
         "manageSubscriptionReceipt"
       );
 
       const failedInvoice = {
-        id: "in_0987654321",
+        id: "in_no_subscription",
         object: "invoice",
-        subscription: "sub_0987654321",
-        payment_intent: "pi_0987654321",
-        metadata: {
-          userId: `${user.id}`,
-          purchaseType: "trackGroup", // Not a subscription
-        },
-        status: "open",
-      } as unknown as Stripe.Invoice;
-
-      await stripeUtils.handleInvoicePaymentFailed(
-        failedInvoice,
-        "acct_test_account"
-      );
-
-      // Assert manageSubscriptionReceipt was NOT called
-      assert.equal(manageSubscriptionReceiptStub.calledOnce, false);
-    });
-
-    it("should handle missing metadata gracefully", async () => {
-      const manageSubscriptionReceiptStub = sinon.stub(
-        subscriptionModule,
-        "manageSubscriptionReceipt"
-      );
-
-      const failedInvoice = {
-        id: "in_missing_metadata",
-        object: "invoice",
-        subscription: "sub_missing",
-        payment_intent: "pi_missing",
+        subscription: null,
+        payment_intent: "pi_no_subscription",
         metadata: {},
         status: "open",
       } as unknown as Stripe.Invoice;
 
-      // Should not throw
       await stripeUtils.handleInvoicePaymentFailed(
         failedInvoice,
         "acct_test_account"
       );
 
-      assert.equal(manageSubscriptionReceiptStub.calledOnce, false);
+      assert.equal(manageSubscriptionReceiptStub.called, false);
     });
   });
 

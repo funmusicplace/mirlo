@@ -2,16 +2,14 @@ import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import DropdownMenu from "components/common/DropdownMenu";
-import Money, { moneyDisplay } from "components/common/Money";
-import Pill from "components/common/Pill";
+import { moneyDisplay } from "components/common/Money";
+import Select from "components/common/Select";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import StatCard from "components/common/StatCard";
 import Table from "components/common/Table";
 import ArtistSubscriberDataDownload from "components/ManageArtist/ArtistSubscriberDataDownload";
 import ArtistSubscriberUploadData from "components/ManageArtist/ArtistSubscriberUploadData";
-import CancelSupporterButton from "components/ManageArtist/CancelSupporterButton";
 import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
-import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { sumBy } from "lodash";
 import { ArtistSection } from "pages/{artistId}/Index";
 import { queryManageArtistSubscribers } from "queries";
@@ -20,6 +18,15 @@ import { useTranslation } from "react-i18next";
 import useArtistQuery from "utils/useArtistQuery";
 
 import { bp } from "../../../../../../constants";
+
+import SupporterRow from "./SupporterRow";
+import {
+  isFreeSubscription,
+  sortSupporters,
+  SupporterSort,
+  supporterSortOptions,
+  SupportTier,
+} from "./supporters";
 
 export const SupporterTable = styled(Table)`
   @media screen and (max-width: ${bp.small}px) {
@@ -31,34 +38,6 @@ export const SupporterTable = styled(Table)`
     }
   }
 `;
-
-type SupportTier = {
-  id: number;
-  user: User;
-  createdAt: string;
-  amount: number;
-  deleteReason?: string | null;
-  nextBillingDate?: string;
-  shippingAddress: {
-    name: string;
-    address: Object;
-  };
-  artistSubscriptionTier: ArtistSubscriptionTier;
-  artistUserSubscriptionCharges?: {
-    id: string;
-    transactionId?: string;
-    transaction?: {
-      platformCut: number | null;
-      stripeCut: number | null;
-      paymentStatus: "PENDING" | "COMPLETED" | "FAILED";
-    } | null;
-  }[];
-};
-
-// A subscription with no associated transaction was added by the artist
-// without payment (e.g. a comp), so we surface it as "Free".
-const isFreeSubscription = (r: SupportTier) =>
-  !r.artistUserSubscriptionCharges?.some((charge) => charge.transactionId);
 
 // Stripe's standard processing fee (2.9% + $0.30 per transaction), matching
 // the estimate used in PlatformPercent.tsx. Amounts are in major units here.
@@ -111,7 +90,7 @@ const sumDeductions = (supporters: SupportTier[]) => {
 const Index = () => {
   const { data: artist } = useArtistQuery();
   const artistId = artist?.id;
-  const { t, i18n } = useTranslation("translation", {
+  const { t } = useTranslation("translation", {
     keyPrefix: "artistSupporters",
   });
   const { data: subscribersData, refetch } = useQuery(
@@ -154,6 +133,12 @@ const Index = () => {
   const currency = artist?.user?.currency ?? "usd";
 
   const totalSupporters = monthlySupporters.length + annualSupporters.length;
+
+  const [sort, setSort] = React.useState<SupporterSort>("createdAt");
+  const sortedSupporters = React.useMemo(
+    () => sortSupporters([...monthlySupporters, ...annualSupporters], sort),
+    [monthlySupporters, annualSupporters, sort]
+  );
 
   // Only show the interval-specific stat boxes when the artist actually has a
   // tier with that interval (or a supporter still on one, e.g. from a deleted
@@ -236,6 +221,19 @@ const Index = () => {
           )}
           <StatCard label={t("supporters")} value={totalSupporters} />
         </div>
+        <div className="flex justify-end">
+          <label className="flex items-center gap-2">
+            {t("sortBy")}
+            <Select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SupporterSort)}
+              options={supporterSortOptions.map((option) => ({
+                value: option,
+                label: t(`sortOptions.${option}`),
+              }))}
+            />
+          </label>
+        </div>
         <SupporterTable>
           <thead>
             <tr>
@@ -248,67 +246,14 @@ const Index = () => {
             </tr>
           </thead>
           <tbody>
-            {[...monthlySupporters, ...annualSupporters]
-              .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1))
-              .map((r) => (
-                <tr key={r.user.id}>
-                  <td>{r.user.name ?? r.shippingAddress?.name ?? "-"}</td>
-                  <td>{r.user.email}</td>
-                  <td>
-                    {r.artistSubscriptionTier.name}
-                    {isFreeSubscription(r) && (
-                      <Pill
-                        className={css`
-                          margin-left: 0.5rem;
-                        `}
-                      >
-                        {t("free")}
-                      </Pill>
-                    )}
-                    {r.deleteReason && (
-                      <Pill
-                        variant="warning"
-                        title={t("cancellingExplanation")}
-                        className={css`
-                          margin-left: 0.5rem;
-                        `}
-                      >
-                        {t("cancelling")}
-                      </Pill>
-                    )}
-                  </td>
-                  <td>
-                    {r.artistSubscriptionTier.interval === "MONTH"
-                      ? t("monthly")
-                      : t("yearly")}
-                    {r.nextBillingDate ? (
-                      <>
-                        <br />
-                        <small>
-                          ({formatDate({ date: r.nextBillingDate, i18n })}){" "}
-                        </small>
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </td>
-                  <td>
-                    <Money
-                      amount={r.amount / 100}
-                      currency={artist?.user?.currency ?? "usd"}
-                    />
-                  </td>
-                  <td>
-                    {artistId && !r.deleteReason && (
-                      <CancelSupporterButton
-                        artistId={artistId}
-                        subscriptionId={r.id}
-                        supporterName={r.user.name ?? r.user.email}
-                      />
-                    )}
-                  </td>
-                </tr>
-              ))}
+            {sortedSupporters.map((r) => (
+              <SupporterRow
+                key={r.user.id}
+                supporter={r}
+                artistId={artistId}
+                currency={currency}
+              />
+            ))}
           </tbody>
         </SupporterTable>
         {monthlySupporters.length + annualSupporters.length === 0 && (
@@ -331,14 +276,12 @@ const Index = () => {
         <SupporterTable>
           <thead>
             <tr>
-              <th>{t("name")}</th>
               <th>{t("email")}</th>
             </tr>
           </thead>
           <tbody>
             {followers.map((r) => (
               <tr key={r.user.id}>
-                <td>{r.user.name}</td>
                 <td>{r.user.email}</td>
               </tr>
             ))}

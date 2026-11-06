@@ -36,6 +36,10 @@ const RESPONSE_ONLY_SETTINGS_PATHS = new Set([
   "stripe.keyMode",
   "stripe.webhookSecretConfigured",
   "cloudflareTurnstileSecretConfigured",
+  "emailProvider.sendgrid.apiKeyConfigured",
+  "emailProvider.mailgun.apiKeyConfigured",
+  "emailProvider.postmark.apiKeyConfigured",
+  "emailProvider.smtp.passwordConfigured",
 ]);
 
 const listSourceFiles = (dir: string): string[] =>

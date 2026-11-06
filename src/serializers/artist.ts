@@ -25,7 +25,7 @@ import {
   LocalTrackGroup,
 } from "./trackGroup";
 import {
-  omitApPrivateKey,
+  omitPrivateProfileFields,
   renameProfileIdToArtistId,
   Serialized,
 } from "./utils";
@@ -67,7 +67,7 @@ export const serializeProfile = <T extends LocalProfile>(
   canSeeSupporterContent?: boolean
 ): Serialized<T> => {
   return {
-    ...omitApPrivateKey(profile),
+    ...omitPrivateProfileFields(profile),
     artistLabels: profile.artistLabels?.map((al) =>
       serializeArtistLabel(
         al as LocalArtistLabel,
@@ -105,7 +105,7 @@ export const serializeProfile = <T extends LocalProfile>(
               ...rest,
               artist: labelProfile
                 ? {
-                    ...omitApPrivateKey(labelProfile),
+                    ...omitPrivateProfileFields(labelProfile),
                     avatar: renameProfileIdToArtistId(
                       addSizesToStoredImage(labelProfile.avatar)
                     ),

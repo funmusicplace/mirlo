@@ -16,8 +16,9 @@ import {
 } from "../handleFinishedTransactions";
 import { merchImageUrl } from "../merch";
 import { recordPaymentAccountStatus } from "../paymentAccountStatus";
-import { completeCheckout } from "../payments/checkout";
+import { completeCheckout, findCheckoutMessages } from "../payments/checkout";
 import { resolvePayee } from "../payments/payee";
+import { ResolvedItem } from "../payments/purchase";
 import {
   calculateAppFee,
   calculatePlatformPercent,
@@ -558,7 +559,9 @@ export const handleSetupIntentSucceeded = async (
       await createOrUpdatePledge({
         userId: Number(actualUserId),
         fundraiserId: fundraiser.id,
-        message: intent.metadata?.message,
+        message:
+          (await findCheckoutMessages(metadata.checkoutId))[0] ??
+          intent.metadata?.message,
         amount: Number(intent.metadata?.paymentIntentAmount),
         stripeSetupIntentId: intent.id,
         stripeAccountId: metadata.stripeAccountId,
@@ -1104,15 +1107,7 @@ export const handleInvoicePaymentFailed = async (
   const subscription = invoice.subscription;
   logger.info(`invoice.failed: ${invoice.id} for ${subscription}`);
 
-  const metadata = invoice.metadata as unknown as SessionMetaData;
-
-  if (
-    typeof subscription === "string" &&
-    metadata.purchaseType === "subscription" &&
-    metadata.tierId &&
-    metadata.userId &&
-    Number.isFinite(+metadata.userId)
-  ) {
+  if (typeof subscription === "string") {
     const { intent, paymentProcessorFee } = await getFeeDetailsFromInvoice(
       invoice,
       accountId
@@ -1272,12 +1267,12 @@ export const completePurchaseFromIntent = async (
 
   const payment = await completedPaymentFromIntent(intent, accountId);
 
-  await completePurchase(
-    Number(actualUserId),
-    JSON.parse(metadata.items ?? "[]"),
-    payment,
-    { newUser }
+  const messages = await findCheckoutMessages(metadata.checkoutId);
+  const items = (JSON.parse(metadata.items ?? "[]") as ResolvedItem[]).map(
+    (item, i) => ({ ...item, message: messages[i] ?? item.message })
   );
+
+  await completePurchase(Number(actualUserId), items, payment, { newUser });
 };
 
 export const handlePaymentIntentSucceeded = async (

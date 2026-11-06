@@ -10,6 +10,7 @@ import { usePurchase } from "components/common/Purchase/usePurchase";
 import { SelectEl } from "components/common/Select";
 import TextArea from "components/common/TextArea";
 import PaymentInputElement from "components/TrackGroup/PaymentInputElement";
+import useSubscriberDiscountPercent from "components/TrackGroup/useSubscriberDiscountPercent";
 import { flatten } from "lodash";
 import { queryUserStripeStatus } from "queries";
 import React from "react";
@@ -21,7 +22,9 @@ import { buildCheckoutCompletePath } from "utils/artist";
 
 import { bp } from "../../constants";
 
-import BuyMerchItemDestinations from "./BuyMerchItemDestinations";
+import BuyMerchItemDestinations, {
+  expandEUDestination,
+} from "./BuyMerchItemDestinations";
 import IncludesDigitalDownload from "./IncludesDigitalDownload";
 
 export type BuyMerchFormData = {
@@ -64,7 +67,12 @@ const BuyMerchItem: React.FC<{
   const shippingDestination = methods.watch("shippingDestinationId");
   const merchOptionIds = methods.watch("merchOptionIds");
   const navigate = useNavigate();
+  const discountPercent = useSubscriberDiscountPercent(artist.id);
   const { checkout, isLoading: isLoadingStripe, startPurchase } = usePurchase();
+  const destinations = React.useMemo(
+    () => expandEUDestination(merch.shippingDestinations),
+    [merch.shippingDestinations]
+  );
 
   const checkoutCompletePath = (buyerEmail?: string) =>
     buildCheckoutCompletePath(artist, {
@@ -147,7 +155,9 @@ const BuyMerchItem: React.FC<{
     });
   });
 
-  merch.shippingDestinations.forEach((sd) => {
+  price *= 1 - discountPercent / 100;
+
+  destinations.forEach((sd) => {
     if (sd.id === shippingDestination) {
       const otherUnitCount = Number(quantity) - 1;
       const costUnit = sd.costUnit / 100;
@@ -295,7 +305,10 @@ const BuyMerchItem: React.FC<{
                 </FormComponent>
               ))}
             </div>
-            <BuyMerchItemDestinations merch={merch} />
+            <BuyMerchItemDestinations
+              merch={merch}
+              destinations={destinations}
+            />
             <div
               className={css`
                 border-bottom: 1px solid var(--mi-tint-x-color);

@@ -14,6 +14,7 @@ import { findArtistIdForURLSlug } from "../../../../../utils/artist";
 import { downloadCSVFile } from "../../../../../utils/download";
 import { AppError } from "../../../../../utils/error";
 import { grantSubscriptionTierReleases } from "../../../../../utils/subscriptionTier";
+import { canProfileImportSubscribers } from "../../../../../utils/trustLevel";
 
 type SubscriberRow = {
   deleteReason?: string | null;
@@ -25,10 +26,6 @@ const csvColumns = [
   {
     label: "Email",
     value: "user.email",
-  },
-  {
-    label: "User",
-    value: "user.name",
   },
   {
     label: "Amount",
@@ -147,8 +144,8 @@ export default function () {
           profileSubscriptionTierId: true,
           user: {
             select: {
+              id: true,
               email: true,
-              name: true,
             },
           },
           shippingAddress: true,
@@ -239,10 +236,12 @@ export default function () {
     const log = req.logger ?? logger;
     let { artistId }: { artistId?: string } = req.params;
 
-    const { subscribers, artistSubscriptionTierId } = req.body as {
-      subscribers: { email: string }[];
-      artistSubscriptionTierId?: number;
-    };
+    const { subscribers, artistSubscriptionTierId, confirmedNoSpam } =
+      req.body as {
+        subscribers: { email: string }[];
+        artistSubscriptionTierId?: number;
+        confirmedNoSpam?: boolean;
+      };
 
     try {
       const parsedArtistId = await findArtistIdForURLSlug(artistId);
@@ -251,6 +250,22 @@ export default function () {
         throw new AppError({
           httpCode: 400,
           description: "Invalid artist id",
+        });
+      }
+
+      if (!(await canProfileImportSubscribers(parsedArtistId, req.user))) {
+        throw new AppError({
+          httpCode: 403,
+          description:
+            "Importing subscribers is available once the artist's payment account is verified",
+        });
+      }
+
+      if (confirmedNoSpam !== true) {
+        throw new AppError({
+          httpCode: 400,
+          description:
+            "Confirm that these people agreed to hear from you before importing them",
         });
       }
 
@@ -357,7 +372,7 @@ export default function () {
         name: "subscribers",
         schema: {
           description: "The list of subscribers to add",
-          required: ["subscribers"],
+          required: ["subscribers", "confirmedNoSpam"],
           type: "object",
           properties: {
             subscribers: {
@@ -371,6 +386,11 @@ export default function () {
               description:
                 "The tier to add subscribers to. Defaults to the artist's default (follow) tier.",
               type: "integer",
+            },
+            confirmedNoSpam: {
+              description:
+                "Must be true: the artist confirms these people agreed to hear from them",
+              type: "boolean",
             },
           },
         },

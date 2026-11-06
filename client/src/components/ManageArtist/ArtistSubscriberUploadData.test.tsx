@@ -14,6 +14,7 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
 
 vi.mock("queries", () => ({
   queryManagedArtistSubscriptionTiers: vi.fn(() => ({ queryKey: ["tiers"] })),
+  queryManagedArtist: vi.fn(() => ({ queryKey: ["artist"] })),
 }));
 
 // Render the modal contents inline regardless of open state so the tier
@@ -64,8 +65,10 @@ const tiers = [
   { id: 2, name: "Gold", isDefaultTier: false, interval: "MONTH" },
 ];
 
-const mockTiers = (results: object[] = tiers) => {
-  vi.mocked(useQuery).mockImplementation(() => ({ data: { results } }) as any);
+const mockTiers = (results: object[] = tiers, canImportSubscribers = true) => {
+  vi.mocked(useQuery).mockImplementation(
+    () => ({ data: { results, canImportSubscribers } }) as any
+  );
 };
 
 // ---- tests ------------------------------------------------------------------
@@ -99,12 +102,14 @@ describe("ArtistSubscriberUploadData", () => {
       screen.getByPlaceholderText("email1@example.com, email2@example.com"),
       "fan@example.com"
     );
+    await user.click(screen.getByLabelText("confirmNoSpam"));
     await user.click(screen.getByRole("button", { name: "next" }));
 
     await waitFor(() =>
       expect(mockPost).toHaveBeenCalledWith("manage/artists/1/subscribers", {
         subscribers: [{ email: "fan@example.com" }],
         artistSubscriptionTierId: 1,
+        confirmedNoSpam: true,
       })
     );
   });
@@ -120,12 +125,14 @@ describe("ArtistSubscriberUploadData", () => {
       screen.getByPlaceholderText("email1@example.com, email2@example.com"),
       "fan@example.com"
     );
+    await user.click(screen.getByLabelText("confirmNoSpam"));
     await user.click(screen.getByRole("button", { name: "next" }));
 
     await waitFor(() =>
       expect(mockPost).toHaveBeenCalledWith("manage/artists/1/subscribers", {
         subscribers: [{ email: "fan@example.com" }],
         artistSubscriptionTierId: 2,
+        confirmedNoSpam: true,
       })
     );
     expect(onDone).toHaveBeenCalled();
@@ -135,6 +142,25 @@ describe("ArtistSubscriberUploadData", () => {
     mockTiers([]);
     render(<ArtistSubscriberUploadData onDone={vi.fn()} />);
 
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+  });
+
+  test("doesn't upload until the artist confirms the list isn't spam", async () => {
+    const user = userEvent.setup();
+    render(<ArtistSubscriberUploadData onDone={vi.fn()} />);
+
+    await user.type(
+      screen.getByPlaceholderText("email1@example.com, email2@example.com"),
+      "fan@example.com"
+    );
+    expect(screen.getByRole("button", { name: "next" })).toBeDisabled();
+  });
+
+  test("explains that importing needs a verified payment account", () => {
+    mockTiers(tiers, false);
+    render(<ArtistSubscriberUploadData onDone={vi.fn()} />);
+
+    expect(screen.getByText("importNeedsVerifiedPayments")).toBeInTheDocument();
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
   });
 });

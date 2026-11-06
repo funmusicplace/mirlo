@@ -11,7 +11,7 @@ import { whereForVisibleTrackGroup } from "../utils/trackGroup";
 import { isTrackPlayable } from "../utils/trackPlayability";
 
 import {
-  omitApPrivateKey,
+  omitPrivateProfileFields,
   renameProfileIdToArtistId,
   Serialized,
 } from "./utils";
@@ -127,7 +127,7 @@ export const serializePost = <T extends PostInput>(
     artistId: profileId ?? undefined,
     artist: profile
       ? {
-          ...omitApPrivateKey(profile),
+          ...omitPrivateProfileFields(profile),
           avatar: renameProfileIdToArtistId(
             addSizesToStoredImage(profile.avatar)
           ),

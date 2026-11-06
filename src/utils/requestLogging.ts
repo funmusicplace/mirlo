@@ -69,6 +69,21 @@ const SENSITIVE_HEADERS = new Set([
 ]);
 
 const SENSITIVE_COOKIES = new Set(["jwt", "refresh"]);
+const SENSITIVE_COOKIE_PREFIXES = ["_session", "_interaction"];
+
+const isSensitiveCookie = (name: string) =>
+  SENSITIVE_COOKIES.has(name) ||
+  SENSITIVE_COOKIE_PREFIXES.some((prefix) => name.startsWith(prefix));
+
+const SENSITIVE_QUERY_PARAM = /token|code|key|secret|password|email/i;
+
+export const sanitizeQueryForLogs = (query: Record<string, unknown>) =>
+  Object.fromEntries(
+    Object.entries(query).map(([key, value]) => [
+      key,
+      SENSITIVE_QUERY_PARAM.test(key) ? "[REDACTED]" : value,
+    ])
+  );
 
 const SENSITIVE_BODY_FIELDS = new Set([
   "password",
@@ -92,7 +107,7 @@ const redactCookieHeader = (cookieHeader: string): string => {
       }
 
       const name = trimmed.slice(0, separatorIndex).trim().toLowerCase();
-      if (SENSITIVE_COOKIES.has(name)) {
+      if (isSensitiveCookie(name)) {
         return `${trimmed.slice(0, separatorIndex)}=[REDACTED]`;
       }
 

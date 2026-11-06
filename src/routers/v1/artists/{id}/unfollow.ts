@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userOrAppLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
+import { isValidUnfollowToken } from "../../../../utils/unfollowToken";
 
 type Params = {
   id: string;
@@ -16,14 +17,25 @@ export default function () {
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: profileId } = req.params as unknown as Params;
     const user = req.user;
-    const { email } = req.body ?? {};
+    const { email, token } = req.body ?? {};
 
     try {
       let userIdToRemove: number | undefined = user?.id;
-      if (!userIdToRemove && email && typeof email === "string") {
+      if (!userIdToRemove) {
+        if (
+          typeof email !== "string" ||
+          typeof token !== "string" ||
+          !isValidUnfollowToken(token, email, Number(profileId))
+        ) {
+          throw new AppError({
+            httpCode: 403,
+            description:
+              "This unsubscribe link isn't valid. Log in to unfollow instead.",
+          });
+        }
         const relevantUser = await prisma.user.findFirst({
           where: {
-            email,
+            email: email.toLowerCase().trim(),
           },
           select: {
             id: true,

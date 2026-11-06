@@ -5,6 +5,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 
+import { unfollowToken } from "../../../src/utils/unfollowToken";
 import { clearTables, createProfile, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
@@ -26,13 +27,12 @@ describe("artists/{id]/unfollow", () => {
       }
     });
 
-    it("should 404 if an artist doesn't exist", async () => {
+    it("should 403 without a login or unsubscribe token", async () => {
       const response = await requestApp
         .post(`artists/1/unfollow`)
         .set("Accept", "application/json");
 
-      assert.equal(response.status, 404);
-      assert.equal(response.body.error, "User not found");
+      assert.equal(response.status, 403);
     });
 
     it("should unfollow an artist", async () => {
@@ -105,7 +105,44 @@ describe("artists/{id]/unfollow", () => {
       assert.equal(after?.stripeSubscriptionKey, "sub_paid_email_opt_out");
     });
 
-    it("should unfollow an artist with just an email address", async () => {
+    it("should not unfollow with an email address and a bad token", async () => {
+      const { user: profileOwner } = await createUser({
+        email: "test@test.com",
+      });
+      const { user: followerUser } = await createUser({
+        email: "follower@follower.com",
+      });
+      const profile = await createProfile(profileOwner.id, {
+        subscriptionTiers: { create: { name: "a tier", isDefaultTier: true } },
+      });
+      await prisma.profileUserSubscription.create({
+        data: {
+          userId: followerUser.id,
+          profileSubscriptionTierId: profile.subscriptionTiers[0].id,
+          amount: 0,
+        },
+      });
+
+      for (const token of [
+        undefined,
+        "nope",
+        unfollowToken(followerUser.email, profile.id + 1),
+        unfollowToken("someone@else.com", profile.id),
+      ]) {
+        const response = await requestApp
+          .post(`artists/${profile.id}/unfollow`)
+          .send({ email: followerUser.email, token })
+          .set("Accept", "application/json");
+        assert.equal(response.status, 403);
+      }
+
+      const subscriptions = await prisma.profileUserSubscription.findMany({
+        where: { userId: followerUser.id },
+      });
+      assert.equal(subscriptions.length, 1);
+    });
+
+    it("should unfollow an artist with an email address and its token", async () => {
       const { user: profileOwner } = await createUser({
         email: "test@test.com",
       });
@@ -118,11 +155,19 @@ describe("artists/{id]/unfollow", () => {
       });
 
       assert(profile.subscriptionTiers.length > 0);
+      await prisma.profileUserSubscription.create({
+        data: {
+          userId: followerUser.id,
+          profileSubscriptionTierId: profile.subscriptionTiers[0].id,
+          amount: 0,
+        },
+      });
 
       const response = await requestApp
         .post(`artists/${profile.id}/unfollow`)
         .send({
           email: followerUser.email,
+          token: unfollowToken(followerUser.email, profile.id),
         })
         .set("Accept", "application/json");
 

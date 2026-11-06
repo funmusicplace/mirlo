@@ -113,7 +113,9 @@ const handlers = {
       }
     ),
     http.get("*/v1/manage/artists/:artistId", () =>
-      HttpResponse.json({ result: ARTIST_WITH_TIERS })
+      HttpResponse.json({
+        result: { ...ARTIST_WITH_TIERS, canImportSubscribers: true },
+      })
     ),
     http.get("*/v1/artists/:artistId/posts", () =>
       HttpResponse.json({
@@ -288,5 +290,11 @@ export const ImportSupporters: Story = {
     await userEvent.click(textarea);
     await pause(TYPING.pauseBefore);
     await userEvent.paste(IMPORTED_EMAILS.join(", "));
+    await pause(700);
+    await userEvent.click(
+      body.getByLabelText(
+        "These people agreed to hear from me, and I won't use this list to send spam."
+      )
+    );
   },
 };

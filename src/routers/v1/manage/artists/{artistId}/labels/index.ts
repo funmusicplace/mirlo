@@ -13,6 +13,7 @@ import { sendMailQueue } from "../../../../../../queues/send-mail-queue";
 import { serializeProfile } from "../../../../../../serializers/artist";
 import { AppError } from "../../../../../../utils/error";
 import { getClient } from "../../../../../../utils/getClient";
+import { removeLabelFromArtist } from "../../../../../../utils/labelRemoval";
 import { getInstanceName } from "../../../../../../utils/settings";
 
 const sendArtistNotificationOfLabel = async (
@@ -282,12 +283,7 @@ export default function () {
         throw new AppError({ httpCode: 400, description: "Need labelUserId" });
       }
 
-      await prisma.artistLabel.deleteMany({
-        where: {
-          labelUserId,
-          artistId: Number(artistId),
-        },
-      });
+      await removeLabelFromArtist(Number(artistId), Number(labelUserId));
 
       const labels = await prisma.artistLabel.findMany({
         where: {

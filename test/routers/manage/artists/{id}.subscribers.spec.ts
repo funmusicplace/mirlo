@@ -49,6 +49,32 @@ describe("manage/artists/{artistId}/subscribers", () => {
       assert.deepEqual(response.body.results, []);
     });
 
+    it("should not include subscriber account names", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user: subscriber } = await createUser({
+        email: "subscriber1@email.com",
+        name: "Secret Name",
+      });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id, { isDefaultTier: true });
+      await prisma.profileUserSubscription.create({
+        data: {
+          userId: subscriber.id,
+          profileSubscriptionTierId: tier.id,
+          amount: 0,
+        },
+      });
+
+      for (const query of ["", "?format=csv"]) {
+        const response = await requestApp
+          .get(`manage/artists/${artist.id}/subscribers${query}`)
+          .set("Cookie", [`jwt=${accessToken}`]);
+        assert.equal(response.statusCode, 200);
+        assert(response.text.includes("subscriber1@email.com"));
+        assert(!response.text.includes("Secret Name"));
+      }
+    });
+
     it("should get csv", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const artist = await createArtist(user.id);
@@ -64,7 +90,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       assert.equal(response.text.split(",")[0], '"Email"');
     });
 
-    it("should include shipping address and name in the csv", async () => {
+    it("should include shipping address and shipping name in the csv", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const { user: subscriber } = await createUser({
         email: "subscriber1@email.com",
@@ -246,7 +272,10 @@ describe("manage/artists/{artistId}/subscribers", () => {
 
   describe("POST", () => {
     it("should upload new subscriptions", async () => {
-      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+        trustLevel: 1,
+      });
       const artist = await createArtist(user.id);
       const tier = await createTier(artist.id, { isDefaultTier: true });
       const subscriberEmail = "subscriber1@email.com";
@@ -254,6 +283,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const response = await requestApp
         .post(`manage/artists/${artist.id}/subscribers`)
         .send({
+          confirmedNoSpam: true,
           subscribers: [
             {
               email: subscriberEmail,
@@ -285,7 +315,10 @@ describe("manage/artists/{artistId}/subscribers", () => {
     });
 
     it("should handle a double subscription", async () => {
-      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+        trustLevel: 1,
+      });
       const artist = await createArtist(user.id);
       const tier = await createTier(artist.id, { isDefaultTier: true });
       const subscriberEmail = "subscriber1@email.com";
@@ -293,6 +326,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const response = await requestApp
         .post(`manage/artists/${artist.id}/subscribers`)
         .send({
+          confirmedNoSpam: true,
           subscribers: [
             {
               email: subscriberEmail,
@@ -329,7 +363,10 @@ describe("manage/artists/{artistId}/subscribers", () => {
     it("should handle an existing user", async () => {
       const subscriberEmail = "subscriber1@email.com";
 
-      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+        trustLevel: 1,
+      });
       const { user: subscriber } = await createUser({ email: subscriberEmail });
       const artist = await createArtist(user.id);
       const tier = await createTier(artist.id, { isDefaultTier: true });
@@ -337,6 +374,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const response = await requestApp
         .post(`manage/artists/${artist.id}/subscribers`)
         .send({
+          confirmedNoSpam: true,
           subscribers: [
             {
               email: subscriberEmail,
@@ -373,7 +411,10 @@ describe("manage/artists/{artistId}/subscribers", () => {
     it("should handle an existing subscription", async () => {
       const subscriberEmail = "subscriber1@email.com";
 
-      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+        trustLevel: 1,
+      });
       const { user: subscriber } = await createUser({ email: subscriberEmail });
       const artist = await createArtist(user.id);
       const tier = await createTier(artist.id, { isDefaultTier: true });
@@ -389,6 +430,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const response = await requestApp
         .post(`manage/artists/${artist.id}/subscribers`)
         .send({
+          confirmedNoSpam: true,
           subscribers: [
             {
               email: subscriberEmail,
@@ -420,6 +462,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const response = await requestApp
         .post(`manage/artists/${artist.id}/subscribers`)
         .send({
+          confirmedNoSpam: true,
           subscribers: [
             {
               email: subscriberEmail,
@@ -445,6 +488,7 @@ describe("manage/artists/{artistId}/subscribers", () => {
       const response = await requestApp
         .post(`manage/artists/${artist.id}/subscribers`)
         .send({
+          confirmedNoSpam: true,
           subscribers: [
             {
               email: subscriberEmail,
@@ -473,6 +517,50 @@ describe("manage/artists/{artistId}/subscribers", () => {
       });
 
       assert.notEqual(subscription, null);
+    });
+
+    it("should not import for an artist whose owner isn't verified", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const artist = await createArtist(user.id);
+      await createTier(artist.id, { isDefaultTier: true });
+
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/subscribers`)
+        .send({
+          confirmedNoSpam: true,
+          subscribers: [{ email: "subscriber1@email.com" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 403);
+      assert.equal(
+        await prisma.user.count({ where: { email: "subscriber1@email.com" } }),
+        0
+      );
+    });
+
+    it("should not import without confirming the list isn't spam", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+        trustLevel: 1,
+      });
+      const artist = await createArtist(user.id);
+      await createTier(artist.id, { isDefaultTier: true });
+
+      for (const confirmedNoSpam of [undefined, false, "true"]) {
+        const response = await requestApp
+          .post(`manage/artists/${artist.id}/subscribers`)
+          .send({
+            confirmedNoSpam,
+            subscribers: [{ email: "subscriber1@email.com" }],
+          })
+          .set("Cookie", [`jwt=${accessToken}`]);
+        assert.equal(response.statusCode, 400);
+      }
+      assert.equal(
+        await prisma.user.count({ where: { email: "subscriber1@email.com" } }),
+        0
+      );
     });
   });
 });

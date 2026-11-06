@@ -1,5 +1,5 @@
 import { serializeProfileUserSubscriptionCharge } from "./profileUserSubscription";
-import { omitApPrivateKey, Serialized } from "./utils";
+import { omitPrivateProfileFields, Serialized } from "./utils";
 
 type NestedOwner = {
   profileId?: number;
@@ -61,7 +61,7 @@ export const serializeUserTransaction = <T extends object>(
     const rawOwner = existingArtist ?? profile;
     const owner =
       rawOwner && typeof rawOwner === "object"
-        ? omitApPrivateKey(rawOwner)
+        ? omitPrivateProfileFields(rawOwner)
         : rawOwner;
     const artistId =
       existingArtistId ?? profileId ?? (profile as { id?: number } | null)?.id;
@@ -117,7 +117,7 @@ export const serializeUserTransaction = <T extends object>(
             const rawIncludeOwner = existingIncludeArtist ?? iProf;
             const includeOwner =
               rawIncludeOwner && typeof rawIncludeOwner === "object"
-                ? omitApPrivateKey(rawIncludeOwner)
+                ? omitPrivateProfileFields(rawIncludeOwner)
                 : rawIncludeOwner;
             const includeArtistId = existingIncludeArtistId ?? iPid;
             return {

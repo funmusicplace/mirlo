@@ -1,5 +1,5 @@
 import prisma from "@mirlo/prisma";
-import { uniq } from "lodash";
+import { omit, uniq } from "lodash";
 
 import { AppError } from "../error";
 import { calculateAppFee } from "../processingPayments";
@@ -16,6 +16,7 @@ export type ResolvedItem = {
   message?: string;
   optionIds?: string[];
   shippingDestinationId?: string;
+  shippingAmount?: number;
   platformPercent?: number | null;
 };
 
@@ -91,7 +92,7 @@ export const initiatePayment = async ({
   let applicationFeeAmount = 0;
   for (const item of items) {
     applicationFeeAmount += await calculateAppFee(
-      item.amount,
+      item.amount - (item.shippingAmount ?? 0),
       currency,
       item.platformPercent ?? profile.defaultPlatformFee
     );
@@ -110,7 +111,14 @@ export const initiatePayment = async ({
     ...(purchaseType === "trackGroup" &&
       items[0]?.id && { trackGroupId: items[0].id }),
     ...(purchaseType === "track" && items[0]?.id && { trackId: items[0].id }),
-    items: JSON.stringify(items),
+    items: JSON.stringify(
+      items.map((item) =>
+        omit(
+          item,
+          checkoutId ? ["message", "shippingAmount"] : "shippingAmount"
+        )
+      )
+    ),
     ...(checkoutId && { checkoutId }),
   };
 

@@ -1,9 +1,21 @@
-export const omitApPrivateKey = <T extends object>(
+export const omitPrivateProfileFields = <T extends object>(
   profile: T
 ): Omit<T, "apPrivateKey"> => {
   const { apPrivateKey: _, ...publicProfile } = profile as T & {
     apPrivateKey?: unknown;
+    properties?: unknown;
   };
+  const properties = publicProfile.properties;
+  if (properties && typeof properties === "object" && "emails" in properties) {
+    const { emails: _emails, ...publicProperties } = properties as Record<
+      string,
+      unknown
+    >;
+    return { ...publicProfile, properties: publicProperties } as Omit<
+      T,
+      "apPrivateKey"
+    >;
+  }
   return publicProfile;
 };
 
@@ -62,3 +74,8 @@ export type Serialized<T> = T extends Builtin
               : K]: Serialized<T[K]>;
         }
       : T;
+
+export const withPrivateProperties = <T extends object>(
+  serializedProfile: T,
+  profile?: { properties?: unknown } | null
+) => ({ ...serializedProfile, properties: profile?.properties });
