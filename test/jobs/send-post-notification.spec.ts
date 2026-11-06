@@ -5,10 +5,12 @@ import assert from "assert";
 
 import prisma from "@mirlo/prisma";
 import { describe, it } from "mocha";
+import pug from "pug";
 import sinon from "sinon";
 
 import sendPostNotification from "../../src/jobs/send-post-notification";
 import { sendMailQueue } from "../../src/queues/send-mail-queue";
+import { isValidUnfollowToken } from "../../src/utils/unfollowToken";
 import { clearTables, createUser } from "../utils";
 
 describe("send-post-notification", () => {
@@ -162,6 +164,30 @@ describe("send-post-notification", () => {
     await sendPostNotification({ data: { postId: post.id } });
 
     assert.strictEqual(mailQueueStub.callCount, 0);
+  });
+
+  it("links to an unsubscribe page whose token matches its email", async () => {
+    const { artist } = await createArtistWithSubscriber("sub+tag@test.com");
+    const post = await createPublishedPost(artist.id);
+
+    await sendPostNotification({ data: { postId: post.id } });
+
+    const [, jobData] = mailQueueStub.firstCall.args;
+    const html = pug.renderFile("emails/announce-post-published/html.pug", {
+      ...jobData.locals,
+      t: (key: string) => key,
+    });
+    const href = html.match(/href="([^"]*\/unsubscribe\?[^"]*)"/)?.[1];
+    assert.ok(href, "email should contain an unsubscribe link");
+    const params = new URL(href.replaceAll("&amp;", "&")).searchParams;
+    assert.strictEqual(params.get("email"), "sub+tag@test.com");
+    assert.ok(
+      isValidUnfollowToken(
+        params.get("token") ?? "",
+        params.get("email") ?? "",
+        artist.id
+      )
+    );
   });
 
   it("uses a stable jobId per notification to support BullMQ deduplication", async () => {

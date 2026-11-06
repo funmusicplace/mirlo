@@ -288,7 +288,7 @@ export default async function sendPostNotification(job: {
                 ...postForEmail,
                 htmlContent,
               },
-              email: encodeURIComponent(notification.user.email),
+              email: notification.user.email,
               unfollowToken: post.profileId
                 ? unfollowToken(notification.user.email, post.profileId)
                 : undefined,
