@@ -84,6 +84,18 @@ const Index = () => {
             flex-direction: row;
             display: flex;
             align-items: center;
+
+            @media screen and (max-width: ${bp.medium}px) {
+              flex-direction: column;
+              align-items: flex-start;
+              gap: 0.75rem;
+              box-sizing: border-box;
+              padding: var(--mi-side-paddings-xsmall);
+
+              .section-header__heading {
+                margin-left: 0;
+              }
+            }
           `}
         >
           <h2 className="h5 section-header__heading">
@@ -95,6 +107,30 @@ const Index = () => {
               flex-direction: row;
               align-items: center;
               gap: 1rem;
+
+              @media screen and (max-width: ${bp.medium}px) {
+                display: grid;
+                grid-template-columns: auto auto 1fr auto;
+                align-items: center;
+                width: 100%;
+
+                & > :nth-child(3) {
+                  grid-column: 3 / -1;
+                  justify-self: end;
+                }
+
+                & > :nth-child(4) {
+                  display: grid;
+                  grid-column: 1 / 4;
+                  grid-template-columns: auto minmax(0, 1fr);
+                  align-items: center;
+                  width: 100%;
+                }
+
+                & > :nth-child(5) {
+                  grid-column: 4;
+                }
+              }
             `}
           >
             <Button
@@ -129,6 +165,20 @@ const Index = () => {
                 flex-direction: row;
                 align-items: center;
                 gap: 1rem;
+
+                @media screen and (max-width: ${bp.medium}px) {
+                  width: 100%;
+                  flex-basis: 100%;
+                  min-width: 0;
+                  flex-direction: row;
+                  align-items: center;
+                  gap: 1rem;
+
+                  select {
+                    width: 100%;
+                    max-width: none;
+                  }
+                }
               `}
             >
               <label htmlFor="location">{t("location")}</label>
