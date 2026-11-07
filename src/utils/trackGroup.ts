@@ -1006,7 +1006,9 @@ export const setDownloadTokenToNull = async ({
   });
 };
 
-export const processTrackGroupQueryOrder = (orderByString?: unknown) => {
+export const processTrackGroupQueryOrder = (
+  orderByString?: unknown
+): Prisma.TrackGroupOrderByWithRelationInput[] => {
   let orderByObj: Partial<{
     releaseDate: "desc";
     id: "desc";
@@ -1024,7 +1026,8 @@ export const processTrackGroupQueryOrder = (orderByString?: unknown) => {
       createdAt: "desc",
     };
   }
-  return orderByObj;
+  // id breaks ties so skip/take pages never repeat or drop a release
+  return orderByObj.id ? [orderByObj] : [orderByObj, { id: "desc" }];
 };
 
 export const createOrUpdatePledge = async ({
