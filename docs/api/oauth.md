@@ -136,6 +136,6 @@ An `api` token can read anything the user can, except the list of connected apps
 
 Refresh with `grant_type=refresh_token`. Public clients get a new refresh token each time, and the old one stops working; using an old one again revokes the whole grant.
 
-When the user signs out of your app, revoke the refresh token at `POST /auth/oidc/token/revocation`.
+When the user signs out of your app, revoke the refresh token at `POST /auth/oidc/token/revocation`. Each sign-in gets its own grant, so this signs the user out on that device only.
 
 Users see and disconnect connected apps under **Account settings → Connected apps**. Disconnecting an app, or resetting the password, revokes its tokens immediately.
