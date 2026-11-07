@@ -3,18 +3,22 @@ import prisma from "@mirlo/prisma";
 import { notExpired } from "./adapter";
 import { isMetadataDocumentClientId } from "./approval";
 
-export const findGrantId = async (accountId: number, clientId: string) =>
-  (
-    await prisma.oAuthPayload.findFirst({
-      where: {
-        model: "Grant",
-        accountId,
-        payload: { path: ["clientId"], equals: clientId },
-        ...notExpired(),
-      },
-      select: { id: true },
-    })
-  )?.id;
+export const grantedScopes = async (accountId: number, clientId: string) => {
+  const grants = await prisma.oAuthPayload.findMany({
+    where: {
+      model: "Grant",
+      accountId,
+      payload: { path: ["clientId"], equals: clientId },
+      ...notExpired(),
+    },
+    select: { payload: true },
+  });
+  return new Set(
+    grants.flatMap(
+      (grant) => (grant.payload as GrantPayload).openid?.scope?.split(" ") ?? []
+    )
+  );
+};
 
 type GrantPayload = {
   clientId?: string;
@@ -26,16 +30,24 @@ const fromEpoch = (seconds?: number) =>
   seconds ? new Date(seconds * 1000).toISOString() : null;
 
 export const listConnectedApps = async (accountId: number) => {
-  const grants = await prisma.oAuthPayload.findMany({
+  const allGrants = await prisma.oAuthPayload.findMany({
     where: { model: "Grant", accountId, ...notExpired() },
   });
   const tokens = await prisma.oAuthPayload.findMany({
     where: {
-      grantId: { in: grants.map((grant) => grant.id) },
+      grantId: { in: allGrants.map((grant) => grant.id) },
       model: { in: ["AccessToken", "RefreshToken"] },
     },
-    select: { grantId: true, payload: true },
+    select: { grantId: true, payload: true, expiresAt: true },
   });
+  // A grant outlives its tokens, so list only sign-ins with a live one
+  const grants = allGrants.filter((grant) =>
+    tokens.some(
+      (token) =>
+        token.grantId === grant.id &&
+        (!token.expiresAt || token.expiresAt > new Date())
+    )
+  );
   const clientIds = grants.map(
     (grant) => (grant.payload as GrantPayload).clientId ?? ""
   );

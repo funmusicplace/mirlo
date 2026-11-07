@@ -25,7 +25,10 @@ const ConnectedApps: React.FC<{ userId: number }> = ({ userId }) => {
 
   const formatDate = (date: string | null) =>
     date
-      ? new Date(date).toLocaleDateString(toLanguageTag(i18n.resolvedLanguage))
+      ? new Date(date).toLocaleString(toLanguageTag(i18n.resolvedLanguage), {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
       : t("never");
 
   return (
@@ -48,6 +51,7 @@ const ConnectedApps: React.FC<{ userId: number }> = ({ userId }) => {
               <div className="text-sm text-(--mi-lighten-foreground-color)">
                 {t("connectedAppDetails", {
                   scopes: app.scopes.join(", "),
+                  connected: formatDate(app.createdAt),
                   lastUsed: formatDate(app.lastUsedAt),
                 })}
               </div>
