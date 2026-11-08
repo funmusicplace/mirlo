@@ -3,7 +3,10 @@ import { difference } from "lodash";
 
 import type { DataMigration } from "..";
 import logger from "../../logger";
-import { forEachStoredAudioIdPage, removeAudioFiles } from "../../utils/minio";
+import {
+  forEachStoredAudioIdPage,
+  removeAudioFiles,
+} from "../../utils/storage";
 
 const orphanedAudio: DataMigration = {
   name: "2026-10-orphaned-audio",

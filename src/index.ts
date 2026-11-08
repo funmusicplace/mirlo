@@ -40,7 +40,6 @@ import { serveStatic } from "./static";
 import errorHandler from "./utils/error";
 import { denyFramingExceptWidgets } from "./utils/framing";
 import { setCdnUrl } from "./utils/images";
-import { setBucketConfig, ensureAllBucketsExist } from "./utils/minio";
 import { getCachedPage } from "./utils/pageCache";
 import { parseTextQuery } from "./utils/plainInput";
 import {
@@ -51,6 +50,7 @@ import {
 } from "./utils/requestLogging";
 import { securityHeaders } from "./utils/securityHeaders";
 import { getSiteSettings } from "./utils/settings";
+import { setBucketConfig, ensureAllBucketsExist } from "./utils/storage";
 import { refreshStripeClient } from "./utils/stripe";
 import { syncStripeConnectWebhookOnBoot } from "./utils/stripe/webhooks";
 import { startAvailableLanguagesRefresh } from "./utils/transifexLanguages";

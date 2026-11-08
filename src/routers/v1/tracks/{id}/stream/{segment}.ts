@@ -2,8 +2,8 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
-import { getAudioSegmentBufferIfExists } from "../../../../../utils/minio";
 import { canUserListenToTrack } from "../../../../../utils/ownership";
+import { getAudioSegmentBufferIfExists } from "../../../../../utils/storage";
 import { whereForTrackGroupVisibleTo } from "../../../../../utils/trackGroup";
 
 const STREAM_FILE = /^(playlist\.m3u8|segment-\d+\.ts)$/;

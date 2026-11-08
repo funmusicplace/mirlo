@@ -1,7 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { Image, InstanceLogo, Settings } from "@mirlo/prisma/client";
 
-import { BucketConfig, DEFAULT_BUCKET_CONFIG } from "./minio";
+import { BucketConfig, DEFAULT_BUCKET_CONFIG } from "./storage";
 
 export interface SettingsType extends Partial<Settings> {
   platformPercent: number;

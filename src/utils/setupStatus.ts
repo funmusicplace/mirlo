@@ -11,9 +11,9 @@ import {
 import { sendMailQueue } from "../queues/send-mail-queue";
 
 import { isSpamProtectionConfigured } from "./cloudflare";
-import { backendStorage, bucketExists, currentBuckets } from "./minio";
 import { getPaymentProcessor } from "./payments/PaymentProcessor";
 import { hasInstanceName, SettingsType } from "./settings";
+import { backendStorage, bucketExists, currentBuckets } from "./storage";
 
 export type CheckStatus = "ok" | "warning" | "error";
 

@@ -4,7 +4,7 @@ import generateSlug from "../../src/utils/generateSlug";
 import prisma from "../prisma";
 
 import {
-  createMinioClient,
+  createS3Client,
   ensureBuckets,
   generateAndUploadImage,
 } from "./publishedTrackGroups";
@@ -50,9 +50,9 @@ export async function seedMerch() {
     return;
   }
 
-  const minioClient = createMinioClient();
-  if (minioClient) {
-    await ensureBuckets(minioClient);
+  const s3 = createS3Client();
+  if (s3) {
+    await ensureBuckets(s3);
   } else {
     console.log("LOCAL_S3_HOST not set — merch images will be skipped");
   }
@@ -115,10 +115,10 @@ export async function seedMerch() {
           }
         }
 
-        if (minioClient) {
+        if (s3) {
           try {
             const { id: imageId, urls } = await generateAndUploadImage(
-              minioClient,
+              s3,
               MERCH_SIZES
             );
             // Merch images are central Image rows at the bucket root.

@@ -9,7 +9,7 @@ import { AppError } from "../../../utils/error";
 import {
   getDownloadableContentMeta,
   getDownloadableContentBuffer,
-} from "../../../utils/minio";
+} from "../../../utils/storage";
 
 type Params = {
   id: string;

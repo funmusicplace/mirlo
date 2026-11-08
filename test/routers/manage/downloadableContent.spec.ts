@@ -10,7 +10,7 @@ import {
   getDownloadsBucket,
   statDownloadableContent,
   uploadWrapper,
-} from "../../../src/utils/minio";
+} from "../../../src/utils/storage";
 import {
   clearTables,
   createArtist,
@@ -144,10 +144,7 @@ describe("manage/downloadableContent", () => {
       await prisma.downloadableContent.findFirst({ where: { id: content.id } }),
       null
     );
-    const { backblazeStat, minioStat } = await statDownloadableContent(
-      content.id
-    );
-    assert.ok(!backblazeStat && !minioStat);
+    assert.ok(!(await statDownloadableContent(content.id)));
   });
 
   it("GET serves content as an attachment with the stored type", async () => {

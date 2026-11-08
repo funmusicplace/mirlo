@@ -5,15 +5,16 @@ import { Prisma } from "@mirlo/prisma/client";
 import { Job } from "bullmq";
 // @ts-ignore: Ignore import errors for github-slugger
 import { slug } from "github-slugger";
+import sinon from "sinon";
 
 import prisma from "../prisma/prisma";
 import { buildTokens, hashPassword } from "../src/routers/auth/utils";
-import { uploadAudioHlsFile } from "../src/utils/minio";
 import {
   CompletedPayment,
   EMPTY_PLATFORM_CURRENCY_VALUE,
 } from "../src/utils/payments/completedPayment";
 import { getSiteSettings } from "../src/utils/settings";
+import { storageClient, uploadAudioHlsFile } from "../src/utils/storage";
 
 const TRUNCATE_TABLES_SQL = `
   TRUNCATE TABLE
@@ -663,4 +664,47 @@ export default {
   createNotification,
   createMerch,
   createMerchShippingDestination,
+};
+
+type StorageInput = { Bucket?: string; Key?: string; Prefix?: string };
+
+export const stubStorage = (
+  options: {
+    body?: Buffer;
+    head?: Record<string, unknown> | Error;
+    listKeys?: string[];
+  } = {}
+) => {
+  const stub = sinon
+    .stub(storageClient!, "send")
+    .callsFake(async (command: any) => {
+      switch (command.constructor.name) {
+        case "HeadObjectCommand":
+          if (options.head instanceof Error) throw options.head;
+          return options.head ?? {};
+        case "GetObjectCommand": {
+          const body = options.body ?? Buffer.alloc(0);
+          return {
+            Body: Object.assign(Readable.from([body]), {
+              transformToByteArray: async () => new Uint8Array(body),
+            }),
+          };
+        }
+        case "ListObjectsV2Command":
+          return { Contents: (options.listKeys ?? []).map((Key) => ({ Key })) };
+        default:
+          return {};
+      }
+    });
+  const inputs = (commandName: string): StorageInput[] =>
+    stub
+      .getCalls()
+      .map((call) => call.args[0] as any)
+      .filter((command) => command.constructor.name === commandName)
+      .map((command) => command.input);
+  const first = (commandName: string) => {
+    const input = inputs(commandName)[0];
+    return [input?.Bucket, input?.Key ?? input?.Prefix];
+  };
+  return { stub, inputs, first, options };
 };

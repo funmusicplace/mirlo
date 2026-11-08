@@ -7,7 +7,7 @@ import pug from "pug";
 import logger from "../logger";
 import { getClient } from "../utils/getClient";
 import { convertURLArrayToSizes } from "../utils/images";
-import { storedImagePrefix } from "../utils/minio";
+import { storedImagePrefix } from "../utils/storage";
 
 const renderWidgetCard = pug.compileFile(
   path.resolve("emails", "widget-card.pug")

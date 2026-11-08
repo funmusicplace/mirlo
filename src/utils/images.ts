@@ -10,7 +10,7 @@ import {
   removeStoredImage,
   S3_ENDPOINT,
   storedImagePrefix,
-} from "./minio";
+} from "./storage";
 
 // Module-level cache initialized from DB settings at startup (and refreshed on admin save).
 // Kept synchronous so generateFullStaticImageUrl can be used as a plain function reference.

@@ -9,7 +9,7 @@ import prisma from "@mirlo/prisma";
 import { describe, it } from "mocha";
 import request from "supertest";
 
-import { downloadIncomingAudio } from "../../../../src/utils/minio";
+import { downloadIncomingAudio } from "../../../../src/utils/storage";
 import {
   clearTables,
   createArtist,

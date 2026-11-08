@@ -8,8 +8,8 @@ import yargs from "yargs";
 
 import { REDIS_CONFIG } from "../config/redis";
 import { runPendingDataMigrations } from "../dataMigrations";
-import { setBucketConfig, ensureAllBucketsExist } from "../utils/minio";
 import { getSiteSettings } from "../utils/settings";
+import { setBucketConfig, ensureAllBucketsExist } from "../utils/storage";
 
 import generateAlbumJob from "./generate-album";
 import moderateImage from "./moderate-image";

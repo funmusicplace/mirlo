@@ -11,7 +11,7 @@ import {
   getAudioBucket,
   statFile,
   uploadIncomingAudio,
-} from "../../src/utils/minio";
+} from "../../src/utils/storage";
 import {
   clearTables,
   createProfile,
@@ -44,7 +44,7 @@ describe("upload-audio", () => {
   };
 
   const exists = async (bucket: string, key: string) =>
-    !!(await statFile(bucket, key)).minioStat;
+    !!(await statFile(bucket, key));
 
   it("converts the incoming upload to HLS", async () => {
     const audio = await seedIncomingAudio();

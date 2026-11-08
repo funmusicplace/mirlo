@@ -9,7 +9,7 @@ import {
   clearTrackDownloads,
   clearTrackGroupDownloads,
 } from "../../src/utils/downloadCache";
-import { uploadZip, zipExists } from "../../src/utils/minio";
+import { uploadZip, zipExists } from "../../src/utils/storage";
 import {
   clearTables,
   createProfile,

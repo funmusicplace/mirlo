@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 
 import {
-  getBufferBasedOnStat,
+  getBufferFromStorage,
   getImagesBucket,
   imageContentType,
   statFile,
-} from "./utils/minio";
+} from "./utils/storage";
 
 const SVG_CONTENT_SECURITY_POLICY =
   "default-src 'none'; style-src 'unsafe-inline'; sandbox";
@@ -46,8 +46,8 @@ export const serveStatic = async (
     return;
   }
 
-  const { backblazeStat, minioStat } = await statFile(bucket, filename);
-  if (!backblazeStat && !minioStat) {
+  const stat = await statFile(bucket, filename);
+  if (!stat) {
     res.status(404);
     next();
     return;
@@ -58,14 +58,10 @@ export const serveStatic = async (
     "Cache-Control",
     "public, max-age=604800, stale-while-revalidate=604800"
   );
-  const etag = `"${backblazeStat?.ETag ?? minioStat?.etag}"`;
+  const etag = stat.ETag?.startsWith('"') ? stat.ETag : `"${stat.ETag}"`;
   res.setHeader("ETag", etag);
   res.setHeader("X-Content-Type-Options", "nosniff");
-  const contentType = contentTypeFor(
-    filename,
-    backblazeStat?.ContentType ??
-      (minioStat?.metaData?.["content-type"] as string | undefined)
-  );
+  const contentType = contentTypeFor(filename, stat.ContentType);
   if (contentType) {
     res.setHeader("Content-Type", contentType);
   }
@@ -85,7 +81,7 @@ export const serveStatic = async (
   }
 
   try {
-    const buffer = await getBufferBasedOnStat(bucket, filename, backblazeStat);
+    const { buffer } = await getBufferFromStorage(bucket, filename);
 
     res.end(buffer, "binary");
 

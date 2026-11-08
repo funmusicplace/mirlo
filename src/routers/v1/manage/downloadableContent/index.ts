@@ -6,11 +6,11 @@ import { userOrAppAuthenticated } from "../../../../auth/passport";
 import { isAllowedDownloadableContentMimeType } from "../../../../utils/content";
 import { clearTrackGroupDownloads } from "../../../../utils/downloadCache";
 import { AppError } from "../../../../utils/error";
-import { getDownloadableContentUploadUrl } from "../../../../utils/minio";
 import {
   doesMerchBelongToUser,
   doesTrackGroupBelongToUser,
 } from "../../../../utils/ownership";
+import { getDownloadableContentUploadUrl } from "../../../../utils/storage";
 
 // Keep in sync with MAX_DOWNLOADABLE_CONTENT_SIZE on the client.
 const MAX_SIZE_MB = 100;

@@ -9,14 +9,10 @@ import assert from "assert";
 import sinon from "sinon";
 import request from "supertest";
 
-import { Readable } from "stream";
-
 import { serveStatic } from "../src/static";
-import {
-  DEFAULT_BUCKET_CONFIG,
-  minioClient,
-  setBucketConfig,
-} from "../src/utils/minio";
+import { DEFAULT_BUCKET_CONFIG, setBucketConfig } from "../src/utils/storage";
+
+import { stubStorage } from "./utils";
 
 const fileContents = "file-bytes";
 
@@ -32,21 +28,13 @@ describe("serveStatic", () => {
   const app = express();
   app.use("/images/:bucket", serveStatic);
 
-  let statStub: sinon.SinonStub;
-  let getObjectStub: sinon.SinonStub;
+  let storage: ReturnType<typeof stubStorage>;
 
   beforeEach(() => {
-    statStub = sinon.stub(minioClient!, "statObject").resolves({
-      size: fileContents.length,
-      etag: "test-etag",
-      lastModified: new Date(),
-      metaData: {},
-    } as any);
-    getObjectStub = sinon
-      .stub(minioClient!, "getObject")
-      .callsFake(
-        () => Promise.resolve(Readable.from([Buffer.from(fileContents)])) as any
-      );
+    storage = stubStorage({
+      body: Buffer.from(fileContents),
+      head: { ETag: '"test-etag"' },
+    });
   });
 
   afterEach(() => {
@@ -60,7 +48,7 @@ describe("serveStatic", () => {
       .parse(rawBody)
       .expect(200);
 
-    assert.deepEqual(statStub.firstCall.args, [
+    assert.deepEqual(storage.first("HeadObjectCommand"), [
       "mirlo-images",
       "trackgroup-covers/some-image-x600.webp",
     ]);
@@ -77,7 +65,7 @@ describe("serveStatic", () => {
       setBucketConfig(DEFAULT_BUCKET_CONFIG);
     }
 
-    assert.deepEqual(statStub.firstCall.args, [
+    assert.deepEqual(storage.first("HeadObjectCommand"), [
       "staging-mirlo-images",
       "some-image-x600.webp",
     ]);
@@ -94,19 +82,21 @@ describe("serveStatic", () => {
       .get("/images/trackgroup-covers/some-image-x600.webp")
       .expect(404);
 
-    assert.equal(statStub.called, false);
+    assert.equal(storage.inputs("HeadObjectCommand").length, 0);
   });
 
   it("404s when the object does not exist", async () => {
-    statStub.rejects(new Error("not found"));
+    storage.options.head = Object.assign(new Error("not found"), {
+      name: "NotFound",
+    });
 
     await request(app).get("/images/mirlo-images/nope.webp").expect(404);
-    assert.equal(getObjectStub.called, false);
+    assert.equal(storage.inputs("GetObjectCommand").length, 0);
   });
 
   it("404s when no object key is given", async () => {
     await request(app).get("/images/mirlo-images").expect(404);
-    assert.equal(statStub.called, false);
+    assert.equal(storage.inputs("HeadObjectCommand").length, 0);
   });
 
   it("sends the type from the extension and nosniff", async () => {
@@ -129,12 +119,7 @@ describe("serveStatic", () => {
   });
 
   it("falls back to a stored image type for unknown extensions", async () => {
-    statStub.resolves({
-      size: fileContents.length,
-      etag: "test-etag",
-      lastModified: new Date(),
-      metaData: { "content-type": "image/heic" },
-    } as any);
+    storage.options.head = { ETag: '"test-etag"', ContentType: "image/heic" };
 
     const response = await request(app)
       .get("/images/mirlo-images/photo.heic")
@@ -144,12 +129,7 @@ describe("serveStatic", () => {
   });
 
   it("never forwards a stored non-image type", async () => {
-    statStub.resolves({
-      size: fileContents.length,
-      etag: "test-etag",
-      lastModified: new Date(),
-      metaData: { "content-type": "text/html" },
-    } as any);
+    storage.options.head = { ETag: '"test-etag"', ContentType: "text/html" };
 
     const response = await request(app)
       .get("/images/mirlo-images/page.html")
@@ -166,6 +146,6 @@ describe("serveStatic", () => {
       .set("If-None-Match", '"test-etag"')
       .expect(304);
 
-    assert.equal(getObjectStub.called, false);
+    assert.equal(storage.inputs("GetObjectCommand").length, 0);
   });
 });

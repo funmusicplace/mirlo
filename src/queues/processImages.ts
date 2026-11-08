@@ -11,16 +11,16 @@ import logger from "../logger";
 import { clearTrackGroupDownloads } from "../utils/downloadCache";
 import { AppError, HttpCode } from "../utils/error";
 import { APIContext } from "../utils/file";
+import { clearPageCache } from "../utils/pageCache";
+import { discardPendingImage, markPendingImage } from "../utils/pendingImage";
+import { stripNullBytes } from "../utils/sanitize";
+import { findSettingsId } from "../utils/splashScreen";
 import {
   ImageType,
   imageTypeUsesQueue,
   removeIncomingImageByType,
   uploadIncomingImageByType,
-} from "../utils/minio";
-import { clearPageCache } from "../utils/pageCache";
-import { discardPendingImage, markPendingImage } from "../utils/pendingImage";
-import { stripNullBytes } from "../utils/sanitize";
-import { findSettingsId } from "../utils/splashScreen";
+} from "../utils/storage";
 
 const queueOptions = {
   prefix: "mirlo",

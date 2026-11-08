@@ -8,7 +8,7 @@ import {
 } from "../../../../../auth/passport";
 import { logger } from "../../../../../logger";
 import { AppError } from "../../../../../utils/error";
-import { streamOriginalAudio } from "../../../../../utils/minio";
+import { streamOriginalAudio } from "../../../../../utils/storage";
 import { basicTrackGroupInclude } from "../../../../../utils/trackGroup";
 import { cleanHeaderValue } from "../../../../../utils/validate-http-headers";
 

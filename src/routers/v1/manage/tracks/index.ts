@@ -10,8 +10,8 @@ import { buildTrackStreamURL } from "../../../../queues/processTrackAudio";
 import { processSingleTrack } from "../../../../serializers/track";
 import { whereForProfilesUserOwnsOrManages } from "../../../../utils/artist";
 import { assertSupportedAudioExtension } from "../../../../utils/audioFormats";
-import { getAudioUploadUrl } from "../../../../utils/minio";
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
+import { getAudioUploadUrl } from "../../../../utils/storage";
 import { trackArtistFields } from "../../../../utils/tracks";
 
 export default function () {
