@@ -6,11 +6,6 @@ import logger from "../../../logger";
 import { isValidEmail } from "../../../utils/email";
 import { AppError } from "../../../utils/error";
 import { setCdnUrl } from "../../../utils/images";
-import {
-  setBucketConfig,
-  ensureAllBucketsExist,
-  isBucketConfig,
-} from "../../../utils/minio";
 import { clearPageCache } from "../../../utils/pageCache";
 import {
   getSiteSettings,
@@ -18,6 +13,11 @@ import {
   SettingsType,
 } from "../../../utils/settings";
 import { validateSplashCustomization } from "../../../utils/splashScreen";
+import {
+  setBucketConfig,
+  ensureAllBucketsExist,
+  isBucketConfig,
+} from "../../../utils/storage";
 import { refreshStripeClient, stripeKeyMode } from "../../../utils/stripe";
 import { isTrustLevelNames } from "../../../utils/trustLevel";
 

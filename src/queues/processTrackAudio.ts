@@ -9,7 +9,7 @@ import {
   unsupportedAudioFormatError,
 } from "../utils/audioFormats";
 import { clearTrackDownloads } from "../utils/downloadCache";
-import { uploadIncomingAudio } from "../utils/minio";
+import { uploadIncomingAudio } from "../utils/storage";
 
 import { verifyAudioQueue } from "./verify-audio-queue";
 

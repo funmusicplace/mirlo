@@ -8,7 +8,7 @@ import prisma from "@mirlo/prisma";
 import {
   createBucketIfNotExists,
   getImagesBucket,
-} from "../../../../src/utils/minio";
+} from "../../../../src/utils/storage";
 import {
   clearTables,
   createArtistLabel,

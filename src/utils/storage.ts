@@ -13,7 +13,6 @@ import {
   PutBucketCorsCommand,
   HeadObjectCommand,
   HeadObjectCommandOutput,
-  ListObjectsCommand,
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
@@ -21,17 +20,13 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
 import contentDisposition from "content-disposition";
 import { chunk } from "lodash";
-import { Client, BucketItem } from "minio";
-import * as Minio from "minio";
 import { Logger } from "winston";
 
 import logger from "../logger";
 
-// Backend-agnostic object storage helpers: MinIO in development, any
+// Backend-agnostic object storage helpers: Garage in development, any
 // S3-compatible provider (Backblaze B2 in production) via the AWS SDK.
-// The filename is historical — nothing here is MinIO-specific from the
-// caller's point of view. Bucket layout is documented in
-// docs/hosting/object-storage.md.
+// Bucket layout is documented in docs/hosting/object-storage.md.
 
 export const instanceLogoPrefix = "instance-logos";
 export const rootImagePrefix = "";
@@ -118,18 +113,6 @@ export const resolveBackendStorage = (
 
 export const backendStorage: "minio" | "backblaze" = resolveBackendStorage();
 
-// and access keys as shown below.
-export const minioClient =
-  backendStorage === "minio" && LOCAL_S3_HOST
-    ? new Minio.Client({
-        endPoint: LOCAL_S3_HOST,
-        port: +LOCAL_S3_API_PORT,
-        useSSL: false, // NODE_ENV !== "development",
-        accessKey: LOCAL_S3_USER,
-        secretKey: LOCAL_S3_PASSWORD,
-      })
-    : undefined;
-
 const localS3Config = {
   region: "us-east-1",
   credentials: {
@@ -158,7 +141,6 @@ export const localS3PublicClient =
       })
     : undefined;
 
-// Instantiate a second minio client for backblaze
 export const backblazeClient =
   backendStorage === "backblaze"
     ? new S3Client({
@@ -217,38 +199,50 @@ const corsConfiguration = () => ({
   ],
 });
 
-const applyCorsPolicyS3 = async (bucket: string) => {
-  if (!backblazeClient) return;
+export const storageClient: S3Client | undefined =
+  backendStorage === "backblaze" ? backblazeClient : localS3Client;
+
+const storageS3Client = () => {
+  if (!storageClient) {
+    throw new Error(`${backendStorage}: no S3 client`);
+  }
+  return storageClient;
+};
+
+const applyCorsPolicy = async (bucket: string) => {
   try {
-    await backblazeClient.send(
+    await storageS3Client().send(
       new PutBucketCorsCommand({
         Bucket: bucket,
         CORSConfiguration: corsConfiguration(),
       })
     );
-    logger.info(`backblaze: set CORS policy on bucket: ${bucket}`);
+    logger.info(`${backendStorage}: set CORS policy on bucket: ${bucket}`);
   } catch (e) {
     if (e instanceof Error && e.message.includes("B2 Native CORS rules")) {
       logger.warn(
-        `backblaze: bucket ${bucket} already has native B2 CORS rules; skipping S3 CORS update`
+        `${backendStorage}: bucket ${bucket} already has native B2 CORS rules; skipping S3 CORS update`
       );
       return;
     }
-    logger.error(`backblaze: failed to set CORS policy on bucket ${bucket}`);
+    logger.error(
+      `${backendStorage}: failed to set CORS policy on bucket ${bucket}`
+    );
     logger.error(e);
   }
 };
 
-const applyPublicReadPolicyS3 = async (bucket: string) => {
-  if (!backblazeClient) return;
+const applyPublicReadPolicy = async (bucket: string) => {
   try {
-    await backblazeClient.send(
+    await storageS3Client().send(
       new PutBucketPolicyCommand({
         Bucket: bucket,
         Policy: publicReadPolicy(bucket),
       })
     );
-    logger.info(`backblaze: set public-read policy on bucket: ${bucket}`);
+    logger.info(
+      `${backendStorage}: set public-read policy on bucket: ${bucket}`
+    );
   } catch (e) {
     // B2 doesn't implement PutBucketPolicy so this isn't actionable and
     // shouldn't be dumped in the error logs.
@@ -258,112 +252,48 @@ const applyPublicReadPolicyS3 = async (bucket: string) => {
       e.message.includes("This API call is not supported")
     ) {
       logger.warn(
-        `backblaze: bucket ${bucket} policy API not supported; make sure it's set to public via your provider's console`
+        `${backendStorage}: bucket ${bucket} policy API not supported; make sure it's set to public via your provider's console`
       );
       return;
     }
     logger.error(
-      `backblaze: failed to set public-read policy on bucket ${bucket} — ` +
+      `${backendStorage}: failed to set public-read policy on bucket ${bucket} — ` +
         `it may need to be made public manually via your provider's console`
     );
     logger.error(e instanceof Error ? e.message : e);
   }
 };
 
-const applyCorsPolicyLocal = async (bucket: string, logger?: Logger) => {
-  if (!localS3Client) return;
-  try {
-    await localS3Client.send(
-      new PutBucketCorsCommand({
-        Bucket: bucket,
-        CORSConfiguration: corsConfiguration(),
-      })
-    );
-  } catch (e) {
-    logger?.warn(`${backendStorage}: failed to set CORS on bucket ${bucket}`);
-    logger?.warn(e instanceof Error ? e.message : String(e));
-  }
+const isNotFound = (e: unknown) => {
+  const error = e as {
+    name?: string;
+    $metadata?: { httpStatusCode?: number };
+  };
+  return (
+    error.$metadata?.httpStatusCode === 404 ||
+    error.name === "NotFound" ||
+    error.name === "NoSuchKey" ||
+    error.name === "NoSuchBucket"
+  );
 };
 
-const createB2BucketIfNotExists = async (
-  bucket: string,
-  makePublic?: boolean
-) => {
-  if (!backblazeClient) {
-    throw new Error("Backblaze client is not initialized");
-  }
-  try {
-    await backblazeClient.send(new HeadBucketCommand({ Bucket: bucket }));
-  } catch (e) {
-    logger.info(`backblaze: bucket ${bucket} doesn't exist yet, creating it`);
-    await backblazeClient.send(new CreateBucketCommand({ Bucket: bucket }));
-  }
-
-  if (makePublic) {
-    await applyPublicReadPolicyS3(bucket);
-  }
-  await applyCorsPolicyS3(bucket);
-
-  return true;
-};
-
-export const fileExistCheckBackblaze = async (
+export const statFile = async (
   bucket: string,
   filename: string
 ): Promise<HeadObjectCommandOutput | undefined> => {
-  if (!backblazeClient) {
-    throw new Error("Backblaze client is not initialized");
-  }
-  let backblazeStat: HeadObjectCommandOutput | undefined = undefined;
   try {
-    backblazeStat = await backblazeClient.send(
-      new HeadObjectCommand({
-        Bucket: bucket,
-        Key: filename,
-      }),
-      {}
+    return await storageS3Client().send(
+      new HeadObjectCommand({ Bucket: bucket, Key: filename })
     );
   } catch (e) {
-    const error = e as {
-      name?: string;
-      $metadata?: { httpStatusCode?: number };
-    };
-
-    if (
-      error.$metadata?.httpStatusCode === 404 ||
-      error.name === "NotFound" ||
-      error.name === "NoSuchKey"
-    ) {
-      return undefined;
+    if (!isNotFound(e)) {
+      logger.error(
+        `${backendStorage}: error fetching file stat: ${bucket}/${filename}`
+      );
+      logger.error(e instanceof Error ? e.message : e);
     }
-
-    logger.error(
-      `Error fetching static file from backblaze: ${bucket}/${filename}`
-    );
     return undefined;
   }
-  return backblazeStat;
-};
-
-export const statFile = async (bucket: string, filename: string) => {
-  let minioStat;
-  let backblazeStat;
-
-  if (backendStorage === "backblaze") {
-    backblazeStat = await fileExistCheckBackblaze(bucket, filename);
-  }
-  // If the object doesn't exist on backblaze we check in minio
-  if (backendStorage === "minio" && minioClient) {
-    try {
-      minioStat = await minioClient.statObject(bucket, filename);
-    } catch {
-      logger.error(`minio doesn't have the file ${bucket}/${filename}`);
-    }
-  }
-  return {
-    minioStat,
-    backblazeStat,
-  };
 };
 
 export interface FileMeta {
@@ -373,100 +303,40 @@ export interface FileMeta {
   etag?: string;
 }
 
-const normalizeStatToMeta = (stat: {
-  backblazeStat?: HeadObjectCommandOutput;
-  minioStat?: Awaited<ReturnType<Client["statObject"]>>;
-}): FileMeta | null => {
-  if (stat.backblazeStat) {
-    return {
-      contentType: stat.backblazeStat.ContentType,
-      contentLength: stat.backblazeStat.ContentLength,
-      lastModified: stat.backblazeStat.LastModified,
-      etag: stat.backblazeStat.ETag,
-    };
-  }
-  if (stat.minioStat) {
-    return {
-      contentType: stat.minioStat.metaData?.["content-type"] as
-        | string
-        | undefined,
-      contentLength: stat.minioStat.size,
-      lastModified: stat.minioStat.lastModified,
-      etag: stat.minioStat.etag,
-    };
-  }
-  return null;
-};
+const normalizeStatToMeta = (
+  stat?: HeadObjectCommandOutput
+): FileMeta | null =>
+  stat
+    ? {
+        contentType: stat.ContentType,
+        contentLength: stat.ContentLength,
+        lastModified: stat.LastModified,
+        etag: stat.ETag,
+      }
+    : null;
 
 export const createBucketIfNotExists = async (
   bucket: string,
   logger?: Logger,
   options?: { makePublic?: boolean }
 ) => {
-  let exists;
+  const client = storageS3Client();
   logger?.info(`${backendStorage}: checking if a bucket exists in: ${bucket}`);
-
-  if (backendStorage === "backblaze") {
-    await createB2BucketIfNotExists(bucket, options?.makePublic);
-  } else if (backendStorage === "minio" && minioClient) {
-    try {
-      exists = await minioClient.bucketExists(bucket);
-    } catch (e) {
-      logger?.error(e);
-      logger?.info(`minio: failed to check, creating bucket: ${bucket}`);
-
-      await minioClient.makeBucket(bucket);
-      logger?.info(`minio: created bucket: ${bucket}`);
-    }
-
-    if (!exists) {
-      logger?.info(`minio: does not exist, creating bucket: ${bucket}`);
-      await minioClient.makeBucket(bucket);
-      logger?.info(`minio: created bucket: ${bucket}`);
-    }
-
-    await applyCorsPolicyLocal(bucket, logger);
+  try {
+    await client.send(new HeadBucketCommand({ Bucket: bucket }));
+  } catch {
+    logger?.info(
+      `${backendStorage}: bucket ${bucket} doesn't exist yet, creating it`
+    );
+    await client.send(new CreateBucketCommand({ Bucket: bucket }));
   }
+
+  if (options?.makePublic && backendStorage === "backblaze") {
+    await applyPublicReadPolicy(bucket);
+  }
+  await applyCorsPolicy(bucket);
 
   return true;
-};
-
-export const uploadFilesToBackblaze = async (
-  bucket: string,
-  fileName: string,
-  fileStream: Readable | Buffer,
-  options?: { contentType?: string; cacheControl?: string }
-) => {
-  if (!backblazeClient) {
-    throw new Error("Backblaze client is not initialized");
-  }
-  if (fileStream instanceof Buffer) {
-    await backblazeClient.send(
-      new PutObjectCommand({
-        Bucket: bucket,
-        Key: fileName,
-        Body: fileStream,
-        ContentType: options?.contentType,
-        CacheControl: options?.cacheControl,
-      })
-    );
-  } else {
-    const upload = new Upload({
-      client: backblazeClient,
-      params: {
-        Bucket: bucket,
-        Key: fileName,
-        Body: fileStream,
-        ContentType: options?.contentType,
-        CacheControl: options?.cacheControl,
-      },
-    });
-
-    await upload.done();
-  }
-  logger.info(
-    `${backendStorage}: done uploading filestream|buffer: ${bucket}/${fileName}`
-  );
 };
 
 export const getPresignedUploadUrl = async (
@@ -520,15 +390,12 @@ export const getPresignedDownloadUrl = async (
   }
 ): Promise<string | null> => {
   const expiresInSeconds = options?.expiresInSeconds ?? 60 * 15;
-  const { backblazeStat, minioStat } = await statFile(bucket, filename);
+  const stat = await statFile(bucket, filename);
 
-  const client = backblazeStat
-    ? backblazeClient
-    : minioStat
-      ? localS3PublicClient
-      : undefined;
+  const client =
+    backendStorage === "backblaze" ? backblazeClient : localS3PublicClient;
 
-  if (!client) {
+  if (!stat || !client) {
     return null;
   }
 
@@ -557,55 +424,35 @@ export const uploadWrapper = async (
   fileStream: Readable | Buffer,
   options?: { contentType?: string; cacheControl?: string }
 ) => {
+  const client = storageS3Client();
   logger.info(
     `${backendStorage}: uploading fileStream|buffer: ${bucket}/${fileName}`
   );
-  if (backendStorage === "backblaze") {
-    await uploadFilesToBackblaze(bucket, fileName, fileStream, options);
-  } else if (backendStorage === "minio" && minioClient) {
-    const client = minioClient;
-    await new Promise((resolve, reject) => {
-      if (fileStream instanceof Readable) {
-        fileStream.once("error", reject);
-      }
-      client
-        .putObject(bucket, fileName, fileStream, undefined, {
-          ...(options?.contentType
-            ? { "Content-Type": options.contentType }
-            : {}),
-          ...(options?.cacheControl
-            ? { "Cache-Control": options.cacheControl }
-            : {}),
-        })
-        .then(resolve, reject);
-    });
+  const params = {
+    Bucket: bucket,
+    Key: fileName,
+    Body: fileStream,
+    ContentType: options?.contentType,
+    CacheControl: options?.cacheControl,
+  };
+  if (fileStream instanceof Buffer) {
+    await client.send(new PutObjectCommand(params));
+  } else {
+    await new Upload({ client, params }).done();
   }
+  logger.info(
+    `${backendStorage}: done uploading filestream|buffer: ${bucket}/${fileName}`
+  );
 };
 
 export const removeObjectFromStorage = async (
   bucket: string,
   fileName: string
 ) => {
-  if (backendStorage === "backblaze" && backblazeClient) {
-    logger.info(`backblaze: removing fileStream: ${bucket}/${fileName}`);
-
-    await backblazeClient.send(
-      new DeleteObjectCommand({ Bucket: bucket, Key: fileName })
-    );
-  } else if (backendStorage === "minio" && minioClient) {
-    logger.info(`minio: removing fileStream: ${bucket}/${fileName}`);
-
-    await minioClient.removeObject(bucket, fileName);
-  }
-};
-
-const storageS3Client = () => {
-  const client =
-    backendStorage === "backblaze" ? backblazeClient : localS3Client;
-  if (!client) {
-    throw new Error(`${backendStorage}: no S3 client`);
-  }
-  return client;
+  logger.info(`${backendStorage}: removing fileStream: ${bucket}/${fileName}`);
+  await storageS3Client().send(
+    new DeleteObjectCommand({ Bucket: bucket, Key: fileName })
+  );
 };
 
 /**
@@ -681,49 +528,17 @@ export const getBufferFromStorage = async (
   bucket: string,
   filename: string
 ) => {
-  if (backendStorage === "backblaze") {
-    logger.info(`backblaze: getting buffer: ${bucket}/${filename}`);
-
-    return getBufferFromBackblaze(bucket, filename);
-  } else if (backendStorage === "minio" && minioClient) {
-    logger.info(`minio: getting buffer: ${bucket}/${filename}`);
-
-    return getBufferFromMinio(minioClient, bucket, filename);
-  } else {
-    return { buffer: null };
-  }
-};
-
-export const getBufferFromBackblaze = async (
-  bucket: string,
-  filename: string
-) => {
-  if (!backblazeClient) {
-    throw new Error("Backblaze client is not initialized");
-  }
-  const result = await backblazeClient.send(
+  logger.info(`${backendStorage}: getting buffer: ${bucket}/${filename}`);
+  const result = await storageS3Client().send(
     new GetObjectCommand({ Bucket: bucket, Key: filename })
   );
+  const bytes = await result.Body?.transformToByteArray();
   return {
-    buffer: await result.Body?.transformToByteArray(),
+    buffer: bytes
+      ? Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+      : undefined,
     etag: result.ETag,
   };
-};
-
-export const downloadFileFromBackblaze = async (
-  bucket: string,
-  remoteFileName: string,
-  localFilePath: string
-) => {
-  if (!backblazeClient) {
-    throw new Error("Backblaze client is not initialized");
-  }
-  const result = await backblazeClient.send(
-    new GetObjectCommand({ Bucket: bucket, Key: remoteFileName })
-  );
-  if (result.Body instanceof Readable) {
-    await fs.promises.writeFile(localFilePath, result.Body);
-  }
 };
 
 export const getFile = async (
@@ -731,41 +546,23 @@ export const getFile = async (
   remoteFileName: string,
   localFilePath: string
 ) => {
-  if (backendStorage === "backblaze") {
-    logger.info(
-      `${backendStorage}: getting buffer: ${bucket}/${remoteFileName} storing at ${localFilePath}`
+  logger.info(
+    `${backendStorage}: getting file: ${bucket}/${remoteFileName} storing at ${localFilePath}`
+  );
+  const result = await storageS3Client().send(
+    new GetObjectCommand({ Bucket: bucket, Key: remoteFileName })
+  );
+  if (!(result.Body instanceof Readable)) {
+    throw new Error(
+      `${backendStorage}: no readable body for ${bucket}/${remoteFileName}`
     );
-
-    return downloadFileFromBackblaze(bucket, remoteFileName, localFilePath);
-  } else if (backendStorage === "minio" && minioClient) {
-    logger.info(
-      `${backendStorage}: getting buffer: ${bucket}/${remoteFileName} storing at ${localFilePath}`
-    );
-
-    await getFileFromMinio(bucket, remoteFileName, localFilePath);
   }
+  await fs.promises.writeFile(localFilePath, result.Body);
 };
 
 export const getReadStream = async (bucket: string, remoteFileName: string) => {
-  if (backendStorage === "backblaze") {
-    logger.info(`backblaze: getting buffer: ${bucket}/${remoteFileName}`);
-
-    return getReadStreamFromBackblaze(bucket, remoteFileName);
-  } else if (backendStorage === "minio" && minioClient) {
-    logger.info(`minio: getting buffer: ${bucket}/${remoteFileName}`);
-
-    return minioClient.getObject(bucket, remoteFileName);
-  }
-};
-
-export const getReadStreamFromBackblaze = async (
-  bucket: string,
-  remoteFileName: string
-) => {
-  if (!backblazeClient) {
-    throw new Error("Backblaze client is not initialized");
-  }
-  const result = await backblazeClient.send(
+  logger.info(`${backendStorage}: getting stream: ${bucket}/${remoteFileName}`);
+  const result = await storageS3Client().send(
     new GetObjectCommand({ Bucket: bucket, Key: remoteFileName })
   );
   if (result.Body instanceof Readable) {
@@ -773,143 +570,21 @@ export const getReadStreamFromBackblaze = async (
   }
 };
 
-export const getBufferBasedOnStat = async (
-  bucket: string,
-  filename: string,
-  backblazeStat?: HeadObjectCommandOutput
-) => {
-  if (backblazeStat) {
-    const { buffer } = await getBufferFromBackblaze(bucket, filename);
-
-    return buffer;
-  } else if (backendStorage === "minio" && minioClient) {
-    const { buffer } = await getBufferFromMinio(minioClient, bucket, filename);
-
-    return buffer;
-  }
-};
-
-export async function getBufferFromMinio(
-  minioClient: Client,
-  bucket: string,
-  filename: string
-): Promise<{ buffer: Buffer }> {
-  return new Promise((resolve: (result: { buffer: Buffer }) => any, reject) => {
-    const buff: Buffer[] = [];
-    minioClient
-      .getObject(bucket, filename)
-      .then(function (dataStream) {
-        dataStream.on("data", async function (chunk) {
-          buff.push(chunk);
-        });
-        dataStream.on("end", function () {
-          resolve({ buffer: Buffer.concat(buff) });
-        });
-        dataStream.on("error", function (err) {
-          logger.error(err);
-          reject(err);
-        });
-      })
-      .catch(reject);
-  });
-}
-
-export async function getFileFromMinio(
-  bucket: string,
-  filename: string,
-  destinationFilePath: string
-): Promise<{ filePath: string }> {
-  if (!minioClient) {
-    throw new Error("MinIO client is not initialized");
-  }
-
-  return new Promise(
-    async (resolve: (result: { filePath: string }) => any, reject) => {
-      logger?.info(
-        `Getting object from MinIO Bucket ${bucket}: ${filename} in ${destinationFilePath}`
-      );
-      // await fs.mkdirSync(`${destinationFolderName}`, { recursive: true });
-
-      // const filePath = `${destinationFolderName}/${
-      //   destinationFilePath ?? `${bucket}_${filename}`
-      // }`;
-
-      const writableStream = fs.createWriteStream(`${destinationFilePath}`);
-      // var size = 0;
-      minioClient
-        .getObject(bucket, filename)
-        .then(function (dataStream) {
-          dataStream.on("data", async function (chunk) {
-            writableStream.write(chunk);
-          });
-          dataStream.on("end", function () {
-            // logger?.info("End. Total size = " + size);
-            writableStream.end();
-            writableStream.on("finish", () => {
-              logger?.info(`getFileFromMinio ${destinationFilePath}`);
-              resolve({ filePath: destinationFilePath });
-            });
-            // resolve({ buffer: Buffer.concat(buff), size });
-            resolve;
-          });
-          dataStream.on("error", function (err) {
-            logger?.error(err);
-            reject(err);
-          });
-        })
-        .catch(reject);
-    }
-  );
-}
-
-export const getObjectList = async (
-  bucket: string,
-  prefix: string
-): Promise<BucketItem[]> => {
-  if (backendStorage === "backblaze" && backblazeClient) {
-    const result = await backblazeClient.send(
-      new ListObjectsCommand({ Bucket: bucket, Prefix: prefix })
-    );
-    return (
-      result.Contents?.map((c) => (c?.Key ? { name: c.Key } : undefined)) ?? []
-    ).filter((c) => !!c) as BucketItem[];
-  } else {
-    const result = await getObjectListFromMinio(bucket, prefix);
-    return result;
-  }
-};
-
-export const getObjectListFromMinio = async (
-  bucket: string,
-  prefix: string
-): Promise<BucketItem[]> => {
-  if (!minioClient) {
-    throw new Error("MinIO client is not initialized");
-  }
-  return await new Promise((resolve, reject) => {
-    const data: BucketItem[] = [];
-    const stream = minioClient.listObjectsV2(bucket, prefix, true);
-    stream.on("data", function (obj) {
-      data.push(obj);
-    });
-    stream.on("end", function () {
-      resolve(data);
-    });
-    stream.on("error", function (err) {
-      console.error(err);
-      reject(err);
-    });
-  });
-};
-
 export const removeObjectsFromBucket = async (
   bucketName: string,
   prefix: string
 ) => {
-  const objects = await getObjectList(bucketName, prefix);
+  const keys: string[] = [];
+  await forEachObjectPage(
+    bucketName,
+    async (page) => {
+      keys.push(...page);
+    },
+    { prefix }
+  );
 
   await Promise.all(
-    objects.map((o) => removeObjectFromStorage(bucketName, o.name!))
+    keys.map((key) => removeObjectFromStorage(bucketName, key))
   );
 };
 
@@ -954,23 +629,16 @@ export const streamOriginalAudio = (audioId: string, ext: string) =>
 export const statAudioSegment = (audioId: string, segment: string) =>
   statFile(getAudioBucket(), `${audioId}/${segment}`);
 
-export const getAudioSegmentBuffer = (
-  audioId: string,
-  segment: string,
-  stat?: HeadObjectCommandOutput
-) => getBufferBasedOnStat(getAudioBucket(), `${audioId}/${segment}`, stat);
-
 export const getAudioSegmentBufferIfExists = async (
   audioId: string,
   segment: string
 ): Promise<Buffer | undefined> => {
-  const stat = await statAudioSegment(audioId, segment);
-  if (!stat.backblazeStat && !stat.minioStat) return undefined;
+  if (!(await statAudioSegment(audioId, segment))) return undefined;
   const { buffer } = await getBufferFromStorage(
     getAudioBucket(),
     `${audioId}/${segment}`
   );
-  return buffer as Buffer | undefined;
+  return buffer;
 };
 
 export const uploadAudioHlsFile = async (
@@ -1184,11 +852,6 @@ export const getDownloadableContentMeta = async (
   return normalizeStatToMeta(stat);
 };
 
-export const getDownloadableContentBufferFromStat = (
-  id: string,
-  stat?: HeadObjectCommandOutput
-) => getBufferBasedOnStat(getDownloadsBucket(), contentKey(id), stat);
-
 export const getDownloadableContentBuffer = (id: string) =>
   getBufferFromStorage(getDownloadsBucket(), contentKey(id));
 
@@ -1223,10 +886,7 @@ export const zipExists = async (
   type: "track" | "trackGroup",
   id: number,
   format: string
-): Promise<boolean> => {
-  const { backblazeStat, minioStat } = await statZip(type, id, format);
-  return !!(backblazeStat || minioStat);
-};
+): Promise<boolean> => !!(await statZip(type, id, format));
 
 export const streamZip = (
   type: "track" | "trackGroup",
@@ -1271,14 +931,14 @@ export const currentBuckets = () => [
 ];
 
 export const bucketExists = async (bucket: string): Promise<boolean> => {
-  if (backendStorage === "backblaze" && backblazeClient) {
-    await backblazeClient.send(new HeadBucketCommand({ Bucket: bucket }));
+  if (!storageClient) return false;
+  try {
+    await storageClient.send(new HeadBucketCommand({ Bucket: bucket }));
     return true;
+  } catch (e) {
+    if (isNotFound(e)) return false;
+    throw e;
   }
-  if (minioClient) {
-    return minioClient.bucketExists(bucket);
-  }
-  return false;
 };
 
 export const ensureAllBucketsExist = async () => {

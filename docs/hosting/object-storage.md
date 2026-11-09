@@ -4,9 +4,8 @@ Mirlo stores all media (audio, images, downloadable files) in S3-compatible
 object storage: [Garage](https://garagehq.deuxfleurs.fr/) in local development
 and CI, Backblaze B2 (or any S3-compatible provider) in production.
 
-All storage access goes through [`src/utils/minio.ts`](https://github.com/funmusicplace/mirlo/blob/main/src/utils/minio.ts),
-which is a backend-agnostic abstraction over both the MinIO SDK (used to talk
-to Garage) and the AWS S3 client (the filename is historical). Call sites express intent (`uploadIncomingAudio`,
+All storage access goes through [`src/utils/storage.ts`](https://github.com/funmusicplace/mirlo/blob/main/src/utils/storage.ts),
+which talks to every backend through the AWS S3 client. Call sites express intent (`uploadIncomingAudio`,
 `getCoverBuffer`, `uploadZip`, …) and that module decides which bucket and
 object key to use.
 
@@ -45,7 +44,7 @@ Optimized images are stored in multiple sizes as `<imageId>-x<width>.webp`
 
 The full routing table (path prefix, and whether the type goes through the
 optimize-image queue) is `imageTypeBuckets`
-in `src/utils/minio.ts` — that is the single source of truth if this document
+in `src/utils/storage.ts` — that is the single source of truth if this document
 drifts.
 
 ### `mirlo-downloads`

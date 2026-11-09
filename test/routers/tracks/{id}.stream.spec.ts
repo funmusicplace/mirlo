@@ -10,7 +10,7 @@ import {
   createBucketIfNotExists,
   getAudioBucket,
   uploadAudioHlsFile,
-} from "../../../src/utils/minio";
+} from "../../../src/utils/storage";
 import {
   clearTables,
   createProfile,

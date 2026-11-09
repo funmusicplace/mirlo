@@ -86,7 +86,7 @@ Or check wherever your storage buckets are.
 
 > **First upload to a newly-created bucket gets `403 AccessDenied` (S3-compatible
 > providers, e.g. Hetzner Object Storage on Ceph/RadosGW):** Mirlo auto-creates
-> buckets on first use (`createBucketIfNotExists` in `src/utils/minio.ts`), and
+> buckets on first use (`createBucketIfNotExists` in `src/utils/storage.ts`), and
 > on at least one Ceph-backed provider the bucket isn't immediately writable —
 > the `CreateBucket` call succeeds but the very next `PutObject` 403s. This is
 > propagation lag, not a credentials or token-scope problem. Just retry the
@@ -100,7 +100,7 @@ Or check wherever your storage buckets are.
 > the browser's network tab instead: a CORS error on the `PUT` to your storage
 > endpoint means the bucket's CORS configuration hasn't been applied yet.
 > Mirlo sets this automatically the same way it does the public-read policy on
-> image buckets (`applyCorsPolicyS3` in `src/utils/minio.ts`, run whenever a
+> image buckets (`applyCorsPolicy` in `src/utils/storage.ts`, run whenever a
 > bucket is created or checked at boot) — restarting the api/background
 > containers re-runs that check and should resolve it.
 

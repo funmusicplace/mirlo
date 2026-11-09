@@ -23,9 +23,8 @@ rpc_public_addr = "127.0.0.1:3901"
 rpc_secret = "b6f3a1c04e2d8975de1a4c7f0b39e8d25c6a7f14b03e9d82a5c1f7604b8e3d29"
 
 [s3_api]
-# Must stay "us-east-1". src/utils/minio.ts constructs its client without an
-# explicit region, so the minio SDK signs every request for us-east-1; Garage
-# rejects a signature whose scope doesn't match this value, and the failure
+# Must stay "us-east-1". The local S3 clients in src/utils/storage.ts and
+# prisma/seeds sign every request for us-east-1; Garage rejects a signature whose scope doesn't match this value, and the failure
 # surfaces as a confusing "AuthorizationHeaderMalformed" on *every* call.
 s3_region = "us-east-1"
 # Listen on 9000, not Garage's default 3900: MINIO_API_PORT is 9000 and the

@@ -23,7 +23,7 @@ import {
   getCoverBuffer,
   uploadZip,
   zipExists,
-} from "../utils/minio";
+} from "../utils/storage";
 import { hasSubscriptionTiers } from "../utils/subscriptionTier";
 import { convertAudioToFormat, resolveTrackArtistName } from "../utils/tracks";
 

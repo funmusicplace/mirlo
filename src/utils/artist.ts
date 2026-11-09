@@ -15,12 +15,12 @@ import generateSlug from "./generateSlug";
 import { getClient } from "./getClient";
 import { convertURLArrayToSizes, storedImageVariantUrl } from "./images";
 import { deleteMerch, merchImagesInclude } from "./merch";
-import { storedImagePrefix } from "./minio";
 import { resolvePayee } from "./payments/payee";
 import { clearImageSlot } from "./pendingImage";
 import { postImagesForContent } from "./postContent";
 import reservedProfileSlugs from "./reservedProfileSlugs";
 import { getSiteSettings } from "./settings";
+import { storedImagePrefix } from "./storage";
 import stripe from "./stripe";
 import { subscriptionTierOrderBy } from "./subscriptionTier";
 import {

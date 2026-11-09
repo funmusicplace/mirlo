@@ -8,7 +8,7 @@ import {
   createBucketIfNotExists,
   getAudioBucket,
   uploadZip,
-} from "../../../src/utils/minio";
+} from "../../../src/utils/storage";
 import {
   clearTables,
   createProfile,

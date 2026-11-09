@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 
 import logger from "../logger";
 
-import { removeZips } from "./minio";
+import { removeZips } from "./storage";
 
 export const clearTrackGroupDownloads = async (trackGroupId: number) => {
   try {

@@ -1,7 +1,7 @@
 import { promises as fsPromises } from "fs";
 
 import logger from "../../logger";
-import { removeAllZips, removeZips, zipRootPath } from "../../utils/minio";
+import { removeAllZips, removeZips, zipRootPath } from "../../utils/storage";
 
 const cleanUpFiles = async (incomingFolder: string) => {
   logger.info("cleanUpFiles");

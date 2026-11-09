@@ -7,9 +7,9 @@ import sharp from "sharp";
 import logger from "../logger";
 
 import { AppError, HttpCode } from "./error";
-import { removeImagesByType, uploadOptimizedImageByType } from "./minio";
 import { stripNullBytes } from "./sanitize";
 import { SettingsType } from "./settings";
+import { removeImagesByType, uploadOptimizedImageByType } from "./storage";
 import { isSvgMarkup, sanitizeSvg } from "./svgSanitizer";
 
 export const MAX_LOGO_BYTES = 200 * 1024;

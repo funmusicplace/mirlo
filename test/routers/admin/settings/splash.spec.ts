@@ -9,13 +9,13 @@ import sharp from "sharp";
 import request from "supertest";
 
 import {
-  createBucketIfNotExists,
-  getImagesBucket,
-} from "../../../../src/utils/minio";
-import {
   attachPendingImage,
   markPendingImage,
 } from "../../../../src/utils/pendingImage";
+import {
+  createBucketIfNotExists,
+  getImagesBucket,
+} from "../../../../src/utils/storage";
 import { clearTables, createSiteSettings, createUser } from "../../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;

@@ -7,13 +7,13 @@ import { describe, it } from "mocha";
 import sharp from "sharp";
 
 import {
-  createBucketIfNotExists,
-  getImagesBucket,
-} from "../../../../src/utils/minio";
-import {
   attachPendingImage,
   markPendingImage,
 } from "../../../../src/utils/pendingImage";
+import {
+  createBucketIfNotExists,
+  getImagesBucket,
+} from "../../../../src/utils/storage";
 import {
   clearTables,
   createProfile,

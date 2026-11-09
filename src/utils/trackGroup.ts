@@ -29,9 +29,9 @@ import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
 import { getClient } from "./getClient";
 import { merchImagesInclude } from "./merch";
-import { streamOriginalAudio } from "./minio";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { clearImageSlot } from "./pendingImage";
+import { streamOriginalAudio } from "./storage";
 import { grantReleaseToExistingSubscribers } from "./subscriptionTier";
 import { deleteTrack } from "./tracks";
 

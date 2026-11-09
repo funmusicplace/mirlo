@@ -7,27 +7,14 @@ import assert from "assert";
 
 import sinon from "sinon";
 
-import { EventEmitter } from "events";
-
 import cleanUpFiles from "../../../src/jobs/tasks/clean-up-files";
-import { minioClient } from "../../../src/utils/minio";
+import { stubStorage } from "../../utils";
 
 describe("clean-up-files", () => {
-  let listObjectsV2Stub: sinon.SinonStub;
-  let removeObjectStub: sinon.SinonStub;
+  let storage: ReturnType<typeof stubStorage>;
 
   beforeEach(() => {
-    listObjectsV2Stub = sinon
-      .stub(minioClient!, "listObjectsV2")
-      .callsFake(() => {
-        const emitter = new EventEmitter();
-        setImmediate(() => {
-          emitter.emit("data", { name: "file1" });
-          emitter.emit("end");
-        });
-        return emitter as any;
-      });
-    removeObjectStub = sinon.stub(minioClient!, "removeObject").resolves();
+    storage = stubStorage({ listKeys: ["file1"] });
   });
 
   afterEach(() => {
@@ -36,18 +23,22 @@ describe("clean-up-files", () => {
 
   it("matches consolidated downloads bucket path", async () => {
     await cleanUpFiles("mirlo-downloads/trackgroup/42");
-    assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-downloads");
-    assert.equal(listObjectsV2Stub.firstCall.args[1], "trackgroup/42/");
+    assert.deepEqual(storage.first("ListObjectsV2Command"), [
+      "mirlo-downloads",
+      "trackgroup/42/",
+    ]);
   });
 
   it("only removes trackgroup zips when no album id is given", async () => {
     await cleanUpFiles("mirlo-downloads/trackgroup");
-    assert.equal(listObjectsV2Stub.firstCall.args[0], "mirlo-downloads");
-    assert.equal(listObjectsV2Stub.firstCall.args[1], "trackgroup/");
+    assert.deepEqual(storage.first("ListObjectsV2Command"), [
+      "mirlo-downloads",
+      "trackgroup/",
+    ]);
   });
 
   it("ignores the bare downloads bucket", async () => {
     await cleanUpFiles("mirlo-downloads");
-    assert.equal(listObjectsV2Stub.callCount, 0);
+    assert.equal(storage.inputs("ListObjectsV2Command").length, 0);
   });
 });

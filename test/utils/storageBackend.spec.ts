@@ -5,7 +5,7 @@ import { describe, it } from "mocha";
 
 import assert from "assert";
 
-import { resolveBackendStorage } from "../../src/utils/minio";
+import { resolveBackendStorage } from "../../src/utils/storage";
 
 describe("resolveBackendStorage", () => {
   it("defaults to minio when nothing is configured", () => {

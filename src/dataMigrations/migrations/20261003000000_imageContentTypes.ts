@@ -1,6 +1,6 @@
 import type { DataMigration } from "..";
 import logger from "../../logger";
-import { fixStoredImageContentTypes } from "../../utils/minio";
+import { fixStoredImageContentTypes } from "../../utils/storage";
 
 const imageContentTypes: DataMigration = {
   name: "2026-10-image-content-types",

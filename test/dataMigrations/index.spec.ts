@@ -37,7 +37,7 @@ import {
   uploadIncomingAudio,
   uploadOptimizedImageByType,
   uploadWrapper,
-} from "../../src/utils/minio";
+} from "../../src/utils/storage";
 import stripe from "../../src/utils/stripe";
 import {
   clearTables,
@@ -357,8 +357,13 @@ describe("dataMigrations: defaultInstanceLogo", () => {
 
 describe("dataMigrations: imageContentTypes", () => {
   const storedMetadata = async (key: string) => {
-    const { minioStat } = await statFile(getImagesBucket(), key);
-    return minioStat?.metaData;
+    const stat = await statFile(getImagesBucket(), key);
+    return (
+      stat && {
+        "content-type": stat.ContentType,
+        "cache-control": stat.CacheControl,
+      }
+    );
   };
 
   it("stores the content type and cache control on local uploads", async () => {
@@ -493,10 +498,10 @@ describe("dataMigrations: orphanedAudio", () => {
   };
 
   const incomingExists = async (incomingKey: string) =>
-    !!(await statFile(getAudioBucket(), incomingKey)).minioStat;
+    !!(await statFile(getAudioBucket(), incomingKey));
 
   const segmentExists = async (audioId: string) =>
-    !!(await statFile(getAudioBucket(), `${audioId}/segment-000.ts`)).minioStat;
+    !!(await statFile(getAudioBucket(), `${audioId}/segment-000.ts`));
 
   it("removes audio with no live TrackAudio row", async () => {
     setBucketConfig({ prefix: "" });
@@ -532,8 +537,7 @@ describe("dataMigrations: orphanedAudio", () => {
 
     assert.equal(await orphanedAudio.run(), true);
 
-    const { minioStat } = await statFile(getAudioBucket(), "not-an-audio-id");
-    assert.ok(minioStat);
+    assert.ok(await statFile(getAudioBucket(), "not-an-audio-id"));
   });
 });
 

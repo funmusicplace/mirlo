@@ -6,7 +6,7 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
 import { assertSupportedDownloadFormat } from "../../../../utils/audioFormats";
 import { AppError } from "../../../../utils/error";
-import { presignZip, streamZip, zipExists } from "../../../../utils/minio";
+import { presignZip, streamZip, zipExists } from "../../../../utils/storage";
 import {
   FormatOptions,
   basicTrackGroupInclude,

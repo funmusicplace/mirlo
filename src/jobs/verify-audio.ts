@@ -2,7 +2,7 @@ import { promises as fsPromises } from "fs";
 
 import { Job } from "bullmq";
 
-import { downloadOriginalAudio, presignOriginalAudio } from "../utils/minio";
+import { downloadOriginalAudio, presignOriginalAudio } from "../utils/storage";
 
 import { logger } from "./queue-worker";
 const TEMP_LOCATION = process.env.TEMP_LOCATION;

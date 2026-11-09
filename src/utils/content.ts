@@ -5,10 +5,11 @@ import { fromBuffer } from "file-type";
 
 import logger from "../logger";
 import { clearTrackGroupDownloads } from "../utils/downloadCache";
+
 import {
   getDownloadableContentReadStream,
   removeDownloadableContent,
-} from "../utils/minio";
+} from "./storage";
 
 // Keep in sync with DOWNLOADABLE_CONTENT_MIME_TYPES on the client.
 export const DOWNLOADABLE_CONTENT_MIME_TYPES = [

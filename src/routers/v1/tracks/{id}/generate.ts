@@ -6,7 +6,7 @@ import { logger } from "../../../../logger";
 import { startGeneratingZip } from "../../../../queues/album-queue";
 import { assertSupportedDownloadFormat } from "../../../../utils/audioFormats";
 import { AppError } from "../../../../utils/error";
-import { zipExists } from "../../../../utils/minio";
+import { zipExists } from "../../../../utils/storage";
 import {
   basicTrackGroupInclude,
   FormatOptions,

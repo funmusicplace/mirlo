@@ -10,7 +10,7 @@ import {
   removeStoredImage,
   S3_ENDPOINT,
   storedImagePrefix,
-} from "./minio";
+} from "./storage";
 
 // Module-level cache initialized from DB settings at startup (and refreshed on admin save).
 // Kept synchronous so generateFullStaticImageUrl can be used as a plain function reference.
@@ -41,7 +41,7 @@ export const generateFullStaticImageUrl = (
     if (_cdnUrl) {
       return `${_cdnUrl}/file/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;
     }
-    // Path-style, matching forcePathStyle on the S3 client in minio.ts —
+    // Path-style, matching forcePathStyle on the S3 client in storage.ts —
     // virtual-hosted-style (bucket.endpoint) depends on wildcard DNS/TLS for
     // arbitrary bucket subdomains, which isn't reliable on every provider.
     return `${S3_ENDPOINT}/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;

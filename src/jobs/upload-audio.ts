@@ -9,7 +9,7 @@ import {
   uploadAudioHlsFile,
   removeIncomingAudio,
   removeAudioFiles,
-} from "../utils/minio";
+} from "../utils/storage";
 
 import { logger } from "./queue-worker";
 const TEMP_LOCATION = process.env.TEMP_LOCATION;

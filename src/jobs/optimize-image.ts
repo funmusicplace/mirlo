@@ -8,17 +8,17 @@ import tempSharpConfig from "../config/sharp";
 import { moderateImageQueue } from "../queues/moderate-image-queue";
 import { generateFullStaticImageUrl } from "../utils/images";
 import {
+  attachPendingImage,
+  discardPendingImage,
+  isImagePending,
+} from "../utils/pendingImage";
+import {
   ImageType,
   downloadIncomingImageByType,
   uploadOptimizedImageByType,
   removeIncomingImageByType,
   getImagePrefix,
-} from "../utils/minio";
-import {
-  attachPendingImage,
-  discardPendingImage,
-  isImagePending,
-} from "../utils/pendingImage";
+} from "../utils/storage";
 
 import { shouldModerateImage } from "./moderate-image";
 import { logger } from "./queue-worker";

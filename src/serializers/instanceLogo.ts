@@ -1,7 +1,7 @@
 import { InstanceLogo } from "@mirlo/prisma/client";
 
 import { generateFullStaticImageUrl } from "../utils/images";
-import { instanceLogoPrefix } from "../utils/minio";
+import { instanceLogoPrefix } from "../utils/storage";
 
 export type SerializedInstanceLogo = {
   url: string;

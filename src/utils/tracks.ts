@@ -13,7 +13,8 @@ import ffmpeg from "fluent-ffmpeg";
 
 import { Format } from "../jobs/generate-album";
 import logger from "../logger";
-import { removeAudioFiles } from "../utils/minio";
+
+import { removeAudioFiles } from "./storage";
 
 export const deleteTrack = async (trackId: number) => {
   await prisma.track.delete({

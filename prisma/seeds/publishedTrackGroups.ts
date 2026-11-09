@@ -3,9 +3,14 @@ import { promises as fsPromises } from "fs";
 import os from "os";
 import path from "path";
 
+import {
+  CreateBucketCommand,
+  HeadBucketCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { faker } from "@faker-js/faker";
 import ffmpeg from "fluent-ffmpeg";
-import * as Minio from "minio";
 import sharp from "sharp";
 
 import generateSlug from "../../src/utils/generateSlug";
@@ -43,21 +48,30 @@ const {
   LOCAL_S3_API_PORT = "9000",
 } = process.env;
 
-export function createMinioClient(): Minio.Client | null {
+export function createS3Client(): S3Client | null {
   if (!LOCAL_S3_HOST) return null;
-  return new Minio.Client({
-    endPoint: LOCAL_S3_HOST,
-    port: +LOCAL_S3_API_PORT,
-    useSSL: false,
-    accessKey: LOCAL_S3_USER,
-    secretKey: LOCAL_S3_PASSWORD,
+  return new S3Client({
+    endpoint: `http://${LOCAL_S3_HOST}:${LOCAL_S3_API_PORT}`,
+    region: "us-east-1",
+    credentials: {
+      accessKeyId: LOCAL_S3_USER,
+      secretAccessKey: LOCAL_S3_PASSWORD,
+    },
+    forcePathStyle: true,
+    requestChecksumCalculation: "WHEN_REQUIRED",
   });
 }
 
-export async function ensureBuckets(minioClient: Minio.Client) {
+const putObject = (s3: S3Client, bucket: string, key: string, body: Buffer) =>
+  s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body }));
+
+export async function ensureBuckets(s3: S3Client) {
   for (const bucket of [IMAGES_BUCKET, AUDIO_BUCKET]) {
-    const exists = await minioClient.bucketExists(bucket);
-    if (!exists) await minioClient.makeBucket(bucket);
+    try {
+      await s3.send(new HeadBucketCommand({ Bucket: bucket }));
+    } catch {
+      await s3.send(new CreateBucketCommand({ Bucket: bucket }));
+    }
   }
 }
 
@@ -98,7 +112,7 @@ function generateGlitchNoiseBuffer(width: number, height: number): Buffer {
 }
 
 export async function generateAndUploadImage(
-  minioClient: Minio.Client,
+  s3: S3Client,
   sizes: number[]
 ): Promise<{ id: string; urls: string[] }> {
   const id = randomUUID();
@@ -113,7 +127,7 @@ export async function generateAndUploadImage(
     .webp({ quality: 70 })
     .toBuffer();
 
-  await minioClient.putObject(IMAGES_BUCKET, `${id}-original.webp`, baseWebp);
+  await putObject(s3, IMAGES_BUCKET, `${id}-original.webp`, baseWebp);
 
   // Sequential resizes — parallel sharp pipelines spike memory enough to
   // get the seed process SIGKILL'd under Docker/cgroup limits.
@@ -123,7 +137,7 @@ export async function generateAndUploadImage(
       .resize(size, size, { fit: "inside", withoutEnlargement: true })
       .webp({ quality: 70 })
       .toBuffer();
-    await minioClient.putObject(IMAGES_BUCKET, `${id}-x${size}.webp`, resized);
+    await putObject(s3, IMAGES_BUCKET, `${id}-x${size}.webp`, resized);
     sizeUrls.push(`${id}-x${size}`);
   }
 
@@ -182,7 +196,7 @@ async function ensureNoiseFiles(noiseType: NoiseType): Promise<string | null> {
 }
 
 async function uploadCachedAudio(
-  minioClient: Minio.Client,
+  s3: S3Client,
   noiseType: NoiseType
 ): Promise<{ audioId: string; duration: number } | null> {
   const tmpDir = await ensureNoiseFiles(noiseType);
@@ -193,7 +207,7 @@ async function uploadCachedAudio(
     const files = await fsPromises.readdir(tmpDir);
     for (const file of files) {
       const buffer = await fsPromises.readFile(path.join(tmpDir, file));
-      await minioClient.putObject(AUDIO_BUCKET, `${audioId}/${file}`, buffer);
+      await putObject(s3, AUDIO_BUCKET, `${audioId}/${file}`, buffer);
     }
     return { audioId, duration: NOISE_DURATION_SECS };
   } catch (err) {
@@ -275,11 +289,11 @@ export async function seedPublishedTrackGroups() {
 async function seedPublishedTrackGroupsInner(
   artists: { id: number; name: string }[]
 ) {
-  const minioClient = createMinioClient();
-  if (!minioClient) {
+  const s3 = createS3Client();
+  if (!s3) {
     console.log("LOCAL_S3_HOST not set — covers and audio will be skipped");
   } else {
-    await ensureBuckets(minioClient);
+    await ensureBuckets(s3);
 
     for (const artist of artists) {
       const existing = await prisma.profile.findUnique({
@@ -291,10 +305,7 @@ async function seedPublishedTrackGroupsInner(
         continue;
       }
       try {
-        const { id, urls } = await generateAndUploadImage(
-          minioClient,
-          AVATAR_SIZES
-        );
+        const { id, urls } = await generateAndUploadImage(s3, AVATAR_SIZES);
         await prisma.image.create({
           data: {
             id,
@@ -371,10 +382,10 @@ async function seedPublishedTrackGroupsInner(
           `Created trackGroup "${title}" for ${artist.name} (id: ${trackGroup.id})`
         );
 
-        if (minioClient) {
+        if (s3) {
           try {
             const { id: coverId, urls } = await generateAndUploadImage(
-              minioClient,
+              s3,
               COVER_SIZES
             );
             await prisma.image.create({
@@ -409,8 +420,8 @@ async function seedPublishedTrackGroupsInner(
             },
           });
 
-          if (minioClient) {
-            const audio = await uploadCachedAudio(minioClient, noiseType);
+          if (s3) {
+            const audio = await uploadCachedAudio(s3, noiseType);
             if (audio) {
               await prisma.trackAudio.create({
                 data: {
@@ -425,7 +436,7 @@ async function seedPublishedTrackGroupsInner(
             }
           }
           console.log(
-            `  ♪ Track ${t + 1}: "${trackTitle}"${minioClient ? ` (${noiseType} noise)` : ""}`
+            `  ♪ Track ${t + 1}: "${trackTitle}"${s3 ? ` (${noiseType} noise)` : ""}`
           );
         }
       } catch (err) {
