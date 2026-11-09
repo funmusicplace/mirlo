@@ -190,7 +190,6 @@
   "manageMerch.saveOptions": "Сохранить настройки",
   "managePost.viewLive": "Смотреть живую версию",
   "manageSubscriptions.downloadSubscriberData": "Скачать информацию о подписчиках",
-  "manageSubscriptions.rightToUpload": "Загружая этот список e-mail адресов, вы клянетесь, что имеете разрешение от их владельцев на загрузку этих адресов.",
   "manageTrackTable.originalFilename": "Название файла: {{ filename }}",
   "manageTrackTable.titleColumn": "Название",
   "merchDetails.artistCheckoutPage": "Вы будете перенаправлены на страницу платежного процессора исполнителя, чтобы оформить подписку.",

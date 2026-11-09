@@ -1,5 +1,11 @@
 {
+  "artistSupporters.sortBy": "Trier par",
+  "labelRemoval.cancel": "Annuler",
+  "labelRemoval.remove": "Retirer",
   "manageTrackTable.thereWasAnError": "Une erreur s'est produite lors du téléversement de votre morceau.",
+  "postForm.audienceAll": "Toutes",
+  "postForm.free": "Gratuit",
   "trackGroupDetails.aboutTitle": "À propos",
-  "trackGroupDetails.credits": "Crédits"
+  "trackGroupDetails.credits": "Crédits",
+  "trackGroupDetails.merch": "Merch"
 }
