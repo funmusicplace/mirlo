@@ -15,8 +15,24 @@ export default function () {
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { artistId } = req.params;
-    const { trackGroupId } = req.body;
+    const { trackGroupId, name } = req.body;
     try {
+      if (!trackGroupId) {
+        if (!name?.trim()) {
+          throw new AppError({
+            httpCode: 400,
+            description: "A fundraiser without a release needs a name",
+          });
+        }
+
+        const fundraiser = await prisma.fundraiser.create({
+          data: { name: name.trim(), profileId: Number(artistId) },
+        });
+
+        res.json({ result: serializeFundraiser(fundraiser) });
+        return;
+      }
+
       const trackGroup = await prisma.trackGroup.findFirst({
         where: { id: Number(trackGroupId), profileId: Number(artistId) },
         include: { fundraiser: true },
@@ -36,7 +52,8 @@ export default function () {
 
       const fundraiser = await prisma.fundraiser.create({
         data: {
-          name: `${trackGroup.title} Fundraiser`,
+          name: name?.trim() || `${trackGroup.title} Fundraiser`,
+          minPledge: trackGroup.minPrice ?? 0,
           profileId: trackGroup.profileId,
           trackGroups: { connect: { id: trackGroup.id } },
         },
@@ -49,7 +66,8 @@ export default function () {
   }
 
   POST.apiDoc = {
-    summary: "Creates a fundraiser for one of the artist's track groups",
+    summary:
+      "Creates a fundraiser for the artist, optionally for one of its track groups",
     parameters: [
       {
         in: "path",
@@ -62,9 +80,12 @@ export default function () {
         name: "fundraiser",
         schema: {
           type: "object",
-          required: ["trackGroupId"],
           properties: {
             trackGroupId: { type: "number" },
+            name: {
+              type: "string",
+              description: "Required when no trackGroupId is given",
+            },
           },
         },
       },

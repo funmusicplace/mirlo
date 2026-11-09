@@ -166,7 +166,6 @@ export class StripePaymentProcessor implements PaymentProcessor {
 
   async createOnlinePledgeSetup({
     fundraiserId,
-    trackGroupId,
     profileId,
     accountId,
     amount,
@@ -192,7 +191,6 @@ export class StripePaymentProcessor implements PaymentProcessor {
         usage: "off_session",
         metadata: {
           fundraiserId: String(fundraiserId),
-          trackGroupId: String(trackGroupId),
           artistId: String(profileId),
           stripeAccountId: accountId,
           userEmail,

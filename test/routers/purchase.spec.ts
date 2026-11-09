@@ -1222,7 +1222,6 @@ describe("purchase", () => {
             {
               type: "fundraiserPledge",
               fundraiserId: fundraiser.id,
-              trackGroupId: trackGroup.id,
               price: "2000",
             },
           ],
@@ -1236,6 +1235,100 @@ describe("purchase", () => {
         "clientSecret should be a SetupIntent secret, not a charge"
       );
       assert.ok(response.body.stripeAccountId);
+    });
+
+    it("should accept a pledge to a fundraiser with no release", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_standalone",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const fundraiser = await createFundraiser(profile.id, {
+        isAllOrNothing: true,
+        minPledge: 500,
+      });
+
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          items: [
+            {
+              type: "fundraiserPledge",
+              fundraiserId: fundraiser.id,
+              price: "500",
+            },
+          ],
+        },
+        accessToken
+      );
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.body.clientSecret?.startsWith("seti_"));
+    });
+
+    it("should return 400 for a pledge below the fundraiser's minimum", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_min",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const trackGroup = await createTrackGroup(profile.id, { minPrice: 100 });
+      const fundraiser = await createFundraiser(profile.id, {
+        trackGroupId: trackGroup.id,
+        isAllOrNothing: true,
+        minPledge: 1500,
+      });
+
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          items: [
+            {
+              type: "fundraiserPledge",
+              fundraiserId: fundraiser.id,
+              price: "1000",
+            },
+          ],
+        },
+        accessToken
+      );
+
+      assert.equal(response.statusCode, 400);
+    });
+
+    it("should return 404 for a pledge to another artist's fundraiser", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_owner",
+      });
+      const { user: otherUser } = await createUser({
+        email: "other@test.com",
+        stripeAccountId: "acct_pledge_other",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const otherProfile = await createProfile(otherUser.id);
+      const otherFundraiser = await createFundraiser(otherProfile.id, {
+        isAllOrNothing: true,
+      });
+
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          items: [
+            {
+              type: "fundraiserPledge",
+              fundraiserId: otherFundraiser.id,
+              price: "1000",
+            },
+          ],
+        },
+        accessToken
+      );
+
+      assert.equal(response.statusCode, 404);
     });
 
     it("should return 400 for a pledge to a fundraiser that is no longer ACTIVE", async () => {
@@ -1259,7 +1352,6 @@ describe("purchase", () => {
             {
               type: "fundraiserPledge",
               fundraiserId: fundraiser.id,
-              trackGroupId: trackGroup.id,
             },
           ],
         },
@@ -1289,7 +1381,6 @@ describe("purchase", () => {
             {
               type: "fundraiserPledge",
               fundraiserId: fundraiser.id,
-              trackGroupId: trackGroup.id,
             },
             { type: "tip", amount: 500 },
           ],
@@ -1548,7 +1639,6 @@ describe("purchase", () => {
           {
             type: "fundraiserPledge",
             fundraiserId: fundraiser.id,
-            trackGroupId: trackGroup.id,
             price: "1000",
           },
         ],
@@ -1945,7 +2035,6 @@ describe("purchase", () => {
       const result = await initiateFundraiserPledge({
         profileId: profile.id,
         fundraiserId: fundraiser.id,
-        trackGroupId: trackGroup.id,
         price: "1000",
         userEmail: "",
         deferred: true,
@@ -1974,7 +2063,6 @@ describe("purchase", () => {
       await assert.rejects(
         initiateFundraiserPledge({
           ...pledge,
-          trackGroupId: trackGroup.id,
           price: "1000",
           userEmail: "someone-else@test.com",
         })
@@ -1982,7 +2070,6 @@ describe("purchase", () => {
       await assert.rejects(
         initiateFundraiserPledge({
           ...pledge,
-          trackGroupId: trackGroup.id,
           price: "1000",
           userEmail: "",
           userId: artistUser.id,
@@ -2113,7 +2200,6 @@ describe("purchase", () => {
       await initiateFundraiserPledge({
         profileId: profile.id,
         fundraiserId: fundraiser.id,
-        trackGroupId: trackGroup.id,
         price: "2000",
         userEmail: buyer.email,
         userId: buyer.id,
@@ -2160,7 +2246,6 @@ describe("purchase", () => {
       await initiateFundraiserPledge({
         profileId: profile.id,
         fundraiserId: fundraiser.id,
-        trackGroupId: trackGroup.id,
         price: "2000",
         userEmail: buyer.email,
         userId: buyer.id,
@@ -2198,7 +2283,6 @@ describe("purchase", () => {
       await initiateFundraiserPledge({
         profileId: profile.id,
         fundraiserId: fundraiser.id,
-        trackGroupId: trackGroup.id,
         price: "2000",
         message: "x".repeat(600),
         userEmail: buyer.email,
@@ -4425,7 +4509,6 @@ describe("purchase", () => {
             {
               type: "fundraiserPledge",
               fundraiserId: fundraiser.id,
-              trackGroupId: trackGroup.id,
               price: "2000",
               message,
             },
@@ -4434,7 +4517,6 @@ describe("purchase", () => {
       });
       const metadata = {
         fundraiserId: String(fundraiser.id),
-        trackGroupId: String(trackGroup.id),
         artistId: String(profile.id),
         stripeAccountId: "acct_pledge_checkout",
         userEmail: buyer.email,

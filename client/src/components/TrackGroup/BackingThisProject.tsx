@@ -1,18 +1,19 @@
 import { css } from "@emotion/css";
+import Button from "components/common/Button";
 import Confetti from "components/common/Confetti";
+import FormComponent from "components/common/FormComponent";
 import Modal from "components/common/Modal";
 import { moneyDisplay } from "components/common/Money";
 import Tooltip from "components/common/Tooltip";
-import React from "react";
-import { useTranslation } from "react-i18next";
-import PaymentInputElement from "./PaymentInputElement";
-import { FormProvider, useForm } from "react-hook-form";
-import FormComponent from "components/common/FormComponent";
-import Button from "components/common/Button";
-import { useSnackbar } from "state/SnackbarContext";
 import { useDeletePledgeMutation, useUpdatePledgeMutation } from "queries";
-import { useConfirm } from "utils/useConfirm";
+import React from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
+import { useSnackbar } from "state/SnackbarContext";
+import { useConfirm } from "utils/useConfirm";
+
+import PaymentInputElement from "./PaymentInputElement";
 
 interface FormData {
   chosenPrice: string;
@@ -29,7 +30,7 @@ const BackingThisProject: React.FC<{
 }> = ({ amount, collapse, currency, trackGroup }) => {
   const [isChangingPledge, setIsChangingPledge] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-  const minPrice = trackGroup?.minPrice;
+  const minPrice = trackGroup?.fundraiser?.minPledge;
   const snackbar = useSnackbar();
   const { mutateAsync: updatePledge } = useUpdatePledgeMutation();
   const { mutateAsync: deletePledge } = useDeletePledgeMutation();
@@ -118,7 +119,7 @@ const BackingThisProject: React.FC<{
               <PaymentInputElement
                 currency={trackGroup.currency}
                 platformPercent={trackGroup.platformPercent}
-                minPrice={trackGroup.minPrice}
+                minPrice={minPrice}
                 artistName={trackGroup.artist?.name}
               />
             </FormComponent>
@@ -127,9 +128,7 @@ const BackingThisProject: React.FC<{
                 type="submit"
                 size="big"
                 isLoading={isSavingPledge}
-                disabled={
-                  Number(chosenPrice) < (trackGroup.minPrice ?? 0) / 100
-                }
+                disabled={Number(chosenPrice) < (minPrice ?? 0) / 100}
               >
                 {t("updatePledge")}
               </Button>

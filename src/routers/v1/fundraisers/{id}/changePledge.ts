@@ -27,6 +27,7 @@ export default function () {
         where: {
           userId: loggedInUser.id,
           fundraiserId: Number(id),
+          paidAt: null,
         },
       });
       if (pledge) {
@@ -57,27 +58,36 @@ export default function () {
           userId: loggedInUser.id,
           fundraiserId: Number(id),
           cancelledAt: null,
+          paidAt: null,
         },
-        include: {
-          fundraiser: { include: { trackGroups: true } },
-        },
+        include: { fundraiser: true },
       });
-      if (pledge) {
-        if (amount < (pledge.fundraiser.trackGroups[0]?.minPrice ?? 0)) {
-          throw new AppError({
-            httpCode: 400,
-            description: "Pledge amount is below the minimum required.",
-          });
-        }
-        await prisma.fundraiserPledge.update({
-          where: {
-            id: pledge.id,
-          },
-          data: {
-            amount,
-          },
+      if (!pledge) {
+        throw new AppError({
+          httpCode: 404,
+          description: "Pledge not found",
         });
       }
+      if (pledge.fundraiser.status !== "ACTIVE") {
+        throw new AppError({
+          httpCode: 400,
+          description: "This fundraiser is no longer accepting pledges",
+        });
+      }
+      if (amount < pledge.fundraiser.minPledge) {
+        throw new AppError({
+          httpCode: 400,
+          description: "Pledge amount is below the minimum required.",
+        });
+      }
+      await prisma.fundraiserPledge.update({
+        where: {
+          id: pledge.id,
+        },
+        data: {
+          amount,
+        },
+      });
       res.status(200);
       res.json({ result: { success: true } });
     } catch (e) {

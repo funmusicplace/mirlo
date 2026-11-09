@@ -34,6 +34,11 @@ const buildDefaultValues = (trackGroup: TrackGroup): TrackGroupFormData => {
     isAllOrNothing: trackGroup?.fundraiser?.isAllOrNothing ?? false,
     fundraiserName: trackGroup?.fundraiser?.name ?? "",
     fundraiserDescription: trackGroup?.fundraiser?.description ?? "",
+    fundraiserMinPledge: `${
+      trackGroup?.fundraiser?.minPledge
+        ? trackGroup.fundraiser.minPledge / 100
+        : ""
+    }`,
   } as unknown as TrackGroupFormData;
 };
 

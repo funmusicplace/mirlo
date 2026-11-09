@@ -226,6 +226,7 @@ interface TrackGroup {
   fundraiser?: {
     id: number;
     goalAmount: number;
+    minPledge: number;
     isAllOrNothing: boolean;
     endDate: string;
     name?: string;
@@ -715,6 +716,7 @@ interface Fundraiser {
   id: number;
   isAllOrNothing: boolean;
   goalAmount: number;
+  minPledge: number;
   endDate: string;
   status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   trackGroups: TrackGroup[];

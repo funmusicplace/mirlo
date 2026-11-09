@@ -9,7 +9,6 @@ import { resolveProfilePaymentContext } from "./purchase";
 export const initiateFundraiserPledge = async ({
   profileId,
   fundraiserId,
-  trackGroupId,
   price,
   message,
   userEmail,
@@ -19,7 +18,6 @@ export const initiateFundraiserPledge = async ({
 }: {
   profileId: number;
   fundraiserId: number;
-  trackGroupId: number;
   price?: string;
   message?: string;
   userEmail: string;
@@ -34,27 +32,24 @@ export const initiateFundraiserPledge = async ({
       setupIntentId: string;
     }
 > => {
-  const trackGroup = await prisma.trackGroup.findFirst({
-    where: { id: trackGroupId, profileId, fundraiserId },
-    include: { fundraiser: true },
+  const fundraiser = await prisma.fundraiser.findFirst({
+    where: { id: fundraiserId, profileId },
   });
-  if (!trackGroup) {
+  if (!fundraiser) {
     throw new AppError({
       httpCode: 404,
-      description: "TrackGroup not found for this fundraiser",
+      description: "Fundraiser not found",
     });
   }
 
-  const fundraiser = trackGroup.fundraiser;
-
-  if (!fundraiser?.isAllOrNothing || fundraiser.status !== "ACTIVE") {
+  if (!fundraiser.isAllOrNothing || fundraiser.status !== "ACTIVE") {
     throw new AppError({
       httpCode: 400,
       description: "This fundraiser is not currently accepting pledges",
     });
   }
 
-  const { priceNumber } = determinePrice(price, trackGroup.minPrice);
+  const { priceNumber } = determinePrice(price, fundraiser.minPledge);
 
   const { stripeAccountId, currency } =
     await resolveProfilePaymentContext(profileId);
@@ -80,7 +75,6 @@ export const initiateFundraiserPledge = async ({
   const { setupIntentId, clientSecret } =
     await getPaymentProcessor().createOnlinePledgeSetup({
       fundraiserId,
-      trackGroupId,
       profileId,
       accountId: stripeAccountId,
       amount: priceNumber,

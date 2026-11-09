@@ -245,6 +245,27 @@ const FundraisingGoal: React.FC<{
             {t("fundraisingGoalDescription")}
           </span>
         </FormComponent>
+        {isAllOrNothing && (
+          <FormComponent>
+            <label htmlFor="input-min-pledge">{t("minPledge")}</label>
+            <div className="flex items-center gap-2">
+              {user?.currency && (
+                <span className="ml-1">{getCurrencySymbol(user.currency)}</span>
+              )}
+              <InputEl
+                aria-describedby="description-min-pledge"
+                id="input-min-pledge"
+                type="number"
+                step="0.01"
+                min={0}
+                {...register("fundraiserMinPledge", { min: 0 })}
+              />
+            </div>
+            <span className="text-sm" id="description-min-pledge">
+              {t("minPledgeDescription")}
+            </span>
+          </FormComponent>
+        )}
       </div>
       <FormComponent>
         <label htmlFor="input-fundraiser-description">

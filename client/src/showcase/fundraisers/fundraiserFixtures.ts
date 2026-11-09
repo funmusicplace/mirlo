@@ -31,6 +31,7 @@ export const makeFundraiser = ({
   return {
     id: FUNDRAISER_ID,
     goalAmount: GOAL_CENTS,
+    minPledge: 1000,
     isAllOrNothing: true,
     endDate,
     status,

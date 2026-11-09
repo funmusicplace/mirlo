@@ -1310,6 +1310,8 @@
     "fundraisingGoalDescription": "The target amount you aim to raise in relation to this release.",
     "fundraiserName": "Fundraiser name",
     "fundraiserNameDescription": "Shown above the fundraiser on your release page.",
+    "minPledge": "Minimum pledge",
+    "minPledgeDescription": "The least a supporter can pledge. Pledges are only charged if the goal is met.",
     "fundraiserDescription": "What is this fundraiser for?",
     "fundraiserDescriptionDescription": "A sentence or two telling listeners what their money goes towards.",
     "id3Data": "ID3 data",

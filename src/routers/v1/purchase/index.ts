@@ -68,7 +68,6 @@ type PurchaseItem =
   | {
       type: "fundraiserPledge";
       fundraiserId: number;
-      trackGroupId: number;
       price?: string;
       message?: string;
     };
@@ -526,7 +525,6 @@ export default function () {
         const result = await initiateFundraiserPledge({
           profileId,
           fundraiserId: pledgeItem.fundraiserId,
-          trackGroupId: pledgeItem.trackGroupId,
           price: pledgeItem.price,
           message: pledgeItem.message,
           userEmail: loggedInUser?.email ?? email ?? "",

@@ -71,6 +71,7 @@ export default function () {
         "description",
         "endDate",
         "goalAmount",
+        "minPledge",
         "isAllOrNothing",
       ]);
 

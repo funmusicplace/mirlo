@@ -55,6 +55,62 @@ describe("manage/artists/{artistId}/fundraisers", () => {
       );
     });
 
+    it("should copy the release's minimum price as the minimum pledge", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+      });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id, { minPrice: 1200 });
+
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/fundraisers`)
+        .send({ trackGroupId: trackGroup.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.minPledge, 1200);
+    });
+
+    it("should create a fundraiser without a track group", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+      });
+      const artist = await createArtist(user.id);
+
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/fundraisers`)
+        .send({ name: "New van" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.name, "New van");
+
+      const fundraiserInDb = await prisma.fundraiser.findFirstOrThrow({
+        where: { id: response.body.result.id },
+        include: { trackGroups: true },
+      });
+      assert.equal(fundraiserInDb.profileId, artist.id);
+      assert.equal(fundraiserInDb.trackGroups.length, 0);
+    });
+
+    it("should require a name for a fundraiser without a track group", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+      });
+      const artist = await createArtist(user.id);
+
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/fundraisers`)
+        .send({ name: "  " })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+      assert.equal(await prisma.fundraiser.count(), 0);
+    });
+
     it("should return existing fundraiser if one already exists", async () => {
       const { user, accessToken } = await createUser({
         email: "test@testcom",

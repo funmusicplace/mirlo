@@ -81,6 +81,19 @@ describe("manage/fundraisers/{fundraiserId}", () => {
       return { accessToken, backer, fundraiser };
     };
 
+    it("saves the minimum pledge", async () => {
+      const { accessToken, fundraiser } = await setUp();
+
+      const response = await requestApp
+        .put(`manage/fundraisers/${fundraiser.id}`)
+        .send({ minPledge: 2500 })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.minPledge, 2500);
+    });
+
     it("refuses to change isAllOrNothing while there are open pledges", async () => {
       const { accessToken, backer, fundraiser } = await setUp();
       await createFundraiserPledge(fundraiser.id, backer.id);

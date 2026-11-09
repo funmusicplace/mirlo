@@ -27,7 +27,6 @@ export type PurchaseItem =
   | {
       type: "fundraiserPledge";
       fundraiserId: number;
-      trackGroupId: number;
       price?: string;
       message?: string;
     };

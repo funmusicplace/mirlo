@@ -52,6 +52,7 @@ export interface TrackGroupFormData {
   isAllOrNothing?: boolean;
   fundraiserName?: string;
   fundraiserDescription?: string;
+  fundraiserMinPledge?: string;
 }
 
 export const FormSection = styled.div`

@@ -960,7 +960,8 @@ model Fundraiser {
   name           String
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
-  goalAmount     Int                @default(0) // in cents 
+  goalAmount     Int                @default(0) // in cents
+  minPledge      Int                @default(0) // in cents
   description    String?
   endDate        DateTime?
   // Is the fundraiser all or nothing
