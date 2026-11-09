@@ -1,3 +1,4 @@
+.env*
 .git
 .gitignore
 node_modules
@@ -7,3 +8,9 @@ dist
 __generated__
 .yarn
 prisma/dist
+umami
+test
+k8s
+docs
+Justfile
+client/.env*

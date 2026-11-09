@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: mirlo-api
+  name: mirlo-api
+spec:
+  selector:
+    matchLabels:
+      service: mirlo-api
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        service: mirlo-api
+    spec:
+      containers:
+        - name: mirlo-api
+          image: txels/mirlo:20261112-0825
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: mirlo-env
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mirlo-db
+                  key: url
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: mirlo-tokens
+                  key: jwt_secret
+            - name: REFRESH_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: mirlo-tokens
+                  key: refresh_secret
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis
+                  key: password
+            - name: S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mirlo-s3-keys
+                  key: access_key
+            - name: S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mirlo-s3-keys
+                  key: secret_key
+            - name: CLOUDFLARE_TURNSTILE_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: turnstile
+                  key: secret
+          volumeMounts:
+            - mountPath: /data/media/incoming
+              name: mirlo-incoming
+            - mountPath: /data/media/downloadCache
+              name: mirlo-download-cache
+          resources:
+            requests:
+              cpu: 200m
+              memory: 300Mi
+            limits:
+              cpu: 800m
+              memory: 600Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      restartPolicy: Always
+      volumes:
+        - name: mirlo-incoming
+          persistentVolumeClaim:
+            claimName: mirlo-incoming
+        - name: mirlo-download-cache
+          persistentVolumeClaim:
+            claimName: mirlo-download-cache

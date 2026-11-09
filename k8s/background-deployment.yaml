@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: mirlo-background
+  name: mirlo-background
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: mirlo-background
+  template:
+    metadata:
+      labels:
+        service: mirlo-background
+    spec:
+      containers:
+        - name: mirlo-background
+          image: txels/mirlo:20261112-0825
+          imagePullPolicy: IfNotPresent
+          command:
+            [
+              "node",
+              "--conditions=mirlo-dist",
+              "--enable-source-maps",
+              "dist/jobs/queue-worker.js",
+              "run",
+            ]
+          envFrom:
+            - configMapRef:
+                name: mirlo-env
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mirlo-db
+                  key: url
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: mirlo-tokens
+                  key: jwt_secret
+            - name: REFRESH_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: mirlo-tokens
+                  key: refresh_secret
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis
+                  key: password
+            - name: S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mirlo-s3-keys
+                  key: access_key
+            - name: S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mirlo-s3-keys
+                  key: secret_key
+          resources:
+            requests:
+              cpu: 200m
+              memory: 300Mi
+            limits:
+              cpu: 800m
+              memory: 600Mi
+          livenessProbe:
+            exec:
+              command:
+                - "true"
+          volumeMounts:
+            - mountPath: /data/media/processing
+              name: mirlo-processing
+      restartPolicy: Always
+      volumes:
+        - name: mirlo-processing
+          persistentVolumeClaim:
+            claimName: mirlo-processing

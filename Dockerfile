@@ -38,3 +38,7 @@ RUN yarn api:build
 FROM build AS prod
 CMD [ "/bin/sh", "-c", "yarn prisma:migrate:deploy && exec node --conditions=mirlo-dist --enable-source-maps dist/index.js" ]
 HEALTHCHECK --interval=10s --timeout=5s --retries=10 CMD ["node", "dist/healthcheck.js"]
+
+FROM build AS background-prod
+CMD [ "node", "--conditions=mirlo-dist", "--enable-source-maps", "dist/jobs/queue-worker.js", "run", ]
+HEALTHCHECK CMD ["true"]
