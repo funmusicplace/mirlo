@@ -65,6 +65,13 @@ export const ArtistColorsWrapper: React.FC<{
   );
 };
 
+export const useIsArtistPageLight = (): boolean | null => {
+  const ctx = React.useContext(ArtistColorsContext);
+  const bg = ctx?.colors.background;
+  if (!bg) return null;
+  return isSchemeLight(bg);
+};
+
 const ArtistColorsProvider: React.FC<{ children: React.ReactElement }> = ({
   children,
 }) => {
