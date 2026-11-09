@@ -26,9 +26,7 @@ import logger from "../logger";
 
 // Backend-agnostic object storage helpers: Garage in development, any
 // S3-compatible provider (Backblaze B2 in production) via the AWS SDK.
-// The filename is historical — nothing here is MinIO-specific from the
-// caller's point of view. Bucket layout is documented in
-// docs/hosting/object-storage.md.
+// Bucket layout is documented in docs/hosting/object-storage.md.
 
 export const instanceLogoPrefix = "instance-logos";
 export const rootImagePrefix = "";

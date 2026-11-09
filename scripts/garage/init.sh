@@ -19,7 +19,7 @@ KEY_SECRET="${LOCAL_S3_PASSWORD}"
 # The buckets the app addresses with the default (empty) prefix, so a
 # browser's CORS preflight always lands on a bucket that already exists with
 # CORS on it. These mirror getImagesBucket/getAudioBucket/getDownloadsBucket
-# in src/utils/minio.ts.
+# in src/utils/storage.ts.
 DEFAULT_BUCKETS="mirlo-audio mirlo-images mirlo-downloads"
 BUCKETS="${GARAGE_BUCKETS:-$DEFAULT_BUCKETS}"
 

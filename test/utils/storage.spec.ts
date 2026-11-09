@@ -44,7 +44,7 @@ function emptyReadable(): Readable {
   });
 }
 
-describe("minio bucket routing", () => {
+describe("storage bucket routing", () => {
   let storage: ReturnType<typeof stubStorage>;
 
   beforeEach(() => {

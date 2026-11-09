@@ -22,4 +22,4 @@ You'll need to wait a minute for this to take effect.
 
 This used to be impossible locally: setting CORS per bucket [needed the paid version of MinIO](https://github.com/minio/minio/discussions/20841), so dev uploads never used direct signed-URL uploads the way production does.
 
-Garage implements `PutBucketCors`, so that restriction is gone. `applyCorsPolicyLocal` in `src/utils/minio.ts` applies CORS rules whenever a local bucket is ensured, so dev exercises the same direct-upload flow as production.
+Garage implements `PutBucketCors`, so that restriction is gone. `applyCorsPolicy` in `src/utils/storage.ts` applies CORS rules whenever a local bucket is ensured, so dev exercises the same direct-upload flow as production.
