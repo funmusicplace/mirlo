@@ -3,6 +3,7 @@ import prisma from "@mirlo/prisma";
 import { AppError } from "../error";
 import { determinePrice } from "../purchasing";
 import { minimumPledge } from "../stripe/currency";
+import { whereForPublishedTrackGroups } from "../trackGroup";
 
 import { getPaymentProcessor, type DeferredQuote } from "./PaymentProcessor";
 import { resolveProfilePaymentContext } from "./purchase";
@@ -34,7 +35,21 @@ export const initiateFundraiserPledge = async ({
     }
 > => {
   const fundraiser = await prisma.fundraiser.findFirst({
-    where: { id: fundraiserId, profileId },
+    where: {
+      id: fundraiserId,
+      profileId,
+      OR: [
+        { isPublic: true },
+        {
+          trackGroups: {
+            some: {
+              ...whereForPublishedTrackGroups(),
+              hideFromSearch: undefined,
+            },
+          },
+        },
+      ],
+    },
   });
   if (!fundraiser) {
     throw new AppError({

@@ -36,6 +36,7 @@ describe("manage/artists/{artistId}/fundraisers", () => {
       const pledged = await createFundraiser(artist.id, {
         name: "Pledged",
         isAllOrNothing: true,
+        videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       });
       await createFundraiserPledge(pledged.id, backer.id, { amount: 4000 });
       const trackGroup = await createTrackGroup(artist.id);
@@ -64,6 +65,53 @@ describe("manage/artists/{artistId}/fundraisers", () => {
       assert.deepEqual(byName["Album sales"].trackGroups, [
         { id: trackGroup.id, title: trackGroup.title },
       ]);
+      assert.equal(byName["Pledged"].artistId, artist.id);
+      assert.equal(byName["Pledged"].profileId, undefined);
+      assert.ok(byName["Pledged"].videoEmbedUrl);
+    });
+
+    it("counts pledges per fundraiser, leaving out cancelled ones", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+      });
+      const artist = await createArtist(user.id);
+      const first = await createFundraiser(artist.id, {
+        name: "First",
+        isAllOrNothing: true,
+      });
+      const second = await createFundraiser(artist.id, {
+        name: "Second",
+        isAllOrNothing: true,
+      });
+      await createFundraiser(artist.id, { name: "Empty" });
+      for (let i = 0; i < 3; i++) {
+        const { user: backer } = await createUser({
+          email: `backer${i}@testcom`,
+        });
+        await createFundraiserPledge(first.id, backer.id, { amount: 1000 });
+        await createFundraiserPledge(second.id, backer.id, {
+          amount: 300,
+          cancelledAt: i === 0 ? new Date() : undefined,
+        });
+      }
+
+      const response = await requestApp
+        .get(`manage/artists/${artist.id}/fundraisers`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const totals = Object.fromEntries(
+        response.body.results.map((f: any) => [
+          f.name,
+          [f.amountRaised, f.pledgeCount],
+        ])
+      );
+      assert.deepEqual(totals, {
+        First: [3000, 3],
+        Second: [600, 2],
+        Empty: [0, 0],
+      });
     });
 
     it("should return 404 if user can't edit the artist", async () => {

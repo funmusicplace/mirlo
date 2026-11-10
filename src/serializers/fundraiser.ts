@@ -4,7 +4,11 @@ import { resolveFundraiserDescription } from "../utils/postContent";
 import { videoEmbedUrl } from "../utils/videoEmbed";
 
 import { processSingleTrackGroup } from "./trackGroup";
-import { omitPrivateProfileFields, Serialized } from "./utils";
+import {
+  omitPrivateProfileFields,
+  renameProfileIdToArtistId,
+  Serialized,
+} from "./utils";
 
 type FullTrackGroup = Parameters<typeof processSingleTrackGroup>[0];
 
@@ -40,7 +44,9 @@ export const serializeFundraiser = <T extends object>(
     videoUrl?: string | null;
   };
   return {
-    ...resolveFundraiserDescription(rest as { description?: string | null }),
+    ...renameProfileIdToArtistId(
+      resolveFundraiserDescription(rest as { description?: string | null })
+    ),
     ...("videoUrl" in rest
       ? { videoEmbedUrl: videoEmbedUrl(rest.videoUrl) }
       : {}),

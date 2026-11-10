@@ -524,7 +524,6 @@
     "releases": "Releases",
     "pledge": "Pledge",
     "stillToGo": "Still {{amount}} to go",
-    "share": "Share",
     "shareFundraiser": "Share this fundraiser",
     "recentPledges": "Recent pledges",
     "someonePledged": "Someone pledged",
@@ -533,6 +532,10 @@
     "pledgeCount_one": "<strong>{{formattedCount}}</strong> pledge",
     "pledgeCount_other": "<strong>{{formattedCount}}</strong> pledges",
     "percentOfGoal": "<strong>{{percent}}</strong> of the goal"
+  },
+  "imageGallery": {
+    "showImage": "Show image {{number}}",
+    "showVideo": "Show video"
   },
   "merchDetails": {
     "merchByArtist": "Merch by {{artist}} on {{instanceName}}",
@@ -568,9 +571,7 @@
     "includesDownloadOf": "Includes a download of <albumLink>{{albumTitle}}</albumLink>",
     "destinationCost": "Cost to ship here: {{costUnit}} ({{costExtraUnit}} per extra item)",
     "supportedShippingDestinations": "Choose the shipping destination that best matches you",
-    "optionalOptionType": "{{name}} (optional)",
-    "showImage": "Show image {{number}}",
-    "showVideo": "Show video"
+    "optionalOptionType": "{{name}} (optional)"
   },
   "labelRemoval": {
     "remove": "Remove",
@@ -1312,9 +1313,7 @@
     "viewPage": "View the fundraiser's page",
     "urlSlug": "Fundraiser URL",
     "urlWillBe": "URL will be: ",
-    "saveUrl": "Save URL",
-    "urlSaved": "URL saved",
-    "urlSlugTaken": "Another of your fundraisers already uses this URL.",
+    "changeUrl": "Change URL",
     "urlSlugWarning": "Changes to this value will break existing links to this fundraiser.",
     "videoUrl": "Video",
     "videoUrlDescription": "A YouTube or Vimeo link, shown at the top of the fundraiser's page.",
@@ -1333,7 +1332,10 @@
     "imageDeleteFailed": "Couldn't delete the image"
   },
   "manageAlbum": {
-    "removingFundraiserWithPledgesWarning": "This release has an active fundraiser with {{ count }} pledges. Are you sure you want to remove the fundraiser? This will cancel all current pledges.",
+    "removingFundraiserWithPledgesWarning": "This fundraiser has {{ count }} pledges. Are you sure you want to remove it? This will cancel all current pledges.",
+    "removingFundraiserWarning": "Are you sure you want to remove this fundraiser?",
+    "confirmChargePledges": "Charge every backer's card now? This can't be undone.",
+    "confirmMarkFundraiserDone": "Mark this fundraiser as done? This can't be undone.",
     "removeFundraiser": "Remove fundraiser",
     "viewPledges": "Pledges",
     "cancelFundraiser": "Cancel fundraiser",

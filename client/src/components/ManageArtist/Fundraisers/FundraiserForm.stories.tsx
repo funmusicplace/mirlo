@@ -44,10 +44,9 @@ export const NewFundraiser: Story = {
     await expect(
       canvas.getByRole("button", { name: "Make public" })
     ).toBeInTheDocument();
+    await expect(canvas.getByText(/\/fundraiser\/a-van$/)).toBeInTheDocument();
     await expect(
-      canvas.getByRole("button", {
-        name: /\/fundraiser\/a-van$/,
-      })
+      canvas.getByRole("button", { name: "Change URL" })
     ).toBeInTheDocument();
     await expect(
       canvas.queryByLabelText("Minimum pledge")

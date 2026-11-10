@@ -7,6 +7,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
+import { useConfirm } from "utils/useConfirm";
 
 const FundraiserActions: React.FC<{
   fundraiser: Pick<
@@ -14,11 +15,11 @@ const FundraiserActions: React.FC<{
     "id" | "isAllOrNothing" | "goalAmount" | "status"
   >;
   amountRaised: number;
-  onChanged?: () => void;
-}> = ({ fundraiser, amountRaised, onChanged }) => {
+}> = ({ fundraiser, amountRaised }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
+  const { ask } = useConfirm();
   const { mutateAsync: chargePledges, isPending: isCharging } =
     useChargeFundraiserPledgesMutation();
 
@@ -29,13 +30,22 @@ const FundraiserActions: React.FC<{
       (amountRaised > 0 && fundraiser.goalAmount <= amountRaised));
 
   const onCharge = async () => {
+    if (
+      !(await ask(
+        t(
+          fundraiser.isAllOrNothing
+            ? "confirmChargePledges"
+            : "confirmMarkFundraiserDone"
+        )
+      ))
+    ) {
+      return;
+    }
     try {
       await chargePledges(fundraiser.id);
       snackbar(t("chargePledgesSuccess"), { type: "success" });
     } catch (e) {
       errorHandler(e);
-    } finally {
-      onChanged?.();
     }
   };
 

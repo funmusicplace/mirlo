@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import type { FundraiserFormData } from "utils/fundraiserFormData";
 import { describe, expect, test, vi } from "vitest";
 
 vi.mock("react-i18next", () => ({
@@ -13,9 +14,9 @@ vi.mock("react-i18next", () => ({
 }));
 
 vi.mock("components/common/TextEditor", () => ({
-  default: ({ label, value, onChange, allowMentions, artistId }: any) => (
+  default: ({ labelledBy, value, onChange, allowMentions, artistId }: any) => (
     <textarea
-      aria-label={label}
+      aria-labelledby={labelledBy}
       data-allow-mentions={String(allowMentions)}
       data-artist-id={artistId}
       value={value}
@@ -24,7 +25,6 @@ vi.mock("components/common/TextEditor", () => ({
   ),
 }));
 
-import { FundraiserFormData } from "./fundraiserFormData";
 import FundraiserFormFields from "./FundraiserFormFields";
 
 const renderFields = (

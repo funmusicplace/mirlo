@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import ArtistRouterLink from "components/Artist/ArtistButtons";
 import AvatarLink from "components/Artist/AvatarLink";
 import Box from "components/common/Box";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
@@ -14,8 +15,8 @@ import FundraiserRecentPledges, {
 import FundraiserSupport from "components/Fundraiser/FundraiserSupport";
 import { queryPublicFundraiser } from "queries";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router-dom";
-import { getFundraiserUrl, getReleaseUrl } from "utils/artist";
+import { useParams } from "react-router-dom";
+import { getArtistUrl, getFundraiserUrl, getReleaseUrl } from "utils/artist";
 import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
 
 function Index() {
@@ -38,7 +39,7 @@ function Index() {
   }
 
   const { artist } = fundraiser;
-  const currency = artist.user?.currency;
+  const currency = fundraiser.currency ?? artist.user?.currency;
   const hasMedia = !!fundraiser.videoEmbedUrl || fundraiser.images.length > 0;
 
   return (
@@ -58,7 +59,7 @@ function Index() {
             <AvatarLink
               avatar={artist.avatar?.sizes?.[60]}
               name={artist.name}
-              to={`/${artist.urlSlug}`}
+              to={getArtistUrl(artist)}
             />
           </div>
         </div>
@@ -97,7 +98,7 @@ function Index() {
           <div className="flex flex-wrap items-center gap-2 ">
             <FundraiserSupport fundraiser={fundraiser} />
             <ShareButton
-              label={t("share")}
+              showLabel
               title={fundraiser.name}
               modalTitle={t("shareFundraiser")}
               url={`${window.location.origin}${getFundraiserUrl(artist, fundraiser)}`}
@@ -124,9 +125,9 @@ function Index() {
             <ul className="list-disc pl-6">
               {fundraiser.trackGroups.map((trackGroup) => (
                 <li key={trackGroup.id}>
-                  <Link to={getReleaseUrl(artist, trackGroup)}>
+                  <ArtistRouterLink to={getReleaseUrl(artist, trackGroup)}>
                     {trackGroup.title}
-                  </Link>
+                  </ArtistRouterLink>
                 </li>
               ))}
             </ul>

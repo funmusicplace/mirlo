@@ -2,19 +2,20 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 import FundraiserProgressCircle from "components/common/FundraiserProgressCircle";
 import { moneyDisplay } from "components/common/Money";
 import { useUpdateFundraiserMutation } from "queries";
+import { MirloFetchError } from "queries/fetch/MirloFetchError";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
-
-import FundraiserActions from "./FundraiserActions";
 import {
   FundraiserFormData,
   formDataToFundraiserUpdate,
   fundraiserToFormData,
-} from "./fundraiserFormData";
+} from "utils/fundraiserFormData";
+
+import FundraiserActions from "./FundraiserActions";
 import FundraiserFormFields from "./FundraiserFormFields";
 import FundraiserImagesEditor from "./FundraiserImagesEditor";
 import FundraiserPublicButton from "./FundraiserPublicButton";
@@ -47,7 +48,10 @@ const FundraiserForm: React.FC<{
     useUpdateFundraiserMutation();
 
   const methods = useForm<FundraiserFormData>({
-    defaultValues: fundraiserToFormData(fundraiser),
+    defaultValues: {
+      ...fundraiserToFormData(fundraiser),
+      urlSlug: fundraiser.urlSlug ?? "",
+    },
   });
 
   const onSubmit = async (data: FundraiserFormData) => {
@@ -59,6 +63,13 @@ const FundraiserForm: React.FC<{
       methods.reset(data);
       snackbar(t("saved"), { type: "success" });
     } catch (e) {
+      if (
+        e instanceof MirloFetchError &&
+        e.status === 400 &&
+        methods.formState.dirtyFields.urlSlug
+      ) {
+        methods.setError("urlSlug", { message: e.message });
+      }
       errorHandler(e);
     }
   };

@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { fundraiserPercent } from "utils/fundraiserPercent";
 
 const VIEWBOX = 30;
 const STROKE = 6;
@@ -19,8 +20,7 @@ const FundraiserProgressCircle: React.FC<{
   const { t } = useTranslation("translation", {
     keyPrefix: "fundraiserProgress",
   });
-  const percent =
-    goalAmount > 0 ? Math.floor((amountRaised / goalAmount) * 100) : 0;
+  const percent = fundraiserPercent(amountRaised, goalAmount);
   const filled = (Math.min(percent, 100) / 100) * CIRCUMFERENCE;
 
   return (

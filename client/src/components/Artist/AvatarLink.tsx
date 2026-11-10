@@ -8,7 +8,7 @@ const AvatarLink: React.FC<{
   to: string;
 }> = ({ avatar, name, to }) => (
   <Link to={to} className="flex items-center gap-1 [&_img]:max-w-[25px]">
-    <Avatar avatar={avatar} /> <span>{name}</span>
+    <Avatar avatar={avatar} alt="" /> <span>{name}</span>
   </Link>
 );
 

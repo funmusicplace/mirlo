@@ -2,7 +2,10 @@ import prisma from "@mirlo/prisma";
 import * as cheerio from "cheerio";
 
 import { singleInclude, whereForVisibleProfile } from "../utils/artist";
-import { fundraiserImagesInclude } from "../utils/fundraiser";
+import {
+  fundraiserImagesInclude,
+  whereForPublicFundraiser,
+} from "../utils/fundraiser";
 import { merchImagesInclude } from "../utils/merch";
 import { postImagesForContent } from "../utils/postContent";
 import { trackGroupPublishedObject } from "../utils/trackGroup";
@@ -133,16 +136,11 @@ export async function fetchFundraiserMetadata(
   profileSlug: string,
   fundraiserSlug: string
 ) {
-  const numericId = Number(fundraiserSlug);
   return await prisma.fundraiser.findFirst({
-    where: {
-      isPublic: true,
-      profile: { urlSlug: profileSlug, ...whereForVisibleProfile() },
-      OR: [
-        { urlSlug: { equals: fundraiserSlug, mode: "insensitive" as const } },
-        ...(Number.isInteger(numericId) ? [{ id: numericId }] : []),
-      ],
-    },
+    where: whereForPublicFundraiser({
+      idOrSlug: fundraiserSlug,
+      artistIdOrSlug: profileSlug,
+    }),
     include: { profile: true, images: fundraiserImagesInclude },
   });
 }

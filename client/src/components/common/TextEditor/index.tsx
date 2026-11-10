@@ -87,6 +87,8 @@ const TextEditor: React.FC<{
   basicStyles?: boolean;
   allowMentions?: boolean;
   label?: string;
+  labelledBy?: string;
+  describedBy?: string;
 }> = ({
   onChange,
   value,
@@ -98,6 +100,8 @@ const TextEditor: React.FC<{
   basicStyles = false,
   allowMentions = true,
   label,
+  labelledBy,
+  describedBy,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
   const mentionHighlightExtRef = useRef<MentionHighlightExtension | null>(null);
@@ -272,6 +276,10 @@ const TextEditor: React.FC<{
         manager={manager}
         state={state}
         label={label}
+        attributes={{
+          ...(labelledBy ? { "aria-labelledby": labelledBy } : {}),
+          ...(describedBy ? { "aria-describedby": describedBy } : {}),
+        }}
         onChange={(parameter) => {
           if (parameter.tr?.docChanged) {
             onChange(prosemirrorNodeToHtml(parameter.state.doc));

@@ -1,25 +1,28 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { expect, userEvent, within } from "@storybook/test";
-import { http, HttpResponse } from "msw";
+import { FormProvider, useForm } from "react-hook-form";
 
-import {
-  ARTIST,
-  VAN,
-  fundraiserMutationHandlers,
-} from "./fundraiserStoryFixtures";
+import { ARTIST, VAN } from "./fundraiserStoryFixtures";
 import FundraiserUrlField from "./FundraiserUrlField";
 
 /**
- * The line under the fundraiser's name on its edit page. Clicking it opens a
- * pop-up to change the URL slug, which saves straight away.
+ * The line under the fundraiser's name on its edit page. "Change URL" shows
+ * an input; the new URL is saved with the rest of the form.
  */
 const meta = {
   title: "Features/Fundraisers/FundraiserUrlField",
   component: FundraiserUrlField,
-  parameters: {
-    layout: "padded",
-    msw: { handlers: { fundraiser: fundraiserMutationHandlers } },
-  },
+  decorators: [
+    (Story) => {
+      const methods = useForm({ defaultValues: { urlSlug: "a-van" } });
+      return (
+        <FormProvider {...methods}>
+          <Story />
+        </FormProvider>
+      );
+    },
+  ],
+  parameters: { layout: "padded" },
   args: {
     artist: ARTIST,
     fundraiser: { id: VAN.id, urlSlug: "a-van", isPublic: false },
@@ -29,49 +32,15 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const openModal = async (canvasElement: HTMLElement) => {
-  await userEvent.click(
-    within(canvasElement).getByRole("button", { name: /\/fundraiser\/a-van$/ })
-  );
-  return within(
-    await within(document.body).findByRole("dialog", { name: "Fundraiser URL" })
-  );
-};
-
 export const ChangeUrl: Story = {
   play: async ({ canvasElement }) => {
-    await expect(
-      within(canvasElement).getByText(/\/tidal-hours\/fundraiser\/a-van$/)
-    ).toBeInTheDocument();
-    const modal = await openModal(canvasElement);
-    const input = modal.getByLabelText("Fundraiser URL");
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "Change URL" }));
+    const input = canvas.getByLabelText("Fundraiser URL");
     await userEvent.clear(input);
     await userEvent.type(input, "our-van");
-    await userEvent.click(modal.getByRole("button", { name: "Save URL" }));
     await expect(
-      await within(document.body).findByText("URL saved")
-    ).toBeInTheDocument();
-  },
-};
-
-/** Another of the artist's fundraisers already uses the URL */
-export const UrlTaken: Story = {
-  parameters: {
-    msw: {
-      handlers: {
-        fundraiser: http.put("*/v1/manage/fundraisers/:fundraiserId", () =>
-          HttpResponse.json({ error: "taken" }, { status: 400 })
-        ),
-      },
-    },
-  },
-  play: async ({ canvasElement }) => {
-    const modal = await openModal(canvasElement);
-    await userEvent.click(modal.getByRole("button", { name: "Save URL" }));
-    await expect(
-      await modal.findByText(
-        "Another of your fundraisers already uses this URL."
-      )
+      canvas.getByText(/\/tidal-hours\/fundraiser\/our-van/)
     ).toBeInTheDocument();
   },
 };
@@ -80,9 +49,10 @@ export const UrlTaken: Story = {
 export const Public: Story = {
   args: { fundraiser: { id: VAN.id, urlSlug: "a-van", isPublic: true } },
   play: async ({ canvasElement }) => {
-    const modal = await openModal(canvasElement);
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "Change URL" }));
     await expect(
-      modal.getByText(/will break existing links/)
+      canvas.getByText(/will break existing links/)
     ).toBeInTheDocument();
   },
 };

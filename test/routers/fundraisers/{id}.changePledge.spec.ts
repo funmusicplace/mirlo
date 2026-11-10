@@ -41,7 +41,7 @@ describe("fundraisers/{id}/changePledge", () => {
     return { artist, backer, accessToken, fundraiser };
   };
 
-  const changePledge = (fundraiserId: number, amount: number, jwt: string) =>
+  const changePledge = (fundraiserId: number, amount: unknown, jwt: string) =>
     requestApp
       .put(`fundraisers/${fundraiserId}/changePledge`)
       .send({ amount })
@@ -103,6 +103,38 @@ describe("fundraisers/{id}/changePledge", () => {
       assert.equal(refreshed.amount, pledge.amount);
     });
 
+    it("refuses an amount that isn't a whole number of cents", async () => {
+      const { backer, accessToken, fundraiser } = await setUp();
+      const pledge = await createFundraiserPledge(fundraiser.id, backer.id);
+
+      for (const amount of [1000.5, "1000", undefined]) {
+        const response = await changePledge(fundraiser.id, amount, accessToken);
+        assert.equal(response.statusCode, 400, String(amount));
+      }
+      const refreshed = await prisma.fundraiserPledge.findUniqueOrThrow({
+        where: { id: pledge.id },
+      });
+      assert.equal(refreshed.amount, pledge.amount);
+    });
+
+    it("checks Stripe's minimum charge in the pledge's currency", async () => {
+      const { backer, accessToken, fundraiser } = await setUp({
+        minPledge: 0,
+      });
+      const pledge = await createFundraiserPledge(fundraiser.id, backer.id, {
+        amount: 20000,
+        currency: "huf",
+      });
+
+      const response = await changePledge(fundraiser.id, 1000, accessToken);
+
+      assert.equal(response.statusCode, 400);
+      const refreshed = await prisma.fundraiserPledge.findUniqueOrThrow({
+        where: { id: pledge.id },
+      });
+      assert.equal(refreshed.amount, 20000);
+    });
+
     it("refuses to change a pledge that was already charged", async () => {
       const { backer, accessToken, fundraiser } = await setUp();
       const pledge = await createFundraiserPledge(fundraiser.id, backer.id, {
@@ -147,6 +179,40 @@ describe("fundraisers/{id}/changePledge", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.statusCode, 200);
+      const refreshed = await prisma.fundraiserPledge.findUniqueOrThrow({
+        where: { id: pledge.id },
+      });
+      assert.equal(refreshed.cancelledAt, null);
+    });
+
+    it("cancels an open pledge", async () => {
+      const { backer, accessToken, fundraiser } = await setUp();
+      const pledge = await createFundraiserPledge(fundraiser.id, backer.id);
+
+      const response = await requestApp
+        .delete(`fundraisers/${fundraiser.id}/changePledge`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const refreshed = await prisma.fundraiserPledge.findUniqueOrThrow({
+        where: { id: pledge.id },
+      });
+      assert.ok(refreshed.cancelledAt);
+    });
+
+    it("refuses to cancel once the artist has started charging pledges", async () => {
+      const { backer, accessToken, fundraiser } = await setUp({
+        status: "SUCCESSFUL",
+      });
+      const pledge = await createFundraiserPledge(fundraiser.id, backer.id);
+
+      const response = await requestApp
+        .delete(`fundraisers/${fundraiser.id}/changePledge`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
       const refreshed = await prisma.fundraiserPledge.findUniqueOrThrow({
         where: { id: pledge.id },
       });

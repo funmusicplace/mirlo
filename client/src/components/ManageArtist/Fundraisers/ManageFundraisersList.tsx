@@ -24,45 +24,48 @@ const ManageFundraisersList: React.FC<{
         {t("fundraisers")}
       </h2>
       <ul className="flex flex-col divide-y divide-(--mi-tint-x-color) border-y border-(--mi-tint-x-color)">
-        {fundraisers.map((fundraiser) => (
-          <li key={fundraiser.id} className="flex items-center gap-3 py-2">
-            <FundraiserProgressCircle
-              amountRaised={fundraiser.amountRaised}
-              goalAmount={fundraiser.goalAmount}
-            />
-            <div className="flex min-w-0 grow flex-col">
-              <span className="font-semibold">
-                {fundraiser.name}
-                {fundraiser.status === "SUCCESSFUL" && (
-                  <span className="ml-2 text-sm font-normal text-(--mi-success-text-color)">
-                    {t("funded")}
-                  </span>
-                )}
-              </span>
-              <span className="text-sm">
-                {t("raisedOutOfGoal", {
-                  raised: moneyDisplay({
-                    amount: fundraiser.amountRaised / 100,
-                    currency,
-                  }),
-                  goal: moneyDisplay({
-                    amount: fundraiser.goalAmount / 100,
-                    currency,
-                  }),
-                })}
-              </span>
-            </div>
-            <ArtistButtonLink
-              to={`/manage/artists/${artistId}/fundraisers/${fundraiser.id}`}
-              size="compact"
-              variant="outlined"
-              rounded
-              onlyIcon
-              startIcon={<FaPen />}
-              aria-label={t("editFundraiserName", { name: fundraiser.name })}
-            />
-          </li>
-        ))}
+        {fundraisers.map((fundraiser) => {
+          const name = fundraiser.name || t("untitledFundraiser");
+          return (
+            <li key={fundraiser.id} className="flex items-center gap-3 py-2">
+              <FundraiserProgressCircle
+                amountRaised={fundraiser.amountRaised}
+                goalAmount={fundraiser.goalAmount}
+              />
+              <div className="flex min-w-0 grow flex-col">
+                <span className="font-semibold">
+                  {name}
+                  {fundraiser.status === "SUCCESSFUL" && (
+                    <span className="ml-2 text-sm font-normal text-(--mi-success-text-color)">
+                      {t("funded")}
+                    </span>
+                  )}
+                </span>
+                <span className="text-sm">
+                  {t("raisedOutOfGoal", {
+                    raised: moneyDisplay({
+                      amount: fundraiser.amountRaised / 100,
+                      currency,
+                    }),
+                    goal: moneyDisplay({
+                      amount: fundraiser.goalAmount / 100,
+                      currency,
+                    }),
+                  })}
+                </span>
+              </div>
+              <ArtistButtonLink
+                to={`/manage/artists/${artistId}/fundraisers/${fundraiser.id}`}
+                size="compact"
+                variant="outlined"
+                rounded
+                onlyIcon
+                startIcon={<FaPen />}
+                aria-label={t("editFundraiserName", { name })}
+              />
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

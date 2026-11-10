@@ -160,6 +160,47 @@ describe("manage/fundraisers/{fundraiserId}", () => {
       assert.equal(cleared.body.result.endDate, null);
     });
 
+    it("rejects an empty name", async () => {
+      const { accessToken, fundraiser } = await setUp();
+
+      const response = await requestApp
+        .put(`manage/fundraisers/${fundraiser.id}`)
+        .send({ name: "   " })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+      const refreshed = await prisma.fundraiser.findFirstOrThrow({
+        where: { id: fundraiser.id },
+      });
+      assert.equal(refreshed.name, fundraiser.name);
+    });
+
+    it("rejects amounts that aren't whole, non-negative cents", async () => {
+      const { accessToken, fundraiser } = await setUp();
+
+      for (const body of [
+        { goalAmount: 10.5 },
+        { goalAmount: -100 },
+        { goalAmount: "lots" },
+        { minPledge: -1 },
+        { minPledge: 2.25 },
+      ]) {
+        const response = await requestApp
+          .put(`manage/fundraisers/${fundraiser.id}`)
+          .send(body)
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json");
+
+        assert.equal(response.statusCode, 400, JSON.stringify(body));
+      }
+      const refreshed = await prisma.fundraiser.findFirstOrThrow({
+        where: { id: fundraiser.id },
+      });
+      assert.equal(refreshed.goalAmount, fundraiser.goalAmount);
+      assert.equal(refreshed.minPledge, fundraiser.minPledge);
+    });
+
     it("rejects an end date that isn't a date", async () => {
       const { accessToken, fundraiser } = await setUp();
 
@@ -348,6 +389,31 @@ describe("manage/fundraisers/{fundraiserId}", () => {
         where: { id: trackGroup.id },
       });
       assert.equal(release?.fundraiserId, null);
+    });
+
+    it("frees the deleted fundraiser's URL for a new one", async () => {
+      const { user, accessToken } = await createUser({
+        email: "fundraiser-owner@example.com",
+      });
+      const artist = await createArtist(user.id);
+      const create = () =>
+        requestApp
+          .post(`manage/artists/${artist.id}/fundraisers`)
+          .send({ name: "New van" })
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json");
+
+      const first = await create();
+      assert.equal(first.body.result.urlSlug, "new-van");
+
+      await requestApp
+        .delete(`manage/fundraisers/${first.body.result.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      const second = await create();
+      assert.equal(second.statusCode, 200);
+      assert.equal(second.body.result.urlSlug, "new-van");
     });
 
     it("doesn't let other users delete a fundraiser", async () => {

@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { expect, within } from "@storybook/test";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { fundraiserToFormData } from "utils/fundraiserFormData";
 
-import { fundraiserToFormData } from "./fundraiserFormData";
 import FundraiserFormFields from "./FundraiserFormFields";
 import { ARTIST, VAN, VINYL } from "./fundraiserStoryFixtures";
 

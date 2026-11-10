@@ -1,9 +1,8 @@
-import { describe, expect, test } from "vitest";
-
 import {
   formDataToFundraiserUpdate,
   fundraiserToFormData,
-} from "./fundraiserFormData";
+} from "utils/fundraiserFormData";
+import { describe, expect, test } from "vitest";
 
 describe("fundraiserFormData", () => {
   test("shows amounts in whole currency units and leaves unset ones blank", () => {

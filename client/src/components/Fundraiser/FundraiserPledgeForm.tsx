@@ -33,7 +33,7 @@ const FundraiserPledgeForm: React.FC<{
   const [isStarting, setIsStarting] = React.useState(false);
   const [verifiedEmail, setVerifiedEmail] = React.useState<string | null>(null);
   const { artist, minPledge } = fundraiser;
-  const currency = artist.user?.currency ?? "usd";
+  const currency = fundraiser.currency ?? artist.user?.currency ?? "usd";
 
   const methods = useForm<FormData>({
     defaultValues: { chosenPrice: minPledge ? `${minPledge / 100}` : "" },

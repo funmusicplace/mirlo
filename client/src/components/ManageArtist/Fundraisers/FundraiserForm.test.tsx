@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MirloFetchError } from "queries/fetch/MirloFetchError";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -32,9 +33,9 @@ vi.mock("./FundraiserImagesEditor", () => ({
   default: () => <div data-testid="images-editor" />,
 }));
 vi.mock("components/common/TextEditor", () => ({
-  default: ({ label, value, onChange, allowMentions, artistId }: any) => (
+  default: ({ labelledBy, value, onChange, allowMentions, artistId }: any) => (
     <textarea
-      aria-label={label}
+      aria-labelledby={labelledBy}
       data-allow-mentions={String(allowMentions)}
       data-artist-id={artistId}
       value={value}
@@ -44,8 +45,8 @@ vi.mock("components/common/TextEditor", () => ({
 }));
 
 vi.mock("components/Artist/ArtistButtons", () => ({
-  ArtistButton: ({ children, type, disabled }: any) => (
-    <button type={type} disabled={disabled}>
+  ArtistButton: ({ children, type, disabled, onClick }: any) => (
+    <button type={type} disabled={disabled} onClick={onClick}>
       {children}
     </button>
   ),
@@ -114,6 +115,40 @@ describe("FundraiserForm", () => {
           isAllOrNothing: true,
         }),
       })
+    );
+  });
+
+  test("saves a changed URL with the rest of the form", async () => {
+    renderForm();
+    await userEvent.click(screen.getByRole("button", { name: "changeUrl" }));
+    const input = screen.getByLabelText("urlSlug");
+    await userEvent.clear(input);
+    await userEvent.type(input, "our-van");
+    await userEvent.click(screen.getByRole("button", { name: "save" }));
+
+    await waitFor(() =>
+      expect(updateFundraiser).toHaveBeenCalledWith({
+        fundraiserId: 7,
+        body: expect.objectContaining({ urlSlug: "our-van" }),
+      })
+    );
+    expect(updateFundraiser).toHaveBeenCalledTimes(1);
+  });
+
+  test("shows the server's reason next to the URL when it's refused", async () => {
+    updateFundraiser.mockRejectedValue(
+      new MirloFetchError(
+        new Response(null, { status: 400 }),
+        "Another fundraiser already uses this URL"
+      )
+    );
+    renderForm();
+    await userEvent.click(screen.getByRole("button", { name: "changeUrl" }));
+    await userEvent.type(screen.getByLabelText("urlSlug"), "-2");
+    await userEvent.click(screen.getByRole("button", { name: "save" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Another fundraiser already uses this URL"
     );
   });
 

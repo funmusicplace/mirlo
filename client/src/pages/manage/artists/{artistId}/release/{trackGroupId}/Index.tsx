@@ -8,7 +8,6 @@ import {
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import AlbumForm from "components/ManageArtist/AlbumForm";
 import BackToArtistLink from "components/ManageArtist/BackToArtistLink";
-import { FundraiserFormData } from "components/ManageArtist/Fundraisers/fundraiserFormData";
 import ManageSectionWrapper from "components/ManageArtist/ManageSectionWrapper";
 import AlbumPaymentReceiver from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/AlbumPaymentReceiver";
 import ManageTrackDefaults from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTrackDefaults";
@@ -30,6 +29,7 @@ import { MdOutlineDownloadForOffline } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistManageUrl } from "utils/artist";
+import { FundraiserFormData } from "utils/fundraiserFormData";
 
 import { bp } from "../../../../../../constants";
 

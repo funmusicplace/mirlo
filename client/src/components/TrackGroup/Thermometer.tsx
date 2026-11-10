@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
 import { queryTrackGroupSupporters } from "queries";
 import { useTranslation } from "react-i18next";
+import { fundraiserPercent } from "utils/fundraiserPercent";
 
 function Thermometer({
   goal,
@@ -23,7 +24,7 @@ function Thermometer({
     keyPrefix: "trackGroupDetails",
   });
 
-  const percent = Math.floor((totalAmount / goal) * 100);
+  const percent = fundraiserPercent(totalAmount, goal);
   const atMost100 = percent > 100 ? 100 : percent;
   const atLeast1 = atMost100 < 1 && atMost100 !== 0 ? 1 : atMost100;
 

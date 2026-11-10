@@ -8,6 +8,7 @@ export type FundraiserFormData = {
   isAllOrNothing?: boolean;
   fundraiserEndDate?: string;
   fundraiserVideoUrl?: string;
+  urlSlug?: string;
 };
 
 const centsToInput = (cents?: number) => (cents ? `${cents / 100}` : "");
@@ -69,7 +70,7 @@ export const formDataToFundraiserUpdate = (
   minPledge: inputToCents(formData.fundraiserMinPledge),
   endDate: dateInputToIso(formData.fundraiserEndDate),
   videoUrl: formData.fundraiserVideoUrl,
-  // Undefined when the checkbox is disabled (pledges exist); leave it as is
+  urlSlug: formData.urlSlug,
   isAllOrNothing:
     formData.isAllOrNothing === undefined
       ? undefined

@@ -3,8 +3,9 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-const { deleteFundraiser } = vi.hoisted(() => ({
+const { deleteFundraiser, ask } = vi.hoisted(() => ({
   deleteFundraiser: vi.fn(),
+  ask: vi.fn(),
 }));
 
 vi.mock("react-i18next", () => ({
@@ -17,9 +18,10 @@ vi.mock("queries", () => ({
   }),
 }));
 vi.mock("state/SnackbarContext", () => ({ useSnackbar: () => vi.fn() }));
+vi.mock("utils/useConfirm", () => ({ useConfirm: () => ({ ask }) }));
 vi.mock("components/Artist/ArtistButtons", () => ({
-  ArtistButton: ({ children, onClick, type }: any) => (
-    <button type={type} onClick={onClick}>
+  ArtistButton: ({ children, onClick, type, disabled }: any) => (
+    <button type={type} onClick={onClick} disabled={disabled}>
       {children}
     </button>
   ),
@@ -31,10 +33,11 @@ describe("RemoveFundraiserButton", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     deleteFundraiser.mockResolvedValue({});
+    ask.mockResolvedValue(true);
   });
 
   test("asks before cancelling a fundraiser that has pledges", async () => {
-    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    ask.mockResolvedValue(false);
     const onRemoved = vi.fn();
     render(
       <RemoveFundraiserButton
@@ -48,13 +51,12 @@ describe("RemoveFundraiserButton", () => {
       screen.getByRole("button", { name: "cancelFundraiser" })
     );
 
-    expect(confirm).toHaveBeenCalled();
+    expect(ask).toHaveBeenCalledWith("removingFundraiserWithPledgesWarning");
     expect(deleteFundraiser).not.toHaveBeenCalled();
     expect(onRemoved).not.toHaveBeenCalled();
-    confirm.mockRestore();
   });
 
-  test("removes a fundraiser without pledges straight away", async () => {
+  test("asks before removing a fundraiser without pledges too", async () => {
     const onRemoved = vi.fn();
     render(
       <RemoveFundraiserButton
@@ -68,6 +70,7 @@ describe("RemoveFundraiserButton", () => {
       screen.getByRole("button", { name: "removeFundraiser" })
     );
 
+    expect(ask).toHaveBeenCalledWith("removingFundraiserWarning");
     expect(deleteFundraiser).toHaveBeenCalledWith(7);
     await waitFor(() => expect(onRemoved).toHaveBeenCalled());
   });

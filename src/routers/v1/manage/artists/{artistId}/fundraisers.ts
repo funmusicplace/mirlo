@@ -10,7 +10,7 @@ import { serializeFundraiser } from "../../../../../serializers/fundraiser";
 import { AppError } from "../../../../../utils/error";
 import {
   generateUniqueFundraiserSlug,
-  getFundraiserTotals,
+  getFundraisersTotals,
 } from "../../../../../utils/fundraiser";
 
 export default function () {
@@ -33,12 +33,12 @@ export default function () {
         orderBy: { createdAt: "desc" },
       });
 
-      const results = await Promise.all(
-        fundraisers.map(async (fundraiser) => ({
-          ...fundraiser,
-          ...(await getFundraiserTotals(fundraiser)),
-        }))
-      );
+      const totals = await getFundraisersTotals(fundraisers);
+      const results = fundraisers.map(({ trackGroups, ...fundraiser }, i) => ({
+        ...serializeFundraiser(fundraiser),
+        trackGroups,
+        ...totals[i],
+      }));
 
       res.json({ results });
     } catch (error) {

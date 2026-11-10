@@ -4,6 +4,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
+import { useConfirm } from "utils/useConfirm";
 
 const RemoveFundraiserButton: React.FC<{
   fundraiserId: number;
@@ -12,16 +13,18 @@ const RemoveFundraiserButton: React.FC<{
 }> = ({ fundraiserId, pledgeCount, onRemoved }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const snackbar = useSnackbar();
+  const { ask } = useConfirm();
   const { mutateAsync: deleteFundraiser, isPending } =
     useDeleteFundraiserMutation();
   const hasPledges = pledgeCount > 0;
 
   const onRemove = async () => {
     if (
-      hasPledges &&
-      !window.confirm(
-        t("removingFundraiserWithPledgesWarning", { count: pledgeCount })
-      )
+      !(await ask(
+        hasPledges
+          ? t("removingFundraiserWithPledgesWarning", { count: pledgeCount })
+          : t("removingFundraiserWarning")
+      ))
     ) {
       return;
     }
@@ -41,6 +44,7 @@ const RemoveFundraiserButton: React.FC<{
       variant="dashed"
       onClick={onRemove}
       isLoading={isPending}
+      disabled={isPending}
       startIcon={<FaTrash />}
       className="self-start"
     >

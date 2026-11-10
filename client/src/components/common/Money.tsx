@@ -41,3 +41,10 @@ export const Money: React.FC<{
 };
 
 export default Money;
+
+export const centsDisplay = (cents: number, currency?: string) =>
+  moneyDisplay({
+    amount: cents / 100,
+    currency,
+    options: { trailingZeroDisplay: "stripIfInteger" },
+  });

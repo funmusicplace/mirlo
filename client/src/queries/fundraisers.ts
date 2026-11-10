@@ -4,6 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import React from "react";
 
 import * as api from "./fetch/fetchWrapper";
 import {
@@ -78,13 +79,16 @@ export function queryPublicFundraiser(opts: {
 
 export function useInvalidateFundraisers() {
   const client = useQueryClient();
-  return () =>
-    client.invalidateQueries({
-      predicate: (query) =>
-        queryKeyIncludes(query, QUERY_KEY_FUNDRAISERS) ||
-        queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS) ||
-        queryKeyIncludes(query, QUERY_KEY_SALES),
-    });
+  return React.useCallback(
+    () =>
+      client.invalidateQueries({
+        predicate: (query) =>
+          queryKeyIncludes(query, QUERY_KEY_FUNDRAISERS) ||
+          queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS) ||
+          queryKeyIncludes(query, QUERY_KEY_SALES),
+      }),
+    [client]
+  );
 }
 
 export function useCreateFundraiserMutation() {

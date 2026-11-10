@@ -119,6 +119,37 @@ describe("fundraisers/{id}", () => {
     assert.equal(response.body.result.minPledge, 50);
   });
 
+  it("returns the currency of the artist's payee and its minimum", async () => {
+    const { artist, fundraiser } = await setUp({ minPledge: 0 });
+    const { user: payee } = await createUser({
+      email: "payee@example.com",
+      currency: "GBP",
+    });
+    await prisma.user.update({
+      where: { id: artist.userId },
+      data: { currency: "huf" },
+    });
+
+    const ownerCurrency = await requestApp
+      .get(`fundraisers/${fundraiser.id}`)
+      .set("Accept", "application/json");
+    assert.equal(ownerCurrency.body.result.currency, "huf");
+    assert.equal(ownerCurrency.body.result.minPledge, 17500);
+
+    await prisma.profile.update({
+      where: { id: artist.id },
+      data: { paymentToUserId: payee.id },
+    });
+
+    const response = await requestApp
+      .get(`fundraisers/${fundraiser.id}`)
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.result.currency, "gbp");
+    assert.equal(response.body.result.minPledge, 30);
+  });
+
   it("hides fundraisers that aren't public", async () => {
     const { fundraiser } = await setUp({ isPublic: false });
 

@@ -93,6 +93,28 @@ export default function () {
         "isPublic",
       ]);
 
+      if (newValues.name !== undefined) {
+        if (typeof newValues.name !== "string" || !newValues.name.trim()) {
+          throw new AppError({
+            httpCode: 400,
+            description: "A fundraiser needs a name",
+          });
+        }
+        newValues.name = newValues.name.trim();
+      }
+
+      for (const field of ["goalAmount", "minPledge"] as const) {
+        if (
+          newValues[field] !== undefined &&
+          !(Number.isInteger(newValues[field]) && newValues[field] >= 0)
+        ) {
+          throw new AppError({
+            httpCode: 400,
+            description: `${field} must be a whole number of cents, zero or more`,
+          });
+        }
+      }
+
       if (newValues.urlSlug !== undefined) {
         const current = await prisma.fundraiser.findFirstOrThrow({
           where: { id: Number(fundraiserId) },
@@ -222,7 +244,7 @@ export default function () {
 
       await prisma.fundraiser.update({
         where: { id: Number(fundraiserId) },
-        data: { trackGroups: { set: [] } },
+        data: { trackGroups: { set: [] }, urlSlug: null },
       });
 
       await deleteFundraiserImages(Number(fundraiserId));

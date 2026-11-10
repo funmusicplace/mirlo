@@ -1,7 +1,8 @@
-import { moneyDisplay } from "components/common/Money";
+import { centsDisplay } from "components/common/Money";
 import { toLanguageTag } from "i18n";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { useMatchMedia } from "utils/useMatchMedia";
 
 export const NEWEST_PLEDGE_DELAY = 5000;
 export const PLEDGE_CYCLE_INTERVAL = 3000;
@@ -26,24 +27,17 @@ export const formatShortTimeAgo = (date: string, language?: string) => {
   }).format(Math.floor(seconds / unitSeconds));
 };
 
-const pledgeAmount = (
-  pledge: PublicFundraiser["recentPledges"][number],
-  currency?: string
-) =>
-  moneyDisplay({
-    amount: pledge.amount / 100,
-    currency,
-    options: { trailingZeroDisplay: "stripIfInteger" },
-  });
-
 const PledgeTimeAgo: React.FC<{
   pledge: PublicFundraiser["recentPledges"][number];
 }> = ({ pledge }) => {
   const { i18n } = useTranslation();
   return (
-    <span className="shrink-0 whitespace-nowrap text-xs text-(--mi-secondary-text-color) opacity-70">
+    <time
+      dateTime={pledge.createdAt}
+      className="shrink-0 whitespace-nowrap text-xs text-(--mi-secondary-text-color)"
+    >
       {formatShortTimeAgo(pledge.createdAt, i18n.resolvedLanguage)}
-    </span>
+    </time>
   );
 };
 
@@ -58,7 +52,9 @@ const PledgeLine: React.FC<{
     <>
       <span className="flex flex-col">
         <span className="text-sm">{t("someonePledged")}</span>
-        <span className="font-bold">{pledgeAmount(pledge, currency)}</span>
+        <span className="font-bold">
+          {centsDisplay(pledge.amount, currency)}
+        </span>
       </span>
       <PledgeTimeAgo pledge={pledge} />
     </>
@@ -76,15 +72,18 @@ const FundraiserRecentPledges: React.FC<{
   const { t } = useTranslation("translation", {
     keyPrefix: "fundraiserPage",
   });
-  const [newestArrived, setNewestArrived] = React.useState(false);
+  const [newestArrived, setNewestArrived] = React.useState(pledges.length < 2);
 
   React.useEffect(() => {
+    if (pledges.length < 2) {
+      return;
+    }
     const timeout = setTimeout(
       () => setNewestArrived(true),
       NEWEST_PLEDGE_DELAY
     );
     return () => clearTimeout(timeout);
-  }, []);
+  }, [pledges.length]);
 
   if (pledges.length === 0) {
     return null;
@@ -102,7 +101,9 @@ const FundraiserRecentPledges: React.FC<{
           <li
             key={pledge.id}
             className={`${lineClass} py-2 ${
-              newestArrived && pledge.id === pledges[0].id ? arriveClass : ""
+              newestArrived && pledges.length > 1 && pledge.id === pledges[0].id
+                ? arriveClass
+                : ""
             }`}
           >
             <PledgeLine pledge={pledge} currency={currency} />
@@ -126,8 +127,13 @@ export const FundraiserPledgeTicker: React.FC<{
     Math.floor(Math.random() * cycled.length)
   );
 
+  const prefersReducedMotion = useMatchMedia(
+    "(prefers-reduced-motion: reduce)"
+  );
+  const [isPaused, setIsPaused] = React.useState(false);
+
   React.useEffect(() => {
-    if (cycled.length < 2) {
+    if (cycled.length < 2 || prefersReducedMotion || isPaused) {
       return;
     }
     const interval = setInterval(
@@ -135,7 +141,7 @@ export const FundraiserPledgeTicker: React.FC<{
       PLEDGE_CYCLE_INTERVAL
     );
     return () => clearInterval(interval);
-  }, [cycled.length]);
+  }, [cycled.length, prefersReducedMotion, isPaused]);
 
   const pledge = cycled[index];
   if (!pledge) {
@@ -143,11 +149,15 @@ export const FundraiserPledgeTicker: React.FC<{
   }
 
   return (
-    <p className={`overflow-hidden ${className ?? ""}`}>
+    <p
+      className={`overflow-hidden ${className ?? ""}`}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       <span key={pledge.id} className={`${lineClass} ${arriveClass}`}>
         <span>
           {t("someonePledgedAmount", {
-            amount: pledgeAmount(pledge, currency),
+            amount: centsDisplay(pledge.amount, currency),
           })}
         </span>
         <PledgeTimeAgo pledge={pledge} />

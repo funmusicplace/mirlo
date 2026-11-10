@@ -1,10 +1,10 @@
 import DraftRestoredBanner from "components/common/DraftRestoredBanner";
 import { RestoredFieldsProvider } from "components/common/RestoredFields";
-import { fundraiserToFormData } from "components/ManageArtist/Fundraisers/fundraiserFormData";
 import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { fundraiserToFormData } from "utils/fundraiserFormData";
 import { useFormPersist } from "utils/useFormPersist";
 
 import AlbumFormContent from "./ManageTrackGroup/AlbumFormComponents/AlbumFormContent";

@@ -5,7 +5,6 @@ import FundraiserFormFields from "components/ManageArtist/Fundraisers/Fundraiser
 import RemoveFundraiserButton from "components/ManageArtist/Fundraisers/RemoveFundraiserButton";
 import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import {
-  queryManagedTrackGroup,
   queryTrackGroupSupporters,
   useCreateFundraiserMutation,
 } from "queries";
@@ -34,8 +33,6 @@ const FundraisingGoal: React.FC<{
   const { mutateAsync: createFundraiser, isPending: isAdding } =
     useCreateFundraiserMutation();
 
-  const { refetch } = useQuery(queryManagedTrackGroup(trackGroupId));
-
   const {
     data: { totalAmount, totalPledges } = {
       totalAmount: 0,
@@ -47,7 +44,6 @@ const FundraisingGoal: React.FC<{
     try {
       setDidAddFundraiser(true);
       await createFundraiser({ artistId, trackGroupId });
-      refetch();
     } catch (e) {
       console.error(e);
     }
@@ -83,11 +79,7 @@ const FundraisingGoal: React.FC<{
             {t("fundraiserComplete")}
           </p>
         )}
-        <FundraiserActions
-          fundraiser={fundraiser}
-          amountRaised={totalAmount}
-          onChanged={refetch}
-        />
+        <FundraiserActions fundraiser={fundraiser} amountRaised={totalAmount} />
       </div>
       <FundraiserFormFields
         artistId={artistId}
@@ -99,10 +91,7 @@ const FundraisingGoal: React.FC<{
       <RemoveFundraiserButton
         fundraiserId={fundraiser.id}
         pledgeCount={totalPledges ?? 0}
-        onRemoved={() => {
-          setDidAddFundraiser(false);
-          refetch();
-        }}
+        onRemoved={() => setDidAddFundraiser(false)}
       />
     </>
   );

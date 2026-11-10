@@ -50,9 +50,14 @@ const SortableImagesEditor: React.FC<{
   const snackbar = useSnackbar();
   const [isUploading, setIsUploading] = React.useState(false);
 
+  const onUploadFailed = React.useCallback(
+    () => snackbar(labels.uploadFailed, { type: "warning" }),
+    [snackbar, labels.uploadFailed]
+  );
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
     reload,
     queue: "optimizeImage",
+    onFailed: onUploadFailed,
   });
 
   const {
@@ -161,23 +166,23 @@ const SortableImagesEditor: React.FC<{
           </SortableContext>
         </DndContext>
         <div>
-          <label
-            htmlFor={inputId}
-            className="relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center gap-1 rounded border-2 border-dashed border-(--mi-darken-x-background-color) text-sm"
-          >
-            <FaPlus />
-            {labels.add}
-            {(isUploading || isProcessing) && <Spinner />}
-          </label>
           <input
             id={inputId}
             type="file"
             accept="image/*"
             multiple
-            className="sr-only"
+            className="peer sr-only"
             onChange={onFilesChosen}
             disabled={isUploading}
           />
+          <label
+            htmlFor={inputId}
+            className="relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center gap-1 rounded border-2 border-dashed border-(--mi-darken-x-background-color) text-sm peer-focus-visible:outline-2 peer-focus-visible:outline-(--mi-button-color)"
+          >
+            <FaPlus />
+            {labels.add}
+            {(isUploading || isProcessing) && <Spinner />}
+          </label>
         </div>
       </div>
       <small>

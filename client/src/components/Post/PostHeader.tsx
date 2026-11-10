@@ -8,7 +8,7 @@ import SupportArtist from "components/common/SupportArtist";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { getPostURLReference } from "utils/artist";
+import { getArtistUrl, getPostURLReference } from "utils/artist";
 import useIsSubscribedToArtist from "utils/useIsSubscribedToArtist";
 import { useMatchMedia } from "utils/useMatchMedia";
 
@@ -66,7 +66,10 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
             link: (
               <AvatarLink
                 avatar={post.artist.avatar?.sizes?.[60]}
-                to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
+                to={getArtistUrl({
+                  urlSlug: post.artist.urlSlug,
+                  id: post.artistId,
+                })}
                 name={post.artist.name}
               ></AvatarLink>
             ),

@@ -10,7 +10,7 @@ const ImageGallery: React.FC<{
   video?: { src: string; title: string };
   aspect?: "square" | "video";
 }> = ({ images = [], alt, video, aspect = "square" }) => {
-  const { t } = useTranslation("translation", { keyPrefix: "merchDetails" });
+  const { t } = useTranslation("translation", { keyPrefix: "imageGallery" });
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const slideCount = images.length + (video ? 1 : 0);
   const isVideoSelected = !!video && selectedIndex === 0;

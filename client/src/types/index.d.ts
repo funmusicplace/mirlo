@@ -750,6 +750,7 @@ interface ManagedFundraiser extends Fundraiser, FundraiserTotals {
 
 interface PublicFundraiser
   extends Omit<Fundraiser, "trackGroups">, FundraiserTotals {
+  currency?: string;
   images: FundraiserImage[];
   recentPledges: { id: number; amount: number; createdAt: string }[];
   trackGroups: Pick<

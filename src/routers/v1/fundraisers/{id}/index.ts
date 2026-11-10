@@ -3,13 +3,13 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { serializeFundraiser } from "../../../../serializers/fundraiser";
-import { whereForVisibleProfile } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import {
   fundraiserImagesInclude,
   getFundraiserTotals,
+  whereForPublicFundraiser,
 } from "../../../../utils/fundraiser";
-import { minimumPledge } from "../../../../utils/stripe/currency";
+import { getCurrency, minimumPledge } from "../../../../utils/stripe/currency";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -22,25 +22,12 @@ export default function () {
     const { artistId } = req.query as { artistId?: string };
 
     try {
-      const byId = /^\d+$/.test(id) ? { id: Number(id) } : undefined;
       const fundraiser = await prisma.fundraiser.findFirst({
-        where: {
-          isPublic: true,
-          profile: {
-            ...(req.user?.isAdmin ? {} : whereForVisibleProfile()),
-            ...(artistId && !/^\d+$/.test(artistId)
-              ? { urlSlug: { equals: artistId, mode: "insensitive" } }
-              : artistId
-                ? { id: Number(artistId) }
-                : {}),
-          },
-          OR: [
-            ...(byId ? [byId] : []),
-            ...(artistId
-              ? [{ urlSlug: { equals: id, mode: "insensitive" as const } }]
-              : []),
-          ],
-        },
+        where: whereForPublicFundraiser({
+          idOrSlug: id,
+          artistIdOrSlug: artistId,
+          includeHiddenProfiles: req.user?.isAdmin,
+        }),
         include: {
           images: fundraiserImagesInclude,
           profile: {
@@ -81,14 +68,13 @@ export default function () {
       }
 
       const { pledges, ...rest } = fundraiser;
+      const currency = await getCurrency(fundraiser.profileId);
       res.json({
         result: {
           ...serializeFundraiser(rest),
+          currency,
           recentPledges: pledges,
-          minPledge: minimumPledge(
-            fundraiser.minPledge,
-            fundraiser.profile.user?.currency
-          ),
+          minPledge: minimumPledge(fundraiser.minPledge, currency),
           ...(await getFundraiserTotals(fundraiser)),
         },
       });

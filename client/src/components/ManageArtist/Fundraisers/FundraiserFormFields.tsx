@@ -5,9 +5,8 @@ import TextEditor from "components/common/TextEditor";
 import React from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { FundraiserFormData } from "utils/fundraiserFormData";
 import { estimateStripeFee } from "utils/stripeFees";
-
-import { FundraiserFormData } from "./fundraiserFormData";
 
 const MoneyInput = React.forwardRef<
   HTMLInputElement,
@@ -129,7 +128,8 @@ const FundraiserFormFields: React.FC<{
           control={control}
           render={({ field: { onChange, value } }) => (
             <TextEditor
-              label={t("fundraiserDescription")}
+              labelledBy="label-fundraiser-description"
+              describedBy="description-fundraiser-description"
               value={value ?? ""}
               onChange={onChange}
               artistId={artistId}
@@ -148,8 +148,7 @@ const FundraiserFormFields: React.FC<{
             aria-describedby="description-all-or-nothing"
             id="isAllOrNothing"
             type="checkbox"
-            disabled={hasPledges}
-            {...register("isAllOrNothing")}
+            {...register("isAllOrNothing", { disabled: hasPledges })}
           />
         </div>
         <div className="flex flex-col pl-2">

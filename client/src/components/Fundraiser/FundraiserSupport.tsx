@@ -58,7 +58,7 @@ const FundraiserSupport: React.FC<{ fundraiser: PublicFundraiser }> = ({
     return <p className="font-semibold">{t("thanksForPledging")}</p>;
   }
 
-  const currency = artist.user?.currency;
+  const currency = fundraiser.currency ?? artist.user?.currency;
   const platformPercent =
     fundraiser.trackGroups[0]?.platformPercent ??
     artist.defaultPlatformFee ??

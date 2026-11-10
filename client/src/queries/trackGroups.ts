@@ -4,7 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { formDataToFundraiserUpdate } from "components/ManageArtist/Fundraisers/fundraiserFormData";
+import { formDataToFundraiserUpdate } from "utils/fundraiserFormData";
 import { getInjectedTrackGroup } from "utils/injectedData";
 
 import * as api from "./fetch/fetchWrapper";

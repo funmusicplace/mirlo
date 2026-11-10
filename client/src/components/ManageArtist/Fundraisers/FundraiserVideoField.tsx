@@ -4,8 +4,7 @@ import LazyIframe from "components/common/LazyIframe";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-
-import { FundraiserFormData } from "./fundraiserFormData";
+import { FundraiserFormData } from "utils/fundraiserFormData";
 
 const FundraiserVideoField: React.FC<{ videoEmbedUrl?: string | null }> = ({
   videoEmbedUrl,

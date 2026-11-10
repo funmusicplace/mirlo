@@ -1,6 +1,8 @@
 import prisma from "@mirlo/prisma";
 import { FundraiserImage, Image, Prisma } from "@mirlo/prisma/client";
+import { keyBy } from "lodash";
 
+import { whereForVisibleProfile } from "./artist";
 import { AppError } from "./error";
 import generateSlug, { generateUniqueSlug } from "./generateSlug";
 import { deleteStoredImages } from "./images";
@@ -24,6 +26,34 @@ export const deleteFundraiserImages = async (fundraiserId: number) => {
   );
 };
 
+const isNumericId = (value: string) => /^\d+$/.test(value);
+
+export const whereForPublicFundraiser = ({
+  idOrSlug,
+  artistIdOrSlug,
+  includeHiddenProfiles = false,
+}: {
+  idOrSlug: string;
+  artistIdOrSlug?: string;
+  includeHiddenProfiles?: boolean;
+}): Prisma.FundraiserWhereInput => ({
+  isPublic: true,
+  profile: {
+    ...(includeHiddenProfiles ? {} : whereForVisibleProfile()),
+    ...(!artistIdOrSlug
+      ? {}
+      : isNumericId(artistIdOrSlug)
+        ? { id: Number(artistIdOrSlug) }
+        : { urlSlug: { equals: artistIdOrSlug, mode: "insensitive" } }),
+  },
+  OR: [
+    ...(isNumericId(idOrSlug) ? [{ id: Number(idOrSlug) }] : []),
+    ...(artistIdOrSlug
+      ? [{ urlSlug: { equals: idOrSlug, mode: "insensitive" as const } }]
+      : []),
+  ],
+});
+
 const isFundraiserSlugTaken = async (
   profileId: number,
   urlSlug: string,
@@ -34,7 +64,6 @@ const isFundraiserSlugTaken = async (
       where: {
         profileId,
         urlSlug,
-        deletedAt: {},
         ...(excludeFundraiserId ? { id: { not: excludeFundraiserId } } : {}),
       },
       select: { id: true },
@@ -66,35 +95,53 @@ export const assertFundraiserSlugAvailable = async (
   return slug;
 };
 
-export const getFundraiserTotals = async (fundraiser: {
+type FundraiserForTotals = {
   id: number;
   profileId: number;
   isAllOrNothing: boolean;
   trackGroups: { id: number }[];
-}) => {
-  const {
-    _sum: { amount: pledgedTotal },
-    _count: pledgeCount,
-  } = await prisma.fundraiserPledge.aggregate({
-    where: { fundraiserId: fundraiser.id, cancelledAt: null },
-    _sum: { amount: true },
-    _count: true,
-  });
-
-  if (fundraiser.isAllOrNothing || fundraiser.trackGroups.length === 0) {
-    return { amountRaised: pledgedTotal ?? 0, pledgeCount };
-  }
-
-  const sales = await findSales({
-    profileId: [fundraiser.profileId],
-    filters: { trackGroupIds: fundraiser.trackGroups.map((tg) => tg.id) },
-  });
-
-  return {
-    amountRaised: sales.reduce((total, sale) => total + sale.amount, 0),
-    pledgeCount,
-  };
 };
+
+export const getFundraisersTotals = async (
+  fundraisers: FundraiserForTotals[]
+) => {
+  const pledgeTotals = keyBy(
+    await prisma.fundraiserPledge.groupBy({
+      by: ["fundraiserId"],
+      where: {
+        fundraiserId: { in: fundraisers.map((fundraiser) => fundraiser.id) },
+        cancelledAt: null,
+      },
+      _sum: { amount: true },
+      _count: { _all: true },
+    }),
+    "fundraiserId"
+  );
+
+  return Promise.all(
+    fundraisers.map(async (fundraiser) => {
+      const pledges = pledgeTotals[fundraiser.id];
+      const pledgeCount = pledges?._count._all ?? 0;
+
+      if (fundraiser.isAllOrNothing || fundraiser.trackGroups.length === 0) {
+        return { amountRaised: pledges?._sum.amount ?? 0, pledgeCount };
+      }
+
+      const sales = await findSales({
+        profileId: [fundraiser.profileId],
+        filters: { trackGroupIds: fundraiser.trackGroups.map((tg) => tg.id) },
+      });
+
+      return {
+        amountRaised: sales.reduce((total, sale) => total + sale.amount, 0),
+        pledgeCount,
+      };
+    })
+  );
+};
+
+export const getFundraiserTotals = async (fundraiser: FundraiserForTotals) =>
+  (await getFundraisersTotals([fundraiser]))[0];
 
 /**
  * Charges every outstanding pledge on a fundraiser and marks it SUCCESSFUL.

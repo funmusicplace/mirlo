@@ -3,8 +3,9 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-const { chargePledges } = vi.hoisted(() => ({
+const { chargePledges, ask } = vi.hoisted(() => ({
   chargePledges: vi.fn(),
+  ask: vi.fn(),
 }));
 
 vi.mock("react-i18next", () => ({
@@ -18,6 +19,7 @@ vi.mock("queries", () => ({
 }));
 vi.mock("services/useErrorHandler", () => ({ default: () => vi.fn() }));
 vi.mock("state/SnackbarContext", () => ({ useSnackbar: () => vi.fn() }));
+vi.mock("utils/useConfirm", () => ({ useConfirm: () => ({ ask }) }));
 vi.mock("components/Artist/ArtistButtons", () => ({
   ArtistButton: ({ children, onClick, type }: any) => (
     <button type={type} onClick={onClick}>
@@ -40,6 +42,7 @@ describe("FundraiserActions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     chargePledges.mockResolvedValue({});
+    ask.mockResolvedValue(true);
   });
 
   test("hides charging until an all-or-nothing goal is met", () => {
@@ -53,22 +56,31 @@ describe("FundraiserActions", () => {
     );
   });
 
-  test("charges pledges once the goal is met", async () => {
-    const onChanged = vi.fn();
+  test("charges pledges once the goal is met, after confirming", async () => {
     render(
-      <FundraiserActions
-        fundraiser={allOrNothing}
-        amountRaised={10000}
-        onChanged={onChanged}
-      />
+      <FundraiserActions fundraiser={allOrNothing} amountRaised={10000} />
     );
 
     await userEvent.click(
       screen.getByRole("button", { name: "chargePledges" })
     );
 
-    expect(chargePledges).toHaveBeenCalledWith(7);
-    await waitFor(() => expect(onChanged).toHaveBeenCalled());
+    expect(ask).toHaveBeenCalledWith("confirmChargePledges");
+    await waitFor(() => expect(chargePledges).toHaveBeenCalledWith(7));
+  });
+
+  test("doesn't charge when the artist backs out of the confirmation", async () => {
+    ask.mockResolvedValue(false);
+    render(
+      <FundraiserActions fundraiser={allOrNothing} amountRaised={10000} />
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "chargePledges" })
+    );
+
+    await waitFor(() => expect(ask).toHaveBeenCalled());
+    expect(chargePledges).not.toHaveBeenCalled();
   });
 
   test("lets a fundraiser that isn't all-or-nothing be marked done, without a pledges link", () => {

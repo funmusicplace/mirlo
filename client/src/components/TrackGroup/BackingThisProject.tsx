@@ -8,6 +8,7 @@ import { useDeletePledgeMutation, useUpdatePledgeMutation } from "queries";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 import { useConfirm } from "utils/useConfirm";
 
@@ -39,6 +40,7 @@ const BackingThisProject: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const minPrice = fundraiser.minPledge;
   const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
   const { mutateAsync: updatePledge } = useUpdatePledgeMutation();
   const { mutateAsync: deletePledge } = useDeletePledgeMutation();
   const { ask } = useConfirm();
@@ -54,7 +56,7 @@ const BackingThisProject: React.FC<{
   const { setValue } = methods;
 
   const onUpdatePledge = async (data: FormData) => {
-    const newPledgeAmount = Number(data.chosenPrice) * 100;
+    const newPledgeAmount = Math.round(Number(data.chosenPrice) * 100);
     if (isFinite(newPledgeAmount) && newPledgeAmount > 0) {
       setIsSavingPledge(true);
 
@@ -68,6 +70,7 @@ const BackingThisProject: React.FC<{
         snackbar(t("pledgeUpdatedSuccessfully"), { type: "success" });
       } catch (e) {
         console.error("Error updating pledge:", e);
+        errorHandler(e);
       } finally {
         setIsSavingPledge(false);
       }
@@ -86,6 +89,7 @@ const BackingThisProject: React.FC<{
       snackbar(t("pledgeDeletedSuccessfully"), { type: "success" });
     } catch (e) {
       console.error("Error deleting pledge:", e);
+      errorHandler(e);
     }
   };
 
@@ -130,9 +134,17 @@ const BackingThisProject: React.FC<{
         </FormProvider>
       </Modal>
       <Tooltip hoverText={t("youWillBeChargedWhenItsFullyFunded")}>
-        <div
-          className="ml-2 flex items-center [&_svg]:-mt-2 [&_svg]:w-10"
+        <button
+          type="button"
+          className="ml-2 flex cursor-pointer items-center [&_svg]:-mt-2 [&_svg]:w-10"
           onClick={() => setIsChangingPledge(true)}
+          aria-label={
+            collapse
+              ? t("backingThisProjectFor", {
+                  amount: moneyDisplay({ amount: amount / 100, currency }),
+                })
+              : undefined
+          }
         >
           <Confetti />
 
@@ -143,7 +155,7 @@ const BackingThisProject: React.FC<{
               })}
             </span>
           )}
-        </div>
+        </button>
       </Tooltip>
     </>
   );

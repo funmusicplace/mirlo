@@ -1246,6 +1246,7 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const fundraiser = await createFundraiser(profile.id, {
         isAllOrNothing: true,
+        isPublic: true,
         minPledge: 500,
       });
 
@@ -1308,6 +1309,7 @@ describe("purchase", () => {
       const profile = await createProfile(artistUser.id);
       const fundraiser = await createFundraiser(profile.id, {
         isAllOrNothing: true,
+        isPublic: true,
         minPledge: 0,
       });
 
@@ -1342,6 +1344,7 @@ describe("purchase", () => {
       const otherProfile = await createProfile(otherUser.id);
       const otherFundraiser = await createFundraiser(otherProfile.id, {
         isAllOrNothing: true,
+        isPublic: true,
       });
 
       const response = await postPurchase(
@@ -1359,6 +1362,43 @@ describe("purchase", () => {
       );
 
       assert.equal(response.statusCode, 404);
+    });
+
+    it("should return 404 for a pledge to a private fundraiser", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_private",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const unpublished = await createTrackGroup(profile.id, {
+        publishedAt: null,
+      });
+      const standalone = await createFundraiser(profile.id, {
+        isAllOrNothing: true,
+      });
+      const forUnpublishedRelease = await createFundraiser(profile.id, {
+        isAllOrNothing: true,
+        trackGroupId: unpublished.id,
+      });
+
+      for (const fundraiser of [standalone, forUnpublishedRelease]) {
+        const response = await postPurchase(
+          {
+            artistId: profile.id,
+            items: [
+              {
+                type: "fundraiserPledge",
+                fundraiserId: fundraiser.id,
+                price: "1000",
+              },
+            ],
+          },
+          accessToken
+        );
+
+        assert.equal(response.statusCode, 404, String(fundraiser.id));
+      }
     });
 
     it("should return 400 for a pledge to a fundraiser that is no longer ACTIVE", async () => {
