@@ -15,6 +15,7 @@ const ShareButton: React.FC<{
   variant?: ButtonProps["variant"];
   color?: string;
   label?: string;
+  rounded?: boolean;
 }> = ({
   title,
   url,
@@ -24,6 +25,7 @@ const ShareButton: React.FC<{
   variant,
   color,
   label,
+  rounded,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "share" });
   const [isOpen, setIsOpen] = React.useState(false);
@@ -55,8 +57,9 @@ const ShareButton: React.FC<{
         aria-label={label ? undefined : (t("share") ?? "")}
         title={t("share") ?? ""}
         onClick={handleShareClick}
-        startIcon={<BsShare />}
+        startIcon={<BsShare className={label ? "size-[0.9em]" : undefined} />}
         size={size}
+        rounded={rounded}
         variant={variant}
         color={color}
         className={buttonClassName}

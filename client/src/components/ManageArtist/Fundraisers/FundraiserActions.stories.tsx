@@ -34,7 +34,7 @@ export const BelowGoal: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(
-      canvas.getByRole("link", { name: "View pledges" })
+      canvas.getByRole("link", { name: "Pledges" })
     ).toBeInTheDocument();
     await expect(
       canvas.queryByRole("button", { name: "Charge pledges now" })
@@ -62,7 +62,7 @@ export const NotAllOrNothing: Story = {
       canvas.getByRole("button", { name: "Mark fundraiser as done" })
     ).toBeInTheDocument();
     await expect(
-      canvas.queryByRole("link", { name: "View pledges" })
+      canvas.queryByRole("link", { name: "Pledges" })
     ).not.toBeInTheDocument();
   },
 };

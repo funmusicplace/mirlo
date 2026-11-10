@@ -40,6 +40,17 @@ vi.mock("components/common/Modal", () => ({
 vi.mock("components/common/TipArtist", () => ({
   default: () => <button>tip</button>,
 }));
+vi.mock("components/TrackGroup/BackingThisProject", () => ({
+  default: ({ amount, currency, fundraiser, platformPercent }: any) => (
+    <div
+      data-testid="backing"
+      data-amount={amount}
+      data-currency={currency}
+      data-fundraiser-id={fundraiser.id}
+      data-platform-percent={platformPercent}
+    />
+  ),
+}));
 vi.mock("./FundraiserPledgeForm", () => ({
   default: ({ platformPercent, returnUrl }: any) => (
     <div
@@ -114,10 +125,14 @@ describe("FundraiserSupport", () => {
     );
   });
 
-  test("shows the supporter's pledge instead of the form", () => {
+  test("lets the supporter change their pledge instead of pledging again", () => {
     auth.user = { pledges: [{ fundraiserId: 7, amount: 4000 }] };
     renderSupport();
-    expect(screen.getByText("youPledged $40.00")).toBeInTheDocument();
+    const backing = screen.getByTestId("backing");
+    expect(backing).toHaveAttribute("data-fundraiser-id", "7");
+    expect(backing).toHaveAttribute("data-amount", "4000");
+    expect(backing).toHaveAttribute("data-currency", "usd");
+    expect(backing).toHaveAttribute("data-platform-percent", "10");
     expect(
       screen.queryByRole("button", { name: "pledge" })
     ).not.toBeInTheDocument();

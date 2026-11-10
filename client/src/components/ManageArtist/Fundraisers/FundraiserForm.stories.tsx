@@ -46,7 +46,7 @@ export const NewFundraiser: Story = {
     ).toBeInTheDocument();
     await expect(
       canvas.getByRole("button", {
-        name: /^URL will be .*\/fundraiser\/a-van$/,
+        name: /\/fundraiser\/a-van$/,
       })
     ).toBeInTheDocument();
     await expect(

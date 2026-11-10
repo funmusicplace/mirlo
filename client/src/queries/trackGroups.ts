@@ -13,6 +13,7 @@ import {
   QUERY_KEY_SALES,
   queryKeyIncludes,
   QUERY_KEY_AUTH,
+  QUERY_KEY_FUNDRAISERS,
 } from "./queryKeys";
 
 export type TrackGroupQueryOptions = {
@@ -284,6 +285,7 @@ export function useUpdatePledgeMutation() {
         predicate: (query) =>
           queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS) ||
           queryKeyIncludes(query, QUERY_KEY_AUTH) ||
+          queryKeyIncludes(query, QUERY_KEY_FUNDRAISERS) ||
           queryKeyIncludes(query, QUERY_KEY_SALES),
       });
     },
@@ -303,6 +305,7 @@ export function useDeletePledgeMutation() {
         predicate: (query) =>
           queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS) ||
           queryKeyIncludes(query, QUERY_KEY_AUTH) ||
+          queryKeyIncludes(query, QUERY_KEY_FUNDRAISERS) ||
           queryKeyIncludes(query, QUERY_KEY_SALES),
       });
     },

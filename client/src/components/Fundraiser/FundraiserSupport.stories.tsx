@@ -54,6 +54,8 @@ const openPledgeForm = async (canvasElement: HTMLElement) => {
   );
 };
 
+const changedPledges: object[] = [];
+
 /** Pledging the minimum, then adding a card that's only charged later */
 export const Pledge: Story = {
   play: async ({ canvasElement }) => {
@@ -101,10 +103,21 @@ export const BelowTheMinimum: Story = {
   },
 };
 
+/** A backer changes their pledge from the fundraiser's page */
 export const AlreadyPledged: Story = {
   parameters: {
     msw: {
       handlers: {
+        changePledge: http.put(
+          "*/fundraisers/:id/changePledge",
+          async ({ params, request }) => {
+            changedPledges.push({
+              fundraiserId: params.id,
+              ...((await request.json()) as object),
+            });
+            return HttpResponse.json({ result: {} });
+          }
+        ),
         auth: http.get("*/auth/profile", () =>
           HttpResponse.json({
             result: {
@@ -123,9 +136,26 @@ export const AlreadyPledged: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    await expect(
-      await within(canvasElement).findByText(/You've pledged \$40\.00/)
-    ).toBeInTheDocument();
+    changedPledges.length = 0;
+    await userEvent.click(
+      await within(canvasElement).findByText("Backing for $40.00")
+    );
+    const dialog = within(
+      await within(document.body).findByRole("dialog", {
+        name: "Change pledge",
+      })
+    );
+    const amount = dialog.getByLabelText(/Name your price/);
+    await userEvent.clear(amount);
+    await userEvent.type(amount, "55");
+    await userEvent.click(
+      dialog.getByRole("button", { name: "Update pledge" })
+    );
+    await waitFor(() =>
+      expect(changedPledges).toEqual([
+        { fundraiserId: String(PUBLIC_VINYL.id), amount: 5500 },
+      ])
+    );
   },
 };
 

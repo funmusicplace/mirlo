@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import Button from "components/common/Button";
 import Confetti from "components/common/Confetti";
 import FormComponent from "components/common/FormComponent";
@@ -9,7 +8,6 @@ import { useDeletePledgeMutation, useUpdatePledgeMutation } from "queries";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { useConfirm } from "utils/useConfirm";
 
@@ -26,24 +24,24 @@ const BackingThisProject: React.FC<{
   amount: number;
   currency: string;
   collapse?: boolean;
-  trackGroup: TrackGroup;
-}> = ({ amount, collapse, currency, trackGroup }) => {
+  fundraiser: { id: number; minPledge?: number };
+  platformPercent: number;
+  artistName?: string;
+}> = ({
+  amount,
+  collapse,
+  currency,
+  fundraiser,
+  platformPercent,
+  artistName,
+}) => {
   const [isChangingPledge, setIsChangingPledge] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-  const minPrice = trackGroup?.fundraiser?.minPledge;
+  const minPrice = fundraiser.minPledge;
   const snackbar = useSnackbar();
   const { mutateAsync: updatePledge } = useUpdatePledgeMutation();
   const { mutateAsync: deletePledge } = useDeletePledgeMutation();
   const { ask } = useConfirm();
-  const { user } = useAuthContext();
-  const activeSubscriptionForArtist = user?.artistUserSubscriptions?.find(
-    (subscription) =>
-      subscription.artistSubscriptionTier.artistId === trackGroup.artistId
-  );
-  const discountPercent =
-    activeSubscriptionForArtist?.artistSubscriptionTier
-      .digitalDiscountPercent ?? 0;
-
   const [isSavingPledge, setIsSavingPledge] = React.useState(false);
 
   const methods = useForm<FormData>({
@@ -55,22 +53,14 @@ const BackingThisProject: React.FC<{
 
   const { setValue } = methods;
 
-  if (!trackGroup) {
-    return null;
-  }
-
   const onUpdatePledge = async (data: FormData) => {
     const newPledgeAmount = Number(data.chosenPrice) * 100;
     if (isFinite(newPledgeAmount) && newPledgeAmount > 0) {
       setIsSavingPledge(true);
 
       try {
-        if (!trackGroup.fundraiserId) {
-          console.error("No fundraiser associated with this track group");
-          return;
-        }
         await updatePledge({
-          fundraiserId: trackGroup.fundraiserId,
+          fundraiserId: fundraiser.id,
           amount: newPledgeAmount,
         });
         setIsChangingPledge(false);
@@ -91,11 +81,7 @@ const BackingThisProject: React.FC<{
       return;
     }
     try {
-      if (!trackGroup.fundraiserId) {
-        console.error("No fundraiser associated with this track group");
-        return;
-      }
-      await deletePledge({ fundraiserId: trackGroup.fundraiserId });
+      await deletePledge({ fundraiserId: fundraiser.id });
       setIsChangingPledge(false);
       snackbar(t("pledgeDeletedSuccessfully"), { type: "success" });
     } catch (e) {
@@ -117,10 +103,10 @@ const BackingThisProject: React.FC<{
           <form onSubmit={methods.handleSubmit(onUpdatePledge)}>
             <FormComponent>
               <PaymentInputElement
-                currency={trackGroup.currency}
-                platformPercent={trackGroup.platformPercent}
+                currency={currency}
+                platformPercent={platformPercent}
                 minPrice={minPrice}
-                artistName={trackGroup.artist?.name}
+                artistName={artistName}
               />
             </FormComponent>
             <div className="flex justify-between">
@@ -145,15 +131,7 @@ const BackingThisProject: React.FC<{
       </Modal>
       <Tooltip hoverText={t("youWillBeChargedWhenItsFullyFunded")}>
         <div
-          className={css`
-            margin-left: 0.5rem;
-            display: flex;
-            align-items: center;
-            svg {
-              width: 40px;
-              margin-top: -0.5rem;
-            }
-          `}
+          className="ml-2 flex items-center [&_svg]:-mt-2 [&_svg]:w-10"
           onClick={() => setIsChangingPledge(true)}
         >
           <Confetti />

@@ -45,7 +45,7 @@ const renderField = (isPublic = false) =>
   );
 
 const openModal = () =>
-  userEvent.click(screen.getByRole("button", { name: /^urlWillBe/ }));
+  userEvent.click(screen.getByRole("button", { name: /\/fundraiser\/a-van$/ }));
 
 describe("FundraiserUrlField", () => {
   beforeEach(() => {
@@ -57,7 +57,7 @@ describe("FundraiserUrlField", () => {
     renderField();
     expect(
       screen.getByRole("button", {
-        name: `urlWillBe ${window.location.origin}/tidal-hours/fundraiser/a-van`,
+        name: `${window.location.origin}/tidal-hours/fundraiser/a-van`,
       })
     ).toBeInTheDocument();
     expect(screen.queryByLabelText("urlSlug")).not.toBeInTheDocument();

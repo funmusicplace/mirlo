@@ -127,13 +127,15 @@ const PurchaseOrDownloadAlbum: React.FC<{
     return null;
   }
 
-  if (showBacking && pledge) {
+  if (showBacking && pledge && trackGroup.fundraiser) {
     return (
       <BackingThisProject
         amount={pledge.amount}
-        currency={trackGroup?.currency}
+        currency={trackGroup.currency}
         collapse={collapse}
-        trackGroup={trackGroup}
+        fundraiser={trackGroup.fundraiser}
+        platformPercent={trackGroup.platformPercent}
+        artistName={trackGroup.artist?.name}
       />
     );
   }

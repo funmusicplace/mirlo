@@ -50,7 +50,7 @@ function Index() {
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4">
         <div className="flex flex-col gap-3">
           <div>
-            <h1 className="mb-1!">{fundraiser.name}</h1>
+            <h1 className="mb-1! font-black!">{fundraiser.name}</h1>
             <Link to={`/${artist.urlSlug}`}>{artist.name}</Link>
           </div>
           <div className="flex items-center gap-3">
@@ -104,6 +104,7 @@ function Index() {
             modalTitle={t("shareFundraiser")}
             url={`${window.location.origin}${getFundraiserUrl(artist, fundraiser)}`}
             size="big"
+            rounded
           />
         </div>
         {fundraiser.description && (

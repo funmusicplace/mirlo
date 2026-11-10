@@ -520,7 +520,6 @@
     "raisedOutOfGoal": "{{raised}} out of {{goal}} raised",
     "endsOn": "Ends on {{date}}",
     "ended": "This fundraiser has ended.",
-    "youPledged": "You've pledged {{amount}}. You'll only be charged if the fundraiser reaches its goal.",
     "thanksForPledging": "Thanks for your pledge! You'll only be charged if the fundraiser reaches its goal.",
     "artistNotSetUp": "{{artistName}} hasn't set up payments yet. Please check back later.",
     "releases": "Releases",

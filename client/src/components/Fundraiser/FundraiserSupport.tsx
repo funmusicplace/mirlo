@@ -4,6 +4,7 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Modal from "components/common/Modal";
 import { moneyDisplay } from "components/common/Money";
 import TipArtist from "components/common/TipArtist";
+import BackingThisProject from "components/TrackGroup/BackingThisProject";
 import { queryUserStripeStatus, useInvalidateFundraisers } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -57,17 +58,22 @@ const FundraiserSupport: React.FC<{ fundraiser: PublicFundraiser }> = ({
     return <p className="font-semibold">{t("thanksForPledging")}</p>;
   }
 
+  const currency = artist.user?.currency;
+  const platformPercent =
+    fundraiser.trackGroups[0]?.platformPercent ??
+    artist.defaultPlatformFee ??
+    0;
+
   const pledge = user?.pledges?.find((p) => p.fundraiserId === fundraiser.id);
   if (pledge) {
     return (
-      <p>
-        {t("youPledged", {
-          amount: moneyDisplay({
-            amount: pledge.amount / 100,
-            currency: artist.user?.currency,
-          }),
-        })}
-      </p>
+      <BackingThisProject
+        amount={pledge.amount}
+        currency={currency ?? "usd"}
+        fundraiser={fundraiser}
+        platformPercent={platformPercent}
+        artistName={artist.name}
+      />
     );
   }
 
@@ -79,7 +85,6 @@ const FundraiserSupport: React.FC<{ fundraiser: PublicFundraiser }> = ({
     return <p>{t("artistNotSetUp", { artistName: artist.name })}</p>;
   }
 
-  const currency = artist.user?.currency;
   const stillToGo = fundraiser.goalAmount - fundraiser.amountRaised;
 
   return (
@@ -101,11 +106,7 @@ const FundraiserSupport: React.FC<{ fundraiser: PublicFundraiser }> = ({
         )}
         <FundraiserPledgeForm
           fundraiser={fundraiser}
-          platformPercent={
-            fundraiser.trackGroups[0]?.platformPercent ??
-            artist.defaultPlatformFee ??
-            0
-          }
+          platformPercent={platformPercent}
           returnUrl={`${window.location.origin}${getFundraiserUrl(artist, fundraiser)}`}
           onPledged={onPledged}
         />

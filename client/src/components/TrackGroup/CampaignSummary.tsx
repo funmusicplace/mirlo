@@ -15,7 +15,7 @@ import {
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import { getReleaseUrl } from "utils/artist";
+import { getFundraiserUrl, getReleaseUrl } from "utils/artist";
 
 import BackOrIsBacking from "./BackOrIsBacking";
 import Thermometer from "./Thermometer";
@@ -105,7 +105,15 @@ function CampaignSummary({
 
         {trackGroup.fundraiser?.name && (
           <h3 className="text-base md:text-lg font-bold mb-1">
-            {trackGroup.fundraiser.name}
+            {trackGroup.fundraiser.isPublic ? (
+              <ArtistRouterLink
+                to={getFundraiserUrl(artist, trackGroup.fundraiser)}
+              >
+                {trackGroup.fundraiser.name}
+              </ArtistRouterLink>
+            ) : (
+              trackGroup.fundraiser.name
+            )}
           </h3>
         )}
         {trackGroup.fundraiser?.description && (

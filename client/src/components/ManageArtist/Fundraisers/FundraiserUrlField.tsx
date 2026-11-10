@@ -60,7 +60,8 @@ const FundraiserUrlField: React.FC<{
           className="self-start text-left text-xs"
           onClick={() => setIsOpen(true)}
         >
-          {window.location.origin}${getFundraiserUrl(artist, fundraiser)}
+          {window.location.origin}
+          {getFundraiserUrl(artist, fundraiser)}
         </ArtistButton>
       </small>
       <Modal open={isOpen} onClose={close} size="small" title={t("urlSlug")}>

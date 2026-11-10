@@ -31,7 +31,7 @@ type Story = StoryObj<typeof meta>;
 
 const openModal = async (canvasElement: HTMLElement) => {
   await userEvent.click(
-    within(canvasElement).getByRole("button", { name: /^URL will be/ })
+    within(canvasElement).getByRole("button", { name: /\/fundraiser\/a-van$/ })
   );
   return within(
     await within(document.body).findByRole("dialog", { name: "Fundraiser URL" })

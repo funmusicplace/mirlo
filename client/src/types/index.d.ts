@@ -232,6 +232,8 @@ interface TrackGroup {
     name?: string;
     description?: string | null;
     status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
+    isPublic?: boolean;
+    urlSlug?: string | null;
   } | null;
   paymentToUser?: {
     email: string;
