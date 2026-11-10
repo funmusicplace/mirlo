@@ -54,6 +54,20 @@ describe("fundraiserFormData", () => {
     );
   });
 
+  test("sends the video link, and leaves it alone on forms without the field", () => {
+    expect(fundraiserToFormData({ videoUrl: null }).fundraiserVideoUrl).toBe(
+      ""
+    );
+    expect(
+      formDataToFundraiserUpdate(
+        fundraiserToFormData({ videoUrl: "https://youtu.be/dQw4w9WgXcQ" })
+      ).videoUrl
+    ).toBe("https://youtu.be/dQw4w9WgXcQ");
+    expect(
+      formDataToFundraiserUpdate(fundraiserToFormData({ name: "Van" })).videoUrl
+    ).toBeUndefined();
+  });
+
   test("leaves all-or-nothing alone when the checkbox was disabled", () => {
     expect(
       formDataToFundraiserUpdate({ isAllOrNothing: undefined }).isAllOrNothing

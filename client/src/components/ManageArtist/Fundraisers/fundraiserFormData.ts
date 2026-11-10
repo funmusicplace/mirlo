@@ -7,6 +7,7 @@ export type FundraiserFormData = {
   fundraiserMinPledge?: string;
   isAllOrNothing?: boolean;
   fundraiserEndDate?: string;
+  fundraiserVideoUrl?: string;
 };
 
 const centsToInput = (cents?: number) => (cents ? `${cents / 100}` : "");
@@ -43,6 +44,7 @@ export const fundraiserToFormData = (
       | "minPledge"
       | "isAllOrNothing"
       | "endDate"
+      | "videoUrl"
     >
   > | null
 ): FundraiserFormData => ({
@@ -52,6 +54,10 @@ export const fundraiserToFormData = (
   fundraiserMinPledge: centsToInput(fundraiser?.minPledge),
   isAllOrNothing: fundraiser?.isAllOrNothing ?? false,
   fundraiserEndDate: isoToDateInput(fundraiser?.endDate),
+  fundraiserVideoUrl:
+    fundraiser?.videoUrl === undefined
+      ? undefined
+      : (fundraiser.videoUrl ?? ""),
 });
 
 export const formDataToFundraiserUpdate = (
@@ -62,6 +68,7 @@ export const formDataToFundraiserUpdate = (
   goalAmount: inputToCents(formData.goalAmount),
   minPledge: inputToCents(formData.fundraiserMinPledge),
   endDate: dateInputToIso(formData.fundraiserEndDate),
+  videoUrl: formData.fundraiserVideoUrl,
   // Undefined when the checkbox is disabled (pledges exist); leave it as is
   isAllOrNothing:
     formData.isAllOrNothing === undefined

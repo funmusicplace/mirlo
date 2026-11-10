@@ -42,6 +42,11 @@ export const VAN: FundraiserSummary = {
   pledgeCount: 0,
 };
 
+export const FUNDRAISER_VIDEO = {
+  videoUrl: "https://youtu.be/aqz-KE-bpKQ",
+  videoEmbedUrl: "https://www.youtube.com/embed/aqz-KE-bpKQ",
+};
+
 export const STUDIO: FundraiserSummary = {
   ...base,
   id: 3,

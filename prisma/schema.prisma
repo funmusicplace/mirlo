@@ -964,6 +964,7 @@ model Fundraiser {
   goalAmount     Int                @default(0) // in cents
   minPledge      Int                @default(0) // in cents
   description    String?
+  videoUrl       String?
   endDate        DateTime?
   // Is the fundraiser all or nothing
   isAllOrNothing Boolean            @default(false)

@@ -17,6 +17,7 @@ import {
 } from "./fundraiserFormData";
 import FundraiserFormFields from "./FundraiserFormFields";
 import FundraiserImagesEditor from "./FundraiserImagesEditor";
+import FundraiserVideoField from "./FundraiserVideoField";
 
 const FundraiserForm: React.FC<{
   artistId: number;
@@ -111,6 +112,7 @@ const FundraiserForm: React.FC<{
             isAllOrNothing={fundraiser.isAllOrNothing}
             hasPledges={fundraiser.pledgeCount > 0}
           />
+          <FundraiserVideoField videoEmbedUrl={fundraiser.videoEmbedUrl} />
           <div>
             <ArtistButton
               type="submit"

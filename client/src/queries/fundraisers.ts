@@ -88,7 +88,12 @@ export function useCreateFundraiserMutation() {
 export type FundraiserUpdate = Partial<
   Pick<
     Fundraiser,
-    "name" | "description" | "goalAmount" | "minPledge" | "isAllOrNothing"
+    | "name"
+    | "description"
+    | "goalAmount"
+    | "minPledge"
+    | "isAllOrNothing"
+    | "videoUrl"
   > & { endDate: string | null }
 >;
 

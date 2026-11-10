@@ -172,6 +172,50 @@ describe("manage/fundraisers/{fundraiserId}", () => {
       assert.equal(response.statusCode, 400);
     });
 
+    it("keeps the video link as pasted and returns its embed URL", async () => {
+      const { accessToken, fundraiser } = await setUp();
+
+      const saved = await requestApp
+        .put(`manage/fundraisers/${fundraiser.id}`)
+        .send({ videoUrl: " https://youtu.be/dQw4w9WgXcQ?si=abc " })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(saved.statusCode, 200);
+      assert.equal(
+        saved.body.result.videoUrl,
+        "https://youtu.be/dQw4w9WgXcQ?si=abc"
+      );
+      assert.equal(
+        saved.body.result.videoEmbedUrl,
+        "https://www.youtube.com/embed/dQw4w9WgXcQ"
+      );
+
+      const cleared = await requestApp
+        .put(`manage/fundraisers/${fundraiser.id}`)
+        .send({ videoUrl: "" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(cleared.statusCode, 200);
+      assert.equal(cleared.body.result.videoUrl, null);
+      assert.equal(cleared.body.result.videoEmbedUrl, null);
+    });
+
+    it("rejects a video link that isn't YouTube or Vimeo", async () => {
+      const { accessToken, fundraiser } = await setUp();
+
+      const response = await requestApp
+        .put(`manage/fundraisers/${fundraiser.id}`)
+        .send({ videoUrl: "https://example.com/watch?v=dQw4w9WgXcQ" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
+      const saved = await prisma.fundraiser.findUniqueOrThrow({
+        where: { id: fundraiser.id },
+      });
+      assert.equal(saved.videoUrl, null);
+    });
+
     it("refuses to change isAllOrNothing while there are open pledges", async () => {
       const { accessToken, backer, fundraiser } = await setUp();
       await createFundraiserPledge(fundraiser.id, backer.id);

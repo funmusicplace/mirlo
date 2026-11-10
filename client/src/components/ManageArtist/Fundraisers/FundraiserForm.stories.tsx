@@ -5,6 +5,7 @@ import FundraiserForm from "./FundraiserForm";
 import {
   ARTIST,
   VAN,
+  FUNDRAISER_VIDEO,
   VINYL,
   VINYL_IMAGES,
   asManaged,
@@ -53,7 +54,13 @@ export const NewFundraiser: Story = {
 
 /** Linked to a release, with pledges coming in */
 export const WithPledges: Story = {
-  args: { fundraiser: { ...asManaged(VINYL), images: VINYL_IMAGES } },
+  args: {
+    fundraiser: {
+      ...asManaged(VINYL),
+      ...FUNDRAISER_VIDEO,
+      images: VINYL_IMAGES,
+    },
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(

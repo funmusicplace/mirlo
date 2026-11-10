@@ -720,6 +720,8 @@ interface Fundraiser {
   goalAmount: number;
   minPledge: number;
   endDate: string | null;
+  videoUrl?: string | null;
+  videoEmbedUrl?: string | null;
   status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   trackGroups: TrackGroup[];
 }

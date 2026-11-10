@@ -1,6 +1,7 @@
 import { addSizesToStoredImage } from "../utils/artist";
 import { FundraiserImageWithImage } from "../utils/fundraiser";
 import { resolveFundraiserDescription } from "../utils/postContent";
+import { videoEmbedUrl } from "../utils/videoEmbed";
 
 import { processSingleTrackGroup } from "./trackGroup";
 import { Serialized } from "./utils";
@@ -25,9 +26,13 @@ export const serializeFundraiser = <T extends object>(
       profile?: FullTrackGroup["profile"];
     })[];
     images?: FundraiserImageWithImage[];
+    videoUrl?: string | null;
   };
   return {
     ...resolveFundraiserDescription(rest as { description?: string | null }),
+    ...("videoUrl" in rest
+      ? { videoEmbedUrl: videoEmbedUrl(rest.videoUrl) }
+      : {}),
     ...(images !== undefined
       ? { images: images.map(serializeFundraiserImage) }
       : {}),

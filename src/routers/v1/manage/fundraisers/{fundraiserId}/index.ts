@@ -15,6 +15,7 @@ import {
   getFundraiserTotals,
 } from "../../../../../utils/fundraiser";
 import { preparePostContent } from "../../../../../utils/postContent";
+import { videoEmbedUrl } from "../../../../../utils/videoEmbed";
 
 type Params = {
   fundraiserId: string;
@@ -86,7 +87,18 @@ export default function () {
         "goalAmount",
         "minPledge",
         "isAllOrNothing",
+        "videoUrl",
       ]);
+
+      if (typeof newValues.videoUrl === "string") {
+        newValues.videoUrl = newValues.videoUrl.trim() || null;
+        if (newValues.videoUrl && !videoEmbedUrl(newValues.videoUrl)) {
+          throw new AppError({
+            httpCode: 400,
+            description: "The video link must be a YouTube or Vimeo video",
+          });
+        }
+      }
 
       if (typeof newValues.description === "string") {
         newValues.description = await preparePostContent(
