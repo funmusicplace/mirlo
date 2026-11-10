@@ -5,6 +5,7 @@ import prisma from "@mirlo/prisma";
 import {
   finalizeTrackGroupPublication,
   findTrackGroupIdForSlug,
+  processTrackGroupQueryOrder,
 } from "../../src/utils/trackGroup";
 import {
   clearTables,
@@ -203,5 +204,22 @@ describe("finalizeTrackGroupPublication", () => {
       await prisma.trackGroup.findUniqueOrThrow({ where: { id: tg.id } })
     ).updatedAt;
     assert.deepEqual(updatedAtAfter, updatedAtBefore);
+  });
+});
+
+describe("processTrackGroupQueryOrder", () => {
+  it("breaks releaseDate and createdAt ties with id", () => {
+    assert.deepEqual(processTrackGroupQueryOrder(), [
+      { releaseDate: "desc" },
+      { id: "desc" },
+    ]);
+    assert.deepEqual(processTrackGroupQueryOrder("createdAt"), [
+      { createdAt: "desc" },
+      { id: "desc" },
+    ]);
+  });
+
+  it("orders by id alone since it is unique", () => {
+    assert.deepEqual(processTrackGroupQueryOrder("id"), [{ id: "desc" }]);
   });
 });
