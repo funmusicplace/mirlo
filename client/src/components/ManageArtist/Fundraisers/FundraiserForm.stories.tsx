@@ -27,6 +27,7 @@ const meta = {
     artistId: ARTIST.id,
     fundraiser: asManaged(VAN),
     currency: "usd",
+    defaultPlatformFee: 10,
     onRemoved: fn(),
   },
 } satisfies Meta<typeof FundraiserForm>;

@@ -6,6 +6,7 @@ export const ARTIST: Artist = {
   ...ARTIST_EXAMPLE,
   name: "The Tidal Hours",
   urlSlug: "tidal-hours",
+  defaultPlatformFee: 10,
   user: { ...ARTIST_EXAMPLE.user, currency: "usd" } as Artist["user"],
 };
 

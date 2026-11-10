@@ -38,6 +38,7 @@ const Index: React.FC = () => {
         artistId={artist.id}
         fundraiser={fundraiser}
         currency={artist.user?.currency}
+        defaultPlatformFee={artist.defaultPlatformFee}
         onRemoved={() => navigate(`/manage/artists/${artist.id}/tiers`)}
       />
     </div>

@@ -23,8 +23,9 @@ const FundraiserForm: React.FC<{
   artistId: number;
   fundraiser: ManagedFundraiser;
   currency?: string;
+  defaultPlatformFee?: number;
   onRemoved: () => void;
-}> = ({ artistId, fundraiser, currency, onRemoved }) => {
+}> = ({ artistId, fundraiser, currency, defaultPlatformFee, onRemoved }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "manageFundraiser",
   });
@@ -111,6 +112,9 @@ const FundraiserForm: React.FC<{
             currency={currency}
             isAllOrNothing={fundraiser.isAllOrNothing}
             hasPledges={fundraiser.pledgeCount > 0}
+            platformPercent={
+              fundraiser.trackGroups[0]?.platformPercent ?? defaultPlatformFee
+            }
           />
           <FundraiserVideoField videoEmbedUrl={fundraiser.videoEmbedUrl} />
           <div>

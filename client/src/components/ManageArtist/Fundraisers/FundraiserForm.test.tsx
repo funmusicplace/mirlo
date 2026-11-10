@@ -9,7 +9,11 @@ const { updateFundraiser } = vi.hoisted(() => ({
 }));
 
 vi.mock("react-i18next", () => ({
-  useTranslation: () => ({ t: (key: string) => key, i18n: { language: "en" } }),
+  useTranslation: () => ({
+    t: (key: string, opts?: { amount?: string }) =>
+      opts?.amount ? `${key} ${opts.amount}` : key,
+    i18n: { language: "en" },
+  }),
 }));
 vi.mock("queries", () => ({
   useUpdateFundraiserMutation: () => ({
@@ -59,13 +63,17 @@ const FUNDRAISER = {
   trackGroups: [],
 } as unknown as ManagedFundraiser;
 
-const renderForm = (fundraiser: ManagedFundraiser = FUNDRAISER) =>
+const renderForm = (
+  fundraiser: ManagedFundraiser = FUNDRAISER,
+  defaultPlatformFee?: number
+) =>
   render(
     <MemoryRouter>
       <FundraiserForm
         artistId={10}
         fundraiser={fundraiser}
         currency="usd"
+        defaultPlatformFee={defaultPlatformFee}
         onRemoved={vi.fn()}
       />
     </MemoryRouter>
@@ -113,5 +121,22 @@ describe("FundraiserForm", () => {
       "href",
       "/manage/artists/10/release/4"
     );
+  });
+
+  test("takes the platform fee from the linked release, or else the artist's default", () => {
+    const { unmount } = renderForm(FUNDRAISER, 10);
+    expect(screen.getByText("lessPlatformFee $50.00")).toBeInTheDocument();
+    unmount();
+
+    renderForm(
+      {
+        ...FUNDRAISER,
+        trackGroups: [
+          { id: 4, title: "Tidal Hours", platformPercent: 5 },
+        ] as TrackGroup[],
+      },
+      10
+    );
+    expect(screen.getByText("lessPlatformFee $25.00")).toBeInTheDocument();
   });
 });

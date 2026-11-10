@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-const VIEWBOX = 36;
-const STROKE = 4;
+const VIEWBOX = 30;
+const STROKE = 6;
 const RADIUS = (VIEWBOX - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 

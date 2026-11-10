@@ -36,6 +36,7 @@ const meta = {
     currency: "usd",
     isAllOrNothing: true,
     hasPledges: false,
+    platformPercent: 10,
   },
 } satisfies Meta<typeof WithForm>;
 
@@ -46,6 +47,11 @@ export const AllOrNothing: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByLabelText("Minimum pledge")).toBeInTheDocument();
+    await expect(canvas.getByText("−$800.00 platform fee")).toBeInTheDocument();
+    await expect(
+      canvas.getByText("−$232.30 Stripe fees (est.)")
+    ).toBeInTheDocument();
+    await expect(canvas.getByText("≈$6,967.70 after fees")).toBeInTheDocument();
     await expect(
       canvas.getByLabelText("Is it all or nothing?")
     ).not.toBeDisabled();

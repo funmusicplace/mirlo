@@ -1,10 +1,11 @@
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
-import { getCurrencySymbol } from "components/common/Money";
+import { getCurrencySymbol, moneyDisplay } from "components/common/Money";
 import TextEditor from "components/common/TextEditor";
 import React from "react";
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { estimateStripeFee } from "utils/stripeFees";
 
 import { FundraiserFormData } from "./fundraiserFormData";
 
@@ -24,9 +25,23 @@ const FundraiserFormFields: React.FC<{
   isAllOrNothing: boolean;
   hasPledges: boolean;
   focusGoal?: boolean;
-}> = ({ artistId, currency, isAllOrNothing, hasPledges, focusGoal }) => {
+  platformPercent?: number;
+}> = ({
+  artistId,
+  currency,
+  isAllOrNothing,
+  hasPledges,
+  focusGoal,
+  platformPercent,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
+  const { t: tFees } = useTranslation("translation", {
+    keyPrefix: "artistSupporters",
+  });
   const { register, control } = useFormContext<FundraiserFormData>();
+  const goal = Number(useWatch({ control, name: "goalAmount" }));
+  const platformFee = (goal * (platformPercent ?? 0)) / 100;
+  const stripeFee = estimateStripeFee(goal);
 
   const goalRef = React.useRef<HTMLInputElement | null>(null);
   const { ref: goalRegisterRef, ...goalRegisterRest } = register("goalAmount", {
@@ -68,6 +83,28 @@ const FundraiserFormFields: React.FC<{
           <span className="text-sm" id="description-goal-amount">
             {t("fundraisingGoalDescription")}
           </span>
+          {platformPercent !== undefined && goal > 0 && (
+            <div className="text-xs">
+              <div>
+                {tFees("lessPlatformFee", {
+                  amount: moneyDisplay({ amount: platformFee, currency }),
+                })}
+              </div>
+              <div>
+                {tFees("lessStripeFeeEstimated", {
+                  amount: moneyDisplay({ amount: stripeFee, currency }),
+                })}
+              </div>
+              <div className="font-semibold">
+                {tFees("netMonthly", {
+                  amount: moneyDisplay({
+                    amount: goal - platformFee - stripeFee,
+                    currency,
+                  }),
+                })}
+              </div>
+            </div>
+          )}
         </FormComponent>
         {isAllOrNothing && (
           <FormComponent>

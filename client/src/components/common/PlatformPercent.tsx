@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { estimateStripeFee } from "utils/stripeFees";
 
 import { moneyDisplay } from "./Money";
 
@@ -27,7 +28,7 @@ const PlatformPercent: React.FC<{
   }
 
   const amount = (chosenNumber * (100 - percent)) / 100;
-  const paymentAmount = chosenNumber * 0.029 + 0.3;
+  const paymentAmount = estimateStripeFee(chosenNumber);
 
   return (
     <div className="relative inline-block">

@@ -1,10 +1,15 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { describe, expect, test, vi } from "vitest";
 
 vi.mock("react-i18next", () => ({
-  useTranslation: () => ({ t: (key: string) => key, i18n: { language: "en" } }),
+  useTranslation: () => ({
+    t: (key: string, opts?: { amount?: string }) =>
+      opts?.amount ? `${key} ${opts.amount}` : key,
+    i18n: { language: "en" },
+  }),
 }));
 
 vi.mock("components/common/TextEditor", () => ({
@@ -72,6 +77,29 @@ describe("FundraiserFormFields", () => {
   test("asks for an end date", () => {
     renderFields();
     expect(screen.getByLabelText("endDate")).toHaveAttribute("type", "date");
+  });
+
+  test("shows what's left of the goal after the platform and Stripe fees", async () => {
+    renderFields({ platformPercent: 10 });
+    expect(screen.getByText("lessPlatformFee $50.00")).toBeInTheDocument();
+    expect(
+      screen.getByText("lessStripeFeeEstimated $14.80")
+    ).toBeInTheDocument();
+    expect(screen.getByText("netMonthly $435.20")).toBeInTheDocument();
+
+    await userEvent.clear(screen.getByLabelText("goal"));
+    await userEvent.type(screen.getByLabelText("goal"), "1000");
+    expect(screen.getByText("netMonthly $870.70")).toBeInTheDocument();
+  });
+
+  test("leaves out the platform fee when there's no percent or goal", async () => {
+    const { unmount } = renderFields();
+    expect(screen.queryByText(/lessPlatformFee/)).not.toBeInTheDocument();
+    unmount();
+
+    renderFields({ platformPercent: 10 });
+    await userEvent.clear(screen.getByLabelText("goal"));
+    expect(screen.queryByText(/lessPlatformFee/)).not.toBeInTheDocument();
   });
 
   test("focuses the goal when asked to", () => {

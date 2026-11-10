@@ -2,12 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import FundraiserActions from "components/ManageArtist/Fundraisers/FundraiserActions";
 import FundraiserFormFields from "components/ManageArtist/Fundraisers/FundraiserFormFields";
+import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import {
   queryManagedTrackGroup,
   queryTrackGroupSupporters,
   useCreateFundraiserMutation,
 } from "queries";
 import React from "react";
+import { useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
 
@@ -25,6 +27,8 @@ const FundraisingGoal: React.FC<{
 }> = ({ artistId, trackGroupId, fundraiser }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { user } = useAuthContext();
+  const { control } = useFormContext<TrackGroupFormData>();
+  const platformPercent = useWatch({ control, name: "platformPercent" });
   const [didAddFundraiser, setDidAddFundraiser] = React.useState(false);
   const { mutateAsync: createFundraiser, isPending: isAdding } =
     useCreateFundraiserMutation();
@@ -95,6 +99,7 @@ const FundraisingGoal: React.FC<{
         isAllOrNothing={fundraiser.isAllOrNothing}
         hasPledges={(totalPledges ?? 0) > 0}
         focusGoal={didAddFundraiser}
+        platformPercent={platformPercent ? Number(platformPercent) : undefined}
       />
     </>
   );

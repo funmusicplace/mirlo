@@ -53,6 +53,7 @@ const WithAlbumForm: React.FC<{ fundraiser?: Fundraiser }> = ({
       isAllOrNothing: fundraiser?.isAllOrNothing ?? false,
       fundraiserName: fundraiser?.name ?? "",
       fundraiserDescription: fundraiser?.description ?? "",
+      platformPercent: "7",
     },
   });
 
@@ -105,6 +106,11 @@ export const NoPledgesYet: Story = {
     await expect(
       canvas.queryByRole("button", { name: "Charge pledges now" })
     ).not.toBeInTheDocument();
+    await expect(canvas.getByText("−$35.00 platform fee")).toBeInTheDocument();
+    await expect(
+      canvas.getByText("−$14.80 Stripe fees (est.)")
+    ).toBeInTheDocument();
+    await expect(canvas.getByText("≈$450.20 after fees")).toBeInTheDocument();
   },
 };
 
