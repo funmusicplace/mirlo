@@ -4,7 +4,7 @@ import { resolveFundraiserDescription } from "../utils/postContent";
 import { videoEmbedUrl } from "../utils/videoEmbed";
 
 import { processSingleTrackGroup } from "./trackGroup";
-import { Serialized } from "./utils";
+import { omitPrivateProfileFields, Serialized } from "./utils";
 
 type FullTrackGroup = Parameters<typeof processSingleTrackGroup>[0];
 
@@ -21,7 +21,8 @@ export const serializeFundraiserImage = (
 export const serializeFundraiser = <T extends object>(
   fundraiser: T
 ): Serialized<T> => {
-  const { trackGroups, images, ...rest } = fundraiser as T & {
+  const { trackGroups, images, profile, ...rest } = fundraiser as T & {
+    profile?: object | null;
     trackGroups?: (Partial<FullTrackGroup> & {
       profile?: FullTrackGroup["profile"];
     })[];
@@ -36,6 +37,7 @@ export const serializeFundraiser = <T extends object>(
     ...(images !== undefined
       ? { images: images.map(serializeFundraiserImage) }
       : {}),
+    ...(profile ? { artist: omitPrivateProfileFields(profile) } : {}),
     ...(trackGroups !== undefined
       ? {
           trackGroups: trackGroups.map((trackGroup) =>

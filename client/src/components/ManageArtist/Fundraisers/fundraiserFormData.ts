@@ -8,6 +8,8 @@ export type FundraiserFormData = {
   isAllOrNothing?: boolean;
   fundraiserEndDate?: string;
   fundraiserVideoUrl?: string;
+  fundraiserUrlSlug?: string;
+  fundraiserIsPublic?: boolean;
 };
 
 const centsToInput = (cents?: number) => (cents ? `${cents / 100}` : "");
@@ -45,6 +47,8 @@ export const fundraiserToFormData = (
       | "isAllOrNothing"
       | "endDate"
       | "videoUrl"
+      | "urlSlug"
+      | "isPublic"
     >
   > | null
 ): FundraiserFormData => ({
@@ -58,6 +62,9 @@ export const fundraiserToFormData = (
     fundraiser?.videoUrl === undefined
       ? undefined
       : (fundraiser.videoUrl ?? ""),
+  fundraiserUrlSlug:
+    fundraiser?.urlSlug === undefined ? undefined : (fundraiser.urlSlug ?? ""),
+  fundraiserIsPublic: fundraiser?.isPublic,
 });
 
 export const formDataToFundraiserUpdate = (
@@ -69,6 +76,8 @@ export const formDataToFundraiserUpdate = (
   minPledge: inputToCents(formData.fundraiserMinPledge),
   endDate: dateInputToIso(formData.fundraiserEndDate),
   videoUrl: formData.fundraiserVideoUrl,
+  urlSlug: formData.fundraiserUrlSlug || undefined,
+  isPublic: formData.fundraiserIsPublic,
   // Undefined when the checkbox is disabled (pledges exist); leave it as is
   isAllOrNothing:
     formData.isAllOrNothing === undefined

@@ -19,6 +19,7 @@ const routes = [
   "trackGroups/{id}/supporters",
   "trackGroups/{id}/recommendedTrackGroups",
   "trackGroups/{id}/canimus.json",
+  "fundraisers/{id}",
   "fundraisers/{id}/changePledge",
   "playable",
   "settings/{setting}",

@@ -18,14 +18,23 @@ import {
 import FundraiserFormFields from "./FundraiserFormFields";
 import FundraiserImagesEditor from "./FundraiserImagesEditor";
 import FundraiserVideoField from "./FundraiserVideoField";
+import FundraiserVisibilityFields from "./FundraiserVisibilityFields";
 
 const FundraiserForm: React.FC<{
   artistId: number;
   fundraiser: ManagedFundraiser;
   currency?: string;
+  artistUrlSlug?: string;
   defaultPlatformFee?: number;
   onRemoved: () => void;
-}> = ({ artistId, fundraiser, currency, defaultPlatformFee, onRemoved }) => {
+}> = ({
+  artistId,
+  artistUrlSlug,
+  fundraiser,
+  currency,
+  defaultPlatformFee,
+  onRemoved,
+}) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "manageFundraiser",
   });
@@ -107,6 +116,10 @@ const FundraiserForm: React.FC<{
           onSubmit={methods.handleSubmit(onSubmit)}
           className="flex flex-col gap-2"
         >
+          <FundraiserVisibilityFields
+            artist={{ id: artistId, urlSlug: artistUrlSlug }}
+            fundraiser={fundraiser}
+          />
           <FundraiserFormFields
             artistId={artistId}
             currency={currency}

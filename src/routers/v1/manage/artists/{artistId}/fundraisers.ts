@@ -8,7 +8,10 @@ import {
 } from "../../../../../auth/passport";
 import { serializeFundraiser } from "../../../../../serializers/fundraiser";
 import { AppError } from "../../../../../utils/error";
-import { getFundraiserTotals } from "../../../../../utils/fundraiser";
+import {
+  generateUniqueFundraiserSlug,
+  getFundraiserTotals,
+} from "../../../../../utils/fundraiser";
 
 export default function () {
   const operations = {
@@ -88,7 +91,14 @@ export default function () {
         }
 
         const fundraiser = await prisma.fundraiser.create({
-          data: { name: name.trim(), profileId: Number(artistId) },
+          data: {
+            name: name.trim(),
+            profileId: Number(artistId),
+            urlSlug: await generateUniqueFundraiserSlug(
+              Number(artistId),
+              name.trim()
+            ),
+          },
         });
 
         res.json({ result: serializeFundraiser(fundraiser) });
@@ -112,9 +122,14 @@ export default function () {
         return;
       }
 
+      const fundraiserName = name?.trim() || `${trackGroup.title} Fundraiser`;
       const fundraiser = await prisma.fundraiser.create({
         data: {
-          name: name?.trim() || `${trackGroup.title} Fundraiser`,
+          name: fundraiserName,
+          urlSlug: await generateUniqueFundraiserSlug(
+            trackGroup.profileId,
+            fundraiserName
+          ),
           minPledge: trackGroup.minPrice ?? 0,
           profileId: trackGroup.profileId,
           trackGroups: { connect: { id: trackGroup.id } },

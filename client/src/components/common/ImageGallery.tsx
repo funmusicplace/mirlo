@@ -2,17 +2,19 @@ import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-const MerchImageGallery: React.FC<{ merch: Merch }> = ({ merch }) => {
+const ImageGallery: React.FC<{
+  images?: { id: string; sizes?: { [key: number]: string } }[];
+  alt: string;
+}> = ({ images = [], alt }) => {
   const { t } = useTranslation("translation", { keyPrefix: "merchDetails" });
   const [selectedIndex, setSelectedIndex] = React.useState(0);
-  const images = merch.images ?? [];
   const selected = images[selectedIndex] ?? images[0];
 
   return (
     <div className="flex w-full flex-col gap-2">
       <ImageWithPlaceholder
         src={selected?.sizes?.[960]}
-        alt={merch.title}
+        alt={alt}
         size={960}
         square
         objectFit="cover"
@@ -46,4 +48,4 @@ const MerchImageGallery: React.FC<{ merch: Merch }> = ({ merch }) => {
   );
 };
 
-export default MerchImageGallery;
+export default ImageGallery;

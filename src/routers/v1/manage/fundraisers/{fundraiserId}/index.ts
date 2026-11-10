@@ -10,6 +10,7 @@ import {
 import { serializeFundraiser } from "../../../../../serializers/fundraiser";
 import { AppError } from "../../../../../utils/error";
 import {
+  assertFundraiserSlugAvailable,
   deleteFundraiserImages,
   fundraiserImagesInclude,
   getFundraiserTotals,
@@ -88,7 +89,20 @@ export default function () {
         "minPledge",
         "isAllOrNothing",
         "videoUrl",
+        "urlSlug",
+        "isPublic",
       ]);
+
+      if (newValues.urlSlug !== undefined) {
+        const current = await prisma.fundraiser.findFirstOrThrow({
+          where: { id: Number(fundraiserId) },
+          select: { id: true, profileId: true },
+        });
+        newValues.urlSlug = await assertFundraiserSlugAvailable(
+          current,
+          String(newValues.urlSlug ?? "")
+        );
+      }
 
       if (typeof newValues.videoUrl === "string") {
         newValues.videoUrl = newValues.videoUrl.trim() || null;

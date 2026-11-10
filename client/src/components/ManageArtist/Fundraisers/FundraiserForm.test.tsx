@@ -52,6 +52,7 @@ import FundraiserForm from "./FundraiserForm";
 const FUNDRAISER = {
   id: 7,
   name: "New van",
+  urlSlug: "new-van",
   description: "",
   goalAmount: 50000,
   minPledge: 1000,

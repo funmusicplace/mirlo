@@ -216,6 +216,39 @@ describe("manage/fundraisers/{fundraiserId}", () => {
       assert.equal(saved.videoUrl, null);
     });
 
+    it("saves the URL slug and the public switch", async () => {
+      const { accessToken, fundraiser } = await setUp();
+
+      const response = await requestApp
+        .put(`manage/fundraisers/${fundraiser.id}`)
+        .send({ urlSlug: "Our New Van", isPublic: true })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.urlSlug, "our-new-van");
+      assert.equal(response.body.result.isPublic, true);
+    });
+
+    it("refuses a URL slug another of the artist's fundraisers uses", async () => {
+      const { accessToken, fundraiser } = await setUp();
+      await createFundraiser(fundraiser.profileId, { urlSlug: "taken" });
+
+      const taken = await requestApp
+        .put(`manage/fundraisers/${fundraiser.id}`)
+        .send({ urlSlug: "taken" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(taken.statusCode, 400);
+
+      const empty = await requestApp
+        .put(`manage/fundraisers/${fundraiser.id}`)
+        .send({ urlSlug: "  " })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(empty.statusCode, 400);
+    });
+
     it("refuses to change isAllOrNothing while there are open pledges", async () => {
       const { accessToken, backer, fundraiser } = await setUp();
       await createFundraiserPledge(fundraiser.id, backer.id);

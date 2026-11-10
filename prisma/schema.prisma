@@ -965,6 +965,8 @@ model Fundraiser {
   minPledge      Int                @default(0) // in cents
   description    String?
   videoUrl       String?
+  urlSlug        String?
+  isPublic       Boolean            @default(false)
   endDate        DateTime?
   // Is the fundraiser all or nothing
   isAllOrNothing Boolean            @default(false)
@@ -976,6 +978,7 @@ model Fundraiser {
   pledges        FundraiserPledge[]
   images         FundraiserImage[]
 
+  @@unique([profileId, urlSlug])
   @@index([profileId])
 }
 

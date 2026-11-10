@@ -55,6 +55,27 @@ export function queryManagedFundraiser(fundraiserId: number) {
   });
 }
 
+const fetchPublicFundraiser: QueryFunction<
+  PublicFundraiser,
+  ["fetchPublicFundraiser", { fundraiserId: string; artistId: string }, ...any]
+> = ({ queryKey: [_, { fundraiserId, artistId }], signal }) =>
+  api
+    .get<{
+      result: PublicFundraiser;
+    }>(`v1/fundraisers/${fundraiserId}?artistId=${artistId}`, { signal })
+    .then((r) => r.result);
+
+export function queryPublicFundraiser(opts: {
+  fundraiserId: string;
+  artistId: string;
+}) {
+  return queryOptions({
+    queryKey: ["fetchPublicFundraiser", opts, QUERY_KEY_FUNDRAISERS],
+    queryFn: fetchPublicFundraiser,
+    enabled: !!opts.fundraiserId && !!opts.artistId,
+  });
+}
+
 export function useInvalidateFundraisers() {
   const client = useQueryClient();
   return () =>
@@ -94,6 +115,8 @@ export type FundraiserUpdate = Partial<
     | "minPledge"
     | "isAllOrNothing"
     | "videoUrl"
+    | "urlSlug"
+    | "isPublic"
   > & { endDate: string | null }
 >;
 

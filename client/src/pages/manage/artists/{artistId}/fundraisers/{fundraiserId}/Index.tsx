@@ -36,6 +36,7 @@ const Index: React.FC = () => {
       <FundraiserForm
         key={fundraiser.id}
         artistId={artist.id}
+        artistUrlSlug={artist.urlSlug}
         fundraiser={fundraiser}
         currency={artist.user?.currency}
         defaultPlatformFee={artist.defaultPlatformFee}

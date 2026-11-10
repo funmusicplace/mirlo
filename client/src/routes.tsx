@@ -980,6 +980,15 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: "fundraiser/:fundraiserId",
+                handle: { title: "artistFundraiser" },
+                async lazy() {
+                  const { default: Component } =
+                    await import("pages/{artistId}/fundraiser/{fundraiserId}/Index");
+                  return { Component };
+                },
+              },
+              {
                 path: "merch",
                 children: [
                   {

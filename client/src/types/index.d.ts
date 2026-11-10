@@ -722,6 +722,8 @@ interface Fundraiser {
   endDate: string | null;
   videoUrl?: string | null;
   videoEmbedUrl?: string | null;
+  urlSlug?: string | null;
+  isPublic?: boolean;
   status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   trackGroups: TrackGroup[];
 }
@@ -742,6 +744,24 @@ interface FundraiserImage {
 
 interface ManagedFundraiser extends Fundraiser, FundraiserTotals {
   images?: FundraiserImage[];
+}
+
+interface PublicFundraiser
+  extends Omit<Fundraiser, "trackGroups">, FundraiserTotals {
+  images: FundraiserImage[];
+  trackGroups: Pick<
+    TrackGroup,
+    "id" | "title" | "urlSlug" | "platformPercent"
+  >[];
+  artist: Pick<
+    Artist,
+    | "id"
+    | "name"
+    | "urlSlug"
+    | "userId"
+    | "paymentToUserId"
+    | "defaultPlatformFee"
+  > & { user?: { currency?: string } };
 }
 
 interface FundraiserSummary

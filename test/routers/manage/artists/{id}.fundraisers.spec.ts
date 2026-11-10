@@ -154,6 +154,24 @@ describe("manage/artists/{artistId}/fundraisers", () => {
       assert.equal(fundraiserInDb.trackGroups.length, 0);
     });
 
+    it("gives a new fundraiser a URL slug from its name, unique for the artist", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+      });
+      const artist = await createArtist(user.id);
+      await createFundraiser(artist.id, { urlSlug: "new-van" });
+
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/fundraisers`)
+        .send({ name: "New Van!" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.urlSlug, "new-van-2");
+      assert.equal(response.body.result.isPublic, false);
+    });
+
     it("should require a name for a fundraiser without a track group", async () => {
       const { user, accessToken } = await createUser({
         email: "test@testcom",

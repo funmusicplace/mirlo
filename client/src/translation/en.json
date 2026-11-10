@@ -43,6 +43,7 @@
     "artistPost": "Post",
     "artistMerch": "Merch",
     "artistMerchItem": "Merch",
+    "artistFundraiser": "Fundraiser",
     "artistRoster": "Roster",
     "artistReleases": "Releases",
     "artistSupport": "Support",
@@ -511,6 +512,18 @@
     "shippingAddress": "Shipping address:",
     "itemPurchased": "Purchased",
     "contactArtistMessage": "Have a question about this purchase? Send a message to the artist:"
+  },
+  "fundraiserPage": {
+    "doesNotExist": "This fundraiser doesn't exist.",
+    "fundraiserByArtist": "A fundraiser by {{artistName}}",
+    "video": "Fundraiser video",
+    "raisedOutOfGoal": "{{raised}} out of {{goal}} raised",
+    "endsOn": "Ends on {{date}}",
+    "ended": "This fundraiser has ended.",
+    "youPledged": "You've pledged {{amount}}. You'll only be charged if the fundraiser reaches its goal.",
+    "thanksForPledging": "Thanks for your pledge! You'll only be charged if the fundraiser reaches its goal.",
+    "artistNotSetUp": "{{artistName}} hasn't set up payments yet. Please check back later.",
+    "releases": "Releases"
   },
   "merchDetails": {
     "merchByArtist": "Merch by {{artist}} on {{instanceName}}",
@@ -1282,6 +1295,11 @@
     "editFundraiserName": "Edit {{name}}",
     "save": "Save fundraiser",
     "saved": "Fundraiser saved",
+    "isPublic": "Public",
+    "isPublicDescription": "Shows the fundraiser's page to everyone. While this is off, nobody can see the page.",
+    "viewPage": "View the fundraiser's page",
+    "urlSlug": "Fundraiser URL",
+    "urlSlugWarning": "Changes to this value will break existing links to this fundraiser.",
     "videoUrl": "Video",
     "videoUrlDescription": "A YouTube or Vimeo link, shown at the top of the fundraiser's page.",
     "videoPreview": "Fundraiser video",

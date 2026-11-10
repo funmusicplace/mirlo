@@ -22,6 +22,7 @@ export const VINYL: FundraiserSummary = {
   ...base,
   id: 1,
   name: "Press Tidal Hours on vinyl",
+  urlSlug: "vinyl",
   description:
     "Help us press 300 copies on sea-glass blue vinyl. You're only charged if we hit the goal.",
   goalAmount: 500000,
@@ -37,6 +38,7 @@ export const VAN: FundraiserSummary = {
   ...base,
   id: 2,
   name: "A van for the autumn tour",
+  urlSlug: "a-van",
   goalAmount: 800000,
   isAllOrNothing: true,
   amountRaised: 0,
@@ -52,6 +54,7 @@ export const STUDIO: FundraiserSummary = {
   ...base,
   id: 3,
   name: "Studio time for the next record",
+  urlSlug: "studio-time",
   goalAmount: 200000,
   isAllOrNothing: false,
   status: "SUCCESSFUL",
@@ -96,3 +99,30 @@ export const fundraiserMutationHandlers = [
     HttpResponse.json({ message: "Success" })
   ),
 ];
+
+/** VINYL as the public fundraiser page receives it */
+export const PUBLIC_VINYL: PublicFundraiser = {
+  ...VINYL,
+  ...FUNDRAISER_VIDEO,
+  urlSlug: "vinyl",
+  isPublic: true,
+  description:
+    "<p>Help us press 300 copies on <strong>sea-glass blue vinyl</strong>. You're only charged if we hit the goal.</p>",
+  images: VINYL_IMAGES,
+  trackGroups: [
+    { id: 4, title: "Tidal Hours", urlSlug: "tidal-hours", platformPercent: 7 },
+  ],
+  artist: {
+    id: ARTIST.id,
+    name: ARTIST.name,
+    urlSlug: ARTIST.urlSlug,
+    userId: ARTIST.userId,
+    defaultPlatformFee: 10,
+    user: { currency: "usd" },
+  },
+};
+
+export const publicFundraiserHandler = (fundraiser: PublicFundraiser) =>
+  http.get("*/v1/fundraisers/:fundraiserId", () =>
+    HttpResponse.json({ result: fundraiser })
+  );

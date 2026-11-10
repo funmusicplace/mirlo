@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import { FundraiserImage, Image, Prisma } from "@mirlo/prisma/client";
 
 import { AppError } from "./error";
+import generateSlug, { generateUniqueSlug } from "./generateSlug";
 import { deleteStoredImages } from "./images";
 import { findSales } from "./sales";
 import { chargePledgePayments, pledgeChargeInclude } from "./stripe";
@@ -21,6 +22,48 @@ export const deleteFundraiserImages = async (fundraiserId: number) => {
   await deleteStoredImages(
     images.map((fundraiserImage) => fundraiserImage.image)
   );
+};
+
+const isFundraiserSlugTaken = async (
+  profileId: number,
+  urlSlug: string,
+  excludeFundraiserId?: number
+) =>
+  Boolean(
+    await prisma.fundraiser.findFirst({
+      where: {
+        profileId,
+        urlSlug,
+        deletedAt: {},
+        ...(excludeFundraiserId ? { id: { not: excludeFundraiserId } } : {}),
+      },
+      select: { id: true },
+    })
+  );
+
+export const generateUniqueFundraiserSlug = (profileId: number, name: string) =>
+  generateUniqueSlug(name, "fundraiser", (urlSlug) =>
+    isFundraiserSlugTaken(profileId, urlSlug)
+  );
+
+export const assertFundraiserSlugAvailable = async (
+  fundraiser: { id: number; profileId: number },
+  urlSlug: string
+) => {
+  const slug = generateSlug(urlSlug.trim());
+  if (!slug) {
+    throw new AppError({
+      httpCode: 400,
+      description: "The fundraiser URL can't be empty",
+    });
+  }
+  if (await isFundraiserSlugTaken(fundraiser.profileId, slug, fundraiser.id)) {
+    throw new AppError({
+      httpCode: 400,
+      description: "Another fundraiser already uses this URL",
+    });
+  }
+  return slug;
 };
 
 export const getFundraiserTotals = async (fundraiser: {

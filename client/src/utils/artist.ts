@@ -168,6 +168,12 @@ export const getTrackUrl = (
   )}/tracks/${track.id}`;
 };
 
+export const getFundraiserUrl = (
+  artist: { urlSlug?: string; id: number },
+  fundraiser: { id: number; urlSlug?: string | null }
+) =>
+  `/${getArtistUrlReference(artist)}/fundraiser/${fundraiser.urlSlug ?? fundraiser.id}`;
+
 export const getMerchUrl = (
   artist: { urlSlug?: string; id: number },
   merch: { id: string; urlSlug?: string | null }
