@@ -1,5 +1,52 @@
 # Changelog
 
+## [1.2.0](https://github.com/funmusicplace/mirlo/compare/v1.1.0...v1.2.0) (2026-11-09)
+
+
+### Features
+
+* **api:** add userId and shipping address to active subscribers ([da07c2f](https://github.com/funmusicplace/mirlo/commit/da07c2f663bc7449a0933f71d2c48308baae1da1))
+* centered design for the track page and for single track releases ([9cf8fec](https://github.com/funmusicplace/mirlo/commit/9cf8fec11d27079ea8718360d4474075b33ead65))
+* **labels:** show the impact and clear payees when a label is removed ([f237eb9](https://github.com/funmusicplace/mirlo/commit/f237eb9f2c74309b51a72f3830c9da7e59866118))
+* **posts:** tier picker with presets, new posts copy last audience ([bbdd2ad](https://github.com/funmusicplace/mirlo/commit/bbdd2ad9d2d701d65fe074d19c2267cf42c325d5))
+* **supporters:** highlight new supporters and add table sorting ([395d15b](https://github.com/funmusicplace/mirlo/commit/395d15b0774c812fb567ea9d8dbef5c31abed030))
+
+
+### Bug Fixes
+
+* **activitypub:** notify artists only on a follower's first Follow ([abb6e51](https://github.com/funmusicplace/mirlo/commit/abb6e51e01d3160fd3dd3b7eed3ab5bd8e049e56))
+* **activitypub:** only drop a follower when their account is deleted ([58596aa](https://github.com/funmusicplace/mirlo/commit/58596aa1ece472e72560b2dede28858bca53537a))
+* **activitypub:** resolve follower inbox before storing the follow ([a328485](https://github.com/funmusicplace/mirlo/commit/a328485b3a47d26fddff589f790603900bd56c80))
+* **activitypub:** route WebFinger lookups through Fedify to block SSRF ([3d3fec0](https://github.com/funmusicplace/mirlo/commit/3d3fec03d077d5a425bb90acb84a569b5e4d511a))
+* **artists:** keep thank-you notes private and sanitise them on save ([75f0915](https://github.com/funmusicplace/mirlo/commit/75f09155c3611066d4eb6ff293f51621d7414fb9))
+* **auth:** end other sessions when a password reset ([34f5e85](https://github.com/funmusicplace/mirlo/commit/34f5e8524ab70e7b2dfd4437ab78d464f5358fa0))
+* **auth:** limit wrong email-code guesses per address ([6719c45](https://github.com/funmusicplace/mirlo/commit/6719c45e03977bc66228b5c8c97d5ef65ff1adf2))
+* **auth:** stop HTML injection via password-reset redirectClient ([a882d79](https://github.com/funmusicplace/mirlo/commit/a882d79b79cdf6900f7434cd7f126b6d88d90238))
+* **checkout:** match loading skeletons and Stripe field spacing ([d9570e1](https://github.com/funmusicplace/mirlo/commit/d9570e1be4bfd214aed0a460980df0ecf682af90))
+* **fundraisers:** charge pledges in the currency they were quoted in ([4740d3b](https://github.com/funmusicplace/mirlo/commit/4740d3b74cb0432e727828a191446d5d6b9a9600))
+* **fundraisers:** charge pledges on their saved card, account and currency ([8ede509](https://github.com/funmusicplace/mirlo/commit/8ede509f33302632d192176136e276df2c936b9f))
+* let release buyers download each track once it's out ([b0e5b6e](https://github.com/funmusicplace/mirlo/commit/b0e5b6eacc5acfdb7e0460347f4f2280b7883596))
+* **logs:** mask email provider secrets and redact tokens from logs ([0b794ab](https://github.com/funmusicplace/mirlo/commit/0b794ab80d3c80714c42a23608b199e61085937f))
+* **logs:** mask email provider secrets and redact tokens from logs ([86a300f](https://github.com/funmusicplace/mirlo/commit/86a300f149dc2ce9af933f9bbc4dc881f41bdf68))
+* mark tracks as playable for release buyers and the artist ([851cae2](https://github.com/funmusicplace/mirlo/commit/851cae222010647d503daf520b552b3edb991e0b))
+* **merch:** apply the subscriber merch discount at checkout ([68132e5](https://github.com/funmusicplace/mirlo/commit/68132e57db32945e71c3613784dbd2f410b6454f))
+* **merch:** leave shipping out of Mirlo's platform fee ([be2bb17](https://github.com/funmusicplace/mirlo/commit/be2bb17e1e82f6e29e2d5fa4fad1b19eaa77659f))
+* **merch:** offer the EU shipping rate in all 27 EU countries ([ad20423](https://github.com/funmusicplace/mirlo/commit/ad204234146aef0b5c9a7a4aaea86cf991507906))
+* **merch:** stop the buy form adding EU countries to the cached merch ([d9bee36](https://github.com/funmusicplace/mirlo/commit/d9bee3632ab632be97ee2af378f810c81e74b1cd))
+* **pledges:** stop the setup status check rewriting the pledge ([9159908](https://github.com/funmusicplace/mirlo/commit/915990895c0085bcb5adc376f5501cb1060d2936))
+* **purchase:** cap subscriber discounts at 100% ([bead202](https://github.com/funmusicplace/mirlo/commit/bead20237147cb5deb57ade39a6a1927ed88a007))
+* **purchase:** only accept http(s) success URLs ([b3ffd19](https://github.com/funmusicplace/mirlo/commit/b3ffd19d009cfdb51039798f9ab218086846e9f3))
+* **purchase:** read buyer messages from the checkout, not Stripe ([1b439aa](https://github.com/funmusicplace/mirlo/commit/1b439aabffef6501d7b308213feef5149aec1e37))
+* show Download instead of Buy to anyone who owns the release ([ff326f9](https://github.com/funmusicplace/mirlo/commit/ff326f9d4996b37269b540fda8e1bfaeac806b77))
+* stop track downloads failing while another zip is being prepared ([c570f32](https://github.com/funmusicplace/mirlo/commit/c570f32c5efe4d6b5f4afce10c920d682c319f11))
+* **subscribers:** gate imports on trust and hide supporter account names ([da43ac3](https://github.com/funmusicplace/mirlo/commit/da43ac395bff67f7253b0a59521c6f42f7ee6329))
+* **subscriptions:** grant auto-purchase albums on publish ([18100c6](https://github.com/funmusicplace/mirlo/commit/18100c6803cbd37453caec5adfb908d4aa232683))
+* **subscriptions:** ignore redelivered invoice.paid webhooks ([b2f6fd3](https://github.com/funmusicplace/mirlo/commit/b2f6fd3c8c8ecd2cb0471d3ed92b8712bd3942b1))
+* **subscriptions:** record failed renewals and email the subscriber ([7e3a496](https://github.com/funmusicplace/mirlo/commit/7e3a49685140b349bfc6ad45ec47414d85339937))
+* **subscriptions:** record invoice.paid writes in one transaction ([ac8c56e](https://github.com/funmusicplace/mirlo/commit/ac8c56e22e151f3352cb09d53de3942d78248803))
+* **unfollow:** require a signed token for email unsubscribe links ([882c539](https://github.com/funmusicplace/mirlo/commit/882c539d043d3fca7381c5fbcbd1bc39879807a1))
+* **unfollow:** stop double-encoding the email in unsubscribe links ([61d6a7a](https://github.com/funmusicplace/mirlo/commit/61d6a7ae949f44ca3e334121c2c21454ab408a54))
+
 ## [1.1.0](https://github.com/funmusicplace/mirlo/compare/v1.0.0...v1.1.0) (2026-11-01)
 
 
