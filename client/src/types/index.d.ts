@@ -729,7 +729,18 @@ interface FundraiserTotals {
   pledgeCount: number;
 }
 
-interface ManagedFundraiser extends Fundraiser, FundraiserTotals {}
+interface FundraiserImage {
+  id: string;
+  fundraiserId: number;
+  imageId: string;
+  position: number;
+  url: string[];
+  sizes?: { [key: number]: string };
+}
+
+interface ManagedFundraiser extends Fundraiser, FundraiserTotals {
+  images?: FundraiserImage[];
+}
 
 interface FundraiserSummary
   extends Omit<Fundraiser, "trackGroups">, FundraiserTotals {

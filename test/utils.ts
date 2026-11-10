@@ -27,6 +27,7 @@ const TRUNCATE_TABLES_SQL = `
     "DownloadableContent",
     "EmailVerification",
     "Fundraiser",
+    "FundraiserImage",
     "FundraiserPledge",
     "Image",
     "InstanceLogo",

@@ -8,8 +8,10 @@ import {
 } from "../../../../../../auth/passport";
 import { processMerchImage } from "../../../../../../queues/processImages";
 import { serializeMerchImage } from "../../../../../../serializers/merch";
-import { AppError } from "../../../../../../utils/error";
-import { busboyOptions } from "../../../../../../utils/images";
+import {
+  assertListsEveryImage,
+  busboyOptions,
+} from "../../../../../../utils/images";
 import { merchImagesInclude } from "../../../../../../utils/merch";
 
 type Params = {
@@ -78,17 +80,11 @@ export default function () {
         select: { id: true },
       });
 
-      const existingIds = existing.map((i) => i.id).sort();
-      if (
-        !Array.isArray(merchImageIds) ||
-        merchImageIds.length !== existingIds.length ||
-        [...merchImageIds].sort().some((id, i) => id !== existingIds[i])
-      ) {
-        throw new AppError({
-          httpCode: 400,
-          description: "merchImageIds must list every image of this merch",
-        });
-      }
+      assertListsEveryImage(
+        merchImageIds,
+        existing.map((i) => i.id),
+        "merchImageIds must list every image of this merch"
+      );
 
       await prisma.$transaction(
         merchImageIds.map((id, position) =>

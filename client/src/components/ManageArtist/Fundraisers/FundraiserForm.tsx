@@ -16,6 +16,7 @@ import {
   fundraiserToFormData,
 } from "./fundraiserFormData";
 import FundraiserFormFields from "./FundraiserFormFields";
+import FundraiserImagesEditor from "./FundraiserImagesEditor";
 
 const FundraiserForm: React.FC<{
   artistId: number;
@@ -98,6 +99,7 @@ const FundraiserForm: React.FC<{
           </ul>
         </div>
       )}
+      <FundraiserImagesEditor fundraiser={fundraiser} />
       <FormProvider {...methods}>
         <form
           onSubmit={methods.handleSubmit(onSubmit)}

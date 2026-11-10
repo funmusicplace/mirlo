@@ -14,6 +14,7 @@ const cleanUpOrphanedImages = async () => {
       createdAt: { lt: cutoff },
       tiers: { none: {} },
       merchImage: { is: null },
+      fundraiserImage: { is: null },
       backgroundOf: { is: null },
       avatarOf: { is: null },
       postImage: { is: null },

@@ -20,6 +20,9 @@ vi.mock("queries", () => ({
 vi.mock("services/useErrorHandler", () => ({ default: () => vi.fn() }));
 vi.mock("state/SnackbarContext", () => ({ useSnackbar: () => vi.fn() }));
 vi.mock("./FundraiserActions", () => ({ default: () => null }));
+vi.mock("./FundraiserImagesEditor", () => ({
+  default: () => <div data-testid="images-editor" />,
+}));
 vi.mock("components/common/TextEditor", () => ({
   default: ({ label, value, onChange, allowMentions, artistId }: any) => (
     <textarea

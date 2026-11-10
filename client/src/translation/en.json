@@ -1283,7 +1283,17 @@
     "save": "Save fundraiser",
     "saved": "Fundraiser saved",
     "linkedReleases": "Linked releases",
-    "funded": "Funded"
+    "funded": "Funded",
+    "images": "Images",
+    "imagesDescription": "Shown at the top of the fundraiser's page. Drag to reorder: the first image is the cover, also used when the page is shared.",
+    "addImages": "Add images",
+    "coverImage": "Cover",
+    "imageAlt": "Fundraiser image {{number}}",
+    "deleteImage": "Delete image",
+    "dragToReorderImage": "Drag to reorder image",
+    "imageUploadFailed": "Couldn't upload the image",
+    "imageReorderFailed": "Couldn't reorder the images",
+    "imageDeleteFailed": "Couldn't delete the image"
   },
   "manageAlbum": {
     "removingFundraiserWithPledgesWarning": "This release has an active fundraiser with {{ count }} pledges. Are you sure you want to remove the fundraiser? This will cancel all current pledges.",

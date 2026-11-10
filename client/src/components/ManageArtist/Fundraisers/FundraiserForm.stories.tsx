@@ -6,6 +6,7 @@ import {
   ARTIST,
   VAN,
   VINYL,
+  VINYL_IMAGES,
   asManaged,
   fundraiserMutationHandlers,
 } from "./fundraiserStoryFixtures";
@@ -52,7 +53,7 @@ export const NewFundraiser: Story = {
 
 /** Linked to a release, with pledges coming in */
 export const WithPledges: Story = {
-  args: { fundraiser: asManaged(VINYL) },
+  args: { fundraiser: { ...asManaged(VINYL), images: VINYL_IMAGES } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(

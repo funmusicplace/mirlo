@@ -418,6 +418,37 @@ export const processMerchImage = (ctx: APIContext) => {
   };
 };
 
+export const processFundraiserImage = (ctx: APIContext) => {
+  return async (fundraiserId: number) => {
+    return uploadAndSendToImageQueue(
+      ctx,
+      "image",
+      "image",
+      "artwork",
+      async (fileInfo: { filename: string }) => {
+        const fundraiser = await prisma.fundraiser.findUniqueOrThrow({
+          where: { id: fundraiserId },
+          select: { profileId: true },
+        });
+        const last = await prisma.fundraiserImage.findFirst({
+          where: { fundraiserId },
+          orderBy: { position: "desc" },
+        });
+        return prisma.image.create({
+          data: {
+            originalFilename: fileInfo.filename,
+            dimensions: "square",
+            profileId: fundraiser.profileId,
+            fundraiserImage: {
+              create: { fundraiserId, position: last ? last.position + 1 : 0 },
+            },
+          },
+        });
+      }
+    );
+  };
+};
+
 export const processPostImage = (ctx: APIContext) => {
   return async (postId: number) => {
     return uploadAndSendToImageQueue(

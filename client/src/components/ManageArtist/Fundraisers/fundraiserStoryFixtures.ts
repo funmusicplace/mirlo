@@ -53,6 +53,28 @@ export const STUDIO: FundraiserSummary = {
   pledgeCount: 0,
 };
 
+export const fundraiserImageFixture = (
+  file: string,
+  position: number,
+  fundraiserId: number = VINYL.id
+): FundraiserImage => {
+  const src = `/showcase/${file}`;
+  return {
+    id: `fundraiser-image-${position}-${file}`,
+    fundraiserId,
+    imageId: `image-${position}-${file}`,
+    position,
+    url: [src],
+    sizes: { 60: src, 120: src, 300: src, 600: src, 960: src, 1200: src },
+  };
+};
+
+export const VINYL_IMAGES = [
+  fundraiserImageFixture("merch-vinyl.svg", 0),
+  fundraiserImageFixture("cover-tidal.svg", 1),
+  fundraiserImageFixture("fees-merch-vinyl.svg", 2),
+];
+
 export const asManaged = (fundraiser: FundraiserSummary): ManagedFundraiser =>
   fundraiser as unknown as ManagedFundraiser;
 

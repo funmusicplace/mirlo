@@ -9,7 +9,11 @@ import {
 } from "../../../../../auth/passport";
 import { serializeFundraiser } from "../../../../../serializers/fundraiser";
 import { AppError } from "../../../../../utils/error";
-import { getFundraiserTotals } from "../../../../../utils/fundraiser";
+import {
+  deleteFundraiserImages,
+  fundraiserImagesInclude,
+  getFundraiserTotals,
+} from "../../../../../utils/fundraiser";
 import { preparePostContent } from "../../../../../utils/postContent";
 
 type Params = {
@@ -32,6 +36,7 @@ export default function () {
           id: Number(fundraiserId),
         },
         include: {
+          images: fundraiserImagesInclude,
           trackGroups: {
             where: { deletedAt: null },
             include: {
@@ -193,6 +198,8 @@ export default function () {
         where: { id: Number(fundraiserId) },
         data: { trackGroups: { set: [] } },
       });
+
+      await deleteFundraiserImages(Number(fundraiserId));
 
       await prisma.fundraiser.delete({
         where: { id: Number(fundraiserId) },

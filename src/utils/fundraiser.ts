@@ -1,8 +1,27 @@
 import prisma from "@mirlo/prisma";
+import { FundraiserImage, Image, Prisma } from "@mirlo/prisma/client";
 
 import { AppError } from "./error";
+import { deleteStoredImages } from "./images";
 import { findSales } from "./sales";
 import { chargePledgePayments, pledgeChargeInclude } from "./stripe";
+
+export const fundraiserImagesInclude = {
+  include: { image: true },
+  orderBy: { position: "asc" },
+} satisfies Prisma.Fundraiser$imagesArgs;
+
+export type FundraiserImageWithImage = FundraiserImage & { image: Image };
+
+export const deleteFundraiserImages = async (fundraiserId: number) => {
+  const images = await prisma.fundraiserImage.findMany({
+    where: { fundraiserId },
+    include: { image: true },
+  });
+  await deleteStoredImages(
+    images.map((fundraiserImage) => fundraiserImage.image)
+  );
+};
 
 export const getFundraiserTotals = async (fundraiser: {
   id: number;

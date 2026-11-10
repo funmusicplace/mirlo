@@ -4,6 +4,7 @@ import {
   ARTIST,
   VAN,
   VINYL,
+  VINYL_IMAGES,
   fundraiserMutationHandlers,
 } from "components/ManageArtist/Fundraisers/fundraiserStoryFixtures";
 import { http, HttpResponse } from "msw";
@@ -13,7 +14,9 @@ import { artistHandlers } from "../../../../../../../.storybook/handlers";
 
 import EditFundraiserPage from "./Index";
 
-const fundraiserHandler = (fundraiser: FundraiserSummary) =>
+const fundraiserHandler = (
+  fundraiser: FundraiserSummary & { images?: FundraiserImage[] }
+) =>
   http.get("*/v1/manage/fundraisers/:fundraiserId", () =>
     HttpResponse.json({ result: fundraiser })
   );
@@ -38,7 +41,10 @@ const meta = {
     msw: {
       handlers: {
         artist: artistHandlers(ARTIST),
-        fundraiser: [fundraiserHandler(VINYL), ...fundraiserMutationHandlers],
+        fundraiser: [
+          fundraiserHandler({ ...VINYL, images: VINYL_IMAGES }),
+          ...fundraiserMutationHandlers,
+        ],
       },
     },
     reactRouter: routeFor(VINYL),

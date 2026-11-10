@@ -55,7 +55,7 @@ export function queryManagedFundraiser(fundraiserId: number) {
   });
 }
 
-function useInvalidateFundraisers() {
+export function useInvalidateFundraisers() {
   const client = useQueryClient();
   return () =>
     client.invalidateQueries({
@@ -121,6 +121,32 @@ export function useDeleteFundraiserMutation() {
   return useMutation({
     mutationFn: (fundraiserId: number) =>
       api.del(`v1/manage/fundraisers/${fundraiserId}`),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteFundraiserImageMutation() {
+  const invalidate = useInvalidateFundraisers();
+  return useMutation({
+    mutationFn: (opts: { fundraiserId: number; fundraiserImageId: string }) =>
+      api.del(
+        `v1/manage/fundraisers/${opts.fundraiserId}/images/${opts.fundraiserImageId}`
+      ),
+    onSuccess: invalidate,
+  });
+}
+
+export function useReorderFundraiserImagesMutation() {
+  const invalidate = useInvalidateFundraisers();
+  return useMutation({
+    mutationFn: (opts: {
+      fundraiserId: number;
+      fundraiserImageIds: string[];
+    }) =>
+      api.put<{ fundraiserImageIds: string[] }, unknown>(
+        `v1/manage/fundraisers/${opts.fundraiserId}/images`,
+        { fundraiserImageIds: opts.fundraiserImageIds }
+      ),
     onSuccess: invalidate,
   });
 }

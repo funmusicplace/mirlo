@@ -139,6 +139,8 @@ const routes = [
   "manage/trackGroups/{trackGroupId}/recommendedTrackGroups",
   "manage/fundraisers/{fundraiserId}",
   "manage/fundraisers/{fundraiserId}/chargePledges",
+  "manage/fundraisers/{fundraiserId}/images",
+  "manage/fundraisers/{fundraiserId}/images/{fundraiserImageId}",
   "manage/fundraisers/{fundraiserId}/pledges",
   "manage/merch/{merchId}",
   "manage/merch/{merchId}/images",
