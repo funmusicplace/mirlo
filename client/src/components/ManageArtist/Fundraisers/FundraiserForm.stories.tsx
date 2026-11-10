@@ -41,6 +41,17 @@ export const NewFundraiser: Story = {
     const canvas = within(canvasElement);
     const save = canvas.getByRole("button", { name: "Save fundraiser" });
     await expect(save).toBeDisabled();
+    await expect(
+      canvas.getByRole("button", { name: "Make public" })
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByRole("button", {
+        name: /^URL will be .*\/fundraiser\/a-van$/,
+      })
+    ).toBeInTheDocument();
+    await expect(
+      canvas.queryByLabelText("Minimum pledge")
+    ).not.toBeInTheDocument();
 
     const goal = canvas.getByLabelText("Goal");
     await userEvent.clear(goal);

@@ -34,7 +34,6 @@ const meta = {
     artistId: ARTIST.id,
     fundraiser: VAN,
     currency: "usd",
-    isAllOrNothing: true,
     hasPledges: false,
     platformPercent: 10,
   },
@@ -46,7 +45,6 @@ type Story = StoryObj<typeof meta>;
 export const AllOrNothing: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByLabelText("Minimum pledge")).toBeInTheDocument();
     await expect(canvas.getByText("−$800.00 platform fee")).toBeInTheDocument();
     await expect(
       canvas.getByText("−$232.30 Stripe fees (est.)")
@@ -58,16 +56,12 @@ export const AllOrNothing: Story = {
   },
 };
 
-/** No minimum pledge: contributions aren't pledges */
 export const NotAllOrNothing: Story = {
-  args: {
-    fundraiser: { ...VAN, isAllOrNothing: false },
-    isAllOrNothing: false,
-  },
+  args: { fundraiser: { ...VAN, isAllOrNothing: false } },
   play: async ({ canvasElement }) => {
     await expect(
-      within(canvasElement).queryByLabelText("Minimum pledge")
-    ).not.toBeInTheDocument();
+      within(canvasElement).getByLabelText("Is it all or nothing?")
+    ).not.toBeChecked();
   },
 };
 
@@ -77,6 +71,5 @@ export const WithPledges: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByLabelText("Is it all or nothing?")).toBeDisabled();
-    await expect(canvas.getByLabelText("Minimum pledge")).toHaveValue(25);
   },
 };

@@ -32,14 +32,13 @@ const renderFields = (
 ) => {
   const Wrapper = () => {
     const methods = useForm<FundraiserFormData>({
-      defaultValues: { goalAmount: "500", fundraiserMinPledge: "10" },
+      defaultValues: { goalAmount: "500" },
     });
     return (
       <FormProvider {...methods}>
         <FundraiserFormFields
           artistId={10}
           currency="usd"
-          isAllOrNothing={false}
           hasPledges={false}
           {...props}
         />
@@ -50,17 +49,14 @@ const renderFields = (
 };
 
 describe("FundraiserFormFields", () => {
-  test("only asks for a minimum pledge on all-or-nothing fundraisers", () => {
-    const { unmount } = renderFields({ isAllOrNothing: false });
+  test("doesn't ask for a minimum pledge, and shows the hint under the name", () => {
+    renderFields({ nameHint: <p>URL hint</p> });
     expect(screen.queryByLabelText("minPledge")).not.toBeInTheDocument();
-    unmount();
-
-    renderFields({ isAllOrNothing: true });
-    expect(screen.getByLabelText("minPledge")).toHaveValue(10);
+    expect(screen.getByText("URL hint")).toBeInTheDocument();
   });
 
   test("locks all-or-nothing once supporters have pledged", () => {
-    renderFields({ isAllOrNothing: true, hasPledges: true });
+    renderFields({ hasPledges: true });
     expect(screen.getByLabelText("isAllOrNothing")).toBeDisabled();
     expect(
       screen.getByText(/isAllOrNothingLockedWithPledges/)

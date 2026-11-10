@@ -4,14 +4,13 @@ import { expect, within } from "@storybook/test";
 import FundraiserActions from "./FundraiserActions";
 import {
   STUDIO,
-  VAN,
   VINYL,
   fundraiserMutationHandlers,
 } from "./fundraiserStoryFixtures";
 
 /**
  * What an artist can do with a fundraiser: see its pledges, charge them once
- * an all-or-nothing goal is met, and remove it. Used on the release form and
+ * an all-or-nothing goal is met. Used on the release form and
  * the fundraiser edit page.
  */
 const meta = {
@@ -24,7 +23,6 @@ const meta = {
   args: {
     fundraiser: VINYL,
     amountRaised: VINYL.amountRaised,
-    pledgeCount: VINYL.pledgeCount,
   },
 } satisfies Meta<typeof FundraiserActions>;
 
@@ -41,9 +39,6 @@ export const BelowGoal: Story = {
     await expect(
       canvas.queryByRole("button", { name: "Charge pledges now" })
     ).not.toBeInTheDocument();
-    await expect(
-      canvas.getByRole("button", { name: "Cancel fundraiser" })
-    ).toBeInTheDocument();
   },
 };
 
@@ -56,21 +51,10 @@ export const GoalReached: Story = {
   },
 };
 
-/** Nobody has pledged, so removing it doesn't cancel anything */
-export const NoPledges: Story = {
-  args: { fundraiser: VAN, amountRaised: 0, pledgeCount: 0 },
-  play: async ({ canvasElement }) => {
-    await expect(
-      within(canvasElement).getByRole("button", { name: "Remove fundraiser" })
-    ).toBeInTheDocument();
-  },
-};
-
 export const NotAllOrNothing: Story = {
   args: {
     fundraiser: { ...STUDIO, status: "ACTIVE" },
     amountRaised: STUDIO.amountRaised,
-    pledgeCount: 0,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

@@ -68,20 +68,6 @@ describe("fundraiserFormData", () => {
     ).toBeUndefined();
   });
 
-  test("sends the URL and public switch, never an empty URL", () => {
-    expect(
-      formDataToFundraiserUpdate(
-        fundraiserToFormData({ urlSlug: "a-van", isPublic: true })
-      )
-    ).toMatchObject({ urlSlug: "a-van", isPublic: true });
-    expect(
-      formDataToFundraiserUpdate({ fundraiserUrlSlug: "" }).urlSlug
-    ).toBeUndefined();
-    expect(
-      formDataToFundraiserUpdate(fundraiserToFormData({ name: "Van" }))
-    ).toMatchObject({ urlSlug: undefined, isPublic: undefined });
-  });
-
   test("leaves all-or-nothing alone when the checkbox was disabled", () => {
     expect(
       formDataToFundraiserUpdate({ isAllOrNothing: undefined }).isAllOrNothing

@@ -103,3 +103,39 @@ export const ManyImages: Story = {
     ).toHaveLength(8);
   },
 };
+
+/**
+ * A fundraiser's gallery: a 16:9 frame with the video as the first slide.
+ * Images fill the frame, so the frame doesn't jump between slides.
+ */
+export const WithVideo: Story = {
+  args: {
+    aspect: "video",
+    alt: "Vinyl fundraiser",
+    video: {
+      src: "https://www.youtube.com/embed/aqz-KE-bpKQ",
+      title: "Fundraiser video",
+    },
+    images: [
+      merchImageFixture("merch-vinyl.svg", 0),
+      merchImageFixture("merch-poster.svg", 1),
+    ],
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTitle("Fundraiser video")).toBeInTheDocument();
+    await expect(
+      canvas.getByRole("button", { name: "Show video" })
+    ).toHaveAttribute("aria-pressed", "true");
+
+    await userEvent.click(canvas.getByRole("button", { name: "Show image 2" }));
+
+    await expect(
+      canvas.queryByTitle("Fundraiser video")
+    ).not.toBeInTheDocument();
+    await expect(canvas.getByAltText("Vinyl fundraiser")).toHaveAttribute(
+      "src",
+      "/showcase/merch-poster.svg"
+    );
+  },
+};

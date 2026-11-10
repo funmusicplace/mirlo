@@ -1298,6 +1298,36 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 400);
     });
 
+    it("should return 400 for a pledge below Stripe's minimum charge", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_stripe_min",
+        currency: "gbp",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const fundraiser = await createFundraiser(profile.id, {
+        isAllOrNothing: true,
+        minPledge: 0,
+      });
+
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          items: [
+            {
+              type: "fundraiserPledge",
+              fundraiserId: fundraiser.id,
+              price: "20",
+            },
+          ],
+        },
+        accessToken
+      );
+
+      assert.equal(response.statusCode, 400);
+    });
+
     it("should return 404 for a pledge to another artist's fundraiser", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",

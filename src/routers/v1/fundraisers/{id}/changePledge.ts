@@ -7,6 +7,7 @@ import {
   userOrAppAuthenticated,
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
+import { getCurrency, minimumPledge } from "../../../../utils/stripe/currency";
 
 type Query = {
   email?: string;
@@ -74,7 +75,8 @@ export default function () {
           description: "This fundraiser is no longer accepting pledges",
         });
       }
-      if (amount < pledge.fundraiser.minPledge) {
+      const currency = await getCurrency(pledge.fundraiser.profileId);
+      if (amount < minimumPledge(pledge.fundraiser.minPledge, currency)) {
         throw new AppError({
           httpCode: 400,
           description: "Pledge amount is below the minimum required.",

@@ -132,6 +132,7 @@ export const uploadAndSendToImageQueue = async (
     | "background"
     | "banner"
     | "splash"
+    | "gallery"
     | "inFormData",
   createDatabaseEntry: (
     {
@@ -209,7 +210,8 @@ export const uploadAndSendToImageQueue = async (
           | "banner"
           | "avatar"
           | "artwork"
-          | "splash" =
+          | "splash"
+          | "gallery" =
           sharpConfigKey === "inFormData"
             ? (fromBody.dimensions ?? "square")
             : sharpConfigKey;
@@ -424,7 +426,7 @@ export const processFundraiserImage = (ctx: APIContext) => {
       ctx,
       "image",
       "image",
-      "artwork",
+      "gallery",
       async (fileInfo: { filename: string }) => {
         const fundraiser = await prisma.fundraiser.findUniqueOrThrow({
           where: { id: fundraiserId },
@@ -437,7 +439,7 @@ export const processFundraiserImage = (ctx: APIContext) => {
         return prisma.image.create({
           data: {
             originalFilename: fileInfo.filename,
-            dimensions: "square",
+            dimensions: "gallery",
             profileId: fundraiser.profileId,
             fundraiserImage: {
               create: { fundraiserId, position: last ? last.position + 1 : 0 },

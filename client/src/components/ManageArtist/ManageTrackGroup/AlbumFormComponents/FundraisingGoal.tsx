@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import FundraiserActions from "components/ManageArtist/Fundraisers/FundraiserActions";
 import FundraiserFormFields from "components/ManageArtist/Fundraisers/FundraiserFormFields";
+import RemoveFundraiserButton from "components/ManageArtist/Fundraisers/RemoveFundraiserButton";
 import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import {
   queryManagedTrackGroup,
@@ -85,21 +86,23 @@ const FundraisingGoal: React.FC<{
         <FundraiserActions
           fundraiser={fundraiser}
           amountRaised={totalAmount}
-          pledgeCount={totalPledges ?? 0}
           onChanged={refetch}
-          onRemoved={() => {
-            setDidAddFundraiser(false);
-            refetch();
-          }}
         />
       </div>
       <FundraiserFormFields
         artistId={artistId}
         currency={user?.currency}
-        isAllOrNothing={fundraiser.isAllOrNothing}
         hasPledges={(totalPledges ?? 0) > 0}
         focusGoal={didAddFundraiser}
         platformPercent={platformPercent ? Number(platformPercent) : undefined}
+      />
+      <RemoveFundraiserButton
+        fundraiserId={fundraiser.id}
+        pledgeCount={totalPledges ?? 0}
+        onRemoved={() => {
+          setDidAddFundraiser(false);
+          refetch();
+        }}
       />
     </>
   );

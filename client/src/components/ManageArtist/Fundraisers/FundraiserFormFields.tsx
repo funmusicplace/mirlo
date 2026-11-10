@@ -22,17 +22,17 @@ const MoneyInput = React.forwardRef<
 const FundraiserFormFields: React.FC<{
   artistId: number;
   currency?: string;
-  isAllOrNothing: boolean;
   hasPledges: boolean;
   focusGoal?: boolean;
   platformPercent?: number;
+  nameHint?: React.ReactNode;
 }> = ({
   artistId,
   currency,
-  isAllOrNothing,
   hasPledges,
   focusGoal,
   platformPercent,
+  nameHint,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { t: tFees } = useTranslation("translation", {
@@ -56,18 +56,19 @@ const FundraiserFormFields: React.FC<{
 
   return (
     <>
+      <FormComponent>
+        <label htmlFor="input-fundraiser-name">{t("fundraiserName")}</label>
+        <InputEl
+          id="input-fundraiser-name"
+          aria-describedby="description-fundraiser-name"
+          {...register("fundraiserName")}
+        />
+        <span className="text-sm" id="description-fundraiser-name">
+          {t("fundraiserNameDescription")}
+        </span>
+        {nameHint}
+      </FormComponent>
       <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
-        <FormComponent>
-          <label htmlFor="input-fundraiser-name">{t("fundraiserName")}</label>
-          <InputEl
-            id="input-fundraiser-name"
-            aria-describedby="description-fundraiser-name"
-            {...register("fundraiserName")}
-          />
-          <span className="text-sm" id="description-fundraiser-name">
-            {t("fundraiserNameDescription")}
-          </span>
-        </FormComponent>
         <FormComponent>
           <label htmlFor="input-goal-amount">{t("goal")}</label>
           <MoneyInput
@@ -106,20 +107,6 @@ const FundraiserFormFields: React.FC<{
             </div>
           )}
         </FormComponent>
-        {isAllOrNothing && (
-          <FormComponent>
-            <label htmlFor="input-min-pledge">{t("minPledge")}</label>
-            <MoneyInput
-              currency={currency}
-              aria-describedby="description-min-pledge"
-              id="input-min-pledge"
-              {...register("fundraiserMinPledge", { min: 0 })}
-            />
-            <span className="text-sm" id="description-min-pledge">
-              {t("minPledgeDescription")}
-            </span>
-          </FormComponent>
-        )}
         <FormComponent>
           <label htmlFor="input-fundraiser-end-date">{t("endDate")}</label>
           <InputEl

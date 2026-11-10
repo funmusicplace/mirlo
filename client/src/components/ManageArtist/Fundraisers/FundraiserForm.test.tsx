@@ -24,6 +24,10 @@ vi.mock("queries", () => ({
 vi.mock("services/useErrorHandler", () => ({ default: () => vi.fn() }));
 vi.mock("state/SnackbarContext", () => ({ useSnackbar: () => vi.fn() }));
 vi.mock("./FundraiserActions", () => ({ default: () => null }));
+vi.mock("./FundraiserPublicButton", () => ({ default: () => null }));
+vi.mock("./RemoveFundraiserButton", () => ({
+  default: () => <button type="button">remove</button>,
+}));
 vi.mock("./FundraiserImagesEditor", () => ({
   default: () => <div data-testid="images-editor" />,
 }));

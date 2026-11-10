@@ -2,13 +2,9 @@ import {
   ArtistButton,
   ArtistButtonLink,
 } from "components/Artist/ArtistButtons";
-import {
-  useChargeFundraiserPledgesMutation,
-  useDeleteFundraiserMutation,
-} from "queries";
+import { useChargeFundraiserPledgesMutation } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaTrash } from "react-icons/fa";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 
@@ -18,19 +14,14 @@ const FundraiserActions: React.FC<{
     "id" | "isAllOrNothing" | "goalAmount" | "status"
   >;
   amountRaised: number;
-  pledgeCount: number;
   onChanged?: () => void;
-  onRemoved?: () => void;
-}> = ({ fundraiser, amountRaised, pledgeCount, onChanged, onRemoved }) => {
+}> = ({ fundraiser, amountRaised, onChanged }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
   const { mutateAsync: chargePledges, isPending: isCharging } =
     useChargeFundraiserPledgesMutation();
-  const { mutateAsync: deleteFundraiser, isPending: isDeleting } =
-    useDeleteFundraiserMutation();
 
-  const hasPledges = pledgeCount > 0;
   const isComplete = fundraiser.status === "SUCCESSFUL";
   const canCharge =
     !isComplete &&
@@ -48,31 +39,13 @@ const FundraiserActions: React.FC<{
     }
   };
 
-  const onRemove = async () => {
-    if (
-      hasPledges &&
-      !window.confirm(
-        t("removingFundraiserWithPledgesWarning", { count: pledgeCount })
-      )
-    ) {
-      return;
-    }
-    try {
-      await deleteFundraiser(fundraiser.id);
-      snackbar(t("fundraiserRemoved"), { type: "success" });
-      onRemoved?.();
-    } catch (e) {
-      console.error(e);
-      snackbar(t("removalFailed"), { type: "warning" });
-    }
-  };
-
   return (
     <div className="flex flex-wrap gap-2">
       {fundraiser.isAllOrNothing && (
         <ArtistButtonLink
           to={`/manage/fundraiser/${fundraiser.id}/pledges`}
           className="flex items-center gap-1"
+          variant="dashed"
         >
           {t("viewPledges")}
         </ArtistButtonLink>
@@ -89,14 +62,6 @@ const FundraiserActions: React.FC<{
           )}
         </ArtistButton>
       )}
-      <ArtistButton
-        type="button"
-        onClick={onRemove}
-        isLoading={isDeleting}
-        startIcon={<FaTrash />}
-      >
-        {t(hasPledges ? "cancelFundraiser" : "removeFundraiser")}
-      </ArtistButton>
     </div>
   );
 };

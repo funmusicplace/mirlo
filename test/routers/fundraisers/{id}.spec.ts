@@ -68,6 +68,16 @@ describe("fundraisers/{id}", () => {
     assert.equal(response.body.result.urlSlug, "a-van");
   });
 
+  it("raises the minimum pledge to Stripe's minimum charge", async () => {
+    const { fundraiser } = await setUp({ minPledge: 0 });
+
+    const response = await requestApp
+      .get(`fundraisers/${fundraiser.id}`)
+      .set("Accept", "application/json");
+
+    assert.equal(response.body.result.minPledge, 50);
+  });
+
   it("hides fundraisers that aren't public", async () => {
     const { fundraiser } = await setUp({ isPublic: false });
 

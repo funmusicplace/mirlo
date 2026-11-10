@@ -3,9 +3,8 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-const { chargePledges, deleteFundraiser } = vi.hoisted(() => ({
+const { chargePledges } = vi.hoisted(() => ({
   chargePledges: vi.fn(),
-  deleteFundraiser: vi.fn(),
 }));
 
 vi.mock("react-i18next", () => ({
@@ -14,10 +13,6 @@ vi.mock("react-i18next", () => ({
 vi.mock("queries", () => ({
   useChargeFundraiserPledgesMutation: () => ({
     mutateAsync: chargePledges,
-    isPending: false,
-  }),
-  useDeleteFundraiserMutation: () => ({
-    mutateAsync: deleteFundraiser,
     isPending: false,
   }),
 }));
@@ -45,17 +40,10 @@ describe("FundraiserActions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     chargePledges.mockResolvedValue({});
-    deleteFundraiser.mockResolvedValue({});
   });
 
   test("hides charging until an all-or-nothing goal is met", () => {
-    render(
-      <FundraiserActions
-        fundraiser={allOrNothing}
-        amountRaised={9999}
-        pledgeCount={3}
-      />
-    );
+    render(<FundraiserActions fundraiser={allOrNothing} amountRaised={9999} />);
     expect(
       screen.queryByRole("button", { name: "chargePledges" })
     ).not.toBeInTheDocument();
@@ -71,7 +59,6 @@ describe("FundraiserActions", () => {
       <FundraiserActions
         fundraiser={allOrNothing}
         amountRaised={10000}
-        pledgeCount={3}
         onChanged={onChanged}
       />
     );
@@ -89,7 +76,6 @@ describe("FundraiserActions", () => {
       <FundraiserActions
         fundraiser={{ ...allOrNothing, isAllOrNothing: false }}
         amountRaised={0}
-        pledgeCount={0}
       />
     );
     expect(
@@ -105,52 +91,10 @@ describe("FundraiserActions", () => {
       <FundraiserActions
         fundraiser={{ ...allOrNothing, status: "SUCCESSFUL" }}
         amountRaised={20000}
-        pledgeCount={3}
       />
     );
     expect(
       screen.queryByRole("button", { name: "chargePledges" })
     ).not.toBeInTheDocument();
-  });
-
-  test("asks before cancelling a fundraiser that has pledges", async () => {
-    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
-    const onRemoved = vi.fn();
-    render(
-      <FundraiserActions
-        fundraiser={allOrNothing}
-        amountRaised={500}
-        pledgeCount={2}
-        onRemoved={onRemoved}
-      />
-    );
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "cancelFundraiser" })
-    );
-
-    expect(confirm).toHaveBeenCalled();
-    expect(deleteFundraiser).not.toHaveBeenCalled();
-    expect(onRemoved).not.toHaveBeenCalled();
-    confirm.mockRestore();
-  });
-
-  test("removes a fundraiser without pledges straight away", async () => {
-    const onRemoved = vi.fn();
-    render(
-      <FundraiserActions
-        fundraiser={allOrNothing}
-        amountRaised={0}
-        pledgeCount={0}
-        onRemoved={onRemoved}
-      />
-    );
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "removeFundraiser" })
-    );
-
-    expect(deleteFundraiser).toHaveBeenCalledWith(7);
-    await waitFor(() => expect(onRemoved).toHaveBeenCalled());
   });
 });

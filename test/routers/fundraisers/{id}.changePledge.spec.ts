@@ -84,6 +84,25 @@ describe("fundraisers/{id}/changePledge", () => {
       assert.equal(refreshed.amount, pledge.amount);
     });
 
+    it("refuses an amount below Stripe's minimum charge", async () => {
+      const { artist, backer, accessToken, fundraiser } = await setUp({
+        minPledge: 0,
+      });
+      await prisma.user.update({
+        where: { id: artist.userId },
+        data: { currency: "eur" },
+      });
+      const pledge = await createFundraiserPledge(fundraiser.id, backer.id);
+
+      const response = await changePledge(fundraiser.id, 40, accessToken);
+
+      assert.equal(response.statusCode, 400);
+      const refreshed = await prisma.fundraiserPledge.findUniqueOrThrow({
+        where: { id: pledge.id },
+      });
+      assert.equal(refreshed.amount, pledge.amount);
+    });
+
     it("refuses to change a pledge that was already charged", async () => {
       const { backer, accessToken, fundraiser } = await setUp();
       const pledge = await createFundraiserPledge(fundraiser.id, backer.id, {

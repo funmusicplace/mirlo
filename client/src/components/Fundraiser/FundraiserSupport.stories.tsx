@@ -21,8 +21,9 @@ import { USER_EXAMPLE } from "../../../test/mocks";
 import FundraiserSupport from "./FundraiserSupport";
 
 /**
- * How a supporter backs a fundraiser on its public page: a pledge form for
- * all-or-nothing fundraisers, a tip button for the others.
+ * How a supporter backs a fundraiser on its public page: a Pledge button
+ * that opens the pledge form for all-or-nothing fundraisers, a tip button for
+ * the others.
  */
 const meta = {
   title: "Features/Fundraisers/FundraiserSupport",
@@ -42,15 +43,28 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const openPledgeForm = async (canvasElement: HTMLElement) => {
+  await userEvent.click(
+    await within(canvasElement).findByRole("button", { name: "Pledge" })
+  );
+  return within(
+    await within(document.body).findByRole("dialog", {
+      name: PUBLIC_VINYL.name,
+    })
+  );
+};
+
 /** Pledging the minimum, then adding a card that's only charged later */
 export const Pledge: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    const modal = await openPledgeForm(canvasElement);
+    await expect(modal.getByText("Still $1,875.00 to go")).toBeInTheDocument();
     await userEvent.click(
-      await canvas.findByLabelText(/my payment method will be stored/)
+      await modal.findByLabelText(/my payment method will be stored/)
     );
     await userEvent.click(
-      canvas.getByRole("button", { name: "Add payment information" })
+      modal.getByRole("button", { name: "Add payment information" })
     );
     await waitFor(() =>
       expect(purchaseMock.bodies[0]).toMatchObject({
@@ -66,7 +80,7 @@ export const Pledge: Story = {
       })
     );
     await userEvent.click(
-      await canvas.findByRole("button", { name: "Complete payment" })
+      await modal.findByRole("button", { name: "Complete payment" })
     );
     await waitFor(() => expect(stripeMock.confirmed).toHaveLength(1));
     await expect(
@@ -77,12 +91,12 @@ export const Pledge: Story = {
 
 export const BelowTheMinimum: Story = {
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const amount = await canvas.findByRole("spinbutton");
+    const modal = await openPledgeForm(canvasElement);
+    const amount = await modal.findByRole("spinbutton");
     await userEvent.clear(amount);
     await userEvent.type(amount, "5");
     await expect(
-      await canvas.findByText(/has set a mimimum price of \$25\.00/)
+      await modal.findByText(/has set a mimimum price of \$25\.00/)
     ).toBeInTheDocument();
   },
 };

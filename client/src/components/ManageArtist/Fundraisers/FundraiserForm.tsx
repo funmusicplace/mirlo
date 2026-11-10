@@ -17,8 +17,10 @@ import {
 } from "./fundraiserFormData";
 import FundraiserFormFields from "./FundraiserFormFields";
 import FundraiserImagesEditor from "./FundraiserImagesEditor";
+import FundraiserPublicButton from "./FundraiserPublicButton";
+import FundraiserUrlField from "./FundraiserUrlField";
 import FundraiserVideoField from "./FundraiserVideoField";
-import FundraiserVisibilityFields from "./FundraiserVisibilityFields";
+import RemoveFundraiserButton from "./RemoveFundraiserButton";
 
 const FundraiserForm: React.FC<{
   artistId: number;
@@ -39,6 +41,7 @@ const FundraiserForm: React.FC<{
     keyPrefix: "manageFundraiser",
   });
   const snackbar = useSnackbar();
+  const artist = { id: artistId, urlSlug: artistUrlSlug };
   const errorHandler = useErrorHandler();
   const { mutateAsync: updateFundraiser, isPending } =
     useUpdateFundraiserMutation();
@@ -87,49 +90,50 @@ const FundraiserForm: React.FC<{
             )}
           </p>
         </div>
-        <FundraiserActions
-          fundraiser={fundraiser}
-          amountRaised={fundraiser.amountRaised}
-          pledgeCount={fundraiser.pledgeCount}
-          onRemoved={onRemoved}
-        />
-      </div>
-      {fundraiser.trackGroups.length > 0 && (
-        <div>
-          <h2 className="text-base! mb-1!">{t("linkedReleases")}</h2>
-          <ul className="list-disc pl-6">
-            {fundraiser.trackGroups.map((trackGroup) => (
-              <li key={trackGroup.id}>
-                <Link
-                  to={`/manage/artists/${artistId}/release/${trackGroup.id}`}
-                >
-                  {trackGroup.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <div className="flex flex-wrap gap-2">
+          <FundraiserPublicButton artist={artist} fundraiser={fundraiser} />
+          <FundraiserActions
+            fundraiser={fundraiser}
+            amountRaised={fundraiser.amountRaised}
+          />
         </div>
-      )}
-      <FundraiserImagesEditor fundraiser={fundraiser} />
+      </div>
+
       <FormProvider {...methods}>
         <form
           onSubmit={methods.handleSubmit(onSubmit)}
           className="flex flex-col gap-2"
         >
-          <FundraiserVisibilityFields
-            artist={{ id: artistId, urlSlug: artistUrlSlug }}
-            fundraiser={fundraiser}
-          />
           <FundraiserFormFields
             artistId={artistId}
+            nameHint={
+              <FundraiserUrlField artist={artist} fundraiser={fundraiser} />
+            }
             currency={currency}
-            isAllOrNothing={fundraiser.isAllOrNothing}
             hasPledges={fundraiser.pledgeCount > 0}
             platformPercent={
               fundraiser.trackGroups[0]?.platformPercent ?? defaultPlatformFee
             }
           />
+          <FundraiserImagesEditor fundraiser={fundraiser} />
+
           <FundraiserVideoField videoEmbedUrl={fundraiser.videoEmbedUrl} />
+          {fundraiser.trackGroups.length > 0 && (
+            <div className="border p-4">
+              <h2 className="text-base! mb-1!">{t("linkedReleases")}</h2>
+              <ul className="list-disc pl-6">
+                {fundraiser.trackGroups.map((trackGroup) => (
+                  <li key={trackGroup.id}>
+                    <Link
+                      to={`/manage/artists/${artistId}/release/${trackGroup.id}`}
+                    >
+                      {trackGroup.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div>
             <ArtistButton
               type="submit"
@@ -141,6 +145,11 @@ const FundraiserForm: React.FC<{
           </div>
         </form>
       </FormProvider>
+      <RemoveFundraiserButton
+        fundraiserId={fundraiser.id}
+        pledgeCount={fundraiser.pledgeCount}
+        onRemoved={onRemoved}
+      />
     </div>
   );
 };

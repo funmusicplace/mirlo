@@ -46,6 +46,15 @@ export const WithVideoAndImages: Story = {
     ).toBeInTheDocument();
     await expect(canvas.getByTitle("Fundraiser video")).toBeInTheDocument();
     await expect(
+      canvas.getAllByRole("button", { name: /Show (video|image)/ })
+    ).toHaveLength(1 + PUBLIC_VINYL.images.length);
+    await expect(
+      await canvas.findByRole("button", { name: "Pledge" })
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByRole("button", { name: "Share" })
+    ).toBeInTheDocument();
+    await expect(
       canvas.getByText("$3,125.00 out of $5,000.00 raised")
     ).toBeInTheDocument();
     await expect(canvas.getByText("sea-glass blue vinyl").tagName).toBe(

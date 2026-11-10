@@ -523,7 +523,11 @@
     "youPledged": "You've pledged {{amount}}. You'll only be charged if the fundraiser reaches its goal.",
     "thanksForPledging": "Thanks for your pledge! You'll only be charged if the fundraiser reaches its goal.",
     "artistNotSetUp": "{{artistName}} hasn't set up payments yet. Please check back later.",
-    "releases": "Releases"
+    "releases": "Releases",
+    "pledge": "Pledge",
+    "stillToGo": "Still {{amount}} to go",
+    "share": "Share",
+    "shareFundraiser": "Share this fundraiser"
   },
   "merchDetails": {
     "merchByArtist": "Merch by {{artist}} on {{instanceName}}",
@@ -560,7 +564,8 @@
     "destinationCost": "Cost to ship here: {{costUnit}} ({{costExtraUnit}} per extra item)",
     "supportedShippingDestinations": "Choose the shipping destination that best matches you",
     "optionalOptionType": "{{name}} (optional)",
-    "showImage": "Show image {{number}}"
+    "showImage": "Show image {{number}}",
+    "showVideo": "Show video"
   },
   "labelRemoval": {
     "remove": "Remove",
@@ -1295,10 +1300,16 @@
     "editFundraiserName": "Edit {{name}}",
     "save": "Save fundraiser",
     "saved": "Fundraiser saved",
-    "isPublic": "Public",
-    "isPublicDescription": "Shows the fundraiser's page to everyone. While this is off, nobody can see the page.",
+    "makePublic": "Make public",
+    "makePrivate": "Make private",
+    "madePublic": "The fundraiser is now public",
+    "madePrivate": "The fundraiser is now private",
     "viewPage": "View the fundraiser's page",
     "urlSlug": "Fundraiser URL",
+    "urlWillBe": "URL will be: ",
+    "saveUrl": "Save URL",
+    "urlSaved": "URL saved",
+    "urlSlugTaken": "Another of your fundraisers already uses this URL.",
     "urlSlugWarning": "Changes to this value will break existing links to this fundraiser.",
     "videoUrl": "Video",
     "videoUrlDescription": "A YouTube or Vimeo link, shown at the top of the fundraiser's page.",
@@ -1319,7 +1330,7 @@
   "manageAlbum": {
     "removingFundraiserWithPledgesWarning": "This release has an active fundraiser with {{ count }} pledges. Are you sure you want to remove the fundraiser? This will cancel all current pledges.",
     "removeFundraiser": "Remove fundraiser",
-    "viewPledges": "View pledges",
+    "viewPledges": "Pledges",
     "cancelFundraiser": "Cancel fundraiser",
     "removalFailed": "Failed to remove fundraiser",
     "fundraiserRemoved": "Fundraiser removed",
@@ -1358,8 +1369,6 @@
     "fundraiserNameDescription": "Shown above the fundraiser on your page.",
     "endDate": "End date",
     "endDateDescription": "The last day of the fundraiser. Leave it empty to keep it open.",
-    "minPledge": "Minimum pledge",
-    "minPledgeDescription": "The least a supporter can pledge. Pledges are only charged if the goal is met.",
     "fundraiserDescription": "What is this fundraiser for?",
     "fundraiserDescriptionDescription": "A paragraph or two telling listeners what their money goes towards.",
     "id3Data": "ID3 data",

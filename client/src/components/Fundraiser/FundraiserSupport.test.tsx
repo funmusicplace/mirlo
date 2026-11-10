@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -23,6 +24,19 @@ vi.mock("queries", () => ({
   useInvalidateFundraisers: () => vi.fn(),
 }));
 vi.mock("state/AuthContext", () => ({ useAuthContext: () => auth }));
+vi.mock("components/Artist/ArtistButtons", () => ({
+  ArtistButton: ({ children, onClick }: any) => (
+    <button onClick={onClick}>{children}</button>
+  ),
+}));
+vi.mock("components/common/Modal", () => ({
+  default: ({ open, title, children }: any) =>
+    open ? (
+      <div role="dialog" aria-label={title}>
+        {children}
+      </div>
+    ) : null,
+}));
 vi.mock("components/common/TipArtist", () => ({
   default: () => <button>tip</button>,
 }));
@@ -40,7 +54,10 @@ import FundraiserSupport from "./FundraiserSupport";
 
 const FUNDRAISER = {
   id: 7,
+  name: "A van",
   urlSlug: "a-van",
+  goalAmount: 100000,
+  amountRaised: 25000,
   isAllOrNothing: true,
   status: "ACTIVE",
   trackGroups: [],
@@ -70,8 +87,14 @@ describe("FundraiserSupport", () => {
     stripeStatus.data = { chargesEnabled: true };
   });
 
-  test("offers a pledge form that returns to the fundraiser page", () => {
+  test("opens the pledge form, with what's left to raise", async () => {
     renderSupport();
+    expect(screen.queryByTestId("pledge-form")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "pledge" }));
+
+    expect(screen.getByRole("dialog", { name: "A van" })).toBeInTheDocument();
+    expect(screen.getByText("stillToGo $750.00")).toBeInTheDocument();
     const form = screen.getByTestId("pledge-form");
     expect(form).toHaveAttribute("data-platform-percent", "10");
     expect(form.getAttribute("data-return-url")).toMatch(
@@ -79,11 +102,12 @@ describe("FundraiserSupport", () => {
     );
   });
 
-  test("uses the linked release's platform cut over the artist's default", () => {
+  test("uses the linked release's platform cut over the artist's default", async () => {
     renderSupport({
       ...FUNDRAISER,
       trackGroups: [{ id: 4, title: "Tidal Hours", platformPercent: 5 }],
     } as PublicFundraiser);
+    await userEvent.click(screen.getByRole("button", { name: "pledge" }));
     expect(screen.getByTestId("pledge-form")).toHaveAttribute(
       "data-platform-percent",
       "5"
@@ -94,7 +118,9 @@ describe("FundraiserSupport", () => {
     auth.user = { pledges: [{ fundraiserId: 7, amount: 4000 }] };
     renderSupport();
     expect(screen.getByText("youPledged $40.00")).toBeInTheDocument();
-    expect(screen.queryByTestId("pledge-form")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "pledge" })
+    ).not.toBeInTheDocument();
   });
 
   test("thanks the supporter when Stripe sends them back", () => {

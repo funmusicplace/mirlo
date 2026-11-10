@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
+import Modal from "components/common/Modal";
 import { moneyDisplay } from "components/common/Money";
 import TipArtist from "components/common/TipArtist";
 import { queryUserStripeStatus, useInvalidateFundraisers } from "queries";
@@ -18,6 +20,7 @@ const FundraiserSupport: React.FC<{ fundraiser: PublicFundraiser }> = ({
   const { user, refreshLoggedInUser } = useAuthContext();
   const invalidate = useInvalidateFundraisers();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isPledging, setIsPledging] = React.useState(false);
   const [justPledged, setJustPledged] = React.useState(
     searchParams.get("redirect_status") === "succeeded"
   );
@@ -27,6 +30,7 @@ const FundraiserSupport: React.FC<{ fundraiser: PublicFundraiser }> = ({
   );
 
   const onPledged = React.useCallback(() => {
+    setIsPledging(false);
     setJustPledged(true);
     refreshLoggedInUser();
     invalidate();
@@ -75,17 +79,38 @@ const FundraiserSupport: React.FC<{ fundraiser: PublicFundraiser }> = ({
     return <p>{t("artistNotSetUp", { artistName: artist.name })}</p>;
   }
 
+  const currency = artist.user?.currency;
+  const stillToGo = fundraiser.goalAmount - fundraiser.amountRaised;
+
   return (
-    <FundraiserPledgeForm
-      fundraiser={fundraiser}
-      platformPercent={
-        fundraiser.trackGroups[0]?.platformPercent ??
-        artist.defaultPlatformFee ??
-        0
-      }
-      returnUrl={`${window.location.origin}${getFundraiserUrl(artist, fundraiser)}`}
-      onPledged={onPledged}
-    />
+    <>
+      <ArtistButton size="big" rounded onClick={() => setIsPledging(true)}>
+        {t("pledge")}
+      </ArtistButton>
+      <Modal
+        open={isPledging}
+        onClose={() => setIsPledging(false)}
+        title={fundraiser.name}
+      >
+        {stillToGo > 0 && (
+          <p className="mb-4 font-semibold">
+            {t("stillToGo", {
+              amount: moneyDisplay({ amount: stillToGo / 100, currency }),
+            })}
+          </p>
+        )}
+        <FundraiserPledgeForm
+          fundraiser={fundraiser}
+          platformPercent={
+            fundraiser.trackGroups[0]?.platformPercent ??
+            artist.defaultPlatformFee ??
+            0
+          }
+          returnUrl={`${window.location.origin}${getFundraiserUrl(artist, fundraiser)}`}
+          onPledged={onPledged}
+        />
+      </Modal>
+    </>
   );
 };
 

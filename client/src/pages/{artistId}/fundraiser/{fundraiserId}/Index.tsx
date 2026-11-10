@@ -3,16 +3,16 @@ import Box from "components/common/Box";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import FundraiserProgressCircle from "components/common/FundraiserProgressCircle";
 import ImageGallery from "components/common/ImageGallery";
-import LazyIframe from "components/common/LazyIframe";
 import { MetaCard } from "components/common/MetaCard";
 import { moneyDisplay } from "components/common/Money";
 import RichTextContent from "components/common/RichTextContent";
+import ShareButton from "components/common/ShareButton";
 import WidthContainer from "components/common/WidthContainer";
 import FundraiserSupport from "components/Fundraiser/FundraiserSupport";
 import { queryPublicFundraiser } from "queries";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
-import { getReleaseUrl } from "utils/artist";
+import { getFundraiserUrl, getReleaseUrl } from "utils/artist";
 import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
 
 function Index() {
@@ -47,59 +47,64 @@ function Index() {
         }
         image={fundraiser.images[0]?.sizes?.[600]}
       />
-      <div className="flex flex-col gap-6 p-4">
-        <div>
-          <h1 className="mb-1!">{fundraiser.name}</h1>
-          <Link to={`/${artist.urlSlug}`}>{artist.name}</Link>
-        </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="flex flex-col gap-4">
-            {fundraiser.videoEmbedUrl && (
-              <LazyIframe
-                src={fundraiser.videoEmbedUrl}
-                title={t("video")}
-                className="aspect-video w-full border-0"
-                allow="fullscreen; picture-in-picture"
-                allowFullScreen
-              />
-            )}
-            {fundraiser.images.length > 0 && (
-              <ImageGallery images={fundraiser.images} alt={fundraiser.name} />
-            )}
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4">
+        <div className="flex flex-col gap-3">
+          <div>
+            <h1 className="mb-1!">{fundraiser.name}</h1>
+            <Link to={`/${artist.urlSlug}`}>{artist.name}</Link>
           </div>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <FundraiserProgressCircle
-                amountRaised={fundraiser.amountRaised}
-                goalAmount={fundraiser.goalAmount}
-                size="large"
-              />
-              <div>
-                <p className="font-semibold">
-                  {t("raisedOutOfGoal", {
-                    raised: moneyDisplay({
-                      amount: fundraiser.amountRaised / 100,
-                      currency,
-                    }),
-                    goal: moneyDisplay({
-                      amount: fundraiser.goalAmount / 100,
-                      currency,
-                    }),
+          <div className="flex items-center gap-3">
+            <FundraiserProgressCircle
+              amountRaised={fundraiser.amountRaised}
+              goalAmount={fundraiser.goalAmount}
+              size="large"
+            />
+            <div>
+              <p className="font-semibold">
+                {t("raisedOutOfGoal", {
+                  raised: moneyDisplay({
+                    amount: fundraiser.amountRaised / 100,
+                    currency,
+                  }),
+                  goal: moneyDisplay({
+                    amount: fundraiser.goalAmount / 100,
+                    currency,
+                  }),
+                })}
+              </p>
+              {fundraiser.endDate && (
+                <p className="text-sm">
+                  {t("endsOn", {
+                    date: new Date(fundraiser.endDate).toLocaleDateString(
+                      i18n.language
+                    ),
                   })}
                 </p>
-                {fundraiser.endDate && (
-                  <p className="text-sm">
-                    {t("endsOn", {
-                      date: new Date(fundraiser.endDate).toLocaleDateString(
-                        i18n.language
-                      ),
-                    })}
-                  </p>
-                )}
-              </div>
+              )}
             </div>
-            <FundraiserSupport fundraiser={fundraiser} />
           </div>
+        </div>
+        {(fundraiser.videoEmbedUrl || fundraiser.images.length > 0) && (
+          <ImageGallery
+            aspect="video"
+            images={fundraiser.images}
+            alt={fundraiser.name}
+            video={
+              fundraiser.videoEmbedUrl
+                ? { src: fundraiser.videoEmbedUrl, title: t("video") }
+                : undefined
+            }
+          />
+        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <FundraiserSupport fundraiser={fundraiser} />
+          <ShareButton
+            label={t("share")}
+            title={fundraiser.name}
+            modalTitle={t("shareFundraiser")}
+            url={`${window.location.origin}${getFundraiserUrl(artist, fundraiser)}`}
+            size="big"
+          />
         </div>
         {fundraiser.description && (
           <RichTextContent html={fundraiser.description} />

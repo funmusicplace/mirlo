@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 
 import { AppError } from "../error";
 import { determinePrice } from "../purchasing";
+import { minimumPledge } from "../stripe/currency";
 
 import { getPaymentProcessor, type DeferredQuote } from "./PaymentProcessor";
 import { resolveProfilePaymentContext } from "./purchase";
@@ -49,10 +50,13 @@ export const initiateFundraiserPledge = async ({
     });
   }
 
-  const { priceNumber } = determinePrice(price, fundraiser.minPledge);
-
   const { stripeAccountId, currency } =
     await resolveProfilePaymentContext(profileId);
+
+  const { priceNumber } = determinePrice(
+    price,
+    minimumPledge(fundraiser.minPledge, currency)
+  );
 
   if (deferred) {
     return {

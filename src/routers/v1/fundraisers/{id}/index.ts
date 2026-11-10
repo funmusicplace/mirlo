@@ -9,6 +9,7 @@ import {
   fundraiserImagesInclude,
   getFundraiserTotals,
 } from "../../../../utils/fundraiser";
+import { minimumPledge } from "../../../../utils/stripe/currency";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -75,6 +76,10 @@ export default function () {
       res.json({
         result: {
           ...serializeFundraiser(fundraiser),
+          minPledge: minimumPledge(
+            fundraiser.minPledge,
+            fundraiser.profile.user?.currency
+          ),
           ...(await getFundraiserTotals(fundraiser)),
         },
       });
