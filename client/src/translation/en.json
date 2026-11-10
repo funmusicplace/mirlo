@@ -52,6 +52,7 @@
     "manageWelcome": "Welcome",
     "bulkTrackUpload": "Bulk track upload",
     "manageFundraiserPledges": "Fundraiser pledges",
+    "manageFundraiser": "Edit fundraiser",
     "manageCustomize": "Customize",
     "manageRoster": "Manage roster",
     "manageReleases": "Manage releases",
@@ -1270,6 +1271,20 @@
     "viewRelease": "View related release",
     "manageRelease": "Manage"
   },
+  "fundraiserProgress": {
+    "percentOfGoal": "{{percent}}% of the goal raised"
+  },
+  "manageFundraiser": {
+    "fundraisers": "Fundraisers",
+    "addFundraiser": "Add fundraiser",
+    "untitledFundraiser": "Untitled fundraiser",
+    "raisedOutOfGoal": "{{raised}} out of {{goal}} raised",
+    "editFundraiserName": "Edit {{name}}",
+    "save": "Save fundraiser",
+    "saved": "Fundraiser saved",
+    "linkedReleases": "Linked releases",
+    "funded": "Funded"
+  },
   "manageAlbum": {
     "removingFundraiserWithPledgesWarning": "This release has an active fundraiser with {{ count }} pledges. Are you sure you want to remove the fundraiser? This will cancel all current pledges.",
     "removeFundraiser": "Remove fundraiser",
@@ -1307,9 +1322,11 @@
     "fundraisingGoal": "Fundraising goal",
     "fundraiserComplete": "Fundraiser complete — pledges charged, release is now on sale.",
     "noTracks": "You have no tracks listed on this release, are you sure you want to continue?",
-    "fundraisingGoalDescription": "The target amount you aim to raise in relation to this release.",
+    "fundraisingGoalDescription": "The target amount you aim to raise.",
     "fundraiserName": "Fundraiser name",
-    "fundraiserNameDescription": "Shown above the fundraiser on your release page.",
+    "fundraiserNameDescription": "Shown above the fundraiser on your page.",
+    "endDate": "End date",
+    "endDateDescription": "The last day of the fundraiser. Leave it empty to keep it open.",
     "minPledge": "Minimum pledge",
     "minPledgeDescription": "The least a supporter can pledge. Pledges are only charged if the goal is met.",
     "fundraiserDescription": "What is this fundraiser for?",

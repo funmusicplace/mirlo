@@ -3,14 +3,76 @@ import { NextFunction, Request, Response } from "express";
 
 import {
   artistBelongsToLoggedInUser,
+  userAuthenticated,
   userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { serializeFundraiser } from "../../../../../serializers/fundraiser";
 import { AppError } from "../../../../../utils/error";
+import { getFundraiserTotals } from "../../../../../utils/fundraiser";
 
 export default function () {
   const operations = {
+    GET: [userAuthenticated, artistBelongsToLoggedInUser, GET],
     POST: [userOrAppAuthenticated, artistBelongsToLoggedInUser, POST],
+  };
+
+  async function GET(req: Request, res: Response, next: NextFunction) {
+    const { artistId } = req.params;
+    try {
+      const fundraisers = await prisma.fundraiser.findMany({
+        where: { profileId: Number(artistId) },
+        include: {
+          trackGroups: {
+            where: { deletedAt: null },
+            select: { id: true, title: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      const results = await Promise.all(
+        fundraisers.map(async (fundraiser) => ({
+          ...fundraiser,
+          ...(await getFundraiserTotals(fundraiser)),
+        }))
+      );
+
+      res.json({ results });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  GET.apiDoc = {
+    summary: "Lists the artist's fundraisers with how much each has raised",
+    parameters: [
+      {
+        in: "path",
+        name: "artistId",
+        required: true,
+        type: "string",
+      },
+    ],
+    responses: {
+      200: {
+        description: "The artist's fundraisers",
+        schema: {
+          type: "object",
+          properties: {
+            results: {
+              type: "array",
+              items: { $ref: "#/definitions/Fundraiser" },
+            },
+          },
+        },
+      },
+      default: {
+        description: "An error occurred",
+        schema: {
+          additionalProperties: true,
+        },
+      },
+    },
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {

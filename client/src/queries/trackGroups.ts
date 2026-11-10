@@ -4,6 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { formDataToFundraiserUpdate } from "components/ManageArtist/Fundraisers/fundraiserFormData";
 import { getInjectedTrackGroup } from "utils/injectedData";
 
 import * as api from "./fetch/fetchWrapper";
@@ -225,17 +226,7 @@ async function saveAlbumForm(opts: {
   if (fundraiserId) {
     requests[1] = api.put<unknown, { result: Fundraiser }>(
       `v1/manage/fundraisers/${fundraiserId}`,
-      {
-        goalAmount: toCentsOrNull(formData.goalAmount) ?? 0,
-        minPledge: toCentsOrNull(formData.fundraiserMinPledge) ?? 0,
-        // Undefined when the checkbox is disabled (pledges exist); leave it as is
-        isAllOrNothing:
-          formData.isAllOrNothing === undefined
-            ? undefined
-            : !!formData.isAllOrNothing,
-        name: formData.fundraiserName,
-        description: formData.fundraiserDescription,
-      }
+      formDataToFundraiserUpdate(formData)
     );
   }
 
@@ -331,29 +322,6 @@ export function useDeleteTrackGroupMutation() {
         predicate: (query) => queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS),
       });
     },
-  });
-}
-
-const fetchManagedFundraiser: QueryFunction<
-  Fundraiser,
-  ["fetchManagedFundraiser", { fundraiserId: number }, ...any]
-> = ({ queryKey: [_, { fundraiserId }], signal }) => {
-  return api
-    .get<{
-      result: Fundraiser;
-    }>(`v1/manage/fundraisers/${fundraiserId}`, { signal })
-    .then((r) => r.result);
-};
-
-export function queryManagedFundraiser(fundraiserId: number) {
-  return queryOptions({
-    queryKey: [
-      "fetchManagedFundraiser",
-      { fundraiserId },
-      QUERY_KEY_TRACK_GROUPS,
-    ],
-    queryFn: fetchManagedFundraiser,
-    enabled: isFinite(fundraiserId),
   });
 }
 

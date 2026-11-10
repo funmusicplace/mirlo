@@ -1,7 +1,38 @@
 import prisma from "@mirlo/prisma";
 
 import { AppError } from "./error";
+import { findSales } from "./sales";
 import { chargePledgePayments, pledgeChargeInclude } from "./stripe";
+
+export const getFundraiserTotals = async (fundraiser: {
+  id: number;
+  profileId: number;
+  isAllOrNothing: boolean;
+  trackGroups: { id: number }[];
+}) => {
+  const {
+    _sum: { amount: pledgedTotal },
+    _count: pledgeCount,
+  } = await prisma.fundraiserPledge.aggregate({
+    where: { fundraiserId: fundraiser.id, cancelledAt: null },
+    _sum: { amount: true },
+    _count: true,
+  });
+
+  if (fundraiser.isAllOrNothing || fundraiser.trackGroups.length === 0) {
+    return { amountRaised: pledgedTotal ?? 0, pledgeCount };
+  }
+
+  const sales = await findSales({
+    profileId: [fundraiser.profileId],
+    filters: { trackGroupIds: fundraiser.trackGroups.map((tg) => tg.id) },
+  });
+
+  return {
+    amountRaised: sales.reduce((total, sale) => total + sale.amount, 0),
+    pledgeCount,
+  };
+};
 
 /**
  * Charges every outstanding pledge on a fundraiser and marks it SUCCESSFUL.

@@ -1,0 +1,97 @@
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import React from "react";
+import { MemoryRouter } from "react-router-dom";
+import { beforeEach, describe, expect, test, vi } from "vitest";
+
+const { updateFundraiser } = vi.hoisted(() => ({
+  updateFundraiser: vi.fn(),
+}));
+
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: "en" } }),
+}));
+vi.mock("queries", () => ({
+  useUpdateFundraiserMutation: () => ({
+    mutateAsync: updateFundraiser,
+    isPending: false,
+  }),
+}));
+vi.mock("services/useErrorHandler", () => ({ default: () => vi.fn() }));
+vi.mock("state/SnackbarContext", () => ({ useSnackbar: () => vi.fn() }));
+vi.mock("./FundraiserActions", () => ({ default: () => null }));
+vi.mock("components/Artist/ArtistButtons", () => ({
+  ArtistButton: ({ children, type, disabled }: any) => (
+    <button type={type} disabled={disabled}>
+      {children}
+    </button>
+  ),
+}));
+
+import FundraiserForm from "./FundraiserForm";
+
+const FUNDRAISER = {
+  id: 7,
+  name: "New van",
+  description: "",
+  goalAmount: 50000,
+  minPledge: 1000,
+  isAllOrNothing: true,
+  status: "ACTIVE",
+  endDate: "",
+  amountRaised: 12000,
+  pledgeCount: 0,
+  trackGroups: [],
+} as unknown as ManagedFundraiser;
+
+const renderForm = (fundraiser: ManagedFundraiser = FUNDRAISER) =>
+  render(
+    <MemoryRouter>
+      <FundraiserForm
+        artistId={10}
+        fundraiser={fundraiser}
+        currency="usd"
+        onRemoved={vi.fn()}
+      />
+    </MemoryRouter>
+  );
+
+describe("FundraiserForm", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    updateFundraiser.mockResolvedValue({});
+  });
+
+  test("saves changes in cents", async () => {
+    renderForm();
+    expect(screen.getByRole("button", { name: "save" })).toBeDisabled();
+
+    const goal = screen.getByLabelText("goal");
+    await userEvent.clear(goal);
+    await userEvent.type(goal, "750.25");
+    await userEvent.click(screen.getByRole("button", { name: "save" }));
+
+    await waitFor(() =>
+      expect(updateFundraiser).toHaveBeenCalledWith({
+        fundraiserId: 7,
+        body: expect.objectContaining({
+          name: "New van",
+          goalAmount: 75025,
+          minPledge: 1000,
+          isAllOrNothing: true,
+        }),
+      })
+    );
+  });
+
+  test("lists the releases the fundraiser is linked to", () => {
+    renderForm({
+      ...FUNDRAISER,
+      trackGroups: [{ id: 4, title: "Tidal Hours" }] as TrackGroup[],
+    });
+    expect(screen.getByRole("link", { name: "Tidal Hours" })).toHaveAttribute(
+      "href",
+      "/manage/artists/10/release/4"
+    );
+  });
+});

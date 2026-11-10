@@ -9,8 +9,10 @@ import {
   clearTables,
   createArtist,
   createFundraiser,
+  createFundraiserPledge,
   createTrackGroup,
   createUser,
+  createUserTrackGroupPurchase,
 } from "../../../utils";
 import { requestApp } from "../../utils";
 
@@ -21,6 +23,63 @@ describe("manage/artists/{artistId}/fundraisers", () => {
     } catch (e) {
       console.error(e);
     }
+  });
+
+  describe("GET", () => {
+    it("lists the artist's fundraisers with how much each has raised", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+      });
+      const { user: backer } = await createUser({ email: "backer@testcom" });
+      const artist = await createArtist(user.id);
+      const otherArtist = await createArtist(backer.id);
+      const pledged = await createFundraiser(artist.id, {
+        name: "Pledged",
+        isAllOrNothing: true,
+      });
+      await createFundraiserPledge(pledged.id, backer.id, { amount: 4000 });
+      const trackGroup = await createTrackGroup(artist.id);
+      await createFundraiser(artist.id, {
+        name: "Album sales",
+        trackGroupId: trackGroup.id,
+      });
+      await createUserTrackGroupPurchase(backer.id, trackGroup.id, {
+        amount: 1500,
+      });
+      await createFundraiser(otherArtist.id, { name: "Someone else's" });
+
+      const response = await requestApp
+        .get(`manage/artists/${artist.id}/fundraisers`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const byName = Object.fromEntries(
+        response.body.results.map((f: any) => [f.name, f])
+      );
+      assert.deepEqual(Object.keys(byName).sort(), ["Album sales", "Pledged"]);
+      assert.equal(byName["Pledged"].amountRaised, 4000);
+      assert.equal(byName["Pledged"].pledgeCount, 1);
+      assert.equal(byName["Album sales"].amountRaised, 1500);
+      assert.deepEqual(byName["Album sales"].trackGroups, [
+        { id: trackGroup.id, title: trackGroup.title },
+      ]);
+    });
+
+    it("should return 404 if user can't edit the artist", async () => {
+      const { user } = await createUser({ email: "owner@testcom" });
+      const { accessToken: otherToken } = await createUser({
+        email: "nonowner@testcom",
+      });
+      const artist = await createArtist(user.id);
+
+      const response = await requestApp
+        .get(`manage/artists/${artist.id}/fundraisers`)
+        .set("Cookie", [`jwt=${otherToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 404);
+    });
   });
 
   describe("POST", () => {

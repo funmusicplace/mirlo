@@ -8,6 +8,7 @@ import {
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import AlbumForm from "components/ManageArtist/AlbumForm";
 import BackToArtistLink from "components/ManageArtist/BackToArtistLink";
+import { FundraiserFormData } from "components/ManageArtist/Fundraisers/fundraiserFormData";
 import ManageSectionWrapper from "components/ManageArtist/ManageSectionWrapper";
 import AlbumPaymentReceiver from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/AlbumPaymentReceiver";
 import ManageTrackDefaults from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTrackDefaults";
@@ -32,7 +33,7 @@ import { getArtistManageUrl } from "utils/artist";
 
 import { bp } from "../../../../../../constants";
 
-export interface TrackGroupFormData {
+export interface TrackGroupFormData extends FundraiserFormData {
   title: string;
   urlSlug?: string;
   minPrice?: string;
@@ -48,11 +49,6 @@ export interface TrackGroupFormData {
   catalogNumber?: string;
   coverImageAlt?: string;
   coverCredit?: string;
-  goalAmount?: string;
-  isAllOrNothing?: boolean;
-  fundraiserName?: string;
-  fundraiserDescription?: string;
-  fundraiserMinPledge?: string;
 }
 
 export const FormSection = styled.div`

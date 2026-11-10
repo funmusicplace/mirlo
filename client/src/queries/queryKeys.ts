@@ -71,6 +71,8 @@ export const QUERY_KEY_LABELS = "labels";
  */
 export const QUERY_KEY_ARTIST_MANAGERS = "artistManagers";
 
+export const QUERY_KEY_FUNDRAISERS = "fundraisers";
+
 export type QueryTag =
   | typeof QUERY_KEY_AUTH
   | typeof QUERY_KEY_ARTISTS
@@ -83,7 +85,8 @@ export type QueryTag =
   | typeof QUERY_KEY_POSTS
   | typeof QUERY_KEY_NOTIFICATIONS
   | typeof QUERY_KEY_LABELS
-  | typeof QUERY_KEY_ARTIST_MANAGERS;
+  | typeof QUERY_KEY_ARTIST_MANAGERS
+  | typeof QUERY_KEY_FUNDRAISERS;
 
 export type QueryArgs = {
   artistId: number;

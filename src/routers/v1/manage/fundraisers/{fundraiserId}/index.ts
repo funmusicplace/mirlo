@@ -9,6 +9,7 @@ import {
 } from "../../../../../auth/passport";
 import { serializeFundraiser } from "../../../../../serializers/fundraiser";
 import { AppError } from "../../../../../utils/error";
+import { getFundraiserTotals } from "../../../../../utils/fundraiser";
 
 type Params = {
   fundraiserId: string;
@@ -31,6 +32,7 @@ export default function () {
         },
         include: {
           trackGroups: {
+            where: { deletedAt: null },
             include: {
               profile: {
                 select: {
@@ -55,7 +57,12 @@ export default function () {
         });
       }
 
-      return res.status(200).json({ result: serializeFundraiser(fundraiser) });
+      return res.status(200).json({
+        result: {
+          ...serializeFundraiser(fundraiser),
+          ...(await getFundraiserTotals(fundraiser)),
+        },
+      });
     } catch (e) {
       next(e);
     }
@@ -74,6 +81,13 @@ export default function () {
         "minPledge",
         "isAllOrNothing",
       ]);
+
+      if (newValues.endDate && isNaN(Date.parse(newValues.endDate))) {
+        throw new AppError({
+          httpCode: 400,
+          description: "End date isn't a valid date",
+        });
+      }
 
       if (newValues.isAllOrNothing !== undefined) {
         const current = await prisma.fundraiser.findFirst({

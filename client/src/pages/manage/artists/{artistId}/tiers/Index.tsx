@@ -7,12 +7,15 @@ import {
 } from "components/Artist/ArtistButtons";
 import SectionActionStrip from "components/common/SectionActionStrip";
 import { tipButtonStyle } from "components/common/TipArtist";
+import ManageFundraisersList from "components/ManageArtist/Fundraisers/ManageFundraisersList";
 import SubscriptionPayoutsWarning from "components/ManageArtist/ManageArtistDetails/SubscriptionPayoutsWarning";
 import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
 import ManageSubscriptionTierBox from "components/ManageArtist/ManageSubscriptionTierBox";
 import {
   queryManagedArtist,
+  queryManagedArtistFundraisers,
   queryManagedArtistSubscriptionTiers,
+  useCreateFundraiserMutation,
   useCreateSubscriptionTierMutation,
   useUpdateArtistMutation,
 } from "queries";
@@ -31,6 +34,9 @@ const Index: React.FC<{}> = () => {
     keyPrefix: "subscriptionForm",
   });
   const { t: tArtist } = useTranslation("translation", { keyPrefix: "artist" });
+  const { t: tFundraiser } = useTranslation("translation", {
+    keyPrefix: "manageFundraiser",
+  });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const errorHandler = useErrorHandler();
@@ -48,7 +54,13 @@ const Index: React.FC<{}> = () => {
     enabled: Boolean(artistId),
   });
 
+  const { data: fundraisers } = useQuery(
+    queryManagedArtistFundraisers(Number(artistId))
+  );
+
   const { mutate, isPending } = useCreateSubscriptionTierMutation();
+  const { mutate: createFundraiser, isPending: isCreatingFundraiser } =
+    useCreateFundraiserMutation();
   const { mutate: updateArtist, isPending: isUpdatingArtist } =
     useUpdateArtistMutation();
 
@@ -80,6 +92,18 @@ const Index: React.FC<{}> = () => {
         onError: (error) => {
           errorHandler(error);
         },
+      }
+    );
+  };
+
+  const handleAddFundraiser = () => {
+    createFundraiser(
+      { artistId: Number(artistId), name: tFundraiser("untitledFundraiser") },
+      {
+        onSuccess: ({ result }) => {
+          navigate(`/manage/artists/${artistId}/fundraisers/${result.id}`);
+        },
+        onError: (error) => errorHandler(error),
       }
     );
   };
@@ -145,8 +169,24 @@ const Index: React.FC<{}> = () => {
         >
           {t("addNewTier")}
         </ArtistButton>
+        <ArtistButton
+          onClick={handleAddFundraiser}
+          startIcon={<FaPlus />}
+          size="compact"
+          variant="dashed"
+          collapsible
+          isLoading={isCreatingFundraiser}
+          disabled={isCreatingFundraiser}
+        >
+          {tFundraiser("addFundraiser")}
+        </ArtistButton>
       </SectionActionStrip>
       <SubscriptionPayoutsWarning artistId={artist.id} />
+      <ManageFundraisersList
+        artistId={artist.id}
+        fundraisers={fundraisers?.results ?? []}
+        currency={artist.user?.currency}
+      />
       {artist.properties?.showTipOnSupportPage && (
         <div className="mb-3">
           <div

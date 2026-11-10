@@ -43,6 +43,32 @@ describe("manage/fundraisers/{fundraiserId}", () => {
       assert.equal(response.body.result.id, fundraiser.id);
     });
 
+    it("includes how much has been pledged, leaving out cancelled pledges", async () => {
+      const { user, accessToken } = await createUser({
+        email: "fundraiser-owner@example.com",
+      });
+      const { user: backer } = await createUser({ email: "a@example.com" });
+      const { user: quitter } = await createUser({ email: "b@example.com" });
+      const artist = await createArtist(user.id);
+      const fundraiser = await createFundraiser(artist.id, {
+        isAllOrNothing: true,
+      });
+      await createFundraiserPledge(fundraiser.id, backer.id, { amount: 2500 });
+      await createFundraiserPledge(fundraiser.id, quitter.id, {
+        amount: 9000,
+        cancelledAt: new Date(),
+      });
+
+      const response = await requestApp
+        .get(`manage/fundraisers/${fundraiser.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.amountRaised, 2500);
+      assert.equal(response.body.result.pledgeCount, 1);
+    });
+
     it("hides a fundraiser from other users", async () => {
       const { user } = await createUser({
         email: "fundraiser-owner@example.com",
@@ -92,6 +118,39 @@ describe("manage/fundraisers/{fundraiserId}", () => {
 
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.result.minPledge, 2500);
+    });
+
+    it("saves and clears the end date", async () => {
+      const { accessToken, fundraiser } = await setUp();
+      const endDate = "2026-12-01T23:59:59.000Z";
+
+      const saved = await requestApp
+        .put(`manage/fundraisers/${fundraiser.id}`)
+        .send({ endDate })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(saved.statusCode, 200);
+      assert.equal(saved.body.result.endDate, endDate);
+
+      const cleared = await requestApp
+        .put(`manage/fundraisers/${fundraiser.id}`)
+        .send({ endDate: null })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+      assert.equal(cleared.statusCode, 200);
+      assert.equal(cleared.body.result.endDate, null);
+    });
+
+    it("rejects an end date that isn't a date", async () => {
+      const { accessToken, fundraiser } = await setUp();
+
+      const response = await requestApp
+        .put(`manage/fundraisers/${fundraiser.id}`)
+        .send({ endDate: "next tuesday" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 400);
     });
 
     it("refuses to change isAllOrNothing while there are open pledges", async () => {

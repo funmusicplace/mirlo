@@ -714,12 +714,26 @@ interface MerchItemType {
 
 interface Fundraiser {
   id: number;
+  name: string;
+  description?: string | null;
   isAllOrNothing: boolean;
   goalAmount: number;
   minPledge: number;
-  endDate: string;
+  endDate: string | null;
   status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   trackGroups: TrackGroup[];
+}
+
+interface FundraiserTotals {
+  amountRaised: number;
+  pledgeCount: number;
+}
+
+interface ManagedFundraiser extends Fundraiser, FundraiserTotals {}
+
+interface FundraiserSummary
+  extends Omit<Fundraiser, "trackGroups">, FundraiserTotals {
+  trackGroups: Pick<TrackGroup, "id" | "title">[];
 }
 
 interface FundraiserPledge {

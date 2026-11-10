@@ -4,10 +4,8 @@ import { moneyDisplay } from "components/common/Money";
 import { Select } from "components/common/Select";
 import Table from "components/common/Table";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
-import {
-  queryFundraiserPledges,
-  queryManagedFundraiser,
-} from "queries/trackGroups";
+import { queryManagedFundraiser } from "queries/fundraisers";
+import { queryFundraiserPledges } from "queries/trackGroups";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
