@@ -1,6 +1,8 @@
 import prisma from "@mirlo/prisma";
+import * as cheerio from "cheerio";
 
 import { singleInclude, whereForVisibleProfile } from "../utils/artist";
+import { fundraiserImagesInclude } from "../utils/fundraiser";
 import { merchImagesInclude } from "../utils/merch";
 import { postImagesForContent } from "../utils/postContent";
 import { trackGroupPublishedObject } from "../utils/trackGroup";
@@ -126,3 +128,34 @@ export async function fetchMerchMetadata(
     include: { profile: true, images: merchImagesInclude },
   });
 }
+
+export async function fetchFundraiserMetadata(
+  profileSlug: string,
+  fundraiserSlug: string
+) {
+  const numericId = Number(fundraiserSlug);
+  return await prisma.fundraiser.findFirst({
+    where: {
+      isPublic: true,
+      profile: { urlSlug: profileSlug, ...whereForVisibleProfile() },
+      OR: [
+        { urlSlug: { equals: fundraiserSlug, mode: "insensitive" as const } },
+        ...(Number.isInteger(numericId) ? [{ id: numericId }] : []),
+      ],
+    },
+    include: { profile: true, images: fundraiserImagesInclude },
+  });
+}
+
+export const htmlToSummary = (html: string, maxLength = 200) => {
+  const text = cheerio
+    .load(html.replace(/<\/(p|h[1-6]|li|blockquote|div)>|<br\s*\/?>/gi, "$& "))
+    .text()
+    .replace(/\s+/g, " ")
+    .trim();
+  if (text.length <= maxLength) {
+    return text;
+  }
+  const cut = text.slice(0, maxLength);
+  return `${cut.slice(0, cut.lastIndexOf(" ") > 0 ? cut.lastIndexOf(" ") : maxLength)}…`;
+};

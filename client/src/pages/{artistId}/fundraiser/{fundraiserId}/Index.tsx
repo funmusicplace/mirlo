@@ -115,6 +115,7 @@ function Index() {
               modalTitle={t("shareFundraiser")}
               url={`${window.location.origin}${getFundraiserUrl(artist, fundraiser)}`}
               size="big"
+              variant="outlined"
               rounded
             />
           </div>

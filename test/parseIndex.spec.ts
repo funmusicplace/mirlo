@@ -28,6 +28,7 @@ import {
   createMerch,
   createSiteSettings,
   createTier,
+  createFundraiser,
 } from "./utils";
 
 describe("analyzePathAndGenerateHTML", () => {
@@ -467,6 +468,106 @@ describe("analyzePathAndGenerateHTML", () => {
           ?.endsWith("/test-artist/support")
       );
       assert.equal($("#__MIRLO_ARTIST__").length, 1);
+    });
+
+    it("should handle artist/fundraiser/{slug} route with name, text summary and cover image", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createProfile(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      const image = await prisma.image.create({
+        data: { url: [], dimensions: "gallery" },
+      });
+      await prisma.image.update({
+        where: { id: image.id },
+        data: {
+          url: [1920, 1280, 960, 600, 120].map(
+            (width) => `${image.id}-x${width}`
+          ),
+        },
+      });
+      const fundraiser = await createFundraiser(artist.id, {
+        name: "Press it on vinyl",
+        urlSlug: "vinyl",
+        isPublic: true,
+        description:
+          "<p>Help us press <strong>blue</strong> vinyl &amp; tapes.</p><p>Records ship in spring.</p>",
+        images: { create: { imageId: image.id, position: 0 } },
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist/fundraiser/Vinyl", $);
+
+      assert.equal(
+        $('meta[property="og:title"]').attr("content"),
+        "Press it on vinyl"
+      );
+      assert.equal(
+        $('meta[property="og:description"]').attr("content"),
+        "Help us press blue vinyl & tapes. Records ship in spring."
+      );
+      assert(
+        $('link[rel="canonical"]')
+          .attr("href")
+          ?.endsWith("/test-artist/fundraiser/vinyl")
+      );
+      assert(
+        $('meta[property="og:image"]')
+          .attr("content")
+          ?.includes(`${image.id}-x1280`)
+      );
+      const schema = JSON.parse(
+        $('script[type="application/ld+json"]').html()!
+      );
+      assert.equal(schema.headline, "Press it on vinyl");
+      assert.equal(schema.author.name, "My Artist");
+
+      const $byId = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML(
+        `/test-artist/fundraiser/${fundraiser.id}`,
+        $byId
+      );
+      assert.equal(
+        $byId('meta[property="og:title"]').attr("content"),
+        "Press it on vinyl"
+      );
+    });
+
+    it("should describe a fundraiser without text, and not describe a private one", async () => {
+      const { user } = await createUser({ email: "artist@example.com" });
+      const artist = await createProfile(user.id, {
+        name: "My Artist",
+        urlSlug: "test-artist",
+      });
+      await createFundraiser(artist.id, {
+        name: "A van",
+        urlSlug: "a-van",
+        isPublic: true,
+      });
+      await createFundraiser(artist.id, {
+        name: "Secret plans",
+        urlSlug: "secret",
+        isPublic: false,
+      });
+
+      const $ = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML("/test-artist/fundraiser/a-van", $);
+      assert.equal(
+        $('meta[property="og:description"]').attr("content"),
+        "A fundraiser by My Artist on Mirlo"
+      );
+
+      const $private = cheerio.load("<html><head></head></html>");
+      await analyzePathAndGenerateHTML(
+        "/test-artist/fundraiser/secret",
+        $private
+      );
+      assert.equal(
+        $private('meta[property="og:title"]').attr("content"),
+        "My Artist"
+      );
+      assert(!$private.html().includes("Secret plans"));
     });
 
     it("should handle artist/release/{slug} route with album title", async () => {
