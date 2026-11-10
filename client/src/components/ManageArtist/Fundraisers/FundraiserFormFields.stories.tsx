@@ -5,7 +5,7 @@ import { FormProvider, useForm } from "react-hook-form";
 
 import { fundraiserToFormData } from "./fundraiserFormData";
 import FundraiserFormFields from "./FundraiserFormFields";
-import { VAN, VINYL } from "./fundraiserStoryFixtures";
+import { ARTIST, VAN, VINYL } from "./fundraiserStoryFixtures";
 
 type Props = React.ComponentProps<typeof FundraiserFormFields> & {
   fundraiser: FundraiserSummary;
@@ -31,6 +31,7 @@ const meta = {
   component: WithForm,
   parameters: { layout: "padded" },
   args: {
+    artistId: ARTIST.id,
     fundraiser: VAN,
     currency: "usd",
     isAllOrNothing: true,

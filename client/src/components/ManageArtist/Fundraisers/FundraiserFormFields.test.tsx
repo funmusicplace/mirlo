@@ -7,6 +7,18 @@ vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: "en" } }),
 }));
 
+vi.mock("components/common/TextEditor", () => ({
+  default: ({ label, value, onChange, allowMentions, artistId }: any) => (
+    <textarea
+      aria-label={label}
+      data-allow-mentions={String(allowMentions)}
+      data-artist-id={artistId}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ),
+}));
+
 import { FundraiserFormData } from "./fundraiserFormData";
 import FundraiserFormFields from "./FundraiserFormFields";
 
@@ -20,6 +32,7 @@ const renderFields = (
     return (
       <FormProvider {...methods}>
         <FundraiserFormFields
+          artistId={10}
           currency="usd"
           isAllOrNothing={false}
           hasPledges={false}
@@ -47,6 +60,13 @@ describe("FundraiserFormFields", () => {
     expect(
       screen.getByText(/isAllOrNothingLockedWithPledges/)
     ).toBeInTheDocument();
+  });
+
+  test("edits the description as rich text, without mentions", () => {
+    renderFields();
+    const editor = screen.getByLabelText("fundraiserDescription");
+    expect(editor).toHaveAttribute("data-allow-mentions", "false");
+    expect(editor).toHaveAttribute("data-artist-id", "10");
   });
 
   test("asks for an end date", () => {

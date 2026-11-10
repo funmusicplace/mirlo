@@ -10,6 +10,7 @@ import {
 import { serializeFundraiser } from "../../../../../serializers/fundraiser";
 import { AppError } from "../../../../../utils/error";
 import { getFundraiserTotals } from "../../../../../utils/fundraiser";
+import { preparePostContent } from "../../../../../utils/postContent";
 
 type Params = {
   fundraiserId: string;
@@ -81,6 +82,14 @@ export default function () {
         "minPledge",
         "isAllOrNothing",
       ]);
+
+      if (typeof newValues.description === "string") {
+        newValues.description = await preparePostContent(
+          newValues.description,
+          [],
+          { images: false }
+        );
+      }
 
       if (newValues.endDate && isNaN(Date.parse(newValues.endDate))) {
         throw new AppError({

@@ -1,3 +1,5 @@
+import { resolveFundraiserDescription } from "../utils/postContent";
+
 import { processSingleTrackGroup } from "./trackGroup";
 import { Serialized } from "./utils";
 
@@ -12,7 +14,7 @@ export const serializeFundraiser = <T extends object>(
     })[];
   };
   return {
-    ...rest,
+    ...resolveFundraiserDescription(rest as { description?: string | null }),
     ...(trackGroups !== undefined
       ? {
           trackGroups: trackGroups.map((trackGroup) =>

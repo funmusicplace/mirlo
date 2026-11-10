@@ -1330,7 +1330,7 @@
     "minPledge": "Minimum pledge",
     "minPledgeDescription": "The least a supporter can pledge. Pledges are only charged if the goal is met.",
     "fundraiserDescription": "What is this fundraiser for?",
-    "fundraiserDescriptionDescription": "A sentence or two telling listeners what their money goes towards.",
+    "fundraiserDescriptionDescription": "A paragraph or two telling listeners what their money goes towards.",
     "id3Data": "ID3 data",
     "showRawId3Data": "Show raw ID3 data",
     "hideRawId3Data": "Hide raw ID3 data",

@@ -120,6 +120,25 @@ describe("manage/fundraisers/{fundraiserId}", () => {
       assert.equal(response.body.result.minPledge, 2500);
     });
 
+    it("cleans the description, leaving out images", async () => {
+      const { accessToken, fundraiser } = await setUp();
+      const video = `<iframe src="https://www.youtube-nocookie.com/embed/abc" allow="autoplay; fullscreen"></iframe>`;
+
+      const response = await requestApp
+        .put(`manage/fundraisers/${fundraiser.id}`)
+        .send({
+          description: `<p onclick="alert(1)"><strong>Hi</strong></p><script>alert(2)</script><img src="https://example.com/a.jpg" />${video}`,
+        })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const saved = await prisma.fundraiser.findUniqueOrThrow({
+        where: { id: fundraiser.id },
+      });
+      assert.equal(saved.description, `<p><strong>Hi</strong></p>${video}`);
+    });
+
     it("saves and clears the end date", async () => {
       const { accessToken, fundraiser } = await setUp();
       const endDate = "2026-12-01T23:59:59.000Z";

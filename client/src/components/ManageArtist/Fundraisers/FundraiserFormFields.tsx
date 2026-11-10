@@ -1,9 +1,9 @@
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { getCurrencySymbol } from "components/common/Money";
-import TextArea from "components/common/TextArea";
+import TextEditor from "components/common/TextEditor";
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { FundraiserFormData } from "./fundraiserFormData";
@@ -19,13 +19,14 @@ const MoneyInput = React.forwardRef<
 ));
 
 const FundraiserFormFields: React.FC<{
+  artistId: number;
   currency?: string;
   isAllOrNothing: boolean;
   hasPledges: boolean;
   focusGoal?: boolean;
-}> = ({ currency, isAllOrNothing, hasPledges, focusGoal }) => {
+}> = ({ artistId, currency, isAllOrNothing, hasPledges, focusGoal }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const { register } = useFormContext<FundraiserFormData>();
+  const { register, control } = useFormContext<FundraiserFormData>();
 
   const goalRef = React.useRef<HTMLInputElement | null>(null);
   const { ref: goalRegisterRef, ...goalRegisterRest } = register("goalAmount", {
@@ -96,14 +97,22 @@ const FundraiserFormFields: React.FC<{
         </FormComponent>
       </div>
       <FormComponent>
-        <label htmlFor="input-fundraiser-description">
+        <label id="label-fundraiser-description">
           {t("fundraiserDescription")}
         </label>
-        <TextArea
-          id="input-fundraiser-description"
-          rows={3}
-          aria-describedby="description-fundraiser-description"
-          {...register("fundraiserDescription")}
+        <Controller
+          name="fundraiserDescription"
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <TextEditor
+              label={t("fundraiserDescription")}
+              value={value ?? ""}
+              onChange={onChange}
+              artistId={artistId}
+              allowMentions={false}
+              disableFloatingToolbar
+            />
+          )}
         />
         <span className="text-sm" id="description-fundraiser-description">
           {t("fundraiserDescriptionDescription")}

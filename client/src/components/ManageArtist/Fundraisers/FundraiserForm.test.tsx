@@ -20,6 +20,18 @@ vi.mock("queries", () => ({
 vi.mock("services/useErrorHandler", () => ({ default: () => vi.fn() }));
 vi.mock("state/SnackbarContext", () => ({ useSnackbar: () => vi.fn() }));
 vi.mock("./FundraiserActions", () => ({ default: () => null }));
+vi.mock("components/common/TextEditor", () => ({
+  default: ({ label, value, onChange, allowMentions, artistId }: any) => (
+    <textarea
+      aria-label={label}
+      data-allow-mentions={String(allowMentions)}
+      data-artist-id={artistId}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ),
+}));
+
 vi.mock("components/Artist/ArtistButtons", () => ({
   ArtistButton: ({ children, type, disabled }: any) => (
     <button type={type} disabled={disabled}>
@@ -69,6 +81,10 @@ describe("FundraiserForm", () => {
     const goal = screen.getByLabelText("goal");
     await userEvent.clear(goal);
     await userEvent.type(goal, "750.25");
+    await userEvent.type(
+      screen.getByLabelText("fundraiserDescription"),
+      "<p>Hi</p>"
+    );
     await userEvent.click(screen.getByRole("button", { name: "save" }));
 
     await waitFor(() =>
@@ -76,6 +92,7 @@ describe("FundraiserForm", () => {
         fundraiserId: 7,
         body: expect.objectContaining({
           name: "New van",
+          description: "<p>Hi</p>",
           goalAmount: 75025,
           minPledge: 1000,
           isAllOrNothing: true,

@@ -35,7 +35,7 @@ import { usePastedImageUpload } from "./usePastedImageUpload";
 const extensions =
   (
     placeholder: string,
-    mentionHighlightExt: MentionHighlightExtension,
+    mentionHighlightExt: MentionHighlightExtension | null,
     slashHighlightExt: SlashCommandHighlightExtension,
     postId?: number,
     reload?: () => void
@@ -71,7 +71,7 @@ const extensions =
         "data-mention-handle": { default: null },
       },
     }),
-    mentionHighlightExt,
+    ...(mentionHighlightExt ? [mentionHighlightExt] : []),
     slashHighlightExt,
     ...wysiwygPreset(),
   ];
@@ -85,6 +85,7 @@ const TextEditor: React.FC<{
   className?: string;
   disableFloatingToolbar?: boolean;
   basicStyles?: boolean;
+  allowMentions?: boolean;
   label?: string;
 }> = ({
   onChange,
@@ -95,6 +96,7 @@ const TextEditor: React.FC<{
   className,
   disableFloatingToolbar,
   basicStyles = false,
+  allowMentions = true,
   label,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "textEditor" });
@@ -113,7 +115,7 @@ const TextEditor: React.FC<{
   const { manager, state, setState } = useRemirror({
     extensions: extensions(
       t("typeSomething").toString(),
-      mentionHighlightExtRef.current,
+      allowMentions ? mentionHighlightExtRef.current : null,
       slashHighlightExtRef.current,
       postId,
       reloadImages
@@ -271,8 +273,9 @@ const TextEditor: React.FC<{
         state={state}
         label={label}
         onChange={(parameter) => {
-          const html = prosemirrorNodeToHtml(parameter.state.doc);
-          onChange(html);
+          if (parameter.tr?.docChanged) {
+            onChange(prosemirrorNodeToHtml(parameter.state.doc));
+          }
           setState(parameter.state);
           void uploadPastedImages();
         }}
@@ -291,9 +294,11 @@ const TextEditor: React.FC<{
           commands={SLASH_COMMANDS}
           anchorRef={slashHighlightExtRef.current!.anchorRef}
         />
-        <MentionCommands
-          anchorRef={mentionHighlightExtRef.current!.anchorRef}
-        />
+        {allowMentions && (
+          <MentionCommands
+            anchorRef={mentionHighlightExtRef.current!.anchorRef}
+          />
+        )}
       </Remirror>
     </div>
   );

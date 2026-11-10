@@ -90,6 +90,7 @@ const FundraisingGoal: React.FC<{
         />
       </div>
       <FundraiserFormFields
+        artistId={artistId}
         currency={user?.currency}
         isAllOrNothing={fundraiser.isAllOrNothing}
         hasPledges={(totalPledges ?? 0) > 0}

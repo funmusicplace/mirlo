@@ -55,7 +55,7 @@ const FundraiserForm: React.FC<{
           <FundraiserProgressCircle
             amountRaised={fundraiser.amountRaised}
             goalAmount={fundraiser.goalAmount}
-            size={48}
+            size="large"
           />
           <p>
             {t("raisedOutOfGoal", {
@@ -104,6 +104,7 @@ const FundraiserForm: React.FC<{
           className="flex flex-col gap-2"
         >
           <FundraiserFormFields
+            artistId={artistId}
             currency={currency}
             isAllOrNothing={fundraiser.isAllOrNothing}
             hasPledges={fundraiser.pledgeCount > 0}

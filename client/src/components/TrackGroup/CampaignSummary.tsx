@@ -5,6 +5,7 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Confetti from "components/common/Confetti";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { moneyDisplay } from "components/common/Money";
+import RichTextContent from "components/common/RichTextContent";
 import ShareToSocials from "components/common/ShareToSocials";
 import { AnnouncementWrapper } from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
 import {
@@ -108,9 +109,10 @@ function CampaignSummary({
           </h3>
         )}
         {trackGroup.fundraiser?.description && (
-          <p className="mb-2 whitespace-pre-line">
-            {trackGroup.fundraiser.description}
-          </p>
+          <RichTextContent
+            html={trackGroup.fundraiser.description}
+            className="mb-2"
+          />
         )}
         <div
           className={css`

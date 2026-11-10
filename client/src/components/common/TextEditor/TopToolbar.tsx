@@ -77,7 +77,7 @@ const TopToolbar: React.FC<{
             {/* <Button startIcon={<FaImage />} /> */}
             <InsertVideoButton />
             <InsertMirloWidgetButton artistId={artistId} />
-            <InsertImageButton postId={postId} />
+            {postId && <InsertImageButton postId={postId} />}
           </CommandButtonGroup>
         )}
       </Toolbar>

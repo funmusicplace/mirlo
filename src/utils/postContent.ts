@@ -104,8 +104,21 @@ const postContentSanitizeOptions: sanitizeHtml.IOptions = {
   },
 };
 
-export const sanitizePostContent = (content: string) =>
-  sanitizeHtml(content, postContentSanitizeOptions);
+const withoutImagesSanitizeOptions: sanitizeHtml.IOptions = {
+  ...postContentSanitizeOptions,
+  allowedTags: (postContentSanitizeOptions.allowedTags || []).filter(
+    (tag) => tag !== "img"
+  ),
+};
+
+export const sanitizePostContent = (
+  content: string,
+  { images = true }: { images?: boolean } = {}
+) =>
+  sanitizeHtml(
+    content,
+    images ? postContentSanitizeOptions : withoutImagesSanitizeOptions
+  );
 
 export const sanitizeProfileEmailMessages = <T>(properties: T): T => {
   const emails = (properties as { emails?: Record<string, unknown> } | null)
@@ -126,10 +139,11 @@ export const sanitizeProfileEmailMessages = <T>(properties: T): T => {
 
 export const preparePostContent = async (
   content: string,
-  imageIds: string[] = []
+  imageIds: string[] = [],
+  { images = true }: { images?: boolean } = {}
 ) =>
   stripWidgetHosts(
-    addImageRefs(sanitizePostContent(content), imageIds),
+    addImageRefs(sanitizePostContent(content, { images }), imageIds),
     await ownWidgetOrigins()
   );
 
@@ -186,6 +200,17 @@ export const resolveWidgetPaths = (content: string) => {
   });
   return changed ? $.html() : content;
 };
+
+export const resolveFundraiserDescription = <
+  T extends { description?: string | null },
+>(
+  fundraiser: T
+): T => ({
+  ...fundraiser,
+  description: fundraiser.description
+    ? resolveWidgetPaths(fundraiser.description)
+    : fundraiser.description,
+});
 
 export const resolvePostContent = (post: {
   content?: string | null;

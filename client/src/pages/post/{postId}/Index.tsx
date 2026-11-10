@@ -1,14 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Box from "components/common/Box";
-import LazyIframe from "components/common/LazyIframe";
-import MarkdownWrapper from "components/common/MarkdownWrapper";
 import { MetaCard } from "components/common/MetaCard";
 import { PageMarkdownWrapper } from "components/common/PageMarkdownWrapper";
+import RichTextContent from "components/common/RichTextContent";
 import SupportArtistPopUp from "components/common/SupportArtistPopUp";
 import PostHeader from "components/Post/PostHeader";
 import PostTracksDock from "components/Post/PostTracksDock";
-import parse, { Element } from "html-react-parser";
 import { queryPost } from "queries";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -86,18 +84,7 @@ const Index: React.FC = () => {
               />
             </div>
           )}
-          {!post.isContentHidden && (
-            <MarkdownWrapper>
-              {parse(post.content, {
-                replace(node) {
-                  if (node instanceof Element && node.tagName === "iframe") {
-                    const { loading: _loading, ...attribs } = node.attribs;
-                    return <LazyIframe {...attribs} />;
-                  }
-                },
-              })}
-            </MarkdownWrapper>
-          )}
+          {!post.isContentHidden && <RichTextContent html={post.content} />}
           {post.featuredImage && post.featuredImageCredit && (
             <p className="mt-8 pt-2 mb-0 border-t border-(--mi-tint-x-color) text-sm opacity-75">
               {t("featuredImageCredit", { credit: post.featuredImageCredit })}

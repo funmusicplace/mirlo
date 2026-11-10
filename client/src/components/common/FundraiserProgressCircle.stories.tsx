@@ -32,13 +32,13 @@ export const NothingYet: Story = { args: { amountRaised: 0 } };
 export const PastTheGoal: Story = { args: { amountRaised: 3100000 } };
 
 /** The size used at the top of the fundraiser edit page */
-export const Large: Story = { args: { size: 48 } };
+export const Large: Story = { args: { size: "large" } };
 
 /** Uses the artist's button colour when one is set */
 export const ArtistColour: Story = {
   decorators: [
     (Story) => (
-      <div style={{ ["--mi-button-color" as string]: "#2a9d8f" }}>
+      <div className="[--mi-button-color:#2a9d8f]">
         <Story />
       </div>
     ),
