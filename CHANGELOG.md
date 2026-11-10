@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.2.0](https://github.com/funmusicplace/mirlo/compare/v1.1.0...v1.2.0) (2026-11-09)
+## [1.2.0](https://github.com/funmusicplace/mirlo/compare/v1.1.0...v1.2.0) (2026-11-10)
 
 
 ### Features
@@ -18,6 +18,8 @@
 * **activitypub:** only drop a follower when their account is deleted ([58596aa](https://github.com/funmusicplace/mirlo/commit/58596aa1ece472e72560b2dede28858bca53537a))
 * **activitypub:** resolve follower inbox before storing the follow ([a328485](https://github.com/funmusicplace/mirlo/commit/a328485b3a47d26fddff589f790603900bd56c80))
 * **activitypub:** route WebFinger lookups through Fedify to block SSRF ([3d3fec0](https://github.com/funmusicplace/mirlo/commit/3d3fec03d077d5a425bb90acb84a569b5e4d511a))
+* **api:** break trackGroups order ties with id so pages stay stable ([3860d55](https://github.com/funmusicplace/mirlo/commit/3860d55b9bf01627c712375a6226d4d8596ebdbb))
+* **api:** break trackGroups order ties with id so pages stay stable ([32a40eb](https://github.com/funmusicplace/mirlo/commit/32a40eb879de797b3d72615e8939f9347beacea6))
 * **artists:** keep thank-you notes private and sanitise them on save ([75f0915](https://github.com/funmusicplace/mirlo/commit/75f09155c3611066d4eb6ff293f51621d7414fb9))
 * **auth:** end other sessions when a password reset ([34f5e85](https://github.com/funmusicplace/mirlo/commit/34f5e8524ab70e7b2dfd4437ab78d464f5358fa0))
 * **auth:** limit wrong email-code guesses per address ([6719c45](https://github.com/funmusicplace/mirlo/commit/6719c45e03977bc66228b5c8c97d5ef65ff1adf2))
