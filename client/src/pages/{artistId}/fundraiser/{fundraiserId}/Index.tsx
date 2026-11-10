@@ -13,7 +13,8 @@ import FundraiserRecentPledges, {
   FundraiserPledgeTicker,
 } from "components/Fundraiser/FundraiserRecentPledges";
 import FundraiserSupport from "components/Fundraiser/FundraiserSupport";
-import { queryPublicFundraiser } from "queries";
+import ReleaseArtistBlock from "components/TrackGroup/ReleaseArtistBlock";
+import { queryArtist, queryPublicFundraiser } from "queries";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { getArtistUrl, getFundraiserUrl, getReleaseUrl } from "utils/artist";
@@ -29,6 +30,9 @@ function Index() {
       fundraiserId: fundraiserId ?? "",
       artistId: artistId ?? "",
     })
+  );
+  const { data: fullArtist } = useQuery(
+    queryArtist({ artistSlug: artistId ?? "" })
   );
 
   if (isLoading) {
@@ -134,6 +138,11 @@ function Index() {
           </div>
         )}
       </div>
+      {fullArtist && (
+        <div className="mx-auto w-full max-w-6xl px-4 pb-4">
+          <ReleaseArtistBlock artist={fullArtist} />
+        </div>
+      )}
     </WidthContainer>
   );
 }
