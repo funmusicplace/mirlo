@@ -107,7 +107,10 @@ export const PUBLIC_VINYL: PublicFundraiser = {
   urlSlug: "vinyl",
   isPublic: true,
   description:
-    "<p>Help us press 300 copies on <strong>sea-glass blue vinyl</strong>. You're only charged if we hit the goal.</p>",
+    "<p>Help us press 300 copies on <strong>sea-glass blue vinyl</strong>. You're only charged if we hit the goal.</p>" +
+    "<p>We recorded Tidal Hours over two winters in a converted boathouse, with the tape machine running off a borrowed generator. The songs grew out of long nights listening to the tide come in, and we've always heard them as a record you flip over halfway through.</p>" +
+    "<p>The money covers mastering for vinyl, lacquers, the pressing itself and printed sleeves designed by our friend Ana. Anything over the goal goes towards a small run of test pressings for the people who backed us first.</p>" +
+    "<p>If we reach the goal, records ship in the spring. Every backer also gets the digital album straight away, and we'll post updates here as each step of the pressing is done.</p>",
   images: VINYL_IMAGES,
   trackGroups: [
     { id: 4, title: "Tidal Hours", urlSlug: "tidal-hours", platformPercent: 7 },
