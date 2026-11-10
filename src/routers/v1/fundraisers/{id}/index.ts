@@ -51,6 +51,7 @@ export default function () {
               userId: true,
               paymentToUserId: true,
               defaultPlatformFee: true,
+              avatar: true,
               user: { select: { currency: true } },
             },
           },

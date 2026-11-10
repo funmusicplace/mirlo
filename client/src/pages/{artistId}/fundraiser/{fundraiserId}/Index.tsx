@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
+import AvatarLink from "components/Artist/AvatarLink";
 import Box from "components/common/Box";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
-import FundraiserProgressCircle from "components/common/FundraiserProgressCircle";
 import ImageGallery from "components/common/ImageGallery";
 import { MetaCard } from "components/common/MetaCard";
-import { moneyDisplay } from "components/common/Money";
 import RichTextContent from "components/common/RichTextContent";
 import ShareButton from "components/common/ShareButton";
 import WidthContainer from "components/common/WidthContainer";
+import FundraiserGauge from "components/Fundraiser/FundraiserGauge";
 import FundraiserRecentPledges, {
   FundraiserPledgeTicker,
 } from "components/Fundraiser/FundraiserRecentPledges";
@@ -19,7 +19,7 @@ import { getFundraiserUrl, getReleaseUrl } from "utils/artist";
 import { getHtmlExcerpt } from "utils/getHtmlExcerpt";
 
 function Index() {
-  const { t, i18n } = useTranslation("translation", {
+  const { t } = useTranslation("translation", {
     keyPrefix: "fundraiserPage",
   });
   const { artistId, fundraiserId } = useParams();
@@ -39,6 +39,7 @@ function Index() {
 
   const { artist } = fundraiser;
   const currency = artist.user?.currency;
+  const hasMedia = !!fundraiser.videoEmbedUrl || fundraiser.images.length > 0;
 
   return (
     <WidthContainer variant="big" justify="center">
@@ -53,9 +54,15 @@ function Index() {
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-start gap-6 p-4 lg:grid-cols-[3fr_2fr] lg:gap-10">
         <div className="lg:col-start-1">
           <h1 className="mb-1! font-black!">{fundraiser.name}</h1>
-          <Link to={`/${artist.urlSlug}`}>{artist.name}</Link>
+          <div className="text-sm">
+            <AvatarLink
+              avatar={artist.avatar?.sizes?.[60]}
+              name={artist.name}
+              to={`/${artist.urlSlug}`}
+            />
+          </div>
         </div>
-        {(fundraiser.videoEmbedUrl || fundraiser.images.length > 0) && (
+        {hasMedia && (
           <div className="lg:col-start-1">
             <ImageGallery
               aspect="video"
@@ -69,45 +76,25 @@ function Index() {
             />
           </div>
         )}
-        <aside className="flex flex-col gap-6 rounded-lg border border-(--mi-tint-x-color) bg-(--mi-background-color) p-6 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-4 lg:row-start-1">
-          <div className="flex items-center gap-3">
-            <FundraiserProgressCircle
-              amountRaised={fundraiser.amountRaised}
-              goalAmount={fundraiser.goalAmount}
-              size="large"
-            />
-            <div>
-              <p className="font-semibold">
-                {t("raisedOutOfGoal", {
-                  raised: moneyDisplay({
-                    amount: fundraiser.amountRaised / 100,
-                    currency,
-                    options: { trailingZeroDisplay: "stripIfInteger" },
-                  }),
-                  goal: moneyDisplay({
-                    amount: fundraiser.goalAmount / 100,
-                    currency,
-                    options: { notation: "compact", maximumFractionDigits: 1 },
-                  }),
-                })}
-              </p>
-              {fundraiser.endDate && (
-                <p className="text-sm">
-                  {t("endsOn", {
-                    date: new Date(fundraiser.endDate).toLocaleDateString(
-                      i18n.language
-                    ),
-                  })}
-                </p>
-              )}
-            </div>
-          </div>
+        <aside
+          className={`flex flex-col gap-6 rounded-lg border border-(--mi-tint-x-color) p-6 lg:sticky lg:top-4 lg:col-start-2 ${hasMedia ? "lg:row-span-3 lg:row-start-2" : "lg:row-span-4 lg:row-start-1"}`}
+        >
+          <FundraiserGauge
+            amountRaised={fundraiser.amountRaised}
+            goalAmount={fundraiser.goalAmount}
+            currency={currency}
+            pledgeCount={
+              fundraiser.isAllOrNothing ? fundraiser.pledgeCount : undefined
+            }
+            className="-mx-6 -mt-6 rounded-t-lg bg-(--mi-tint-color) p-6"
+            endDate={fundraiser.endDate}
+          />
           <FundraiserPledgeTicker
             pledges={fundraiser.recentPledges}
             currency={currency}
             className="lg:hidden"
           />
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 ">
             <FundraiserSupport fundraiser={fundraiser} />
             <ShareButton
               label={t("share")}

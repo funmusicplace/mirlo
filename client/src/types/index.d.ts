@@ -764,6 +764,7 @@ interface PublicFundraiser
     | "userId"
     | "paymentToUserId"
     | "defaultPlatformFee"
+    | "avatar"
   > & { user?: { currency?: string } };
 }
 

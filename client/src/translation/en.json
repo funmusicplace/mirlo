@@ -517,7 +517,6 @@
     "doesNotExist": "This fundraiser doesn't exist.",
     "fundraiserByArtist": "A fundraiser by {{artistName}}",
     "video": "Fundraiser video",
-    "raisedOutOfGoal": "{{raised}} out of {{goal}} raised",
     "endsOn": "Ends on {{date}}",
     "ended": "This fundraiser has ended.",
     "thanksForPledging": "Thanks for your pledge! You'll only be charged if the fundraiser reaches its goal.",
@@ -529,7 +528,11 @@
     "shareFundraiser": "Share this fundraiser",
     "recentPledges": "Recent pledges",
     "someonePledged": "Someone pledged",
-    "someonePledgedAmount": "Someone pledged {{amount}}"
+    "someonePledgedAmount": "Someone pledged {{amount}}",
+    "goalAmount": "goal: {{amount}}",
+    "pledgeCount_one": "<strong>{{formattedCount}}</strong> pledge",
+    "pledgeCount_other": "<strong>{{formattedCount}}</strong> pledges",
+    "percentOfGoal": "<strong>{{percent}}</strong> of the goal"
   },
   "merchDetails": {
     "merchByArtist": "Merch by {{artist}} on {{instanceName}}",

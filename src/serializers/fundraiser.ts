@@ -18,6 +18,16 @@ export const serializeFundraiserImage = (
   position: fundraiserImage.position,
 });
 
+const serializeFundraiserArtist = (profile: object) => {
+  const { avatar, ...rest } = profile as {
+    avatar?: Parameters<typeof addSizesToStoredImage>[0];
+  };
+  return {
+    ...omitPrivateProfileFields(rest),
+    ...(avatar !== undefined ? { avatar: addSizesToStoredImage(avatar) } : {}),
+  };
+};
+
 export const serializeFundraiser = <T extends object>(
   fundraiser: T
 ): Serialized<T> => {
@@ -37,7 +47,7 @@ export const serializeFundraiser = <T extends object>(
     ...(images !== undefined
       ? { images: images.map(serializeFundraiserImage) }
       : {}),
-    ...(profile ? { artist: omitPrivateProfileFields(profile) } : {}),
+    ...(profile ? { artist: serializeFundraiserArtist(profile) } : {}),
     ...(trackGroups !== undefined
       ? {
           trackGroups: trackGroups.map((trackGroup) =>

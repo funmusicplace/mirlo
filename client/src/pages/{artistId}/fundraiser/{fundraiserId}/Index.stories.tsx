@@ -1,11 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { expect, within } from "@storybook/test";
+import ArtistColorsProvider from "components/ArtistColorsProvider";
 import {
   ARTIST,
   PUBLIC_VINYL,
   publicFundraiserHandler,
 } from "components/ManageArtist/Fundraisers/fundraiserStoryFixtures";
 import { http, HttpResponse } from "msw";
+import { THEMES, withTheme } from "showcase/artistPage/artistPageData";
 import { reactRouterParameters } from "storybook-addon-remix-react-router";
 
 import { artistHandlers } from "../../../../../.storybook/handlers";
@@ -55,7 +57,7 @@ export const WithVideoAndImages: Story = {
       canvas.getByRole("button", { name: "Share" })
     ).toBeInTheDocument();
     await expect(
-      canvas.getByText("$3,125 out of $5K raised")
+      canvas.getByRole("progressbar", { name: "62% of the goal raised" })
     ).toBeInTheDocument();
     await expect(
       within(
@@ -68,6 +70,22 @@ export const WithVideoAndImages: Story = {
     await expect(
       canvas.getByRole("link", { name: "Tidal Hours" })
     ).toHaveAttribute("href", "/tidal-hours/release/tidal-hours");
+  },
+};
+
+/** With an artist's dark colour theme */
+export const DarkArtistColours: Story = {
+  decorators: [
+    (Story) => (
+      <ArtistColorsProvider>
+        <Story />
+      </ArtistColorsProvider>
+    ),
+  ],
+  parameters: {
+    msw: {
+      handlers: { artist: artistHandlers(withTheme(ARTIST, THEMES.ember)) },
+    },
   },
 };
 

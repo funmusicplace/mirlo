@@ -10,6 +10,7 @@ import {
   createArtist,
   createFundraiser,
   createFundraiserPledge,
+  createProfileImage,
   createUser,
 } from "../../utils";
 import { requestApp } from "../utils";
@@ -55,6 +56,18 @@ describe("fundraisers/{id}", () => {
     assert.equal(response.body.result.pledgeCount, 1);
     assert.deepEqual(response.body.result.images, []);
     assert.equal(response.body.result.artist.apPrivateKey, undefined);
+  });
+
+  it("includes the artist's avatar with its sizes", async () => {
+    const { artist } = await setUp();
+    await createProfileImage(artist.id, "avatar", { url: ["avatar-x60"] });
+
+    const response = await requestApp
+      .get("fundraisers/a-van?artistId=tidal-hours")
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.ok(response.body.result.artist.avatar.sizes[60]);
   });
 
   it("finds a public fundraiser by id", async () => {

@@ -128,6 +128,11 @@ export const PUBLIC_VINYL: PublicFundraiser = {
     urlSlug: ARTIST.urlSlug,
     userId: ARTIST.userId,
     defaultPlatformFee: 10,
+    avatar: {
+      url: "/showcase/avatar.svg",
+      sizes: { 60: "/showcase/avatar.svg" },
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    },
     user: { currency: "usd" },
   },
 };
