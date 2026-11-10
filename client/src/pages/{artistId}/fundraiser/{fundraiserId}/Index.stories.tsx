@@ -55,8 +55,13 @@ export const WithVideoAndImages: Story = {
       canvas.getByRole("button", { name: "Share" })
     ).toBeInTheDocument();
     await expect(
-      canvas.getByText("$3,125.00 out of $5,000.00 raised")
+      canvas.getByText("$3,125 out of $5K raised")
     ).toBeInTheDocument();
+    await expect(
+      within(
+        canvas.getByRole("region", { name: "Recent pledges", hidden: true })
+      ).getAllByRole("listitem", { hidden: true })
+    ).toHaveLength(5);
     await expect(canvas.getByText("sea-glass blue vinyl").tagName).toBe(
       "STRONG"
     );

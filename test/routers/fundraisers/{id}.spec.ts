@@ -68,6 +68,34 @@ describe("fundraisers/{id}", () => {
     assert.equal(response.body.result.urlSlug, "a-van");
   });
 
+  it("lists the six latest pledges without saying who made them", async () => {
+    const { fundraiser } = await setUp();
+    for (let i = 0; i < 8; i++) {
+      const { user } = await createUser({ email: `backer${i}@example.com` });
+      await createFundraiserPledge(fundraiser.id, user.id, {
+        amount: 1000 + i,
+        createdAt: new Date(2026, 0, 1 + i),
+        cancelledAt: i === 7 ? new Date() : undefined,
+      });
+    }
+
+    const response = await requestApp
+      .get(`fundraisers/${fundraiser.id}`)
+      .set("Accept", "application/json");
+
+    const { recentPledges } = response.body.result;
+    assert.deepEqual(
+      recentPledges.map((p: { amount: number }) => p.amount),
+      [1006, 1005, 1004, 1003, 1002, 1001]
+    );
+    assert.deepEqual(Object.keys(recentPledges[0]).sort(), [
+      "amount",
+      "createdAt",
+      "id",
+    ]);
+    assert.equal(response.body.result.pledges, undefined);
+  });
+
   it("raises the minimum pledge to Stripe's minimum charge", async () => {
     const { fundraiser } = await setUp({ minPledge: 0 });
 

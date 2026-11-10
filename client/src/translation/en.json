@@ -526,7 +526,10 @@
     "pledge": "Pledge",
     "stillToGo": "Still {{amount}} to go",
     "share": "Share",
-    "shareFundraiser": "Share this fundraiser"
+    "shareFundraiser": "Share this fundraiser",
+    "recentPledges": "Recent pledges",
+    "someonePledged": "Someone pledged",
+    "someonePledgedAmount": "Someone pledged {{amount}}"
   },
   "merchDetails": {
     "merchByArtist": "Merch by {{artist}} on {{instanceName}}",

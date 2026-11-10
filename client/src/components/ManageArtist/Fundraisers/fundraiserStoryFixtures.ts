@@ -112,6 +112,13 @@ export const PUBLIC_VINYL: PublicFundraiser = {
     "<p>The money covers mastering for vinyl, lacquers, the pressing itself and printed sleeves designed by our friend Ana. Anything over the goal goes towards a small run of test pressings for the people who backed us first.</p>" +
     "<p>If we reach the goal, records ship in the spring. Every backer also gets the digital album straight away, and we'll post updates here as each step of the pressing is done.</p>",
   images: VINYL_IMAGES,
+  recentPledges: [2500, 1000, 5000, 1500, 2000, 10000].map((amount, i) => ({
+    id: 100 - i,
+    amount,
+    createdAt: new Date(
+      Date.now() - (i * 3 + 1) * 60 * 60 * 1000
+    ).toISOString(),
+  })),
   trackGroups: [
     { id: 4, title: "Tidal Hours", urlSlug: "tidal-hours", platformPercent: 7 },
   ],

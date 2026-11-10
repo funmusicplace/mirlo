@@ -54,6 +54,12 @@ export default function () {
               user: { select: { currency: true } },
             },
           },
+          pledges: {
+            where: { cancelledAt: null },
+            orderBy: { createdAt: "desc" },
+            take: 6,
+            select: { id: true, amount: true, createdAt: true },
+          },
           trackGroups: {
             where: whereForPublishedTrackGroups(),
             select: {
@@ -73,9 +79,11 @@ export default function () {
         });
       }
 
+      const { pledges, ...rest } = fundraiser;
       res.json({
         result: {
-          ...serializeFundraiser(fundraiser),
+          ...serializeFundraiser(rest),
+          recentPledges: pledges,
           minPledge: minimumPledge(
             fundraiser.minPledge,
             fundraiser.profile.user?.currency

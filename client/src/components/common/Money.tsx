@@ -17,9 +17,11 @@ export const getCurrencySymbol = (currency?: string, locale?: string) => {
 export const moneyDisplay = ({
   amount,
   currency,
+  options,
 }: {
   amount?: number | string;
   currency?: string;
+  options?: Intl.NumberFormatOptions;
 }) => {
   if (amount === undefined || amount === null) {
     return "-";
@@ -27,6 +29,7 @@ export const moneyDisplay = ({
   return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency: currency ?? "usd",
+    ...options,
   }).format(+amount);
 };
 

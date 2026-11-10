@@ -8,6 +8,9 @@ import { moneyDisplay } from "components/common/Money";
 import RichTextContent from "components/common/RichTextContent";
 import ShareButton from "components/common/ShareButton";
 import WidthContainer from "components/common/WidthContainer";
+import FundraiserRecentPledges, {
+  FundraiserPledgeTicker,
+} from "components/Fundraiser/FundraiserRecentPledges";
 import FundraiserSupport from "components/Fundraiser/FundraiserSupport";
 import { queryPublicFundraiser } from "queries";
 import { useTranslation } from "react-i18next";
@@ -47,12 +50,26 @@ function Index() {
         }
         image={fundraiser.images[0]?.sizes?.[600]}
       />
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4">
-        <div className="flex flex-col gap-3">
-          <div>
-            <h1 className="mb-1! font-black!">{fundraiser.name}</h1>
-            <Link to={`/${artist.urlSlug}`}>{artist.name}</Link>
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-start gap-6 p-4 lg:grid-cols-[3fr_2fr] lg:gap-10">
+        <div className="lg:col-start-1">
+          <h1 className="mb-1! font-black!">{fundraiser.name}</h1>
+          <Link to={`/${artist.urlSlug}`}>{artist.name}</Link>
+        </div>
+        {(fundraiser.videoEmbedUrl || fundraiser.images.length > 0) && (
+          <div className="lg:col-start-1">
+            <ImageGallery
+              aspect="video"
+              images={fundraiser.images}
+              alt={fundraiser.name}
+              video={
+                fundraiser.videoEmbedUrl
+                  ? { src: fundraiser.videoEmbedUrl, title: t("video") }
+                  : undefined
+              }
+            />
           </div>
+        )}
+        <aside className="flex flex-col gap-6 rounded-lg border border-(--mi-tint-x-color) bg-(--mi-background-color) p-6 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-4 lg:row-start-1">
           <div className="flex items-center gap-3">
             <FundraiserProgressCircle
               amountRaised={fundraiser.amountRaised}
@@ -65,10 +82,12 @@ function Index() {
                   raised: moneyDisplay({
                     amount: fundraiser.amountRaised / 100,
                     currency,
+                    options: { trailingZeroDisplay: "stripIfInteger" },
                   }),
                   goal: moneyDisplay({
                     amount: fundraiser.goalAmount / 100,
                     currency,
+                    options: { notation: "compact", maximumFractionDigits: 1 },
                   }),
                 })}
               </p>
@@ -83,35 +102,36 @@ function Index() {
               )}
             </div>
           </div>
-        </div>
-        {(fundraiser.videoEmbedUrl || fundraiser.images.length > 0) && (
-          <ImageGallery
-            aspect="video"
-            images={fundraiser.images}
-            alt={fundraiser.name}
-            video={
-              fundraiser.videoEmbedUrl
-                ? { src: fundraiser.videoEmbedUrl, title: t("video") }
-                : undefined
-            }
+          <FundraiserPledgeTicker
+            pledges={fundraiser.recentPledges}
+            currency={currency}
+            className="lg:hidden"
           />
-        )}
-        <div className="flex flex-wrap items-center gap-2">
-          <FundraiserSupport fundraiser={fundraiser} />
-          <ShareButton
-            label={t("share")}
-            title={fundraiser.name}
-            modalTitle={t("shareFundraiser")}
-            url={`${window.location.origin}${getFundraiserUrl(artist, fundraiser)}`}
-            size="big"
-            rounded
+          <div className="flex flex-wrap items-center gap-2">
+            <FundraiserSupport fundraiser={fundraiser} />
+            <ShareButton
+              label={t("share")}
+              title={fundraiser.name}
+              modalTitle={t("shareFundraiser")}
+              url={`${window.location.origin}${getFundraiserUrl(artist, fundraiser)}`}
+              size="big"
+              rounded
+            />
+          </div>
+          <FundraiserRecentPledges
+            pledges={fundraiser.recentPledges}
+            currency={currency}
+            className="hidden lg:block"
           />
-        </div>
+        </aside>
         {fundraiser.description && (
-          <RichTextContent html={fundraiser.description} />
+          <RichTextContent
+            html={fundraiser.description}
+            className="lg:col-start-1"
+          />
         )}
         {fundraiser.trackGroups.length > 0 && (
-          <div>
+          <div className="lg:col-start-1">
             <h2 className="text-base! mb-1!">{t("releases")}</h2>
             <ul className="list-disc pl-6">
               {fundraiser.trackGroups.map((trackGroup) => (
