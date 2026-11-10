@@ -24,6 +24,8 @@ You can also add a fundraiser to a release from the release editor.
 The release page then shows the fundraiser's progress, and supporters
 can back it from there as well as from the fundraiser's own page.
 
+![fundraiser sample](./images/fundraising-sample.png)
+
 ## What goes on the page
 
 - **Name**, shown at the top of the page.
@@ -42,9 +44,9 @@ can back it from there as well as from the fundraiser's own page.
 Fundraisers start out private. Click **Make public** when the page is
 ready, and **Make private** to hide it again.
 
-The page's address is shown under the name. Click it to change the
-last part of the URL. Changing it on a public fundraiser breaks links
-people have already shared.
+The page's address is shown under the name. Click **Change URL** to
+edit the last part of it, then save the fundraiser. Changing it on a
+public fundraiser breaks links people have already shared.
 
 ## All-or-nothing fundraisers
 
@@ -57,10 +59,11 @@ the goal is reached.
   page (or the release page) until the pledges are charged.
 - The smallest pledge is the smallest amount Stripe can charge in
   your currency (for example $0.50 or £0.30).
-- Once the pledges add up to the goal, click **Charge pledges now**.
-  Every backer is charged and gets an email saying the fundraiser was
+- Once the pledges add up to the goal, click **Charge pledges now**
+  and confirm. Every backer is charged and gets an email saying the fundraiser was
   funded. If a card fails, that backer gets an email asking them to
-  pay another way.
+  pay another way. Once the pledges are being charged, backers can no
+  longer change or cancel them.
 - The **Pledges** button lists everyone who has pledged.
 
 All-or-nothing can't be turned off once someone has pledged.
@@ -79,5 +82,6 @@ done**.
   fundraiser done yourself.
 - Tips made from a fundraiser's page don't count towards its goal
   yet.
-- Removing a fundraiser cancels any pledges that haven't been
-  charged.
+- Removing a fundraiser asks you to confirm first, and cancels any
+  pledges that haven't been charged. Its address is freed, so a new
+  fundraiser can use it.

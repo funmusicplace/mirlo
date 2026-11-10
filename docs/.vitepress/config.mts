@@ -33,7 +33,6 @@ export default defineConfig({
           { text: "For artists", link: "/features/for-artists" },
           { text: "For labels", link: "/features/for-labels" },
           { text: "For listeners", link: "/features/for-listeners" },
-          { text: "Fundraisers", link: "/features/fundraisers" },
         ],
       },
       { text: "FAQ", link: "/faq" },
@@ -46,6 +45,7 @@ export default defineConfig({
             text: "Setting up an artist account",
             link: "/how-tos/setting-up-an-artist-account",
           },
+          { text: "Fundraisers", link: "/how-tos/fundraisers" },  
           {
             text: "Subscriber-only releases",
             link: "/how-tos/subscriber-only-releases",
