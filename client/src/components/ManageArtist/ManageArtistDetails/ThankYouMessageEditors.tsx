@@ -1,12 +1,9 @@
-import React from "react";
-import { css } from "@emotion/css";
-import { useTranslation } from "react-i18next";
 import { pickBy, isString } from "lodash";
-import TextEditor from "components/common/TextEditor";
-import Button from "components/common/Button";
+import React from "react";
+import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
-import { useUpdateArtistMutation } from "queries";
+
 import SavingInput from "../ManageTrackGroup/AlbumFormComponents/SavingInput";
 
 type ArtistEmailKey = keyof NonNullable<
@@ -88,46 +85,12 @@ const ThankYouMessageEditors: React.FC<ThankYouMessageEditorsProps> = ({
   const { user } = useAuthContext();
 
   return (
-    <div
-      className={css`
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-      `}
-    >
-      <h3>{t("thankYouMessages")}</h3>
-      <p
-        className={css`
-          margin-bottom: 1.5rem;
-          max-width: 60ch;
-        `}
-      >
-        {t("thankYouMessagesDescription")}
-      </p>
-      <div
-        className={css`
-          display: grid;
-          gap: 1.5rem;
-          margin-bottom: 1.5rem;
-
-          @media (min-width: 960px) {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-        `}
-      >
-        <div
-          className={css`
-            display: flex;
-            flex-direction: column;
-          `}
-        >
-          <h4
-            className={css`
-              margin-bottom: 0.5rem;
-            `}
-          >
-            {t("supportEmailLabel")}
-          </h4>
+    <div className="flex w-full flex-col">
+      <h2 className="font-bold!">{t("thankYouMessages")}</h2>
+      <p className="mb-6 max-w-[60ch]">{t("thankYouMessagesDescription")}</p>
+      <div className="mb-6 grid gap-6 min-[960px]:grid-cols-2">
+        <div className="flex flex-col">
+          <h3 className="mb-2! pb-0! text-lg!">{t("supportEmailLabel")}</h3>
           <SavingInput
             formKey="properties.emails.support"
             textEditor
@@ -138,19 +101,8 @@ const ThankYouMessageEditors: React.FC<ThankYouMessageEditorsProps> = ({
             url={`manage/artists/${artist.id}`}
           />
         </div>
-        <div
-          className={css`
-            display: flex;
-            flex-direction: column;
-          `}
-        >
-          <h4
-            className={css`
-              margin-bottom: 0.5rem;
-            `}
-          >
-            {t("purchaseEmailLabel")}
-          </h4>
+        <div className="flex flex-col">
+          <h3 className="mb-2! pb-0! text-lg!">{t("purchaseEmailLabel")}</h3>
           <SavingInput
             formKey="properties.emails.purchase"
             textEditor
