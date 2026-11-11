@@ -1,4 +1,5 @@
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import { useSaveAlbumFormMutation } from "queries/trackGroups";
 import React from "react";
 import { useFormContext, useFormState } from "react-hook-form";
@@ -8,14 +9,12 @@ import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 import { isTrackGroupPublished } from "utils/artist";
 
-import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
-
 const SaveDraftBar: React.FC<{
   existingObject: TrackGroup;
   onSaveSuccess?: () => void;
 }> = ({ existingObject, onSaveSuccess }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const { isDirty } = useFormState<TrackGroupFormData>();
+  const { isDirty, dirtyFields } = useFormState<TrackGroupFormData>();
   const { getValues, reset } = useFormContext<TrackGroupFormData>();
   const { artistId } = useParams();
   const snackbar = useSnackbar();
@@ -34,6 +33,7 @@ const SaveDraftBar: React.FC<{
         trackGroupId: existingObject.id,
         artistId: Number(artistId),
         fundraiserId: existingObject.fundraiser?.id,
+        dirtyFields,
       });
       reset({
         ...values,

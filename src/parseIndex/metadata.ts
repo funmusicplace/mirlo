@@ -3,7 +3,7 @@ import * as cheerio from "cheerio";
 
 import { singleInclude, whereForVisibleProfile } from "../utils/artist";
 import {
-  fundraiserImagesInclude,
+  publicFundraiserImagesInclude,
   whereForPublicFundraiser,
 } from "../utils/fundraiser";
 import { merchImagesInclude } from "../utils/merch";
@@ -141,7 +141,7 @@ export async function fetchFundraiserMetadata(
       idOrSlug: fundraiserSlug,
       artistIdOrSlug: profileSlug,
     }),
-    include: { profile: true, images: fundraiserImagesInclude },
+    include: { profile: true, images: publicFundraiserImagesInclude },
   });
 }
 

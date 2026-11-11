@@ -14,9 +14,10 @@ const FundraiserUrlField: React.FC<{
     keyPrefix: "manageFundraiser",
   });
   const { register, watch, formState } = useFormContext<FundraiserFormData>();
-  const [isEditing, setIsEditing] = React.useState(false);
+  const [isEditingSlug, setIsEditing] = React.useState(false);
   const urlSlug = watch("urlSlug") || fundraiser.urlSlug;
   const error = formState.errors.urlSlug?.message;
+  const isEditing = isEditingSlug || !!error;
 
   return (
     <>

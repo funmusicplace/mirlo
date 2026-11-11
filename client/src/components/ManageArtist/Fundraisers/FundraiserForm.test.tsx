@@ -88,7 +88,7 @@ const renderForm = (
 describe("FundraiserForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    updateFundraiser.mockResolvedValue({});
+    updateFundraiser.mockResolvedValue({ result: FUNDRAISER });
   });
 
   test("saves changes in cents", async () => {
@@ -107,13 +107,7 @@ describe("FundraiserForm", () => {
     await waitFor(() =>
       expect(updateFundraiser).toHaveBeenCalledWith({
         fundraiserId: 7,
-        body: expect.objectContaining({
-          name: "New van",
-          description: "<p>Hi</p>",
-          goalAmount: 75025,
-          minPledge: 1000,
-          isAllOrNothing: true,
-        }),
+        body: { description: "<p>Hi</p>", goalAmount: 75025 },
       })
     );
   });
@@ -139,7 +133,8 @@ describe("FundraiserForm", () => {
     updateFundraiser.mockRejectedValue(
       new MirloFetchError(
         new Response(null, { status: 400 }),
-        "Another fundraiser already uses this URL"
+        "Another fundraiser already uses this URL",
+        "fundraiser_slug_taken"
       )
     );
     renderForm();

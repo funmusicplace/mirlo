@@ -94,6 +94,7 @@ describe("manage/fundraisers/{fundraiserId}", () => {
     const setUp = async () => {
       const { user, accessToken } = await createUser({
         email: "fundraiser-owner@example.com",
+        stripeAccountId: "acct_fundraiser_owner",
       });
       const { user: backer } = await createUser({
         email: "backer@example.com",
@@ -340,6 +341,109 @@ describe("manage/fundraisers/{fundraiserId}", () => {
         where: { id: fundraiser.id },
       });
       assert.equal(refreshed?.isAllOrNothing, false);
+    });
+
+    const put = (fundraiserId: number, accessToken: string, body: object) =>
+      requestApp
+        .put(`manage/fundraisers/${fundraiserId}`)
+        .send(body)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+    it("returns 400 for fields of the wrong type", async () => {
+      const { accessToken, fundraiser } = await setUp();
+
+      for (const body of [
+        { isPublic: "yes" },
+        { isAllOrNothing: 1 },
+        { description: 5 },
+        { urlSlug: 5 },
+        { videoUrl: 5 },
+        { endDate: 12345 },
+      ]) {
+        const response = await put(fundraiser.id, accessToken, body);
+        assert.equal(response.statusCode, 400, JSON.stringify(body));
+      }
+    });
+
+    it("refuses a URL slug made only of digits", async () => {
+      const { accessToken, fundraiser } = await setUp();
+
+      const response = await put(fundraiser.id, accessToken, {
+        urlSlug: "2024",
+      });
+
+      assert.equal(response.statusCode, 400);
+      assert.equal(response.body.code, "fundraiser_slug_invalid");
+    });
+
+    it("renames the URL with the fundraiser until it's public", async () => {
+      const { accessToken, fundraiser } = await setUp();
+
+      const draft = await put(fundraiser.id, accessToken, {
+        name: "Our New Van",
+      });
+      assert.equal(draft.body.result.urlSlug, "our-new-van");
+
+      await put(fundraiser.id, accessToken, { isPublic: true });
+      const published = await put(fundraiser.id, accessToken, {
+        name: "Another name",
+      });
+      assert.equal(published.body.result.urlSlug, "our-new-van");
+    });
+
+    it("refuses to make a fundraiser public before payments are set up", async () => {
+      const { user, accessToken } = await createUser({
+        email: "no-stripe@example.com",
+      });
+      const artist = await createArtist(user.id);
+      const fundraiser = await createFundraiser(artist.id, { name: "Van" });
+
+      const response = await put(fundraiser.id, accessToken, {
+        isPublic: true,
+      });
+
+      assert.equal(response.statusCode, 400);
+      const refreshed = await prisma.fundraiser.findUniqueOrThrow({
+        where: { id: fundraiser.id },
+      });
+      assert.equal(refreshed.isPublic, false);
+    });
+
+    it("refuses to make a fundraiser private while it has open pledges", async () => {
+      const { accessToken, backer, fundraiser } = await setUp();
+      await put(fundraiser.id, accessToken, { isPublic: true });
+      await createFundraiserPledge(fundraiser.id, backer.id);
+
+      const response = await put(fundraiser.id, accessToken, {
+        isPublic: false,
+      });
+
+      assert.equal(response.statusCode, 400);
+      const refreshed = await prisma.fundraiser.findUniqueOrThrow({
+        where: { id: fundraiser.id },
+      });
+      assert.equal(refreshed.isPublic, true);
+    });
+
+    it("locks the goal and minimum pledge once supporters have pledged", async () => {
+      const { accessToken, backer, fundraiser } = await setUp();
+      await createFundraiserPledge(fundraiser.id, backer.id);
+
+      const goal = await put(fundraiser.id, accessToken, {
+        goalAmount: fundraiser.goalAmount + 100,
+      });
+      const minimum = await put(fundraiser.id, accessToken, {
+        minPledge: fundraiser.minPledge + 100,
+      });
+      const unchanged = await put(fundraiser.id, accessToken, {
+        goalAmount: fundraiser.goalAmount,
+        name: "Same goal",
+      });
+
+      assert.equal(goal.statusCode, 400);
+      assert.equal(minimum.statusCode, 400);
+      assert.equal(unchanged.statusCode, 200);
     });
   });
 

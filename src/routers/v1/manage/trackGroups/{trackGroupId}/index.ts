@@ -12,6 +12,7 @@ import {
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { clearTrackGroupDownloads } from "../../../../../utils/downloadCache";
 import { AppError } from "../../../../../utils/error";
+import { isFundraiserSlugTaken } from "../../../../../utils/fundraiser";
 import generateSlug from "../../../../../utils/generateSlug";
 import { merchImagesInclude } from "../../../../../utils/merch";
 import { clearPageCache } from "../../../../../utils/pageCache";
@@ -206,6 +207,7 @@ export default function () {
 
       const existingTrackGroup = await prisma.trackGroup.findFirst({
         where: { id: Number(trackGroupId) },
+        include: { fundraiser: { select: { id: true, urlSlug: true } } },
       });
 
       if (!existingTrackGroup) {
@@ -305,6 +307,22 @@ export default function () {
             targetProfileId
           );
         }
+      }
+
+      if (
+        movingToNewProfile &&
+        existingTrackGroup.fundraiser?.urlSlug &&
+        (await isFundraiserSlugTaken(
+          targetProfileId,
+          existingTrackGroup.fundraiser.urlSlug,
+          existingTrackGroup.fundraiser.id
+        ))
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description:
+            "The artist you're moving this release to already has a fundraiser with the same URL. Change the fundraiser's URL first.",
+        });
       }
 
       await prisma.trackGroup.updateMany({

@@ -45,6 +45,7 @@ const FundraiserFormFields: React.FC<{
   const goalRef = React.useRef<HTMLInputElement | null>(null);
   const { ref: goalRegisterRef, ...goalRegisterRest } = register("goalAmount", {
     min: 0,
+    disabled: hasPledges,
   });
 
   React.useEffect(() => {
@@ -82,6 +83,7 @@ const FundraiserFormFields: React.FC<{
           />
           <span className="text-sm" id="description-goal-amount">
             {t("fundraisingGoalDescription")}
+            {hasPledges && <> {t("isAllOrNothingLockedWithPledges")}</>}
           </span>
           {platformPercent !== undefined && goal > 0 && (
             <div className="text-xs">

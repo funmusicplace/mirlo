@@ -1,3 +1,4 @@
+import { pickBy } from "lodash";
 import type { FundraiserUpdate } from "queries/fundraisers";
 
 export type FundraiserFormData = {
@@ -60,6 +61,28 @@ export const fundraiserToFormData = (
       ? undefined
       : (fundraiser.videoUrl ?? ""),
 });
+
+const updateFieldSources: Partial<
+  Record<keyof FundraiserUpdate, keyof FundraiserFormData>
+> = {
+  name: "fundraiserName",
+  description: "fundraiserDescription",
+  goalAmount: "goalAmount",
+  minPledge: "fundraiserMinPledge",
+  endDate: "fundraiserEndDate",
+  videoUrl: "fundraiserVideoUrl",
+  urlSlug: "urlSlug",
+  isAllOrNothing: "isAllOrNothing",
+};
+
+export const dirtyFundraiserUpdate = (
+  formData: FundraiserFormData,
+  dirtyFields: Partial<Record<keyof FundraiserFormData, unknown>>
+): FundraiserUpdate =>
+  pickBy(formDataToFundraiserUpdate(formData), (_value, key) => {
+    const source = updateFieldSources[key as keyof FundraiserUpdate];
+    return !!source && !!dirtyFields[source];
+  });
 
 export const formDataToFundraiserUpdate = (
   formData: FundraiserFormData

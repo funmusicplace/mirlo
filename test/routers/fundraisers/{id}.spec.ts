@@ -150,6 +150,48 @@ describe("fundraisers/{id}", () => {
     assert.equal(response.body.result.minPledge, 30);
   });
 
+  it("leaves out images that never finished uploading", async () => {
+    const { fundraiser } = await setUp();
+    const failed = await prisma.image.create({
+      data: { url: [], dimensions: "square" },
+    });
+    const done = await prisma.image.create({
+      data: { url: ["van-x600"], dimensions: "square" },
+    });
+    await prisma.fundraiserImage.create({
+      data: { fundraiserId: fundraiser.id, imageId: failed.id, position: 0 },
+    });
+    await prisma.fundraiserImage.create({
+      data: { fundraiserId: fundraiser.id, imageId: done.id, position: 1 },
+    });
+
+    const response = await requestApp
+      .get(`fundraisers/${fundraiser.id}`)
+      .set("Accept", "application/json");
+
+    assert.deepEqual(
+      response.body.result.images.map(
+        (image: { imageId: string }) => image.imageId
+      ),
+      [done.id]
+    );
+  });
+
+  it("doesn't expose the artist's payment account", async () => {
+    const { artist, fundraiser } = await setUp();
+    await prisma.user.update({
+      where: { id: artist.userId },
+      data: { stripeAccountId: "acct_secret" },
+    });
+
+    const response = await requestApp
+      .get(`fundraisers/${fundraiser.id}`)
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.ok(!JSON.stringify(response.body).includes("acct_secret"));
+  });
+
   it("hides fundraisers that aren't public", async () => {
     const { fundraiser } = await setUp({ isPublic: false });
 

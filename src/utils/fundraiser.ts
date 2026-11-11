@@ -14,6 +14,11 @@ export const fundraiserImagesInclude = {
   orderBy: { position: "asc" },
 } satisfies Prisma.Fundraiser$imagesArgs;
 
+export const publicFundraiserImagesInclude = {
+  ...fundraiserImagesInclude,
+  where: { image: { url: { isEmpty: false } } },
+} satisfies Prisma.Fundraiser$imagesArgs;
+
 export type FundraiserImageWithImage = FundraiserImage & { image: Image };
 
 export const deleteFundraiserImages = async (fundraiserId: number) => {
@@ -54,7 +59,7 @@ export const whereForPublicFundraiser = ({
   ],
 });
 
-const isFundraiserSlugTaken = async (
+export const isFundraiserSlugTaken = async (
   profileId: number,
   urlSlug: string,
   excludeFundraiserId?: number
@@ -70,10 +75,18 @@ const isFundraiserSlugTaken = async (
     })
   );
 
-export const generateUniqueFundraiserSlug = (profileId: number, name: string) =>
-  generateUniqueSlug(name, "fundraiser", (urlSlug) =>
-    isFundraiserSlugTaken(profileId, urlSlug)
+export const generateUniqueFundraiserSlug = (
+  profileId: number,
+  name: string,
+  excludeFundraiserId?: number
+) => {
+  const base = generateSlug(name);
+  return generateUniqueSlug(
+    isNumericId(base) ? `fundraiser-${base}` : base,
+    "fundraiser",
+    (urlSlug) => isFundraiserSlugTaken(profileId, urlSlug, excludeFundraiserId)
   );
+};
 
 export const assertFundraiserSlugAvailable = async (
   fundraiser: { id: number; profileId: number },
@@ -84,12 +97,21 @@ export const assertFundraiserSlugAvailable = async (
     throw new AppError({
       httpCode: 400,
       description: "The fundraiser URL can't be empty",
+      code: "fundraiser_slug_invalid",
+    });
+  }
+  if (isNumericId(slug)) {
+    throw new AppError({
+      httpCode: 400,
+      description: "The fundraiser URL needs at least one letter",
+      code: "fundraiser_slug_invalid",
     });
   }
   if (await isFundraiserSlugTaken(fundraiser.profileId, slug, fundraiser.id)) {
     throw new AppError({
       httpCode: 400,
       description: "Another fundraiser already uses this URL",
+      code: "fundraiser_slug_taken",
     });
   }
   return slug;

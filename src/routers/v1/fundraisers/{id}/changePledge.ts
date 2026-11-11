@@ -121,14 +121,20 @@ export default function () {
           description: "Pledge amount is below the minimum required.",
         });
       }
-      await prisma.fundraiserPledge.update({
+      const changed = await prisma.fundraiserPledge.updateMany({
         where: {
           id: pledge.id,
+          paidAt: null,
+          cancelledAt: null,
+          fundraiser: { status: "ACTIVE" },
         },
         data: {
           amount,
         },
       });
+      if (changed.count === 0) {
+        throw closedFundraiserError();
+      }
       res.status(200);
       res.json({ result: { success: true } });
     } catch (e) {

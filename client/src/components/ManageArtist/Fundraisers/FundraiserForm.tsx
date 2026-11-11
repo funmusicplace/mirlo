@@ -11,7 +11,7 @@ import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 import {
   FundraiserFormData,
-  formDataToFundraiserUpdate,
+  dirtyFundraiserUpdate,
   fundraiserToFormData,
 } from "utils/fundraiserFormData";
 
@@ -56,19 +56,23 @@ const FundraiserForm: React.FC<{
 
   const onSubmit = async (data: FundraiserFormData) => {
     try {
-      await updateFundraiser({
+      const { result } = await updateFundraiser({
         fundraiserId: fundraiser.id,
-        body: formDataToFundraiserUpdate(data),
+        body: dirtyFundraiserUpdate(data, methods.formState.dirtyFields),
       });
-      methods.reset(data);
+      methods.reset({
+        ...fundraiserToFormData(result),
+        urlSlug: result.urlSlug ?? "",
+      });
       snackbar(t("saved"), { type: "success" });
     } catch (e) {
       if (
         e instanceof MirloFetchError &&
-        e.status === 400 &&
-        methods.formState.dirtyFields.urlSlug
+        (e.code === "fundraiser_slug_invalid" ||
+          e.code === "fundraiser_slug_taken")
       ) {
         methods.setError("urlSlug", { message: e.message });
+        return;
       }
       errorHandler(e);
     }

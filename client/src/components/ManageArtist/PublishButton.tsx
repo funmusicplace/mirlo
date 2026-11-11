@@ -39,6 +39,7 @@ const PublishButton: React.FC<{
       trackGroupId: trackGroup.id,
       artistId: Number(artistId),
       fundraiserId: trackGroup.fundraiser?.id,
+      dirtyFields: methods.formState.dirtyFields,
     });
     methods.reset(values);
   }, [

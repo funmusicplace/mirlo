@@ -13,8 +13,10 @@ import {
   assertFundraiserSlugAvailable,
   deleteFundraiserImages,
   fundraiserImagesInclude,
+  generateUniqueFundraiserSlug,
   getFundraiserTotals,
 } from "../../../../../utils/fundraiser";
+import { resolvePayee } from "../../../../../utils/payments/payee";
 import { preparePostContent } from "../../../../../utils/postContent";
 import { videoEmbedUrl } from "../../../../../utils/videoEmbed";
 
@@ -93,6 +95,41 @@ export default function () {
         "isPublic",
       ]);
 
+      for (const field of ["isAllOrNothing", "isPublic"] as const) {
+        if (
+          newValues[field] !== undefined &&
+          typeof newValues[field] !== "boolean"
+        ) {
+          throw new AppError({
+            httpCode: 400,
+            description: `${field} must be true or false`,
+          });
+        }
+      }
+
+      for (const field of ["description", "urlSlug"] as const) {
+        if (
+          newValues[field] !== undefined &&
+          typeof newValues[field] !== "string"
+        ) {
+          throw new AppError({
+            httpCode: 400,
+            description: `${field} must be text`,
+          });
+        }
+      }
+
+      if (
+        newValues.videoUrl !== undefined &&
+        newValues.videoUrl !== null &&
+        typeof newValues.videoUrl !== "string"
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description: "videoUrl must be text",
+        });
+      }
+
       if (newValues.name !== undefined) {
         if (typeof newValues.name !== "string" || !newValues.name.trim()) {
           throw new AppError({
@@ -115,14 +152,71 @@ export default function () {
         }
       }
 
-      if (newValues.urlSlug !== undefined) {
-        const current = await prisma.fundraiser.findFirstOrThrow({
-          where: { id: Number(fundraiserId) },
-          select: { id: true, profileId: true },
+      const current = await prisma.fundraiser.findFirstOrThrow({
+        where: { id: Number(fundraiserId) },
+        include: {
+          profile: {
+            include: {
+              user: { select: { stripeAccountId: true } },
+              paymentToUser: { select: { stripeAccountId: true } },
+            },
+          },
+        },
+      });
+
+      const activePledges = await prisma.fundraiserPledge.count({
+        where: { fundraiserId: current.id, cancelledAt: null },
+      });
+      const openPledges = await prisma.fundraiserPledge.count({
+        where: { fundraiserId: current.id, cancelledAt: null, paidAt: null },
+      });
+
+      if (activePledges > 0) {
+        for (const field of ["goalAmount", "minPledge"] as const) {
+          if (
+            newValues[field] !== undefined &&
+            newValues[field] !== current[field]
+          ) {
+            throw new AppError({
+              httpCode: 400,
+              description:
+                "The goal and minimum pledge can't be changed once supporters have pledged",
+            });
+          }
+        }
+      }
+
+      if (newValues.isPublic === true && !current.isPublic) {
+        if (!resolvePayee({ profile: current.profile }).stripeAccountId) {
+          throw new AppError({
+            httpCode: 400,
+            description: "Set up payments before making the fundraiser public",
+          });
+        }
+      }
+
+      if (newValues.isPublic === false && current.isPublic && openPledges > 0) {
+        throw new AppError({
+          httpCode: 400,
+          description:
+            "The fundraiser can't be made private while it has pledges",
         });
+      }
+
+      if (newValues.urlSlug !== undefined) {
         newValues.urlSlug = await assertFundraiserSlugAvailable(
           current,
-          String(newValues.urlSlug ?? "")
+          newValues.urlSlug
+        );
+      } else if (
+        newValues.name !== undefined &&
+        newValues.name !== current.name &&
+        !current.isPublic
+      ) {
+        newValues.urlSlug = await generateUniqueFundraiserSlug(
+          current.profileId,
+          newValues.name,
+          current.id
         );
       }
 
@@ -144,38 +238,30 @@ export default function () {
         );
       }
 
-      if (newValues.endDate && isNaN(Date.parse(newValues.endDate))) {
+      if (
+        newValues.endDate !== undefined &&
+        newValues.endDate !== null &&
+        (typeof newValues.endDate !== "string" ||
+          isNaN(Date.parse(newValues.endDate)))
+      ) {
         throw new AppError({
           httpCode: 400,
           description: "End date isn't a valid date",
         });
       }
 
-      if (newValues.isAllOrNothing !== undefined) {
-        const current = await prisma.fundraiser.findFirst({
-          where: { id: Number(fundraiserId) },
-          select: { isAllOrNothing: true },
+      // Supporters pledged under the current terms, so don't let them change
+      // while there are pledges still waiting to be charged
+      if (
+        newValues.isAllOrNothing !== undefined &&
+        newValues.isAllOrNothing !== current.isAllOrNothing &&
+        openPledges > 0
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description:
+            "All or nothing can't be changed while the fundraiser has pledges",
         });
-
-        // Supporters pledged under the current terms, so don't let them change
-        // while there are pledges still waiting to be charged
-        if (current && !!newValues.isAllOrNothing !== current.isAllOrNothing) {
-          const openPledges = await prisma.fundraiserPledge.count({
-            where: {
-              fundraiserId: Number(fundraiserId),
-              paidAt: null,
-              cancelledAt: null,
-            },
-          });
-
-          if (openPledges > 0) {
-            throw new AppError({
-              httpCode: 400,
-              description:
-                "All or nothing can't be changed while the fundraiser has pledges",
-            });
-          }
-        }
       }
 
       await prisma.fundraiser.updateMany({

@@ -2,8 +2,15 @@
 ALTER TABLE "Fundraiser" ADD COLUMN     "isPublic" BOOLEAN NOT NULL DEFAULT false,
 ADD COLUMN     "urlSlug" TEXT;
 
--- Existing fundraisers are already shown on their release pages
-UPDATE "Fundraiser" SET "isPublic" = true;
+-- Existing fundraisers are already shown on their published release pages
+UPDATE "Fundraiser" f SET "isPublic" = true
+WHERE f."deletedAt" IS NULL
+  AND EXISTS (
+    SELECT 1 FROM "TrackGroup" tg
+    WHERE tg."fundraiserId" = f.id
+      AND tg."deletedAt" IS NULL
+      AND tg."publishedAt" <= now()
+  );
 
 DO $$
 DECLARE
@@ -26,8 +33,12 @@ BEGIN
         'fundraiser'
       ) AS base
     FROM "Fundraiser"
+    WHERE "deletedAt" IS NULL
     ORDER BY "profileId", "createdAt", id
   LOOP
+    IF fundraiser.base ~ '^[0-9]+$' THEN
+      fundraiser.base := 'fundraiser-' || fundraiser.base;
+    END IF;
     candidate := fundraiser.base;
     suffix := 2;
     WHILE EXISTS (

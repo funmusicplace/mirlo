@@ -4,7 +4,8 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { formDataToFundraiserUpdate } from "utils/fundraiserFormData";
+import { omit } from "lodash";
+import { dirtyFundraiserUpdate } from "utils/fundraiserFormData";
 import { getInjectedTrackGroup } from "utils/injectedData";
 
 import * as api from "./fetch/fetchWrapper";
@@ -190,8 +191,9 @@ async function saveAlbumForm(opts: {
   trackGroupId: number;
   artistId: number;
   fundraiserId?: number;
+  dirtyFields?: Partial<Record<string, unknown>>;
 }) {
-  const { formData, trackGroupId, artistId, fundraiserId } = opts;
+  const { formData, trackGroupId, artistId, fundraiserId, dirtyFields } = opts;
   const trackGroupPayload = {
     title: formData.title,
     about: formData.about,
@@ -224,10 +226,14 @@ async function saveAlbumForm(opts: {
     undefined,
   ];
 
-  if (fundraiserId) {
+  const fundraiserUpdate = dirtyFundraiserUpdate(
+    formData,
+    omit(dirtyFields, "urlSlug")
+  );
+  if (fundraiserId && Object.keys(fundraiserUpdate).length > 0) {
     requests[1] = api.put<unknown, { result: Fundraiser }>(
       `v1/manage/fundraisers/${fundraiserId}`,
-      formDataToFundraiserUpdate(formData)
+      fundraiserUpdate
     );
   }
 

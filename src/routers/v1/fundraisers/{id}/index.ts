@@ -5,10 +5,11 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { serializeFundraiser } from "../../../../serializers/fundraiser";
 import { AppError } from "../../../../utils/error";
 import {
-  fundraiserImagesInclude,
+  publicFundraiserImagesInclude,
   getFundraiserTotals,
   whereForPublicFundraiser,
 } from "../../../../utils/fundraiser";
+import { resolvePayee } from "../../../../utils/payments/payee";
 import { getCurrency, minimumPledge } from "../../../../utils/stripe/currency";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
@@ -29,7 +30,7 @@ export default function () {
           includeHiddenProfiles: req.user?.isAdmin,
         }),
         include: {
-          images: fundraiserImagesInclude,
+          images: publicFundraiserImagesInclude,
           profile: {
             select: {
               id: true,
@@ -39,7 +40,8 @@ export default function () {
               paymentToUserId: true,
               defaultPlatformFee: true,
               avatar: true,
-              user: { select: { currency: true } },
+              user: { select: { currency: true, stripeAccountId: true } },
+              paymentToUser: { select: { stripeAccountId: true } },
             },
           },
           pledges: {
@@ -67,11 +69,21 @@ export default function () {
         });
       }
 
-      const { pledges, ...rest } = fundraiser;
-      const currency = await getCurrency(fundraiser.profileId);
+      const { pledges, profile, ...rest } = fundraiser;
+      const currency = await getCurrency(
+        fundraiser.profileId,
+        resolvePayee({ profile }).stripeAccountId ?? undefined
+      );
       res.json({
         result: {
-          ...serializeFundraiser(rest),
+          ...serializeFundraiser({
+            ...rest,
+            profile: {
+              ...profile,
+              user: { currency: profile.user.currency },
+              paymentToUser: undefined,
+            },
+          }),
           currency,
           recentPledges: pledges,
           minPledge: minimumPledge(fundraiser.minPledge, currency),

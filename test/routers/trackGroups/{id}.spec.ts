@@ -6,6 +6,7 @@ import { describe, it } from "mocha";
 
 import {
   clearTables,
+  createFundraiser,
   createProfile,
   createTier,
   createTrackGroup,
@@ -211,6 +212,27 @@ describe("trackGroups/{id}", () => {
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.result.id, trackGroup.id);
       assert.equal(response.body.result.isPublic, false);
+    });
+
+    it("should raise the fundraiser's minimum pledge to Stripe's minimum charge", async () => {
+      const { user } = await createUser({
+        email: "artist-pledge-min@artist.com",
+        currency: "gbp",
+      });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      await createFundraiser(profile.id, {
+        trackGroupId: trackGroup.id,
+        isAllOrNothing: true,
+        minPledge: 10,
+      });
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.fundraiser.minPledge, 30);
     });
 
     it("should GET / 200 with isPlayable false when user hasn't purchased", async () => {

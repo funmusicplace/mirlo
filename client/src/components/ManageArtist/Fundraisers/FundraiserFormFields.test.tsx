@@ -55,12 +55,13 @@ describe("FundraiserFormFields", () => {
     expect(screen.getByText("URL hint")).toBeInTheDocument();
   });
 
-  test("locks all-or-nothing once supporters have pledged", () => {
+  test("locks the goal and all-or-nothing once supporters have pledged", () => {
     renderFields({ hasPledges: true });
     expect(screen.getByLabelText("isAllOrNothing")).toBeDisabled();
-    expect(
-      screen.getByText(/isAllOrNothingLockedWithPledges/)
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("goal")).toBeDisabled();
+    expect(screen.getAllByText(/isAllOrNothingLockedWithPledges/)).toHaveLength(
+      2
+    );
   });
 
   test("edits the description as rich text, without mentions", () => {
