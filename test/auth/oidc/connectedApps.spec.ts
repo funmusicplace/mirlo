@@ -103,7 +103,7 @@ describe("connected apps", () => {
     assert.equal(again.status, 404);
   });
 
-  it("lists each sign-in on its own and disconnects only that one", async () => {
+  it("lists an app once and disconnecting it signs out every sign-in", async () => {
     const { user, accessToken, client, tokens } = await setup();
     const other = await tokensFor(
       accessToken,
@@ -118,26 +118,25 @@ describe("connected apps", () => {
 
     const before = await list();
     assert.equal(before.status, 200, before.text);
-    assert.equal(before.body.results.length, 2);
-    for (const app of before.body.results) {
-      assert.ok(app.createdAt);
-      assert.ok(app.lastUsedAt);
-    }
+    assert.equal(before.body.results.length, 1);
+    assert.ok(before.body.results[0].createdAt);
+    assert.ok(before.body.results[0].lastUsedAt);
 
     const revoke = await request(API)
       .delete(`/v1/users/${user.id}/connectedApps/${before.body.results[0].id}`)
       .set("Cookie", [`jwt=${accessToken}`]);
     assert.equal(revoke.status, 200, revoke.text);
 
-    const statuses = [
-      (await profileWith(tokens.access_token)).status,
-      (await profileWith(other.access_token)).status,
-    ];
-    assert.deepEqual(statuses.sort(), [200, 401]);
-    assert.equal((await list()).body.results.length, 1);
+    assert.equal((await profileWith(tokens.access_token)).status, 401);
+    assert.equal((await profileWith(other.access_token)).status, 401);
+    assert.equal(
+      await prisma.oAuthPayload.count({ where: { model: "Grant" } }),
+      0
+    );
+    assert.deepEqual((await list()).body.results, []);
   });
 
-  it("leaves out sign-ins whose tokens are revoked or expired", async () => {
+  it("lists an app whose tokens are revoked or expired, so it can be disconnected", async () => {
     const { user, accessToken, client, tokens } = await setup();
     const revoked = await tokenRequest(
       client,
@@ -159,7 +158,16 @@ describe("connected apps", () => {
       .get(`/v1/users/${user.id}/connectedApps`)
       .set("Cookie", [`jwt=${accessToken}`]);
     assert.equal(list.status, 200, list.text);
-    assert.deepEqual(list.body.results, []);
+    assert.equal(list.body.results.length, 1);
+
+    const revoke = await request(API)
+      .delete(`/v1/users/${user.id}/connectedApps/${list.body.results[0].id}`)
+      .set("Cookie", [`jwt=${accessToken}`]);
+    assert.equal(revoke.status, 200, revoke.text);
+    assert.equal(
+      await prisma.oAuthPayload.count({ where: { model: "Grant" } }),
+      0
+    );
   });
 
   it("a password reset disconnects every app", async () => {

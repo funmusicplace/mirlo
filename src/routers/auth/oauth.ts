@@ -182,7 +182,6 @@ router.post(
           };
         } else {
           const accountId = String(req.user.id);
-          // One grant per sign-in, since revoking a refresh token revokes its grant
           const grant = new provider.Grant({ accountId, clientId });
           grant.addOIDCScope(scopes);
           const missingClaims = interaction.prompt.details.missingOIDCClaims;

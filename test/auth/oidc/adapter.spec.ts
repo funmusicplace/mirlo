@@ -80,11 +80,22 @@ describe("oidc PrismaAdapter", () => {
     );
   });
 
-  it("cleans up only expired rows", async () => {
+  it("cleans up expired rows and grants without live tokens", async () => {
+    const now = Math.floor(Date.now() / 1000);
+    await new PrismaAdapter("Grant").upsert(
+      "used-grant",
+      { iat: now - 7200 },
+      60
+    );
+    await new PrismaAdapter("Grant").upsert(
+      "old-grant",
+      { iat: now - 7200 },
+      60
+    );
+    await new PrismaAdapter("Grant").upsert("new-grant", { iat: now }, 60);
     const adapter = new PrismaAdapter("AccessToken");
-    await adapter.upsert("expired", {}, 60);
-    await adapter.upsert("current", {}, 60);
-    await new PrismaAdapter("Grant").upsert("forever", {});
+    await adapter.upsert("current", { grantId: "used-grant" }, 60);
+    await adapter.upsert("expired", { grantId: "old-grant" }, 60);
     await prisma.oAuthPayload.updateMany({
       where: { id: "expired" },
       data: { expiresAt: new Date(Date.now() - 1000) },
@@ -94,8 +105,8 @@ describe("oidc PrismaAdapter", () => {
 
     const left = await prisma.oAuthPayload.findMany({ orderBy: { id: "asc" } });
     assert.deepEqual(
-      left.map((row) => row.id),
-      ["current", "forever"]
+      left.map((row) => `${row.model}:${row.id}`),
+      ["AccessToken:current", "Grant:new-grant", "Grant:used-grant"]
     );
   });
 });

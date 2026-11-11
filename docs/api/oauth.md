@@ -73,7 +73,7 @@ All clients use the authorization code flow with PKCE (`S256`). Other response t
 
    Native apps should use the system browser session (`ASWebAuthenticationSession`, Custom Tabs, `expo-auth-session` or AppAuth), not an embedded web view. Mirlo's pages can't be shown in a frame.
 
-3. The user logs in to Mirlo if they need to, and sees which app is asking and for what. Mirlo remembers the answer and only asks again when your app asks for more scopes, or sends `prompt=consent`.
+3. The user logs in to Mirlo if they need to, and sees which app is asking and for what. Mirlo remembers the answer while your app holds a valid access or refresh token for the user, and asks again when your app asks for more scopes or sends `prompt=consent`.
 4. Mirlo redirects to `redirect_uri` with `code`, `state` and `iss`. Check that `state` matches and that `iss` is the instance you started with.
 5. Exchange the code at the token endpoint:
 
@@ -138,4 +138,4 @@ Refresh with `grant_type=refresh_token`. Public clients get a new refresh token 
 
 When the user signs out of your app, revoke the refresh token at `POST /auth/oidc/token/revocation`. Each sign-in gets its own grant, so this signs the user out on that device only.
 
-Users see and disconnect connected apps under **Account settings → Connected apps**. Disconnecting an app, or resetting the password, revokes its tokens immediately.
+Users see and disconnect connected apps under **Account settings → Connected apps**. Disconnecting an app, or resetting the password, revokes its tokens on every device immediately.
