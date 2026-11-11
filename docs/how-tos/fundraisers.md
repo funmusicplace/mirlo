@@ -41,6 +41,21 @@ can back it from there as well as from the fundraiser's own page.
 - **Video**: paste a YouTube or Vimeo link. It's shown first, in
   the same carousel as the images.
 
+## Platform fee
+
+You choose how much Mirlo takes from your fundraiser, the same way
+you do for your releases:
+
+- For a fundraiser linked to a release, it's that release's
+  **Platform cut**, set in the release editor.
+- For a fundraiser on its own, it's your **Default platform cut**,
+  set on your artist's settings page. It starts at 10%.
+
+You can set it as low as 0%. Stripe's processing fee is charged on
+top. See [payouts](../payouts.md) for how fees work.
+
+## Making it public
+
 Fundraisers start out private. Click **Make public** when the page is
 ready, and **Make private** to hide it again.
 
@@ -84,4 +99,5 @@ done**.
   yet.
 - Removing a fundraiser asks you to confirm first, and cancels any
   pledges that haven't been charged. Its address is freed, so a new
-  fundraiser can use it.
+  fundraiser can use it. While pledges are being charged, it can't be
+  removed until every pledge is paid or cancelled.

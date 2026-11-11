@@ -324,9 +324,25 @@ export default function () {
           fundraiserId: Number(fundraiserId),
           paidAt: null,
           cancelledAt: null,
+          fundraiser: { status: "ACTIVE" },
         },
         data: { cancelledAt: new Date() },
       });
+
+      const pledgesBeingCharged = await prisma.fundraiserPledge.count({
+        where: {
+          fundraiserId: Number(fundraiserId),
+          paidAt: null,
+          cancelledAt: null,
+        },
+      });
+      if (pledgesBeingCharged > 0) {
+        throw new AppError({
+          httpCode: 409,
+          description:
+            "This fundraiser's pledges are being charged. It can be removed once every pledge is paid or cancelled.",
+        });
+      }
 
       await prisma.fundraiser.update({
         where: { id: Number(fundraiserId) },

@@ -495,6 +495,48 @@ describe("manage/fundraisers/{fundraiserId}", () => {
       assert.equal(release?.fundraiserId, null);
     });
 
+    it("refuses while pledges are being charged, and allows it once they're settled", async () => {
+      const { user, accessToken } = await createUser({
+        email: "fundraiser-owner@example.com",
+      });
+      const { user: backer } = await createUser({ email: "a@example.com" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+      const fundraiser = await createFundraiser(artist.id, {
+        trackGroupId: trackGroup.id,
+        isAllOrNothing: true,
+        status: "SUCCESSFUL",
+      });
+      const pledge = await createFundraiserPledge(fundraiser.id, backer.id);
+
+      const refused = await requestApp
+        .delete(`manage/fundraisers/${fundraiser.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(refused.statusCode, 409);
+      const stillThere = await prisma.fundraiser.findFirstOrThrow({
+        where: { id: fundraiser.id },
+        include: { trackGroups: true },
+      });
+      assert.equal(stillThere.trackGroups.length, 1);
+      const untouched = await prisma.fundraiserPledge.findUniqueOrThrow({
+        where: { id: pledge.id },
+      });
+      assert.equal(untouched.cancelledAt, null);
+
+      await prisma.fundraiserPledge.update({
+        where: { id: pledge.id },
+        data: { paidAt: new Date() },
+      });
+      const allowed = await requestApp
+        .delete(`manage/fundraisers/${fundraiser.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(allowed.statusCode, 200);
+    });
+
     it("frees the deleted fundraiser's URL for a new one", async () => {
       const { user, accessToken } = await createUser({
         email: "fundraiser-owner@example.com",
