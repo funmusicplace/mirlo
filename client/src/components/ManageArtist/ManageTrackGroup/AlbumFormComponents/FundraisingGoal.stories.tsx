@@ -125,8 +125,8 @@ export const BelowGoal: Story = {
     ).not.toBeInTheDocument();
     await expect(canvas.getByLabelText("Is it all or nothing?")).toBeDisabled();
     await expect(
-      canvas.getByText(/can't be changed once supporters have pledged/)
-    ).toBeInTheDocument();
+      canvas.getAllByText(/can't be changed once supporters have pledged/)
+    ).toHaveLength(2);
   },
 };
 
