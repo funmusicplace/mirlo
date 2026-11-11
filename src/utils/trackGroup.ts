@@ -1047,6 +1047,21 @@ export const createOrUpdatePledge = async ({
   logger.info(
     `Creating or updating pledge for userId: ${userId}, fundraiserId: ${fundraiserId}`
   );
+  const existing = await prisma.fundraiserPledge.findUnique({
+    where: {
+      userId_fundraiserId: { userId, fundraiserId: Number(fundraiserId) },
+    },
+  });
+  if (
+    existing?.paidAt ||
+    (existing?.cancelledAt &&
+      existing.stripeSetupIntentId === stripeSetupIntentId)
+  ) {
+    logger.info(
+      `Not updating pledge ${existing.id}: it's already paid, or was cancelled after this setup intent`
+    );
+    return;
+  }
   try {
     await prisma.fundraiserPledge.upsert({
       where: {

@@ -57,9 +57,7 @@ const ShareButton: React.FC<{
         aria-label={showLabel ? undefined : (t("share") ?? "")}
         title={t("share") ?? ""}
         onClick={handleShareClick}
-        startIcon={
-          <BsShare className={showLabel ? "size-[0.9em]" : undefined} />
-        }
+        startIcon={<BsShare />}
         size={size}
         rounded={rounded}
         variant={variant}

@@ -90,9 +90,9 @@ const FundraiserPledgeForm: React.FC<{
             />
           </FormComponent>
           <FormComponent>
-            <label htmlFor="pledge-message">{t("leaveAComment")}</label>
+            <label htmlFor="input-pledge-message">{t("leaveAComment")}</label>
             <TextArea
-              id="pledge-message"
+              id="input-pledge-message"
               rows={2}
               {...methods.register("message")}
             />
@@ -108,10 +108,10 @@ const FundraiserPledgeForm: React.FC<{
               <FormComponent direction="row">
                 <InputEl
                   type="checkbox"
-                  id="consentToStoreData"
+                  id="input-consent-to-store-data"
                   {...methods.register("consentToStoreData")}
                 />
-                <label htmlFor="consentToStoreData">
+                <label htmlFor="input-consent-to-store-data">
                   {t("consentToStoreData")}
                 </label>
               </FormComponent>

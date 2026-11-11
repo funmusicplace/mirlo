@@ -9,6 +9,13 @@ export const determinePrice = (
     minPrice ??
     0;
 
+  if (!Number.isFinite(priceNumber)) {
+    throw new AppError({
+      httpCode: 400,
+      description: "The price must be a number",
+    });
+  }
+
   const isPriceZero = (minPrice ?? 0) === 0 && priceNumber === 0;
 
   if (priceNumber < (minPrice ?? 0)) {

@@ -8,7 +8,7 @@ const RADIUS = (VIEWBOX - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const SIZES = {
-  small: "size-9 text-[9px]",
+  small: "size-9 text-2xs",
   large: "size-12 text-xs",
 };
 

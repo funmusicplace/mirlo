@@ -44,12 +44,23 @@ const FundraiserUrlField: React.FC<{
           </label>
           <InputEl
             id="input-fundraiser-url-slug"
-            aria-describedby="description-fundraiser-url-slug"
+            aria-describedby={
+              [
+                error && "error-fundraiser-url-slug",
+                fundraiser.isPublic && "description-fundraiser-url-slug",
+              ]
+                .filter(Boolean)
+                .join(" ") || undefined
+            }
             aria-invalid={!!error}
             {...register("urlSlug")}
           />
           {error && (
-            <small className="error" role="alert">
+            <small
+              id="error-fundraiser-url-slug"
+              className="error"
+              role="alert"
+            >
               {error}
             </small>
           )}

@@ -86,26 +86,26 @@ const FundraiserFormFields: React.FC<{
             {hasPledges && <> {t("isAllOrNothingLockedWithPledges")}</>}
           </span>
           {platformPercent !== undefined && goal > 0 && (
-            <div className="text-xs">
-              <div>
+            <output htmlFor="input-goal-amount" className="block text-xs">
+              <span className="block">
                 {tFees("lessPlatformFee", {
                   amount: moneyDisplay({ amount: platformFee, currency }),
                 })}
-              </div>
-              <div>
+              </span>
+              <span className="block">
                 {tFees("lessStripeFeeEstimated", {
                   amount: moneyDisplay({ amount: stripeFee, currency }),
                 })}
-              </div>
-              <div className="font-semibold">
+              </span>
+              <span className="block font-semibold">
                 {tFees("netMonthly", {
                   amount: moneyDisplay({
                     amount: goal - platformFee - stripeFee,
                     currency,
                   }),
                 })}
-              </div>
-            </div>
+              </span>
+            </output>
           )}
         </FormComponent>
         <FormComponent>
@@ -148,13 +148,13 @@ const FundraiserFormFields: React.FC<{
         <div>
           <InputEl
             aria-describedby="description-all-or-nothing"
-            id="isAllOrNothing"
+            id="input-is-all-or-nothing"
             type="checkbox"
             {...register("isAllOrNothing", { disabled: hasPledges })}
           />
         </div>
         <div className="flex flex-col pl-2">
-          <label htmlFor="isAllOrNothing">{t("isAllOrNothing")}</label>
+          <label htmlFor="input-is-all-or-nothing">{t("isAllOrNothing")}</label>
           <small id="description-all-or-nothing">
             {t("isAllOrNothingDescription")}
             {hasPledges && <> {t("isAllOrNothingLockedWithPledges")}</>}

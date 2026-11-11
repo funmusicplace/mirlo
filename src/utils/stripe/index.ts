@@ -542,9 +542,10 @@ export const handleSetupIntentSucceeded = async (
   } = await findOrCreateUserBasedOnEmail(userEmail, userId, userName);
 
   if (fundraiserId) {
-    const fundraiser = await prisma.fundraiser.findUnique({
+    const fundraiser = await prisma.fundraiser.findFirst({
       where: {
         id: Number(fundraiserId),
+        status: "ACTIVE",
       },
       include: {
         profile: {
@@ -569,6 +570,10 @@ export const handleSetupIntentSucceeded = async (
         currency: metadata.currency,
       });
       await subscribeUserToProfile(fundraiser.profile, user);
+    } else {
+      logger.warn(
+        `handleSetupIntentSucceeded: ${intent.id} is for fundraiser ${fundraiserId}, which is deleted or no longer taking pledges; no pledge recorded`
+      );
     }
   } else if (metadata.tierId) {
     const {

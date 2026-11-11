@@ -47,6 +47,7 @@ describe("FundraiserUrlField", () => {
       screen.getByText(/\/tidal-hours\/fundraiser\/new-van/)
     ).toBeInTheDocument();
     expect(screen.queryByText("urlSlugWarning")).not.toBeInTheDocument();
+    expect(input).not.toHaveAttribute("aria-describedby");
   });
 
   test("warns that changing a public fundraiser's URL breaks links", async () => {

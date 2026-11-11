@@ -45,6 +45,9 @@ function Index() {
   const { artist } = fundraiser;
   const currency = fundraiser.currency ?? artist.user?.currency;
   const hasMedia = !!fundraiser.videoEmbedUrl || fundraiser.images.length > 0;
+  const asideRows = hasMedia
+    ? "lg:row-span-3 lg:row-start-2"
+    : "lg:row-span-4 lg:row-start-1";
 
   return (
     <WidthContainer variant="big" justify="center">
@@ -56,8 +59,8 @@ function Index() {
         }
         image={fundraiser.images[0]?.sizes?.[600]}
       />
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-start gap-6 p-4 lg:grid-cols-[3fr_2fr] lg:gap-10">
-        <div className="lg:col-start-1">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-start gap-6 p-4 lg:grid-cols-5 lg:gap-10">
+        <div className="lg:col-span-3 lg:col-start-1">
           <h1 className="mb-1! font-black!">{fundraiser.name}</h1>
           <div className="text-sm">
             <AvatarLink
@@ -68,7 +71,7 @@ function Index() {
           </div>
         </div>
         {hasMedia && (
-          <div className="lg:col-start-1">
+          <div className="lg:col-span-3 lg:col-start-1">
             <ImageGallery
               aspect="video"
               images={fundraiser.images}
@@ -82,7 +85,7 @@ function Index() {
           </div>
         )}
         <aside
-          className={`flex flex-col gap-6 rounded-lg border border-(--mi-tint-x-color) p-6 lg:sticky lg:top-4 lg:col-start-2 ${hasMedia ? "lg:row-span-3 lg:row-start-2" : "lg:row-span-4 lg:row-start-1"}`}
+          className={`flex flex-col gap-6 rounded-lg border border-(--mi-tint-x-color) p-6 lg:sticky lg:top-4 lg:col-span-2 lg:col-start-4 ${asideRows}`}
         >
           <FundraiserGauge
             amountRaised={fundraiser.amountRaised}
@@ -120,11 +123,11 @@ function Index() {
         {fundraiser.description && (
           <RichTextContent
             html={fundraiser.description}
-            className="lg:col-start-1"
+            className="lg:col-span-3 lg:col-start-1"
           />
         )}
         {fundraiser.trackGroups.length > 0 && (
-          <div className="lg:col-start-1">
+          <div className="lg:col-span-3 lg:col-start-1">
             <h2 className="text-base! mb-1!">{t("releases")}</h2>
             <ul className="list-disc pl-6">
               {fundraiser.trackGroups.map((trackGroup) => (

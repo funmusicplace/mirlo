@@ -21,6 +21,9 @@ const FundraiserPublicButton: React.FC<{
     useUpdateFundraiserMutation();
 
   const toggle = async () => {
+    if (isPending) {
+      return;
+    }
     try {
       await updateFundraiser({
         fundraiserId: fundraiser.id,
@@ -40,7 +43,6 @@ const FundraiserPublicButton: React.FC<{
         type="button"
         onClick={toggle}
         isLoading={isPending}
-        disabled={isPending}
         startIcon={fundraiser.isPublic ? <FaEyeSlash /> : <FaEye />}
       >
         {t(fundraiser.isPublic ? "makePrivate" : "makePublic")}

@@ -48,6 +48,7 @@ const SortableImagesEditor: React.FC<{
 }) => {
   const { t } = useTranslation("translation");
   const snackbar = useSnackbar();
+  const addInputRef = React.useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = React.useState(false);
 
   const onUploadFailed = React.useCallback(
@@ -114,6 +115,7 @@ const SortableImagesEditor: React.FC<{
   const remove = async (id: string) => {
     try {
       await onDelete(id);
+      addInputRef.current?.focus();
     } catch (err) {
       snackbar(labels.deleteFailed, { type: "warning" });
       console.error(err);
@@ -121,7 +123,7 @@ const SortableImagesEditor: React.FC<{
   };
 
   return (
-    <div className="flex w-full max-w-[400px] flex-col gap-2">
+    <div className="flex w-full max-w-100 flex-col gap-2">
       <h2 className="text-lg font-bold">{labels.title}</h2>
       <p className="text-sm">{labels.description}</p>
       <div className="grid grid-cols-2 gap-2">
@@ -167,6 +169,7 @@ const SortableImagesEditor: React.FC<{
         </DndContext>
         <div>
           <input
+            ref={addInputRef}
             id={inputId}
             type="file"
             accept="image/*"

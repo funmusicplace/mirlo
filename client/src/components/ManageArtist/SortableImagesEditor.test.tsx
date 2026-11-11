@@ -85,6 +85,9 @@ describe("SortableImagesEditor", () => {
     const { onDelete } = renderEditor();
     await userEvent.click(screen.getAllByLabelText("Delete image")[1]);
     expect(onDelete).toHaveBeenCalledWith("b");
+    await waitFor(() =>
+      expect(document.getElementById("things-images-input")).toHaveFocus()
+    );
   });
 
   test("tells the artist when a delete fails", async () => {

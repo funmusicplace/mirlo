@@ -57,11 +57,19 @@ top. See [payouts](../payouts.md) for how fees work.
 ## Making it public
 
 Fundraisers start out private. Click **Make public** when the page is
-ready, and **Make private** to hide it again.
+ready. You need to have
+[set up payments](../how-tos/setting-up-an-artist-account.md) first.
 
-The page's address is shown under the name. Click **Change URL** to
-edit the last part of it, then save the fundraiser. Changing it on a
-public fundraiser breaks links people have already shared.
+Click **Make private** to hide it again. You can't make a fundraiser
+private while it has pledges that haven't been charged, because
+backers need the page to change or cancel their pledge.
+
+The page's address is shown under the name. While the fundraiser is
+private, the address follows its name when you rename it. Click
+**Change URL** to edit the last part of it yourself, then save the
+fundraiser. Once the fundraiser is public, renaming it keeps the
+address, and changing the address breaks links people have already
+shared.
 
 ## All-or-nothing fundraisers
 
@@ -81,7 +89,8 @@ the goal is reached.
   longer change or cancel them.
 - The **Pledges** button lists everyone who has pledged.
 
-All-or-nothing can't be turned off once someone has pledged.
+Once someone has pledged, the goal can't be changed and all-or-nothing
+can't be turned off.
 
 ## Other fundraisers
 

@@ -23,11 +23,21 @@ const FundraiserActions: React.FC<{
   const { mutateAsync: chargePledges, isPending: isCharging } =
     useChargeFundraiserPledgesMutation();
 
+  const actionsRef = React.useRef<HTMLDivElement>(null);
+  const focusAfterCharge = React.useRef(false);
+
   const isComplete = fundraiser.status === "SUCCESSFUL";
   const canCharge =
     !isComplete &&
     (!fundraiser.isAllOrNothing ||
       (amountRaised > 0 && fundraiser.goalAmount <= amountRaised));
+
+  React.useEffect(() => {
+    if (isComplete && focusAfterCharge.current) {
+      focusAfterCharge.current = false;
+      actionsRef.current?.querySelector<HTMLElement>("a, button")?.focus();
+    }
+  }, [isComplete]);
 
   const onCharge = async () => {
     if (
@@ -42,15 +52,17 @@ const FundraiserActions: React.FC<{
       return;
     }
     try {
+      focusAfterCharge.current = true;
       await chargePledges(fundraiser.id);
       snackbar(t("chargePledgesSuccess"), { type: "success" });
     } catch (e) {
+      focusAfterCharge.current = false;
       errorHandler(e);
     }
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div ref={actionsRef} className="flex flex-wrap gap-2">
       {fundraiser.isAllOrNothing && (
         <ArtistButtonLink
           to={`/manage/fundraiser/${fundraiser.id}/pledges`}

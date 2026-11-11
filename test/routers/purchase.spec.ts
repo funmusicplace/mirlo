@@ -39,6 +39,7 @@ import {
   createClient,
   createProfile,
   createFundraiser,
+  createFundraiserPledge,
   createTrack,
   createTrackGroup,
   createMerch,
@@ -4609,6 +4610,103 @@ describe("purchase", () => {
         where: { fundraiserId: fundraiser.id, userId: buyer.id },
       });
       assert.equal(pledge.message, message);
+    });
+
+    const setUpPledgeIntent = async (
+      fundraiserData: Parameters<typeof createFundraiser>[1] = {}
+    ) => {
+      sinon.stub(sendMailQueue, "add").resolves();
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_pledge_guard",
+      });
+      const { user: buyer } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+      const fundraiser = await createFundraiser(profile.id, {
+        isAllOrNothing: true,
+        ...fundraiserData,
+      });
+      const metadata = {
+        fundraiserId: String(fundraiser.id),
+        artistId: String(profile.id),
+        stripeAccountId: "acct_pledge_guard",
+        userEmail: buyer.email,
+        userId: String(buyer.id),
+        paymentIntentAmount: "2000",
+        currency: "usd",
+      };
+      sinon.stub(stripeUtils.stripe.setupIntents, "retrieve").resolves({
+        id: "seti_pledge_guard",
+        metadata,
+      } as unknown as Stripe.Response<Stripe.SetupIntent>);
+      const succeed = () =>
+        stripeUtils.handleSetupIntentSucceeded({
+          id: "seti_pledge_guard",
+          metadata,
+        } as unknown as Stripe.SetupIntent);
+      return { buyer, fundraiser, succeed };
+    };
+
+    it("records no pledge for a fundraiser that's no longer taking pledges", async () => {
+      const { fundraiser, succeed } = await setUpPledgeIntent({
+        status: "SUCCESSFUL",
+      });
+
+      await succeed();
+
+      assert.equal(
+        await prisma.fundraiserPledge.count({
+          where: { fundraiserId: fundraiser.id },
+        }),
+        0
+      );
+    });
+
+    it("records no pledge for a deleted fundraiser", async () => {
+      const { fundraiser, succeed } = await setUpPledgeIntent({
+        deletedAt: new Date(),
+      });
+
+      await succeed();
+
+      assert.equal(
+        await prisma.fundraiserPledge.count({
+          where: { fundraiserId: fundraiser.id },
+        }),
+        0
+      );
+    });
+
+    it("doesn't bring back a pledge cancelled after this setup intent", async () => {
+      const { buyer, fundraiser, succeed } = await setUpPledgeIntent();
+      const cancelledAt = new Date();
+      await createFundraiserPledge(fundraiser.id, buyer.id, {
+        stripeSetupIntentId: "seti_pledge_guard",
+        cancelledAt,
+      });
+
+      await succeed();
+
+      const pledge = await prisma.fundraiserPledge.findFirstOrThrow({
+        where: { fundraiserId: fundraiser.id, userId: buyer.id },
+      });
+      assert.deepEqual(pledge.cancelledAt, cancelledAt);
+    });
+
+    it("still lets a backer pledge again with a new card after cancelling", async () => {
+      const { buyer, fundraiser, succeed } = await setUpPledgeIntent();
+      await createFundraiserPledge(fundraiser.id, buyer.id, {
+        stripeSetupIntentId: "seti_old",
+        cancelledAt: new Date(),
+      });
+
+      await succeed();
+
+      const pledge = await prisma.fundraiserPledge.findFirstOrThrow({
+        where: { fundraiserId: fundraiser.id, userId: buyer.id },
+      });
+      assert.equal(pledge.cancelledAt, null);
+      assert.equal(pledge.stripeSetupIntentId, "seti_pledge_guard");
     });
   });
 

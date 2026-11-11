@@ -239,6 +239,8 @@ button {
 @import "tailwindcss";
 
 @theme {
+  --text-2xs: 0.5625rem;
+
   --animate-shine: shine 0.75s linear infinite;
 
   @keyframes shine {
