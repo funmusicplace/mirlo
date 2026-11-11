@@ -1116,6 +1116,11 @@ describe("Stripe Webhooks - Failed Payments", () => {
       const mailCall = sendMailStub.getCall(0);
       assert.equal(mailCall.args[1].template, "fundraiser-success");
       assert.equal(mailCall.args[1].message.to, user.email);
+      assert.ok(
+        mailCall.args[1].locals.fundraiserUrl.endsWith(
+          `/${profile.urlSlug}/fundraiser/${fundraiser.id}`
+        )
+      );
     });
 
     it("should handle missing transaction gracefully", async () => {
@@ -1275,6 +1280,7 @@ describe("Stripe Webhooks - Failed Payments", () => {
       assert.equal(locals.fundraiserName, "Help Record");
       assert.equal(locals.trackGroup, undefined);
       assert.deepEqual(locals.artist, {
+        id: profile.id,
         name: profile.name,
         urlSlug: profile.urlSlug,
       });

@@ -226,11 +226,14 @@ interface TrackGroup {
   fundraiser?: {
     id: number;
     goalAmount: number;
+    minPledge: number;
     isAllOrNothing: boolean;
     endDate: string;
     name?: string;
     description?: string | null;
     status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
+    isPublic?: boolean;
+    urlSlug?: string | null;
   } | null;
   paymentToUser?: {
     email: string;
@@ -713,11 +716,62 @@ interface MerchItemType {
 
 interface Fundraiser {
   id: number;
+  name: string;
+  description?: string | null;
   isAllOrNothing: boolean;
   goalAmount: number;
-  endDate: string;
+  minPledge: number;
+  endDate: string | null;
+  videoUrl?: string | null;
+  videoEmbedUrl?: string | null;
+  urlSlug?: string | null;
+  isPublic?: boolean;
   status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   trackGroups: TrackGroup[];
+}
+
+interface FundraiserTotals {
+  amountRaised: number;
+  pledgeCount: number;
+}
+
+interface FundraiserImage {
+  id: string;
+  fundraiserId: number;
+  imageId: string;
+  position: number;
+  url: string[];
+  sizes?: { [key: number]: string };
+}
+
+interface ManagedFundraiser extends Fundraiser, FundraiserTotals {
+  images?: FundraiserImage[];
+}
+
+interface PublicFundraiser
+  extends Omit<Fundraiser, "trackGroups">, FundraiserTotals {
+  currency?: string;
+  images: FundraiserImage[];
+  recentPledges: { id: number; amount: number; createdAt: string }[];
+  trackGroups: Pick<
+    TrackGroup,
+    "id" | "title" | "urlSlug" | "platformPercent"
+  >[];
+  artist: Pick<
+    Artist,
+    | "id"
+    | "name"
+    | "urlSlug"
+    | "userId"
+    | "paymentToUserId"
+    | "defaultPlatformFee"
+    | "avatar"
+  > & { user?: { currency?: string } };
+}
+
+interface FundraiserSummary
+  extends Omit<Fundraiser, "trackGroups">, FundraiserTotals {
+  trackGroups: Pick<TrackGroup, "id" | "title">[];
 }
 
 interface FundraiserPledge {

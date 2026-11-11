@@ -3,34 +3,29 @@ import { Prisma } from "@mirlo/prisma/client";
 
 import logger from "../logger";
 
-import generateSlug from "./generateSlug";
+import { generateUniqueSlug } from "./generateSlug";
 
 export const subscriptionTierOrderBy: Prisma.ProfileSubscriptionTierOrderByWithRelationInput[] =
   [{ order: { sort: "asc", nulls: "last" } }, { minAmount: "asc" }];
 
-export const generateUniqueTierSlug = async (
+export const generateUniqueTierSlug = (
   profileId: number,
   name: string,
   excludeTierId?: number
-) => {
-  const base = generateSlug(name) || "tier";
-  let candidate = base;
-  for (let suffix = 2; ; suffix++) {
-    const taken = await prisma.profileSubscriptionTier.findFirst({
-      where: {
-        profileId,
-        urlSlug: candidate,
-        deletedAt: {},
-        ...(excludeTierId ? { id: { not: excludeTierId } } : {}),
-      },
-      select: { id: true },
-    });
-    if (!taken) {
-      return candidate;
-    }
-    candidate = `${base}-${suffix}`;
-  }
-};
+) =>
+  generateUniqueSlug(name, "tier", async (urlSlug) =>
+    Boolean(
+      await prisma.profileSubscriptionTier.findFirst({
+        where: {
+          profileId,
+          urlSlug,
+          deletedAt: {},
+          ...(excludeTierId ? { id: { not: excludeTierId } } : {}),
+        },
+        select: { id: true },
+      })
+    )
+  );
 
 export const hasSubscriptionTiers = async (profileId: number) => {
   const count = await prisma.profileSubscriptionTier.count({

@@ -25,7 +25,6 @@ export type CreateSubscriptionSetupArgs = {
 
 export type CreatePledgeSetupArgs = {
   fundraiserId: number;
-  trackGroupId: number;
   profileId: number;
   accountId: string;
   amount: number;

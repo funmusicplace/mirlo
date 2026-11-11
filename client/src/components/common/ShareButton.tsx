@@ -14,7 +14,19 @@ const ShareButton: React.FC<{
   size?: "compact" | "big" | "tiny";
   variant?: ButtonProps["variant"];
   color?: string;
-}> = ({ title, url, modalTitle, buttonClassName, size, variant, color }) => {
+  showLabel?: boolean;
+  rounded?: boolean;
+}> = ({
+  title,
+  url,
+  modalTitle,
+  buttonClassName,
+  size,
+  variant,
+  color,
+  showLabel,
+  rounded,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "share" });
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -41,16 +53,19 @@ const ShareButton: React.FC<{
   return (
     <>
       <ArtistButton
-        onlyIcon
-        aria-label={t("share") ?? ""}
+        onlyIcon={!showLabel}
+        aria-label={showLabel ? undefined : (t("share") ?? "")}
         title={t("share") ?? ""}
         onClick={handleShareClick}
         startIcon={<BsShare />}
         size={size}
+        rounded={rounded}
         variant={variant}
         color={color}
         className={buttonClassName}
-      />
+      >
+        {showLabel && t("share")}
+      </ArtistButton>
       <Modal
         size="small"
         title={modalTitle}

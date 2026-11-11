@@ -15,6 +15,7 @@ import { ArtistSection } from "pages/{artistId}/Index";
 import { queryManageArtistSubscribers } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { estimateStripeFee } from "utils/stripeFees";
 import useArtistQuery from "utils/useArtistQuery";
 
 import { bp } from "../../../../../../constants";
@@ -38,11 +39,6 @@ export const SupporterTable = styled(Table)`
     }
   }
 `;
-
-// Stripe's standard processing fee (2.9% + $0.30 per transaction), matching
-// the estimate used in PlatformPercent.tsx. Amounts are in major units here.
-const STRIPE_PERCENT_FEE = 0.029;
-const STRIPE_FLAT_FEE = 0.3;
 
 // The most recent completed charge carries the real fees Stripe and Mirlo
 // took. Charges arrive newest-first from the API.
@@ -74,7 +70,7 @@ const sumDeductions = (supporters: SupportTier[]) => {
       const amount = r.amount / 100;
       platformFee +=
         amount * ((r.artistSubscriptionTier.platformPercent ?? 7) / 100);
-      stripeFee += amount * STRIPE_PERCENT_FEE + STRIPE_FLAT_FEE;
+      stripeFee += estimateStripeFee(amount);
       isEstimated = true;
     }
   }

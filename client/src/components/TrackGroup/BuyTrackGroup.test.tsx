@@ -199,8 +199,36 @@ describe("BuyTrackGroup", () => {
           expect.objectContaining({
             type: "fundraiserPledge",
             fundraiserId: 55,
-            trackGroupId: 100,
           }),
+        ],
+      })
+    );
+  });
+
+  test("a pledge's minimum comes from the fundraiser, not the album's price", async () => {
+    const pledgeTrackGroup = {
+      ...baseTrackGroup,
+      fundraiserId: 55,
+      fundraiser: {
+        id: 55,
+        isAllOrNothing: true,
+        status: "ACTIVE",
+        minPledge: 300,
+      },
+    };
+    const { container } = renderComponent({ trackGroup: pledgeTrackGroup });
+
+    const priceInput = container.querySelector(
+      "input[name='chosenPrice']"
+    ) as HTMLInputElement;
+    fireEvent.change(priceInput, { target: { value: "3" } });
+    fireEvent.click(container.querySelector("#consentToStoreData")!);
+    await submitForm(container);
+
+    expect(startPurchase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: [
+          expect.objectContaining({ type: "fundraiserPledge", price: "300" }),
         ],
       })
     );

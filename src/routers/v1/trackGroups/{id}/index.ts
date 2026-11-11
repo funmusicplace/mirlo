@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import { canUserEditProfile } from "../../../../utils/artist";
+import { minimumPledge } from "../../../../utils/stripe/currency";
 import {
   findTrackGroupIdForSlug,
   trackGroupSingleInclude,
@@ -66,11 +67,25 @@ export default function () {
           .json({ error: `TrackGroup with id ${actualId} not found` });
         return next();
       }
+      const result = processSingleTrackGroup(trackGroup, {
+        loggedInUserId: loggedInUser?.id,
+        canEdit,
+      });
       res.json({
-        result: processSingleTrackGroup(trackGroup, {
-          loggedInUserId: loggedInUser?.id,
-          canEdit,
-        }),
+        result: {
+          ...result,
+          ...(result.fundraiser
+            ? {
+                fundraiser: {
+                  ...result.fundraiser,
+                  minPledge: minimumPledge(
+                    result.fundraiser.minPledge,
+                    result.currency
+                  ),
+                },
+              }
+            : {}),
+        },
       });
     } catch (e) {
       next(e);

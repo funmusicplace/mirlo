@@ -44,7 +44,12 @@ const BuyTrackGroup: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const { user, refreshLoggedInUser } = useAuthContext();
 
-  const minPrice = track?.minPrice ?? trackGroup.minPrice;
+  const isPledgeMode =
+    !!trackGroup.fundraiser?.isAllOrNothing &&
+    (trackGroup.fundraiser?.status ?? "ACTIVE") === "ACTIVE";
+  const minPrice = isPledgeMode
+    ? trackGroup.fundraiser?.minPledge
+    : (track?.minPrice ?? trackGroup.minPrice);
   const currency = trackGroup.currency ?? "usd";
   const initialChosenPriceCents = track
     ? (minPrice ?? 0)
@@ -70,10 +75,6 @@ const BuyTrackGroup: React.FC<{
   const chosenPrice = watch("chosenPrice");
   const consentToStoreData = watch("consentToStoreData");
   const { checkout, startPurchase } = usePurchase();
-
-  const isPledgeMode =
-    !!trackGroup.fundraiser?.isAllOrNothing &&
-    (trackGroup.fundraiser?.status ?? "ACTIVE") === "ACTIVE";
 
   const isFreeAcquisition =
     !isPledgeMode && !minPrice && Number(chosenPrice || 0) === 0;
@@ -135,7 +136,6 @@ const BuyTrackGroup: React.FC<{
             ? {
                 type: "fundraiserPledge",
                 fundraiserId: trackGroup.fundraiserId,
-                trackGroupId: trackGroup.id,
                 price,
                 message: data.message,
               }

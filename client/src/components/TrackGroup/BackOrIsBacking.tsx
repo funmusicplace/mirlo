@@ -4,9 +4,9 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import api from "services/api";
-import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
 
 import BackingThisProject from "./BackingThisProject";
+import PurchaseOrDownloadAlbum from "./PurchaseOrDownloadAlbumModal";
 
 const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
   trackGroup,
@@ -67,13 +67,17 @@ const BackOrIsBacking: React.FC<{ trackGroup: TrackGroup; artist: Artist }> = ({
       {isLoading && <div>{t("loading")}</div>}
       {!isLoading && (
         <>
-          {paymentStatus === "succeeded" && paymentIntentAmount && (
-            <BackingThisProject
-              amount={paymentIntentAmount}
-              currency={trackGroup?.currency}
-              trackGroup={trackGroup}
-            />
-          )}
+          {paymentStatus === "succeeded" &&
+            paymentIntentAmount &&
+            trackGroup.fundraiser && (
+              <BackingThisProject
+                amount={paymentIntentAmount}
+                currency={trackGroup.currency}
+                fundraiser={trackGroup.fundraiser}
+                platformPercent={trackGroup.platformPercent}
+                artistName={trackGroup.artist?.name}
+              />
+            )}
           {!paymentStatus && (
             <PurchaseOrDownloadAlbum flex trackGroup={trackGroup} />
           )}

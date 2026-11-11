@@ -4,6 +4,7 @@ import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{tra
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { fundraiserToFormData } from "utils/fundraiserFormData";
 import { useFormPersist } from "utils/useFormPersist";
 
 import AlbumFormContent from "./ManageTrackGroup/AlbumFormComponents/AlbumFormContent";
@@ -26,14 +27,7 @@ const buildDefaultValues = (trackGroup: TrackGroup): TrackGroupFormData => {
       trackGroup?.suggestedPrice !== undefined
         ? `${trackGroup.suggestedPrice / 100}`
         : "",
-    goalAmount: `${
-      trackGroup?.fundraiser?.goalAmount
-        ? trackGroup.fundraiser.goalAmount / 100
-        : ""
-    }`,
-    isAllOrNothing: trackGroup?.fundraiser?.isAllOrNothing ?? false,
-    fundraiserName: trackGroup?.fundraiser?.name ?? "",
-    fundraiserDescription: trackGroup?.fundraiser?.description ?? "",
+    ...fundraiserToFormData(trackGroup?.fundraiser),
   } as unknown as TrackGroupFormData;
 };
 

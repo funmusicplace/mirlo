@@ -2,7 +2,10 @@ import { css } from "@emotion/css";
 
 import { bp } from "../../constants";
 
-const Avatar: React.FC<{ avatar?: string }> = ({ avatar }) => {
+const Avatar: React.FC<{ avatar?: string; alt?: string }> = ({
+  avatar,
+  alt = "Artist avatar",
+}) => {
   if (!avatar) {
     return null;
   }
@@ -23,7 +26,7 @@ const Avatar: React.FC<{ avatar?: string }> = ({ avatar }) => {
     >
       <img
         src={avatar}
-        alt="Artist avatar"
+        alt={alt}
         className={css`
           width: 100%;
           border-radius: 100px;

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, it } from "mocha";
 import { generateFullStaticImageUrl } from "../../src/utils/images";
 import {
   addImageRefs,
+  resolveFundraiserDescription,
   resolveImageRefs,
   resolvePostContent,
   resolveWidgetPaths,
@@ -168,6 +169,42 @@ describe("postContent", () => {
     });
   });
 
+  describe("resolveFundraiserDescription", () => {
+    let previous: string | undefined;
+
+    beforeEach(() => {
+      previous = process.env.CLIENT_DOMAIN;
+      process.env.CLIENT_DOMAIN = "https://now.example";
+    });
+
+    afterEach(() => {
+      if (previous === undefined) {
+        delete process.env.CLIENT_DOMAIN;
+      } else {
+        process.env.CLIENT_DOMAIN = previous;
+      }
+    });
+
+    it("points music players in the description at the current domain", () => {
+      assert.deepEqual(
+        resolveFundraiserDescription({
+          id: 1,
+          description: `<iframe src="/widget/track/3"></iframe>`,
+        }),
+        {
+          id: 1,
+          description: `<iframe src="https://now.example/widget/track/3"></iframe>`,
+        }
+      );
+    });
+
+    it("passes an empty description through", () => {
+      assert.deepEqual(resolveFundraiserDescription({ description: null }), {
+        description: null,
+      });
+    });
+  });
+
   describe("resolvePostContent", () => {
     it("passes null content through", () => {
       assert.equal(resolvePostContent({ content: null, images: [] }), null);
@@ -190,6 +227,17 @@ describe("postContent", () => {
         `<img src="data:image/png;base64,iVBORw0KGgo=" />`,
       ].join("");
       assert.equal(sanitizePostContent(editorOutput), editorOutput);
+    });
+
+    it("can leave images out, keeping videos and players", () => {
+      const iframe = `<iframe src="https://player.vimeo.com/video/1" allow="autoplay; fullscreen"></iframe>`;
+      assert.equal(
+        sanitizePostContent(
+          `<p>Hi</p><img src="https://example.com/a.jpg" />${iframe}`,
+          { images: false }
+        ),
+        `<p>Hi</p>${iframe}`
+      );
     });
 
     it("removes scripts and event handlers", () => {

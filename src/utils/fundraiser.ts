@@ -1,7 +1,169 @@
 import prisma from "@mirlo/prisma";
+import { FundraiserImage, Image, Prisma } from "@mirlo/prisma/client";
+import { keyBy } from "lodash";
 
+import { whereForVisibleProfile } from "./artist";
 import { AppError } from "./error";
+import generateSlug, { generateUniqueSlug } from "./generateSlug";
+import { deleteStoredImages } from "./images";
+import { findSales } from "./sales";
 import { chargePledgePayments, pledgeChargeInclude } from "./stripe";
+
+export const fundraiserImagesInclude = {
+  include: { image: true },
+  orderBy: { position: "asc" },
+} satisfies Prisma.Fundraiser$imagesArgs;
+
+export const publicFundraiserImagesInclude = {
+  ...fundraiserImagesInclude,
+  where: { image: { url: { isEmpty: false } } },
+} satisfies Prisma.Fundraiser$imagesArgs;
+
+export type FundraiserImageWithImage = FundraiserImage & { image: Image };
+
+export const deleteFundraiserImages = async (fundraiserId: number) => {
+  const images = await prisma.fundraiserImage.findMany({
+    where: { fundraiserId },
+    include: { image: true },
+  });
+  await deleteStoredImages(
+    images.map((fundraiserImage) => fundraiserImage.image)
+  );
+};
+
+const isNumericId = (value: string) => /^\d+$/.test(value);
+
+export const whereForPublicFundraiser = ({
+  idOrSlug,
+  artistIdOrSlug,
+  includeHiddenProfiles = false,
+}: {
+  idOrSlug: string;
+  artistIdOrSlug?: string;
+  includeHiddenProfiles?: boolean;
+}): Prisma.FundraiserWhereInput => ({
+  isPublic: true,
+  profile: {
+    ...(includeHiddenProfiles ? {} : whereForVisibleProfile()),
+    ...(!artistIdOrSlug
+      ? {}
+      : isNumericId(artistIdOrSlug)
+        ? { id: Number(artistIdOrSlug) }
+        : { urlSlug: { equals: artistIdOrSlug, mode: "insensitive" } }),
+  },
+  OR: [
+    ...(isNumericId(idOrSlug) ? [{ id: Number(idOrSlug) }] : []),
+    ...(artistIdOrSlug
+      ? [{ urlSlug: { equals: idOrSlug, mode: "insensitive" as const } }]
+      : []),
+  ],
+});
+
+export const isFundraiserSlugTaken = async (
+  profileId: number,
+  urlSlug: string,
+  excludeFundraiserId?: number
+) =>
+  Boolean(
+    await prisma.fundraiser.findFirst({
+      where: {
+        profileId,
+        urlSlug,
+        ...(excludeFundraiserId ? { id: { not: excludeFundraiserId } } : {}),
+      },
+      select: { id: true },
+    })
+  );
+
+export const generateUniqueFundraiserSlug = (
+  profileId: number,
+  name: string,
+  excludeFundraiserId?: number
+) => {
+  const base = generateSlug(name);
+  return generateUniqueSlug(
+    isNumericId(base) ? `fundraiser-${base}` : base,
+    "fundraiser",
+    (urlSlug) => isFundraiserSlugTaken(profileId, urlSlug, excludeFundraiserId)
+  );
+};
+
+export const assertFundraiserSlugAvailable = async (
+  fundraiser: { id: number; profileId: number },
+  urlSlug: string
+) => {
+  const slug = generateSlug(urlSlug.trim());
+  if (!slug) {
+    throw new AppError({
+      httpCode: 400,
+      description: "The fundraiser URL can't be empty",
+      code: "fundraiser_slug_invalid",
+    });
+  }
+  if (isNumericId(slug)) {
+    throw new AppError({
+      httpCode: 400,
+      description: "The fundraiser URL needs at least one letter",
+      code: "fundraiser_slug_invalid",
+    });
+  }
+  if (await isFundraiserSlugTaken(fundraiser.profileId, slug, fundraiser.id)) {
+    throw new AppError({
+      httpCode: 400,
+      description: "Another fundraiser already uses this URL",
+      code: "fundraiser_slug_taken",
+    });
+  }
+  return slug;
+};
+
+type FundraiserForTotals = {
+  id: number;
+  profileId: number;
+  isAllOrNothing: boolean;
+  trackGroups: { id: number }[];
+};
+
+export const getFundraisersTotals = async (
+  fundraisers: FundraiserForTotals[]
+) => {
+  const pledgeTotals = keyBy(
+    await prisma.fundraiserPledge.groupBy({
+      by: ["fundraiserId"],
+      where: {
+        fundraiserId: { in: fundraisers.map((fundraiser) => fundraiser.id) },
+        cancelledAt: null,
+      },
+      _sum: { amount: true },
+      _count: { _all: true },
+    }),
+    "fundraiserId"
+  );
+
+  return Promise.all(
+    fundraisers.map(async (fundraiser) => {
+      const pledges = pledgeTotals[fundraiser.id];
+      const pledgeCount = pledges?._count._all ?? 0;
+
+      if (fundraiser.isAllOrNothing || fundraiser.trackGroups.length === 0) {
+        return { amountRaised: pledges?._sum.amount ?? 0, pledgeCount };
+      }
+
+      const sales = await findSales({
+        profileId: [fundraiser.profileId],
+        filters: { trackGroupIds: fundraiser.trackGroups.map((tg) => tg.id) },
+      });
+
+      return {
+        amountRaised: sales.reduce((total, sale) => total + sale.amount, 0),
+        pledgeCount,
+      };
+    })
+  );
+};
+
+export const getFundraiserTotals = async (fundraiser: FundraiserForTotals) =>
+  (await getFundraisersTotals([fundraiser]))[0];
 
 /**
  * Charges every outstanding pledge on a fundraiser and marks it SUCCESSFUL.

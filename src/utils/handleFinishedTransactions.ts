@@ -12,6 +12,7 @@ import { withPrivateProperties } from "../serializers/utils";
 import { subscribeUserToProfile } from "./artist";
 import { sendBasecampAMessage } from "./basecamp";
 import { findCataloguePurchasableTrackGroups } from "./catalogue";
+import { fundraiserPageUrl } from "./clientUrl";
 import { getClient } from "./getClient";
 import { decrementMerchStock } from "./merch";
 import {
@@ -928,7 +929,7 @@ export const handleFundraiserPledgePaymentSuccess = async (
           user: { select: { email: true } },
           fundraiser: {
             include: {
-              profile: { select: { name: true, urlSlug: true } },
+              profile: { select: { id: true, name: true, urlSlug: true } },
               trackGroups: { where: { deletedAt: null } },
             },
           },
@@ -1019,6 +1020,11 @@ export const handleFundraiserPledgePaymentSuccess = async (
       pledgedAmount: pledge.amount,
       fundraisingGoal: fundraiser.goalAmount,
       client: applicationUrl,
+      fundraiserUrl: fundraiserPageUrl(
+        applicationUrl,
+        fundraiser.profile,
+        fundraiser
+      ),
     },
   });
 };

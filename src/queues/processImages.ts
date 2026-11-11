@@ -132,6 +132,7 @@ export const uploadAndSendToImageQueue = async (
     | "background"
     | "banner"
     | "splash"
+    | "gallery"
     | "inFormData",
   createDatabaseEntry: (
     {
@@ -209,7 +210,8 @@ export const uploadAndSendToImageQueue = async (
           | "banner"
           | "avatar"
           | "artwork"
-          | "splash" =
+          | "splash"
+          | "gallery" =
           sharpConfigKey === "inFormData"
             ? (fromBody.dimensions ?? "square")
             : sharpConfigKey;
@@ -410,6 +412,37 @@ export const processMerchImage = (ctx: APIContext) => {
             profileId: merch.profileId,
             merchImage: {
               create: { merchId, position: last ? last.position + 1 : 0 },
+            },
+          },
+        });
+      }
+    );
+  };
+};
+
+export const processFundraiserImage = (ctx: APIContext) => {
+  return async (fundraiserId: number) => {
+    return uploadAndSendToImageQueue(
+      ctx,
+      "image",
+      "image",
+      "gallery",
+      async (fileInfo: { filename: string }) => {
+        const fundraiser = await prisma.fundraiser.findUniqueOrThrow({
+          where: { id: fundraiserId },
+          select: { profileId: true },
+        });
+        const last = await prisma.fundraiserImage.findFirst({
+          where: { fundraiserId },
+          orderBy: { position: "desc" },
+        });
+        return prisma.image.create({
+          data: {
+            originalFilename: fileInfo.filename,
+            dimensions: "gallery",
+            profileId: fundraiser.profileId,
+            fundraiserImage: {
+              create: { fundraiserId, position: last ? last.position + 1 : 0 },
             },
           },
         });

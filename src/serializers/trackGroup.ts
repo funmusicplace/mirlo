@@ -10,6 +10,7 @@ import {
 
 import { addSizesToStoredImage } from "../utils/artist";
 import { storedImageVariantUrl } from "../utils/images";
+import { resolveFundraiserDescription } from "../utils/postContent";
 import { isTrackPlayableNested } from "../utils/trackPlayability";
 
 import { serializeMerch } from "./merch";
@@ -138,6 +139,13 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
       })
     ),
     tags: tg.tags?.map((t) => t.tag?.tag) ?? [],
+    ...("fundraiser" in tg && tg.fundraiser
+      ? {
+          fundraiser: resolveFundraiserDescription(
+            tg.fundraiser as { description?: string | null }
+          ),
+        }
+      : {}),
     cover: addSizesToStoredImage(tg.cover),
     downloadableContent: tg.downloadableContent?.map((dc) => ({
       ...dc,

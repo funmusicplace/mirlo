@@ -152,6 +152,18 @@ export default {
         variants: [{ width: 1500, height: 1500 }],
       },
     },
+    gallery: {
+      webp: {
+        options: { quality: 80 },
+        variants: [
+          { width: 1920, height: 1920, resize: { fit: "inside" } },
+          { width: 1280, height: 1280, resize: { fit: "inside" } },
+          { width: 960, height: 960, resize: { fit: "inside" } },
+          { width: 600, height: 600, resize: { fit: "inside" } },
+          { width: 120, height: 120, resize: { fit: "inside" } },
+        ],
+      },
+    },
     splash: {
       webp: {
         options: { quality: 85 },

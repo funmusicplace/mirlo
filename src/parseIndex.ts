@@ -21,6 +21,8 @@ import {
   fetchPostMetadata,
   fetchMerchMetadata,
   fetchSubscriptionTierMetadata,
+  fetchFundraiserMetadata,
+  htmlToSummary,
 } from "./parseIndex/metadata";
 import {
   matchRoute as matchRoutePattern,
@@ -42,6 +44,7 @@ import { serializeProfile } from "./serializers/artist";
 import { serializeInstanceSettings } from "./serializers/instanceSettings";
 import { postIncludeForUser } from "./serializers/post";
 import { resolveProfileImageUrl, whereForVisibleProfile } from "./utils/artist";
+import { fundraiserPageUrl } from "./utils/clientUrl";
 import { getClient } from "./utils/getClient";
 import { storedImageFileUrl, storedImageVariantUrl } from "./utils/images";
 import { merchImageUrl } from "./utils/merch";
@@ -631,6 +634,66 @@ const handleSupport: RouteHandler<SupportParams> = async ({
   });
 };
 
+type FundraiserParams = { profileSlug: string; fundraiserSlug: string };
+const handleFundraiser: RouteHandler<FundraiserParams> = async ({
+  $,
+  client,
+  instanceName,
+  avatarUrl,
+  params: { profileSlug, fundraiserSlug },
+  hydrations,
+}) => {
+  const profile = await fetchProfileMetadata(profileSlug);
+  if (!profile) return;
+
+  registerProfileHydration(hydrations, profile);
+
+  const profileName = profile.name || `A ${instanceName} Profile`;
+  const rss = `${process.env.API_DOMAIN}/v1/artists/${profile.urlSlug}/feed?format=rss`;
+  const fundraiser = await fetchFundraiserMetadata(profileSlug, fundraiserSlug);
+
+  if (!fundraiser) {
+    buildOpenGraphTags($, instanceName, {
+      title: profileName,
+      description: `${profileName} on ${instanceName}`,
+      url: `${client.applicationUrl}/${profile.urlSlug}`,
+      imageUrl: avatarUrl,
+      rss,
+    });
+    return;
+  }
+
+  const fundraiserUrl = fundraiserPageUrl(
+    client.applicationUrl,
+    profile,
+    fundraiser
+  );
+  const description =
+    (fundraiser.description && htmlToSummary(fundraiser.description)) ||
+    `A fundraiser by ${profileName} on ${instanceName}`;
+  const imageUrl =
+    storedImageVariantUrl(fundraiser.images[0]?.image, 1280) ?? avatarUrl;
+
+  const schema = buildArticleSchema({
+    title: fundraiser.name,
+    description,
+    url: fundraiserUrl,
+    imageUrl,
+    profileName,
+    releaseDate: fundraiser.createdAt.toISOString().split("T")[0],
+  });
+
+  buildOpenGraphTags($, instanceName, {
+    title: fundraiser.name,
+    description,
+    url: fundraiserUrl,
+    imageUrl,
+    rss,
+    profileName,
+    schemas: [schema],
+  });
+};
+
 type ProfileReleasesParams = { profileSlug: string };
 const handleProfileReleases: RouteHandler<ProfileReleasesParams> = async ({
   $,
@@ -833,6 +896,15 @@ const dispatchRoute = async (
       await handleMerch({
         ...contextWithHydrations,
         params: { profileSlug: routeParams.profileSlug },
+      });
+      break;
+    case "fundraiser":
+      await handleFundraiser({
+        ...contextWithHydrations,
+        params: {
+          profileSlug: routeParams.profileSlug,
+          fundraiserSlug: routeParams.fundraiserSlug,
+        },
       });
       break;
     case "support":

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
 import Box from "components/common/Box";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
+import ImageGallery from "components/common/ImageGallery";
 import MarkdownContent from "components/common/MarkdownContent";
 import { MetaCard } from "components/common/MetaCard";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
@@ -11,7 +12,6 @@ import PublicTrackGroupListing from "components/common/TrackList/PublicTrackGrou
 import WidthContainer from "components/common/WidthContainer";
 import MerchButtonPopUp from "components/Merch/MerchButtonPopUp";
 import MerchDownloadableContent from "components/Merch/MerchDownloadableContent";
-import MerchImageGallery from "components/Merch/MerchImageGallery";
 import ImageWrapper from "components/TrackGroup/ImageWrapper";
 import { ItemViewTitle } from "components/TrackGroup/ItemViewTitle";
 import { ImageAndDetailsWrapper } from "pages/{artistId}/release/{trackGroupId}/Index";
@@ -149,7 +149,7 @@ function Index() {
               `}
             >
               <ImageWrapper>
-                <MerchImageGallery merch={merch} />
+                <ImageGallery images={merch.images} alt={merch.title} />
               </ImageWrapper>
             </ImageAndDetailsWrapper>
             <div

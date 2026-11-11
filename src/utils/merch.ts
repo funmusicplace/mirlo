@@ -8,12 +8,14 @@ import {
   Prisma,
 } from "@mirlo/prisma/client";
 
-import logger from "../logger";
-
 import { deleteDownloadableContent } from "./content";
 import countryCodesCurrencies from "./country-codes-currencies";
 import { AppError } from "./error";
-import { deleteStoredImage, storedImageVariantUrl } from "./images";
+import {
+  deleteStoredImage,
+  deleteStoredImages,
+  storedImageVariantUrl,
+} from "./images";
 
 export const merchImagesInclude = {
   include: { image: true },
@@ -35,15 +37,7 @@ export const deleteMerchImages = async (merchId: string) => {
     where: { merchId },
     include: { image: true },
   });
-
-  for (const image of images) {
-    try {
-      await deleteMerchImage(image);
-    } catch (e) {
-      logger.error(`Error deleting merch image ${image.id}`);
-      console.error(e);
-    }
-  }
+  await deleteStoredImages(images.map((merchImage) => merchImage.image));
 };
 
 export const deleteMerch = async (merchId: string) => {

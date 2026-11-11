@@ -15,6 +15,7 @@ import {
   createPost,
   createMerch,
   createUser,
+  createFundraiser,
 } from "../../utils";
 import { requestApp } from "../utils";
 
@@ -418,6 +419,39 @@ describe("oembed", () => {
 
         assert.equal(response.statusCode, 404);
         assert.equal(response.body.error, "Content not found");
+      });
+
+      it("should return oEmbed data for a public fundraiser, and 404 for a private one", async () => {
+        const user = await createUser({ email: "test@test.com" });
+        const profile = await createProfile(user.user.id);
+        await createFundraiser(profile.id, {
+          name: "Press it on vinyl",
+          urlSlug: "vinyl",
+          isPublic: true,
+        });
+        await createFundraiser(profile.id, {
+          name: "Secret plans",
+          urlSlug: "secret",
+          isPublic: false,
+        });
+
+        const response = await requestApp
+          .get(
+            `oembed/?url=${encodeURIComponent(`${applicationUrl}/${profile.urlSlug}/fundraiser/vinyl`)}`
+          )
+          .set("Accept", "application/json");
+
+        assert.equal(response.statusCode, 200);
+        assert.equal(response.body.type, "link");
+        assert.equal(response.body.title, "Press it on vinyl");
+        assert.equal(response.body.author_name, profile.name);
+
+        const hidden = await requestApp
+          .get(
+            `oembed/?url=${encodeURIComponent(`${applicationUrl}/${profile.urlSlug}/fundraiser/secret`)}`
+          )
+          .set("Accept", "application/json");
+        assert.equal(hidden.statusCode, 404);
       });
 
       it("should return 404 for invalid URL pattern", async () => {

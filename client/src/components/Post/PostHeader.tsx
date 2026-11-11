@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import Avatar from "components/Artist/Avatar";
+import AvatarLink from "components/Artist/AvatarLink";
 import ClickToPlayTracks from "components/common/ClickToPlayTracks";
 import FollowArtist from "components/common/FollowArtist";
 import ShareButton from "components/common/ShareButton";
@@ -8,8 +8,7 @@ import SupportArtist from "components/common/SupportArtist";
 import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
-import { getPostURLReference } from "utils/artist";
+import { getArtistUrl, getPostURLReference } from "utils/artist";
 import useIsSubscribedToArtist from "utils/useIsSubscribedToArtist";
 import { useMatchMedia } from "utils/useMatchMedia";
 
@@ -35,22 +34,6 @@ const AvatarWrapper = styled.div`
     max-width: 25px;
   }
 `;
-
-const AvatarLink: React.FC<{
-  avatar?: string;
-  name?: string;
-  to: string;
-}> = ({ avatar, name, to }) => (
-  <Link
-    to={to}
-    className={css`
-      display: flex;
-      gap: 0.25rem;
-    `}
-  >
-    <Avatar avatar={avatar} /> <span>{name}</span>
-  </Link>
-);
 
 const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "post" });
@@ -83,7 +66,10 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
             link: (
               <AvatarLink
                 avatar={post.artist.avatar?.sizes?.[60]}
-                to={`/${post.artist.urlSlug?.toLowerCase() ?? post.artistId}`}
+                to={getArtistUrl({
+                  urlSlug: post.artist.urlSlug,
+                  id: post.artistId,
+                })}
                 name={post.artist.name}
               ></AvatarLink>
             ),

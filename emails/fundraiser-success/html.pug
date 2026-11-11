@@ -9,9 +9,6 @@ block content
 
   p= t("emails.fundraiserSuccess.contributed", { amount: formatMoney(pledgedAmount, currency), goal: formatMoney(fundraisingGoal, currency) })
   p
-    if trackGroup
-      +releaseLink({ ...trackGroup, artist })= t("emails.fundraiserSuccess.viewIt", { instanceName })
-    else
-      a(href!=`${client}/${artist.urlSlug}`)= t("emails.fundraiserSuccess.viewIt", { instanceName })
+    a(href!=fundraiserUrl)= t("emails.fundraiserSuccess.viewIt", { instanceName })
   hr
   p= t("emails.fundraiserSuccess.thanks", { instanceName })

@@ -29,10 +29,11 @@ const SortableGridItem: React.FC<{
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className="relative [&_button]:opacity-0 hover:[&_button]:opacity-100"
+      className="relative [&_button]:opacity-0 hover:[&_button]:opacity-100 focus-within:[&_button]:opacity-100 pointer-coarse:[&_button]:opacity-100"
     >
       {showHandle && (
         <ArtistButton
+          type="button"
           className="absolute top-2 right-2 z-[999]"
           {...listeners}
           ref={setActivatorNodeRef}

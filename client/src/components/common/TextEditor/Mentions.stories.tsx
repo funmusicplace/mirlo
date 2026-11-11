@@ -198,3 +198,22 @@ export const ExistingMentions: Story = {
     );
   },
 };
+
+/** Fundraiser descriptions switch mentions off: "@" is just text */
+export const MentionsOff: Story = {
+  args: { allowMentions: false, postId: undefined },
+  play: async ({ canvasElement }) => {
+    const editor = await findEditor(canvasElement);
+    const page = within(canvasElement.ownerDocument.body);
+
+    await typeLikeAPerson(editor, "Recorded with @lum");
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    await expect(
+      page.queryByRole("button", { name: "Lumen Tide" })
+    ).not.toBeInTheDocument();
+    await expect(editor.querySelector(".mention-highlight")).toBeNull();
+    await expect(
+      page.queryByRole("button", { name: "Add image" })
+    ).not.toBeInTheDocument();
+  },
+};

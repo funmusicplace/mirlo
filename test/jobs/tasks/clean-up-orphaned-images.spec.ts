@@ -10,6 +10,7 @@ import cleanUpOrphanedImages, {
 } from "../../../src/jobs/tasks/clean-up-orphaned-images";
 import {
   clearTables,
+  createFundraiser,
   createProfile,
   createProfileImage,
   createUser,
@@ -37,13 +38,22 @@ describe("clean-up-orphaned-images", () => {
       where: { id: avatar.id },
       data: { createdAt: old },
     });
+    const fundraiser = await createFundraiser(profile.id);
+    const fundraiserImage = await prisma.image.create({
+      data: {
+        dimensions: "square",
+        profileId: profile.id,
+        createdAt: old,
+        fundraiserImage: { create: { fundraiserId: fundraiser.id } },
+      },
+    });
 
     await cleanUpOrphanedImages();
 
     const left = await prisma.image.findMany({ select: { id: true } });
     assert.deepEqual(
       left.map((i) => i.id).sort(),
-      [recent.id, avatar.id].sort()
+      [recent.id, avatar.id, fundraiserImage.id].sort()
     );
     const deleted = await prisma.image.findFirst({
       where: { id: orphan.id, deletedAt: { not: null } },

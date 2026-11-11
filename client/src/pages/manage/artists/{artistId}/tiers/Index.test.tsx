@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -12,7 +12,12 @@ vi.mock("react-i18next", () => ({
 }));
 
 const tiersState: { results: any[] } = { results: [] };
+const fundraisersState: { results: any[] } = { results: [] };
 const invalidateQueries = vi.fn();
+const { createFundraiser, navigate } = vi.hoisted(() => ({
+  createFundraiser: vi.fn(),
+  navigate: vi.fn(),
+}));
 
 vi.mock("queries", () => ({
   queryManagedArtist: (artistId: number) => ({
@@ -24,6 +29,13 @@ vi.mock("queries", () => ({
     artistId: number;
   }) => ({
     queryKey: ["managedArtistTiers", artistId],
+  }),
+  queryManagedArtistFundraisers: (artistId: number) => ({
+    queryKey: ["managedArtistFundraisers", artistId],
+  }),
+  useCreateFundraiserMutation: () => ({
+    mutate: createFundraiser,
+    isPending: false,
   }),
   useCreateSubscriptionTierMutation: () => ({
     mutate: vi.fn(),
@@ -50,6 +62,9 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
           },
         };
       }
+      if (opts.queryKey[0] === "managedArtistFundraisers") {
+        return { data: fundraisersState };
+      }
       return { data: tiersState };
     },
     useQueryClient: () => ({ invalidateQueries }),
@@ -61,7 +76,7 @@ vi.mock("react-router-dom", async (importOriginal) => {
   return {
     ...actual,
     useParams: () => ({ artistId: "10" }),
-    useNavigate: () => vi.fn(),
+    useNavigate: () => navigate,
   };
 });
 
@@ -99,6 +114,16 @@ vi.mock("utils/useSortableReorder", async (importOriginal) => {
   };
 });
 
+vi.mock("components/ManageArtist/Fundraisers/ManageFundraisersList", () => ({
+  default: ({ fundraisers }: any) => (
+    <ul data-testid="fundraisers">
+      {fundraisers.map((f: any) => (
+        <li key={f.id}>{f.name}</li>
+      ))}
+    </ul>
+  ),
+}));
+
 vi.mock("components/ManageArtist/ManageSubscriptionTierBox", () => ({
   default: ({ tier }: any) => <div data-testid="tier-box">{tier.name}</div>,
 }));
@@ -116,6 +141,7 @@ describe("Manage Tiers Index", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     capturedPersistOrder = undefined;
+    fundraisersState.results = [];
     tiersState.results = [
       { id: 2, name: "Gold ($15)", minAmount: 1500, order: 1 },
       { id: 1, name: "Bronze ($5)", minAmount: 500, order: 2 },
@@ -154,5 +180,39 @@ describe("Manage Tiers Index", () => {
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: ["managedArtistTiers", 10],
     });
+  });
+
+  test("lists the artist's fundraisers above the tiers", () => {
+    fundraisersState.results = [{ id: 5, name: "New van" }];
+    render(
+      <MemoryRouter>
+        <Index />
+      </MemoryRouter>
+    );
+
+    const fundraisers = screen.getByTestId("fundraisers");
+    expect(fundraisers).toHaveTextContent("New van");
+    expect(
+      fundraisers.compareDocumentPosition(screen.getAllByTestId("tier-box")[0])
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  test("creates an untitled fundraiser and opens it for editing", () => {
+    createFundraiser.mockImplementation((_vars, { onSuccess }) =>
+      onSuccess({ result: { id: 12 } })
+    );
+    render(
+      <MemoryRouter>
+        <Index />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "addFundraiser" }));
+
+    expect(createFundraiser).toHaveBeenCalledWith(
+      { artistId: 10, name: "untitledFundraiser" },
+      expect.anything()
+    );
+    expect(navigate).toHaveBeenCalledWith("/manage/artists/10/fundraisers/12");
   });
 });

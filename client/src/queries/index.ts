@@ -11,3 +11,4 @@ export * from "./labels";
 export * from "./artistManagers";
 export * from "./tip";
 export * from "./purchase";
+export * from "./fundraisers";

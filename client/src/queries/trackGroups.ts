@@ -4,6 +4,8 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { omit } from "lodash";
+import { dirtyFundraiserUpdate } from "utils/fundraiserFormData";
 import { getInjectedTrackGroup } from "utils/injectedData";
 
 import * as api from "./fetch/fetchWrapper";
@@ -12,6 +14,7 @@ import {
   QUERY_KEY_SALES,
   queryKeyIncludes,
   QUERY_KEY_AUTH,
+  QUERY_KEY_FUNDRAISERS,
 } from "./queryKeys";
 
 export type TrackGroupQueryOptions = {
@@ -188,8 +191,9 @@ async function saveAlbumForm(opts: {
   trackGroupId: number;
   artistId: number;
   fundraiserId?: number;
+  dirtyFields?: Partial<Record<string, unknown>>;
 }) {
-  const { formData, trackGroupId, artistId, fundraiserId } = opts;
+  const { formData, trackGroupId, artistId, fundraiserId, dirtyFields } = opts;
   const trackGroupPayload = {
     title: formData.title,
     about: formData.about,
@@ -222,19 +226,14 @@ async function saveAlbumForm(opts: {
     undefined,
   ];
 
-  if (fundraiserId) {
+  const fundraiserUpdate = dirtyFundraiserUpdate(
+    formData,
+    omit(dirtyFields, "urlSlug")
+  );
+  if (fundraiserId && Object.keys(fundraiserUpdate).length > 0) {
     requests[1] = api.put<unknown, { result: Fundraiser }>(
       `v1/manage/fundraisers/${fundraiserId}`,
-      {
-        goalAmount: toCentsOrNull(formData.goalAmount) ?? 0,
-        // Undefined when the checkbox is disabled (pledges exist); leave it as is
-        isAllOrNothing:
-          formData.isAllOrNothing === undefined
-            ? undefined
-            : !!formData.isAllOrNothing,
-        name: formData.fundraiserName,
-        description: formData.fundraiserDescription,
-      }
+      fundraiserUpdate
     );
   }
 
@@ -292,6 +291,7 @@ export function useUpdatePledgeMutation() {
         predicate: (query) =>
           queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS) ||
           queryKeyIncludes(query, QUERY_KEY_AUTH) ||
+          queryKeyIncludes(query, QUERY_KEY_FUNDRAISERS) ||
           queryKeyIncludes(query, QUERY_KEY_SALES),
       });
     },
@@ -311,6 +311,7 @@ export function useDeletePledgeMutation() {
         predicate: (query) =>
           queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS) ||
           queryKeyIncludes(query, QUERY_KEY_AUTH) ||
+          queryKeyIncludes(query, QUERY_KEY_FUNDRAISERS) ||
           queryKeyIncludes(query, QUERY_KEY_SALES),
       });
     },
@@ -330,29 +331,6 @@ export function useDeleteTrackGroupMutation() {
         predicate: (query) => queryKeyIncludes(query, QUERY_KEY_TRACK_GROUPS),
       });
     },
-  });
-}
-
-const fetchManagedFundraiser: QueryFunction<
-  Fundraiser,
-  ["fetchManagedFundraiser", { fundraiserId: number }, ...any]
-> = ({ queryKey: [_, { fundraiserId }], signal }) => {
-  return api
-    .get<{
-      result: Fundraiser;
-    }>(`v1/manage/fundraisers/${fundraiserId}`, { signal })
-    .then((r) => r.result);
-};
-
-export function queryManagedFundraiser(fundraiserId: number) {
-  return queryOptions({
-    queryKey: [
-      "fetchManagedFundraiser",
-      { fundraiserId },
-      QUERY_KEY_TRACK_GROUPS,
-    ],
-    queryFn: fetchManagedFundraiser,
-    enabled: isFinite(fundraiserId),
   });
 }
 

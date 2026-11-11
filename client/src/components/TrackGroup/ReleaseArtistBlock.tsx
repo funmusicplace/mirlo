@@ -123,7 +123,7 @@ const FittedBio: React.FC<{
 
 const ReleaseArtistBlock: React.FC<{
   artist: Artist;
-  trackGroupId: number;
+  trackGroupId?: number;
 }> = ({ artist, trackGroupId }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",

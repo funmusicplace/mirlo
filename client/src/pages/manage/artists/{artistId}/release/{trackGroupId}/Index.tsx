@@ -29,10 +29,11 @@ import { MdOutlineDownloadForOffline } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistManageUrl } from "utils/artist";
+import { FundraiserFormData } from "utils/fundraiserFormData";
 
 import { bp } from "../../../../../../constants";
 
-export interface TrackGroupFormData {
+export interface TrackGroupFormData extends FundraiserFormData {
   title: string;
   urlSlug?: string;
   minPrice?: string;
@@ -48,10 +49,6 @@ export interface TrackGroupFormData {
   catalogNumber?: string;
   coverImageAlt?: string;
   coverCredit?: string;
-  goalAmount?: string;
-  isAllOrNothing?: boolean;
-  fundraiserName?: string;
-  fundraiserDescription?: string;
 }
 
 export const FormSection = styled.div`

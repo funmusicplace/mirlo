@@ -1,9 +1,11 @@
 import { basename, extname } from "path";
 
 import prisma from "@mirlo/prisma";
+import { isEqual, sortBy } from "lodash";
 
 import logger from "../logger";
 
+import { AppError } from "./error";
 import {
   backendStorage,
   getImagesBucket,
@@ -105,6 +107,7 @@ export const deleteStoredImage = async (
   const imageId = image.id;
   await prisma.subscriptionTierImage.deleteMany({ where: { imageId } });
   await prisma.merchImage.deleteMany({ where: { imageId } });
+  await prisma.fundraiserImage.deleteMany({ where: { imageId } });
   await prisma.postImage.deleteMany({ where: { imageId } });
   await prisma.post.updateMany({
     where: { featuredImageId: imageId },
@@ -134,3 +137,26 @@ export const deleteStoredImage = async (
     logger.info(`No stored objects for image ${imageId}, that's okay`);
   }
 };
+
+export const deleteStoredImages = async (
+  images: Pick<StoredImage, "id" | "keyPrefix">[]
+) => {
+  for (const image of images) {
+    try {
+      await deleteStoredImage(image);
+    } catch (e) {
+      logger.error(`Error deleting image ${image.id}`);
+      console.error(e);
+    }
+  }
+};
+
+export function assertListsEveryImage(
+  ids: unknown,
+  existingIds: string[],
+  description: string
+): asserts ids is string[] {
+  if (!Array.isArray(ids) || !isEqual(sortBy(ids), sortBy(existingIds))) {
+    throw new AppError({ httpCode: 400, description });
+  }
+}

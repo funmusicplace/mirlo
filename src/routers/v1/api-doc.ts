@@ -200,11 +200,6 @@ const apiDoc = {
                 type: "number",
                 description: "Fundraiser ID (fundraiserPledge items only)",
               },
-              trackGroupId: {
-                type: "number",
-                description:
-                  "TrackGroup ID the fundraiser belongs to (fundraiserPledge items only)",
-              },
               price: {
                 type: "string",
                 description:

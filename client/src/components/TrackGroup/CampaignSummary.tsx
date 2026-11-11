@@ -5,6 +5,7 @@ import LoadingBlocks from "components/Artist/LoadingBlocks";
 import Confetti from "components/common/Confetti";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { moneyDisplay } from "components/common/Money";
+import RichTextContent from "components/common/RichTextContent";
 import ShareToSocials from "components/common/ShareToSocials";
 import { AnnouncementWrapper } from "components/ManageArtist/ManageArtistDetails/ManageArtistAnnouncement";
 import {
@@ -14,7 +15,7 @@ import {
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import { getReleaseUrl } from "utils/artist";
+import { getFundraiserUrl, getReleaseUrl } from "utils/artist";
 
 import BackOrIsBacking from "./BackOrIsBacking";
 import Thermometer from "./Thermometer";
@@ -104,13 +105,22 @@ function CampaignSummary({
 
         {trackGroup.fundraiser?.name && (
           <h3 className="text-base md:text-lg font-bold mb-1">
-            {trackGroup.fundraiser.name}
+            {trackGroup.fundraiser.isPublic ? (
+              <ArtistRouterLink
+                to={getFundraiserUrl(artist, trackGroup.fundraiser)}
+              >
+                {trackGroup.fundraiser.name}
+              </ArtistRouterLink>
+            ) : (
+              trackGroup.fundraiser.name
+            )}
           </h3>
         )}
         {trackGroup.fundraiser?.description && (
-          <p className="mb-2 whitespace-pre-line">
-            {trackGroup.fundraiser.description}
-          </p>
+          <RichTextContent
+            html={trackGroup.fundraiser.description}
+            className="mb-2"
+          />
         )}
         <div
           className={css`

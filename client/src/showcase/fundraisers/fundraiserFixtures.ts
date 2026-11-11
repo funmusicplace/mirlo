@@ -31,13 +31,14 @@ export const makeFundraiser = ({
   return {
     id: FUNDRAISER_ID,
     goalAmount: GOAL_CENTS,
+    minPledge: 1000,
     isAllOrNothing: true,
     endDate,
     status,
     name: "Press Tidal Hours on vinyl",
     description: funded
-      ? `We did it! Thank you to every single backer: 300 copies of Tidal Hours on 180g sea-glass blue vinyl are going to the pressing plant.\n\nYou can still pledge until ${closes} to claim one of the last records.`
-      : `Help us press 300 copies of Tidal Hours on 180g sea-glass blue vinyl, with a gatefold sleeve and hand-stamped labels. Every backer gets the album now and a record in the mail next spring.\n\nYou're only charged if we hit the goal. Pledges close on ${closes}.`,
+      ? `<p>We did it! Thank you to every single backer: 300 copies of Tidal Hours on 180g sea-glass blue vinyl are going to the pressing plant.</p><p>You can still pledge until ${closes} to claim one of the last records.</p>`
+      : `<p>Help us press 300 copies of Tidal Hours on 180g sea-glass blue vinyl, with a gatefold sleeve and hand-stamped labels. Every backer gets the album now and a record in the mail next spring.</p><p>You're only charged if we hit the goal. Pledges close on ${closes}.</p>`,
   };
 };
 

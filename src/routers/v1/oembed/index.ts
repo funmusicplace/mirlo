@@ -6,6 +6,7 @@ import {
   fetchAlbumMetadata,
   fetchPostMetadata,
   fetchMerchMetadata,
+  fetchFundraiserMetadata,
 } from "../../../parseIndex/metadata";
 import {
   matchRoute,
@@ -196,6 +197,29 @@ export default function () {
               cache_age: 86400,
             };
           }
+        }
+      } else if (routeParams.type === "fundraiser") {
+        const fundraiser = await fetchFundraiserMetadata(
+          routeParams.profileSlug,
+          routeParams.fundraiserSlug
+        );
+        if (fundraiser) {
+          oembedData = {
+            type: "link",
+            width: 400,
+            height: 300,
+            title: fundraiser.name,
+            author_name:
+              fundraiser.profile.name || (await getFallbackAuthorName()),
+            author_url: `${client.applicationUrl}/${fundraiser.profile.urlSlug}`,
+            thumbnail_url: storedImageVariantUrl(
+              fundraiser.images[0]?.image,
+              600
+            ),
+            thumbnail_width: 600,
+            thumbnail_height: 338,
+            cache_age: 86400,
+          };
         }
       } else if (routeParams.type === "profile") {
         // Artist profile

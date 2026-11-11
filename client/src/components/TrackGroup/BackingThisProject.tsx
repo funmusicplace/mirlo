@@ -1,18 +1,18 @@
-import { css } from "@emotion/css";
+import Button from "components/common/Button";
 import Confetti from "components/common/Confetti";
+import FormComponent from "components/common/FormComponent";
 import Modal from "components/common/Modal";
 import { moneyDisplay } from "components/common/Money";
 import Tooltip from "components/common/Tooltip";
-import React from "react";
-import { useTranslation } from "react-i18next";
-import PaymentInputElement from "./PaymentInputElement";
-import { FormProvider, useForm } from "react-hook-form";
-import FormComponent from "components/common/FormComponent";
-import Button from "components/common/Button";
-import { useSnackbar } from "state/SnackbarContext";
 import { useDeletePledgeMutation, useUpdatePledgeMutation } from "queries";
+import React from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import useErrorHandler from "services/useErrorHandler";
+import { useSnackbar } from "state/SnackbarContext";
 import { useConfirm } from "utils/useConfirm";
-import { useAuthContext } from "state/AuthContext";
+
+import PaymentInputElement from "./PaymentInputElement";
 
 interface FormData {
   chosenPrice: string;
@@ -25,24 +25,25 @@ const BackingThisProject: React.FC<{
   amount: number;
   currency: string;
   collapse?: boolean;
-  trackGroup: TrackGroup;
-}> = ({ amount, collapse, currency, trackGroup }) => {
+  fundraiser: { id: number; minPledge?: number };
+  platformPercent: number;
+  artistName?: string;
+}> = ({
+  amount,
+  collapse,
+  currency,
+  fundraiser,
+  platformPercent,
+  artistName,
+}) => {
   const [isChangingPledge, setIsChangingPledge] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
-  const minPrice = trackGroup?.minPrice;
+  const minPrice = fundraiser.minPledge;
   const snackbar = useSnackbar();
+  const errorHandler = useErrorHandler();
   const { mutateAsync: updatePledge } = useUpdatePledgeMutation();
   const { mutateAsync: deletePledge } = useDeletePledgeMutation();
   const { ask } = useConfirm();
-  const { user } = useAuthContext();
-  const activeSubscriptionForArtist = user?.artistUserSubscriptions?.find(
-    (subscription) =>
-      subscription.artistSubscriptionTier.artistId === trackGroup.artistId
-  );
-  const discountPercent =
-    activeSubscriptionForArtist?.artistSubscriptionTier
-      .digitalDiscountPercent ?? 0;
-
   const [isSavingPledge, setIsSavingPledge] = React.useState(false);
 
   const methods = useForm<FormData>({
@@ -54,22 +55,14 @@ const BackingThisProject: React.FC<{
 
   const { setValue } = methods;
 
-  if (!trackGroup) {
-    return null;
-  }
-
   const onUpdatePledge = async (data: FormData) => {
-    const newPledgeAmount = Number(data.chosenPrice) * 100;
+    const newPledgeAmount = Math.round(Number(data.chosenPrice) * 100);
     if (isFinite(newPledgeAmount) && newPledgeAmount > 0) {
       setIsSavingPledge(true);
 
       try {
-        if (!trackGroup.fundraiserId) {
-          console.error("No fundraiser associated with this track group");
-          return;
-        }
         await updatePledge({
-          fundraiserId: trackGroup.fundraiserId,
+          fundraiserId: fundraiser.id,
           amount: newPledgeAmount,
         });
         setIsChangingPledge(false);
@@ -77,6 +70,7 @@ const BackingThisProject: React.FC<{
         snackbar(t("pledgeUpdatedSuccessfully"), { type: "success" });
       } catch (e) {
         console.error("Error updating pledge:", e);
+        errorHandler(e);
       } finally {
         setIsSavingPledge(false);
       }
@@ -90,15 +84,12 @@ const BackingThisProject: React.FC<{
       return;
     }
     try {
-      if (!trackGroup.fundraiserId) {
-        console.error("No fundraiser associated with this track group");
-        return;
-      }
-      await deletePledge({ fundraiserId: trackGroup.fundraiserId });
+      await deletePledge({ fundraiserId: fundraiser.id });
       setIsChangingPledge(false);
       snackbar(t("pledgeDeletedSuccessfully"), { type: "success" });
     } catch (e) {
       console.error("Error deleting pledge:", e);
+      errorHandler(e);
     }
   };
 
@@ -116,10 +107,10 @@ const BackingThisProject: React.FC<{
           <form onSubmit={methods.handleSubmit(onUpdatePledge)}>
             <FormComponent>
               <PaymentInputElement
-                currency={trackGroup.currency}
-                platformPercent={trackGroup.platformPercent}
-                minPrice={trackGroup.minPrice}
-                artistName={trackGroup.artist?.name}
+                currency={currency}
+                platformPercent={platformPercent}
+                minPrice={minPrice}
+                artistName={artistName}
               />
             </FormComponent>
             <div className="flex justify-between">
@@ -127,9 +118,7 @@ const BackingThisProject: React.FC<{
                 type="submit"
                 size="big"
                 isLoading={isSavingPledge}
-                disabled={
-                  Number(chosenPrice) < (trackGroup.minPrice ?? 0) / 100
-                }
+                disabled={Number(chosenPrice) < (minPrice ?? 0) / 100}
               >
                 {t("updatePledge")}
               </Button>
@@ -145,17 +134,17 @@ const BackingThisProject: React.FC<{
         </FormProvider>
       </Modal>
       <Tooltip hoverText={t("youWillBeChargedWhenItsFullyFunded")}>
-        <div
-          className={css`
-            margin-left: 0.5rem;
-            display: flex;
-            align-items: center;
-            svg {
-              width: 40px;
-              margin-top: -0.5rem;
-            }
-          `}
+        <button
+          type="button"
+          className="ml-2 flex cursor-pointer items-center [&_svg]:-mt-2 [&_svg]:w-10"
           onClick={() => setIsChangingPledge(true)}
+          aria-label={
+            collapse
+              ? t("backingThisProjectFor", {
+                  amount: moneyDisplay({ amount: amount / 100, currency }),
+                })
+              : undefined
+          }
         >
           <Confetti />
 
@@ -166,7 +155,7 @@ const BackingThisProject: React.FC<{
               })}
             </span>
           )}
-        </div>
+        </button>
       </Tooltip>
     </>
   );

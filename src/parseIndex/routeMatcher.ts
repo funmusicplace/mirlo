@@ -23,6 +23,7 @@ export type MatchedRoute =
   | { type: "posts-index"; profileSlug: string }
   | { type: "merch"; profileSlug: string; merchId: string }
   | { type: "merch-index"; profileSlug: string }
+  | { type: "fundraiser"; profileSlug: string; fundraiserSlug: string }
   | { type: "support"; profileSlug: string; tierId?: string }
   | { type: "profile-releases"; profileSlug: string }
   | { type: "profile"; profileSlug: string }
@@ -116,6 +117,17 @@ const routePatterns: Array<RoutePattern> = [
             type: "merch",
             profileSlug: segments[0],
             merchId: segments[2],
+          }
+        : null,
+  },
+  // /artistSlug/fundraiser/fundraiserSlug (by slug or id)
+  {
+    pattern: (segments) =>
+      segments.length === 3 && segments[1] === "fundraiser"
+        ? {
+            type: "fundraiser",
+            profileSlug: segments[0],
+            fundraiserSlug: segments[2],
           }
         : null,
   },

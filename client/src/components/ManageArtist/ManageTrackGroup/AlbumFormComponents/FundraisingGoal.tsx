@@ -1,23 +1,17 @@
-import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArtistButton,
-  ArtistButtonLink,
-} from "components/Artist/ArtistButtons";
-import FormComponent from "components/common/FormComponent";
-import { InputEl } from "components/common/Input";
-import { getCurrencySymbol } from "components/common/Money";
-import TextArea from "components/common/TextArea";
+import { ArtistButton } from "components/Artist/ArtistButtons";
+import FundraiserActions from "components/ManageArtist/Fundraisers/FundraiserActions";
+import FundraiserFormFields from "components/ManageArtist/Fundraisers/FundraiserFormFields";
+import RemoveFundraiserButton from "components/ManageArtist/Fundraisers/RemoveFundraiserButton";
 import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
-import { queryManagedTrackGroup, queryTrackGroupSupporters } from "queries";
+import {
+  queryTrackGroupSupporters,
+  useCreateFundraiserMutation,
+} from "queries";
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { FaTrash } from "react-icons/fa";
-import api from "services/api";
-import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
-import { useSnackbar } from "state/SnackbarContext";
 
 const FundraisingGoal: React.FC<{
   artistId: number;
@@ -31,119 +25,29 @@ const FundraisingGoal: React.FC<{
     status?: "ACTIVE" | "SUCCESSFUL" | "FAILED";
   } | null;
 }> = ({ artistId, trackGroupId, fundraiser }) => {
-  const snackbar = useSnackbar();
-  const errorHandler = useErrorHandler();
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
-  const { register } = useFormContext<TrackGroupFormData>();
   const { user } = useAuthContext();
-  const [isLoading, setIsLoading] = React.useState(false);
+  const { control } = useFormContext<TrackGroupFormData>();
+  const platformPercent = useWatch({ control, name: "platformPercent" });
   const [didAddFundraiser, setDidAddFundraiser] = React.useState(false);
-
-  const { data: trackGroup, refetch } = useQuery(
-    queryManagedTrackGroup(trackGroupId)
-  );
-
-  // Use the saved fundraiser, not unsaved form state, to decide whether
-  // pledges can be charged
-  const isAllOrNothing = !!fundraiser?.isAllOrNothing;
-  const goalAmount = fundraiser?.goalAmount ?? 0;
+  const { mutateAsync: createFundraiser, isPending: isAdding } =
+    useCreateFundraiserMutation();
 
   const {
     data: { totalAmount, totalPledges } = {
-      total: 0,
       totalAmount: 0,
-      totalSupporters: 0,
       totalPledges: 0,
     },
   } = useQuery(queryTrackGroupSupporters(trackGroupId));
 
-  const hasPledges = (totalPledges ?? 0) > 0;
-
-  const isFundraiserComplete = fundraiser?.status === "SUCCESSFUL";
-  const chargePledgesVisible =
-    !isFundraiserComplete &&
-    (!isAllOrNothing || (totalAmount > 0 && goalAmount <= totalAmount));
-
-  const onChargePledges = async () => {
-    try {
-      setIsLoading(true);
-      if (!fundraiser) {
-        return;
-      }
-      await api.post(`manage/fundraisers/${fundraiser.id}/chargePledges`, {
-        message: `Fundraiser successfully funded!`,
-      });
-      snackbar(t("chargePledgesSuccess"), { type: "success" });
-    } catch (e) {
-      errorHandler(e);
-    } finally {
-      refetch();
-      setIsLoading(false);
-    }
-  };
-
   const onAddFundraiser = async () => {
     try {
-      setIsLoading(true);
       setDidAddFundraiser(true);
-      await api.post(`manage/artists/${artistId}/fundraisers`, {
-        trackGroupId,
-      });
-      refetch();
+      await createFundraiser({ artistId, trackGroupId });
     } catch (e) {
       console.error(e);
-    } finally {
-      setIsLoading(false);
     }
   };
-
-  const onRemoveFundraiser = async () => {
-    try {
-      setIsLoading(true);
-      setDidAddFundraiser(false);
-      if (!fundraiser) {
-        return;
-      }
-
-      if (hasPledges) {
-        const result = confirm(
-          t("removingFundraiserWithPledgesWarning", {
-            count: totalPledges ?? 0,
-          })
-        );
-        if (!result) {
-          return;
-        }
-      }
-      await api.delete(`manage/fundraisers/${fundraiser.id}`);
-      snackbar(t("fundraiserRemoved"), {
-        type: "success",
-      });
-      refetch();
-    } catch (e) {
-      console.error(e);
-      snackbar(t("removalFailed"), {
-        type: "warning",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const goalRef = React.useRef<HTMLInputElement | null>(null);
-  const { ref: goalRegisterRef, ...goalRegisterRest } = register("goalAmount", {
-    min: 0,
-  });
-  const setGoalRef = (el: HTMLInputElement | null) => {
-    goalRegisterRef(el);
-    goalRef.current = el;
-  };
-
-  React.useEffect(() => {
-    if (didAddFundraiser) {
-      goalRef.current?.focus();
-    }
-  }, [didAddFundraiser, goalRef.current]);
 
   if (!fundraiser) {
     return (
@@ -156,7 +60,7 @@ const FundraisingGoal: React.FC<{
           wrap
           type="button"
           onClick={onAddFundraiser}
-          isLoading={isLoading}
+          isLoading={isAdding}
           aria-describedby="description-add-fundraiser"
           className="mt-4"
         >
@@ -170,114 +74,25 @@ const FundraisingGoal: React.FC<{
     <>
       <div className="flex justify-between items-center w-full">
         <h2>{t("fundraisingGoal")}</h2>
-        {isFundraiserComplete && (
+        {fundraiser.status === "SUCCESSFUL" && (
           <p className="text-sm text-(--mi-success-text-color) font-semibold">
             {t("fundraiserComplete")}
           </p>
         )}
-        <div className="flex gap-2">
-          {fundraiser.isAllOrNothing && (
-            <ArtistButtonLink
-              to={`/manage/fundraiser/${fundraiser.id}/pledges`}
-              className="flex items-center gap-1"
-            >
-              {t("viewPledges")}
-            </ArtistButtonLink>
-          )}
-          {chargePledgesVisible && (
-            <ArtistButton
-              type="button"
-              onClick={onChargePledges}
-              isLoading={isLoading}
-              disabled={isLoading}
-            >
-              {t(isAllOrNothing ? "chargePledges" : "markFundraiserDone")}
-            </ArtistButton>
-          )}
-          {fundraiser && (
-            <ArtistButton
-              type="button"
-              onClick={onRemoveFundraiser}
-              isLoading={isLoading}
-              startIcon={<FaTrash />}
-            >
-              {t(hasPledges ? "cancelFundraiser" : "removeFundraiser")}
-            </ArtistButton>
-          )}
-        </div>
+        <FundraiserActions fundraiser={fundraiser} amountRaised={totalAmount} />
       </div>
-      <div
-        className={css`
-          width: 100%;
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 0.5rem;
-        `}
-      >
-        <FormComponent>
-          <label htmlFor="input-fundraiser-name">{t("fundraiserName")}</label>
-          <InputEl
-            id="input-fundraiser-name"
-            aria-describedby="description-fundraiser-name"
-            {...register("fundraiserName")}
-          />
-          <span className="text-sm" id="description-fundraiser-name">
-            {t("fundraiserNameDescription")}
-          </span>
-        </FormComponent>
-        <FormComponent>
-          <label htmlFor="input-goal-amount">{t("goal")}</label>
-          <div className="flex items-center gap-2">
-            {user?.currency && (
-              <span className="ml-1">{getCurrencySymbol(user.currency)}</span>
-            )}
-            <InputEl
-              aria-describedby="description-goal-amount"
-              id="input-goal-amount"
-              type="number"
-              step="0.01"
-              min={0}
-              {...goalRegisterRest}
-              ref={setGoalRef}
-            />
-          </div>
-          <span className="text-sm" id="description-goal-amount">
-            {t("fundraisingGoalDescription")}
-          </span>
-        </FormComponent>
-      </div>
-      <FormComponent>
-        <label htmlFor="input-fundraiser-description">
-          {t("fundraiserDescription")}
-        </label>
-        <TextArea
-          id="input-fundraiser-description"
-          rows={3}
-          aria-describedby="description-fundraiser-description"
-          {...register("fundraiserDescription")}
-        />
-        <span className="text-sm" id="description-fundraiser-description">
-          {t("fundraiserDescriptionDescription")}
-        </span>
-      </FormComponent>
-      <FormComponent direction="row">
-        <div>
-          <InputEl
-            aria-describedby="description-all-or-nothing"
-            id="isAllOrNothing"
-            type="checkbox"
-            disabled={hasPledges}
-            {...register("isAllOrNothing")}
-          />
-        </div>
-        <div className="flex flex-col pl-2">
-          <label htmlFor="isAllOrNothing">{t("isAllOrNothing")}</label>
-          <small id="description-all-or-nothing">
-            {t("isAllOrNothingDescription")}
-            {hasPledges && <> {t("isAllOrNothingLockedWithPledges")}</>}
-          </small>
-        </div>
-      </FormComponent>
+      <FundraiserFormFields
+        artistId={artistId}
+        currency={user?.currency}
+        hasPledges={(totalPledges ?? 0) > 0}
+        focusGoal={didAddFundraiser}
+        platformPercent={platformPercent ? Number(platformPercent) : undefined}
+      />
+      <RemoveFundraiserButton
+        fundraiserId={fundraiser.id}
+        pledgeCount={totalPledges ?? 0}
+        onRemoved={() => setDidAddFundraiser(false)}
+      />
     </>
   );
 };

@@ -547,6 +547,15 @@ const routes: RouteObject[] = [
                 },
               },
               {
+                path: "fundraisers/:fundraiserId",
+                handle: { title: "manageFundraiser" },
+                async lazy() {
+                  const { default: Component } =
+                    await import("pages/manage/artists/{artistId}/fundraisers/{fundraiserId}/Index");
+                  return { Component };
+                },
+              },
+              {
                 path: "post/:postId",
                 handle: { title: "managePost" },
                 async lazy() {
@@ -967,6 +976,15 @@ const routes: RouteObject[] = [
                 async lazy() {
                   const { default: Component } =
                     await import("pages/{artistId}/posts/Index");
+                  return { Component };
+                },
+              },
+              {
+                path: "fundraiser/:fundraiserId",
+                handle: { title: "artistFundraiser" },
+                async lazy() {
+                  const { default: Component } =
+                    await import("pages/{artistId}/fundraiser/{fundraiserId}/Index");
                   return { Component };
                 },
               },
