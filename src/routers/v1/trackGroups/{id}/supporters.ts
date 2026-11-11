@@ -1,6 +1,7 @@
 import prisma from "@mirlo/prisma";
 import { Request, Response } from "express";
 
+import { getFundraiserTotals } from "../../../../utils/fundraiser";
 import { findSales } from "../../../../utils/sales";
 
 export default function () {
@@ -22,7 +23,11 @@ export default function () {
         },
         include: {
           profile: true,
-          fundraiser: true,
+          fundraiser: {
+            include: {
+              trackGroups: { where: { deletedAt: null }, select: { id: true } },
+            },
+          },
         },
       });
 
@@ -71,7 +76,9 @@ export default function () {
       }
 
       const total = results.length;
-      const totalAmount = results.reduce((acc, curr) => acc + curr.amount, 0);
+      const totalAmount = trackGroup.fundraiser
+        ? (await getFundraiserTotals(trackGroup.fundraiser)).amountRaised
+        : results.reduce((acc, curr) => acc + curr.amount, 0);
       const totalSupporters = Object.keys(
         results.reduce(
           (acc, curr) => {
