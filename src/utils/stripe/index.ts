@@ -6,6 +6,7 @@ import Stripe from "stripe";
 
 import { logger } from "../../logger";
 import { subscribeUserToProfile } from "../artist";
+import { fundraiserPageUrl } from "../clientUrl";
 import { AppError } from "../error";
 import { getClient } from "../getClient";
 import {
@@ -935,9 +936,7 @@ export const chargePledgePayments = async (
         customer: customerId,
         payment_method: paymentMethodId,
         return_url: encodeURI(
-          trackGroup
-            ? `${client.applicationUrl}/${profile.urlSlug}/release/${trackGroup.urlSlug}`
-            : `${client.applicationUrl}/${profile.urlSlug}`
+          fundraiserPageUrl(client.applicationUrl, profile, pledge.fundraiser)
         ),
         off_session: true,
         confirm: true,

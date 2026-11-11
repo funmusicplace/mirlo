@@ -51,3 +51,10 @@ export const originOf = (url: string): string | null => {
     return null;
   }
 };
+
+export const fundraiserPageUrl = (
+  applicationUrl: string,
+  profile: { id: number; urlSlug: string | null },
+  fundraiser: { id: number; urlSlug: string | null }
+) =>
+  `${applicationUrl}/${profile.urlSlug ?? profile.id}/fundraiser/${fundraiser.urlSlug ?? fundraiser.id}`;

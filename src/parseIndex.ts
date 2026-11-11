@@ -44,6 +44,7 @@ import { serializeProfile } from "./serializers/artist";
 import { serializeInstanceSettings } from "./serializers/instanceSettings";
 import { postIncludeForUser } from "./serializers/post";
 import { resolveProfileImageUrl, whereForVisibleProfile } from "./utils/artist";
+import { fundraiserPageUrl } from "./utils/clientUrl";
 import { getClient } from "./utils/getClient";
 import { storedImageFileUrl, storedImageVariantUrl } from "./utils/images";
 import { merchImageUrl } from "./utils/merch";
@@ -662,7 +663,11 @@ const handleFundraiser: RouteHandler<FundraiserParams> = async ({
     return;
   }
 
-  const fundraiserUrl = `${client.applicationUrl}/${profile.urlSlug}/fundraiser/${fundraiser.urlSlug ?? fundraiser.id}`;
+  const fundraiserUrl = fundraiserPageUrl(
+    client.applicationUrl,
+    profile,
+    fundraiser
+  );
   const description =
     (fundraiser.description && htmlToSummary(fundraiser.description)) ||
     `A fundraiser by ${profileName} on ${instanceName}`;

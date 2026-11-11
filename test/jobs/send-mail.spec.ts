@@ -616,6 +616,8 @@ describe("send-mail job", () => {
               pledgedAmount: 2000,
               fundraisingGoal: 100000,
               client: "http://localhost:3000",
+              fundraiserUrl:
+                "http://localhost:3000/test-artist/fundraiser/new-van",
             },
             message: { to: "backer@example.com" },
           },
@@ -632,7 +634,9 @@ describe("send-mail job", () => {
           "Fundraiser successful: New Van has been funded!"
         );
         assert.ok(
-          standalone.html?.includes('href="http://localhost:3000/test-artist"')
+          standalone.html?.includes(
+            'href="http://localhost:3000/test-artist/fundraiser/new-van"'
+          )
         );
         assert.ok(!standalone.html?.includes("undefined"));
 
@@ -643,7 +647,7 @@ describe("send-mail job", () => {
         assert.ok(withRelease.html?.includes("Test Album"));
         assert.ok(
           withRelease.html?.includes(
-            'href="http://localhost:3000/test-artist/release/test-album"'
+            'href="http://localhost:3000/test-artist/fundraiser/new-van"'
           )
         );
       } finally {
