@@ -708,6 +708,96 @@ describe("Stripe Webhooks - Failed Payments", () => {
       assert.equal(after.deleteReason, "USER_CANCELLED");
     });
 
+    it("emails the artist when a subscription ends and they opted in", async () => {
+      const mailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves();
+      const { user: profileOwner } = await createUser({
+        email: "artist@artist.com",
+      });
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+      });
+      const profile = await createProfile(profileOwner.id);
+      await prisma.profile.update({
+        where: { id: profile.id },
+        data: { notifyOnSubscriptionEnd: true },
+      });
+      const tier = await createTier(profile.id, { name: "Premium" });
+
+      await prisma.profileUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub_notify_123",
+          userId: subscriber.id,
+          profileSubscriptionTierId: tier.id,
+          amount: 500,
+        },
+      });
+
+      await stripeUtils.handleSubscriptionDeleted({
+        id: "sub_notify_123",
+        object: "subscription",
+        cancellation_details: { reason: "payment_failed" },
+      } as unknown as Stripe.Subscription);
+
+      assert.equal(mailStub.callCount, 1);
+      const data = mailStub.firstCall.args[1] as any;
+      assert.equal(data.template, "artist-subscription-ended");
+      assert.equal(data.message.to, "artist@artist.com");
+      assert.equal(data.locals.reason, "PAYMENT_FAILURE");
+      assert.equal(data.locals.user.email, "subscriber@subscriber.com");
+    });
+
+    it("doesn't email the artist when they haven't opted in, or were already told at cancellation", async () => {
+      const mailStub = sinon
+        .stub(sendMailQueueModule.sendMailQueue, "add")
+        .resolves();
+      const { user: profileOwner } = await createUser({
+        email: "artist@artist.com",
+      });
+      const { user: subscriber } = await createUser({
+        email: "subscriber@subscriber.com",
+      });
+      const profile = await createProfile(profileOwner.id);
+      const tier = await createTier(profile.id, { name: "Premium" });
+
+      await prisma.profileUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub_quiet_123",
+          userId: subscriber.id,
+          profileSubscriptionTierId: tier.id,
+          amount: 500,
+        },
+      });
+      await stripeUtils.handleSubscriptionDeleted({
+        id: "sub_quiet_123",
+        object: "subscription",
+        cancellation_details: { reason: "payment_failed" },
+      } as unknown as Stripe.Subscription);
+
+      await prisma.profile.update({
+        where: { id: profile.id },
+        data: { notifyOnSubscriptionEnd: true },
+      });
+      const otherTier = await createTier(profile.id, { name: "Basic" });
+      await prisma.profileUserSubscription.create({
+        data: {
+          stripeSubscriptionKey: "sub_cancelled_123",
+          userId: subscriber.id,
+          profileSubscriptionTierId: otherTier.id,
+          amount: 500,
+          deleteReason: "USER_CANCELLED",
+        },
+      });
+      await stripeUtils.handleSubscriptionDeleted({
+        id: "sub_cancelled_123",
+        object: "subscription",
+        cancellation_details: { reason: "cancellation_requested" },
+      } as unknown as Stripe.Subscription);
+
+      assert.equal(mailStub.callCount, 0);
+    });
+
     it("downgrades to the free tier instead of deleting when keepFollowingOnCancel is set", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@artist.com",

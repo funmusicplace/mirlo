@@ -8,7 +8,10 @@ import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 
 import logger from "../../logger";
-import { sendSubscriptionCancellationEmail } from "../artist";
+import {
+  notifyArtistOfSubscriptionEnd,
+  sendSubscriptionCancellationEmail,
+} from "../artist";
 import { AppError } from "../error";
 import { calculatePlatformPercent } from "../processingPayments";
 import {
@@ -382,6 +385,14 @@ export const cancelUserSubscription = async (
         keepFollowingOnCancel: keepFollowing,
       },
     });
+
+    if (!cancelledByArtist) {
+      await notifyArtistOfSubscriptionEnd(
+        subscription.id,
+        "USER_CANCELLED",
+        subscription.nextBillingDate
+      );
+    }
   } else {
     // Free/follow tier
     if (cancelledByArtist) {

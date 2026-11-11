@@ -61,6 +61,7 @@ export type ArtistFormData = {
   activityPub: boolean;
   federatedStreaming: boolean;
   allowDirectMessages: boolean;
+  notifyOnSubscriptionEnd: boolean;
   defaultPlatformFee: number;
   properties: {
     colors: ArtistColors;
@@ -88,6 +89,7 @@ const generateDefaults = (existing?: Artist) => {
     activityPub: existing?.activityPub ?? false,
     federatedStreaming: existing?.federatedStreaming ?? false,
     allowDirectMessages: existing?.allowDirectMessages ?? true,
+    notifyOnSubscriptionEnd: existing?.notifyOnSubscriptionEnd ?? false,
     defaultPlatformFee: existing?.defaultPlatformFee ?? 10,
     shortDescription: existing?.shortDescription ?? "",
     maxFreePlays: existing?.maxFreePlays,
@@ -167,6 +169,7 @@ export const Index: React.FC = () => {
         activityPub: data.activityPub,
         federatedStreaming: data.federatedStreaming,
         allowDirectMessages: data.allowDirectMessages,
+        notifyOnSubscriptionEnd: data.notifyOnSubscriptionEnd,
         properties: { ...artist?.properties, ...data.properties },
       };
 
@@ -208,6 +211,7 @@ export const Index: React.FC = () => {
 
   const activityPub = methods.watch("activityPub");
   const allowDirectMessages = methods.watch("allowDirectMessages");
+  const notifyOnSubscriptionEnd = methods.watch("notifyOnSubscriptionEnd");
 
   if (!artist) {
     return null;
@@ -342,8 +346,9 @@ export const Index: React.FC = () => {
                 <small id="hint-allow-direct-messages">
                   {t("allowDirectMessagesDescription")}
                 </small>
-              </FormComponent>
+              </FormComponent>{" "}
             </ArtistFormSection>
+
             <CustomNamesForTabs />
             <LayoutSettings />
             <ArtistFormSection isOdd>
@@ -351,7 +356,24 @@ export const Index: React.FC = () => {
                 artist={artist}
                 onArtistUpdated={refetchArtist}
               />
+              <FormComponent>
+                <Toggle
+                  ariaDescribedBy="hint-notify-on-subscription-end"
+                  label={t("notifyOnSubscriptionEnd")}
+                  toggled={notifyOnSubscriptionEnd}
+                  onClick={() => {
+                    methods.setValue(
+                      "notifyOnSubscriptionEnd",
+                      !notifyOnSubscriptionEnd
+                    );
+                  }}
+                />
+                <small id="hint-notify-on-subscription-end">
+                  {t("notifyOnSubscriptionEndDescription")}
+                </small>
+              </FormComponent>
             </ArtistFormSection>
+
             <ArtistFormSection
               className={css`
                 margin-bottom: 0 !important;
