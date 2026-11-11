@@ -378,6 +378,47 @@ describe("oauth bearer tokens", () => {
     assert.equal(profile.status, 401);
   });
 
+  it("signs out only the device whose refresh token is revoked", async () => {
+    const { accessToken } = await createUser({
+      email: "fan@example.com",
+      emailConfirmationToken: null,
+    });
+    const client = await createOAuthClient({ confidential: false });
+    const signInOnDevice = () =>
+      tokensFor(accessToken, client, "openid api offline_access", {
+        prompt: "consent",
+      });
+    const phone = await signInOnDevice();
+    const tablet = await signInOnDevice();
+    assert.equal(
+      await prisma.oAuthPayload.count({ where: { model: "Grant" } }),
+      2
+    );
+
+    const revoked = await tokenRequest(
+      client,
+      { token: phone.refresh_token! },
+      "/auth/oidc/token/revocation"
+    );
+    assert.equal(revoked.status, 200, revoked.text);
+
+    const profile = (token: string) =>
+      request(API).get("/auth/profile").set(bearer(token));
+    const refresh = (refreshToken: string) =>
+      tokenRequest(client, {
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+      });
+    assert.equal((await profile(phone.access_token)).status, 401);
+    assert.equal(
+      (await refresh(phone.refresh_token!)).body.error,
+      "invalid_grant"
+    );
+    assert.equal((await profile(tablet.access_token)).status, 200);
+    const refreshed = await refresh(tablet.refresh_token!);
+    assert.equal(refreshed.status, 200, refreshed.text);
+  });
+
   it("can't be used to approve another app", async () => {
     const { tokens } = await setup();
     const other = await createOAuthClient({ applicationName: "Other" });

@@ -153,7 +153,7 @@ describe("oidc interaction", () => {
     assert.equal(wrongVerifier.body.error, "invalid_grant");
   });
 
-  it("remembers consent and asks again only when the scopes grow", async () => {
+  it("remembers consent across sign-ins and asks again only when the scopes grow", async () => {
     const { accessToken } = await verifiedUser();
     const client = await createOAuthClient();
     const agent = request.agent(API);
@@ -184,6 +184,15 @@ describe("oidc interaction", () => {
     const more = await startAuthorization(agent, client.id, pkce().challenge);
     const moreDetails = await agent.get(`/auth/oauth/${more.uid}/details`);
     assert.equal(moreDetails.body.result.needsConsent, true);
+
+    const otherDevice = request.agent(API);
+    signIn(otherDevice, accessToken);
+    await authorizeAndAllow(otherDevice, client.id, pkce().challenge, {
+      scope: "openid email",
+    });
+    const all = await startAuthorization(agent, client.id, pkce().challenge);
+    const allDetails = await agent.get(`/auth/oauth/${all.uid}/details`);
+    assert.equal(allDetails.body.result.needsConsent, false);
   });
 
   it("checks the Mirlo session on every authorization", async () => {

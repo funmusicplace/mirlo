@@ -8,7 +8,7 @@ dotenv.config();
 
 import { clearTables, createUser } from "../../utils";
 
-import { API, createOAuthClient, tokensFor } from "./utils";
+import { API, createOAuthClient, tokenRequest, tokensFor } from "./utils";
 
 describe("connected apps", () => {
   beforeEach(async () => {
@@ -101,6 +101,73 @@ describe("connected apps", () => {
       .delete(`/v1/users/${user.id}/connectedApps/${grant.id}`)
       .set("Cookie", [`jwt=${accessToken}`]);
     assert.equal(again.status, 404);
+  });
+
+  it("lists an app once and disconnecting it signs out every sign-in", async () => {
+    const { user, accessToken, client, tokens } = await setup();
+    const other = await tokensFor(
+      accessToken,
+      client,
+      "openid api offline_access",
+      { prompt: "consent" }
+    );
+    const list = () =>
+      request(API)
+        .get(`/v1/users/${user.id}/connectedApps`)
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+    const before = await list();
+    assert.equal(before.status, 200, before.text);
+    assert.equal(before.body.results.length, 1);
+    assert.ok(before.body.results[0].createdAt);
+    assert.ok(before.body.results[0].lastUsedAt);
+
+    const revoke = await request(API)
+      .delete(`/v1/users/${user.id}/connectedApps/${before.body.results[0].id}`)
+      .set("Cookie", [`jwt=${accessToken}`]);
+    assert.equal(revoke.status, 200, revoke.text);
+
+    assert.equal((await profileWith(tokens.access_token)).status, 401);
+    assert.equal((await profileWith(other.access_token)).status, 401);
+    assert.equal(
+      await prisma.oAuthPayload.count({ where: { model: "Grant" } }),
+      0
+    );
+    assert.deepEqual((await list()).body.results, []);
+  });
+
+  it("lists an app whose tokens are revoked or expired, so it can be disconnected", async () => {
+    const { user, accessToken, client, tokens } = await setup();
+    const revoked = await tokenRequest(
+      client,
+      { token: tokens.access_token },
+      "/auth/oidc/token/revocation"
+    );
+    assert.equal(revoked.status, 200, revoked.text);
+    await tokensFor(accessToken, client, "openid api");
+    await prisma.oAuthPayload.updateMany({
+      where: { model: "AccessToken" },
+      data: { expiresAt: new Date(Date.now() - 1000) },
+    });
+    assert.equal(
+      await prisma.oAuthPayload.count({ where: { model: "Grant" } }),
+      2
+    );
+
+    const list = await request(API)
+      .get(`/v1/users/${user.id}/connectedApps`)
+      .set("Cookie", [`jwt=${accessToken}`]);
+    assert.equal(list.status, 200, list.text);
+    assert.equal(list.body.results.length, 1);
+
+    const revoke = await request(API)
+      .delete(`/v1/users/${user.id}/connectedApps/${list.body.results[0].id}`)
+      .set("Cookie", [`jwt=${accessToken}`]);
+    assert.equal(revoke.status, 200, revoke.text);
+    assert.equal(
+      await prisma.oAuthPayload.count({ where: { model: "Grant" } }),
+      0
+    );
   });
 
   it("a password reset disconnects every app", async () => {

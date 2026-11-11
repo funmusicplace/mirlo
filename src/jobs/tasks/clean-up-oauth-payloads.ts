@@ -7,7 +7,16 @@ const cleanUpOAuthPayloads = async () => {
     where: { expiresAt: { lt: new Date() } },
   });
 
-  logger.info(`cleanUpOAuthPayloads: deleted ${count} expired rows`);
+  const grants = await prisma.$executeRaw`
+    DELETE FROM "OAuthPayload" AS g
+    WHERE g.model = 'Grant'
+      AND (g.payload->>'iat')::bigint < extract(epoch FROM now() - interval '1 hour')
+      AND NOT EXISTS (SELECT 1 FROM "OAuthPayload" AS t WHERE t."grantId" = g.id)
+  `;
+
+  logger.info(
+    `cleanUpOAuthPayloads: deleted ${count} expired rows and ${grants} grants without live tokens`
+  );
 };
 
 export default cleanUpOAuthPayloads;

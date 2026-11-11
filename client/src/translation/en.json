@@ -357,7 +357,7 @@
     "deleteAccountConsequenceSubscriptions": "Your subscriptions to other artists are cancelled.",
     "connectedApps": "Connected apps",
     "connectedAppsDescription": "These apps can use your account. Disconnecting an app signs it out right away.",
-    "connectedAppDetails": "Access: {{scopes}} · Last used: {{lastUsed}}",
+    "connectedAppDetails": "Access: {{scopes}} · Connected: {{connected}} · Last used: {{lastUsed}}",
     "never": "never",
     "disconnectApp": "Disconnect"
   },

@@ -6,7 +6,7 @@ import {
   approvalStatusOf,
   isMetadataDocumentClientId,
 } from "../../auth/oidc/approval";
-import { findGrantId } from "../../auth/oidc/grants";
+import { grantedScopes } from "../../auth/oidc/grants";
 import { getProvider } from "../../auth/oidc/provider";
 import { requestedScopes } from "../../auth/oidc/scopes";
 import { cookieUserLoggedInWithoutRedirect } from "../../auth/passport";
@@ -81,22 +81,12 @@ const requestApproval = async (
   }
 };
 
-const grantedScopes = async (
-  provider: Awaited<ReturnType<typeof getProvider>>,
-  userId: number,
-  clientId: string
-) => {
-  const grantId = await findGrantId(userId, clientId);
-  const grant = grantId ? await provider.Grant.find(grantId) : undefined;
-  return new Set(grant?.getOIDCScope().split(" ") ?? []);
-};
-
 router.get(
   "/:uid/details",
   cookieUserLoggedInWithoutRedirect,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { provider, interaction, client, clientId, approval, scopes } =
+      const { interaction, client, clientId, approval, scopes } =
         await loadInteraction(req, res);
       const metadata = client.metadata();
       const redirectUri = new URL(String(interaction.params.redirect_uri));
@@ -114,7 +104,7 @@ router.get(
         .includes("consent");
       let needsConsent = true;
       if (req.user && !promptsConsent) {
-        const granted = await grantedScopes(provider, req.user.id, clientId);
+        const granted = await grantedScopes(req.user.id, clientId);
         needsConsent = scopes.some((scope) => !granted.has(scope));
       }
 
@@ -192,10 +182,7 @@ router.post(
           };
         } else {
           const accountId = String(req.user.id);
-          const grantId = await findGrantId(req.user.id, clientId);
-          const grant =
-            (grantId && (await provider.Grant.find(grantId))) ||
-            new provider.Grant({ accountId, clientId });
+          const grant = new provider.Grant({ accountId, clientId });
           grant.addOIDCScope(scopes);
           const missingClaims = interaction.prompt.details.missingOIDCClaims;
           if (Array.isArray(missingClaims)) {

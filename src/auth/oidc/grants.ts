@@ -3,24 +3,34 @@ import prisma from "@mirlo/prisma";
 import { notExpired } from "./adapter";
 import { isMetadataDocumentClientId } from "./approval";
 
-export const findGrantId = async (accountId: number, clientId: string) =>
-  (
-    await prisma.oAuthPayload.findFirst({
+type GrantPayload = {
+  clientId?: string;
+  iat?: number;
+  openid?: { scope?: string };
+};
+
+const iatOf = (row: { payload: unknown }) =>
+  (row.payload as GrantPayload).iat ?? 0;
+
+const scopesOf = (grants: { payload: unknown }[]) =>
+  new Set(
+    grants.flatMap(
+      (grant) => (grant.payload as GrantPayload).openid?.scope?.split(" ") ?? []
+    )
+  );
+
+export const grantedScopes = async (accountId: number, clientId: string) =>
+  scopesOf(
+    await prisma.oAuthPayload.findMany({
       where: {
         model: "Grant",
         accountId,
         payload: { path: ["clientId"], equals: clientId },
         ...notExpired(),
       },
-      select: { id: true },
+      select: { payload: true },
     })
-  )?.id;
-
-type GrantPayload = {
-  clientId?: string;
-  iat?: number;
-  openid?: { scope?: string };
-};
+  );
 
 const fromEpoch = (seconds?: number) =>
   seconds ? new Date(seconds * 1000).toISOString() : null;
@@ -36,9 +46,11 @@ export const listConnectedApps = async (accountId: number) => {
     },
     select: { grantId: true, payload: true },
   });
-  const clientIds = grants.map(
+  const apps = Map.groupBy(
+    grants.sort((a, b) => iatOf(a) - iatOf(b)),
     (grant) => (grant.payload as GrantPayload).clientId ?? ""
   );
+  const clientIds = [...apps.keys()];
   const clients = await prisma.client.findMany({
     where: {
       OR: [
@@ -55,25 +67,22 @@ export const listConnectedApps = async (accountId: number) => {
     },
   });
 
-  return grants.map((grant) => {
-    const payload = grant.payload as GrantPayload;
+  return [...apps].map(([clientId, appGrants]) => {
     const client = clients.find(
-      (c) =>
-        String(c.id) === payload.clientId || c.clientIdUrl === payload.clientId
+      (c) => String(c.id) === clientId || c.clientIdUrl === clientId
     );
+    const grantIds = new Set(appGrants.map((grant) => grant.id));
     const lastUsed = Math.max(
       0,
-      ...tokens
-        .filter((token) => token.grantId === grant.id)
-        .map((token) => (token.payload as GrantPayload).iat ?? 0)
+      ...tokens.filter((token) => grantIds.has(token.grantId ?? "")).map(iatOf)
     );
     return {
-      id: grant.id,
-      clientId: payload.clientId,
-      name: client?.applicationName ?? payload.clientId,
+      id: appGrants[appGrants.length - 1].id,
+      clientId,
+      name: client?.applicationName ?? clientId,
       url: client?.applicationUrl ?? null,
-      scopes: payload.openid?.scope?.split(" ") ?? [],
-      createdAt: fromEpoch(payload.iat),
+      scopes: [...scopesOf(appGrants)],
+      createdAt: fromEpoch(iatOf(appGrants[0])),
       lastUsedAt: fromEpoch(lastUsed),
     };
   });
@@ -83,13 +92,18 @@ export const revokeConnectedApp = async (
   accountId: number,
   grantId: string
 ) => {
-  const { count } = await prisma.oAuthPayload.deleteMany({
+  const grant = await prisma.oAuthPayload.findFirst({
     where: { model: "Grant", id: grantId, accountId },
+    select: { payload: true },
   });
-  if (count) {
-    await prisma.oAuthPayload.deleteMany({ where: { grantId } });
+  const clientId = (grant?.payload as GrantPayload | undefined)?.clientId;
+  if (!clientId) {
+    return false;
   }
-  return count > 0;
+  await prisma.oAuthPayload.deleteMany({
+    where: { accountId, payload: { path: ["clientId"], equals: clientId } },
+  });
+  return true;
 };
 
 export const revokeAllConnectedApps = (
