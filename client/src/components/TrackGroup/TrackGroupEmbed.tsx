@@ -17,6 +17,8 @@ import {
 } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
 
+import { CLIENT_ROOT } from "../../constants";
+
 export const widgetIframeHtml = (src: string, height: number = 230) => `<iframe
     src="${src}"
     style="width:100%; height: ${height}px; border:0; border-radius: 4px; overflow:hidden;"
@@ -95,9 +97,7 @@ const Embed: React.FC<{
         >
           <Button
             onClick={() => {
-              navigator.clipboard.writeText(
-                import.meta.env.VITE_CLIENT_DOMAIN + url
-              );
+              navigator.clipboard.writeText(CLIENT_ROOT + url);
               snackbar(t("copiedToClipboard"), { type: "success" });
             }}
           >

@@ -17,6 +17,8 @@ import api, { APIResponseError } from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
 
+import { CLIENT_ROOT } from "../../constants";
+
 const Lottie = React.lazy(() => import("lottie-react"));
 
 type SignupInputs = {
@@ -153,7 +155,7 @@ function Index() {
           {
             ...data,
             receiveMailingList: !!data.receiveMailingList,
-            client: import.meta.env.VITE_CLIENT_DOMAIN,
+            client: CLIENT_ROOT,
             cfTurnstile: cfTurnstile.current,
             language: i18n.resolvedLanguage,
           },
@@ -185,8 +187,7 @@ function Index() {
           await api.post("password-reset/initiate", {
             ...data,
             accountIncomplete: true,
-            redirectClient:
-              import.meta.env.VITE_CLIENT_DOMAIN + "/password-reset",
+            redirectClient: CLIENT_ROOT + "/password-reset",
           });
           snackbar(t("checkEmailContinueSignup"), {
             type: "success",
@@ -219,7 +220,7 @@ function Index() {
         ResendVerificationResponse
       >("resend-verification-email", {
         email: pendingVerification.email,
-        client: import.meta.env.VITE_CLIENT_DOMAIN,
+        client: CLIENT_ROOT,
         accountType: pendingVerification.accountType,
       });
       snackbar(

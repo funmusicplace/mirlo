@@ -1,3 +1,5 @@
+import { CLIENT_ROOT } from "../constants";
+
 export function inIframe() {
   try {
     return window.self !== window.top;
@@ -8,7 +10,7 @@ export function inIframe() {
 
 export function inMirlo() {
   try {
-    return window.top?.location.origin === import.meta.env.VITE_CLIENT_DOMAIN;
+    return window.top?.location.origin === CLIENT_ROOT;
   } catch (e) {
     return false;
   }

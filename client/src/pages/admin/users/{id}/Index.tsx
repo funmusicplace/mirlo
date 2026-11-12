@@ -16,6 +16,8 @@ import api from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
 
+import { CLIENT_ROOT } from "../../../../constants";
+
 const Index = () => {
   const { id } = useParams();
   const [user, setUser] = React.useState<UserFromAdmin>();
@@ -50,7 +52,7 @@ const Index = () => {
     try {
       await api.post("resend-verification-email", {
         email: user.email,
-        client: import.meta.env.VITE_CLIENT_DOMAIN,
+        client: CLIENT_ROOT,
       });
       snackbar(`Confirmation email sent to ${user.email}`, {
         type: "success",

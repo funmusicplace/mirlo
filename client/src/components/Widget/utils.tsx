@@ -4,7 +4,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { fmtMSS } from "utils/tracks";
 
-import { bp } from "../../constants";
+import { bp, CLIENT_ROOT } from "../../constants";
 
 import WidgetActionButtons from "./WidgetActionButtons";
 
@@ -115,7 +115,7 @@ export const WidgetLink: React.FC<{
   }
   return (
     <a
-      href={`${import.meta.env.VITE_CLIENT_DOMAIN}${to}`}
+      href={`${CLIENT_ROOT}${to}`}
       target="_blank"
       rel="noopener noreferrer"
       className={className}

@@ -1,6 +1,8 @@
 import type { Decorator } from "@storybook/react";
 import React from "react";
 
+import { CLIENT_ROOT } from "../../constants";
+
 /** Story ids of the release widget stories, by `?variant=` */
 const STORY_FOR_VARIANT: Record<string, string> = {
   card: "features-embeds-trackgroupwidget--card",
@@ -20,7 +22,7 @@ export const widgetStorySrc = (storyId: string) =>
  */
 export const useLocalWidgetPreviews: Decorator = (Story) => {
   React.useEffect(() => {
-    const clientDomain = String(import.meta.env.VITE_CLIENT_DOMAIN ?? "");
+    const clientDomain = String(CLIENT_ROOT ?? "");
     const widgetPrefix = `${clientDomain}/widget/trackGroup/`;
     const rewrite = () => {
       document.querySelectorAll("iframe").forEach((iframe) => {

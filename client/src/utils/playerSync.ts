@@ -1,6 +1,8 @@
 import React from "react";
 import { useGlobalStateContext } from "state/GlobalState";
 
+import { CLIENT_ROOT } from "../constants";
+
 import { isEmbeddedInMirlo } from "./widgetContext";
 
 const MESSAGE_TAG = "mirlo-player-sync";
@@ -24,8 +26,7 @@ const isOurMessage = (data: unknown): data is Message =>
   data !== null &&
   (data as { tag?: unknown }).tag === MESSAGE_TAG;
 
-const targetOrigin = (): string =>
-  import.meta.env.VITE_CLIENT_DOMAIN || window.location.origin;
+const targetOrigin = (): string => CLIENT_ROOT || window.location.origin;
 
 const postToIframes = (msg: Message) => {
   const origin = targetOrigin();

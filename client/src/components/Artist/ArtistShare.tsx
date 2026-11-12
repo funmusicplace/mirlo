@@ -3,6 +3,8 @@ import ShareButton from "components/common/ShareButton";
 import { useTranslation } from "react-i18next";
 import { getArtistUrl } from "utils/artist";
 
+import { CLIENT_ROOT } from "../../constants";
+
 const ArtistShare: React.FC<{
   artist: Artist;
   buttonClassName?: string;
@@ -14,7 +16,7 @@ const ArtistShare: React.FC<{
 
   if (!artist) return null;
 
-  const artistUrl = `${import.meta.env.VITE_CLIENT_DOMAIN}${getArtistUrl(artist)}`;
+  const artistUrl = `${CLIENT_ROOT}${getArtistUrl(artist)}`;
 
   return (
     <ShareButton

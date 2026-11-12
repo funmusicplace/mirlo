@@ -1,13 +1,15 @@
 import { css } from "@emotion/css";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { useLocation, useNavigate } from "react-router-dom";
-import api from "services/api";
+import Box from "components/common/Box";
 import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
-import { useSnackbar } from "state/SnackbarContext";
+import React from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import Box from "components/common/Box";
+import { useLocation, useNavigate } from "react-router-dom";
+import api from "services/api";
+import { useSnackbar } from "state/SnackbarContext";
+
+import { CLIENT_ROOT } from "../../constants";
 
 type SignupInputs = {
   email: string;
@@ -36,8 +38,7 @@ function Index() {
       try {
         await api.post("password-reset/initiate", {
           ...data,
-          redirectClient:
-            import.meta.env.VITE_CLIENT_DOMAIN + "/password-reset",
+          redirectClient: CLIENT_ROOT + "/password-reset",
         });
         snackbar("Check your email to continue resetting your password", {
           type: "success",

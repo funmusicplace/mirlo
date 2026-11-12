@@ -3,6 +3,8 @@ vi.mock("state/GlobalState", () => ({ useGlobalStateContext: vi.fn() }));
 import { renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
+import * as constants from "../constants";
+
 import { PlayerSyncState, useBroadcastPlayerSync } from "./playerSync";
 
 // ---- fixtures ---------------------------------------------------------------
@@ -33,7 +35,7 @@ describe("useBroadcastPlayerSync", () => {
   });
 
   test("posts to relative widget iframes on the page's origin", () => {
-    vi.stubEnv("VITE_CLIENT_DOMAIN", "");
+    vi.spyOn(constants, "CLIENT_ROOT", "get").mockReturnValue("");
     const postMessage = addIframe("/widget/track/1");
 
     renderHook(() => useBroadcastPlayerSync(playing));
@@ -45,7 +47,9 @@ describe("useBroadcastPlayerSync", () => {
   });
 
   test("posts to absolute widget iframes on the client domain", () => {
-    vi.stubEnv("VITE_CLIENT_DOMAIN", "https://mirlo.example");
+    vi.spyOn(constants, "CLIENT_ROOT", "get").mockReturnValue(
+      "https://mirlo.example"
+    );
     const postMessage = addIframe(
       "https://mirlo.example/widget/trackGroup/2?variant=card"
     );
@@ -59,7 +63,9 @@ describe("useBroadcastPlayerSync", () => {
   });
 
   test("skips widget iframes from other origins and non-widget iframes", () => {
-    vi.stubEnv("VITE_CLIENT_DOMAIN", "https://mirlo.example");
+    vi.spyOn(constants, "CLIENT_ROOT", "get").mockReturnValue(
+      "https://mirlo.example"
+    );
     const otherHost = addIframe("https://other.example/widget/track/1");
     const otherHostWithOurUrl = addIframe(
       "https://other.example/?ref=https://mirlo.example/widget/track/1"
@@ -74,7 +80,7 @@ describe("useBroadcastPlayerSync", () => {
   });
 
   test("doesn't re-post an unchanged state", () => {
-    vi.stubEnv("VITE_CLIENT_DOMAIN", "");
+    vi.spyOn(constants, "CLIENT_ROOT", "get").mockReturnValue("");
     const postMessage = addIframe("/widget/track/1");
 
     const { rerender } = renderHook(

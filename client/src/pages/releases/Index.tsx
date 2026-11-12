@@ -15,7 +15,7 @@ import { FaChevronRight, FaRss } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
 import usePagination from "utils/usePagination";
 
-import { bp } from "../../constants";
+import { API_ROOT, bp } from "../../constants";
 
 const pageSize = 40;
 
@@ -161,7 +161,7 @@ const Index = () => {
               aria-label={t("rssFeed")}
               title={t("rssFeed")}
               target="_blank"
-              href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?${tag ? `tag=${encodeURIComponent(tag)}&` : ""}isReleased=released&format=rss`}
+              href={`${API_ROOT}/v1/trackGroups?${tag ? `tag=${encodeURIComponent(tag)}&` : ""}isReleased=released&format=rss`}
               rel="noreferrer"
               onlyIcon
               smallIcon
