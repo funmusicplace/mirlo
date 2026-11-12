@@ -12,7 +12,7 @@ import { getArtistUrl, getPostURLReference } from "utils/artist";
 import useIsSubscribedToArtist from "utils/useIsSubscribedToArtist";
 import { useMatchMedia } from "utils/useMatchMedia";
 
-import { bp } from "../../constants";
+import { bp, CLIENT_ROOT } from "../../constants";
 
 const AvatarWrapper = styled.div`
   margin-right: 0.25rem;
@@ -113,7 +113,7 @@ const PostHeader: React.FC<{ post: Post }> = ({ post }) => {
       />
       <ShareButton
         title={post.title}
-        url={`${import.meta.env.VITE_CLIENT_DOMAIN}${getPostURLReference(post)}`}
+        url={`${CLIENT_ROOT}${getPostURLReference(post)}`}
         modalTitle={tShare("sharePost") ?? ""}
         size="compact"
       />

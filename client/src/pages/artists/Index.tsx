@@ -1,6 +1,12 @@
 import { css } from "@emotion/css";
 import { useQuery } from "@tanstack/react-query";
+import ArtistSquare from "components/Artist/ArtistSquare";
+import LoadingBlocks from "components/Artist/LoadingBlocks";
+import Button, { ButtonAnchor } from "components/common/Button";
+import { SectionHeader } from "components/common/SectionHeader";
+import { SelectEl } from "components/common/Select";
 import TrackgroupGrid from "components/common/TrackgroupGrid";
+import WidthContainer from "components/common/WidthContainer";
 import { queryLocationTags } from "queries/locationTags";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -11,14 +17,7 @@ import api from "services/api";
 import { getArtistUrl } from "utils/artist";
 import usePagination from "utils/usePagination";
 
-import { bp } from "../../constants";
-
-import ArtistSquare from "components/Artist/ArtistSquare";
-import LoadingBlocks from "components/Artist/LoadingBlocks";
-import Button, { ButtonAnchor } from "components/common/Button";
-import { SelectEl } from "components/common/Select";
-import WidthContainer from "components/common/WidthContainer";
-import { SectionHeader } from "components/common/SectionHeader";
+import { API_ROOT, bp } from "../../constants";
 
 const Index = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artists" });
@@ -149,7 +148,7 @@ const Index = () => {
             </div>
             <ButtonAnchor
               target="_blank"
-              href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists?format=rss`}
+              href={`${API_ROOT}/v1/artists?format=rss`}
               rel="noreferrer"
               onlyIcon
               className={css`

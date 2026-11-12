@@ -1,6 +1,8 @@
 import produce from "immer";
 import api from "services/api";
 
+import { CLIENT_ROOT } from "../constants";
+
 import { canUserEditArtist } from "./artist";
 
 export const determineNewTrackOrder = produce(
@@ -80,7 +82,7 @@ export const widgetPath = (trackId: number, type: "track" | "trackGroup") =>
   `/widget/${type}/${trackId}`;
 
 export const widgetUrl = (trackId: number, type: "track" | "trackGroup") => {
-  return import.meta.env.VITE_CLIENT_DOMAIN + widgetPath(trackId, type);
+  return CLIENT_ROOT + widgetPath(trackId, type);
 };
 
 export const isWidgetUrl = (url: string) => {
@@ -88,8 +90,8 @@ export const isWidgetUrl = (url: string) => {
 
   const hostArray = ["localhost:8080", "mirlo.space"];
 
-  if (import.meta.env.VITE_CLIENT_DOMAIN?.split("//")[1]) {
-    hostArray.push(import.meta.env.VITE_CLIENT_DOMAIN?.split("//")[1]);
+  if (CLIENT_ROOT?.split("//")[1]) {
+    hostArray.push(CLIENT_ROOT?.split("//")[1]);
   }
   const includesHost = hostArray.includes(host);
   const isWidget = pathname.includes("/widget");

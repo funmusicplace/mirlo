@@ -5,7 +5,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { getTrackUrl } from "utils/artist";
 
-import { bp } from "../../constants";
+import { bp, CLIENT_ROOT } from "../../constants";
 
 export const TrackArtistLinks: React.FC<{
   track: Track;
@@ -30,7 +30,7 @@ export const TrackArtistLinks: React.FC<{
             <a
               target="_blank"
               rel="noopener noreferrer"
-              href={`${import.meta.env.VITE_CLIENT_DOMAIN}/${artist.artistId}`}
+              href={`${CLIENT_ROOT}/${artist.artistId}`}
             >
               {artist.artistName}
             </a>

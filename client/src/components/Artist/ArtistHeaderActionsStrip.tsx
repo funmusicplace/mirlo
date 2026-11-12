@@ -5,7 +5,7 @@ import { FaRss } from "react-icons/fa";
 import { transformFromLinks } from "utils/links";
 import { useMatchMedia } from "utils/useMatchMedia";
 
-import { between, bp } from "../../constants";
+import { API_ROOT, between, bp } from "../../constants";
 
 import { ArtistButtonAnchor, ArtistButtonLink } from "./ArtistButtons";
 import ArtistHeaderDescription from "./ArtistHeaderDescription";
@@ -64,7 +64,7 @@ const ArtistHeaderActionsStrip: React.FC<{
       )}
       <ArtistButtonAnchor
         target="_blank"
-        href={`${import.meta.env.VITE_API_DOMAIN}/v1/artists/${artist.urlSlug}/feed?format=rss`}
+        href={`${API_ROOT}/v1/artists/${artist.urlSlug}/feed?format=rss`}
         rel="noreferrer"
         onlyIcon
         size={buttonSize}

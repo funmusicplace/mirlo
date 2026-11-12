@@ -15,7 +15,7 @@ import { queryTags } from "queries/tags";
 import { useTranslation } from "react-i18next";
 import { FaRedoAlt, FaChevronRight, FaRss } from "react-icons/fa";
 
-import { bp } from "../../constants";
+import { API_ROOT, bp } from "../../constants";
 
 const futureReleasesPageSize = 12;
 
@@ -140,7 +140,7 @@ const HomeReleases = () => {
                 aria-label={t("rssFeed")}
                 title={t("rssFeed")}
                 target="_blank"
-                href={`${import.meta.env.VITE_API_DOMAIN}/v1/trackGroups?isReleased=released&format=rss`}
+                href={`${API_ROOT}/v1/trackGroups?isReleased=released&format=rss`}
                 rel="noreferrer"
                 onlyIcon
                 smallIcon

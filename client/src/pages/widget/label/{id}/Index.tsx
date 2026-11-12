@@ -18,6 +18,8 @@ import { getArtistUrl } from "utils/artist";
 import { isTrackOwnedOrPreview } from "utils/tracks";
 import { isEmbeddedInMirlo } from "utils/widgetContext";
 
+import { CLIENT_ROOT } from "../../../../constants";
+
 const Index = () => {
   const { t } = useTranslation("translation", {
     keyPrefix: "labelWidget",
@@ -109,9 +111,7 @@ const Index = () => {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={`${import.meta.env.VITE_CLIENT_DOMAIN}${getArtistUrl(
-                    label.profile
-                  )}`}
+                  href={`${CLIENT_ROOT}${getArtistUrl(label.profile)}`}
                 >
                   {label.profile.name}
                 </a>

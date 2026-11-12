@@ -3,6 +3,7 @@ import { FaLink } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 import { getReleaseUrl } from "utils/artist";
 
+import { CLIENT_ROOT } from "../../../constants";
 import { DropdownMenuItemButton } from "../DropdownMenuItem";
 
 const CopyTrackLink: React.FC<{
@@ -20,7 +21,7 @@ const CopyTrackLink: React.FC<{
       onClick={(e) => {
         e.stopPropagation();
         navigator.clipboard.writeText(
-          `${import.meta.env.VITE_CLIENT_DOMAIN}${getReleaseUrl(artist, trackGroup)}/tracks/${track.id}`
+          `${CLIENT_ROOT}${getReleaseUrl(artist, trackGroup)}/tracks/${track.id}`
         );
         snackbar(t("copiedTrackLink"), { type: "success" });
       }}

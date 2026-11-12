@@ -1,3 +1,5 @@
+import { CLIENT_ROOT } from "../constants";
+
 export const canUserEditArtist = (
   user:
     | Pick<LoggedInUser, "id" | "isAdmin" | "editableArtistIds">
@@ -131,15 +133,15 @@ export const getArtistManageMerchUrl = (artistId: number, merchId: string) => {
 };
 
 export const getTrackGroupWidget = (trackGroupId: number) => {
-  return `${import.meta.env.VITE_CLIENT_DOMAIN}/widget/trackGroup/${trackGroupId}`;
+  return `${CLIENT_ROOT}/widget/trackGroup/${trackGroupId}`;
 };
 
 export const getTrackWidget = (trackId: number) => {
-  return `${import.meta.env.VITE_CLIENT_DOMAIN}/widget/track/${trackId}`;
+  return `${CLIENT_ROOT}/widget/track/${trackId}`;
 };
 
 export const getLabelWidget = (labelId: number) => {
-  return `${import.meta.env.VITE_CLIENT_DOMAIN}/widget/label/${labelId}`;
+  return `${CLIENT_ROOT}/widget/label/${labelId}`;
 };
 
 export const getReleaseUrl = (
