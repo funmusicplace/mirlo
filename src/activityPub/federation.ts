@@ -15,8 +15,12 @@ import {
   Follow,
   Image,
   isActor,
+  Mention,
+  Note,
+  Page,
   Person,
   PUBLIC_COLLECTION,
+  Question,
   Undo,
   Audio,
 } from "@fedify/fedify/vocab";
@@ -31,7 +35,9 @@ import {
   getTemporal,
   NODEINFO_PATH,
   parseMentionsFromContent,
+  remoteHtmlToText,
   root,
+  toBoundedText,
 } from "../activityPub/utils";
 import { redisClient } from "../config/redis";
 import logger from "../logger";
@@ -297,6 +303,43 @@ const findAPPostById = async (id: number) => {
 };
 
 const MENTION_LOOKUP_TIMEOUT_MS = 5000;
+const AP_MENTION_EXCERPT_LENGTH = 500;
+const MAX_ACTOR_NAME_LENGTH = 200;
+const MAX_INSPECTED_TAGS = 50;
+const AP_MENTION_DEDUP_TTL_SECONDS = 24 * 60 * 60;
+const AP_MENTION_DEDUP_PREFIX = "ap-mention";
+const AP_MENTION_TOMBSTONE_PREFIX = "ap-mention-deleted";
+const MAX_AP_URL_LENGTH = 2048;
+const AP_USERNAME_REGEX = /^[\p{L}\p{M}\p{N}_.-]{1,64}$/u;
+const MENTIONABLE_OBJECT_TYPES = [Note, Article, Page, Question];
+
+const mentionTombstoneKey = (actor: string, objectId?: string) =>
+  objectId
+    ? `${AP_MENTION_TOMBSTONE_PREFIX}:${actor}:${objectId}`
+    : `${AP_MENTION_TOMBSTONE_PREFIX}:${actor}`;
+
+const markMentionsDeleted = (actor: string, objectId?: string) =>
+  redisClient.set(
+    mentionTombstoneKey(actor, objectId),
+    "1",
+    "EX",
+    AP_MENTION_DEDUP_TTL_SECONDS
+  );
+
+const discardIfDeletedMeanwhile = async (
+  notificationId: string,
+  actor: string,
+  objectId: string
+) => {
+  const deleted = await redisClient.exists(
+    mentionTombstoneKey(actor, objectId),
+    mentionTombstoneKey(actor)
+  );
+  if (deleted > 0) {
+    await prisma.notification.deleteMany({ where: { id: notificationId } });
+  }
+  return deleted > 0;
+};
 
 export const sendPostToActivityPubFollowers = async (postId: number) => {
   const post = await findAPPostById(postId);
@@ -539,6 +582,159 @@ federation
 
     logger.info(`ActivityPub Follow stored for ${actorHref} → ${identifier}`);
   })
+  .on(Create, async (ctx, create) => {
+    const actorId = create.actorId;
+    if (!actorId) return;
+
+    const loaderOptions = {
+      documentLoader: (url: string) =>
+        ctx.documentLoader(url, {
+          signal: AbortSignal.timeout(MENTION_LOOKUP_TIMEOUT_MS),
+        }),
+      contextLoader: ctx.contextLoader,
+    };
+
+    const object = await create.getObject(loaderOptions);
+    if (
+      !MENTIONABLE_OBJECT_TYPES.some((type) => object instanceof type) ||
+      !object?.id
+    ) {
+      return;
+    }
+    if (object.id.origin !== actorId.origin) return;
+    if (object.attributionId?.href !== actorId.href) return;
+    if (
+      actorId.href.length > MAX_AP_URL_LENGTH ||
+      object.id.href.length > MAX_AP_URL_LENGTH
+    ) {
+      return;
+    }
+
+    const audience = [
+      ...create.toIds,
+      ...create.ccIds,
+      ...object.toIds,
+      ...object.ccIds,
+    ];
+    if (!audience.some((id) => id.href === PUBLIC_COLLECTION.href)) return;
+
+    const mentionedIdentifiers = new Set<string>();
+    let inspectedTags = 0;
+    for await (const tag of object.getTags({
+      ...loaderOptions,
+      suppressError: true,
+    })) {
+      if (++inspectedTags > MAX_INSPECTED_TAGS) break;
+      if (!(tag instanceof Mention)) continue;
+      const parsed = ctx.parseUri(tag.href);
+      if (parsed?.type === "actor") mentionedIdentifiers.add(parsed.identifier);
+    }
+    if (mentionedIdentifiers.size === 0) return;
+
+    const profileIds = (
+      await Promise.all(
+        [...mentionedIdentifiers].map((identifier) =>
+          findArtistIdForURLSlug(identifier)
+        )
+      )
+    ).filter((id): id is number => id !== undefined);
+
+    const artists = await prisma.profile.findMany({
+      where: {
+        ...whereForVisibleProfile(),
+        id: { in: profileIds },
+        activityPub: true,
+        allowFediverseMentions: true,
+        user: { disabledAt: null },
+      },
+    });
+    if (artists.length === 0) return;
+
+    const actorHref = actorId.href;
+    let actorName: string | undefined;
+    let actorHandle: string | undefined;
+    try {
+      const actor = await create.getActor(loaderOptions);
+      actorName = actor?.name
+        ? toBoundedText(actor.name.toString(), MAX_ACTOR_NAME_LENGTH)
+        : undefined;
+      const username = actor?.preferredUsername?.toString();
+      actorHandle =
+        username && AP_USERNAME_REGEX.test(username)
+          ? `@${username}@${actorId.host}`
+          : undefined;
+    } catch (e) {
+      logger.warn(
+        `ActivityPub mention: actor lookup failed for ${actorHref}: ${e}`
+      );
+    }
+
+    const objectUrl = object.url instanceof URL ? object.url : object.url?.href;
+    const url = [objectUrl, object.id].find(
+      (candidate) =>
+        candidate?.origin === actorId.origin &&
+        (candidate.protocol === "https:" || candidate.protocol === "http:") &&
+        candidate.href.length <= MAX_AP_URL_LENGTH
+    );
+    const summaryIsContentWarning =
+      object instanceof Note || object instanceof Question;
+    const contentWarning =
+      summaryIsContentWarning && object.summary
+        ? remoteHtmlToText(object.summary.toString(), AP_MENTION_EXCERPT_LENGTH)
+        : undefined;
+    const content =
+      object.content && !contentWarning
+        ? remoteHtmlToText(object.content.toString(), AP_MENTION_EXCERPT_LENGTH)
+        : null;
+    const objectId = object.id.href;
+
+    for (const artist of artists) {
+      const dedupKey = `${AP_MENTION_DEDUP_PREFIX}:${artist.id}:${objectId}`;
+      const claimed = await redisClient.set(
+        dedupKey,
+        "1",
+        "EX",
+        AP_MENTION_DEDUP_TTL_SECONDS,
+        "NX"
+      );
+      if (!claimed) continue;
+
+      const notification = await prisma.notification
+        .create({
+          data: {
+            notificationType: "AP_MENTION",
+            deliveryMethod: "IN_APP",
+            userId: artist.userId,
+            profileId: artist.id,
+            content,
+            metadata: {
+              ap: {
+                actor: actorHref,
+                actorName,
+                actorHandle,
+                objectId,
+                url: url?.href,
+                ...(contentWarning ? { contentWarning } : {}),
+              },
+            },
+          },
+        })
+        .catch(async (error) => {
+          await redisClient.del(dedupKey);
+          throw error;
+        });
+
+      if (
+        await discardIfDeletedMeanwhile(notification.id, actorHref, objectId)
+      ) {
+        continue;
+      }
+
+      logger.info(
+        `ActivityPub mention stored for ${objectId} → ${artist.urlSlug}`
+      );
+    }
+  })
   .on(Undo, async (ctx, undo) => {
     const identifier = ctx.recipient;
     if (!identifier) return;
@@ -557,19 +753,60 @@ federation
   })
   .on(Delete, async (ctx, del) => {
     const identifier = ctx.recipient;
-    if (!identifier || !del.actorId) return;
-    if (del.objectId?.href !== del.actorId.href) return;
+    const actorId = del.actorId;
+    const objectId = del.objectId;
+    if (!identifier || !actorId || !objectId) return;
 
-    const parsedId = await findArtistIdForURLSlug(identifier);
-    if (!parsedId) return;
+    const urlTooLong =
+      actorId.href.length > MAX_AP_URL_LENGTH ||
+      objectId.href.length > MAX_AP_URL_LENGTH;
 
-    await prisma.activityPubProfileFollowers.deleteMany({
-      where: { profileId: parsedId, actor: del.actorId.href },
+    if (objectId.href === actorId.href) {
+      const parsedId = await findArtistIdForURLSlug(identifier);
+      if (parsedId) {
+        await prisma.activityPubProfileFollowers.deleteMany({
+          where: { profileId: parsedId, actor: actorId.href },
+        });
+        logger.info(
+          `ActivityPub Delete: removed ${actorId.href} from followers`
+        );
+      }
+
+      if (urlTooLong) return;
+
+      await markMentionsDeleted(actorId.href);
+      const { count: mentionCount } = await prisma.notification.deleteMany({
+        where: {
+          notificationType: "AP_MENTION",
+          metadata: { path: ["ap", "actor"], equals: actorId.href },
+        },
+      });
+      if (mentionCount > 0) {
+        logger.info(
+          `ActivityPub Delete: removed ${mentionCount} mention(s) by ${actorId.href}`
+        );
+      }
+      return;
+    }
+
+    if (objectId.origin !== actorId.origin || urlTooLong) return;
+
+    await markMentionsDeleted(actorId.href, objectId.href);
+    const { count } = await prisma.notification.deleteMany({
+      where: {
+        notificationType: "AP_MENTION",
+        AND: [
+          { metadata: { path: ["ap", "objectId"], equals: objectId.href } },
+          { metadata: { path: ["ap", "actor"], equals: actorId.href } },
+        ],
+      },
     });
 
-    logger.info(
-      `ActivityPub Delete: removed ${del.actorId.href} from followers`
-    );
+    if (count > 0) {
+      logger.info(
+        `ActivityPub Delete: removed ${count} mention(s) of ${objectId.href}`
+      );
+    }
   });
 
 federation.setNodeInfoDispatcher(NODEINFO_PATH, async () => {

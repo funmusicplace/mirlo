@@ -57,6 +57,7 @@ export default function () {
       announcementText,
       allowDirectMessages,
       notifyOnSubscriptionEnd,
+      allowFediverseMentions,
       displayLabelUserId,
       paymentToUserId,
     } = req.body;
@@ -213,6 +214,7 @@ export default function () {
             announcementText,
             allowDirectMessages,
             notifyOnSubscriptionEnd,
+            allowFediverseMentions,
             ...(paymentToUserId !== undefined
               ? {
                   paymentToUserId:

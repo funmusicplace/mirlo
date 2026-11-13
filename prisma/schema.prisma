@@ -282,6 +282,8 @@ model Notification {
   relatedUser      User?                      @relation(fields: [relatedUserId], references: [id], name: "relatedUser")
   /// NotificationMetaData
   metadata         Json?
+
+  @@index([notificationType])
 }
 
 enum NotificationType {
@@ -297,6 +299,7 @@ enum NotificationType {
   LABEL_ADDED_ARTIST
   FUNDRAISER_PLEDGE_CHARGED
   AP_FOLLOW
+  AP_MENTION
   ARTIST_CONTACT_MESSAGE
   MENTION_IN_POST
   PROFILE_MANAGER_INVITE
@@ -415,6 +418,7 @@ model Profile {
   profileLocationTags                 ProfileLocationTag[]
   allowDirectMessages                 Boolean                               @default(false)
   notifyOnSubscriptionEnd             Boolean                               @default(false)
+  allowFediverseMentions              Boolean                               @default(true)
   contentFlags                        ContentFlag[]
   managers                            ProfileManager[]
   checkouts                           Checkout[]
