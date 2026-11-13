@@ -579,6 +579,49 @@ export const sendSubscriptionCancellationEmail = async (
   });
 };
 
+export const notifyArtistOfSubscriptionEnd = async (
+  subscriptionId: number,
+  reason: "USER_CANCELLED" | "PAYMENT_FAILURE" | "ENDED",
+  endsAt: Date | null = null
+) => {
+  const subscription = await prisma.profileUserSubscription.findFirst({
+    where: { id: subscriptionId },
+    include: {
+      user: { select: { name: true, email: true } },
+      profileSubscriptionTier: {
+        include: {
+          profile: {
+            include: {
+              user: { select: { email: true } },
+              paymentToUser: { select: { email: true } },
+            },
+          },
+        },
+      },
+    },
+  });
+  const profile = subscription?.profileSubscriptionTier.profile;
+  if (!subscription || !profile?.notifyOnSubscriptionEnd) {
+    return;
+  }
+
+  const payee = resolvePayee({ profile });
+
+  await sendMailQueue.add("send-mail", {
+    template: "artist-subscription-ended",
+    message: { to: payee.email },
+    locals: {
+      artist: { name: profile.name },
+      user: subscription.user,
+      tierName: subscription.profileSubscriptionTier.name,
+      reason,
+      endsAt: endsAt ? endsAt.toISOString() : null,
+      host: process.env.API_DOMAIN,
+      client: (await getClient()).applicationUrl,
+    },
+  });
+};
+
 /**
  * Common includes when returning a single artist
  */

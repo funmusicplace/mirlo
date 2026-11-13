@@ -56,6 +56,7 @@ export default function () {
       maxFreePlays,
       announcementText,
       allowDirectMessages,
+      notifyOnSubscriptionEnd,
       displayLabelUserId,
       paymentToUserId,
     } = req.body;
@@ -211,6 +212,7 @@ export default function () {
             maxFreePlays,
             announcementText,
             allowDirectMessages,
+            notifyOnSubscriptionEnd,
             ...(paymentToUserId !== undefined
               ? {
                   paymentToUserId:

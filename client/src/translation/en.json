@@ -1533,6 +1533,8 @@
   "artistForm": {
     "allowDirectMessages": "Allow direct messages from listeners",
     "allowDirectMessagesDescription": "When enabled, logged-in listeners can send you a message through your profile. Messages arrive as a notification and by email.",
+    "notifyOnSubscriptionEnd": "Email me when a supporter unsubscribes",
+    "notifyOnSubscriptionEndDescription": "When enabled, you'll get an email when someone cancels a paid subscription, or when their subscription ends because a payment failed.",
     "deleteArtist": "Permanently delete artist page",
     "artistDeleted": "Artist page deleted",
     "shortDescription": "Something short about you",
@@ -2825,6 +2827,16 @@
     "thanksYearly": "Thank you for supporting {{artistName}} with your yearly support at the \"{{tierName}}\" tier.",
     "viewSubscriptions": "To view all your subscriptions log in or create an account with this email address.",
     "thankYou": "Thank you!"
+  },
+  "emails.artistSubscriptionEnded": {
+    "subject": "{{instanceName}}: {{name}} is no longer supporting you at the \"{{tierName}}\" tier",
+    "subjectNoName": "{{instanceName}}: A supporter is no longer supporting you at the \"{{tierName}}\" tier",
+    "hello": "Hi {{artistName}},",
+    "cancelled": "({{email}}) {{name}} cancelled their subscription to your \"{{tierName}}\" tier.",
+    "paymentFailed": "({{email}}) {{name}}'s subscription to your \"{{tierName}}\" tier ended because their payment failed.",
+    "ended": "({{email}}) {{name}}'s subscription to your \"{{tierName}}\" tier has ended.",
+    "accessUntil": "They keep access until the end of the period they've already paid for, on {{date}}.",
+    "turnOff": "You're getting this email because you asked to be told when supporters leave. You can turn this off in your artist settings on {{instanceName}}."
   },
   "emails.artistSubscriptionCancelled": {
     "subject": "{{instanceName}}: Your subscription to {{artistName}} has been cancelled",

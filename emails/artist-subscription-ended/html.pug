@@ -1,0 +1,14 @@
+extends ../layout.pug
+include ../mixins.pug
+
+block content
+  p= t("emails.artistSubscriptionEnded.hello", { artistName: artist.name })
+  if reason === "PAYMENT_FAILURE"
+    p= t("emails.artistSubscriptionEnded.paymentFailed", { email: user.email, name: user.name || t("emails.common.aSupporter"), tierName })
+  else if reason === "USER_CANCELLED"
+    p= t("emails.artistSubscriptionEnded.cancelled", { email: user.email, name: user.name || t("emails.common.aSupporter"), tierName })
+  else
+    p= t("emails.artistSubscriptionEnded.ended", { email: user.email, name: user.name || t("emails.common.aSupporter"), tierName })
+  if endsAt
+    p= t("emails.artistSubscriptionEnded.accessUntil", { date: formatDate(endsAt) })
+  p= t("emails.artistSubscriptionEnded.turnOff", { instanceName })

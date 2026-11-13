@@ -1,0 +1,4 @@
+if user.name
+  != t("emails.artistSubscriptionEnded.subject", { instanceName, name: user.name, tierName })
+else
+  != t("emails.artistSubscriptionEnded.subjectNoName", { instanceName, tierName })

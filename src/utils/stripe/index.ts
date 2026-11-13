@@ -5,7 +5,10 @@ import { compact, uniq } from "lodash";
 import Stripe from "stripe";
 
 import { logger } from "../../logger";
-import { subscribeUserToProfile } from "../artist";
+import {
+  notifyArtistOfSubscriptionEnd,
+  subscribeUserToProfile,
+} from "../artist";
 import { fundraiserPageUrl } from "../clientUrl";
 import { AppError } from "../error";
 import { getClient } from "../getClient";
@@ -1203,6 +1206,13 @@ export const handleSubscriptionDeleted = async (
         );
         continue;
       }
+    }
+
+    if (!row.deleteReason) {
+      await notifyArtistOfSubscriptionEnd(
+        row.id,
+        isPaymentFailure ? "PAYMENT_FAILURE" : "ENDED"
+      );
     }
 
     await prisma.profileUserSubscription.update({

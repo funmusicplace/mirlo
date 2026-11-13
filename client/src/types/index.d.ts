@@ -385,6 +385,7 @@ interface Artist {
   activityPub: boolean;
   federatedStreaming: boolean;
   allowDirectMessages?: boolean;
+  notifyOnSubscriptionEnd?: boolean;
   urlSlug?: string;
   userId: number;
   paymentToUserId?: number;
