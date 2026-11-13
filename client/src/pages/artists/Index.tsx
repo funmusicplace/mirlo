@@ -79,23 +79,12 @@ const Index = () => {
         <WidthContainer
           variant="big"
           justify="space-between"
-          className={css`
-            flex-direction: row;
-            display: flex;
-            align-items: center;
-          `}
+          className="flex flex-col items-start gap-3 p-(--mi-side-paddings-xsmall) md:flex-row md:items-center md:gap-0 md:p-0"
         >
-          <h2 className="h5 section-header__heading">
+          <h2 className="h5 section-header__heading max-md:ml-0">
             {t(isViewingLabels ? "labels" : "artists")}
           </h2>
-          <div
-            className={css`
-              display: flex;
-              flex-direction: row;
-              align-items: center;
-              gap: 1rem;
-            `}
-          >
+          <div className="flex w-full flex-wrap items-center gap-4 md:w-auto">
             <Button
               startIcon={<BsGrid />}
               onClick={() => setTiles(true)}
@@ -104,14 +93,7 @@ const Index = () => {
               startIcon={<BsList />}
               onClick={() => setTiles(false)}
             ></Button>
-            <div
-              className={css`
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                gap: 1rem;
-              `}
-            >
+            <div className="ml-auto flex items-center gap-4">
               <label htmlFor="orderBy">{t("sortBy")}</label>
               <SelectEl
                 value={orderBy}
@@ -122,18 +104,12 @@ const Index = () => {
                 <option value="name">{t("sortByName")}</option>
               </SelectEl>
             </div>
-            <div
-              className={css`
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                gap: 1rem;
-              `}
-            >
+            <div className="flex min-w-0 items-center gap-4">
               <label htmlFor="location">{t("location")}</label>
               <SelectEl
                 value={locationSlug}
                 id="location"
+                className="w-48 max-w-full"
                 onChange={(e) => setLocationSlug(e.target.value)}
               >
                 <option value="">{t("allLocations")}</option>
