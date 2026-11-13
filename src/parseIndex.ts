@@ -1052,6 +1052,12 @@ export const analyzePathAndGenerateHTML = async (
   );
   appendHydrationScript($, "__MIRLO_INSTANCE__", "instance", instanceSettings);
 
+  const icon = instanceSettings.mobileLogo ?? instanceSettings.logo;
+  if (icon) {
+    $('link[rel="icon"], link[rel="apple-touch-icon"]').remove();
+    $("head").append($("<link>").attr({ rel: "icon", href: icon.url }));
+  }
+
   $("title").text(instanceName);
   $("title").after(`
     <style>
