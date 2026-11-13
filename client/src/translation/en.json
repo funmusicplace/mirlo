@@ -1750,7 +1750,7 @@
   "footer": {
     "language": "Language",
     "helpTranslate": "Help translate Mirlo",
-    "poweredByMirlo": "Powered by <mirlo>Mirlo</mirlo>, open-source software for selling music directly. Find the project on <github>GitHub</github> and <discord>Discord</discord>.",
+    "poweredByMirlo": "Powered by <mirlo>Mirlo</mirlo>, open-source software for selling music directly. Find the project on <github>GitHub</github>.",
     "legalHeading": "Legal",
     "terms": "Terms and conditions",
     "privacy": "Privacy",

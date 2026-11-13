@@ -157,7 +157,6 @@ export const Footer = () => {
               components={{
                 mirlo: <a href="https://docs.mirlo.space"></a>,
                 github: <a href="https://github.com/funmusicplace/mirlo/"></a>,
-                discord: <a href="https://discord.gg/VjKq26raKX"></a>,
               }}
             />
           </p>
