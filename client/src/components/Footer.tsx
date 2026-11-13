@@ -1,21 +1,28 @@
 import { css } from "@emotion/css";
+import { useQuery } from "@tanstack/react-query";
 import { getFinishedLanguages, setStoredLanguage } from "i18n";
 import { useProfileMutation } from "queries";
 import { useInstanceSettings } from "queries/instanceSettings";
+import { queryInstanceArtist } from "queries/settings";
 import { Trans, useTranslation } from "react-i18next";
-import { FaInstagram, FaMastodon } from "react-icons/fa";
-import { FaBluesky } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
+import { transformFromLinks } from "utils/links";
 
 import { bp } from "../constants";
 
+import {
+  findOutsideSite,
+  linkUrlDisplay,
+  linkUrlHref,
+} from "./common/LinkIconDisplay";
 import { SelectEl } from "./common/Select";
 import WidthContainer from "./common/WidthContainer";
 
 export const Footer = () => {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "footer" });
-  const { contactEmail } = useInstanceSettings();
+  const { name, contactEmail } = useInstanceSettings();
+  const { data: instanceArtist } = useQuery(queryInstanceArtist());
   const { user } = useAuthContext();
   const { mutate: saveLanguage } = useProfileMutation();
 
@@ -29,18 +36,28 @@ export const Footer = () => {
     }
   };
 
+  const instanceLinks = instanceArtist
+    ? transformFromLinks(instanceArtist).linkArray.map((link) => {
+        const { icon } = findOutsideSite(link);
+        return {
+          text: linkUrlDisplay(link),
+          href: linkUrlHref(link.url, true),
+          icon: icon && <span aria-hidden>{icon}</span>,
+        };
+      })
+    : [];
+
   const columns: {
     heading: string;
     links: { text: string; to?: string; href?: string; icon?: JSX.Element }[];
   }[] = [
     {
-      heading: t("aboutHeading"),
+      heading: name,
       links: [
-        { text: t("about"), href: "https://docs.mirlo.space" },
-        { text: t("documentation"), href: "https://docs.mirlo.space" },
         ...(contactEmail
           ? [{ text: t("contact"), href: `mailto:${contactEmail}` }]
           : []),
+        ...instanceLinks,
       ],
     },
     {
@@ -52,27 +69,7 @@ export const Footer = () => {
         { text: t("content"), to: "/pages/content-policy" },
       ],
     },
-    {
-      heading: t("connectHeading"),
-      links: [
-        {
-          text: "Instagram",
-          href: "https://instagram.com/mirlo.space",
-          icon: <FaInstagram aria-hidden />,
-        },
-        {
-          text: "Mastodon",
-          href: "https://musician.social/@mirlo",
-          icon: <FaMastodon aria-hidden />,
-        },
-        {
-          text: "Bluesky",
-          href: "https://bsky.app/profile/mirlo.space",
-          icon: <FaBluesky aria-hidden />,
-        },
-      ],
-    },
-  ];
+  ].filter((column) => column.links.length > 0);
 
   return (
     <footer
@@ -99,13 +96,13 @@ export const Footer = () => {
             padding: 2rem;
           `}`}
         >
-          <div className="grid grid-cols-2 md:grid-cols-[1fr_1fr_1fr_auto] gap-8 mbe-8">
+          <div className="grid grid-cols-2 md:grid-cols-[1fr_1fr_auto] gap-8 mbe-8">
             {columns.map((column) => (
               <div key={column.heading}>
                 <h2 className="text-sm! font-bold! mbe-2">{column.heading}</h2>
                 <ul className="flex flex-col gap-2">
                   {column.links.map((link) => (
-                    <li key={link.text}>
+                    <li key={link.to ?? link.href}>
                       {link.to ? (
                         <Link to={link.to}>{link.text}</Link>
                       ) : (
@@ -156,11 +153,10 @@ export const Footer = () => {
           <p className="text-xs md:text-center">
             <Trans
               t={t}
-              i18nKey="getInTouch"
+              i18nKey="poweredByMirlo"
               components={{
+                mirlo: <a href="https://docs.mirlo.space"></a>,
                 github: <a href="https://github.com/funmusicplace/mirlo/"></a>,
-                discord: <a href="https://discord.gg/VjKq26raKX"></a>,
-                email: <a href="mailto:mirlodotspace@proton.me"></a>,
               }}
             />
           </p>

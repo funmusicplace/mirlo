@@ -649,6 +649,62 @@ describe("analyzePathAndGenerateHTML", () => {
       const ogDesc = $('meta[property="og:description"]').attr("content");
       assert.equal(ogDesc, "Buy and sell music directly from musicians.");
     });
+
+    it("keeps the default favicon when the instance has no logo", async () => {
+      const $ = cheerio.load(
+        '<html><head><link rel="icon" href="/favicon.ico" /></head></html>'
+      );
+      await analyzePathAndGenerateHTML("/", $);
+
+      assert.deepEqual(
+        $('link[rel="icon"]')
+          .map((_, el) => $(el).attr("href"))
+          .get(),
+        ["/favicon.ico"]
+      );
+    });
+
+    it("uses the mobile logo, else the main logo, as the favicon", async () => {
+      const row = await createSiteSettings();
+      const createLogo = (extension: string) =>
+        prisma.instanceLogo.create({
+          data: {
+            mimeType: extension === "svg" ? "image/svg+xml" : "image/png",
+            extension,
+            width: 100,
+            height: 100,
+          },
+        });
+      const logo = await createLogo("svg");
+      const mobileLogo = await createLogo("png");
+      await prisma.settings.update({
+        where: { id: row.id },
+        data: { logoId: logo.id },
+      });
+      const html =
+        '<html><head><link rel="icon" href="/favicon.ico" /><link rel="apple-touch-icon" href="/apple-touch-icon.png" /></head></html>';
+
+      let $ = cheerio.load(html);
+      await analyzePathAndGenerateHTML("/", $);
+      let hrefs = $('link[rel="icon"]')
+        .map((_, el) => $(el).attr("href"))
+        .get();
+      assert.equal(hrefs.length, 1);
+      assert.match(hrefs[0], new RegExp(`${logo.id}\\.svg$`));
+      assert.equal($('link[rel="apple-touch-icon"]').length, 0);
+
+      await prisma.settings.update({
+        where: { id: row.id },
+        data: { mobileLogoId: mobileLogo.id },
+      });
+      $ = cheerio.load(html);
+      await analyzePathAndGenerateHTML("/", $);
+      hrefs = $('link[rel="icon"]')
+        .map((_, el) => $(el).attr("href"))
+        .get();
+      assert.equal(hrefs.length, 1);
+      assert.match(hrefs[0], new RegExp(`${mobileLogo.id}\\.png$`));
+    });
   });
 
   describe("percent-encoded paths", () => {
