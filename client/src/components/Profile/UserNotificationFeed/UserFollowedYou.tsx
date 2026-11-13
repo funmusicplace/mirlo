@@ -4,6 +4,8 @@ import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getArtistUrl } from "utils/artist";
 
+import NotificationAvatar from "./NotificationAvatar";
+
 const UserFollowedYou: React.FC<{
   notification: Notification;
   compact?: boolean;
@@ -28,15 +30,7 @@ const UserFollowedYou: React.FC<{
           : "flex items-center gap-3.5 py-3.5 px-4"
       }
     >
-      <div
-        className={
-          compact
-            ? "w-7 h-7 rounded-full shrink-0 bg-(--mi-pink) flex items-center justify-center font-bold text-xs text-white"
-            : "w-11 h-11 rounded-full shrink-0 bg-(--mi-pink) flex items-center justify-center font-bold text-base text-white"
-        }
-      >
-        {(userName?.[0] ?? "?").toUpperCase()}
-      </div>
+      <NotificationAvatar name={userName} compact={compact} />
 
       <div className="flex-1 min-w-0">
         {!compact && (

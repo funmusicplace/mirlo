@@ -62,6 +62,7 @@ export type ArtistFormData = {
   federatedStreaming: boolean;
   allowDirectMessages: boolean;
   notifyOnSubscriptionEnd: boolean;
+  allowFediverseMentions: boolean;
   defaultPlatformFee: number;
   properties: {
     colors: ArtistColors;
@@ -90,6 +91,7 @@ const generateDefaults = (existing?: Artist) => {
     federatedStreaming: existing?.federatedStreaming ?? false,
     allowDirectMessages: existing?.allowDirectMessages ?? true,
     notifyOnSubscriptionEnd: existing?.notifyOnSubscriptionEnd ?? false,
+    allowFediverseMentions: existing?.allowFediverseMentions ?? true,
     defaultPlatformFee: existing?.defaultPlatformFee ?? 10,
     shortDescription: existing?.shortDescription ?? "",
     maxFreePlays: existing?.maxFreePlays,
@@ -170,6 +172,7 @@ export const Index: React.FC = () => {
         federatedStreaming: data.federatedStreaming,
         allowDirectMessages: data.allowDirectMessages,
         notifyOnSubscriptionEnd: data.notifyOnSubscriptionEnd,
+        allowFediverseMentions: data.allowFediverseMentions,
         properties: { ...artist?.properties, ...data.properties },
       };
 
@@ -212,6 +215,7 @@ export const Index: React.FC = () => {
   const activityPub = methods.watch("activityPub");
   const allowDirectMessages = methods.watch("allowDirectMessages");
   const notifyOnSubscriptionEnd = methods.watch("notifyOnSubscriptionEnd");
+  const allowFediverseMentions = methods.watch("allowFediverseMentions");
 
   if (!artist) {
     return null;
@@ -330,6 +334,25 @@ export const Index: React.FC = () => {
                   {t("makeSearchable")}
                 </small>
               </FormComponent>
+              {activityPub && (
+                <FormComponent>
+                  <Toggle
+                    id="input-allow-fediverse-mentions"
+                    ariaDescribedBy="hint-allow-fediverse-mentions"
+                    label={t("allowFediverseMentions")}
+                    toggled={allowFediverseMentions}
+                    onClick={() => {
+                      methods.setValue(
+                        "allowFediverseMentions",
+                        !allowFediverseMentions
+                      );
+                    }}
+                  />
+                  <small id="hint-allow-fediverse-mentions">
+                    {t("allowFediverseMentionsDescription")}
+                  </small>
+                </FormComponent>
+              )}
               <FederatedStreamingToggle />
               <FormComponent>
                 <Toggle

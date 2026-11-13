@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import React from "react";
 
 import ArtistContactMessage from "./ArtistContactMessage";
+import FediverseMention from "./FediverseMention";
 import FundraiserPledge from "./FundraiserPledge";
 import LabelInvite from "./LabelInvite";
 import ManagerInvite from "./ManagerInvite";
@@ -45,12 +46,18 @@ const LI = styled.li<{
     ${(props) => categoryBorderColor(props.notificationType)};
 `;
 
-const NotificationFeedItem: React.FC<{
-  notification: Notification;
-  compact?: boolean;
-}> = ({ notification, compact }) => {
+const NotificationFeedItem = React.forwardRef<
+  HTMLLIElement,
+  {
+    notification: Notification;
+    compact?: boolean;
+    onRemoved?: () => void;
+  }
+>(({ notification, compact, onRemoved }, ref) => {
   return (
     <LI
+      ref={ref}
+      tabIndex={-1}
       isRead={notification.isRead}
       notificationType={notification.notificationType}
       compact={compact}
@@ -85,8 +92,17 @@ const NotificationFeedItem: React.FC<{
       {notification.notificationType === "ARTIST_CONTACT_MESSAGE" && (
         <ArtistContactMessage notification={notification} compact={compact} />
       )}
+      {notification.notificationType === "AP_MENTION" && (
+        <FediverseMention
+          notification={notification}
+          compact={compact}
+          onRemoved={onRemoved}
+        />
+      )}
     </LI>
   );
-};
+});
+
+NotificationFeedItem.displayName = "NotificationFeedItem";
 
 export default NotificationFeedItem;

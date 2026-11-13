@@ -149,6 +149,7 @@ export const createProfile = async (
       isLabelProfile: data?.isLabelProfile ?? false,
       paymentToUserId: data?.paymentToUserId,
       allowDirectMessages: data?.allowDirectMessages ?? false,
+      allowFediverseMentions: data?.allowFediverseMentions ?? true,
       federatedStreaming: data?.federatedStreaming ?? false,
       federatedStreamingOptInDate: data?.federatedStreamingOptInDate ?? null,
       federatedStreamingOptOutDate: data?.federatedStreamingOptOutDate ?? null,
@@ -564,6 +565,8 @@ export const createNotification = async (data: {
   trackGroupId?: number;
   relatedUserId?: number;
   profileId?: number;
+  content?: string;
+  metadata?: Prisma.InputJsonValue;
   /** Accepted while the artist->profile rename lands across the test suite. */
   artistId?: number;
 }) => {

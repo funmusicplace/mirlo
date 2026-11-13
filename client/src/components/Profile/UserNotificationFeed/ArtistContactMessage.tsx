@@ -12,6 +12,8 @@ import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl } from "utils/artist";
 
+import NotificationAvatar from "./NotificationAvatar";
+
 const ArtistContactMessage: React.FC<{
   notification: Notification;
   compact?: boolean;
@@ -81,15 +83,7 @@ const ArtistContactMessage: React.FC<{
           : "flex items-start gap-3.5 py-3.5 px-4"
       }
     >
-      <div
-        className={
-          compact
-            ? "w-7 h-7 rounded-full shrink-0 bg-(--mi-pink) flex items-center justify-center font-bold text-xs text-white"
-            : "w-11 h-11 rounded-full shrink-0 bg-(--mi-pink) flex items-center justify-center font-bold text-base text-white"
-        }
-      >
-        {(senderName?.[0] ?? "?").toUpperCase()}
-      </div>
+      <NotificationAvatar name={senderName} compact={compact} />
 
       <div className="flex-1 min-w-0">
         <div

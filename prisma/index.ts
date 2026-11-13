@@ -95,6 +95,11 @@ declare global {
     type NotificationMetaData = {
       ap: {
         actor: string;
+        actorName?: string;
+        actorHandle?: string;
+        objectId?: string;
+        url?: string;
+        contentWarning?: string;
       };
     };
   }

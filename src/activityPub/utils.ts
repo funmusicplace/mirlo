@@ -11,6 +11,7 @@ import {
   PUBLIC_COLLECTION,
 } from "@fedify/fedify/vocab";
 import { Temporal } from "@js-temporal/polyfill";
+import * as cheerio from "cheerio";
 
 import { storedImageVariantUrl } from "../utils/images";
 import { ContentImage, resolvePostContent } from "../utils/postContent";
@@ -26,6 +27,27 @@ export const stripHtml = (html: string) =>
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+
+const REMOTE_HTML_INPUT_LIMIT = 20000;
+
+export const toBoundedText = (text: string, maxLength: number) =>
+  Array.from(
+    text
+      .replace(/\u0000/g, "")
+      .replace(/\p{Cs}/gu, "\uFFFD")
+      .replace(/\s+/g, " ")
+      .trim()
+  )
+    .slice(0, maxLength)
+    .join("");
+
+export const remoteHtmlToText = (html: string, maxLength: number) => {
+  const $ = cheerio.load(html.slice(0, REMOTE_HTML_INPUT_LIMIT), null, false);
+  $("script, style").remove();
+  $("br").replaceWith(" ");
+  $("p").append(" ");
+  return toBoundedText($.root().text(), maxLength);
+};
 
 export const getTemporal = (date?: Date | null) => {
   if (!date) return undefined;
