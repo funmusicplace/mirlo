@@ -80,59 +80,12 @@ const Index = () => {
         <WidthContainer
           variant="big"
           justify="space-between"
-          className={css`
-            flex-direction: row;
-            display: flex;
-            align-items: center;
-
-            @media screen and (max-width: ${bp.medium}px) {
-              flex-direction: column;
-              align-items: flex-start;
-              gap: 0.75rem;
-              box-sizing: border-box;
-              padding: var(--mi-side-paddings-xsmall);
-
-              .section-header__heading {
-                margin-left: 0;
-              }
-            }
-          `}
+          className="flex flex-col items-start gap-3 p-(--mi-side-paddings-xsmall) md:flex-row md:items-center md:gap-0 md:p-0"
         >
-          <h2 className="h5 section-header__heading">
+          <h2 className="h5 section-header__heading max-md:ml-0">
             {t(isViewingLabels ? "labels" : "artists")}
           </h2>
-          <div
-            className={css`
-              display: flex;
-              flex-direction: row;
-              align-items: center;
-              gap: 1rem;
-
-              @media screen and (max-width: ${bp.medium}px) {
-                display: grid;
-                grid-template-columns: auto auto 1fr auto;
-                align-items: center;
-                width: 100%;
-
-                & > :nth-child(3) {
-                  grid-column: 3 / -1;
-                  justify-self: end;
-                }
-
-                & > :nth-child(4) {
-                  display: grid;
-                  grid-column: 1 / 4;
-                  grid-template-columns: auto minmax(0, 1fr);
-                  align-items: center;
-                  width: 100%;
-                }
-
-                & > :nth-child(5) {
-                  grid-column: 4;
-                }
-              }
-            `}
-          >
+          <div className="flex w-full flex-wrap items-center gap-4 md:w-auto">
             <Button
               startIcon={<BsGrid />}
               onClick={() => setTiles(true)}
@@ -141,14 +94,7 @@ const Index = () => {
               startIcon={<BsList />}
               onClick={() => setTiles(false)}
             ></Button>
-            <div
-              className={css`
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                gap: 1rem;
-              `}
-            >
+            <div className="ml-auto flex items-center gap-4">
               <label htmlFor="orderBy">{t("sortBy")}</label>
               <SelectEl
                 value={orderBy}
@@ -159,32 +105,12 @@ const Index = () => {
                 <option value="name">{t("sortByName")}</option>
               </SelectEl>
             </div>
-            <div
-              className={css`
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                gap: 1rem;
-
-                @media screen and (max-width: ${bp.medium}px) {
-                  width: 100%;
-                  flex-basis: 100%;
-                  min-width: 0;
-                  flex-direction: row;
-                  align-items: center;
-                  gap: 1rem;
-
-                  select {
-                    width: 100%;
-                    max-width: none;
-                  }
-                }
-              `}
-            >
+            <div className="flex min-w-0 items-center gap-4">
               <label htmlFor="location">{t("location")}</label>
               <SelectEl
                 value={locationSlug}
                 id="location"
+                className="w-48 max-w-full"
                 onChange={(e) => setLocationSlug(e.target.value)}
               >
                 <option value="">{t("allLocations")}</option>
