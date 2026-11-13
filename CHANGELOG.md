@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.3.0](https://github.com/funmusicplace/mirlo/compare/v1.2.0...v1.3.0) (2026-11-13)
+
+
+### Features
+
+* **artists:** opt-in email when a supporter's subscription ends ([120d935](https://github.com/funmusicplace/mirlo/commit/120d935b18522f487c4179853189b39e946a3b83))
+* **fundraisers:** add a public fundraiser page ([0c880d5](https://github.com/funmusicplace/mirlo/commit/0c880d53d0f4356860ac9ea21488ce63548165b5))
+* **fundraisers:** change or cancel a pledge from the fundraiser page ([3ed00d8](https://github.com/funmusicplace/mirlo/commit/3ed00d85a95e2cc22ae91e17be94996e27a11c38))
+* **fundraisers:** describe fundraiser pages to search and link previews ([8dcf38d](https://github.com/funmusicplace/mirlo/commit/8dcf38d7d808d9e2ee6355c2afe32b4322089808))
+* **fundraisers:** progress gauge and artist avatar on fundraiser page ([83ed4f5](https://github.com/funmusicplace/mirlo/commit/83ed4f563e4bd4e8e16d53f2e12964da12731733))
+* **fundraisers:** rework the fundraiser page and edit page ([cbb42fc](https://github.com/funmusicplace/mirlo/commit/cbb42fc597a76c325c6937e68c33bde13c6fc5d2))
+* **fundraisers:** show the fees under the goal ([3b1ed97](https://github.com/funmusicplace/mirlo/commit/3b1ed97fbf80b5d798a83a7811788eec14231cb4))
+* **fundraisers:** two-column fundraiser page with recent pledge ([ccf9e7b](https://github.com/funmusicplace/mirlo/commit/ccf9e7b7e9bac72d72a57f7591568d3c08d255b5))
+* **instance:** logo as favicon, instance artist links in footer ([#2525](https://github.com/funmusicplace/mirlo/issues/2525)) ([c638da0](https://github.com/funmusicplace/mirlo/commit/c638da0509ec21138493836d7d255480ca9c5e51))
+* let users remove a fediverse mention from their notifications ([7110697](https://github.com/funmusicplace/mirlo/commit/711069779f138a5a64614e5988187042ee457e9d))
+* notify artists when they are mentioned on the fediverse ([f0e56fa](https://github.com/funmusicplace/mirlo/commit/f0e56fa8256c49f8197c414e989e325093a7c5b1))
+* show fediverse mentions in the notification feed ([fd4b234](https://github.com/funmusicplace/mirlo/commit/fd4b234bda17dcf4bc2111386cf144367d976f28))
+
+
+### Bug Fixes
+
+* **auth:** address review (one row per app, disconnect drops every grant, prune token-less grants) ([c4e8e14](https://github.com/funmusicplace/mirlo/commit/c4e8e1499da7583d42ffdb0b214d17536a3dedbd))
+* do not require build-time vars for api and client domain ([68256b7](https://github.com/funmusicplace/mirlo/commit/68256b750fd5ee2d373a55f92eb55004db920171))
+* do not require build-time vars for api and client domain ([a4918e2](https://github.com/funmusicplace/mirlo/commit/a4918e2d88a0d20f782fae1e63a88b4f8fd00be9))
+* **emails:** avoid nested t() in subscription-ended subject ([f3158ba](https://github.com/funmusicplace/mirlo/commit/f3158baa11c924707e483a66f3a5c48a07e50159))
+* **footer:** remove discord from footer ([0d07cee](https://github.com/funmusicplace/mirlo/commit/0d07cee8fbdac6c3701047e9acb760861985ec05))
+* **fundraiser:** responses to feedback ([96004db](https://github.com/funmusicplace/mirlo/commit/96004dbbba9dab1b90097c485e7422443722c6f9))
+* **fundraisers:** block removal mid-charge; document the platform fee ([fce2601](https://github.com/funmusicplace/mirlo/commit/fce2601da96e4d63e8cfcd06f91db4d8e77a0c8b))
+* **fundraisers:** guard pledge webhook and price; a11y, docs, styles ([92f121e](https://github.com/funmusicplace/mirlo/commit/92f121e7f35c398443e57d357cd33380e9e1a0e4))
+* **fundraisers:** link pledge emails and returns to the fundraiser page ([1bf50cb](https://github.com/funmusicplace/mirlo/commit/1bf50cb2579f8737b7d55b98e510c0cd6147c73d))
+* **fundraisers:** review fixes, confirmations and artist card ([0999cfd](https://github.com/funmusicplace/mirlo/commit/0999cfdf73244d37ac24b7e1132f41c93a95387d))
+* **fundraisers:** show the same raised amount on release and fundraiser ([30243ed](https://github.com/funmusicplace/mirlo/commit/30243ed94ba98929bce8c7991d2523a4222e1b8b))
+* **fundraisers:** slug, visibility, pledge and release-form audit fixes ([ff0866d](https://github.com/funmusicplace/mirlo/commit/ff0866d6f9391672399e31ae6d93f91a3898b269))
+* prevent location dropdown from breaking mobile artists layout ([fd5d9d6](https://github.com/funmusicplace/mirlo/commit/fd5d9d6dc85979fe1887e34e79044fb7a6f82955))
+
 ## [1.2.0](https://github.com/funmusicplace/mirlo/compare/v1.1.0...v1.2.0) (2026-11-10)
 
 
