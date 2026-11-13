@@ -26,6 +26,7 @@ const ACTIVITY_TYPES: Notification["notificationType"][] = [
   "PROFILE_MANAGER_INVITE",
   "FUNDRAISER_PLEDGE_CHARGED",
   "ARTIST_CONTACT_MESSAGE",
+  "AP_MENTION",
 ];
 
 const hasNotifications = (data: { total?: number } | undefined): boolean =>
@@ -83,6 +84,14 @@ const Index = () => {
     ...queryNotifications(user?.id, {
       take: 1,
       notificationType: ["ARTIST_CONTACT_MESSAGE"],
+    }),
+    enabled: !!user?.id,
+  });
+
+  const { data: fediverseCheck } = useQuery({
+    ...queryNotifications(user?.id, {
+      take: 1,
+      notificationType: ["AP_MENTION"],
     }),
     enabled: !!user?.id,
   });
@@ -152,6 +161,15 @@ const Index = () => {
             types: [
               "ARTIST_CONTACT_MESSAGE",
             ] as Notification["notificationType"][],
+          },
+        ]
+      : []),
+    ...(hasNotifications(fediverseCheck)
+      ? [
+          {
+            value: "fediverse",
+            label: t("categoryFediverse"),
+            types: ["AP_MENTION"] as Notification["notificationType"][],
           },
         ]
       : []),

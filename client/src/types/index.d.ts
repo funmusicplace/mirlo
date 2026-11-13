@@ -328,7 +328,18 @@ interface Notification {
     | "LABEL_ADDED_ARTIST"
     | "FUNDRAISER_PLEDGE_CHARGED"
     | "ARTIST_CONTACT_MESSAGE"
-    | "PROFILE_MANAGER_INVITE";
+    | "PROFILE_MANAGER_INVITE"
+    | "AP_MENTION";
+  metadata?: {
+    ap?: {
+      actor: string;
+      actorName?: string;
+      actorHandle?: string;
+      objectId?: string;
+      url?: string;
+      contentWarning?: string;
+    };
+  } | null;
   post?: Post;
   relatedUser?: User;
   artist?: Artist;
@@ -386,6 +397,7 @@ interface Artist {
   federatedStreaming: boolean;
   allowDirectMessages?: boolean;
   notifyOnSubscriptionEnd?: boolean;
+  allowFediverseMentions?: boolean;
   urlSlug?: string;
   userId: number;
   paymentToUserId?: number;

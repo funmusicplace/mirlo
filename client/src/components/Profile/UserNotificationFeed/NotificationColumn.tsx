@@ -43,6 +43,15 @@ const NotificationColumn: React.FC<{
 
   const results = data?.results ?? [];
 
+  const itemRefs = React.useRef(new Map<string, HTMLLIElement>());
+  const titleRef = React.useRef<HTMLHeadingElement & HTMLParagraphElement>(
+    null
+  );
+  const focusItemOrTitle = (id?: string) => {
+    const item = id ? itemRefs.current.get(id) : undefined;
+    (item ?? titleRef.current)?.focus();
+  };
+
   const unreadIdsAtMount = React.useRef<Set<string> | null>(null);
   if (unreadIdsAtMount.current === null && data) {
     unreadIdsAtMount.current = new Set(
@@ -63,11 +72,19 @@ const NotificationColumn: React.FC<{
   return (
     <div className="flex-1 min-w-0">
       {compact ? (
-        <p className="text-sm font-semibold uppercase tracking-[0.08em] text-(--mi-light-foreground-color) mb-3">
+        <p
+          ref={titleRef}
+          tabIndex={-1}
+          className="text-sm font-semibold uppercase tracking-[0.08em] text-(--mi-light-foreground-color) mb-3"
+        >
           {title}
         </p>
       ) : (
-        <h2 className="text-lg font-bold text-(--mi-text-color) mb-3">
+        <h2
+          ref={titleRef}
+          tabIndex={-1}
+          className="text-lg font-bold text-(--mi-text-color) mb-3"
+        >
           {title}
         </h2>
       )}
@@ -96,8 +113,20 @@ const NotificationColumn: React.FC<{
               </li>
             )}
             <NotificationFeedItem
+              ref={(element) => {
+                if (element) {
+                  itemRefs.current.set(notification.id, element);
+                } else {
+                  itemRefs.current.delete(notification.id);
+                }
+              }}
               notification={notification}
               compact={compact}
+              onRemoved={() =>
+                focusItemOrTitle(
+                  results[index + 1]?.id ?? results[index - 1]?.id
+                )
+              }
             />
           </React.Fragment>
         ))}

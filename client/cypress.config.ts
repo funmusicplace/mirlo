@@ -181,6 +181,8 @@ export default defineConfig({
           trackGroupId?: number;
           relatedUserId?: number;
           artistId?: number;
+          content?: string;
+          metadata?: Prisma.InputJsonValue;
         }) => {
           return createNotification(query);
         },

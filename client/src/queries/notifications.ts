@@ -17,6 +17,10 @@ export const reportNotificationAsSpam = (
   );
 };
 
+export const removeNotification = (userId: number, notificationId: string) => {
+  return api.del(`v1/users/${userId}/notifications/${notificationId}`);
+};
+
 const fetchNotifications: QueryFunction<
   { results: Notification[]; total?: number },
   [
