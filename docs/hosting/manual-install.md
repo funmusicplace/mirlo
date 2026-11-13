@@ -73,7 +73,6 @@ Key variables to set:
 NODE_ENV=production
 PORT=3000
 API_DOMAIN=https://yourdomain.com
-STATIC_MEDIA_HOST=https://yourdomain.com
 
 # Security
 JWT_SECRET=your-secure-jwt-secret-here

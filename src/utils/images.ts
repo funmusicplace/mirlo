@@ -38,7 +38,7 @@ export const generateFullStaticImageUrl = (
   const effectiveKey = prefix ? `${prefix}/${imageName}` : imageName;
 
   if (backendStorage === "minio") {
-    return `${process.env.STATIC_MEDIA_HOST}/images/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;
+    return `${process.env.API_DOMAIN}/images/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;
   } else {
     if (_cdnUrl) {
       return `${_cdnUrl}/file/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;
