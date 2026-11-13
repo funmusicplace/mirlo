@@ -2830,6 +2830,7 @@
   },
   "emails.artistSubscriptionEnded": {
     "subject": "{{instanceName}}: {{name}} is no longer supporting you at the \"{{tierName}}\" tier",
+    "subjectNoName": "{{instanceName}}: A supporter is no longer supporting you at the \"{{tierName}}\" tier",
     "hello": "Hi {{artistName}},",
     "cancelled": "({{email}}) {{name}} cancelled their subscription to your \"{{tierName}}\" tier.",
     "paymentFailed": "({{email}}) {{name}}'s subscription to your \"{{tierName}}\" tier ended because their payment failed.",
