@@ -1,13 +1,10 @@
 import { faker } from "@faker-js/faker";
 
 import generateSlug from "../../src/utils/generateSlug";
+import { storageClient } from "../../src/utils/storage";
 import prisma from "../prisma";
 
-import {
-  createS3Client,
-  ensureBuckets,
-  generateAndUploadImage,
-} from "./publishedTrackGroups";
+import { ensureBuckets, generateAndUploadImage } from "./publishedTrackGroups";
 
 const MERCH_SIZES = [1500, 1200, 960, 600, 300, 120, 60];
 const ITEMS_PER_ARTIST = 3;
@@ -50,11 +47,11 @@ export async function seedMerch() {
     return;
   }
 
-  const s3 = createS3Client();
+  const s3 = storageClient;
   if (s3) {
     await ensureBuckets(s3);
   } else {
-    console.log("LOCAL_S3_HOST not set — merch images will be skipped");
+    console.log("S3_ENDPOINT not set — merch images will be skipped");
   }
 
   for (const artist of artists) {

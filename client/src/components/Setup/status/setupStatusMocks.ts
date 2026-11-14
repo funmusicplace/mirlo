@@ -34,7 +34,7 @@ export const HEALTHY_SETUP_STATUS: SetupStatus = {
       apiDomainConfigured: true,
       clientRegistered: true,
     },
-    storage: { status: "ok", backend: "minio", missingBuckets: 0 },
+    storage: { status: "ok", host: "garage:9000", missingBuckets: 0 },
   },
   steps: {
     identity: true,
@@ -58,7 +58,11 @@ export const TROUBLED_SETUP_STATUS: SetupStatus = {
         lastCompletedAt: null,
       })),
     },
-    storage: { status: "warning", backend: "backblaze", missingBuckets: 2 },
+    storage: {
+      status: "warning",
+      host: "s3.us-east-005.backblazeb2.com",
+      missingBuckets: 2,
+    },
   },
   steps: {
     identity: true,

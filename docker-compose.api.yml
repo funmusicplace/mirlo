@@ -107,7 +107,7 @@ services:
     profiles: [garage]
     networks: [api-network]
     ports:
-      - "9000:9000" # S3 API, the port LOCAL_S3_API_PORT expects
+      - "9000:9000" # S3 API, the port S3_ENDPOINT points at
       - "3903:3903" # Admin API (cluster status, keys, buckets)
     volumes:
       - garage_storage:/var/lib/garage

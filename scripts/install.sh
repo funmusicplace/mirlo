@@ -23,7 +23,7 @@
 #   ADMIN_EMAIL=you@example.com ADMIN_PASSWORD=... bash scripts/install.sh
 #
 # To use S3-compatible object storage (Backblaze B2, Hetzner Object Storage,
-# etc.) instead of bundled MinIO, either answer "y" at the storage prompt, or
+# etc.) instead of the bundled Garage store, either answer "y" at the storage prompt, or
 # pass credentials up front (also skips the prompt):
 #   S3_ACCESS_KEY_ID=... S3_SECRET_ACCESS_KEY=... \
 #   S3_REGION=fsn1 S3_ENDPOINT=https://fsn1.your-objectstorage.com \
@@ -144,11 +144,11 @@ if [ -z "${ADMIN_NAME:-}" ]; then
   ADMIN_NAME=${ADMIN_NAME:-Administrator}
 fi
 
-# Object storage: MinIO (bundled) or an S3-compatible service (Backblaze B2,
+# Object storage: Garage (bundled) or an S3-compatible service (Backblaze B2,
 # Hetzner Object Storage, etc.) — only asked if .env doesn't exist yet, since
 # it's only used the first time generate-env.sh writes .env.
 if [ ! -f .env ] && [ -z "${S3_ACCESS_KEY_ID:-}" ]; then
-  read -p "Use an S3-compatible object storage service instead of bundled MinIO? (y/N): " USE_S3
+  read -p "Use an S3-compatible object storage service instead of the bundled Garage store? (y/N): " USE_S3
   case "$USE_S3" in
     y | Y | yes | Yes)
       echo "Create an access key/token for your bucket in your storage"

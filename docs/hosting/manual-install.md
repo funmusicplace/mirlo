@@ -87,27 +87,24 @@ POSTGRES_PASSWORD=secure-password
 REDIS_PASSWORD=secure-redis-password
 
 ###
-# Choose one: the bundled Garage store or an S3 Service. S3 Services are recommended in production. https://mirlo.space uses Backblaze as an S3 Service.
-# The Garage containers only run when COMPOSE_PROFILES=garage is set. Delete
-# that line if you're using an S3 Service, so they don't start or bind ports.
-# Mirlo uses the S3 service whenever both S3 credentials below are set, and
-# Garage otherwise (set STORAGE_BACKEND=minio|s3 to override explicitly; the
-# "minio" value is historical and selects the bundled Garage store).
+# Object storage. An external S3 service (Backblaze B2, Hetzner, ...) is
+# recommended in production: delete COMPOSE_PROFILES and the last two lines,
+# and fill in its endpoint, region and keys, e.g.
+#   S3_ENDPOINT=https://s3.us-east-005.backblazeb2.com
+#   S3_REGION=us-east-005
+#
+# The values below use the bundled Garage store. Its key must be "GK" + 24 hex
+# chars and a 64 hex char secret (scripts/generate-env.sh makes a valid pair).
+# Browsers can't reach Garage, so uploads and downloads go through the API.
 ###
 
 COMPOSE_PROFILES=garage
-
-# Garage. The access key must be "GK" + 24 hex characters and the secret
-# exactly 64 hex characters — Garage rejects any other shape. Use
-# scripts/generate-env.sh to generate a valid pair.
-LOCAL_S3_USER=GK0e7a1c94b2df63805a7e4d12
-LOCAL_S3_PASSWORD=5f3b9d20c8a7e146b0d94f27a3c5e8b16d20f74a9c3e581bd67a0f4923ce8d15
-
-# Backblaze B2 / S3 / Hetzner Object Storage
-S3_ACCESS_KEY_ID=
-S3_SECRET_ACCESS_KEY=
-S3_REGION=
-S3_ENDPOINT=
+S3_ENDPOINT=http://garage:9000
+S3_REGION=us-east-1
+S3_ACCESS_KEY_ID=GK0e7a1c94b2df63805a7e4d12
+S3_SECRET_ACCESS_KEY=5f3b9d20c8a7e146b0d94f27a3c5e8b16d20f74a9c3e581bd67a0f4923ce8d15
+S3_PUBLIC_ENDPOINT=
+SERVE_IMAGES_FROM_API=true
 
 # Optional: Stripe Integration
 STRIPE_KEY=your-stripe-key

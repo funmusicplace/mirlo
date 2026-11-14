@@ -13,7 +13,7 @@ import { sendMailQueue } from "../queues/send-mail-queue";
 import { isSpamProtectionConfigured } from "./cloudflare";
 import { getPaymentProcessor } from "./payments/PaymentProcessor";
 import { hasInstanceName, SettingsType } from "./settings";
-import { backendStorage, bucketExists, currentBuckets } from "./storage";
+import { bucketExists, currentBuckets, S3_ENDPOINT } from "./storage";
 
 export type CheckStatus = "ok" | "warning" | "error";
 
@@ -41,7 +41,7 @@ export type SetupStatus = {
     };
     storage: {
       status: CheckStatus;
-      backend: "minio" | "backblaze";
+      host: string;
       missingBuckets: number;
     };
   };
@@ -203,7 +203,7 @@ const checkStorage = async (): Promise<SetupStatus["checks"]["storage"]> => {
         : missingBuckets === buckets.length
           ? "error"
           : "warning",
-    backend: backendStorage,
+    host: S3_ENDPOINT ? new URL(S3_ENDPOINT).host : "",
     missingBuckets,
   };
 };

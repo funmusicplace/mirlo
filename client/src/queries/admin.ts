@@ -507,7 +507,7 @@ export interface SetupStatus {
     };
     storage: {
       status: SetupCheckStatus;
-      backend: "minio" | "backblaze";
+      host: string;
       missingBuckets: number;
     };
   };

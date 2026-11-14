@@ -14,6 +14,7 @@ import ffmpeg from "fluent-ffmpeg";
 import sharp from "sharp";
 
 import generateSlug from "../../src/utils/generateSlug";
+import { storageClient } from "../../src/utils/storage";
 import prisma from "../prisma";
 
 // Fresh installs use the consolidated 3-bucket layout (see docs/hosting/object-storage.md).
@@ -40,27 +41,6 @@ const ARTIST_SLUGS = [
   "a-flock-of-gulls",
   "herring-gull",
 ];
-
-const {
-  LOCAL_S3_HOST,
-  LOCAL_S3_USER = "",
-  LOCAL_S3_PASSWORD = "",
-  LOCAL_S3_API_PORT = "9000",
-} = process.env;
-
-export function createS3Client(): S3Client | null {
-  if (!LOCAL_S3_HOST) return null;
-  return new S3Client({
-    endpoint: `http://${LOCAL_S3_HOST}:${LOCAL_S3_API_PORT}`,
-    region: "us-east-1",
-    credentials: {
-      accessKeyId: LOCAL_S3_USER,
-      secretAccessKey: LOCAL_S3_PASSWORD,
-    },
-    forcePathStyle: true,
-    requestChecksumCalculation: "WHEN_REQUIRED",
-  });
-}
 
 const putObject = (s3: S3Client, bucket: string, key: string, body: Buffer) =>
   s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body }));
@@ -289,9 +269,9 @@ export async function seedPublishedTrackGroups() {
 async function seedPublishedTrackGroupsInner(
   artists: { id: number; name: string }[]
 ) {
-  const s3 = createS3Client();
+  const s3 = storageClient;
   if (!s3) {
-    console.log("LOCAL_S3_HOST not set — covers and audio will be skipped");
+    console.log("S3_ENDPOINT not set — covers and audio will be skipped");
   } else {
     await ensureBuckets(s3);
 

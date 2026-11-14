@@ -153,7 +153,8 @@ directly in `.env`:
 
 1. In Hetzner Console, go to "Storage" → "Object Storage"
 2. Create an API Token (project-level, not scoped to a single bucket, since it needs to create one)
-3. Add the S3 variables to `.env`, remove the `COMPOSE_PROFILES=garage` line
+3. Replace the `S3_*` variables in `.env`, delete `S3_PUBLIC_ENDPOINT` and
+   `SERVE_IMAGES_FROM_API`, remove the `COMPOSE_PROFILES=garage` line
    (it starts the bundled store, which you no longer need), and run
    `docker compose up -d --remove-orphans` to recreate api/background and stop
    the Garage containers:

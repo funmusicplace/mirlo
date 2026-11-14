@@ -74,100 +74,67 @@ export const getAudioBucket = (): string =>
 export const getDownloadsBucket = (): string =>
   `${_bucketConfig.prefix}mirlo-downloads`;
 
-const {
-  LOCAL_S3_HOST = "",
-  LOCAL_S3_PUBLIC_HOST = "",
-  LOCAL_S3_PUBLIC_PORT = "",
-  LOCAL_S3_USER = "",
-  LOCAL_S3_PASSWORD = "",
-  S3_ACCESS_KEY_ID = "",
-  S3_SECRET_ACCESS_KEY = "",
-  S3_ENDPOINT: RAW_S3_ENDPOINT = "https://s3.us-east-005.backblazeb2.com",
-  S3_REGION = "us-east-005",
-  LOCAL_S3_API_PORT = 9000,
-} = process.env;
-
-export const S3_ENDPOINT = RAW_S3_ENDPOINT;
-
-/**
- * Choose what backend storage to use. Inferred when things are configured, but
- * can be overwritten by passed explict string.
- * @param explicit
- * @param hasS3Credentials
- * @returns
- */
-export const resolveBackendStorage = (
-  explicit: string | undefined = process.env.STORAGE_BACKEND,
-  hasS3Credentials: boolean = Boolean(S3_ACCESS_KEY_ID && S3_SECRET_ACCESS_KEY)
-): "minio" | "backblaze" => {
-  const normalized = explicit?.trim().toLowerCase();
-  if (normalized === "minio") return "minio";
-  if (normalized === "s3" || normalized === "backblaze") return "backblaze";
-  if (normalized) {
-    throw new Error(
-      `Invalid STORAGE_BACKEND "${explicit}" — expected "minio", "s3" or "backblaze"`
-    );
+export const readStorageConfig = (env: NodeJS.ProcessEnv) => {
+  if (!env.S3_ENDPOINT) {
+    if (Object.keys(env).some((name) => name.startsWith("LOCAL_S3_"))) {
+      throw new Error(
+        "storage: the LOCAL_S3_* variables are no longer read. " +
+          "Set S3_ENDPOINT, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, S3_PUBLIC_ENDPOINT " +
+          "and SERVE_IMAGES_FROM_API=true in .env as in .env.example"
+      );
+    }
+    if (env.S3_ACCESS_KEY_ID) {
+      throw new Error("storage: S3_ACCESS_KEY_ID is set but S3_ENDPOINT isn't");
+    }
   }
-  return hasS3Credentials ? "backblaze" : "minio";
+  const endpoint = env.S3_ENDPOINT ?? "";
+  return {
+    endpoint,
+    publicEndpoint: env.S3_PUBLIC_ENDPOINT ?? endpoint,
+    region: env.S3_REGION || "us-east-1",
+    credentials: {
+      accessKeyId: env.S3_ACCESS_KEY_ID ?? "",
+      secretAccessKey: env.S3_SECRET_ACCESS_KEY ?? "",
+    },
+    serveImagesFromApi: env.SERVE_IMAGES_FROM_API === "true",
+  };
 };
 
-export const backendStorage: "minio" | "backblaze" = resolveBackendStorage();
+const storageConfig = readStorageConfig(process.env);
 
-const localS3Config = {
-  region: "us-east-1",
-  credentials: {
-    accessKeyId: LOCAL_S3_USER,
-    secretAccessKey: LOCAL_S3_PASSWORD,
-  },
-  forcePathStyle: true,
-  requestChecksumCalculation: "WHEN_REQUIRED" as const,
-};
+export const S3_ENDPOINT = storageConfig.endpoint;
+export const serveImagesFromApi = storageConfig.serveImagesFromApi;
 
-export const localS3Client =
-  backendStorage === "minio" && LOCAL_S3_HOST
-    ? new S3Client({
-        ...localS3Config,
-        endpoint: `http://${LOCAL_S3_HOST}:${LOCAL_S3_API_PORT}`,
-      })
-    : undefined;
+const createS3Client = (endpoint: string) =>
+  new S3Client({
+    region: storageConfig.region,
+    endpoint,
+    credentials: storageConfig.credentials,
+    // Path-style (endpoint/bucket/key) rather than virtual-hosted-style
+    // (bucket.endpoint/key). Virtual-hosted style depends on the provider
+    // having wildcard DNS/TLS for arbitrary bucket-name subdomains, which
+    // isn't reliable on every S3-compatible provider and has caused
+    // requests to hang indefinitely on newly-created buckets.
+    forcePathStyle: true,
+    responseChecksumValidation: "WHEN_REQUIRED",
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    maxAttempts: 4,
+    // Without explicit timeouts, a stalled connection (no response, no
+    // error) hangs forever — maxAttempts only retries attempts that
+    // actually fail, so a silent stall never gets retried at all.
+    requestHandler: new NodeHttpHandler({
+      connectionTimeout: 10_000,
+      requestTimeout: 30_000,
+    }),
+  });
 
-export const localS3PublicClient =
-  backendStorage === "minio" && LOCAL_S3_PUBLIC_HOST
-    ? new S3Client({
-        ...localS3Config,
-        endpoint: `http://${LOCAL_S3_PUBLIC_HOST}:${
-          LOCAL_S3_PUBLIC_PORT || LOCAL_S3_API_PORT
-        }`,
-      })
-    : undefined;
+export const storageClient: S3Client | undefined = storageConfig.endpoint
+  ? createS3Client(storageConfig.endpoint)
+  : undefined;
 
-export const backblazeClient =
-  backendStorage === "backblaze"
-    ? new S3Client({
-        region: S3_REGION,
-        endpoint: S3_ENDPOINT,
-        credentials: {
-          accessKeyId: S3_ACCESS_KEY_ID,
-          secretAccessKey: S3_SECRET_ACCESS_KEY,
-        },
-        // Path-style (endpoint/bucket/key) rather than virtual-hosted-style
-        // (bucket.endpoint/key). Virtual-hosted style depends on the provider
-        // having wildcard DNS/TLS for arbitrary bucket-name subdomains, which
-        // isn't reliable on every S3-compatible provider and has caused
-        // requests to hang indefinitely on newly-created buckets.
-        forcePathStyle: true,
-        responseChecksumValidation: "WHEN_REQUIRED",
-        requestChecksumCalculation: "WHEN_REQUIRED",
-        maxAttempts: 4,
-        // Without explicit timeouts, a stalled connection (no response, no
-        // error) hangs forever — maxAttempts only retries attempts that
-        // actually fail, so a silent stall never gets retried at all.
-        requestHandler: new NodeHttpHandler({
-          connectionTimeout: 10_000,
-          requestTimeout: 30_000,
-        }),
-      })
-    : undefined;
+const presignClient: S3Client | undefined = storageConfig.publicEndpoint
+  ? createS3Client(storageConfig.publicEndpoint)
+  : undefined;
 
 // Buckets holding processed images are fetched directly by browsers (see
 // docs/hosting/object-storage.md) and so need public read access.
@@ -199,12 +166,9 @@ const corsConfiguration = () => ({
   ],
 });
 
-export const storageClient: S3Client | undefined =
-  backendStorage === "backblaze" ? backblazeClient : localS3Client;
-
 const storageS3Client = () => {
   if (!storageClient) {
-    throw new Error(`${backendStorage}: no S3 client`);
+    throw new Error("storage: no S3 client, S3_ENDPOINT isn't set");
   }
   return storageClient;
 };
@@ -217,17 +181,15 @@ const applyCorsPolicy = async (bucket: string) => {
         CORSConfiguration: corsConfiguration(),
       })
     );
-    logger.info(`${backendStorage}: set CORS policy on bucket: ${bucket}`);
+    logger.info(`storage: set CORS policy on bucket: ${bucket}`);
   } catch (e) {
     if (e instanceof Error && e.message.includes("B2 Native CORS rules")) {
       logger.warn(
-        `${backendStorage}: bucket ${bucket} already has native B2 CORS rules; skipping S3 CORS update`
+        `storage: bucket ${bucket} already has native B2 CORS rules; skipping S3 CORS update`
       );
       return;
     }
-    logger.error(
-      `${backendStorage}: failed to set CORS policy on bucket ${bucket}`
-    );
+    logger.error(`storage: failed to set CORS policy on bucket ${bucket}`);
     logger.error(e);
   }
 };
@@ -240,9 +202,7 @@ const applyPublicReadPolicy = async (bucket: string) => {
         Policy: publicReadPolicy(bucket),
       })
     );
-    logger.info(
-      `${backendStorage}: set public-read policy on bucket: ${bucket}`
-    );
+    logger.info(`storage: set public-read policy on bucket: ${bucket}`);
   } catch (e) {
     // B2 doesn't implement PutBucketPolicy so this isn't actionable and
     // shouldn't be dumped in the error logs.
@@ -252,12 +212,12 @@ const applyPublicReadPolicy = async (bucket: string) => {
       e.message.includes("This API call is not supported")
     ) {
       logger.warn(
-        `${backendStorage}: bucket ${bucket} policy API not supported; make sure it's set to public via your provider's console`
+        `storage: bucket ${bucket} policy API not supported; make sure it's set to public via your provider's console`
       );
       return;
     }
     logger.error(
-      `${backendStorage}: failed to set public-read policy on bucket ${bucket} — ` +
+      `storage: failed to set public-read policy on bucket ${bucket} — ` +
         `it may need to be made public manually via your provider's console`
     );
     logger.error(e instanceof Error ? e.message : e);
@@ -287,9 +247,7 @@ export const statFile = async (
     );
   } catch (e) {
     if (!isNotFound(e)) {
-      logger.error(
-        `${backendStorage}: error fetching file stat: ${bucket}/${filename}`
-      );
+      logger.error(`storage: error fetching file stat: ${bucket}/${filename}`);
       logger.error(e instanceof Error ? e.message : e);
     }
     return undefined;
@@ -321,17 +279,15 @@ export const createBucketIfNotExists = async (
   options?: { makePublic?: boolean }
 ) => {
   const client = storageS3Client();
-  logger?.info(`${backendStorage}: checking if a bucket exists in: ${bucket}`);
+  logger?.info(`storage: checking if a bucket exists in: ${bucket}`);
   try {
     await client.send(new HeadBucketCommand({ Bucket: bucket }));
   } catch {
-    logger?.info(
-      `${backendStorage}: bucket ${bucket} doesn't exist yet, creating it`
-    );
+    logger?.info(`storage: bucket ${bucket} doesn't exist yet, creating it`);
     await client.send(new CreateBucketCommand({ Bucket: bucket }));
   }
 
-  if (options?.makePublic && backendStorage === "backblaze") {
+  if (options?.makePublic && !serveImagesFromApi) {
     await applyPublicReadPolicy(bucket);
   }
   await applyCorsPolicy(bucket);
@@ -351,13 +307,7 @@ export const getPresignedUploadUrl = async (
   const { expiresInSeconds = 3600, contentType, contentLength } = options ?? {};
   await createBucketIfNotExists(bucket);
 
-  const client =
-    backendStorage === "backblaze" ? backblazeClient : localS3PublicClient;
-
-  if (!client) {
-    if (backendStorage === "backblaze") {
-      throw new Error("Backblaze client is not initialized");
-    }
+  if (!presignClient) {
     return null;
   }
 
@@ -374,7 +324,7 @@ export const getPresignedUploadUrl = async (
   if (contentType !== undefined) signableHeaders.add("content-type");
   if (contentLength !== undefined) signableHeaders.add("content-length");
 
-  return getSignedUrl(client, command, {
+  return getSignedUrl(presignClient, command, {
     expiresIn: expiresInSeconds,
     signableHeaders,
   });
@@ -392,10 +342,7 @@ export const getPresignedDownloadUrl = async (
   const expiresInSeconds = options?.expiresInSeconds ?? 60 * 15;
   const stat = await statFile(bucket, filename);
 
-  const client =
-    backendStorage === "backblaze" ? backblazeClient : localS3PublicClient;
-
-  if (!stat || !client) {
+  if (!stat || !presignClient) {
     return null;
   }
 
@@ -415,7 +362,7 @@ export const getPresignedDownloadUrl = async (
       : {}),
   });
 
-  return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
+  return getSignedUrl(presignClient, command, { expiresIn: expiresInSeconds });
 };
 
 export const uploadWrapper = async (
@@ -425,9 +372,7 @@ export const uploadWrapper = async (
   options?: { contentType?: string; cacheControl?: string }
 ) => {
   const client = storageS3Client();
-  logger.info(
-    `${backendStorage}: uploading fileStream|buffer: ${bucket}/${fileName}`
-  );
+  logger.info(`storage: uploading fileStream|buffer: ${bucket}/${fileName}`);
   const params = {
     Bucket: bucket,
     Key: fileName,
@@ -441,7 +386,7 @@ export const uploadWrapper = async (
     await new Upload({ client, params }).done();
   }
   logger.info(
-    `${backendStorage}: done uploading filestream|buffer: ${bucket}/${fileName}`
+    `storage: done uploading filestream|buffer: ${bucket}/${fileName}`
   );
 };
 
@@ -449,7 +394,7 @@ export const removeObjectFromStorage = async (
   bucket: string,
   fileName: string
 ) => {
-  logger.info(`${backendStorage}: removing fileStream: ${bucket}/${fileName}`);
+  logger.info(`storage: removing fileStream: ${bucket}/${fileName}`);
   await storageS3Client().send(
     new DeleteObjectCommand({ Bucket: bucket, Key: fileName })
   );
@@ -470,7 +415,7 @@ export const copyObjectInStorage = async (
 ) => {
   const client = storageS3Client();
   logger.info(
-    `${backendStorage}: copying ${fromBucket}/${fromKey} to ${toBucket}/${toKey}`
+    `storage: copying ${fromBucket}/${fromKey} to ${toBucket}/${toKey}`
   );
   const replaceMetadata = options?.contentType
     ? {
@@ -528,7 +473,7 @@ export const getBufferFromStorage = async (
   bucket: string,
   filename: string
 ) => {
-  logger.info(`${backendStorage}: getting buffer: ${bucket}/${filename}`);
+  logger.info(`storage: getting buffer: ${bucket}/${filename}`);
   const result = await storageS3Client().send(
     new GetObjectCommand({ Bucket: bucket, Key: filename })
   );
@@ -547,21 +492,21 @@ export const getFile = async (
   localFilePath: string
 ) => {
   logger.info(
-    `${backendStorage}: getting file: ${bucket}/${remoteFileName} storing at ${localFilePath}`
+    `storage: getting file: ${bucket}/${remoteFileName} storing at ${localFilePath}`
   );
   const result = await storageS3Client().send(
     new GetObjectCommand({ Bucket: bucket, Key: remoteFileName })
   );
   if (!(result.Body instanceof Readable)) {
     throw new Error(
-      `${backendStorage}: no readable body for ${bucket}/${remoteFileName}`
+      `storage: no readable body for ${bucket}/${remoteFileName}`
     );
   }
   await fs.promises.writeFile(localFilePath, result.Body);
 };
 
 export const getReadStream = async (bucket: string, remoteFileName: string) => {
-  logger.info(`${backendStorage}: getting stream: ${bucket}/${remoteFileName}`);
+  logger.info(`storage: getting stream: ${bucket}/${remoteFileName}`);
   const result = await storageS3Client().send(
     new GetObjectCommand({ Bucket: bucket, Key: remoteFileName })
   );
@@ -812,7 +757,7 @@ export const fixStoredImageContentTypes = async () => {
             summary.fixed += 1;
           } catch (e) {
             logger.error(
-              `${backendStorage}: couldn't fix content type of ${bucket}/${key}`,
+              `storage: couldn't fix content type of ${bucket}/${key}`,
               e
             );
             summary.failed += 1;

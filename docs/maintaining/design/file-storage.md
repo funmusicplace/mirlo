@@ -2,7 +2,7 @@
 
 During development we use [Garage](https://garagehq.deuxfleurs.fr/) to store our files. On production, mirlo.spaces uses backblaze. You could theoretically (if untested) use any S3 compatible client to do this.
 
-Garage has no web console. Point an S3 client (`mc`, `rclone`, `aws s3`) at localhost:9000 with the LOCAL_S3_USER and LOCAL_S3_PASSWORD you set in .env, or use `docker exec blackbird-garage /garage bucket list`. See [object-storage.md](../../hosting/object-storage.md#inspecting-storage-in-development).
+Garage has no web console. Point an S3 client (`mc`, `rclone`, `aws s3`) at localhost:9000 with the S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY from .env, or use `docker exec blackbird-garage /garage bucket list`. See [object-storage.md](../../hosting/object-storage.md#inspecting-storage-in-development).
 
 See [the design decisions and thinking that went into this](../../technical_designs/2024-12-scalable-audio-storage.md).
 

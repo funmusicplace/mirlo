@@ -117,7 +117,7 @@ export default function () {
       // Prefer handing the browser a short-lived presigned storage URL so
       // the zip bytes don't flow through this server (egress costs). Falls
       // back to piping the file when presigning isn't available (e.g. local
-      // MinIO without a browser-reachable endpoint).
+      // Garage without a browser-reachable endpoint).
       const presignedUrl = await presignZip("track", track.id, format, {
         downloadFilename: `${title}.zip`,
         contentType: "application/zip",

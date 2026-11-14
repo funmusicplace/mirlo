@@ -89,14 +89,13 @@ const SetupChecklist: React.FC<{
           : t("publicAddress.noDomain");
       }
       case "storage": {
-        const { backend, missingBuckets } = checks.storage;
-        const backendName = t(`storage.backend.${backend}`);
+        const { host, missingBuckets } = checks.storage;
+        if (!host) {
+          return t("storage.noEndpoint");
+        }
         return missingBuckets === 0
-          ? t("storage.ok", { backend: backendName })
-          : t("storage.missing", {
-              backend: backendName,
-              count: missingBuckets,
-            });
+          ? t("storage.ok", { host })
+          : t("storage.missing", { host, count: missingBuckets });
       }
     }
   };
