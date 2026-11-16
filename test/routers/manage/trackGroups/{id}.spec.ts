@@ -159,6 +159,51 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       assert.equal(moved.profileId, to.id);
     });
 
+    it("should refuse to move a release whose fundraiser has open pledges", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user: backer } = await createUser({ email: "backer@test.com" });
+      const from = await createProfile(user.id, { urlSlug: "from-artist" });
+      const to = await createProfile(user.id, { urlSlug: "to-artist" });
+      const trackGroup = await createTrackGroup(from.id);
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+      });
+      const pledge = await createFundraiserPledge(fundraiser.id, backer.id);
+
+      const refused = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ moveToArtistId: to.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(refused.status, 409);
+      const unmoved = await prisma.trackGroup.findFirstOrThrow({
+        where: { id: trackGroup.id },
+      });
+      assert.equal(unmoved.profileId, from.id);
+      const fundraiserAfter = await prisma.fundraiser.findFirstOrThrow({
+        where: { id: fundraiser.id },
+      });
+      assert.equal(fundraiserAfter.profileId, from.id);
+
+      await prisma.fundraiserPledge.update({
+        where: { id: pledge.id },
+        data: { paidAt: new Date() },
+      });
+
+      const moved = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ moveToArtistId: to.id })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(moved.status, 200);
+      const fundraiserMoved = await prisma.fundraiser.findFirstOrThrow({
+        where: { id: fundraiser.id },
+      });
+      assert.equal(fundraiserMoved.profileId, to.id);
+    });
+
     it("should refuse to move a release whose fundraiser URL the destination already uses", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const from = await createProfile(user.id, { urlSlug: "from-artist" });
