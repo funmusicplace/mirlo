@@ -1,3 +1,5 @@
+import { NextFunction, Request, Response } from "express";
+
 import { AppError } from "./error";
 import { getSiteSettings, SettingsType } from "./settings";
 
@@ -8,31 +10,15 @@ const getTurnstileSecret = (settings: SettingsType) =>
 export const isSpamProtectionConfigured = (settings: SettingsType) =>
   Boolean(getTurnstileSecret(settings));
 
-const isDev =
+const isDev = () =>
   process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
 
 const CLOUDFLARE_VERIFY_URL =
   "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
-type CheckTurnstileOptions = {
-  token: unknown;
-  ip?: unknown;
-  missingTokenMessage?: string;
-  failureMessage?: string;
-  skipIfNoSecret?: boolean;
-};
+const ROBOT_MESSAGE = "Sounds like a robot";
 
-export async function checkCloudFlareTurnstile({
-  token,
-  ip,
-  missingTokenMessage = "Spam protection challenge is required",
-  failureMessage = "Spam protection failed",
-  skipIfNoSecret = false,
-}: CheckTurnstileOptions) {
-  if (isDev) {
-    // TBD if this is desirable--kind of prevents tests from being written for it.
-    return;
-  }
+async function checkCloudFlareTurnstile(req: Request, skipIfNoSecret: boolean) {
   const secret = getTurnstileSecret(await getSiteSettings());
   if (!secret) {
     if (skipIfNoSecret) {
@@ -45,18 +31,16 @@ export async function checkCloudFlareTurnstile({
     });
   }
 
+  const token = req.body?.cfTurnstile;
   if (!token || typeof token !== "string") {
-    throw new AppError({
-      httpCode: 400,
-      description: missingTokenMessage,
-    });
+    throw new AppError({ httpCode: 400, description: ROBOT_MESSAGE });
   }
 
   const result = await fetch(CLOUDFLARE_VERIFY_URL, {
     body: JSON.stringify({
       secret,
       response: token,
-      remoteip: ip,
+      remoteip: req.get("cf-connecting-ip") ?? req.ip,
     }),
     method: "POST",
     headers: {
@@ -66,9 +50,26 @@ export async function checkCloudFlareTurnstile({
 
   const outcome = (await result.json()) as { success: boolean };
   if (!outcome.success) {
-    throw new AppError({
-      httpCode: 400,
-      description: failureMessage,
-    });
+    throw new AppError({ httpCode: 400, description: ROBOT_MESSAGE });
   }
 }
+
+export const requireSpamChallenge =
+  ({
+    skip,
+    skipIfNoSecret = false,
+  }: {
+    skip?: (req: Request) => boolean;
+    skipIfNoSecret?: boolean;
+  } = {}) =>
+  async (req: Request, _res: Response, next: NextFunction) => {
+    if (isDev() || skip?.(req)) {
+      return next();
+    }
+    try {
+      await checkCloudFlareTurnstile(req, skipIfNoSecret);
+      next();
+    } catch (e) {
+      next(e);
+    }
+  };

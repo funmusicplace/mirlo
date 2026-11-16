@@ -65,6 +65,7 @@ export default function () {
                   enum: ["welcome", "guide", "done"],
                 },
                 stripePublishableKey: { type: "string" },
+                turnstileSiteKey: { type: "string" },
                 contactEmail: { type: "string" },
                 supportEmail: { type: "string" },
                 logo: {

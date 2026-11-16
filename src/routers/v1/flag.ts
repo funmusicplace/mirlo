@@ -3,29 +3,20 @@ import { NextFunction, Request, Response } from "express";
 
 import { sendMailQueue } from "../../queues/send-mail-queue";
 import { processSingleTrackGroup } from "../../serializers/trackGroup";
-import { checkCloudFlareTurnstile } from "../../utils/cloudflare";
+import { requireSpamChallenge } from "../../utils/cloudflare";
 import { AppError } from "../../utils/error";
 import { getClient } from "../../utils/getClient";
 import { getSiteSettings, resolveSupportEmail } from "../../utils/settings";
 
 export default function () {
   const operations = {
-    POST: [POST],
+    POST: [requireSpamChallenge(), POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { email, reason, description, trackGroupId } = req.body;
-    const connectingIP = req.body["CF-Connecting-IP"];
-    const cfTurnstile = req.body["cfTurnstile"];
 
     try {
-      await checkCloudFlareTurnstile({
-        token: cfTurnstile,
-        ip: connectingIP,
-        missingTokenMessage: "Sounds like a robot",
-        failureMessage: "Sounds like a robot",
-      });
-
       const trackGroup = await prisma.trackGroup.findUnique({
         where: { id: trackGroupId },
         include: {

@@ -1,11 +1,11 @@
 import { css } from "@emotion/css";
-import { Turnstile } from "@marsidev/react-turnstile";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
 import { SelectEl } from "components/common/Select";
+import { useSpamChallenge } from "components/common/SpamChallenge";
 import TextArea from "components/common/TextArea";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -23,6 +23,7 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
   const [isLoading, setIsLoading] = React.useState(false);
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const { challenge: spamChallenge, token: cfTurnstile } = useSpamChallenge();
   const methods = useForm({
     defaultValues: {
       reason: "copyrightViolation",
@@ -35,9 +36,11 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
     setIsLoading(true);
 
     try {
-      // @ts-ignore
-      const cfTurnstile = turnstile.getResponse();
-      await api.post(`flag`, { ...data, cfTurnstile, trackGroupId });
+      await api.post(`flag`, {
+        ...data,
+        cfTurnstile: cfTurnstile.current,
+        trackGroupId,
+      });
       setIsLoading(false);
       setIsFlagOpen(false);
       snackbar(
@@ -113,7 +116,7 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
 
             <InputEl required {...methods.register("email")} />
           </FormComponent>
-          <Turnstile siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY} />
+          {spamChallenge}
 
           <Button isLoading={isLoading} type="submit" disabled={isLoading}>
             {t("submit")}

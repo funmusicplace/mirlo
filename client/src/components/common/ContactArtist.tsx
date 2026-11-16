@@ -1,4 +1,3 @@
-import { Turnstile } from "@marsidev/react-turnstile";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -13,6 +12,7 @@ import { canUserEditArtist } from "utils/artist";
 import Button, { ButtonProps } from "./Button";
 import FormComponent from "./FormComponent";
 import Modal from "./Modal";
+import { useSpamChallenge } from "./SpamChallenge";
 import TextArea from "./TextArea";
 
 type FormData = { message: string };
@@ -31,7 +31,8 @@ const ContactArtist: React.FC<{
   const errorHandler = useErrorHandler();
   const [isOpen, setIsOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const cfTurnstile = React.useRef<string | undefined>(undefined);
+  const { challenge: spamChallenge, token: cfTurnstile } =
+    useSpamChallenge("mb-4");
 
   const methods = useForm<FormData>({ defaultValues: { message: "" } });
 
@@ -99,14 +100,7 @@ const ContactArtist: React.FC<{
                 })}
               />
             </FormComponent>
-            <div className="flex justify-center mb-4">
-              <Turnstile
-                siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY}
-                onSuccess={(token) => {
-                  cfTurnstile.current = token;
-                }}
-              />
-            </div>
+            {spamChallenge}
             <Button
               type="submit"
               isLoading={isSubmitting}

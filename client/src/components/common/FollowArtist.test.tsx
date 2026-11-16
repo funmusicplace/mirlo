@@ -50,8 +50,8 @@ vi.mock("components/common/FollowArtistFromFediverse", () => ({
   default: () => <div data-testid="follow-from-fediverse" />,
 }));
 
-vi.mock("@marsidev/react-turnstile", () => ({
-  Turnstile: () => null,
+vi.mock("components/common/SpamChallenge", () => ({
+  useSpamChallenge: () => ({ challenge: null, token: { current: undefined } }),
 }));
 
 import FollowArtist from "./FollowArtist";

@@ -5,7 +5,7 @@ import { NextFunction, Request, Response } from "express";
 import { userOrAppAuthenticated } from "../../../../auth/passport";
 import { sendMailQueue } from "../../../../queues/send-mail-queue";
 import { serializeProfile } from "../../../../serializers/artist";
-import { checkCloudFlareTurnstile } from "../../../../utils/cloudflare";
+import { requireSpamChallenge } from "../../../../utils/cloudflare";
 import { AppError } from "../../../../utils/error";
 import { getClient } from "../../../../utils/getClient";
 
@@ -18,26 +18,15 @@ const MAX_MESSAGE_LENGTH = 5000;
 
 export default function () {
   const operations = {
-    POST: [userOrAppAuthenticated, POST],
+    POST: [userOrAppAuthenticated, requireSpamChallenge(), POST],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: profileId } = req.params as unknown as Params;
-    const { message, cfTurnstile } = req.body as {
-      message?: string;
-      cfTurnstile?: string;
-    };
-    const connectingIP = req.body["CF-Connecting-IP"];
+    const { message } = req.body as { message?: string };
     const sender = req.user as User;
 
     try {
-      await checkCloudFlareTurnstile({
-        token: cfTurnstile,
-        ip: connectingIP,
-        missingTokenMessage: "Sounds like a robot",
-        failureMessage: "Sounds like a robot",
-      });
-
       const trimmed = typeof message === "string" ? message.trim() : "";
       if (!trimmed) {
         throw new AppError({
