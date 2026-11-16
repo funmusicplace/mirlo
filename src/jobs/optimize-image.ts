@@ -17,6 +17,7 @@ import {
   downloadIncomingImageByType,
   uploadOptimizedImageByType,
   removeIncomingImageByType,
+  removeImagesByType,
   getImagePrefix,
 } from "../utils/storage";
 
@@ -259,10 +260,17 @@ const optimizeImage = async (job: Job) => {
     ) as string[];
     logger.info(`Saving URLs [${urls.join(", ")}]`);
 
-    await prisma.image.update({
-      where: { id: destinationId },
+    const { count } = await prisma.image.updateMany({
+      where: { id: destinationId, deletedAt: null },
       data: { url: urls },
     });
+    if (count === 0) {
+      await removeImagesByType(imageType, destinationId).catch((e) =>
+        logger.error(`Could not remove images for ${destinationId}`, e)
+      );
+      logger.info(`Image ${destinationId} was deleted, dropped its files`);
+      return;
+    }
 
     if (slot && urls.length > 0) {
       isAttached = await attachPendingImage(destinationId);
