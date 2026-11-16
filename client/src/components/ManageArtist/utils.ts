@@ -1,4 +1,5 @@
 import produce from "immer";
+import { isPlainObject, mapValues } from "lodash";
 import type { IAudioMetadata, ICommonTagsResult, ITag } from "music-metadata";
 
 import { ACCEPTED_AUDIO } from "./ManageTrackGroup/AlbumFormComponents/ReplaceTrackAudioInput";
@@ -129,21 +130,73 @@ const commentsToText = (
   return text.length > 0 ? text : undefined;
 };
 
+const utf8Decoder = new TextDecoder("utf-8", { fatal: true });
+
+const latin1ToUtf8 = (value: string) => {
+  if (!/[\u0080-ÿ]/.test(value) || /[^\u0000-ÿ]/.test(value)) {
+    return value;
+  }
+  try {
+    return utf8Decoder.decode(
+      Uint8Array.from(value, (char) => char.charCodeAt(0))
+    );
+  } catch {
+    return value;
+  }
+};
+
+const fixWaveValue = (value: unknown): unknown => {
+  if (typeof value === "string") {
+    return latin1ToUtf8(value);
+  }
+  if (Array.isArray(value)) {
+    return value.map(fixWaveValue);
+  }
+  if (isPlainObject(value) && typeof (value as ITag).id === "string") {
+    return { ...(value as ITag), value: fixWaveValue((value as ITag).value) };
+  }
+  if (
+    isPlainObject(value) &&
+    typeof (value as MetadataComments[number]).text === "string"
+  ) {
+    return {
+      ...(value as MetadataComments[number]),
+      text: latin1ToUtf8((value as MetadataComments[number]).text as string),
+    };
+  }
+  return value;
+};
+
+const fixWaveEncoding = (metadata: IAudioMetadata): IAudioMetadata => ({
+  ...metadata,
+  common: mapValues(metadata.common, fixWaveValue) as ICommonTagsResult,
+  native: mapValues(metadata.native, (tags) =>
+    tags.map((tag) => fixWaveValue(tag) as ITag)
+  ),
+});
+
 /**
  * music-metadata 12 represents comments and lyrics as structured values.
  * Mirlo stores the common tag object and uses its plain text values for
  * display and for FFmpeg tag writing, so keep the previous string-array shape.
  */
 export const normalizeMetadata = (
-  metadata: IAudioMetadata
-): NormalizedAudioMetadata => ({
-  ...metadata,
-  common: {
-    ...metadata.common,
-    lyrics: lyricsToText(metadata.common.lyrics),
-    comment: commentsToText(metadata.common.comment),
-  },
-});
+  rawMetadata: IAudioMetadata
+): NormalizedAudioMetadata => {
+  const metadata =
+    rawMetadata.format?.container === "WAVE"
+      ? fixWaveEncoding(rawMetadata)
+      : rawMetadata;
+  const { common } = metadata;
+  return {
+    ...metadata,
+    common: {
+      ...common,
+      lyrics: lyricsToText(common.lyrics),
+      comment: commentsToText(common.comment),
+    },
+  };
+};
 
 export interface ParsedTrackArtist {
   artistName: string;

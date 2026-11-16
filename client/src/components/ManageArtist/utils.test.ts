@@ -39,6 +39,38 @@ describe("normalizeMetadata", () => {
     expect(normalized.common.comment).toEqual(["Reader migration"]);
     expect(normalized.common.lyrics).toEqual(["First line", "Second line"]);
   });
+
+  const withTitle = (container: string, title: string, artists: string[]) =>
+    normalizeMetadata({
+      common: { title, artists },
+      format: { container },
+      native: {},
+    } as unknown as IAudioMetadata).common;
+
+  test("re-decodes UTF-8 text that a WAV file's INFO chunk read as latin1", () => {
+    const common = withTitle("WAVE", "CafÃ© Ã\u00a0 minuit", ["BjÃ¶rk"]);
+    expect(common.title).toEqual("Café à minuit");
+    expect(common.artists).toEqual(["Björk"]);
+  });
+
+  test("leaves genuine latin1 and non-latin1 WAV text alone", () => {
+    expect(withTitle("WAVE", "Café", ["日本"]).title).toEqual("Café");
+    expect(withTitle("WAVE", "Café", ["日本"]).artists).toEqual(["日本"]);
+  });
+
+  test("re-decodes WAV comments and native tags", () => {
+    const normalized = normalizeMetadata({
+      common: { comment: [{ text: "TrÃ¨s bien" }] },
+      format: { container: "WAVE" },
+      native: { exif: [{ id: "PERFORMER", value: "SinÃ©ad" }] },
+    } as unknown as IAudioMetadata);
+    expect(normalized.common.comment).toEqual(["Très bien"]);
+    expect(extractTrackArtists(normalized)[0].artistName).toEqual("Sinéad");
+  });
+
+  test("doesn't touch text from other containers", () => {
+    expect(withTitle("FLAC", "CafÃ©", []).title).toEqual("CafÃ©");
+  });
 });
 
 describe("extractTrackArtists", () => {
