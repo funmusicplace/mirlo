@@ -374,7 +374,7 @@ export const Index: React.FC = () => {
 
             <CustomNamesForTabs />
             <LayoutSettings />
-            <ArtistFormSection isOdd>
+            <ArtistFormSection isOdd className="flex-col">
               <ThankYouMessageEditors
                 artist={artist}
                 onArtistUpdated={refetchArtist}

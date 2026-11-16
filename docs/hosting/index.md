@@ -23,7 +23,7 @@ Mirlo consists of several components. We use Docker to orchestrate these:
 - **API Server** (Node.js/Express) - REST API and frontend
 - **Database** (PostgreSQL) - User data, tracks, artists, etc.
 - **Queue** (Redis) - Job queue
-- **File Storage** (MinIO/Backblaze/Hetzner) - S3-compatible storage for media files
+- **File Storage** (Garage/Backblaze/Hetzner) - S3-compatible storage for media files
 - **Background Worker** (Node.js) - Async job processing (audio conversion, image optimization, email)
 
 ## Prerequisites
@@ -191,7 +191,7 @@ After creating the endpoint, Stripe reveals a **signing secret** (starts with
 1. **Backups**: Automate daily database backups to off-site storage
 2. **Monitoring**: Setup alerts for disk space, CPU, memory, and service health
 3. **SSL/TLS**: Always use HTTPS with valid certificates (Let's Encrypt recommended)
-4. **Firewall**: Restrict access to internal ports (MinIO, Redis, PostgreSQL)
+4. **Firewall**: Restrict access to internal ports (Garage, Redis, PostgreSQL)
 5. **Updates**: Keep OS and dependencies updated regularly
 6. **Logging**: Centralize logs using ELK, Syslog, or similar
 7. **Rate Limiting**: Configure Nginx rate limiting for API endpoints

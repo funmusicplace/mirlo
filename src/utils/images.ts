@@ -7,10 +7,10 @@ import logger from "../logger";
 
 import { AppError } from "./error";
 import {
-  backendStorage,
   getImagesBucket,
   removeStoredImage,
   S3_ENDPOINT,
+  serveImagesFromApi,
   storedImagePrefix,
 } from "./storage";
 
@@ -37,8 +37,8 @@ export const generateFullStaticImageUrl = (
   const effectiveBucket = getImagesBucket();
   const effectiveKey = prefix ? `${prefix}/${imageName}` : imageName;
 
-  if (backendStorage === "minio") {
-    return `${process.env.STATIC_MEDIA_HOST}/images/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;
+  if (serveImagesFromApi) {
+    return `${process.env.API_DOMAIN}/images/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;
   } else {
     if (_cdnUrl) {
       return `${_cdnUrl}/file/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;

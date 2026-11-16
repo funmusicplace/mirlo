@@ -72,19 +72,31 @@ REFRESH_TOKEN_SECRET=$(generate_secret)
 POSTGRES_USER=mirlo
 POSTGRES_PASSWORD=$(generate_secret)
 REDIS_PASSWORD=$(generate_secret)
-# Garage requires its S3 access keys in a fixed shape: "GK" + 24 hex chars
-# for the ID, and exactly 64 hex chars for the secret. generate_secret() emits
-# 48, so these two are generated separately rather than reusing it.
-LOCAL_S3_USER=GK$(openssl rand -hex 12)
-LOCAL_S3_PASSWORD=$(openssl rand -hex 32)
 
 # The bundled Garage store only runs under the "garage" compose profile, so
 # leave it off when an external S3 service is configured — otherwise it would
 # start for nothing and claim host ports 9000/3903.
 if [ -n "${S3_ACCESS_KEY_ID:-}" ]; then
+  if [ -z "${S3_ENDPOINT:-}" ]; then
+    echo "❌ Error: S3_ENDPOINT is required with S3_ACCESS_KEY_ID"
+    exit 1
+  fi
   COMPOSE_PROFILES_VALUE=
+  S3_PUBLIC_ENDPOINT_VALUE=$S3_ENDPOINT
+  SERVE_IMAGES_FROM_API_VALUE=false
 else
   COMPOSE_PROFILES_VALUE=garage
+  S3_ENDPOINT=http://garage:9000
+  # Garage wants "GK" + 24 hex chars and a 64 hex char secret.
+  S3_ACCESS_KEY_ID=GK$(openssl rand -hex 12)
+  S3_SECRET_ACCESS_KEY=$(openssl rand -hex 32)
+  # Browsers can only reach Garage in local dev.
+  if [ "$MIRLO_DOMAIN" = "http://localhost:3000" ]; then
+    S3_PUBLIC_ENDPOINT_VALUE=http://localhost:9000
+  else
+    S3_PUBLIC_ENDPOINT_VALUE=
+  fi
+  SERVE_IMAGES_FROM_API_VALUE=true
 fi
 
 # Local dev serves the client from its own dev server on :8080; a deployed
@@ -105,23 +117,22 @@ sed -E \
   -e "s|^REFRESH_TOKEN_SECRET=.*|REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}|" \
   -e "s|^API_DOMAIN=.*|API_DOMAIN=${MIRLO_DOMAIN}|" \
   -e "s|^CLIENT_DOMAIN=.*|CLIENT_DOMAIN=${CLIENT_DOMAIN_VALUE}|" \
-  -e "s|^STATIC_MEDIA_HOST=.*|STATIC_MEDIA_HOST=${MIRLO_DOMAIN}|" \
   -e "s|^DATABASE_URL=.*|DATABASE_URL=\"${DATABASE_URL}\"|" \
   -e "s|^POSTGRES_USER=.*|POSTGRES_USER=${POSTGRES_USER}|" \
   -e "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=${POSTGRES_PASSWORD}|" \
   -e "s|^REDIS_PASSWORD=.*|REDIS_PASSWORD=${REDIS_PASSWORD}|" \
   -e "s|^COMPOSE_PROFILES=.*|COMPOSE_PROFILES=${COMPOSE_PROFILES_VALUE}|" \
-  -e "s|^LOCAL_S3_USER=.*|LOCAL_S3_USER=${LOCAL_S3_USER}|" \
-  -e "s|^LOCAL_S3_PASSWORD=.*|LOCAL_S3_PASSWORD=${LOCAL_S3_PASSWORD}|" \
-  -e "s|^S3_ACCESS_KEY_ID=.*|S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-}|" \
+  -e "s|^S3_ENDPOINT=.*|S3_ENDPOINT=${S3_ENDPOINT}|" \
+  -e "s|^S3_REGION=.*|S3_REGION=${S3_REGION:-us-east-1}|" \
+  -e "s|^S3_ACCESS_KEY_ID=.*|S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}|" \
   -e "s|^S3_SECRET_ACCESS_KEY=.*|S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-}|" \
-  -e "s|^S3_REGION=.*|S3_REGION=${S3_REGION:-}|" \
-  -e "s|^S3_ENDPOINT=.*|S3_ENDPOINT=${S3_ENDPOINT:-}|" \
+  -e "s|^S3_PUBLIC_ENDPOINT=.*|S3_PUBLIC_ENDPOINT=${S3_PUBLIC_ENDPOINT_VALUE}|" \
+  -e "s|^SERVE_IMAGES_FROM_API=.*|SERVE_IMAGES_FROM_API=${SERVE_IMAGES_FROM_API_VALUE}|" \
   .env.example > .env
 
 echo "✓ Wrote .env"
-if [ -n "${S3_ACCESS_KEY_ID:-}" ]; then
-  echo "✓ Configured S3-compatible object storage (region: ${S3_REGION:-unset})"
+if [ -z "$COMPOSE_PROFILES_VALUE" ]; then
+  echo "✓ Configured S3-compatible object storage at ${S3_ENDPOINT}"
 fi
 
 if [ -f client/.env ]; then
@@ -147,7 +158,7 @@ echo ""
 echo "  Instance URL:      ${MIRLO_DOMAIN}"
 echo "  Environment:       NODE_ENV=${NODE_ENV_VALUE}"
 echo "  Postgres user:     ${POSTGRES_USER}"
-echo "  Generated secrets: JWT, refresh token, Postgres, Redis, local S3"
+echo "  Generated secrets: JWT, refresh token, Postgres, Redis, Garage S3 key"
 echo ""
 echo "  Keep .env private — it now contains all your credentials."
 echo "  Next steps: docker compose -f docker-compose.prod.yml up -d"

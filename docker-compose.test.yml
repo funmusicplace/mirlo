@@ -60,7 +60,7 @@ services:
       STRIPE_PORT: 12111
       STRIPE_PROTOCOL: http
       STRIPE_KEY: sk_test_123
-      LOCAL_S3_PUBLIC_HOST: ""
+      S3_PUBLIC_ENDPOINT: ""
     profiles: [test]
 
   garage-test:
@@ -121,7 +121,7 @@ services:
       NODE_ENV: test
       CI: "${CI:-false}"
       API_DOMAIN: http://api:3000
-      LOCAL_S3_PUBLIC_HOST: ""
+      S3_PUBLIC_ENDPOINT: ""
     command: yarn api:test
     restart: no
     profiles: [test]

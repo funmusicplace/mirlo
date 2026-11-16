@@ -14,8 +14,8 @@ set -eu
 
 ADMIN="http://${GARAGE_HOST:-garage}:3903/v2"
 AUTH="Authorization: Bearer ${GARAGE_ADMIN_TOKEN}"
-KEY_ID="${LOCAL_S3_USER}"
-KEY_SECRET="${LOCAL_S3_PASSWORD}"
+KEY_ID="${S3_ACCESS_KEY_ID}"
+KEY_SECRET="${S3_SECRET_ACCESS_KEY}"
 # The buckets the app addresses with the default (empty) prefix, so a
 # browser's CORS preflight always lands on a bucket that already exists with
 # CORS on it. These mirror getImagesBucket/getAudioBucket/getDownloadsBucket

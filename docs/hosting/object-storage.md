@@ -87,11 +87,11 @@ docker exec blackbird-garage /garage status
 
 That covers cluster and bucket state but cannot list objects — Garage's CLI is
 cluster administration, not an object browser. For browsing objects, point any
-S3 client at `localhost:9000` with the `LOCAL_S3_USER` / `LOCAL_S3_PASSWORD`
-from your `.env`:
+S3 client at `localhost:9000` with the `S3_ACCESS_KEY_ID` /
+`S3_SECRET_ACCESS_KEY` from your `.env`:
 
 ```bash
-export MC_HOST_dev="http://$LOCAL_S3_USER:$LOCAL_S3_PASSWORD@localhost:9000"
+export MC_HOST_dev="http://$S3_ACCESS_KEY_ID:$S3_SECRET_ACCESS_KEY@localhost:9000"
 mc ls --recursive dev/mirlo-images
 mc du dev/mirlo-audio
 mc stat dev/mirlo-images/trackgroup-covers/<id>-x600.webp
@@ -108,8 +108,8 @@ Garage serves nothing until a cluster layout is assigned, and its S3 keys are
 created through the admin API rather than read from environment variables. The
 `garage-init` compose service ([`scripts/garage/init.sh`](https://github.com/funmusicplace/mirlo/blob/main/scripts/garage/init.sh))
 does that on every `docker compose up` and is a no-op once provisioned: it
-assigns the layout, imports the key from `LOCAL_S3_USER` /
-`LOCAL_S3_PASSWORD`, and pre-creates the standard buckets. `api` and
+assigns the layout, imports the key from `S3_ACCESS_KEY_ID` /
+`S3_SECRET_ACCESS_KEY`, and pre-creates the standard buckets. `api` and
 `background` wait on it via `service_completed_successfully`.
 
 Both services sit behind the `garage` compose profile, enabled by

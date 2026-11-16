@@ -2388,13 +2388,10 @@
       "storage": {
         "help": "Where audio files, images and downloads are kept: either the bundled storage installed with your platform (<garageLink>Garage</garageLink>), or an S3 compatible service such as <backblazeLink>Backblaze</backblazeLink>. Files are grouped in buckets, the top level folders of this kind of storage, one per kind of file.",
         "label": "Storage",
-        "backend": {
-          "minio": "Bundled object storage",
-          "backblaze": "S3 compatible storage"
-        },
-        "ok": "{{backend}}, every bucket is reachable.",
-        "missing_one": "{{backend}}, {{count}} bucket missing or unreachable.",
-        "missing_other": "{{backend}}, {{count}} buckets missing or unreachable."
+        "noEndpoint": "No storage is configured: S3_ENDPOINT isn't set.",
+        "ok": "{{host}}, every bucket is reachable.",
+        "missing_one": "{{host}}, {{count}} bucket missing or unreachable.",
+        "missing_other": "{{host}}, {{count}} buckets missing or unreachable."
       }
     },
     "card": {

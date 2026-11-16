@@ -52,8 +52,8 @@ export const uploadDownloadableContentFile = async (
   if (!response?.uploadUrl) {
     await api.delete(`manage/downloadableContent/${response.result.id}`);
     throw new Error(
-      "The server did not return an upload URL. In local development set " +
-        "LOCAL_S3_PUBLIC_HOST so the object store is reachable from the browser."
+      "The server did not return an upload URL. Set S3_PUBLIC_ENDPOINT so " +
+        "the object store is reachable from the browser."
     );
   }
 
