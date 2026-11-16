@@ -276,6 +276,8 @@ const isHtmlPageRequest = (reqPath: string): boolean =>
     reqPath.includes(".pdf") ||
     reqPath.includes(".woff") ||
     reqPath.includes(".woff2") ||
+    reqPath.includes(".ttf") ||
+    reqPath.includes(".otf") ||
     reqPath.includes("robots.txt") ||
     reqPath.startsWith("/static/") ||
     reqPath.startsWith("/v1")

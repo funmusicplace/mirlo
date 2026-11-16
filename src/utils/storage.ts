@@ -29,6 +29,7 @@ import logger from "../logger";
 // Bucket layout is documented in docs/hosting/object-storage.md.
 
 export const instanceLogoPrefix = "instance-logos";
+export const fontPrefix = "fonts";
 export const rootImagePrefix = "";
 
 export type BucketConfig = { prefix: string };
@@ -768,6 +769,52 @@ export const fixStoredImageContentTypes = async () => {
   });
   return summary;
 };
+
+// ── Fonts ─────────────────────────────────────────────────────────────────────
+
+const FONT_CONTENT_TYPES: Record<string, string> = {
+  woff2: "font/woff2",
+  woff: "font/woff",
+  ttf: "font/ttf",
+  otf: "font/otf",
+};
+
+export const fontContentType = (key: string): string | undefined =>
+  FONT_CONTENT_TYPES[key.split(".").pop()?.toLowerCase() ?? ""];
+
+const fontFolder = (fontId: string) => `${fontPrefix}/${fontId}/`;
+
+export const fontFileName = (fontId: string, fileId: string) =>
+  `${fontId}/${fileId}`;
+
+export const uploadFontFile = async (
+  fontId: string,
+  fileId: string,
+  extension: string,
+  buffer: Buffer
+) => {
+  const bucket = getImagesBucket();
+  await ensureBucketCached(bucket, true);
+  return uploadWrapper(
+    bucket,
+    `${fontFolder(fontId)}${fileId}.${extension}`,
+    buffer,
+    { contentType: fontContentType(extension) }
+  );
+};
+
+export const removeFontFile = (
+  fontId: string,
+  fileId: string,
+  extension: string
+) =>
+  removeObjectFromStorage(
+    getImagesBucket(),
+    `${fontFolder(fontId)}${fileId}.${extension}`
+  );
+
+export const removeFontFiles = (fontId: string) =>
+  removeObjectsFromBucket(getImagesBucket(), fontFolder(fontId));
 
 export const getCoverBuffer = (
   cover: { id: string; keyPrefix: string | null },
