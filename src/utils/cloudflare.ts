@@ -1,9 +1,12 @@
 import { AppError } from "./error";
+import { getSiteSettings, SettingsType } from "./settings";
 
-const { CLOUDFLARE_TURNSTILE_API_SECRET } = process.env;
+const getTurnstileSecret = (settings: SettingsType) =>
+  settings.settings?.cloudflareTurnstileSecret ||
+  process.env.CLOUDFLARE_TURNSTILE_API_SECRET;
 
-export const isSpamProtectionConfigured = () =>
-  Boolean(CLOUDFLARE_TURNSTILE_API_SECRET);
+export const isSpamProtectionConfigured = (settings: SettingsType) =>
+  Boolean(getTurnstileSecret(settings));
 
 const isDev =
   process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
@@ -30,7 +33,8 @@ export async function checkCloudFlareTurnstile({
     // TBD if this is desirable--kind of prevents tests from being written for it.
     return;
   }
-  if (!CLOUDFLARE_TURNSTILE_API_SECRET) {
+  const secret = getTurnstileSecret(await getSiteSettings());
+  if (!secret) {
     if (skipIfNoSecret) {
       return;
     }
@@ -50,7 +54,7 @@ export async function checkCloudFlareTurnstile({
 
   const result = await fetch(CLOUDFLARE_VERIFY_URL, {
     body: JSON.stringify({
-      secret: CLOUDFLARE_TURNSTILE_API_SECRET,
+      secret,
       response: token,
       remoteip: ip,
     }),
