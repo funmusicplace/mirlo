@@ -253,6 +253,37 @@ const apiDoc = {
         },
       },
     },
+    InstanceFont: {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        name: { type: "string" },
+        family: { type: "string" },
+        stack: { type: "string" },
+        css: { type: "string" },
+        files: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              url: { type: "string" },
+              format: {
+                type: "string",
+                enum: ["woff2", "woff", "ttf", "otf"],
+              },
+              weightMin: { type: "number" },
+              weightMax: { type: "number" },
+              style: { type: "string", enum: ["normal", "italic"] },
+              scripts: { type: "array", items: { type: "string" } },
+              ascentOverride: { type: ["number", "null"] },
+              descentOverride: { type: ["number", "null"] },
+              byteSize: { type: "number" },
+            },
+          },
+        },
+      },
+    },
     ArtistSubscriptionTierResult: {
       type: "object",
       properties: {

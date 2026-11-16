@@ -5,6 +5,7 @@ import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import logger from "../../../logger";
 import { isValidEmail } from "../../../utils/email";
 import { AppError } from "../../../utils/error";
+import { assertFontIdExists } from "../../../utils/font";
 import { setCdnUrl } from "../../../utils/images";
 import { clearPageCache } from "../../../utils/pageCache";
 import {
@@ -50,8 +51,12 @@ export default function () {
       showQueueDashboard,
       cdnUrl,
       bucketNames,
+      headingFontId,
+      bodyFontId,
     } = req.body;
     try {
+      await assertFontIdExists(headingFontId);
+      await assertFontIdExists(bodyFontId);
       if (bucketNames !== undefined && !isBucketConfig(bucketNames)) {
         throw new AppError({
           httpCode: 400,
@@ -202,6 +207,8 @@ export default function () {
           showQueueDashboard,
           cdnUrl,
           ...(bucketNames !== undefined && { bucketNames }),
+          headingFontId,
+          bodyFontId,
         },
         where: {
           id: existingSettings.id,
@@ -314,6 +321,8 @@ function maskSecrets(settings: object) {
     logo: undefined,
     mobileLogo: undefined,
     splashImage: undefined,
+    headingFont: undefined,
+    bodyFont: undefined,
     settings: settingsJson
       ? {
           ...settingsJson,

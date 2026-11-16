@@ -1114,5 +1114,54 @@ describe("admin/settings", () => {
       const row = await prisma.settings.findFirst();
       assert.deepEqual(row?.bucketNames, { prefix: "keep-" });
     });
+
+    it("saves the title and text fonts and clears them with null", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      const font = await prisma.font.create({
+        data: { name: "Poster", category: "serif" },
+      });
+      const post = (body: object) =>
+        requestApp
+          .post("admin/settings")
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json")
+          .send({ settings: { platformPercent: 7 }, ...body });
+
+      const saved = await post({ headingFontId: font.id, bodyFontId: font.id });
+      assert.equal(saved.statusCode, 200);
+      assert.equal(saved.body.result.headingFontId, font.id);
+      assert.equal(saved.body.result.headingFont, undefined);
+
+      await post({});
+      const kept = await prisma.settings.findFirst();
+      assert.equal(kept?.headingFontId, font.id);
+
+      await post({ headingFontId: null });
+      const cleared = await prisma.settings.findFirst();
+      assert.equal(cleared?.headingFontId, null);
+      assert.equal(cleared?.bodyFontId, font.id);
+    });
+
+    it("refuses a font that does not exist", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+
+      const response = await requestApp
+        .post("admin/settings")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          settings: { platformPercent: 7 },
+          headingFontId: "00000000-0000-4000-8000-000000000000",
+        });
+
+      assert.equal(response.statusCode, 400);
+      assert.equal(response.body.error, "The chosen font does not exist.");
+    });
   });
 });

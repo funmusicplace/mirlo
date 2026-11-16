@@ -32,13 +32,14 @@ export const busboyOptions = {
 export const generateFullStaticImageUrl = (
   imageName: string,
   prefix: string,
-  extension?: string
+  extension?: string,
+  options?: { throughApi?: boolean }
 ) => {
   const effectiveBucket = getImagesBucket();
   const effectiveKey = prefix ? `${prefix}/${imageName}` : imageName;
 
-  if (serveImagesFromApi) {
-    return `${process.env.API_DOMAIN}/images/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;
+  if (serveImagesFromApi || options?.throughApi) {
+    return `${(process.env.API_DOMAIN ?? "").replace(/\/+$/, "")}/images/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;
   } else {
     if (_cdnUrl) {
       return `${_cdnUrl}/file/${effectiveBucket}/${effectiveKey}.${extension ?? "webp"}`;
