@@ -29,8 +29,13 @@ html {
   --player-reserved-height: 65px;
 
   --mi-font-family-stack:
-    system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol", "Noto Color Emoji";
+    var(--mi-instance-font-body, system-ui, sans-serif), "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --mi-font-heading-stack: var(
+    --mi-instance-font-heading,
+    "Cubano",
+    var(--mi-font-family-stack)
+  );
 
   --mi-font-size-normal: 1rem;
   --mi-font-size-small: 0.875rem;

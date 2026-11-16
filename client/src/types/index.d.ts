@@ -11,6 +11,28 @@ interface InstanceLogo {
   height: number;
 }
 
+interface FontFile {
+  id: string;
+  url: string;
+  format: "woff2" | "woff" | "ttf" | "otf";
+  weightMin: number;
+  weightMax: number;
+  style: "normal" | "italic";
+  scripts: string[];
+  ascentOverride: number | null;
+  descentOverride: number | null;
+  byteSize: number;
+}
+
+interface Font {
+  id: string;
+  name: string;
+  family: string;
+  stack: string;
+  css: string;
+  files: FontFile[];
+}
+
 interface InstanceSettings {
   name: string;
   colors: {
@@ -35,12 +57,15 @@ interface InstanceSettings {
   splashTitle?: string | null;
   splashSubtitle?: string | null;
   splashTextPosition?: SplashTextPosition;
+  fonts: { heading: Font | null; body: Font | null };
 }
 
 type SplashTextPosition = "left" | "center" | "right";
 
 interface SettingsFromAPI {
   cdnUrl?: string;
+  headingFontId?: string | null;
+  bodyFontId?: string | null;
   bucketNames?: { prefix: string };
   settings: {
     platformPercent: number;

@@ -1,7 +1,13 @@
+import styled from "@emotion/styled";
 import InstanceLogoImage from "components/common/InstanceLogoImage";
 import { useInstanceSettings } from "queries/instanceSettings";
 import React from "react";
 import { Link } from "react-router-dom";
+
+const InstanceName = styled.span`
+  margin-block: -0.2em;
+  padding-block: 0.2em;
+`;
 
 const HeaderLogo = () => {
   const { name, logo, mobileLogo, tintLogo } = useInstanceSettings();
@@ -21,11 +27,11 @@ const HeaderLogo = () => {
         className={`w-auto ${sizes.logo} ${sizes.visibility}`}
       />
     ) : (
-      <span
-        className={`truncate font-cubano leading-none text-(--mi-text-color) ${sizes.text} ${sizes.visibility}`}
+      <InstanceName
+        className={`truncate font-heading leading-none text-(--mi-text-color) ${sizes.text} ${sizes.visibility}`}
       >
         {name}
-      </span>
+      </InstanceName>
     );
 
   return (

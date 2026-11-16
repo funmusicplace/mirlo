@@ -24,7 +24,7 @@ export default function () {
   GET.apiDoc = {
     summary: "Returns the public settings of this instance",
     description:
-      "Name, colours, hero flag, artist signup policy, trust level names, offered UI languages, how far the first setup went, the Stripe publishable key, the public contact email, the support email (the contact email when unset), the header logo and the compact one for small screens with their intrinsic sizes, and whether they are tinted with the button color, and the custom splash screen (whether it replaces the default one, its background image sizes, its two texts and where the text box sits). Never includes secrets.",
+      "Name, colours, hero flag, artist signup policy, trust level names, offered UI languages, how far the first setup went, the Stripe publishable key, the public contact email, the support email (the contact email when unset), the header logo and the compact one for small screens with their intrinsic sizes, and whether they are tinted with the button color, and the custom splash screen (whether it replaces the default one, its background image sizes, its two texts and where the text box sits), and the title and text fonts with the CSS that loads them. Never includes secrets.",
     responses: {
       200: {
         description: "The public instance settings",
@@ -99,6 +99,15 @@ export default function () {
                 splashTextPosition: {
                   type: "string",
                   enum: [...SPLASH_TEXT_POSITIONS],
+                },
+                fonts: {
+                  type: "object",
+                  description:
+                    "Null for a role that uses the default font. stack is the CSS font-family value, css the @font-face rules that load the files.",
+                  properties: {
+                    heading: { $ref: "#/definitions/InstanceFont" },
+                    body: { $ref: "#/definitions/InstanceFont" },
+                  },
                 },
               },
             },

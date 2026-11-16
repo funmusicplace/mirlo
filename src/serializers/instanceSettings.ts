@@ -14,6 +14,7 @@ import {
 import { AvailableLanguage } from "../utils/transifexLanguages";
 import { resolveTrustLevelNames } from "../utils/trustLevel";
 
+import { SerializedFont, serializeOptionalFont } from "./font";
 import { SerializedInstanceLogo, serializeInstanceLogo } from "./instanceLogo";
 
 export const DEFAULT_INSTANCE_COLORS = {
@@ -42,6 +43,7 @@ export type InstanceSettings = {
   splashTitle: string | null;
   splashSubtitle: string | null;
   splashTextPosition: SplashTextPosition;
+  fonts: { heading: SerializedFont | null; body: SerializedFont | null };
 };
 
 const HEX_COLOR_REGEX = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -99,5 +101,9 @@ export const serializeInstanceSettings = (
     splashTextPosition: isSplashTextPosition(splashTextPosition)
       ? splashTextPosition
       : "center",
+    fonts: {
+      heading: serializeOptionalFont(settings.headingFont),
+      body: serializeOptionalFont(settings.bodyFont),
+    },
   };
 };

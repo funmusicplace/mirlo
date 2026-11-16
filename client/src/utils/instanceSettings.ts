@@ -1,3 +1,4 @@
+import { applyFontVariable } from "./fonts";
 import { SITE_THEME_PROFILE, deriveThemeVariables } from "./themeVariables";
 import { DEFAULT_TRUST_LEVEL_NAMES } from "./trustLevel";
 
@@ -22,6 +23,7 @@ export const DEFAULT_INSTANCE_SETTINGS: InstanceSettings = {
   splashTitle: null,
   splashSubtitle: null,
   splashTextPosition: "center",
+  fonts: { heading: null, body: null },
 };
 
 export const applyInstanceStyles = (settings: InstanceSettings) => {
@@ -34,4 +36,9 @@ export const applyInstanceStyles = (settings: InstanceSettings) => {
     "--mi-instance-show-hero-on-home",
     settings.showHeroOnHome ? "flex" : "none"
   );
+  applyFontVariable(
+    "--mi-instance-font-heading",
+    settings.fonts?.heading ?? null
+  );
+  applyFontVariable("--mi-instance-font-body", settings.fonts?.body ?? null);
 };

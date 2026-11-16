@@ -8,6 +8,10 @@ import { Request } from "express";
 
 import { findActivityPubAlternate } from "./activityPub/pageAlternate";
 import {
+  appendInstanceFontFaces,
+  instanceFontVariables,
+} from "./parseIndex/fonts";
+import {
   registerProfileHydration,
   registerPostHydration,
   registerTrackGroupHydration,
@@ -1067,9 +1071,11 @@ export const analyzePathAndGenerateHTML = async (
       --mi-instance-background-color: ${instanceSettings.colors.background};
       --mi-instance-text-color: ${instanceSettings.colors.text};
       --mi-instance-show-hero-on-home: ${instanceSettings.showHeroOnHome ? "flex" : "none"};
+      ${instanceFontVariables(instanceSettings.fonts)}
     }
     </style>
   `);
+  appendInstanceFontFaces($, instanceSettings.fonts);
 
   return $;
 };
