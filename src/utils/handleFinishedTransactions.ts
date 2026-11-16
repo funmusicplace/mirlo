@@ -1,6 +1,7 @@
 import prisma, { SafeUser } from "@mirlo/prisma";
 import { Profile, TrackGroup, FundraiserPledge } from "@mirlo/prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
+import { pick } from "lodash";
 
 import { logger } from "../logger";
 import { sendMailQueue } from "../queues/send-mail-queue";
@@ -1042,7 +1043,7 @@ export const handleFundraiserPledgePaymentSuccess = async (
       to: pledge.user.email,
     },
     locals: {
-      artist: fundraiser.profile,
+      artist: pick(fundraiser.profile, ["id", "name", "urlSlug"]),
       fundraiserName: fundraiser.name,
       email: encodeURIComponent(pledge.user.email),
       host: process.env.API_DOMAIN,
