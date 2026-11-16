@@ -938,7 +938,15 @@ export const handleFundraiserPledgePaymentSuccess = async (
           user: { select: { email: true } },
           fundraiser: {
             include: {
-              profile: { select: { id: true, name: true, urlSlug: true } },
+              profile: {
+                select: {
+                  id: true,
+                  name: true,
+                  urlSlug: true,
+                  user: { select: { id: true } },
+                  paymentToUser: { select: { id: true } },
+                },
+              },
               trackGroups: { where: { deletedAt: null } },
             },
           },
@@ -974,6 +982,20 @@ export const handleFundraiserPledgePaymentSuccess = async (
       paymentStatus: "COMPLETED",
     },
   });
+
+  if (transaction.amount > 0) {
+    try {
+      await numberSale(
+        transaction.id,
+        resolvePayee({ profile: pledge.fundraiser.profile }).id
+      );
+    } catch (e) {
+      logger.error(
+        `handleFundraiserPledgePaymentSuccess: could not number ${transaction.id}`,
+        e
+      );
+    }
+  }
 
   await prisma.fundraiserPledge.update({
     where: {
