@@ -20,7 +20,16 @@ export interface FormSettings {
   pendingLogo?: File | null;
   pendingMobileLogo?: File | null;
   pendingSplashImage?: File | null;
+  headingFontId?: string;
+  bodyFontId?: string;
 }
+
+export const FONT_ROLE_FIELDS = {
+  heading: "headingFontId",
+  body: "bodyFontId",
+} as const;
+
+export type FontRole = keyof typeof FONT_ROLE_FIELDS;
 
 export const LOGO_FIELDS = {
   main: {
@@ -55,6 +64,7 @@ export const SPLASH_IMAGE_JOB_KEY = "splashImage";
 
 export const SETTINGS_SECTIONS = [
   { id: "settings-identity", labelKey: "sectionIdentity" },
+  { id: "settings-fonts", labelKey: "sectionFonts" },
   { id: "settings-general", labelKey: "sectionGeneral" },
   { id: "settings-platform-policy", labelKey: "sectionPlatformPolicy" },
   { id: "settings-featured-artists", labelKey: "sectionFeaturedArtists" },
@@ -74,6 +84,8 @@ export const settingsToForm = (
   showQueueDashboard: settings.showQueueDashboard ?? false,
   platformPercent: settings.settings?.platformPercent,
   cdnUrl: settings.cdnUrl ?? "",
+  headingFontId: settings.headingFontId ?? "",
+  bodyFontId: settings.bodyFontId ?? "",
   instanceCustomization: {
     ...settings.settings?.instanceCustomization,
     title: settings.settings?.instanceCustomization?.title ?? "",
@@ -110,6 +122,11 @@ export const settingsToForm = (
   ),
 });
 
+const fontIdPayload = (
+  data: Partial<FormSettings>,
+  field: (typeof FONT_ROLE_FIELDS)[FontRole]
+) => (data[field] === undefined ? undefined : data[field] || null);
+
 export const formToSettingsPayload = (
   data: Partial<FormSettings>,
   featuredArtistIds: number[]
@@ -132,6 +149,8 @@ export const formToSettingsPayload = (
     trustLevelNames: data.trustLevelNames,
   },
   cdnUrl: data.cdnUrl,
+  headingFontId: fontIdPayload(data, "headingFontId"),
+  bodyFontId: fontIdPayload(data, "bodyFontId"),
   bucketNames: { prefix: data.bucketPrefix ?? "" },
   terms: data.terms,
   showQueueDashboard: data.showQueueDashboard,

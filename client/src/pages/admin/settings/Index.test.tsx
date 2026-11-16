@@ -39,7 +39,11 @@ vi.stubGlobal(
 
 vi.mock("services/api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("services/api")>()),
-  default: { get: vi.fn(), post: vi.fn() },
+  default: {
+    get: vi.fn(),
+    post: vi.fn(),
+    getMany: vi.fn().mockResolvedValue({ results: [] }),
+  },
 }));
 
 const mockSnackbar = vi.fn();
