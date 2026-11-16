@@ -22,6 +22,7 @@ import {
 import { resolvePayee } from "./payments/payee";
 import type { ResolvedItem } from "./payments/purchase";
 import { calculateAppFee } from "./processingPayments";
+import { numberSale } from "./saleNumber";
 import { hasSubscriptionTiers } from "./subscriptionTier";
 import { registerPurchase, registerTrackPurchase } from "./trackGroup";
 
@@ -772,6 +773,14 @@ export const completePurchase = async (
         `completePurchase: failed to record ${item.type} ${item.id ?? ""} for userId ${userId}, payment ${payment?.id}:`,
         e
       );
+    }
+  }
+
+  if (sale && transaction.amount > 0) {
+    try {
+      await numberSale(transaction.id, resolvePayee(sale).id);
+    } catch (e) {
+      logger.error(`completePurchase: could not number ${transaction.id}`, e);
     }
   }
 

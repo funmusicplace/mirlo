@@ -4,10 +4,12 @@ import { NextFunction, Request, Response } from "express";
 import { difference } from "lodash";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
-import { getDateRange } from "../../../utils/dateRange";
-import { AppError } from "../../../utils/error";
 import { serializeTrackGroupPurchase } from "../../../serializers/trackGroup";
 import { serializeUserTransaction } from "../../../serializers/userTransaction";
+import { getDateRange } from "../../../utils/dateRange";
+import { AppError } from "../../../utils/error";
+import { resolvePayee } from "../../../utils/payments/payee";
+import { numberSale } from "../../../utils/saleNumber";
 import { registerPurchase } from "../../../utils/trackGroup";
 
 export default function () {
@@ -112,9 +114,13 @@ export default function () {
         });
       }
 
-      await prisma.trackGroup.findFirstOrThrow({
+      const trackGroup = await prisma.trackGroup.findFirstOrThrow({
         where: {
           id: trackGroupId,
+        },
+        include: {
+          paymentToUser: true,
+          profile: { include: { user: true, paymentToUser: true } },
         },
       });
 
@@ -137,6 +143,18 @@ export default function () {
             },
           });
           userTransactionId = createdTransaction.id;
+          if (
+            createdTransaction.paymentStatus === "COMPLETED" &&
+            createdTransaction.amount > 0
+          ) {
+            await numberSale(
+              createdTransaction.id,
+              resolvePayee({
+                profile: trackGroup.profile,
+                releasePaymentToUser: trackGroup.paymentToUser,
+              }).id
+            );
+          }
         }
 
         const purchase = await registerPurchase({

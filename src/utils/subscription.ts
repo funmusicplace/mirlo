@@ -12,6 +12,7 @@ import {
   withPlatformCurrency,
 } from "./payments/completedPayment";
 import { resolvePayee } from "./payments/payee";
+import { numberSale } from "./saleNumber";
 import { grantSubscriptionTierReleases } from "./subscriptionTier";
 
 export type ArtistSubscriptionReceiptEmailType = {
@@ -181,6 +182,19 @@ export const manageSubscriptionReceipt = async ({
       }
       return transaction;
     });
+
+    if (status === "COMPLETED" && transaction.amount > 0) {
+      try {
+        await numberSale(
+          transaction.id,
+          resolvePayee({
+            profile: profileUserSubscription.profileSubscriptionTier.profile,
+          }).id
+        );
+      } catch (e) {
+        logger.error(`invoice.paid: could not number ${transaction.id}`, e);
+      }
+    }
 
     logger.info(
       `invoice.paid: ${processorPaymentReferenceId} found subscription, sending receipt`
