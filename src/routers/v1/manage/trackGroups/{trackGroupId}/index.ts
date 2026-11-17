@@ -311,6 +311,25 @@ export default function () {
 
       if (
         movingToNewProfile &&
+        existingTrackGroup.fundraiserId &&
+        (await prisma.fundraiserPledge.count({
+          where: {
+            fundraiserId: existingTrackGroup.fundraiserId,
+            paidAt: null,
+            cancelledAt: null,
+            fundraiser: { status: "ACTIVE" },
+          },
+        })) > 0
+      ) {
+        throw new AppError({
+          httpCode: 409,
+          description:
+            "This release's fundraiser has pledges that haven't been paid yet. It can be moved once every pledge is paid or cancelled.",
+        });
+      }
+
+      if (
+        movingToNewProfile &&
         existingTrackGroup.fundraiser?.urlSlug &&
         (await isFundraiserSlugTaken(
           targetProfileId,

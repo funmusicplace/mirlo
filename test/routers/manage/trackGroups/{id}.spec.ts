@@ -188,6 +188,43 @@ describe("manage/trackGroups/{trackGroupId}", () => {
       assert.equal(fundraiserAfter.profileId, from.id);
     });
 
+    it("should refuse to move a release whose fundraiser has unpaid pledges", async () => {
+      const { user, accessToken } = await createUser({ email: "test@testcom" });
+      const { user: backer } = await createUser({ email: "backer@test.com" });
+      const from = await createProfile(user.id, { urlSlug: "from-artist" });
+      const to = await createProfile(user.id, { urlSlug: "to-artist" });
+      const trackGroup = await createTrackGroup(from.id);
+      const fundraiser = await createFundraiser(trackGroup.profileId, {
+        trackGroupId: trackGroup.id,
+      });
+      await createFundraiserPledge(fundraiser.id, backer.id);
+
+      const response = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ moveToArtistId: to.id, title: "Renamed" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 409);
+      const unmoved = await prisma.trackGroup.findFirstOrThrow({
+        where: { id: trackGroup.id },
+      });
+      assert.equal(unmoved.profileId, from.id);
+      assert.notEqual(unmoved.title, "Renamed");
+      const fundraiserAfter = await prisma.fundraiser.findFirstOrThrow({
+        where: { id: fundraiser.id },
+      });
+      assert.equal(fundraiserAfter.profileId, from.id);
+
+      const edit = await requestApp
+        .put(`manage/trackGroups/${trackGroup.id}`)
+        .send({ title: "Renamed" })
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(edit.status, 200);
+    });
+
     it("should give a moved release a free slug when the destination already uses it", async () => {
       const { user, accessToken } = await createUser({ email: "test@testcom" });
       const from = await createProfile(user.id, { urlSlug: "from-artist" });
