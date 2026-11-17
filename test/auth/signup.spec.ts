@@ -64,6 +64,25 @@ describe("auth/signup", () => {
     assert(stub.calledWithMatch("send-mail", { template: "new-user" }));
   });
 
+  it("signup leaves the confirmation token out of the response", async () => {
+    const stub = sinon.stub(sendMailQueue, "add").resolves();
+    await prisma.client.create({
+      data: { applicationUrl: "test", applicationName: "test" },
+    });
+
+    await signup(mockReq, mockRes, mockNext);
+
+    const user = await prisma.user.findFirst({
+      where: { email: mockReq.body.email },
+      omit: { emailConfirmationToken: false },
+    });
+    assert(user?.emailConfirmationToken);
+    assert(stub.calledWithMatch("send-mail", { template: "new-user" }));
+    const body = jsonStub.firstCall.args[0];
+    assert.equal(body.email, mockReq.body.email);
+    assert(!("emailConfirmationToken" in body));
+  });
+
   it("signup stores the language the user signed up in", async () => {
     sinon.stub(sendMailQueue, "add").resolves();
 
