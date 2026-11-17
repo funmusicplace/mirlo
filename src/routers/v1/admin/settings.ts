@@ -67,6 +67,17 @@ export default function () {
           description: "Invalid trust level names",
         });
       }
+      const incomingCurrency = settings?.defaultCurrency;
+      if (
+        incomingCurrency !== undefined &&
+        (typeof incomingCurrency !== "string" ||
+          !/^[a-z]{3}$/i.test(incomingCurrency.trim()))
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description: "The default currency must be a 3-letter currency code",
+        });
+      }
       let existingSettings = await prisma.settings.findFirst();
       if (!existingSettings) {
         existingSettings = await prisma.settings.create({
@@ -171,6 +182,9 @@ export default function () {
               splashSubtitle: incomingSplashSubtitle.trim(),
             }),
           },
+        }),
+        ...(typeof incomingCurrency === "string" && {
+          defaultCurrency: incomingCurrency.trim().toLowerCase(),
         }),
         stripe: {
           ...existingStripe,

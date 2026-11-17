@@ -26,11 +26,12 @@ export const makeTopAccounts = (
   const scale = period === "year" ? 12 : 1;
   return {
     period,
+    currency: "usd",
     sellers: Array.from({ length: count }, (_, index) => ({
       id: index + 1,
       name: ARTIST_NAMES[index] ?? `Artist ${index + 1}`,
       urlSlug: `artist-${index + 1}`,
-      usdCents: (count - index) * 4250 * scale,
+      cents: (count - index) * 4250 * scale,
       transactionCount: (count - index) * 3 * scale,
     })),
     purchasers: Array.from({ length: count }, (_, index) => ({
@@ -38,7 +39,7 @@ export const makeTopAccounts = (
       // Every third purchaser has no name, so the email fallback shows.
       name: index % 3 === 2 ? null : `Listener ${index + 1}`,
       email: `listener${index + 1}@example.com`,
-      usdCents: (count - index) * 1800 * scale,
+      cents: (count - index) * 1800 * scale,
       transactionCount: (count - index) * scale,
     })),
     freeDownloads: Array.from({ length: count }, (_, index) => ({
@@ -92,6 +93,7 @@ export const makeAdminStats = (granularity: StatsGranularity): AdminStats => {
 
   return {
     granularity,
+    currency: "usd",
     userSignups: dates.map((date, index) => ({
       date,
       count: wave(index, 40, 0.8),
@@ -102,13 +104,13 @@ export const makeAdminStats = (granularity: StatsGranularity): AdminStats => {
     })),
     revenue: dates.map((date, index) => ({
       date,
-      purchasesUsdCents: wave(index, 180000, 2500),
-      subscriptionsUsdCents: wave(index, 90000, 1500),
-      purchasesConvertedUsdCents: wave(index, 40000, 600),
-      subscriptionsConvertedUsdCents: wave(index, 15000, 300),
-      platformCutUsdCents: wave(index, 19000, 280),
-      platformCutConvertedUsdCents: wave(index, 3900, 60),
-      instanceProfileUsdCents: wave(index, 6000, 90),
+      purchasesCents: wave(index, 180000, 2500),
+      subscriptionsCents: wave(index, 90000, 1500),
+      purchasesConvertedCents: wave(index, 40000, 600),
+      subscriptionsConvertedCents: wave(index, 15000, 300),
+      platformCutCents: wave(index, 19000, 280),
+      platformCutConvertedCents: wave(index, 3900, 60),
+      instanceProfileCents: wave(index, 6000, 90),
     })),
     transactionCounts: ["usd", "eur", "gbp"].flatMap((currency, rank) =>
       dates.map((date, index) => ({

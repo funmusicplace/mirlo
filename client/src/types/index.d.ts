@@ -45,6 +45,7 @@ interface SettingsFromAPI {
   bucketNames?: { prefix: string };
   settings: {
     platformPercent: number;
+    defaultCurrency?: string;
     instanceCustomization?: {
       colors?: {
         button?: string;

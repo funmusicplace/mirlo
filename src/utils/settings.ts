@@ -43,6 +43,11 @@ export const resolveSupportEmail = (settings: SettingsType): string | null =>
   trimmedEmail(settings.settings?.instanceCustomization?.supportEmail) ??
   resolveContactEmail(settings);
 
+export const DEFAULT_CURRENCY = "usd";
+
+export const resolveDefaultCurrency = (settings: SettingsType): string =>
+  settings.settings?.defaultCurrency?.trim().toLowerCase() || DEFAULT_CURRENCY;
+
 export type SetupStage = "welcome" | "guide" | "done";
 
 export const hasInstanceName = (settings: SettingsType): boolean =>

@@ -188,10 +188,10 @@ describe("admin/stats", () => {
       (row: { date: string }) => row.date === week
     );
     assert(weekRow, `expected a revenue row for week ${week}`);
-    assert.equal(weekRow.purchasesUsdCents, 1000);
-    assert.equal(weekRow.subscriptionsUsdCents, 500);
-    assert.equal(weekRow.purchasesConvertedUsdCents, 1800);
-    assert.equal(weekRow.subscriptionsConvertedUsdCents, 850);
+    assert.equal(weekRow.purchasesCents, 1000);
+    assert.equal(weekRow.subscriptionsCents, 500);
+    assert.equal(weekRow.purchasesConvertedCents, 1800);
+    assert.equal(weekRow.subscriptionsConvertedCents, 850);
   });
 
   it("should count transactionCounts per currency", async () => {
@@ -285,8 +285,70 @@ describe("admin/stats", () => {
       (row: { date: string }) => row.date === week
     );
     assert(weekRow, `expected a revenue row for week ${week}`);
-    assert.equal(weekRow.platformCutUsdCents, 150);
-    assert.equal(weekRow.platformCutConvertedUsdCents, 180);
+    assert.equal(weekRow.platformCutCents, 150);
+    assert.equal(weekRow.platformCutConvertedCents, 180);
+  });
+
+  it("should report in the instance's default currency", async () => {
+    const { accessToken } = await createUser({
+      email: "admin@admin.com",
+      isAdmin: true,
+    });
+    const { user: buyer } = await createUser({ email: "buyer@buyer.com" });
+    await createSiteSettings({ defaultCurrency: "eur" });
+
+    const now = new Date();
+    const week = mondayOf(now);
+
+    await prisma.userTransaction.createMany({
+      data: [
+        {
+          userId: buyer.id,
+          amount: 1000,
+          currency: "eur",
+          platformCut: 100,
+          createdAt: now,
+        },
+        {
+          userId: buyer.id,
+          amount: 2000,
+          currency: "usd",
+          platformCut: 200,
+          platformCurrency: "eur",
+          platformCurrencyAmount: 1800,
+          exchangeRate: 0.9,
+          createdAt: now,
+        },
+        // Settled into another currency, so it can't be counted.
+        {
+          userId: buyer.id,
+          amount: 3000,
+          currency: "gbp",
+          platformCut: 300,
+          platformCurrency: "usd",
+          platformCurrencyAmount: 3900,
+          exchangeRate: 1.3,
+          createdAt: now,
+        },
+      ],
+    });
+
+    const response = await requestApp
+      .get("admin/stats")
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.result.currency, "eur");
+
+    const weekRow = response.body.result.revenue.find(
+      (row: { date: string }) => row.date === week
+    );
+    assert(weekRow, `expected a revenue row for week ${week}`);
+    assert.equal(weekRow.purchasesCents, 1000);
+    assert.equal(weekRow.purchasesConvertedCents, 1800);
+    assert.equal(weekRow.platformCutCents, 100);
+    assert.equal(weekRow.platformCutConvertedCents, 180);
   });
 
   it("should report the instance profile's income net of the platform cut", async () => {
@@ -364,8 +426,8 @@ describe("admin/stats", () => {
     );
     assert(weekRow, `expected a revenue row for week ${week}`);
     // (1000 - 100) + (1800 - 200 * 0.9)
-    assert.equal(weekRow.instanceProfileUsdCents, 2520);
-    assert.equal(weekRow.platformCutUsdCents, 600);
+    assert.equal(weekRow.instanceProfileCents, 2520);
+    assert.equal(weekRow.platformCutCents, 600);
   });
 
   it("should bucket by month when asked for monthly granularity", async () => {
@@ -404,7 +466,7 @@ describe("admin/stats", () => {
       (row: { date: string }) => row.date === firstOfMonth(now)
     );
     assert(monthRow, `expected a revenue row for ${firstOfMonth(now)}`);
-    assert.equal(monthRow.purchasesUsdCents, 1500);
+    assert.equal(monthRow.purchasesCents, 1500);
   });
 
   it("should fall back to the default when days is not a valid integer", async () => {
@@ -446,7 +508,7 @@ describe("admin/stats", () => {
       (row: { date: string }) => row.date === week
     );
     assert(weekRow, `expected a revenue row for week ${week}`);
-    assert.equal(weekRow.purchasesUsdCents, 1000);
+    assert.equal(weekRow.purchasesCents, 1000);
   });
 
   it("should leave FAILED transactions out of revenue and counts", async () => {
@@ -491,8 +553,8 @@ describe("admin/stats", () => {
       (row: { date: string }) => row.date === week
     );
     assert(weekRow, `expected a revenue row for week ${week}`);
-    assert.equal(weekRow.purchasesUsdCents, 1000);
-    assert.equal(weekRow.platformCutUsdCents, 100);
+    assert.equal(weekRow.purchasesCents, 1000);
+    assert.equal(weekRow.platformCutCents, 100);
 
     const usdRow = response.body.result.transactionCounts.find(
       (row: { date: string; currency: string }) =>

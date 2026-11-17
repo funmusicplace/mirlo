@@ -3,7 +3,10 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
-import { getSiteSettings } from "../../../utils/settings";
+import {
+  getSiteSettings,
+  resolveDefaultCurrency,
+} from "../../../utils/settings";
 import { transactionSellerLinks } from "../../../utils/transactionSellers";
 
 /**
@@ -101,28 +104,30 @@ const avgPerMonth = async (
 /**
  * Every money figure the dashboard charts, in one pass over the transactions.
  *
- * `amount`/`currency` are presentment values, so USD charges are summed
- * directly while foreign charges are counted through the frozen
+ * Figures are in the instance's default currency. `amount`/`currency` are
+ * presentment values, so charges in that currency are summed directly while
+ * foreign charges are counted through the frozen
  * `platformCurrencyAmount`/`exchangeRate` reporting fields.
  *
- * `instanceProfileUsdCents` is what the instance's own artist profile took in,
+ * `instanceProfileCents` is what the instance's own artist profile took in,
  * net of the platform cut so it doesn't double count `platformCut*`.
  */
 const revenuePerBucket = (
   granularity: Granularity,
   days: number,
-  instanceProfileId: number | null
+  instanceProfileId: number | null,
+  currency: string
 ) =>
   prisma.$queryRaw<
     Array<{
       date: string;
-      purchasesUsdCents: number;
-      subscriptionsUsdCents: number;
-      purchasesConvertedUsdCents: number;
-      subscriptionsConvertedUsdCents: number;
-      platformCutUsdCents: number;
-      platformCutConvertedUsdCents: number;
-      instanceProfileUsdCents: number;
+      purchasesCents: number;
+      subscriptionsCents: number;
+      purchasesConvertedCents: number;
+      subscriptionsConvertedCents: number;
+      platformCutCents: number;
+      platformCutConvertedCents: number;
+      instanceProfileCents: number;
     }>
   >`
     WITH ${bucketSeries(granularity, days)},
@@ -143,25 +148,25 @@ const revenuePerBucket = (
           SELECT 1 FROM (${transactionSellerLinks}) links
           WHERE links.tx_id = t.id AND links."profileId" = ${instanceProfileId}
         ) AS "isInstanceProfile",
-        -- Foreign charges only count once they were settled into USD.
-        (t.currency != 'usd' AND t."platformCurrency" = 'usd') AS "isUsdConverted"
+        -- Foreign charges only count once they were settled into the default currency.
+        (t.currency != ${currency} AND t."platformCurrency" = ${currency}) AS "isConverted"
       FROM "UserTransaction" t
       WHERE t."createdAt" >= ${windowStart(granularity, days)}
         AND ${notFailed("t")}
     )
     SELECT
       ${bucketDate},
-      COALESCE(SUM(CASE WHEN tx.currency = 'usd' AND NOT tx."isSubscription" THEN tx.amount END), 0)::double precision AS "purchasesUsdCents",
-      COALESCE(SUM(CASE WHEN tx.currency = 'usd' AND tx."isSubscription" THEN tx.amount END), 0)::double precision AS "subscriptionsUsdCents",
-      COALESCE(SUM(CASE WHEN tx."isUsdConverted" AND NOT tx."isSubscription" THEN tx."platformCurrencyAmount" END), 0)::double precision AS "purchasesConvertedUsdCents",
-      COALESCE(SUM(CASE WHEN tx."isUsdConverted" AND tx."isSubscription" THEN tx."platformCurrencyAmount" END), 0)::double precision AS "subscriptionsConvertedUsdCents",
-      COALESCE(SUM(CASE WHEN tx.currency = 'usd' THEN tx."platformCut" END), 0)::double precision AS "platformCutUsdCents",
-      COALESCE(SUM(CASE WHEN tx."isUsdConverted" THEN ROUND(tx."platformCut" * tx."exchangeRate") END), 0)::double precision AS "platformCutConvertedUsdCents",
+      COALESCE(SUM(CASE WHEN tx.currency = ${currency} AND NOT tx."isSubscription" THEN tx.amount END), 0)::double precision AS "purchasesCents",
+      COALESCE(SUM(CASE WHEN tx.currency = ${currency} AND tx."isSubscription" THEN tx.amount END), 0)::double precision AS "subscriptionsCents",
+      COALESCE(SUM(CASE WHEN tx."isConverted" AND NOT tx."isSubscription" THEN tx."platformCurrencyAmount" END), 0)::double precision AS "purchasesConvertedCents",
+      COALESCE(SUM(CASE WHEN tx."isConverted" AND tx."isSubscription" THEN tx."platformCurrencyAmount" END), 0)::double precision AS "subscriptionsConvertedCents",
+      COALESCE(SUM(CASE WHEN tx.currency = ${currency} THEN tx."platformCut" END), 0)::double precision AS "platformCutCents",
+      COALESCE(SUM(CASE WHEN tx."isConverted" THEN ROUND(tx."platformCut" * tx."exchangeRate") END), 0)::double precision AS "platformCutConvertedCents",
       COALESCE(SUM(CASE
         WHEN NOT tx."isInstanceProfile" THEN NULL
-        WHEN tx.currency = 'usd' THEN tx.amount - COALESCE(tx."platformCut", 0)
-        WHEN tx."isUsdConverted" THEN tx."platformCurrencyAmount" - ROUND(COALESCE(tx."platformCut", 0) * tx."exchangeRate")
-      END), 0)::double precision AS "instanceProfileUsdCents"
+        WHEN tx.currency = ${currency} THEN tx.amount - COALESCE(tx."platformCut", 0)
+        WHEN tx."isConverted" THEN tx."platformCurrencyAmount" - ROUND(COALESCE(tx."platformCut", 0) * tx."exchangeRate")
+      END), 0)::double precision AS "instanceProfileCents"
     FROM buckets
     LEFT JOIN tx ON DATE_TRUNC(${granularity}, tx."createdAt") = buckets.bucket_start
     GROUP BY buckets.bucket_start
@@ -211,6 +216,7 @@ export default function () {
         req.query.granularity === "month" ? "month" : "week";
 
       const settings = await getSiteSettings();
+      const currency = resolveDefaultCurrency(settings);
       const parsedInstanceProfileId = Number(
         settings.settings?.instanceCustomization?.artistId
       );
@@ -230,7 +236,7 @@ export default function () {
       ] = await Promise.all([
         countPerBucket("User", granularity, days),
         countPerBucket("Profile", granularity, days),
-        revenuePerBucket(granularity, days, instanceProfileId),
+        revenuePerBucket(granularity, days, instanceProfileId, currency),
         transactionCountsPerBucket(granularity, days),
         avgPerMonth(Prisma.sql`"TrackPlay"`, Prisma.sql`COUNT(*)`),
         avgPerMonth(
@@ -244,6 +250,7 @@ export default function () {
       res.json({
         result: {
           granularity,
+          currency,
           userSignups,
           artistSignups,
           revenue,

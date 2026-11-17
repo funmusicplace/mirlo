@@ -31,12 +31,13 @@ describe("TopAccountsTables", () => {
     vi.mocked(api.get).mockResolvedValue({
       result: {
         period: "month",
+        currency: "usd",
         sellers: [
           {
             id: 3,
             name: "Big Seller",
             urlSlug: "big-seller",
-            usdCents: 5000,
+            cents: 5000,
             transactionCount: 2,
           },
         ],
@@ -45,7 +46,7 @@ describe("TopAccountsTables", () => {
             id: 7,
             name: null,
             email: "big@buyer.com",
-            usdCents: 1250,
+            cents: 1250,
             transactionCount: 1,
           },
         ],

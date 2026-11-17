@@ -32,12 +32,13 @@ const countColumn = <K extends string>(
   cell: (row) => row[field].toLocaleString(),
 });
 
-const usdColumn = <T extends { usdCents: number }>(
-  header: string
+const moneyColumn = <T extends { cents: number }>(
+  header: string,
+  currency: string
 ): RankingColumn<T> => ({
   header,
   numeric: true,
-  cell: (row) => moneyDisplay({ amount: row.usdCents / 100, currency: "usd" }),
+  cell: (row) => moneyDisplay({ amount: row.cents / 100, currency }),
 });
 
 const byId = (row: { id: number }) => row.id;
@@ -45,7 +46,10 @@ const byId = (row: { id: number }) => row.id;
 const useDashboardT = () =>
   useTranslation("translation", { keyPrefix: "adminDashboard" }).t;
 
-export const TopSellers: React.FC<{ rows: AdminTopSeller[] }> = ({ rows }) => {
+export const TopSellers: React.FC<{
+  rows: AdminTopSeller[];
+  currency: string;
+}> = ({ rows, currency }) => {
   const t = useDashboardT();
   return (
     <RankingTable
@@ -56,15 +60,16 @@ export const TopSellers: React.FC<{ rows: AdminTopSeller[] }> = ({ rows }) => {
       columns={[
         artistColumn(t("artist")),
         countColumn(t("transactions"), "transactionCount"),
-        usdColumn(t("usd")),
+        moneyColumn(t("revenue"), currency),
       ]}
     />
   );
 };
 
-export const TopPurchasers: React.FC<{ rows: AdminTopPurchaser[] }> = ({
-  rows,
-}) => {
+export const TopPurchasers: React.FC<{
+  rows: AdminTopPurchaser[];
+  currency: string;
+}> = ({ rows, currency }) => {
   const t = useDashboardT();
   return (
     <RankingTable
@@ -82,7 +87,7 @@ export const TopPurchasers: React.FC<{ rows: AdminTopPurchaser[] }> = ({
           ),
         },
         countColumn(t("transactions"), "transactionCount"),
-        usdColumn(t("usd")),
+        moneyColumn(t("revenue"), currency),
       ]}
     />
   );
