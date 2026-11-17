@@ -1,4 +1,4 @@
-import type { IAudioMetadata } from "music-metadata";
+import { type IAudioMetadata, parseBuffer } from "music-metadata";
 import { describe, expect, test } from "vitest";
 
 import { extractTrackArtists, normalizeMetadata } from "./utils";
@@ -38,6 +38,45 @@ describe("normalizeMetadata", () => {
 
     expect(normalized.common.comment).toEqual(["Reader migration"]);
     expect(normalized.common.lyrics).toEqual(["First line", "Second line"]);
+  });
+
+  test("repairs UTF-8 WAV tags and keeps ISO-8859-1 ones", async () => {
+    const encoder = new TextEncoder();
+    // RIFF chunk: id, little-endian size, body, pad byte after an odd body
+    const chunk = (id: string, ...body: Uint8Array[]) => {
+      const bytes = Uint8Array.from(body.flatMap((part) => Array.from(part)));
+      const out = new Uint8Array(8 + bytes.length + (bytes.length & 1));
+      out.set(encoder.encode(id));
+      new DataView(out.buffer).setUint32(4, bytes.length, true);
+      out.set(bytes, 8);
+      return out;
+    };
+    // PCM, mono, 8000 Hz, 16000 bytes per second, 2 byte frames, 16 bit
+    const format = new Uint8Array([
+      1, 0, 1, 0, 0x40, 0x1f, 0, 0, 0x80, 0x3e, 0, 0, 2, 0, 16, 0,
+    ]);
+    const wav = chunk(
+      "RIFF",
+      encoder.encode("WAVE"),
+      chunk("fmt ", format),
+      chunk(
+        "LIST",
+        encoder.encode("INFO"),
+        chunk("INAM", encoder.encode("L’Été à Montréal\0")),
+        chunk("IART", encoder.encode("Mélodie Brûlée\0")),
+        // "Café" in ISO-8859-1
+        chunk("IGNR", new Uint8Array([0x43, 0x61, 0x66, 0xe9, 0]))
+      ),
+      chunk("data", new Uint8Array(8))
+    );
+
+    const normalized = normalizeMetadata(
+      await parseBuffer(wav, { mimeType: "audio/wav" })
+    );
+
+    expect(normalized.common.title).toBe("L’Été à Montréal");
+    expect(normalized.common.artists).toEqual(["Mélodie Brûlée"]);
+    expect(normalized.common.genre).toEqual(["Café"]);
   });
 });
 

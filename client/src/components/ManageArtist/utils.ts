@@ -129,6 +129,45 @@ const commentsToText = (
   return text.length > 0 ? text : undefined;
 };
 
+// WAV INFO tags are read as ISO-8859-1 but most tools write UTF-8
+const repairMojibake = (value: string): string => {
+  const codes = Array.from(value, (char) => char.charCodeAt(0));
+  if (codes.some((code) => code > 0xff) || codes.every((code) => code < 0x80)) {
+    return value;
+  }
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(
+      Uint8Array.from(codes)
+    );
+  } catch {
+    return value;
+  }
+};
+
+const repairWavTags = (
+  metadata: NormalizedAudioMetadata
+): NormalizedAudioMetadata => {
+  // Only INFO values, an id3 chunk declares its own encoding
+  const infoValues = new Set(
+    (metadata.native.exif ?? []).map(({ value }) => value)
+  );
+  const repair = (value: unknown): unknown =>
+    Array.isArray(value)
+      ? value.map(repair)
+      : typeof value === "string" && infoValues.has(value)
+        ? repairMojibake(value)
+        : value;
+  return {
+    ...metadata,
+    common: Object.fromEntries(
+      Object.entries(metadata.common).map(([key, value]) => [
+        key,
+        repair(value),
+      ])
+    ) as NormalizedAudioMetadata["common"],
+  };
+};
+
 /**
  * music-metadata 12 represents comments and lyrics as structured values.
  * Mirlo stores the common tag object and uses its plain text values for
@@ -136,14 +175,19 @@ const commentsToText = (
  */
 export const normalizeMetadata = (
   metadata: IAudioMetadata
-): NormalizedAudioMetadata => ({
-  ...metadata,
-  common: {
-    ...metadata.common,
-    lyrics: lyricsToText(metadata.common.lyrics),
-    comment: commentsToText(metadata.common.comment),
-  },
-});
+): NormalizedAudioMetadata => {
+  const normalized = {
+    ...metadata,
+    common: {
+      ...metadata.common,
+      lyrics: lyricsToText(metadata.common.lyrics),
+      comment: commentsToText(metadata.common.comment),
+    },
+  };
+  return metadata.format.container === "WAVE"
+    ? repairWavTags(normalized)
+    : normalized;
+};
 
 export interface ParsedTrackArtist {
   artistName: string;
