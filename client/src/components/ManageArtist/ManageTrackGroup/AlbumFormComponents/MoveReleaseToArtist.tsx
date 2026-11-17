@@ -6,7 +6,7 @@ import { queryManagedArtists } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import api from "services/api";
+import api, { APIResponseError } from "services/api";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistManageUrl } from "utils/artist";
 
@@ -51,7 +51,12 @@ const MoveReleaseToArtist: React.FC<{
       navigate(`${getArtistManageUrl(moveToArtistId)}/releases`);
     } catch (e) {
       console.error(e);
-      snackbar(t("releaseMoveFailed"), { type: "warning" });
+      snackbar(
+        e instanceof APIResponseError && e.status < 500
+          ? e.message
+          : t("releaseMoveFailed"),
+        { type: "warning", timeout: 10000 }
+      );
     } finally {
       setIsMoving(false);
     }
