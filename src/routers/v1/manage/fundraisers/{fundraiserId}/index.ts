@@ -320,6 +320,15 @@ export default function () {
     };
     try {
       await prisma.$transaction(async (tx) => {
+        await tx.fundraiser.update({
+          where: { id: Number(fundraiserId) },
+          data: {
+            trackGroups: { set: [] },
+            urlSlug: null,
+            deletedAt: new Date(),
+          },
+        });
+
         await tx.fundraiserPledge.updateMany({
           where: {
             fundraiserId: Number(fundraiserId),
@@ -344,15 +353,6 @@ export default function () {
               "This fundraiser's pledges are being charged. It can be removed once every pledge is paid or cancelled.",
           });
         }
-
-        await tx.fundraiser.update({
-          where: { id: Number(fundraiserId) },
-          data: {
-            trackGroups: { set: [] },
-            urlSlug: null,
-            deletedAt: new Date(),
-          },
-        });
       });
 
       await deleteFundraiserImages(Number(fundraiserId));
