@@ -115,6 +115,7 @@ const queryUserTransactions = (
   return prisma.userTransaction.findMany({
     where: {
       amount: { gt: 0 },
+      paymentStatus: { not: "FAILED" },
       createdAt: dateFilter,
       OR: or,
     },

@@ -1,5 +1,6 @@
 import assert from "node:assert";
 
+import prisma from "@mirlo/prisma";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it, beforeEach } from "mocha";
@@ -111,6 +112,45 @@ describe("manage/sales", () => {
       assert.equal(response.body.results.length, 1);
       assert.equal(response.body.total, 1);
       assert.equal(response.body.totalAmount, 500);
+    });
+
+    it("should not return failed charges", async () => {
+      const { user, accessToken } = await createUser({
+        email: "artist@test.com",
+      });
+
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+
+      for (const [paymentStatus, amount] of [
+        ["COMPLETED", 1000],
+        ["PENDING", 700],
+        ["FAILED", 500],
+      ] as const) {
+        const buyer = await createUser({
+          email: `${paymentStatus.toLowerCase()}@test.com`,
+        });
+        await prisma.userTransaction.create({
+          data: {
+            userId: buyer.user.id,
+            amount,
+            currency: "usd",
+            paymentStatus,
+            trackGroupPurchases: {
+              create: { userId: buyer.user.id, trackGroupId: trackGroup.id },
+            },
+          },
+        });
+      }
+
+      const response = await requestApp
+        .get("manage/sales")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.total, 2);
+      assert.equal(response.body.totalAmount, 1700);
     });
 
     it("should filter sales by artist ID", async () => {

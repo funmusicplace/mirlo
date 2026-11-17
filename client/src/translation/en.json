@@ -3052,9 +3052,9 @@
     "signature": "The Mirlo Team"
   },
   "emails.announcePostPublished": {
-    "subject": "New Post: {{title}}",
+    "subject": "New: {{title}}",
     "featuredImageAlt": "Featured Image",
-    "byline": "{{artistName}} just published a new post on {{instanceName}}",
+    "byline": "{{artistName}} just published {{instanceName}}",
     "readOn": "Read it on {{instanceName}}.",
     "unsubscribePrompt": "Don't want to receive emails from {{artistName}} anymore?",
     "unsubscribe": "Unsubscribe."
