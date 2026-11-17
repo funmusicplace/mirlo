@@ -68,6 +68,7 @@ declare global {
       };
       featuredArtistIds?: number[];
       cloudflareTurnstileSecret?: string;
+      cloudflareTurnstileSiteKey?: string;
       trustLevelNames?: string[];
     };
     type Properties = {

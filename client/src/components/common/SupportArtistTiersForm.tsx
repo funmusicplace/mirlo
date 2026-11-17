@@ -4,6 +4,7 @@ import { ArtistButton } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import SwitchTierConfirmation from "components/Artist/SwitchTierConfirmation";
 import { isEmpty } from "lodash";
+import { useTurnstileSiteKey } from "queries/instanceSettings";
 import React from "react";
 import { FormProvider, Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -33,6 +34,7 @@ const SupportArtistTiersForm: React.FC<{
 
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
+  const turnstileSiteKey = useTurnstileSiteKey();
 
   const {
     data: artistDetails,
@@ -267,7 +269,7 @@ const SupportArtistTiersForm: React.FC<{
           margin-top: 1rem;
         `}
       >
-        <Turnstile siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY} />
+        <Turnstile siteKey={turnstileSiteKey ?? ""} />
       </div>
     </>
   );

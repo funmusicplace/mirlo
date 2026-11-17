@@ -5,6 +5,7 @@ import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
+import { useTurnstileSiteKey } from "queries/instanceSettings";
 import { queryInstanceArtist } from "queries/settings";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -53,7 +54,7 @@ const NewsletterSignup: React.FC = () => {
   const [isResending, setIsResending] = React.useState(false);
   const [verifyError, setVerifyError] = React.useState<string | null>(null);
   const codeInputRef = React.useRef<HTMLInputElement>(null);
-  const turnstileSiteKey = import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY;
+  const turnstileSiteKey = useTurnstileSiteKey();
   const { data: instanceArtist, isPending } = useQuery(queryInstanceArtist());
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

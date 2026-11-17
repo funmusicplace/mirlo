@@ -1,5 +1,6 @@
 import { Turnstile } from "@marsidev/react-turnstile";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { useTurnstileSiteKey } from "queries/instanceSettings";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -29,6 +30,7 @@ const ContactArtist: React.FC<{
   const { user } = useAuthContext();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
+  const turnstileSiteKey = useTurnstileSiteKey();
   const [isOpen, setIsOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const cfTurnstile = React.useRef<string | undefined>(undefined);
@@ -101,7 +103,7 @@ const ContactArtist: React.FC<{
             </FormComponent>
             <div className="flex justify-center mb-4">
               <Turnstile
-                siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY}
+                siteKey={turnstileSiteKey ?? ""}
                 onSuccess={(token) => {
                   cfTurnstile.current = token;
                 }}

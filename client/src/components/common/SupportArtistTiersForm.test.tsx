@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
@@ -75,9 +76,11 @@ const ARTIST = { id: 10, name: "Test Artist", userId: 1, urlSlug: "test" };
 
 const renderForm = () =>
   render(
-    <MemoryRouter>
-      <SupportArtistTiersForm artist={ARTIST} />
-    </MemoryRouter>
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter>
+        <SupportArtistTiersForm artist={ARTIST} />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 
 describe("SupportArtistTiersForm", () => {

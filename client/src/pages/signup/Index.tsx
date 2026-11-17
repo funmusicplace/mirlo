@@ -8,7 +8,10 @@ import Checkbox from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import WidthContainer from "components/common/WidthContainer";
-import { useInstanceSettings } from "queries/instanceSettings";
+import {
+  useInstanceSettings,
+  useTurnstileSiteKey,
+} from "queries/instanceSettings";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -103,6 +106,7 @@ function Index() {
   const [search] = useSearchParams();
   const snackbar = useSnackbar();
   const { isClosedToPublicArtistSignup } = useInstanceSettings();
+  const turnstileSiteKey = useTurnstileSiteKey();
   const errorHandler = useErrorHandler();
   const invitedBy = search.get("invitedBy");
   const accountType = search.get("accountType");
@@ -453,7 +457,7 @@ function Index() {
           </div>
           <div className="flex justify-center mb-4">
             <Turnstile
-              siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY}
+              siteKey={turnstileSiteKey ?? ""}
               onSuccess={(token) => {
                 cfTurnstile.current = token;
               }}

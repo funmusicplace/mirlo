@@ -12,6 +12,7 @@ export interface FormSettings {
   isClosedToPublicArtistSignup?: boolean;
   showQueueDashboard?: boolean;
   emailProvider?: SettingsFromAPI["settings"]["emailProvider"];
+  cloudflareTurnstileSiteKey?: string;
   cloudflareTurnstileSecret?: string;
   cloudflareTurnstileSecretConfigured?: boolean;
   defconLevel?: number;
@@ -96,6 +97,8 @@ export const settingsToForm = (
     fromEmail: settings.settings?.emailProvider?.fromEmail ?? "",
   },
   bucketPrefix: settings.bucketNames?.prefix ?? "",
+  cloudflareTurnstileSiteKey:
+    settings.settings?.cloudflareTurnstileSiteKey ?? "",
   cloudflareTurnstileSecret: "",
   cloudflareTurnstileSecretConfigured:
     settings.settings?.cloudflareTurnstileSecretConfigured,
@@ -127,6 +130,7 @@ export const formToSettingsPayload = (
     emailProvider: {
       ...data.emailProvider,
     },
+    cloudflareTurnstileSiteKey: data.cloudflareTurnstileSiteKey,
     cloudflareTurnstileSecret: data.cloudflareTurnstileSecret,
     featuredArtistIds,
     trustLevelNames: data.trustLevelNames,

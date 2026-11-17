@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { ArtistButton } from "components/Artist/ArtistButtons";
+import { useTurnstileSiteKey } from "queries/instanceSettings";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -19,6 +20,7 @@ const FollowArtistWithEmail: React.FC<{
   const { user, refreshLoggedInUser } = useAuthContext();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
+  const turnstileSiteKey = useTurnstileSiteKey();
 
   const [isLoading, setIsLoading] = React.useState(false);
   const cfTurnstile = React.useRef<string | undefined>(undefined);
@@ -81,7 +83,7 @@ const FollowArtistWithEmail: React.FC<{
           `}
         >
           <Turnstile
-            siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY}
+            siteKey={turnstileSiteKey ?? ""}
             onSuccess={(token) => {
               cfTurnstile.current = token;
             }}

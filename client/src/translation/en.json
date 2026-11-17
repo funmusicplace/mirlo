@@ -2036,6 +2036,8 @@
     "trustLevels": "Trust levels",
     "trustLevelName": "Level {{level}} name",
     "security": "Security",
+    "cloudflareTurnstileSiteKey": "Cloudflare Turnstile site key",
+    "cloudflareTurnstileSiteKeyHint": "The site key from the same Turnstile widget as the secret below. You can find both in the Cloudflare dashboard.",
     "cloudflareTurnstileSecret": "Cloudflare Turnstile secret",
     "cloudflareTurnstileSecretPlaceholderConfigured": "Secret saved (leave blank to keep)",
     "secretPlaceholderConfigured": "Saved (leave blank to keep)",

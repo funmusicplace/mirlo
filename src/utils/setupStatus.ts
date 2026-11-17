@@ -217,7 +217,7 @@ export const stepsFromSettings = (
     settings.terms?.trim() || settings.contentPolicy?.trim()
   ),
   payments: getPaymentProcessor().isConfigured(settings),
-  spamProtection: isSpamProtectionConfigured(),
+  spamProtection: isSpamProtectionConfigured(settings),
 });
 
 export const getSetupStatus = async (

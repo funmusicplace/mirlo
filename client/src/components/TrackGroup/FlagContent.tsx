@@ -7,6 +7,7 @@ import { InputEl } from "components/common/Input";
 import Modal from "components/common/Modal";
 import { SelectEl } from "components/common/Select";
 import TextArea from "components/common/TextArea";
+import { useTurnstileSiteKey } from "queries/instanceSettings";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -23,6 +24,7 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
   const [isLoading, setIsLoading] = React.useState(false);
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const turnstileSiteKey = useTurnstileSiteKey();
   const methods = useForm({
     defaultValues: {
       reason: "copyrightViolation",
@@ -113,7 +115,7 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
 
             <InputEl required {...methods.register("email")} />
           </FormComponent>
-          <Turnstile siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY} />
+          <Turnstile siteKey={turnstileSiteKey ?? ""} />
 
           <Button isLoading={isLoading} type="submit" disabled={isLoading}>
             {t("submit")}

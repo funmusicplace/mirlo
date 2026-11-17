@@ -105,7 +105,7 @@ describe("admin/setup/status", () => {
         email: true,
         platformPolicy: true,
         payments: true,
-        spamProtection: false,
+        spamProtection: true,
       });
     });
   });

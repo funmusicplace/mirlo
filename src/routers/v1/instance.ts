@@ -24,7 +24,7 @@ export default function () {
   GET.apiDoc = {
     summary: "Returns the public settings of this instance",
     description:
-      "Name, colours, hero flag, artist signup policy, trust level names, offered UI languages, how far the first setup went, the Stripe publishable key, the public contact email, the support email (the contact email when unset), the header logo and the compact one for small screens with their intrinsic sizes, and whether they are tinted with the button color, and the custom splash screen (whether it replaces the default one, its background image sizes, its two texts and where the text box sits). Never includes secrets.",
+      "Name, colours, hero flag, artist signup policy, trust level names, offered UI languages, how far the first setup went, the Stripe publishable key, the Cloudflare Turnstile site key, the public contact email, the support email (the contact email when unset), the header logo and the compact one for small screens with their intrinsic sizes, and whether they are tinted with the button color, and the custom splash screen (whether it replaces the default one, its background image sizes, its two texts and where the text box sits). Never includes secrets.",
     responses: {
       200: {
         description: "The public instance settings",
@@ -65,6 +65,7 @@ export default function () {
                   enum: ["welcome", "guide", "done"],
                 },
                 stripePublishableKey: { type: "string" },
+                turnstileSiteKey: { type: "string" },
                 contactEmail: { type: "string" },
                 supportEmail: { type: "string" },
                 logo: {

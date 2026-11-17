@@ -148,6 +148,7 @@ export default function () {
       const incomingTurnstileSecret = (
         settings?.cloudflareTurnstileSecret ?? ""
       ).trim();
+      const incomingTurnstileSiteKey = settings?.cloudflareTurnstileSiteKey;
       const mergedSettings = {
         ...storedSettings,
         ...settings,
@@ -183,6 +184,11 @@ export default function () {
         },
         cloudflareTurnstileSecret:
           incomingTurnstileSecret || storedSettings.cloudflareTurnstileSecret,
+        // the key is public, so a blank value clears it
+        cloudflareTurnstileSiteKey:
+          typeof incomingTurnstileSiteKey === "string"
+            ? incomingTurnstileSiteKey.trim()
+            : storedSettings.cloudflareTurnstileSiteKey,
         emailProvider: mergeEmailProvider(
           settings?.emailProvider,
           storedSettings.emailProvider as EmailProvider | undefined
