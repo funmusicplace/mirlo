@@ -23,7 +23,11 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
   const [isLoading, setIsLoading] = React.useState(false);
   const snackbar = useSnackbar();
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const { challenge: spamChallenge, token: cfTurnstile } = useSpamChallenge();
+  const {
+    challenge: spamChallenge,
+    token: cfTurnstile,
+    reset: resetSpamChallenge,
+  } = useSpamChallenge();
   const methods = useForm({
     defaultValues: {
       reason: "copyrightViolation",
@@ -50,6 +54,7 @@ const FlagContent: React.FC<{ trackGroupId: number; onlyIcon?: boolean }> = ({
         }
       );
     } catch (e) {
+      resetSpamChallenge();
       setIsLoading(false);
       snackbar("An error happened while reporting this content", {
         type: "warning",

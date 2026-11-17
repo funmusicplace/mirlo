@@ -8,7 +8,10 @@ const getTurnstileSecret = (settings: SettingsType) =>
   process.env.CLOUDFLARE_TURNSTILE_API_SECRET;
 
 export const isSpamProtectionConfigured = (settings: SettingsType) =>
-  Boolean(getTurnstileSecret(settings));
+  Boolean(
+    getTurnstileSecret(settings) &&
+    settings.settings?.cloudflareTurnstileSiteKey?.trim()
+  );
 
 const isDev = () =>
   process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";

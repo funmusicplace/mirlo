@@ -29,8 +29,12 @@ const SecuritySection: React.FC<{ hideTitle?: boolean }> = ({ hideTitle }) => {
         <InputEl
           id="input-cloudflare-turnstile-site-key"
           className="max-w-md"
+          aria-describedby="hint-cloudflare-turnstile-site-key"
           {...register("cloudflareTurnstileSiteKey")}
         />
+        <small id="hint-cloudflare-turnstile-site-key">
+          {t("cloudflareTurnstileSiteKeyHint")}
+        </small>
       </FormComponent>
       <FormComponent>
         <label htmlFor="input-cloudflare-turnstile-secret">

@@ -31,8 +31,11 @@ const ContactArtist: React.FC<{
   const errorHandler = useErrorHandler();
   const [isOpen, setIsOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { challenge: spamChallenge, token: cfTurnstile } =
-    useSpamChallenge("mb-4");
+  const {
+    challenge: spamChallenge,
+    token: cfTurnstile,
+    reset: resetSpamChallenge,
+  } = useSpamChallenge("mb-4");
 
   const methods = useForm<FormData>({ defaultValues: { message: "" } });
 
@@ -55,6 +58,7 @@ const ContactArtist: React.FC<{
       methods.reset();
       setIsOpen(false);
     } catch (e) {
+      resetSpamChallenge();
       errorHandler(e);
     } finally {
       setIsSubmitting(false);

@@ -21,8 +21,11 @@ const FollowArtistWithEmail: React.FC<{
   const errorHandler = useErrorHandler();
 
   const [isLoading, setIsLoading] = React.useState(false);
-  const { challenge: spamChallenge, token: cfTurnstile } =
-    useSpamChallenge("mt-4");
+  const {
+    challenge: spamChallenge,
+    token: cfTurnstile,
+    reset: resetSpamChallenge,
+  } = useSpamChallenge("mt-4");
 
   const { register, handleSubmit } = useForm<{ email: string }>();
 
@@ -42,6 +45,7 @@ const FollowArtistWithEmail: React.FC<{
         snackbar(t("verificationEmailSent"), { type: "success" });
       }
     } catch (e) {
+      resetSpamChallenge();
       errorHandler(e);
     } finally {
       setIsLoading(false);

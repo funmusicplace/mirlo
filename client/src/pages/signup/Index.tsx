@@ -108,8 +108,11 @@ function Index() {
   const accountType = search.get("accountType");
   const [hasRegistered, setHasRegistered] = React.useState(false);
   const [accountIncomplete, setAccountIncomplete] = React.useState(false);
-  const { challenge: spamChallenge, token: cfTurnstile } =
-    useSpamChallenge("mb-4");
+  const {
+    challenge: spamChallenge,
+    token: cfTurnstile,
+    reset: resetSpamChallenge,
+  } = useSpamChallenge("mb-4");
   const methods = useForm<SignupInputs>({
     defaultValues: {
       email: search.get("email") ?? "",
@@ -167,6 +170,7 @@ function Index() {
         setHasRegistered(true);
         snackbar(t("success"), { type: "success" });
       } catch (e) {
+        resetSpamChallenge();
         if (e instanceof APIResponseError) {
           const errorBody = e.body as SignupErrorResponse | undefined;
           if (errorBody?.requiresEmailVerification) {
@@ -202,7 +206,7 @@ function Index() {
         setIsLoading(false);
       }
     },
-    [errorHandler, snackbar, t, i18n]
+    [errorHandler, snackbar, t, i18n, resetSpamChallenge]
   );
 
   const handleResendVerification = React.useCallback(async () => {

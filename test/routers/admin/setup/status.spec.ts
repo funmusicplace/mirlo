@@ -89,6 +89,7 @@ describe("admin/setup/status", () => {
           webhookConnectSigningSecret: "whsec_1",
         },
         cloudflareTurnstileSecret: "turnstile-secret",
+        cloudflareTurnstileSiteKey: "turnstile-site-key",
       });
       await prisma.settings.update({
         where: { id: row.id },
@@ -107,6 +108,23 @@ describe("admin/setup/status", () => {
         payments: true,
         spamProtection: true,
       });
+    });
+
+    it("should not count spam protection as done without a site key", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({
+        cloudflareTurnstileSecret: "turnstile-secret",
+      });
+
+      const response = await requestApp
+        .get("admin/setup/status")
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.body.result.steps.spamProtection, false);
     });
   });
 });

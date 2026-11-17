@@ -12,7 +12,11 @@ vi.mock("react-i18next", () => ({
 }));
 
 vi.mock("./SpamChallenge", () => ({
-  useSpamChallenge: () => ({ challenge: null, token: { current: undefined } }),
+  useSpamChallenge: () => ({
+    challenge: null,
+    token: { current: undefined },
+    reset: vi.fn(),
+  }),
 }));
 
 const PAID_TIER = {

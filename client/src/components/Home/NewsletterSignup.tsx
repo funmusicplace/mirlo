@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import { TurnstileInstance } from "@marsidev/react-turnstile";
 import { useQuery } from "@tanstack/react-query";
 import Button from "components/common/Button";
 import FormComponent from "components/common/FormComponent";
@@ -54,6 +55,9 @@ const NewsletterSignup: React.FC = () => {
   const [isResending, setIsResending] = React.useState(false);
   const [verifyError, setVerifyError] = React.useState<string | null>(null);
   const codeInputRef = React.useRef<HTMLInputElement>(null);
+  const spamChallengeRef = React.useRef<TurnstileInstance | undefined>(
+    undefined
+  );
   const turnstileSiteKey = useTurnstileSiteKey();
   const { data: instanceArtist, isPending } = useQuery(queryInstanceArtist());
 
@@ -84,6 +88,7 @@ const NewsletterSignup: React.FC = () => {
       await api.post("verify-email", { email, cfTurnstile: token });
       setStep(2);
     } catch {
+      spamChallengeRef.current?.reset();
       snackbar(t("newsletterError"), { type: "warning" });
     }
   };
@@ -200,7 +205,10 @@ const NewsletterSignup: React.FC = () => {
             <p className="text-sm text-(--mi-light-foreground-color)">
               {t("newsletterVerifyingDescription")}
             </p>
-            <SpamChallenge onSuccess={handleTurnstileSuccess} />
+            <SpamChallenge
+              ref={spamChallengeRef}
+              onSuccess={handleTurnstileSuccess}
+            />
           </div>
         ) : (
           <div className="flex flex-col gap-4">

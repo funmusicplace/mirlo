@@ -116,7 +116,8 @@ you're not using Docker/Ubuntu and need to adapt the steps.
 
 > **Note**: for now you'll still need to do the Stripe set up steps described
 > in [Set Up Stripe Connect](#set-up-stripe-connect) and
-> [Register Stripe Webhooks](#register-stripe-webhooks) below.
+> [Register Stripe Webhooks](#register-stripe-webhooks) below, and
+> [Set Up Spam Protection](#set-up-spam-protection).
 
 ## Set Up Stripe Connect
 
@@ -185,6 +186,24 @@ After creating the endpoint, Stripe reveals a **signing secret** (starts with
 `whsec_`). Paste it into Admin Settings, or set it in `.env` as
 `STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET` and recreate the api container
 (`docker compose up -d`).
+
+## Set Up Spam Protection
+
+Mirlo protects its sign-up, contact, report and follow-by-email forms with
+[Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/). Until
+it's set up, sign-ups, contact messages and reports are refused in
+production. Turnstile works whether or not your DNS is on Cloudflare.
+
+1. In the Cloudflare dashboard, open **Turnstile** and add a widget for your
+   domain.
+2. Copy the widget's **site key** and **secret key** into **Admin Settings →
+   Security** (also part of the setup guide). Both must come from the same
+   widget; a site key and secret from different widgets fail every challenge.
+
+No rebuild or restart is needed. You can set the secret in `.env` as
+`CLOUDFLARE_TURNSTILE_API_SECRET` instead, but a secret saved in Admin
+Settings takes precedence. The setup guide counts this step as done once
+there's a secret and a site key saved in Admin Settings.
 
 ## Production Best Practices
 

@@ -2037,6 +2037,7 @@
     "trustLevelName": "Level {{level}} name",
     "security": "Security",
     "cloudflareTurnstileSiteKey": "Cloudflare Turnstile site key",
+    "cloudflareTurnstileSiteKeyHint": "The site key and the secret both come from the same Turnstile widget in your Cloudflare dashboard. Forms only show the challenge once the site key is saved.",
     "cloudflareTurnstileSecret": "Cloudflare Turnstile secret",
     "cloudflareTurnstileSecretPlaceholderConfigured": "Secret saved (leave blank to keep)",
     "secretPlaceholderConfigured": "Saved (leave blank to keep)",

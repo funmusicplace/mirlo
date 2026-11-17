@@ -26,8 +26,11 @@ const SupportArtistTiersForm: React.FC<{
   excludeDefault?: boolean;
 }> = ({ artist, onFinishedSubscribing, excludeDefault }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const { challenge: spamChallenge, token: cfTurnstile } =
-    useSpamChallenge("mt-4");
+  const {
+    challenge: spamChallenge,
+    token: cfTurnstile,
+    reset: resetSpamChallenge,
+  } = useSpamChallenge("mt-4");
 
   const { user, refreshLoggedInUser } = useAuthContext();
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
@@ -104,6 +107,7 @@ const SupportArtistTiersForm: React.FC<{
         snackbar(t("verificationEmailSent"), { type: "success" });
       }
     } catch (e) {
+      resetSpamChallenge();
       errorHandler(e);
     } finally {
       setIsCheckingForSubscription(false);

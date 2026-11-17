@@ -51,7 +51,11 @@ vi.mock("components/common/FollowArtistFromFediverse", () => ({
 }));
 
 vi.mock("components/common/SpamChallenge", () => ({
-  useSpamChallenge: () => ({ challenge: null, token: { current: undefined } }),
+  useSpamChallenge: () => ({
+    challenge: null,
+    token: { current: undefined },
+    reset: vi.fn(),
+  }),
 }));
 
 import FollowArtist from "./FollowArtist";
