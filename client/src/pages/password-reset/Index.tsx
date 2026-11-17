@@ -40,7 +40,7 @@ function Index() {
           ...data,
           redirectClient: CLIENT_ROOT + "/password-reset",
         });
-        snackbar("Check your email to continue resetting your password", {
+        snackbar(t("checkEmail"), {
           type: "success",
         });
       } catch (e: unknown) {
@@ -48,7 +48,7 @@ function Index() {
         console.error(e);
       }
     },
-    [snackbar]
+    [snackbar, t]
   );
 
   const onNewPassword = React.useCallback(
