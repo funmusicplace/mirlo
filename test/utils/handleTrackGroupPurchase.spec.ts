@@ -22,6 +22,7 @@ import {
   createProfile,
   createTrackGroup,
   createUser,
+  fakePayment,
 } from "../utils";
 
 describe("handleTrackGroupPurchase", () => {
@@ -222,60 +223,84 @@ describe("handleTrackGroupPurchase", () => {
     );
   });
 
-  it("should increment userFriendlyId per user across multiple purchases", async () => {
-    const stub = sinon.stub(sendMailQueue, "add").resolves();
+  const paid = (id: string) => fakePayment({ id, amount: 1000 });
 
-    const { user: profileOwner } = await createUser({
+  it("should number sales per seller across a label's artists", async () => {
+    sinon.stub(sendMailQueue, "add").resolves();
+    const { user: label } = await createUser({ email: "label@label.com" });
+    const { user: artistOwner } = await createUser({
       email: "artist@artist.com",
     });
-
-    const { user: purchaser } = await createUser({
-      email: "follower@follower.com",
-      emailConfirmationToken: null,
+    const { user: firstBuyer } = await createUser({
+      email: "first@buyer.com",
     });
-
-    const profile = await createProfile(profileOwner.id);
-
-    const trackGroup1 = await createTrackGroup(profile.id, {
-      title: "Album One",
+    const { user: secondBuyer } = await createUser({
+      email: "second@buyer.com",
     });
-
-    const trackGroup2 = await createTrackGroup(profile.id, {
-      title: "Album Two",
+    const owned = await createProfile(label.id);
+    const signed = await createProfile(artistOwner.id, {
+      paymentToUserId: label.id,
     });
+    const ownedAlbum = await createTrackGroup(owned.id, { title: "One" });
+    const signedAlbum = await createTrackGroup(signed.id, { title: "Two" });
 
-    // Make first purchase
-    await handleTrackGroupPurchase(purchaser.id, trackGroup1.id);
-    const firstTransaction = await prisma.userTransaction.findFirst({
-      where: { userId: purchaser.id },
-      orderBy: { createdAt: "asc" },
-    });
-    assert.equal(
-      firstTransaction?.userFriendlyId,
-      "0001",
-      "first transaction should have ID 0001"
+    const first = await handleTrackGroupPurchase(
+      firstBuyer.id,
+      ownedAlbum.id,
+      paid("pi_1")
+    );
+    const second = await handleTrackGroupPurchase(
+      secondBuyer.id,
+      signedAlbum.id,
+      paid("pi_2")
     );
 
-    // Make second purchase
-    await handleTrackGroupPurchase(purchaser.id, trackGroup2.id);
-    const secondTransaction = await prisma.userTransaction.findFirst({
-      where: { userId: purchaser.id },
-      orderBy: { createdAt: "desc" },
-    });
-    assert.equal(
-      secondTransaction?.userFriendlyId,
-      "0002",
-      "second transaction should have ID 0002"
-    );
-
-    // Verify count is correct
-    const allTransactions = await prisma.userTransaction.findMany({
-      where: { userId: purchaser.id },
+    const numbers = await prisma.userTransaction.findMany({
+      where: { id: { in: [first!.id, second!.id] } },
       orderBy: { createdAt: "asc" },
     });
-    assert.equal(allTransactions.length, 2);
-    assert.equal(allTransactions[0].userFriendlyId, "0001");
-    assert.equal(allTransactions[1].userFriendlyId, "0002");
+    assert.deepEqual(
+      numbers.map((t) => t.userFriendlyId),
+      ["0001", "0002"]
+    );
+  });
+
+  it("should number a buyer's sales from each seller separately", async () => {
+    sinon.stub(sendMailQueue, "add").resolves();
+    const { user: firstSeller } = await createUser({ email: "a@seller.com" });
+    const { user: secondSeller } = await createUser({ email: "b@seller.com" });
+    const { user: buyer } = await createUser({ email: "buyer@buyer.com" });
+    const firstAlbum = await createTrackGroup(
+      (await createProfile(firstSeller.id)).id
+    );
+    const secondAlbum = await createTrackGroup(
+      (await createProfile(secondSeller.id)).id
+    );
+
+    await handleTrackGroupPurchase(buyer.id, firstAlbum.id, paid("pi_1"));
+    await handleTrackGroupPurchase(buyer.id, secondAlbum.id, paid("pi_2"));
+
+    const transactions = await prisma.userTransaction.findMany({
+      where: { userId: buyer.id },
+    });
+    assert.deepEqual(
+      transactions.map((t) => t.userFriendlyId),
+      ["0001", "0001"]
+    );
+  });
+
+  it("should not number a free purchase", async () => {
+    sinon.stub(sendMailQueue, "add").resolves();
+    const { user: seller } = await createUser({ email: "seller@seller.com" });
+    const { user: buyer } = await createUser({ email: "buyer@buyer.com" });
+    const album = await createTrackGroup((await createProfile(seller.id)).id);
+
+    const transaction = await handleTrackGroupPurchase(buyer.id, album.id);
+
+    const saved = await prisma.userTransaction.findFirstOrThrow({
+      where: { id: transaction!.id },
+    });
+    assert.equal(saved.userFriendlyId, null);
   });
 
   it("should pass all variables required by artist-purchase-notification template", async () => {

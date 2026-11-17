@@ -1,4 +1,4 @@
-import type { IAudioMetadata } from "music-metadata";
+import { type IAudioMetadata, parseBuffer } from "music-metadata";
 import { describe, expect, test } from "vitest";
 
 import { extractTrackArtists, normalizeMetadata } from "./utils";
@@ -38,6 +38,74 @@ describe("normalizeMetadata", () => {
 
     expect(normalized.common.comment).toEqual(["Reader migration"]);
     expect(normalized.common.lyrics).toEqual(["First line", "Second line"]);
+  });
+
+  const withTitle = (container: string, title: string, artists: string[]) =>
+    normalizeMetadata({
+      common: { title, artists },
+      format: { container },
+      native: {},
+    } as unknown as IAudioMetadata).common;
+
+  test("re-decodes UTF-8 text that a WAV file's INFO chunk read as latin1", () => {
+    const common = withTitle("WAVE", "CafÃ© Ã\u00a0 minuit", ["BjÃ¶rk"]);
+    expect(common.title).toEqual("Café à minuit");
+    expect(common.artists).toEqual(["Björk"]);
+  });
+
+  test("leaves genuine latin1 and non-latin1 WAV text alone", () => {
+    expect(withTitle("WAVE", "Café", ["日本"]).title).toEqual("Café");
+    expect(withTitle("WAVE", "Café", ["日本"]).artists).toEqual(["日本"]);
+  });
+
+  test("re-decodes WAV comments and native tags", () => {
+    const normalized = normalizeMetadata({
+      common: { comment: [{ text: "TrÃ¨s bien" }] },
+      format: { container: "WAVE" },
+      native: { exif: [{ id: "PERFORMER", value: "SinÃ©ad" }] },
+    } as unknown as IAudioMetadata);
+    expect(normalized.common.comment).toEqual(["Très bien"]);
+    expect(extractTrackArtists(normalized)[0].artistName).toEqual("Sinéad");
+  });
+
+  test("doesn't touch text from other containers", () => {
+    expect(withTitle("FLAC", "CafÃ©", []).title).toEqual("CafÃ©");
+  });
+
+  test("repairs UTF-8 tags in a real WAV file and keeps ISO-8859-1 ones", async () => {
+    const encoder = new TextEncoder();
+    const chunk = (id: string, ...body: Uint8Array[]) => {
+      const bytes = Uint8Array.from(body.flatMap((part) => Array.from(part)));
+      const out = new Uint8Array(8 + bytes.length + (bytes.length & 1));
+      out.set(encoder.encode(id));
+      new DataView(out.buffer).setUint32(4, bytes.length, true);
+      out.set(bytes, 8);
+      return out;
+    };
+    const format = new Uint8Array([
+      1, 0, 1, 0, 0x40, 0x1f, 0, 0, 0x80, 0x3e, 0, 0, 2, 0, 16, 0,
+    ]);
+    const wav = chunk(
+      "RIFF",
+      encoder.encode("WAVE"),
+      chunk("fmt ", format),
+      chunk(
+        "LIST",
+        encoder.encode("INFO"),
+        chunk("INAM", encoder.encode("L’Été à Montréal\0")),
+        chunk("IART", encoder.encode("Mélodie Brûlée\0")),
+        chunk("IGNR", new Uint8Array([0x43, 0x61, 0x66, 0xe9, 0]))
+      ),
+      chunk("data", new Uint8Array(8))
+    );
+
+    const normalized = normalizeMetadata(
+      await parseBuffer(wav, { mimeType: "audio/wav" })
+    );
+
+    expect(normalized.common.title).toBe("L’Été à Montréal");
+    expect(normalized.common.artists).toEqual(["Mélodie Brûlée"]);
+    expect(normalized.common.genre).toEqual(["Café"]);
   });
 });
 

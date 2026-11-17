@@ -99,9 +99,7 @@ export const passwordResetInitiate = async (
       },
     });
 
-    if (!user) {
-      return res.status(404).json({ error: "This user does not exist" });
-    } else {
+    if (user) {
       const expirationDate = new Date();
       expirationDate.setMinutes(new Date().getMinutes() + 60);
       const token = randomUUID();
@@ -136,9 +134,9 @@ export const passwordResetInitiate = async (
           token,
         },
       });
-
-      return res.status(200).send({ message: "Success" });
     }
+
+    return res.status(200).send({ message: "Success" });
   } catch (e) {
     console.error(e);
     res.status(500);

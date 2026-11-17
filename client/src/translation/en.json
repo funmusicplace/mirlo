@@ -215,6 +215,7 @@
     "accountIncompleteTitle": "Finish claiming account",
     "email": "Email",
     "reset": "Send reset email",
+    "checkEmail": "If that address has an account, we've sent it a link to reset your password.",
     "password": "New password",
     "confirmNewPassword": "Set password",
     "accountIncomplete": "Set a password to finish claiming this account"

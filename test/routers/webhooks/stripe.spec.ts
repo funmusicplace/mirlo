@@ -1213,6 +1213,47 @@ describe("Stripe Webhooks - Failed Payments", () => {
       );
     });
 
+    it("should number the charged pledge as a sale of the payee", async () => {
+      const { user: label } = await createUser({ email: "label@test.com" });
+      const { user: artistOwner } = await createUser({
+        email: "artist@test.com",
+      });
+      const { user: backer } = await createUser({ email: "backer@test.com" });
+      await prisma.user.update({
+        where: { id: label.id },
+        data: { saleCount: 4 },
+      });
+      const profile = await createProfile(artistOwner.id, {
+        paymentToUserId: label.id,
+      });
+      const trackGroup = await createTrackGroup(profile.id);
+      const fundraiser = await createFundraiser(profile.id, {
+        trackGroupId: trackGroup.id,
+      });
+      const transaction = await prisma.userTransaction.create({
+        data: {
+          userId: backer.id,
+          amount: 5000,
+          currency: "usd",
+          paymentStatus: "PENDING",
+        },
+      });
+      await createFundraiserPledge(fundraiser.id, backer.id, {
+        amount: 5000,
+        associatedTransactionId: transaction.id,
+      });
+      sinon.stub(sendMailQueueModule.sendMailQueue, "add").resolves({} as any);
+
+      await handleFinishedTransactions.handleFundraiserPledgePaymentSuccess(
+        transaction.id
+      );
+
+      const numbered = await prisma.userTransaction.findFirstOrThrow({
+        where: { id: transaction.id },
+      });
+      assert.equal(numbered.userFriendlyId, "0005");
+    });
+
     it("should handle missing transaction gracefully", async () => {
       const sendMailStub = sinon
         .stub(sendMailQueueModule.sendMailQueue, "add")

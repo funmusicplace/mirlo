@@ -122,6 +122,7 @@ model User {
   isAdmin                             Boolean                          @default(false)
   countryCode                         String?
   currency                            String?
+  saleCount                           Int                              @default(0)
   emailConfirmationToken              String?                          @default(uuid()) @db.Uuid
   emailConfirmationExpiration         DateTime?                        @default(dbgenerated("(NOW() + '00:20:00'::interval)"))
   passwordResetConfirmationToken      String?

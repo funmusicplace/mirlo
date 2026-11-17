@@ -325,6 +325,24 @@ export default function () {
         });
       }
 
+      if (
+        movingToNewProfile &&
+        existingTrackGroup.fundraiserId &&
+        (await prisma.fundraiserPledge.count({
+          where: {
+            fundraiserId: existingTrackGroup.fundraiserId,
+            paidAt: null,
+            cancelledAt: null,
+          },
+        })) > 0
+      ) {
+        throw new AppError({
+          httpCode: 409,
+          description:
+            "This release's fundraiser has open pledges. It can be moved once they're paid or cancelled.",
+        });
+      }
+
       await prisma.trackGroup.updateMany({
         where: { id: Number(trackGroupId) },
         data: {

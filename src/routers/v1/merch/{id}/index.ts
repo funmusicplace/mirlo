@@ -45,9 +45,6 @@ export default function () {
           ...(loggedInUser?.isAdmin
             ? {}
             : { profile: whereForVisibleProfile() }),
-          shippingDestinations: {
-            some: {},
-          },
         },
         include: {
           profile: { include: { user: { select: { currency: true } } } },

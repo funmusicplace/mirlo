@@ -1,5 +1,6 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+import { omit } from "lodash";
 
 import logger from "../../logger";
 import { subscribeUserToArtist } from "../../utils/artist";
@@ -191,7 +192,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
         accountType: normalizeAccountType(accountType),
       });
 
-      return res.json(result);
+      return res.json(omit(result, ["emailConfirmationToken"]));
     }
   } catch (e) {
     next(e);

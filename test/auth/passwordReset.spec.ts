@@ -140,6 +140,33 @@ describe("auth/password-reset/initiate", () => {
     return add.firstCall.args[1].locals;
   };
 
+  it("should answer the same whether or not the account exists", async () => {
+    await createUser({ email: "test@test.com" });
+    const add = sinon.stub(sendMailQueue, "add").resolves();
+    const responses = [];
+
+    for (const email of ["test@test.com", "nobody@test.com"]) {
+      const res = {
+        status: sinon.stub().returnsThis(),
+        send: sinon.stub(),
+        json: sinon.stub(),
+      };
+      await passwordResetInitiate(
+        { body: { email, redirectClient: "" } } as Request,
+        res as unknown as Response,
+        () => {}
+      );
+      responses.push({
+        status: res.status.firstCall.args[0],
+        body: res.send.firstCall?.args[0] ?? res.json.firstCall?.args[0],
+      });
+    }
+
+    assert.deepEqual(responses[1], responses[0]);
+    assert.equal(add.callCount, 1);
+    assert.equal(add.firstCall.args[1].message.to, "test@test.com");
+  });
+
   it("should keep a redirect on the client's origin", async () => {
     const { user } = await createUser({ email: "test@test.com" });
     const { applicationUrl } = await getClient();

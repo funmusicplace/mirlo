@@ -537,6 +537,58 @@ describe("manage/fundraisers/{fundraiserId}", () => {
       assert.equal(allowed.statusCode, 200);
     });
 
+    it("leaves pledges and the release alone when the delete fails", async () => {
+      const { user, accessToken } = await createUser({
+        email: "fundraiser-owner@example.com",
+      });
+      const { user: backer } = await createUser({ email: "a@example.com" });
+      const artist = await createArtist(user.id);
+      const trackGroup = await createTrackGroup(artist.id);
+      const fundraiser = await createFundraiser(artist.id, {
+        trackGroupId: trackGroup.id,
+      });
+      const pledge = await createFundraiserPledge(fundraiser.id, backer.id);
+
+      await prisma.$executeRawUnsafe(`
+        CREATE OR REPLACE FUNCTION test_fail_fundraiser_delete() RETURNS trigger AS $$
+        BEGIN
+          RAISE EXCEPTION 'delete failed';
+        END;
+        $$ LANGUAGE plpgsql;
+      `);
+      await prisma.$executeRawUnsafe(`
+        CREATE TRIGGER test_fail_fundraiser_delete
+        BEFORE UPDATE ON "Fundraiser"
+        FOR EACH ROW WHEN (NEW."deletedAt" IS NOT NULL)
+        EXECUTE FUNCTION test_fail_fundraiser_delete();
+      `);
+      try {
+        const response = await requestApp
+          .delete(`manage/fundraisers/${fundraiser.id}`)
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json");
+        assert.notEqual(response.statusCode, 200);
+      } finally {
+        await prisma.$executeRawUnsafe(
+          `DROP TRIGGER IF EXISTS test_fail_fundraiser_delete ON "Fundraiser"`
+        );
+        await prisma.$executeRawUnsafe(
+          `DROP FUNCTION IF EXISTS test_fail_fundraiser_delete()`
+        );
+      }
+
+      const stillThere = await prisma.fundraiser.findFirstOrThrow({
+        where: { id: fundraiser.id },
+        include: { trackGroups: true },
+      });
+      assert.equal(stillThere.trackGroups.length, 1);
+      assert.equal(stillThere.urlSlug, fundraiser.urlSlug);
+      const untouched = await prisma.fundraiserPledge.findUniqueOrThrow({
+        where: { id: pledge.id },
+      });
+      assert.equal(untouched.cancelledAt, null);
+    });
+
     it("frees the deleted fundraiser's URL for a new one", async () => {
       const { user, accessToken } = await createUser({
         email: "fundraiser-owner@example.com",

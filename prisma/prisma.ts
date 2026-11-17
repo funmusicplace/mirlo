@@ -16,6 +16,7 @@ export const SECRET_USER_FIELDS = {
   passwordResetConfirmationToken: true,
   userConfirmationCode: true,
   pendingEmailToken: true,
+  saleCount: true,
 } as const;
 
 // A SafeUser is one that omits the secret fields
@@ -81,15 +82,6 @@ const SOFT_DELETE_MODELS = new Set<string>(
  */
 const prisma = baseClient.$extends({
   query: {
-    userTransaction: {
-      async create({ args, query }) {
-        const count = await baseClient.userTransaction.count({
-          where: { userId: args.data.userId },
-        });
-        args.data.userFriendlyId = String(count + 1).padStart(4, "0");
-        return query(args);
-      },
-    },
     $allModels: {
       async $allOperations({ model, operation, args, query }) {
         if (!SOFT_DELETE_MODELS.has(model)) {

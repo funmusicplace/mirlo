@@ -319,41 +319,43 @@ export default function () {
       fundraiserId: string;
     };
     try {
-      await prisma.fundraiserPledge.updateMany({
-        where: {
-          fundraiserId: Number(fundraiserId),
-          paidAt: null,
-          cancelledAt: null,
-          fundraiser: { status: "ACTIVE" },
-        },
-        data: { cancelledAt: new Date() },
-      });
-
-      const pledgesBeingCharged = await prisma.fundraiserPledge.count({
-        where: {
-          fundraiserId: Number(fundraiserId),
-          paidAt: null,
-          cancelledAt: null,
-        },
-      });
-      if (pledgesBeingCharged > 0) {
-        throw new AppError({
-          httpCode: 409,
-          description:
-            "This fundraiser's pledges are being charged. It can be removed once every pledge is paid or cancelled.",
+      await prisma.$transaction(async (tx) => {
+        await tx.fundraiser.update({
+          where: { id: Number(fundraiserId) },
+          data: {
+            trackGroups: { set: [] },
+            urlSlug: null,
+            deletedAt: new Date(),
+          },
         });
-      }
 
-      await prisma.fundraiser.update({
-        where: { id: Number(fundraiserId) },
-        data: { trackGroups: { set: [] }, urlSlug: null },
+        await tx.fundraiserPledge.updateMany({
+          where: {
+            fundraiserId: Number(fundraiserId),
+            paidAt: null,
+            cancelledAt: null,
+            fundraiser: { status: "ACTIVE" },
+          },
+          data: { cancelledAt: new Date() },
+        });
+
+        const pledgesBeingCharged = await tx.fundraiserPledge.count({
+          where: {
+            fundraiserId: Number(fundraiserId),
+            paidAt: null,
+            cancelledAt: null,
+          },
+        });
+        if (pledgesBeingCharged > 0) {
+          throw new AppError({
+            httpCode: 409,
+            description:
+              "This fundraiser's pledges are being charged. It can be removed once every pledge is paid or cancelled.",
+          });
+        }
       });
 
       await deleteFundraiserImages(Number(fundraiserId));
-
-      await prisma.fundraiser.delete({
-        where: { id: Number(fundraiserId) },
-      });
 
       return res.json({ message: "Success" });
     } catch (e) {
