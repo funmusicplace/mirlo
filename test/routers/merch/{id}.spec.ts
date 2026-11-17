@@ -65,6 +65,23 @@ describe("GET /v1/merch/{id}", () => {
     assert.equal(response.body.result.id, merch.id);
   });
 
+  it("should GET / merch with no shipping destinations", async () => {
+    const { user } = await createUser({ email: "artist@artist.com" });
+    const profile = await createProfile(user.id);
+    const merch = await createMerch(profile.id, {
+      title: "Digital zine",
+      isPublic: true,
+    });
+
+    const response = await requestApp
+      .get(`merch/${merch.id}`)
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.result.id, merch.id);
+    assert.deepEqual(response.body.result.shippingDestinations, []);
+  });
+
   it("returns the trackGroup's own artist on includePurchaseTrackGroup (#2008)", async () => {
     // A label-as-artist sells merch that bundles a release owned by a roster
     // artist. The client builds the album link from the merch response and

@@ -24,6 +24,14 @@ export const merchImagesInclude = {
 
 export type MerchImageWithImage = MerchImage & { image: Image };
 
+export const publicMerchArgs = {
+  where: {
+    isPublic: true,
+    deletedAt: null,
+  },
+  orderBy: [{ order: { sort: "asc", nulls: "last" } }, { createdAt: "asc" }],
+} satisfies Prisma.Profile$merchArgs;
+
 export const merchImageUrl = (
   merchImage: MerchImageWithImage | undefined,
   size: number

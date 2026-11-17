@@ -14,7 +14,7 @@ import { AppError } from "./error";
 import generateSlug from "./generateSlug";
 import { getClient } from "./getClient";
 import { convertURLArrayToSizes, storedImageVariantUrl } from "./images";
-import { deleteMerch, merchImagesInclude } from "./merch";
+import { deleteMerch, merchImagesInclude, publicMerchArgs } from "./merch";
 import { resolvePayee } from "./payments/payee";
 import { clearImageSlot } from "./pendingImage";
 import { postImagesForContent } from "./postContent";
@@ -663,14 +663,7 @@ export const singleInclude = (queryOptions?: {
     background: true,
     avatar: true,
     merch: {
-      where: {
-        isPublic: true,
-        deletedAt: null,
-      },
-      orderBy: [
-        { order: { sort: "asc", nulls: "last" } },
-        { createdAt: "asc" },
-      ],
+      ...publicMerchArgs,
       include: {
         images: merchImagesInclude,
         includePurchaseTrackGroup: true,
