@@ -14,6 +14,7 @@ export interface FormSettings {
   emailProvider?: SettingsFromAPI["settings"]["emailProvider"];
   cloudflareTurnstileSecret?: string;
   cloudflareTurnstileSecretConfigured?: boolean;
+  cloudflareTurnstileSiteKey?: string;
   defconLevel?: number;
   bucketPrefix?: string;
   trustLevelNames?: string[];
@@ -99,6 +100,8 @@ export const settingsToForm = (
   cloudflareTurnstileSecret: "",
   cloudflareTurnstileSecretConfigured:
     settings.settings?.cloudflareTurnstileSecretConfigured,
+  cloudflareTurnstileSiteKey:
+    settings.settings?.cloudflareTurnstileSiteKey ?? "",
   terms: settings.terms ?? "",
   privacyPolicy: settings.privacyPolicy ?? "",
   cookiePolicy: settings.cookiePolicy ?? "",
@@ -128,6 +131,7 @@ export const formToSettingsPayload = (
       ...data.emailProvider,
     },
     cloudflareTurnstileSecret: data.cloudflareTurnstileSecret,
+    cloudflareTurnstileSiteKey: data.cloudflareTurnstileSiteKey,
     featuredArtistIds,
     trustLevelNames: data.trustLevelNames,
   },

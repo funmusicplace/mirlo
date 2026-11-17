@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import { Turnstile } from "@marsidev/react-turnstile";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -11,6 +10,7 @@ import { useSnackbar } from "state/SnackbarContext";
 
 import FormComponent from "./FormComponent";
 import { InputEl } from "./Input";
+import { useSpamChallenge } from "./SpamChallenge";
 
 const FollowArtistWithEmail: React.FC<{
   artist: Pick<Artist, "id" | "name">;
@@ -21,7 +21,11 @@ const FollowArtistWithEmail: React.FC<{
   const errorHandler = useErrorHandler();
 
   const [isLoading, setIsLoading] = React.useState(false);
-  const cfTurnstile = React.useRef<string | undefined>(undefined);
+  const {
+    challenge: spamChallenge,
+    token: cfTurnstile,
+    reset: resetSpamChallenge,
+  } = useSpamChallenge("mt-4");
 
   const { register, handleSubmit } = useForm<{ email: string }>();
 
@@ -41,6 +45,7 @@ const FollowArtistWithEmail: React.FC<{
         snackbar(t("verificationEmailSent"), { type: "success" });
       }
     } catch (e) {
+      resetSpamChallenge();
       errorHandler(e);
     } finally {
       setIsLoading(false);
@@ -72,22 +77,7 @@ const FollowArtistWithEmail: React.FC<{
       >
         {t("followArtist", { artistName: artist.name })}
       </ArtistButton>
-      {!user && (
-        <div
-          className={css`
-            display: flex;
-            justify-content: center;
-            margin-top: 1rem;
-          `}
-        >
-          <Turnstile
-            siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY}
-            onSuccess={(token) => {
-              cfTurnstile.current = token;
-            }}
-          />
-        </div>
-      )}
+      {!user && spamChallenge}
     </form>
   );
 };

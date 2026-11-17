@@ -9,6 +9,7 @@ import {
   loadInstanceSettings,
   queryInstanceSettings,
   useStripePublishableKey,
+  useTurnstileSiteKey,
 } from "./instanceSettings";
 
 const injectInstance = (data: unknown) => {
@@ -96,33 +97,49 @@ describe("loadInstanceSettings", () => {
   });
 });
 
+const renderHookValue = <T>(hook: () => T) => {
+  const queryClient = new QueryClient();
+  const wrapper = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+  return renderHook(hook, { wrapper }).result.current;
+};
+
 describe("useStripePublishableKey", () => {
   afterEach(() => {
     document.getElementById("__MIRLO_INSTANCE__")?.remove();
   });
 
-  const renderKeyHook = () => {
-    const queryClient = new QueryClient();
-    const wrapper = ({ children }: { children: React.ReactNode }) =>
-      React.createElement(
-        QueryClientProvider,
-        { client: queryClient },
-        children
-      );
-    return renderHook(() => useStripePublishableKey(), { wrapper }).result
-      .current;
-  };
-
   it("prefers the key saved in Admin Settings", () => {
     injectInstance({ ...injected, stripePublishableKey: "pk_test_admin" });
 
-    expect(renderKeyHook()).toBe("pk_test_admin");
+    expect(renderHookValue(useStripePublishableKey)).toBe("pk_test_admin");
   });
 
   it("falls back to the build-time env key when none is saved", () => {
     injectInstance({ ...injected, stripePublishableKey: null });
 
     // Set in test/vitest-setup.ts.
-    expect(renderKeyHook()).toBe("pk_test_fake");
+    expect(renderHookValue(useStripePublishableKey)).toBe("pk_test_fake");
+  });
+});
+
+describe("useTurnstileSiteKey", () => {
+  afterEach(() => {
+    document.getElementById("__MIRLO_INSTANCE__")?.remove();
+    vi.unstubAllEnvs();
+  });
+
+  it("prefers the site key saved in Admin Settings", () => {
+    vi.stubEnv("VITE_CLOUDFLARE_CLIENT_KEY", "0xbuildtime");
+    injectInstance({ ...injected, turnstileSiteKey: "0xadmin" });
+
+    expect(renderHookValue(useTurnstileSiteKey)).toBe("0xadmin");
+  });
+
+  it("falls back to the build-time env key when none is saved", () => {
+    vi.stubEnv("VITE_CLOUDFLARE_CLIENT_KEY", "0xbuildtime");
+    injectInstance({ ...injected, turnstileSiteKey: null });
+
+    expect(renderHookValue(useTurnstileSiteKey)).toBe("0xbuildtime");
   });
 });

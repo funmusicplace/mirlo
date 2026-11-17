@@ -1,12 +1,12 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
-import { Turnstile } from "@marsidev/react-turnstile";
 import checkmark from "animations/lotties/checkmark.json";
 import Box from "components/common/Box";
 import Button from "components/common/Button";
 import Checkbox from "components/common/FormCheckbox";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
+import { useSpamChallenge } from "components/common/SpamChallenge";
 import WidthContainer from "components/common/WidthContainer";
 import { useInstanceSettings } from "queries/instanceSettings";
 import React from "react";
@@ -108,7 +108,11 @@ function Index() {
   const accountType = search.get("accountType");
   const [hasRegistered, setHasRegistered] = React.useState(false);
   const [accountIncomplete, setAccountIncomplete] = React.useState(false);
-  const cfTurnstile = React.useRef<string | undefined>(undefined);
+  const {
+    challenge: spamChallenge,
+    token: cfTurnstile,
+    reset: resetSpamChallenge,
+  } = useSpamChallenge("mb-4");
   const methods = useForm<SignupInputs>({
     defaultValues: {
       email: search.get("email") ?? "",
@@ -166,6 +170,7 @@ function Index() {
         setHasRegistered(true);
         snackbar(t("success"), { type: "success" });
       } catch (e) {
+        resetSpamChallenge();
         if (e instanceof APIResponseError) {
           const errorBody = e.body as SignupErrorResponse | undefined;
           if (errorBody?.requiresEmailVerification) {
@@ -201,7 +206,7 @@ function Index() {
         setIsLoading(false);
       }
     },
-    [errorHandler, snackbar, t, i18n]
+    [errorHandler, snackbar, t, i18n, resetSpamChallenge]
   );
 
   const handleResendVerification = React.useCallback(async () => {
@@ -451,14 +456,7 @@ function Index() {
               }}
             />{" "}
           </div>
-          <div className="flex justify-center mb-4">
-            <Turnstile
-              siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY}
-              onSuccess={(token) => {
-                cfTurnstile.current = token;
-              }}
-            />
-          </div>
+          {spamChallenge}
           <Button
             className={css`
               margin-top: 1rem;

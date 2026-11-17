@@ -38,7 +38,11 @@ export const STEP_FIELDS: Record<SavedStepKey, Path<FormSettings>[]> = {
     "stripe.publishableKey",
     "stripe.webhookConnectSigningSecret",
   ],
-  spamProtection: ["cloudflareTurnstileSecret", "defconLevel"],
+  spamProtection: [
+    "cloudflareTurnstileSiteKey",
+    "cloudflareTurnstileSecret",
+    "defconLevel",
+  ],
   platformPolicy: [
     "platformPercent",
     "isClosedToPublicArtistSignup",

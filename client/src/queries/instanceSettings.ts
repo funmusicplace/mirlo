@@ -33,6 +33,11 @@ export const useStripePublishableKey = (): string | undefined =>
   import.meta.env.VITE_PUBLISHABLE_STRIPE_KEY ||
   undefined;
 
+export const useTurnstileSiteKey = (): string =>
+  useInstanceSettings().turnstileSiteKey ||
+  import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY ||
+  "";
+
 const completeInstanceSetup = () =>
   api
     .post<

@@ -8,6 +8,7 @@ import {
   createSubscriptionConfirmation,
   subscribeUserToProfile,
 } from "../../../../utils/artist";
+import { requireSpamChallenge } from "../../../../utils/cloudflare";
 import { AppError } from "../../../../utils/error";
 import { getSiteSettings } from "../../../../utils/settings";
 
@@ -19,14 +20,22 @@ type Params = {
 
 export default function () {
   const operations = {
-    POST: [confirmProfileIdExists, userOrAppLoggedInWithoutRedirect, POST],
+    POST: [
+      confirmProfileIdExists,
+      userOrAppLoggedInWithoutRedirect,
+      requireSpamChallenge({
+        skip: (req) => Boolean(req.user),
+        skipIfNoSecret: true,
+      }),
+      POST,
+    ],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
     const { id: profileId } = req.params as unknown as Params;
     const loggedInuser = req.user;
 
-    const { email, message, cfTurnstile } = req.body ?? {};
+    const { email, message } = req.body ?? {};
     const normalisedEmail =
       typeof email === "string" ? email.trim().toLowerCase() : undefined;
 

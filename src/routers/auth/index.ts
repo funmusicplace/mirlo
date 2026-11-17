@@ -2,6 +2,7 @@ import express from "express";
 import { rateLimit } from "express-rate-limit";
 
 import { userAuthenticated } from "../../auth/passport";
+import { requireSpamChallenge } from "../../utils/cloudflare";
 import { plainBodyValuesOnly } from "../../utils/plainInput";
 
 import confirmEmailToken from "./confirmEmailToken";
@@ -23,7 +24,7 @@ const router = express.Router();
 
 router.use(plainBodyValuesOnly);
 
-router.post(`/signup`, signup);
+router.post(`/signup`, requireSpamChallenge(), signup);
 
 const verifyEmailLimiter = rateLimit({
   windowMs: 60 * 1000,

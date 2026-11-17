@@ -32,6 +32,7 @@ export type InstanceSettings = {
   languages: AvailableLanguage[] | null;
   setupStage: SetupStage;
   stripePublishableKey: string | null;
+  turnstileSiteKey: string | null;
   contactEmail: string | null;
   supportEmail: string | null;
   logo: SerializedInstanceLogo | null;
@@ -85,6 +86,8 @@ export const serializeInstanceSettings = (
     setupStage: resolveSetupStage(settings),
     stripePublishableKey:
       settings.settings?.stripe?.publishableKey?.trim() || null,
+    turnstileSiteKey:
+      settings.settings?.cloudflareTurnstileSiteKey?.trim() || null,
     contactEmail: resolveContactEmail(settings),
     supportEmail: resolveSupportEmail(settings),
     logo: serializeInstanceLogo(settings.logo),

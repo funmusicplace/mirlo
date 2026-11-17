@@ -25,6 +25,7 @@ interface InstanceSettings {
   languages: { short: string; name: string }[] | null;
   setupStage: "welcome" | "guide" | "done";
   stripePublishableKey?: string | null;
+  turnstileSiteKey?: string | null;
   contactEmail?: string | null;
   supportEmail?: string | null;
   logo?: InstanceLogo | null;
@@ -101,6 +102,7 @@ interface SettingsFromAPI {
     };
     cloudflareTurnstileSecret?: string;
     cloudflareTurnstileSecretConfigured?: boolean;
+    cloudflareTurnstileSiteKey?: string;
     featuredArtistIds?: number[];
     trustLevelNames?: string[];
   };

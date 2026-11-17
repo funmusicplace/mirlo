@@ -11,7 +11,13 @@ vi.mock("react-i18next", () => ({
   initReactI18next: { type: "3rdParty", init: vi.fn() },
 }));
 
-vi.mock("@marsidev/react-turnstile", () => ({ Turnstile: () => null }));
+vi.mock("./SpamChallenge", () => ({
+  useSpamChallenge: () => ({
+    challenge: null,
+    token: { current: undefined },
+    reset: vi.fn(),
+  }),
+}));
 
 const PAID_TIER = {
   id: 3,

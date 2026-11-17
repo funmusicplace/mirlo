@@ -1,5 +1,4 @@
 import { css } from "@emotion/css";
-import { Turnstile } from "@marsidev/react-turnstile";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import SwitchTierConfirmation from "components/Artist/SwitchTierConfirmation";
@@ -18,6 +17,7 @@ import { InputEl } from "./Input";
 import { moneyDisplay } from "./Money";
 import PurchaseElements from "./Purchase/PurchaseElements";
 import { useSubscriptionCheckout } from "./Purchase/useSubscriptionCheckout";
+import { useSpamChallenge } from "./SpamChallenge";
 import SupportArtistPopUpTiers from "./SupportArtistPopUpTiers";
 
 const SupportArtistTiersForm: React.FC<{
@@ -26,6 +26,11 @@ const SupportArtistTiersForm: React.FC<{
   excludeDefault?: boolean;
 }> = ({ artist, onFinishedSubscribing, excludeDefault }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const {
+    challenge: spamChallenge,
+    token: cfTurnstile,
+    reset: resetSpamChallenge,
+  } = useSpamChallenge("mt-4");
 
   const { user, refreshLoggedInUser } = useAuthContext();
   const [isCheckingForSubscription, setIsCheckingForSubscription] =
@@ -93,17 +98,16 @@ const SupportArtistTiersForm: React.FC<{
         });
         return;
       } else {
-        // @ts-ignore
-        const cfTurnstile = turnstile.getResponse();
         await api.post(`artists/${artist.id}/follow`, {
           email,
-          cfTurnstile,
+          cfTurnstile: cfTurnstile.current,
         });
       }
       if (!user) {
         snackbar(t("verificationEmailSent"), { type: "success" });
       }
     } catch (e) {
+      resetSpamChallenge();
       errorHandler(e);
     } finally {
       setIsCheckingForSubscription(false);
@@ -260,15 +264,7 @@ const SupportArtistTiersForm: React.FC<{
         </div>
       )}
 
-      <div
-        className={css`
-          display: flex;
-          justify-content: center;
-          margin-top: 1rem;
-        `}
-      >
-        <Turnstile siteKey={import.meta.env.VITE_CLOUDFLARE_CLIENT_KEY} />
-      </div>
+      {spamChallenge}
     </>
   );
 };

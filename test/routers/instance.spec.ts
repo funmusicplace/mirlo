@@ -39,6 +39,7 @@ describe("instance", () => {
         languages: null,
         setupStage: "welcome",
         stripePublishableKey: null,
+        turnstileSiteKey: null,
         contactEmail: null,
         supportEmail: null,
         logo: null,
@@ -71,6 +72,7 @@ describe("instance", () => {
         },
         emailProvider: { provider: "sendgrid", sendgrid: { apiKey: "SG.x" } },
         cloudflareTurnstileSecret: "0xsecret",
+        cloudflareTurnstileSiteKey: " 0xpublic ",
       });
 
       const response = await requestApp
@@ -112,8 +114,10 @@ describe("instance", () => {
         "supportEmail",
         "tintLogo",
         "trustLevelNames",
+        "turnstileSiteKey",
       ]);
       assert.equal(result.stripePublishableKey, "pk_live_public");
+      assert.equal(result.turnstileSiteKey, "0xpublic");
       assert.equal(result.contactEmail, "hello@nightjar.test");
       assert.equal(result.supportEmail, "help@nightjar.test");
       assert.ok(!JSON.stringify(response.body).includes("secret"));
