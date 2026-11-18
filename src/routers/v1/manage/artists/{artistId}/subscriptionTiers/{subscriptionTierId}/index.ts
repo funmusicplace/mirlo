@@ -128,6 +128,12 @@ export default function () {
           // TODO: make sure minAmount is alphanumeric
           minAmount: +req.body.minAmount,
           autoPurchaseAlbums: !!req.body.autoPurchaseAlbums,
+          hiddenAt:
+            req.body.isHidden === undefined
+              ? undefined
+              : req.body.isHidden
+                ? (subscriptionTier.hiddenAt ?? new Date())
+                : null,
           digitalDiscountPercent: normalizeDiscountPercent(
             req.body.digitalDiscountPercent
           ),

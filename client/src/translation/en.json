@@ -1716,6 +1716,9 @@
   },
   "subscriptionForm": {
     "supporters": "Manage supporters",
+    "hideTier": "Hide this tier from my profile",
+    "hideTierHint": "Hidden tiers aren't listed on your profile, but anyone with the link can still view and subscribe to them. Existing supporters keep their subscription.",
+    "hidden": "Hidden",
     "theMoneyBit": "The money bit",
     "tierImageDescription": "add an image to illustrate this support tier (optional)",
     "platformPercent": "Platform cut",

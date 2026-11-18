@@ -215,6 +215,29 @@ describe("manage/artists/{artistId}/subscriptionTiers/{tierId}", () => {
       assert.equal(response.statusCode, 200);
     });
 
+    it("should hide and unhide a tier with isHidden", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id);
+      const put = (body: Record<string, unknown>) =>
+        requestApp
+          .put(`manage/artists/${artist.id}/subscriptionTiers/${tier.id}`)
+          .send({ minAmount: 500, ...body })
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json");
+
+      const hidden = await put({ isHidden: true });
+      assert.ok(hidden.body.result.hiddenAt);
+
+      const untouched = await put({});
+      assert.equal(untouched.body.result.hiddenAt, hidden.body.result.hiddenAt);
+
+      const shown = await put({ isHidden: false });
+      assert.equal(shown.body.result.hiddenAt, null);
+    });
+
     it("should refresh the urlSlug when the tier is renamed and keep it otherwise", async () => {
       const { user, accessToken } = await createUser({
         email: "test@test.com",

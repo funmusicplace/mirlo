@@ -278,6 +278,12 @@ const apiDoc = {
             "discount percentage applied for subscribers on merch purchases",
           type: "number",
         },
+        hiddenAt: {
+          description:
+            "when the tier was hidden from the artist's profile, or null if it is listed",
+          type: "string",
+          format: "date-time",
+        },
       },
     },
     ArtistSubscriptionTierCreate: {
@@ -306,6 +312,11 @@ const apiDoc = {
             "discount percentage applied for subscribers on merch purchases",
           type: "number",
         },
+        isHidden: {
+          description:
+            "hide the tier from the artist's profile; it stays reachable by direct link",
+          type: "boolean",
+        },
       },
     },
     ArtistSubscriptionTierUpdate: {
@@ -332,6 +343,11 @@ const apiDoc = {
           description:
             "discount percentage applied for subscribers on merch purchases",
           type: "number",
+        },
+        isHidden: {
+          description:
+            "hide the tier from the artist's profile; it stays reachable by direct link",
+          type: "boolean",
         },
       },
     },

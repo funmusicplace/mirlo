@@ -622,18 +622,95 @@ export const notifyArtistOfSubscriptionEnd = async (
   });
 };
 
+export const subscriptionTierInclude = ({
+  includePrivate,
+  loggedInUserId,
+}: {
+  includePrivate?: boolean;
+  loggedInUserId?: number;
+}) =>
+  ({
+    images: {
+      where: {
+        image: {
+          deletedAt: null,
+        },
+      },
+      include: {
+        image: true,
+      },
+    },
+    releases: {
+      where: {
+        trackGroup: includePrivate
+          ? { deletedAt: null }
+          : trackGroupPublishedObject(),
+      },
+      orderBy: [
+        { order: { sort: "asc", nulls: "last" } },
+        { trackGroup: { releaseDate: "desc" } },
+      ],
+      select: {
+        trackGroup: {
+          select: {
+            cover: true,
+            id: true,
+            title: true,
+            urlSlug: true,
+            isGettable: true,
+            isPublic: true,
+            isPreorder: true,
+            publishedAt: true,
+            releaseDate: true,
+            minPrice: true,
+            fundraiserId: true,
+            fundraiser: true,
+            paymentToUser: { select: { currency: true } },
+            _count: subscriptionTierReleasesCount,
+            tracks: {
+              where: { deletedAt: null, audio: { uploadState: "SUCCESS" } },
+              orderBy: { order: "asc" },
+              select: { id: true, order: true, isPreview: true },
+            },
+            ...(loggedInUserId
+              ? {
+                  userTrackGroupPurchases: {
+                    where: { userId: loggedInUserId },
+                    select: { userId: true },
+                  },
+                }
+              : {}),
+            profile: {
+              select: {
+                name: true,
+                id: true,
+                urlSlug: true,
+                user: { select: { currency: true } },
+              },
+            },
+          },
+        },
+      },
+    },
+  }) satisfies Prisma.ProfileSubscriptionTierInclude;
+
 /**
  * Common includes when returning a single artist
  */
 export const singleInclude = (queryOptions?: {
   includeDefaultTier?: boolean;
+  includeHiddenTiers?: boolean;
   includePrivate?: boolean;
   loggedInUserId?: number;
 }): Prisma.ProfileInclude<DefaultArgs> & {
   merch: { include: { images: typeof merchImagesInclude } };
 } => {
-  const { includeDefaultTier, includePrivate, loggedInUserId } =
-    queryOptions ?? {};
+  const {
+    includeDefaultTier,
+    includeHiddenTiers,
+    includePrivate,
+    loggedInUserId,
+  } = queryOptions ?? {};
   return {
     trackGroups: {
       where: {
@@ -673,72 +750,25 @@ export const singleInclude = (queryOptions?: {
       where: {
         deletedAt: null,
         isDefaultTier: includeDefaultTier ? undefined : false,
+        ...(includeHiddenTiers
+          ? {}
+          : {
+              OR: [
+                { hiddenAt: null },
+                ...(loggedInUserId
+                  ? [
+                      {
+                        userSubscriptions: {
+                          some: { userId: loggedInUserId, deletedAt: null },
+                        },
+                      },
+                    ]
+                  : []),
+              ],
+            }),
       },
       orderBy: subscriptionTierOrderBy,
-      include: {
-        images: {
-          where: {
-            image: {
-              deletedAt: null,
-            },
-          },
-          include: {
-            image: true,
-          },
-        },
-        releases: {
-          where: {
-            trackGroup: includePrivate
-              ? { deletedAt: null }
-              : trackGroupPublishedObject(),
-          },
-          orderBy: [
-            { order: { sort: "asc", nulls: "last" } },
-            { trackGroup: { releaseDate: "desc" } },
-          ],
-          select: {
-            trackGroup: {
-              select: {
-                cover: true,
-                id: true,
-                title: true,
-                urlSlug: true,
-                isGettable: true,
-                isPublic: true,
-                isPreorder: true,
-                publishedAt: true,
-                releaseDate: true,
-                minPrice: true,
-                fundraiserId: true,
-                fundraiser: true,
-                paymentToUser: { select: { currency: true } },
-                _count: subscriptionTierReleasesCount,
-                tracks: {
-                  where: { deletedAt: null, audio: { uploadState: "SUCCESS" } },
-                  orderBy: { order: "asc" },
-                  select: { id: true, order: true, isPreview: true },
-                },
-                ...(loggedInUserId
-                  ? {
-                      userTrackGroupPurchases: {
-                        where: { userId: loggedInUserId },
-                        select: { userId: true },
-                      },
-                    }
-                  : {}),
-                profile: {
-                  select: {
-                    name: true,
-                    id: true,
-                    urlSlug: true,
-                    user: { select: { currency: true } },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
+      include: subscriptionTierInclude({ includePrivate, loggedInUserId }),
     },
     artistLabels: {
       include: {

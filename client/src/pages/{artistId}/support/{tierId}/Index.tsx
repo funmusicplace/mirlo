@@ -1,7 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
 import SubscriptionTierPage from "components/Artist/SubscriptionTierPage";
 import Box from "components/common/Box";
 import FullPageLoadingSpinner from "components/common/FullPageLoadingSpinner";
 import { MetaCard } from "components/common/MetaCard";
+import { queryArtistSubscriptionTier } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useParams } from "react-router-dom";
@@ -10,19 +12,15 @@ import useArtistQuery from "utils/useArtistQuery";
 
 const Index: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
-  const { tierId } = useParams();
+  const { artistId, tierId } = useParams();
   const { data: artist, isLoading } = useArtistQuery();
+  const { data: subscriptionTier, isLoading: isLoadingTier } = useQuery(
+    queryArtistSubscriptionTier({ artistSlug: artistId, tierId })
+  );
 
-  if (!artist && isLoading) {
+  if ((!artist && isLoading) || (!subscriptionTier && isLoadingTier)) {
     return <FullPageLoadingSpinner />;
   }
-
-  const subscriptionTier = artist?.subscriptionTiers.find(
-    (tier) =>
-      !tier.isDefaultTier &&
-      (tier.urlSlug?.toLowerCase() === tierId?.toLowerCase() ||
-        String(tier.id) === tierId)
-  );
 
   if (!artist) {
     return <Box>{t("tierDoesNotExist")}</Box>;

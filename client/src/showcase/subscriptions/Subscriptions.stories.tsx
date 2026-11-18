@@ -82,6 +82,17 @@ const handlers = {
             : [],
       })
     ),
+    http.get(
+      "*/v1/artists/:artistSlug/subscriptionTiers/:tierId",
+      ({ params }) =>
+        HttpResponse.json({
+          result: TIERS.find(
+            (tier) =>
+              tier.urlSlug === params.tierId ||
+              String(tier.id) === params.tierId
+          ),
+        })
+    ),
     http.get("*/v1/manage/artists/:artistId/subscriptionTiers", () =>
       HttpResponse.json({ results: TIERS })
     ),

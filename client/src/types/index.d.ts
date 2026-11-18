@@ -544,6 +544,7 @@ interface ArtistSubscriptionTier {
   merchDiscountPercent?: number;
   allowVariable?: boolean;
   autoPurchaseAlbums?: boolean;
+  hiddenAt?: string | null;
   images: {
     imageId: string;
     image: {

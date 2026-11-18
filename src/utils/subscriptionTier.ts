@@ -33,6 +33,7 @@ export const hasSubscriptionTiers = async (profileId: number) => {
       profileId,
       isDefaultTier: false,
       deletedAt: null,
+      hiddenAt: null,
     },
   });
   return count > 0;

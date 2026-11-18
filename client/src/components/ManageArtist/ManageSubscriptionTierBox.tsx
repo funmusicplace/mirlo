@@ -7,6 +7,7 @@ import {
 import Box from "components/common/Box";
 import MarkdownContent from "components/common/MarkdownContent";
 import { Money } from "components/common/Money";
+import Pill from "components/common/Pill";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -64,11 +65,7 @@ const ManageSubscriptionTierBox: React.FC<{
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <Box
-        key={tier.id}
-        className="bg-(--mi-tint-color) h-full"
-        noPadding
-      >
+      <Box key={tier.id} className="bg-(--mi-tint-color) h-full" noPadding>
         {tier.images?.[0]?.image.sizes?.[625] && (
           <img
             src={tier.images[0].image.sizes[625] + `?updatedAt=${Date.now()}`}
@@ -89,6 +86,11 @@ const ManageSubscriptionTierBox: React.FC<{
                   />{" "}
                   {t(tier.interval === "MONTH" ? "monthly" : "yearly")}
                 </strong>
+                {tier.hiddenAt && (
+                  <Pill variant="tint" className="ml-2">
+                    {t("hidden")}
+                  </Pill>
+                )}
               </div>
               <div className="flex">
                 <ArtistButton

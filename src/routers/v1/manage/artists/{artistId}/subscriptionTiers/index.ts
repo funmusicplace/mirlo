@@ -102,6 +102,7 @@ export default function () {
         digitalDiscountPercent,
         merchDiscountPercent,
         imageId,
+        isHidden,
       } = req.body;
       if (imageId) {
         const image = await prisma.image.findFirst({
@@ -131,6 +132,7 @@ export default function () {
             digitalDiscountPercent
           ),
           merchDiscountPercent: normalizeDiscountPercent(merchDiscountPercent),
+          hiddenAt: isHidden ? new Date() : null,
         },
       });
       if (imageId) {
