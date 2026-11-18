@@ -745,9 +745,7 @@ export const registerTrackPurchase = async ({
 
 export const subscriptionTierReleasesCount = {
   select: {
-    subscriptionTierReleases: {
-      where: { tier: { deletedAt: null, hiddenAt: null } },
-    },
+    subscriptionTierReleases: { where: { tier: { deletedAt: null } } },
   },
 };
 

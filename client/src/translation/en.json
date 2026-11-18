@@ -1951,7 +1951,7 @@
     "supportEmailInvalid": "Enter a valid support email",
     "platformPercent": "Platform percent",
     "defaultCurrency": "Default currency",
-    "defaultCurrencyHint": "The currency the admin dashboard reports in. Charges in other currencies are counted once Stripe has converted them into this currency.",
+    "defaultCurrencyHint": "The currency the admin dashboard reports in. Set it to your Stripe platform account's currency: Stripe converts charges in other currencies into that one, and only those conversions can be counted.",
     "cdnUrl": "CDN URL",
     "cdnUrlHint": "Optional. Only fill this in if you subscribed to a CDN (content delivery network, a service that speeds up image loading) and it gave you an address. Leave it empty otherwise: images will still work.",
     "isClosedToPublicArtistSignup": "Is closed to public artist signup",
@@ -3059,7 +3059,7 @@
   "emails.announcePostPublished": {
     "subject": "New: {{title}}",
     "featuredImageAlt": "Featured Image",
-    "byline": "{{artistName}} just published {{instanceName}}",
+    "byline": "{{artistName}} just published on {{instanceName}}",
     "readOn": "Read it on {{instanceName}}.",
     "unsubscribePrompt": "Don't want to receive emails from {{artistName}} anymore?",
     "unsubscribe": "Unsubscribe."
