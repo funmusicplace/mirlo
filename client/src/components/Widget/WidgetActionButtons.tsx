@@ -2,6 +2,7 @@ import { ButtonAnchor } from "components/common/Button";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { getArtistUrl, getReleaseUrl, getTrackUrl } from "utils/artist";
+import { isSingleTrackRelease } from "utils/tracks";
 
 const WidgetActionButtons: React.FC<{
   artist: Artist | undefined;
@@ -14,9 +15,10 @@ const WidgetActionButtons: React.FC<{
 
   if (!trackGroup.artist) return null;
 
-  const buyPath = track
-    ? getTrackUrl(trackGroup.artist, trackGroup, track)
-    : getReleaseUrl(trackGroup.artist, trackGroup);
+  const buyPath =
+    track && !isSingleTrackRelease(trackGroup)
+      ? getTrackUrl(trackGroup.artist, trackGroup, track)
+      : getReleaseUrl(trackGroup.artist, trackGroup);
   const buyUrl = `${buyPath}?buy=true`;
 
   const hasTiers = (artist?.subscriptionTiers?.length ?? 0) > 0;

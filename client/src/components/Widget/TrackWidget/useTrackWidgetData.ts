@@ -13,7 +13,7 @@ export const useTrackWidgetData = () => {
   const [track, setTrack] = React.useState<Track>();
   const [artist, setArtist] = React.useState<Artist>();
   const [isLoading, setIsLoading] = React.useState(true);
-  const [currentSeconds, setCurrentSeconds] = React.useState(0);
+  const [localSeconds, setCurrentSeconds] = React.useState(0);
 
   const embeddedInMirlo = isEmbeddedInMirlo();
   const playerSyncState = usePlayerSyncState();
@@ -53,12 +53,12 @@ export const useTrackWidgetData = () => {
     callback();
   }, [params.id]);
 
-  React.useEffect(() => {
-    if (!embeddedInMirlo || !track || !playerSyncState) return;
-    if (playerSyncState.currentTrackId === track.id) {
-      setCurrentSeconds(playerSyncState.currentSeconds);
-    }
-  }, [embeddedInMirlo, track, playerSyncState]);
+  const isSyncedTrack = !!track && playerSyncState?.currentTrackId === track.id;
+  const currentSeconds = embeddedInMirlo
+    ? isSyncedTrack
+      ? (playerSyncState?.currentSeconds ?? 0)
+      : 0
+    : localSeconds;
 
   return {
     track,
@@ -70,3 +70,5 @@ export const useTrackWidgetData = () => {
     embeddedInMirlo,
   };
 };
+
+export type TrackWidgetData = ReturnType<typeof useTrackWidgetData>;

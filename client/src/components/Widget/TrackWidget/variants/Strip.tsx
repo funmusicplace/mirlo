@@ -13,20 +13,18 @@ import {
   WidgetPlayerBar,
   WidgetWrapper,
 } from "../../utils";
-import { useTrackWidgetData } from "../useTrackWidgetData";
+import { TrackWidgetData } from "../useTrackWidgetData";
 
-const Strip = () => {
+const Strip: React.FC<TrackWidgetData> = ({
+  track,
+  artist,
+  isLoading,
+  user,
+  currentSeconds,
+  setCurrentSeconds,
+  embeddedInMirlo,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackDetails" });
-
-  const {
-    track,
-    artist,
-    isLoading,
-    user,
-    currentSeconds,
-    setCurrentSeconds,
-    embeddedInMirlo,
-  } = useTrackWidgetData();
 
   if (isLoading) {
     return <LoadingBlocks />;

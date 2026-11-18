@@ -68,6 +68,85 @@ describe("TrackTitleContent", () => {
     });
   });
 
+  describe("the track of a single", () => {
+    const singleTrack = (title: string): Track => ({
+      ...TRACK_EXAMPLE,
+      title,
+      trackGroup: {
+        ...TRACK_EXAMPLE.trackGroup,
+        tracks: [{ ...TRACK_EXAMPLE, title }],
+      },
+    });
+
+    it("hides the release when the track is named after it", () => {
+      const { container } = renderTitle(singleTrack("Example Album"), {
+        combineFromAndBy: true,
+      });
+
+      expect(screen.queryByText("from")).not.toBeInTheDocument();
+      expect(container.textContent).not.toContain("·");
+      expect(screen.getByText("by")).toBeInTheDocument();
+    });
+
+    it("hides the release in the stacked layout too", () => {
+      renderTitle(singleTrack("Example Album"));
+
+      expect(screen.queryByText("from")).not.toBeInTheDocument();
+      expect(screen.getByText("by")).toBeInTheDocument();
+    });
+
+    it("links the title to the release when the track is named after it", () => {
+      renderTitle(singleTrack("Example Album"));
+
+      expect(
+        screen.getByRole("link", { name: "Example Album" })
+      ).toHaveAttribute(
+        "href",
+        expect.stringContaining("/example-artist/release/example-album")
+      );
+    });
+
+    it("keeps the given title link", () => {
+      renderTitle(singleTrack("Example Album"), {
+        titleLinkTo: "/example-artist/release/example-album/tracks/42",
+      });
+
+      expect(
+        screen.getByRole("link", { name: "Example Album" })
+      ).toHaveAttribute(
+        "href",
+        "/example-artist/release/example-album/tracks/42"
+      );
+    });
+
+    it("keeps the release when the track has another title", () => {
+      renderTitle(singleTrack("Radio edit"));
+
+      expect(screen.getByText("from")).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Example Album" })
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Radio edit" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("never links to the drafts album", () => {
+      renderTitle({
+        ...DRAFTS_ALBUM_TRACK_EXAMPLE,
+        title: "",
+        trackGroup: {
+          ...DRAFTS_ALBUM_TRACK_EXAMPLE.trackGroup,
+          tracks: [DRAFTS_ALBUM_TRACK_EXAMPLE],
+        },
+      });
+
+      for (const link of screen.getAllByRole("link")) {
+        expect(link.getAttribute("href")).not.toContain("hidden-draft-album");
+      }
+    });
+  });
+
   // #2372: post uploads live in a hidden drafts album with no public page
   describe("a track uploaded to a post", () => {
     it("doesn't link to the hidden drafts album", () => {
