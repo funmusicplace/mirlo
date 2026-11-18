@@ -11,11 +11,26 @@ import {
   clearTables,
   createArtist,
   createProfile,
+  createSubscription,
   createTier,
   createTrackGroup,
   createUser,
 } from "../../../utils";
 import { requestApp } from "../../utils";
+
+const seedSubscribers = async (tierId: number) => {
+  const { user: active } = await createUser({ email: "active@test.com" });
+  const { user: cancelled } = await createUser({ email: "cancelled@test.com" });
+  const { user: deleted } = await createUser({
+    email: "deleted@test.com",
+    deletedAt: new Date(),
+  });
+  await createSubscription(active.id, tierId);
+  await createSubscription(cancelled.id, tierId, 500, {
+    deletedAt: new Date(),
+  });
+  await createSubscription(deleted.id, tierId);
+};
 
 describe("manage/artists/{artistId}/subscriptionTiers", () => {
   beforeEach(async () => {
@@ -29,6 +44,36 @@ describe("manage/artists/{artistId}/subscriptionTiers", () => {
   afterEach(async () => {
     await sendMailQueueModule.sendMailQueue.close();
     await sendMailQueueModule.sendMailQueueEvents.close();
+  });
+
+  describe("GET", () => {
+    it("should return each tier's active subscriber count", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id);
+      const emptyTier = await createTier(artist.id, { name: "Empty" });
+      await seedSubscribers(tier.id);
+
+      const response = await requestApp
+        .get(`manage/artists/${artist.id}/subscriptionTiers`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const counts = Object.fromEntries(
+        response.body.results.map(
+          (t: { id: number; subscriberCount: number }) => [
+            t.id,
+            t.subscriberCount,
+          ]
+        )
+      );
+      assert.equal(counts[tier.id], 1);
+      assert.equal(counts[emptyTier.id], 0);
+      assert.equal(response.body.results[0]._count, undefined);
+    });
   });
 
   describe("POST", () => {
@@ -191,6 +236,25 @@ describe("manage/artists/{artistId}/subscriptionTiers/{tierId}", () => {
     } catch (e) {
       console.error(e);
     }
+  });
+
+  describe("GET", () => {
+    it("should return the tier's active subscriber count", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@test.com",
+      });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id);
+      await seedSubscribers(tier.id);
+
+      const response = await requestApp
+        .get(`manage/artists/${artist.id}/subscriptionTiers/${tier.id}`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.subscriberCount, 1);
+    });
   });
 
   describe("PUT", () => {

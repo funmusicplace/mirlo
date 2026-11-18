@@ -555,6 +555,7 @@ interface ArtistSubscriptionTier {
     };
   }[];
   releases?: SubscriptionTierRelease[];
+  subscriberCount?: number;
 }
 
 interface MerchImage {

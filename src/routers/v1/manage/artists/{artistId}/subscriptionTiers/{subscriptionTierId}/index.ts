@@ -12,7 +12,10 @@ import { AppError } from "../../../../../../../utils/error";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
 import { normalizeDiscountPercent } from "../../../../../../../utils/purchasing";
 import { getSiteSettings } from "../../../../../../../utils/settings";
-import { generateUniqueTierSlug } from "../../../../../../../utils/subscriptionTier";
+import {
+  activeTierSubscriptionWhere,
+  generateUniqueTierSlug,
+} from "../../../../../../../utils/subscriptionTier";
 
 export default function () {
   const operations = {
@@ -32,10 +35,22 @@ export default function () {
         user
       );
 
+      if (!subscriptionTier) {
+        return res.json({ result: null });
+      }
+
+      const subscriberCount = await prisma.profileUserSubscription.count({
+        where: {
+          profileSubscriptionTierId: subscriptionTier.id,
+          ...activeTierSubscriptionWhere,
+        },
+      });
+
       return res.json({
-        result: subscriptionTier
-          ? serializeProfileSubscriptionTier(subscriptionTier)
-          : subscriptionTier,
+        result: {
+          ...serializeProfileSubscriptionTier(subscriptionTier),
+          subscriberCount,
+        },
       });
     } catch (error) {
       next(error);
