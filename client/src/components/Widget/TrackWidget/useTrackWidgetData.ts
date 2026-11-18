@@ -70,3 +70,5 @@ export const useTrackWidgetData = () => {
     embeddedInMirlo,
   };
 };
+
+export type TrackWidgetData = ReturnType<typeof useTrackWidgetData>;

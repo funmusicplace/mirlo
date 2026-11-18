@@ -13,26 +13,24 @@ import {
   WidgetPlayerBar,
   WidgetWrapper,
 } from "../../utils";
-import { useTrackGroupWidgetData } from "../useTrackGroupWidgetData";
+import { TrackGroupWidgetData } from "../useTrackGroupWidgetData";
 
 const TRACKLIST_MIN_HEIGHT = 200;
 
-const Card = () => {
+const Card: React.FC<TrackGroupWidgetData> = ({
+  trackGroup,
+  artist,
+  isLoading,
+  currentTrack,
+  currentSeconds,
+  setCurrentSeconds,
+  elapsedSeconds,
+  embeddedInMirlo,
+  playableTracks,
+}) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
-
-  const {
-    trackGroup,
-    artist,
-    isLoading,
-    currentTrack,
-    currentSeconds,
-    setCurrentSeconds,
-    elapsedSeconds,
-    embeddedInMirlo,
-    playableTracks,
-  } = useTrackGroupWidgetData();
 
   const [hasRoomForTracklist, setHasRoomForTracklist] = React.useState(true);
 

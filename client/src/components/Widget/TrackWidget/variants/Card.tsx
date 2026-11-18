@@ -12,22 +12,20 @@ import {
   WidgetPlayerBar,
   WidgetWrapper,
 } from "../../utils";
-import { useTrackWidgetData } from "../useTrackWidgetData";
+import { TrackWidgetData } from "../useTrackWidgetData";
 
 const HERO_MIN_HEIGHT = 200;
 
-const Card = () => {
+const Card: React.FC<TrackWidgetData> = ({
+  track,
+  artist,
+  isLoading,
+  user,
+  currentSeconds,
+  setCurrentSeconds,
+  embeddedInMirlo,
+}) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackDetails" });
-
-  const {
-    track,
-    artist,
-    isLoading,
-    user,
-    currentSeconds,
-    setCurrentSeconds,
-    embeddedInMirlo,
-  } = useTrackWidgetData();
 
   const [useHeroLayout, setUseHeroLayout] = React.useState(true);
 

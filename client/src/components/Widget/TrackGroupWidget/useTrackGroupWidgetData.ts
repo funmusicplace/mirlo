@@ -87,3 +87,5 @@ export const useTrackGroupWidgetData = () => {
     playableTracks,
   };
 };
+
+export type TrackGroupWidgetData = ReturnType<typeof useTrackGroupWidgetData>;
