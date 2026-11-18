@@ -40,6 +40,21 @@ describe("WidgetActionButtons", () => {
     );
   });
 
+  it("links Buy to the release page for the track of a single", () => {
+    render(
+      <WidgetActionButtons
+        artist={ARTIST_EXAMPLE}
+        trackGroup={{ ...TRACK_EXAMPLE.trackGroup, tracks: [TRACK_EXAMPLE] }}
+        track={TRACK_EXAMPLE}
+      />
+    );
+
+    expect(screen.getByRole("link", { name: "buy" })).toHaveAttribute(
+      "href",
+      "/example-artist/release/example-album?buy=true"
+    );
+  });
+
   it("links Buy to the release page for a release widget", () => {
     render(
       <WidgetActionButtons

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { MdLyrics } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
+import { isSingleTrackRelease } from "utils/tracks";
 
 import { WidgetLink } from "./utils";
 
@@ -33,6 +34,12 @@ export const TrackTitleContent: React.FC<{
 
   const isInHiddenDraftAlbum =
     !!track.trackGroup.isHiddenTrackGroupForSongDrafts;
+  const isSingleNamedAfterRelease =
+    !isInHiddenDraftAlbum &&
+    isSingleTrackRelease(track.trackGroup) &&
+    !!track.title &&
+    track.title === track.trackGroup.title;
+  const showFrom = !isInHiddenDraftAlbum && !isSingleNamedAfterRelease;
   const trackGroupLabel = track.trackGroup.title || tTrackGroup("untitled");
 
   const trackGroupLink = useTrackArtistLinks ? (
@@ -76,6 +83,13 @@ export const TrackTitleContent: React.FC<{
         </>
       )}
     </Link>
+  ) : isSingleNamedAfterRelease ? (
+    <WidgetLink
+      to={getReleaseUrl(track.trackGroup.artist, track.trackGroup)}
+      embeddedInMirlo={embeddedInMirlo}
+    >
+      {track.title}
+    </WidgetLink>
   ) : (
     (track.title ?? "")
   );
@@ -106,14 +120,14 @@ export const TrackTitleContent: React.FC<{
       {combineFromAndBy ? (
         <div className={byLineWrapperClass}>
           <span className={byLineTruncateClass}>
-            {!isInHiddenDraftAlbum && (
+            {showFrom && (
               <>
                 <span className="opacity-60">{t("from")}</span> {trackGroupLink}
               </>
             )}
             {artistLink && (
               <>
-                {!isInHiddenDraftAlbum && " · "}
+                {showFrom && " · "}
                 <span className="opacity-60">{t("by")}</span> {artistLink}
               </>
             )}
@@ -126,7 +140,7 @@ export const TrackTitleContent: React.FC<{
         </div>
       ) : (
         <>
-          {!isInHiddenDraftAlbum && (
+          {showFrom && (
             <div className="text-sm leading-normal truncate break-normal max-sm:text-xs max-xs:text-[0.65rem] [&_a:hover]:underline!">
               <span className="opacity-60">{t("from")}</span> {trackGroupLink}
             </div>

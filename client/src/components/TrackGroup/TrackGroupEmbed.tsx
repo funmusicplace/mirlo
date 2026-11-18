@@ -15,6 +15,7 @@ import {
   getTrackUrl,
   getTrackWidget,
 } from "utils/artist";
+import { isSingleTrackRelease } from "utils/tracks";
 import useArtistQuery from "utils/useArtistQuery";
 
 import { CLIENT_ROOT } from "../../constants";
@@ -230,11 +231,22 @@ const TrackGroupEmbed: React.FC<{
       title={trackGroup.title}
       url={getReleaseUrl(trackGroup.artist, trackGroup)}
       src={trackGroupWidget}
-      variants={[
-        { key: "card", height: 230, labelKey: "variantCard" },
-        { key: "compact", height: 140, labelKey: "variantStrip" },
-        { key: "strip", height: 230, labelKey: "variantStripWithTracklist" },
-      ]}
+      variants={
+        isSingleTrackRelease(trackGroup)
+          ? [
+              { key: "card", height: 130, labelKey: "variantCard" },
+              { key: "compact", height: 120, labelKey: "variantStrip" },
+            ]
+          : [
+              { key: "card", height: 230, labelKey: "variantCard" },
+              { key: "compact", height: 140, labelKey: "variantStrip" },
+              {
+                key: "strip",
+                height: 230,
+                labelKey: "variantStripWithTracklist",
+              },
+            ]
+      }
     />
   );
 };
