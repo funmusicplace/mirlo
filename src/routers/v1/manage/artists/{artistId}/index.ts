@@ -319,7 +319,7 @@ export default function () {
           id: Number(castProfileId),
         },
         include: {
-          ...singleInclude({ includePrivate: true }),
+          ...singleInclude({ includePrivate: true, includeHiddenTiers: true }),
           merch: {
             where: {
               deletedAt: null,

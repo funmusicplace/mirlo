@@ -34,6 +34,7 @@ const generateDefaultValues = (existing?: ArtistSubscriptionTier) => {
   const vals = {
     ...existing,
     imageId: existing?.images?.[0]?.image?.id,
+    isHidden: !!existing?.hiddenAt,
     minAmount: `${
       existing?.minAmount !== undefined ? existing.minAmount / 100 : ""
     }`,
@@ -53,6 +54,7 @@ type FormData = {
   collectAddress: boolean;
   interval: "MONTH" | "YEAR";
   imageId?: string;
+  isHidden: boolean;
 };
 
 const SubscriptionForm: React.FC<{
@@ -101,6 +103,7 @@ const SubscriptionForm: React.FC<{
               "collectAddress",
               "platformPercent",
               "imageId",
+              "isHidden",
             ]),
             minAmount: data.minAmount ? +data.minAmount * 100 : undefined,
             digitalDiscountPercent:
@@ -176,6 +179,14 @@ const SubscriptionForm: React.FC<{
           <FormComponent>
             <label htmlFor="input-description">{t("description")}</label>
             <TextArea id="input-description" {...register("description")} />
+          </FormComponent>
+          <FormComponent>
+            <FormCheckbox
+              idPrefix={`${localExistingId}`}
+              keyName="isHidden"
+              description={t("hideTier")}
+              hint={t("hideTierHint")}
+            />
           </FormComponent>
         </FormSection>
         <FormSection>

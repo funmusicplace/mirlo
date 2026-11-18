@@ -8,6 +8,9 @@ import { generateUniqueSlug } from "./generateSlug";
 export const subscriptionTierOrderBy: Prisma.ProfileSubscriptionTierOrderByWithRelationInput[] =
   [{ order: { sort: "asc", nulls: "last" } }, { minAmount: "asc" }];
 
+export const activeTierSubscriptionWhere: Prisma.ProfileUserSubscriptionWhereInput =
+  { deletedAt: null, user: { deletedAt: null } };
+
 export const generateUniqueTierSlug = (
   profileId: number,
   name: string,
@@ -33,6 +36,7 @@ export const hasSubscriptionTiers = async (profileId: number) => {
       profileId,
       isDefaultTier: false,
       deletedAt: null,
+      hiddenAt: null,
     },
   });
   return count > 0;

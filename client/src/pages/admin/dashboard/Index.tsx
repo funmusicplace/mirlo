@@ -37,13 +37,14 @@ type Series = { key: string; name: string };
 
 type ChartPoint = { label: string } & Record<string, number | string>;
 
-const usd = (value: number) => moneyDisplay({ amount: value, currency: "usd" });
+const money = (currency: string) => (value: number) =>
+  moneyDisplay({ amount: value, currency });
 
 /** Axis ticks get the compact form ("$1.2K") so they don't crowd the plot. */
-const usdCompact = (value: number) =>
+const moneyCompact = (currency: string) => (value: number) =>
   new Intl.NumberFormat(undefined, {
     style: "currency",
-    currency: "usd",
+    currency,
     notation: "compact",
     maximumFractionDigits: 1,
   }).format(value);
@@ -215,13 +216,13 @@ const toCountPoints = (
 const toRevenuePoints = (stats: AdminStats) =>
   stats.revenue.map((point) => ({
     label: formatDate(point.date, stats.granularity),
-    purchases: point.purchasesUsdCents / 100,
-    subscriptions: point.subscriptionsUsdCents / 100,
-    purchasesConverted: point.purchasesConvertedUsdCents / 100,
-    subscriptionsConverted: point.subscriptionsConvertedUsdCents / 100,
-    platformCut: point.platformCutUsdCents / 100,
-    platformCutConverted: point.platformCutConvertedUsdCents / 100,
-    instanceProfile: point.instanceProfileUsdCents / 100,
+    purchases: point.purchasesCents / 100,
+    subscriptions: point.subscriptionsCents / 100,
+    purchasesConverted: point.purchasesConvertedCents / 100,
+    subscriptionsConverted: point.subscriptionsConvertedCents / 100,
+    platformCut: point.platformCutCents / 100,
+    platformCutConverted: point.platformCutConvertedCents / 100,
+    instanceProfile: point.instanceProfileCents / 100,
   }));
 
 /** One row per bucket, one column per currency seen in the window. */
@@ -251,16 +252,22 @@ export const Index: React.FC = () => {
 
   // Titles follow the data that came back, not the pending toggle.
   const isMonthly = stats.granularity === "month";
+  const currency = stats.currency.toUpperCase();
+  const format = money(stats.currency);
+  const formatAxis = moneyCompact(stats.currency);
 
   const revenueSeries: Series[] = [
     { key: "purchases", name: t("purchases") },
     { key: "subscriptions", name: t("subscriptions") },
-    { key: "purchasesConverted", name: t("purchasesConverted") },
-    { key: "subscriptionsConverted", name: t("subscriptionsConverted") },
+    { key: "purchasesConverted", name: t("purchasesConverted", { currency }) },
+    {
+      key: "subscriptionsConverted",
+      name: t("subscriptionsConverted", { currency }),
+    },
   ];
 
   const platformSeries: Series[] = [
-    { key: "platformCut", name: t("platformCut") },
+    { key: "platformCut", name: t("platformCut", { currency }) },
     { key: "platformCutConverted", name: t("platformCutConverted") },
     { key: "instanceProfile", name: t("instanceProfileIncome") },
   ];
@@ -333,13 +340,17 @@ export const Index: React.FC = () => {
         </ChartContainer>
 
         <ChartContainer
-          title={isMonthly ? t("usdRevenuePerMonth") : t("usdRevenuePerWeek")}
+          title={
+            isMonthly
+              ? t("revenuePerMonth", { currency })
+              : t("revenuePerWeek", { currency })
+          }
         >
           <StackedChart
             data={revenuePoints}
             series={revenueSeries}
-            format={usd}
-            formatAxis={usdCompact}
+            format={format}
+            formatAxis={formatAxis}
           />
         </ChartContainer>
 
@@ -353,8 +364,8 @@ export const Index: React.FC = () => {
           <StackedChart
             data={revenuePoints}
             series={platformSeries}
-            format={usd}
-            formatAxis={usdCompact}
+            format={format}
+            formatAxis={formatAxis}
           />
         </ChartContainer>
 

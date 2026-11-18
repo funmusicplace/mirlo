@@ -713,6 +713,30 @@ describe("admin/settings", () => {
       assert.equal(response.statusCode, 400);
     });
 
+    it("should store the default currency in lowercase and reject non-codes", async () => {
+      const { accessToken } = await createUser({
+        email: "admin@test.com",
+        isAdmin: true,
+      });
+      await createSiteSettings({ platformPercent: 7 });
+      const post = (defaultCurrency: unknown) =>
+        requestApp
+          .post("admin/settings")
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json")
+          .send({ settings: { platformPercent: 7, defaultCurrency } });
+
+      assert.equal((await post(" EUR ")).statusCode, 200);
+      const row = await prisma.settings.findFirst();
+      assert.equal(
+        (row?.settings as { defaultCurrency?: string }).defaultCurrency,
+        "eur"
+      );
+
+      assert.equal((await post("euro")).statusCode, 400);
+      assert.equal((await post(42)).statusCode, 400);
+    });
+
     it("should trim the splash screen texts before storing them", async () => {
       const { accessToken } = await createUser({
         email: "admin@test.com",

@@ -51,6 +51,7 @@ const routes = [
   "artists/{id}/contact",
   "artists/{id}/redeemCode",
   "artists/{id}/canimus.json",
+  "artists/{id}/subscriptionTiers/{tierId}",
   "downloadableContent/{id}",
   "images/{id}",
   "merch/{id}",

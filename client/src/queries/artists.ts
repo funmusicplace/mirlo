@@ -42,6 +42,29 @@ export function queryArtist(opts: { artistSlug?: string }) {
   });
 }
 
+const fetchArtistSubscriptionTier: QueryFunction<
+  ArtistSubscriptionTier,
+  ["fetchArtistSubscriptionTier", { artistSlug?: string; tierId?: string }]
+> = ({ queryKey: [_, { artistSlug, tierId }], signal }) => {
+  return api
+    .get<{
+      result: ArtistSubscriptionTier;
+    }>(`v1/artists/${artistSlug}/subscriptionTiers/${tierId}`, { signal })
+    .then((r) => r.result);
+};
+
+export function queryArtistSubscriptionTier(opts: {
+  artistSlug?: string;
+  tierId?: string;
+}) {
+  return queryOptions({
+    queryKey: ["fetchArtistSubscriptionTier", opts],
+    queryFn: fetchArtistSubscriptionTier,
+    enabled: !!opts.artistSlug && !!opts.tierId,
+    retry: false,
+  });
+}
+
 const fetchCataloguePrice: QueryFunction<
   { price: number | null },
   ["fetchCataloguePrice", { artistId?: number }, ...any]

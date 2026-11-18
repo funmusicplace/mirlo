@@ -2,6 +2,7 @@ import { omit } from "lodash";
 
 export interface FormSettings {
   platformPercent?: number;
+  defaultCurrency?: string;
   cdnUrl?: string;
   terms?: string;
   privacyPolicy?: string;
@@ -74,6 +75,7 @@ export const settingsToForm = (
   isClosedToPublicArtistSignup: settings.isClosedToPublicArtistSignup ?? false,
   showQueueDashboard: settings.showQueueDashboard ?? false,
   platformPercent: settings.settings?.platformPercent,
+  defaultCurrency: settings.settings?.defaultCurrency ?? "usd",
   cdnUrl: settings.cdnUrl ?? "",
   instanceCustomization: {
     ...settings.settings?.instanceCustomization,
@@ -119,6 +121,7 @@ export const formToSettingsPayload = (
 ) => ({
   settings: {
     platformPercent: data.platformPercent,
+    defaultCurrency: data.defaultCurrency,
     instanceCustomization: {
       ...data.instanceCustomization,
     },

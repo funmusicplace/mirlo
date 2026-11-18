@@ -3,6 +3,10 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
+import {
+  getSiteSettings,
+  resolveDefaultCurrency,
+} from "../../../utils/settings";
 import { transactionSellerLinks } from "../../../utils/transactionSellers";
 
 type Period = "month" | "year";
@@ -13,7 +17,7 @@ type TopSeller = {
   id: number;
   name: string;
   urlSlug: string;
-  usdCents: number;
+  cents: number;
   transactionCount: number;
 };
 
@@ -21,7 +25,7 @@ type TopPurchaser = {
   id: number;
   name: string | null;
   email: string;
-  usdCents: number;
+  cents: number;
   transactionCount: number;
 };
 
@@ -51,15 +55,15 @@ type TopDownloadedAlbum = {
 const since = (period: Period) =>
   Prisma.sql`NOW() - ${Prisma.raw(`INTERVAL '1 ${period}'`)}`;
 
-const transactionsInPeriod = (period: Period) => Prisma.sql`
+const transactionsInPeriod = (period: Period, currency: string) => Prisma.sql`
   tx AS (
     SELECT
       t.id,
       t."userId",
       CASE
-        WHEN t.currency = 'usd' THEN t.amount
-        WHEN t."platformCurrency" = 'usd' THEN t."platformCurrencyAmount"
-      END AS "usdCents"
+        WHEN t.currency = ${currency} THEN t.amount
+        WHEN t."platformCurrency" = ${currency} THEN t."platformCurrencyAmount"
+      END AS "cents"
     FROM "UserTransaction" t
     WHERE t."createdAt" >= ${since(period)}
       AND t."paymentStatus" != 'FAILED'
@@ -67,9 +71,9 @@ const transactionsInPeriod = (period: Period) => Prisma.sql`
   )
 `;
 
-const topSellers = (period: Period) =>
+const topSellers = (period: Period, currency: string) =>
   prisma.$queryRaw<TopSeller[]>`
-    WITH ${transactionsInPeriod(period)},
+    WITH ${transactionsInPeriod(period, currency)},
     sellers AS (
       SELECT DISTINCT ON (links.tx_id) links.tx_id, links."profileId"
       FROM (${transactionSellerLinks}) links
@@ -79,31 +83,31 @@ const topSellers = (period: Period) =>
       p.id,
       p.name,
       p."urlSlug",
-      SUM(tx."usdCents")::double precision AS "usdCents",
+      SUM(tx."cents")::double precision AS "cents",
       COUNT(tx.id)::int AS "transactionCount"
     FROM tx
     JOIN sellers ON sellers.tx_id = tx.id
     JOIN "Profile" p ON p.id = sellers."profileId"
-    WHERE tx."usdCents" IS NOT NULL
+    WHERE tx."cents" IS NOT NULL
     GROUP BY p.id
-    ORDER BY "usdCents" DESC
+    ORDER BY "cents" DESC
     LIMIT ${LIMIT}
   `;
 
-const topPurchasers = (period: Period) =>
+const topPurchasers = (period: Period, currency: string) =>
   prisma.$queryRaw<TopPurchaser[]>`
-    WITH ${transactionsInPeriod(period)}
+    WITH ${transactionsInPeriod(period, currency)}
     SELECT
       u.id,
       u.name,
       u.email,
-      SUM(tx."usdCents")::double precision AS "usdCents",
+      SUM(tx."cents")::double precision AS "cents",
       COUNT(tx.id)::int AS "transactionCount"
     FROM tx
     JOIN "User" u ON u.id = tx."userId"
-    WHERE tx."usdCents" IS NOT NULL
+    WHERE tx."cents" IS NOT NULL
     GROUP BY u.id
-    ORDER BY "usdCents" DESC
+    ORDER BY "cents" DESC
     LIMIT ${LIMIT}
   `;
 
@@ -188,11 +192,12 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     try {
       const period: Period = req.query.period === "year" ? "year" : "month";
+      const currency = resolveDefaultCurrency(await getSiteSettings());
 
       const [sellers, purchasers, freeDownloads, uploaders, downloadedAlbums] =
         await Promise.all([
-          topSellers(period),
-          topPurchasers(period),
+          topSellers(period, currency),
+          topPurchasers(period, currency),
           topFreeDownloads(period),
           topUploaders(period),
           topDownloadedAlbums(period),
@@ -201,6 +206,7 @@ export default function () {
       res.json({
         result: {
           period,
+          currency,
           sellers,
           purchasers,
           freeDownloads,
@@ -214,7 +220,7 @@ export default function () {
   }
 
   GET.apiDoc = {
-    summary: `Returns the top ${LIMIT} sellers and purchasers by USD revenue, the top ${LIMIT} artists by free downloads and by tracks uploaded, and the top ${LIMIT} most downloaded albums`,
+    summary: `Returns the top ${LIMIT} sellers and purchasers by revenue in the instance's default currency, the top ${LIMIT} artists by free downloads and by tracks uploaded, and the top ${LIMIT} most downloaded albums`,
     parameters: [
       {
         in: "query",

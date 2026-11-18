@@ -255,6 +255,8 @@ export const createTier = async (
       collectAddress: data?.collectAddress,
       platformPercent: data?.platformPercent,
       interval: data?.interval,
+      urlSlug: data?.urlSlug,
+      hiddenAt: data?.hiddenAt,
     },
   });
   return tier;

@@ -134,6 +134,36 @@ describe("artists", () => {
       assert.deepEqual(titles, ["first", "second", "third"]);
     });
 
+    it("should leave hidden tiers out of subscriptionTiers unless the viewer subscribes to them", async () => {
+      const { user } = await createUser({ email: "tiered@test.com" });
+      const profile = await createProfile(user.id, { urlSlug: "tiered" });
+      await createTier(profile.id, { name: "Listed", minAmount: 500 });
+      const hidden = await createTier(profile.id, {
+        name: "Hidden",
+        minAmount: 900,
+        hiddenAt: new Date(),
+      });
+      const { user: fan, accessToken } = await createUser({
+        email: "fan@test.com",
+      });
+      await createSubscription(fan.id, hidden.id);
+
+      const tierNames = async (cookie?: string) => {
+        const request = requestApp.get(`artists/${profile.urlSlug}`);
+        if (cookie) request.set("Cookie", [cookie]);
+        const response = await request.set("Accept", "application/json");
+        return response.body.result.subscriptionTiers.map(
+          (tier: { name: string }) => tier.name
+        );
+      };
+
+      assert.deepEqual(await tierNames(), ["Listed"]);
+      assert.deepEqual(await tierNames(`jwt=${accessToken}`), [
+        "Listed",
+        "Hidden",
+      ]);
+    });
+
     it("should not include soft-deleted albums in subscriptionTiers releases", async () => {
       const { user } = await createUser({ email: "tiered@test.com" });
       const profile = await createProfile(user.id, {

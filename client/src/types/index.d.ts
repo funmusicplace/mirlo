@@ -45,6 +45,7 @@ interface SettingsFromAPI {
   bucketNames?: { prefix: string };
   settings: {
     platformPercent: number;
+    defaultCurrency?: string;
     instanceCustomization?: {
       colors?: {
         button?: string;
@@ -543,6 +544,7 @@ interface ArtistSubscriptionTier {
   merchDiscountPercent?: number;
   allowVariable?: boolean;
   autoPurchaseAlbums?: boolean;
+  hiddenAt?: string | null;
   images: {
     imageId: string;
     image: {
@@ -553,6 +555,7 @@ interface ArtistSubscriptionTier {
     };
   }[];
   releases?: SubscriptionTierRelease[];
+  subscriberCount?: number;
 }
 
 interface MerchImage {

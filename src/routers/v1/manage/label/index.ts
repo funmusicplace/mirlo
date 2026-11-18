@@ -29,10 +29,10 @@ export default function () {
         include: {
           artist: {
             include: {
-              ...singleInclude({ includePrivate: true }),
-              // Roster rows show a release count per artist. Counting in the
-              // database beats counting the included trackGroups, which are
-              // filtered down to what's publicly visible. See #2265.
+              ...singleInclude({
+                includePrivate: true,
+                includeHiddenTiers: true,
+              }),
               _count: {
                 select: { trackGroups: { where: { deletedAt: null } } },
               },

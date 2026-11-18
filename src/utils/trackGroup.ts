@@ -423,7 +423,7 @@ export const trackGroupSingleInclude = (options: {
     },
     _count: subscriptionTierReleasesCount,
     subscriptionTierReleases: {
-      where: { tier: { deletedAt: null } },
+      where: { tier: { deletedAt: null, hiddenAt: null } },
       select: {
         tier: {
           select: {

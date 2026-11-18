@@ -9,6 +9,7 @@ import request from "supertest";
 import {
   clearTables,
   createArtist,
+  createSiteSettings,
   createFundraiser,
   createFundraiserPledge,
   createMerch,
@@ -126,9 +127,9 @@ describe("admin/topAccounts", () => {
     assert.equal(month.statusCode, 200);
     assert.deepEqual(
       month.body.result.sellers.map(
-        (s: { name: string; usdCents: number; transactionCount: number }) => [
+        (s: { name: string; cents: number; transactionCount: number }) => [
           s.name,
-          s.usdCents,
+          s.cents,
           s.transactionCount,
         ]
       ),
@@ -139,7 +140,7 @@ describe("admin/topAccounts", () => {
     );
     assert.deepEqual(
       month.body.result.purchasers.map(
-        (p: { email: string; usdCents: number }) => [p.email, p.usdCents]
+        (p: { email: string; cents: number }) => [p.email, p.cents]
       ),
       [
         ["big@buyer.com", 5000],
@@ -155,9 +156,9 @@ describe("admin/topAccounts", () => {
     assert.equal(year.statusCode, 200);
     assert.equal(year.body.result.period, "year");
     assert.deepEqual(
-      year.body.result.sellers.map((s: { name: string; usdCents: number }) => [
+      year.body.result.sellers.map((s: { name: string; cents: number }) => [
         s.name,
-        s.usdCents,
+        s.cents,
       ]),
       [
         ["Small Seller", 10000],
@@ -165,6 +166,38 @@ describe("admin/topAccounts", () => {
       ]
     );
     assert.equal(year.body.result.purchasers[0].email, "small@buyer.com");
+  });
+
+  it("should rank by the instance's default currency", async () => {
+    const { accessToken } = await createUser({
+      email: "admin@admin.com",
+      isAdmin: true,
+    });
+    const { user: artistUser } = await createUser({ email: "a@a.com" });
+    const { user: buyer } = await createUser({ email: "buyer@buyer.com" });
+    const artist = await createArtist(artistUser.id, { name: "Euro Seller" });
+    const trackGroup = await createTrackGroup(artist.id);
+    await createSiteSettings({ defaultCurrency: "eur" });
+
+    await createUserTrackGroupPurchase(buyer.id, trackGroup.id, {
+      amount: 2000,
+      currency: "eur",
+    });
+
+    const response = await requestApp
+      .get("admin/topAccounts?period=month")
+      .set("Cookie", [`jwt=${accessToken}`])
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body.result.currency, "eur");
+    assert.deepEqual(
+      response.body.result.sellers.map((s: { name: string; cents: number }) => [
+        s.name,
+        s.cents,
+      ]),
+      [["Euro Seller", 2000]]
+    );
   });
 
   it("should credit a charged pledge to the fundraiser's profile", async () => {
@@ -195,9 +228,10 @@ describe("admin/topAccounts", () => {
 
     assert.equal(response.statusCode, 200);
     assert.deepEqual(
-      response.body.result.sellers.map(
-        (s: { name: string; usdCents: number }) => [s.name, s.usdCents]
-      ),
+      response.body.result.sellers.map((s: { name: string; cents: number }) => [
+        s.name,
+        s.cents,
+      ]),
       [["Fundraiser", 4000]]
     );
   });

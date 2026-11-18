@@ -35,8 +35,8 @@ const TopAccountsTables: React.FC = () => {
 
       {data && (
         <div className="grid gap-4 md:grid-cols-2">
-          <TopSellers rows={data.sellers} />
-          <TopPurchasers rows={data.purchasers} />
+          <TopSellers rows={data.sellers} currency={data.currency} />
+          <TopPurchasers rows={data.purchasers} currency={data.currency} />
           <TopFreeDownloads rows={data.freeDownloads} />
           <TopUploaders rows={data.uploaders} />
           <TopDownloadedAlbums rows={data.downloadedAlbums} />

@@ -26,17 +26,18 @@ export interface StatsCountPoint {
 
 export interface StatsRevenuePoint {
   date: string;
-  purchasesUsdCents: number;
-  subscriptionsUsdCents: number;
-  purchasesConvertedUsdCents: number;
-  subscriptionsConvertedUsdCents: number;
-  platformCutUsdCents: number;
-  platformCutConvertedUsdCents: number;
-  instanceProfileUsdCents: number;
+  purchasesCents: number;
+  subscriptionsCents: number;
+  purchasesConvertedCents: number;
+  subscriptionsConvertedCents: number;
+  platformCutCents: number;
+  platformCutConvertedCents: number;
+  instanceProfileCents: number;
 }
 
 export interface AdminStats {
   granularity: StatsGranularity;
+  currency: string;
   userSignups: StatsCountPoint[];
   artistSignups: StatsCountPoint[];
   revenue: StatsRevenuePoint[];
@@ -71,7 +72,7 @@ export interface AdminTopSeller {
   id: number;
   name: string;
   urlSlug: string;
-  usdCents: number;
+  cents: number;
   transactionCount: number;
 }
 
@@ -79,7 +80,7 @@ export interface AdminTopPurchaser {
   id: number;
   name: string | null;
   email: string;
-  usdCents: number;
+  cents: number;
   transactionCount: number;
 }
 
@@ -108,6 +109,7 @@ export interface AdminTopDownloadedAlbum {
 
 export interface AdminTopAccounts {
   period: TopAccountsPeriod;
+  currency: string;
   sellers: AdminTopSeller[];
   purchasers: AdminTopPurchaser[];
   freeDownloads: AdminTopFreeDownloadArtist[];

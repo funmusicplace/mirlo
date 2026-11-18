@@ -13,6 +13,7 @@ import { getPlatformFeeForArtist } from "../../../../../../utils/artist";
 import { AppError } from "../../../../../../utils/error";
 import { normalizeDiscountPercent } from "../../../../../../utils/purchasing";
 import {
+  activeTierSubscriptionWhere,
   generateUniqueTierSlug,
   subscriptionTierOrderBy,
 } from "../../../../../../utils/subscriptionTier";
@@ -50,6 +51,11 @@ export default function () {
         },
         orderBy: subscriptionTierOrderBy,
         include: {
+          _count: {
+            select: {
+              userSubscriptions: { where: activeTierSubscriptionWhere },
+            },
+          },
           images: {
             include: { image: true },
           },
@@ -76,7 +82,10 @@ export default function () {
       });
 
       res.status(200).json({
-        results: subscriptions.map((s) => serializeProfileSubscriptionTier(s)),
+        results: subscriptions.map(({ _count, ...s }) => ({
+          ...serializeProfileSubscriptionTier(s),
+          subscriberCount: _count.userSubscriptions,
+        })),
       });
     } catch (e) {
       next(e);
@@ -102,6 +111,7 @@ export default function () {
         digitalDiscountPercent,
         merchDiscountPercent,
         imageId,
+        isHidden,
       } = req.body;
       if (imageId) {
         const image = await prisma.image.findFirst({
@@ -131,6 +141,7 @@ export default function () {
             digitalDiscountPercent
           ),
           merchDiscountPercent: normalizeDiscountPercent(merchDiscountPercent),
+          hiddenAt: isHidden ? new Date() : null,
         },
       });
       if (imageId) {
