@@ -45,6 +45,7 @@ export const STEP_FIELDS: Record<SavedStepKey, Path<FormSettings>[]> = {
   ],
   platformPolicy: [
     "platformPercent",
+    "defaultCurrency",
     "isClosedToPublicArtistSignup",
     "terms",
     "privacyPolicy",
