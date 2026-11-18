@@ -2,13 +2,13 @@ import { NextFunction, Request, Response } from "express";
 
 import {
   profileBelongsToLoggedInUser,
-  userAuthenticated,
+  userAuthenticatedWithScope,
 } from "../../../../../auth/passport";
 import { listArtistReaders } from "../../../../../utils/payments/readers";
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, profileBelongsToLoggedInUser, GET],
+    GET: [userAuthenticatedWithScope("pos"), profileBelongsToLoggedInUser, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
@@ -25,7 +25,7 @@ export default function () {
   GET.apiDoc = {
     summary: "List the artist's Stripe Terminal readers",
     description:
-      "Card readers registered on the artist's connected Stripe account, for picking a dispatch target on the point-of-sale page.",
+      "Card readers registered on the artist's connected Stripe account, for picking a dispatch target on the point-of-sale page. Accepts the signed-in session or an OAuth token with the `pos` scope.",
     parameters: [
       {
         in: "path",

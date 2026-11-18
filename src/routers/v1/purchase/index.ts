@@ -4,7 +4,7 @@ import { uniq } from "lodash";
 
 import {
   profileEditableByUser,
-  userOrAppLoggedInWithoutRedirect,
+  userOrAppLoggedInWithoutRedirectWithScope,
 } from "../../../auth/passport";
 import { subscribeUserToProfile } from "../../../utils/artist";
 import { calculateCatalogueFloorPrice } from "../../../utils/catalogue";
@@ -317,7 +317,12 @@ export const cancelPreviousAttempt = async (checkout: {
 
 export default function () {
   const operations = {
-    POST: [userOrAppLoggedInWithoutRedirect, POST],
+    POST: [
+      userOrAppLoggedInWithoutRedirectWithScope((req) =>
+        req.body?.readerId && !req.body?.checkoutId ? "pos" : "api"
+      ),
+      POST,
+    ],
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
@@ -464,7 +469,7 @@ export default function () {
         >;
 
         if (readerId) {
-          const { setupIntentId } = await initiateSubscription({
+          const result = await initiateSubscription({
             readerId,
             profileId,
             tierId: subItem.tierId,
@@ -472,7 +477,7 @@ export default function () {
             userEmail: email ?? "",
           });
 
-          return res.status(200).json({ setupIntentId });
+          return res.status(200).json(result);
         }
 
         const result = await initiateOnlineSubscription({
@@ -855,7 +860,12 @@ export default function () {
       "call when no one is logged in. Paying again replaces the intent; " +
       "`success: true` means the checkout is already paid. When a " +
       "subscriber checks out another tier, an active subscription is moved " +
-      "to the new tier once they confirm; one that isn't active is replaced.",
+      "to the new tier once they confirm; one that isn't active is replaced. " +
+      "With `readerId` the purchase is sent to that card reader and the " +
+      "response has `paymentIntentId` (or `setupIntentId` for a " +
+      "subscription) and `stripeAccountId`, for polling or cancelling it " +
+      "at `purchase/{id}`. Sending to a reader accepts an OAuth token with " +
+      "the `pos` scope; everything else needs `api`.",
     parameters: [
       {
         in: "body",

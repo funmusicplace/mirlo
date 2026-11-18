@@ -2425,6 +2425,10 @@ describe("purchase", () => {
         (result as { paymentIntentId: string }).paymentIntentId,
         "pi_terminal_tg"
       );
+      assert.equal(
+        (result as { stripeAccountId: string }).stripeAccountId,
+        "acct_tg_terminal"
+      );
     });
 
     it("tags a single online trackGroup purchase with purchaseType 'trackGroup' and its trackGroupId", async () => {
@@ -3008,6 +3012,7 @@ describe("purchase", () => {
       });
 
       assert.equal(result.setupIntentId, "seti_sub_terminal");
+      assert.equal(result.stripeAccountId, "acct_sub_terminal");
     });
 
     it("refuses a terminal subscription without the buyer's email", async () => {

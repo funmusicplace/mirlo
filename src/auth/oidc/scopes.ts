@@ -5,6 +5,7 @@ export const OAUTH_SCOPES = [
   "email",
   "api",
   "subscribers:read",
+  "pos",
 ];
 
 export const requestedScopes = (scope: unknown) =>

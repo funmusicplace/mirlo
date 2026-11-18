@@ -2,8 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import {
   profileEditableByUser,
-  userAuthenticated,
-  userOrAppAuthenticated,
+  userAuthenticatedWithScope,
 } from "../../../../auth/passport";
 import { AppError } from "../../../../utils/error";
 import { getPaymentProcessor } from "../../../../utils/payments/PaymentProcessor";
@@ -71,8 +70,8 @@ const intentStatusSchema = {
 
 export default function () {
   const operations = {
-    GET: [userAuthenticated, GET],
-    DELETE: [userOrAppAuthenticated, DELETE],
+    GET: [userAuthenticatedWithScope("pos"), GET],
+    DELETE: [userAuthenticatedWithScope("pos"), DELETE],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
@@ -88,7 +87,8 @@ export default function () {
     summary: "Poll a pending purchase",
     description:
       "The status of a PaymentIntent (pi_*) or SetupIntent (seti_*), e.g. " +
-      "one dispatched to a terminal reader.",
+      "one dispatched to a terminal reader. Accepts the signed-in session " +
+      "or an OAuth token with the `pos` scope.",
     parameters: idParameters,
     responses: {
       200: { description: "Current status", schema: intentStatusSchema },
@@ -137,7 +137,8 @@ export default function () {
   DELETE.apiDoc = {
     summary: "Cancel a pending purchase",
     description:
-      "Cancels a pending PaymentIntent (pi_*) or SetupIntent (seti_*). ",
+      "Cancels a pending PaymentIntent (pi_*) or SetupIntent (seti_*). " +
+      "Accepts the signed-in session or an OAuth token with the `pos` scope.",
     parameters: [
       ...idParameters,
       {
