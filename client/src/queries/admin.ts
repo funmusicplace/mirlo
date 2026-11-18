@@ -11,7 +11,7 @@ const QUERY_KEY_ADMIN_SETTINGS = "admin-settings";
 const QUERY_KEY_ADMIN_FUNDRAISER_PLEDGES = "admin-fundraiser-pledges";
 const QUERY_KEY_ADMIN_CLIENTS = "admin-clients";
 const QUERY_KEY_ADMIN_STATS = "admin-stats";
-const QUERY_KEY_ADMIN_TOP_ACCOUNTS = "admin-top-accounts";
+const QUERY_KEY_ADMIN_TOP_RANKING = "admin-top-ranking";
 const QUERY_KEY_ADMIN_ARTIST = "admin-artist";
 const QUERY_KEY_ADMIN_CONTENT_FLAGS = "admin-content-flags";
 const QUERY_KEY_ADMIN_SETUP_STATUS = "admin-setup-status";
@@ -65,64 +65,94 @@ export const useAdminStatsQuery = (
   });
 };
 
-/** How far back the admin dashboard's top sellers/purchasers look. */
-export type TopAccountsPeriod = "month" | "year";
+export const TOP_RANKING_PERIODS = ["month", "year"] as const;
 
-export interface AdminTopSeller {
+/** How far back the admin dashboard's top-X tables look. */
+export type TopRankingPeriod = (typeof TOP_RANKING_PERIODS)[number];
+
+export interface AdminTopArtist {
   id: number;
   name: string;
   urlSlug: string;
-  cents: number;
-  transactionCount: number;
+  email: string;
+  createdAt: string;
+  location: string | null;
+  label: string | null;
+  albumCount: number;
+  trackCount: number;
+  merchCount: number;
+  tierCount: number;
+  albumDownloads: number;
+  freeDownloads: number;
+  revenueCents: number;
+  salesCount: number;
+  albumsUploaded: number;
+  tracksUploaded: number;
 }
 
 export interface AdminTopPurchaser {
   id: number;
   name: string | null;
   email: string;
+  createdAt: string;
   cents: number;
   transactionCount: number;
+  artistCount: number;
 }
 
-export interface AdminTopFreeDownloadArtist {
+export interface AdminTopListener {
   id: number;
-  name: string;
-  urlSlug: string;
-  downloadCount: number;
-}
-
-export interface AdminTopUploader {
-  id: number;
-  name: string;
-  urlSlug: string;
+  name: string | null;
+  email: string;
+  createdAt: string;
+  playCount: number;
   trackCount: number;
-  trackGroupCount: number;
+  artistCount: number;
 }
 
-export interface AdminTopDownloadedAlbum {
+export interface AdminTopAlbum {
   id: number;
   title: string | null;
+  releaseDate: string | null;
   artistId: number;
   artistName: string;
+  artistEmail: string;
   downloadCount: number;
+  revenueCents: number;
+  salesCount: number;
 }
 
-export interface AdminTopAccounts {
-  period: TopAccountsPeriod;
+export interface AdminTopRankingRows {
+  topSellers: AdminTopArtist;
+  topPurchasers: AdminTopPurchaser;
+  topListeners: AdminTopListener;
+  topFreeDownloads: AdminTopArtist;
+  topUploaders: AdminTopArtist;
+  topAlbums: AdminTopAlbum;
+}
+
+export type TopRanking = keyof AdminTopRankingRows;
+
+export interface AdminTopRanking<Row> {
+  period: TopRankingPeriod;
   currency: string;
-  sellers: AdminTopSeller[];
-  purchasers: AdminTopPurchaser[];
-  freeDownloads: AdminTopFreeDownloadArtist[];
-  uploaders: AdminTopUploader[];
-  downloadedAlbums: AdminTopDownloadedAlbum[];
+  rows: Row[];
 }
 
-export const useAdminTopAccountsQuery = (period: TopAccountsPeriod) => {
+export const adminTopRankingEndpoint = (
+  ranking: TopRanking,
+  period: TopRankingPeriod
+) => `admin/stats/${ranking}?period=${period}`;
+
+export const useAdminTopRankingQuery = <R extends TopRanking>(
+  ranking: R,
+  period: TopRankingPeriod
+) => {
   return useQuery({
-    queryKey: [QUERY_KEY_ADMIN_TOP_ACCOUNTS, period],
+    queryKey: [QUERY_KEY_ADMIN_TOP_RANKING, ranking, period],
     queryFn: async () => {
-      const { result } = await api.get<AdminTopAccounts>(
-        `admin/topAccounts?period=${period}`
+      const { result } = await api.get<AdminTopRanking<AdminTopRankingRows[R]>>(
+        adminTopRankingEndpoint(ranking, period)
       );
       return result;
     },

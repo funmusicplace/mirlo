@@ -6,8 +6,10 @@ import { MemoryRouter } from "react-router-dom";
 import api from "services/api";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
+import { makeTopRankings } from "../../../../test/mocks";
+
 vi.mock("services/api", () => ({
-  default: { get: vi.fn() },
+  default: { get: vi.fn(), getFile: vi.fn() },
 }));
 
 import TopAccountsTables from "./TopAccountsTables";
@@ -25,55 +27,52 @@ const renderTables = () =>
     </QueryClientProvider>
   );
 
+const rankings = makeTopRankings("month", 1);
+rankings.topSellers.rows[0] = {
+  ...rankings.topSellers.rows[0],
+  id: 3,
+  name: "Big Seller",
+  revenueCents: 5000,
+};
+rankings.topPurchasers.rows[0] = {
+  ...rankings.topPurchasers.rows[0],
+  id: 7,
+  name: null,
+  email: "big@buyer.com",
+  cents: 1250,
+};
+rankings.topListeners.rows[0] = {
+  ...rankings.topListeners.rows[0],
+  id: 8,
+  name: "Keen Fan",
+  playCount: 321,
+};
+rankings.topFreeDownloads.rows[0] = {
+  ...rankings.topFreeDownloads.rows[0],
+  id: 4,
+  name: "Free Artist",
+  freeDownloads: 42,
+};
+rankings.topUploaders = makeTopRankings("month", 20).topUploaders;
+rankings.topAlbums.rows[0] = {
+  ...rankings.topAlbums.rows[0],
+  id: 9,
+  title: null,
+  artistId: 5,
+  artistName: "Album Artist",
+  downloadCount: 77,
+};
+
 describe("TopAccountsTables", () => {
   beforeEach(() => {
     vi.mocked(api.get).mockReset();
-    vi.mocked(api.get).mockResolvedValue({
-      result: {
-        period: "month",
-        currency: "usd",
-        sellers: [
-          {
-            id: 3,
-            name: "Big Seller",
-            urlSlug: "big-seller",
-            cents: 5000,
-            transactionCount: 2,
-          },
-        ],
-        purchasers: [
-          {
-            id: 7,
-            name: null,
-            email: "big@buyer.com",
-            cents: 1250,
-            transactionCount: 1,
-          },
-        ],
-        freeDownloads: [
-          { id: 4, name: "Free Artist", urlSlug: "free", downloadCount: 42 },
-        ],
-        uploaders: Array.from({ length: 20 }, (_, index) => ({
-          id: 100 + index,
-          name: `Uploader ${index + 1}`,
-          urlSlug: `uploader-${index + 1}`,
-          trackCount: 20 - index,
-          trackGroupCount: 1,
-        })),
-        downloadedAlbums: [
-          {
-            id: 9,
-            title: null,
-            artistId: 5,
-            artistName: "Album Artist",
-            downloadCount: 77,
-          },
-        ],
-      },
-    } as any);
+    vi.mocked(api.get).mockImplementation(async (endpoint: string) => {
+      const ranking = endpoint.match(/^admin\/stats\/(\w+)\?/)?.[1];
+      return { result: rankings[ranking as keyof typeof rankings] } as any;
+    });
   });
 
-  test("links each seller and purchaser to their admin page", async () => {
+  test("links each seller, purchaser and listener to their admin page", async () => {
     renderTables();
 
     await waitFor(() => screen.getByText("Big Seller"));
@@ -87,8 +86,13 @@ describe("TopAccountsTables", () => {
       "href",
       "/admin/content/users/7"
     );
+    expect(screen.getByText("Keen Fan").closest("a")).toHaveAttribute(
+      "href",
+      "/admin/content/users/8"
+    );
     expect(screen.getByText("$50.00")).toBeInTheDocument();
     expect(screen.getByText("$12.50")).toBeInTheDocument();
+    expect(screen.getByText("321")).toBeInTheDocument();
   });
 
   test("shows free downloads and uploads", async () => {
@@ -133,15 +137,37 @@ describe("TopAccountsTables", () => {
     expect(screen.queryByText("Uploader 11")).not.toBeInTheDocument();
   });
 
-  test("refetches for the past year when the period is switched", async () => {
+  test("refetches every table for the past year when the period is switched", async () => {
     renderTables();
 
-    expect(api.get).toHaveBeenCalledWith("admin/topAccounts?period=month");
+    expect(api.get).toHaveBeenCalledWith("admin/stats/topSellers?period=month");
+    expect(api.get).toHaveBeenCalledWith(
+      "admin/stats/topListeners?period=month"
+    );
 
     await userEvent.selectOptions(screen.getByRole("combobox"), "year");
 
     await waitFor(() =>
-      expect(api.get).toHaveBeenCalledWith("admin/topAccounts?period=year")
+      expect(api.get).toHaveBeenCalledWith("admin/stats/topSellers?period=year")
+    );
+    expect(api.get).toHaveBeenCalledWith("admin/stats/topAlbums?period=year");
+  });
+
+  test("downloads a table's CSV for the selected period from its menu", async () => {
+    renderTables();
+
+    await waitFor(() => screen.getByText("Big Seller"));
+    await userEvent.selectOptions(screen.getByRole("combobox"), "year");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Top 50 Sellers options" })
+    );
+    await userEvent.click(screen.getByText("Download CSV"));
+
+    expect(api.getFile).toHaveBeenCalledWith(
+      "topSellers-year",
+      "admin/stats/topSellers?period=year&format=csv",
+      "text/csv"
     );
   });
 });

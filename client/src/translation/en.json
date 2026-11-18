@@ -2131,7 +2131,13 @@
     "album": "Album",
     "downloads": "Downloads",
     "untitledAlbum": "Untitled",
-    "noAlbumDownloadsInPeriod": "No album downloads in this period."
+    "noAlbumDownloadsInPeriod": "No album downloads in this period.",
+    "topListeners": "Top 50 Listeners",
+    "plays": "Plays",
+    "artists": "Artists",
+    "noPlaysInPeriod": "No plays in this period.",
+    "downloadCsv": "Download CSV",
+    "rankingOptions": "{{title}} options"
   },
   "flaggedContent": {
     "title": "Flagged content",

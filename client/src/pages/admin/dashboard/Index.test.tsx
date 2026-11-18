@@ -59,7 +59,8 @@ vi.mock("recharts", () => ({
   Legend: () => null,
 }));
 
-import Index, { ChartTooltip } from "./Index";
+import ChartTooltip from "./ChartTooltip";
+import Index from "./Index";
 
 function makeStats(overrides: Record<string, unknown> = {}) {
   return {
@@ -104,15 +105,8 @@ function makeStats(overrides: Record<string, unknown> = {}) {
   };
 }
 
-const emptyTopAccounts = {
-  result: {
-    period: "month",
-    sellers: [],
-    purchasers: [],
-    freeDownloads: [],
-    uploaders: [],
-    downloadedAlbums: [],
-  },
+const emptyRanking = {
+  result: { period: "month", currency: "usd", rows: [] },
 };
 
 /** Serves the top-accounts tables so tests can focus on the stats payload. */
@@ -120,8 +114,8 @@ const mockStats = (stats: (endpoint: string) => unknown = () => makeStats()) =>
   vi
     .mocked(api.get)
     .mockImplementation(async (endpoint: string) =>
-      endpoint.startsWith("admin/topAccounts")
-        ? (emptyTopAccounts as any)
+      endpoint.startsWith("admin/stats/top")
+        ? (emptyRanking as any)
         : (stats(endpoint) as any)
     );
 

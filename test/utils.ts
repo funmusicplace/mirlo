@@ -457,11 +457,13 @@ export const createUserTrackPurchase = async (
 
 export const createTrackPlay = async (
   trackId: number,
-  data?: Partial<Prisma.TrackPlayCreateArgs["data"]>
+  data?: { userId?: number; createdAt?: Date }
 ) => {
   const trackPlay = await prisma.trackPlay.create({
     data: {
       trackId: trackId,
+      userId: data?.userId,
+      createdAt: data?.createdAt,
     },
   });
   return trackPlay;
