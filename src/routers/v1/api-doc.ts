@@ -111,7 +111,7 @@ const apiDoc = {
         pointOfSale: {
           type: "boolean",
           description:
-            "The logged-in user is selling on the artist's behalf, not buying: the sale is credited to `email`, or to no one when it's left out. Releases need `email`. Requires edit rights on the artist.",
+            "The logged-in user is selling on the artist's behalf, not buying: the sale is credited to `email`, or to no one when it's left out. Releases and subscriptions need `email`. Requires edit rights on the artist.",
         },
         artistId: {
           type: "number",

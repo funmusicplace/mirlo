@@ -168,4 +168,37 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
     assert.equal(job.message.to, "artist@test.com");
     assert.equal(job.locals.email, null);
   });
+
+  it("doesn't credit a point-of-sale sale to the email Stripe collected", async () => {
+    sinon.stub(sendMailQueue, "add").resolves();
+    const { user: artistUser } = await createUser({ email: "artist@test.com" });
+    const artist = await createArtist(artistUser.id);
+    const merch = await createMerch(artist.id, { quantityRemaining: 5 });
+
+    const intent = {
+      id: "pi_identity_pos_link",
+      amount_received: 1000,
+      currency: "usd",
+      receipt_email: "seller@test.com",
+      metadata: {
+        purchaseType: "merch",
+        items: JSON.stringify([
+          { type: "merch", id: merch.id, quantity: 1, amount: 1000 },
+        ]),
+        artistId: String(artist.id),
+        pointOfSale: "true",
+      },
+    } as unknown as Stripe.PaymentIntent;
+
+    await completePurchaseFromIntent(intent, "acct_identity_pos_link");
+
+    const transaction = await prisma.userTransaction.findFirst({
+      where: { stripeId: "pi_identity_pos_link" },
+    });
+    assert.equal(transaction?.userId, null);
+    const seller = await prisma.user.findFirst({
+      where: { email: "seller@test.com" },
+    });
+    assert.equal(seller, null);
+  });
 });

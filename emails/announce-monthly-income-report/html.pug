@@ -72,7 +72,7 @@ block content
             td
               +saleKind(sale.saleKind)
             td #{sale.saleKind === 'tip' ? '' : sale.title}
-            td #{sale.user.name || t("emails.common.aSupporter")} (#{sale.user.email})
+            td #{sale.user.name || t("emails.common.aSupporter")}#{sale.user.email ? " (" + sale.user.email + ")" : ""}
             td.num
               +currency(sale.amount, currency)
     p= t("emails.announceMonthlyIncomeReport.salesIncome", { amount: formatMoney(salesTotal, currency) })

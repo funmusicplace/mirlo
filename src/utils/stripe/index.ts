@@ -1266,7 +1266,7 @@ export const completePurchaseFromIntent = async (
   const { userId, userEmail } = metadata;
 
   let resolvedEmail = userEmail ?? "";
-  if (!resolvedEmail && !userId) {
+  if (!resolvedEmail && !userId && metadata.pointOfSale !== "true") {
     resolvedEmail = await recoverEmailFromIntent(intent, accountId);
     if (resolvedEmail) {
       logger.warn(

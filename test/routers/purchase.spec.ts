@@ -400,6 +400,23 @@ describe("purchase", () => {
         assert.equal(response.statusCode, 400);
       });
 
+      it("needs the buyer's email to sell a subscription online", async () => {
+        const { accessToken, profile } = await setupReaderSale();
+        const tier = await createTier(profile.id, { minAmount: 500 });
+
+        const response = await postPurchase(
+          {
+            artistId: profile.id,
+            pointOfSale: true,
+            items: [{ type: "subscription", tierId: tier.id }],
+          },
+          accessToken
+        );
+
+        assert.equal(response.statusCode, 400);
+        assert.match(response.body.error, /needs the buyer's email/);
+      });
+
       it("won't open a checkout, which would forget who's selling", async () => {
         const { accessToken, profile } = await setupReaderSale();
         const merch = await createMerch(profile.id, {

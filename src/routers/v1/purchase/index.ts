@@ -89,8 +89,8 @@ type PostBody = {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const POINT_OF_SALE_DOWNLOAD_NEEDS_EMAIL =
-  "A download sold at the point of sale needs the buyer's email";
+const POINT_OF_SALE_NEEDS_EMAIL =
+  "A download or subscription sold at the point of sale needs the buyer's email";
 
 type DigitalReleaseProfile = Parameters<typeof subscribeUserToProfile>[0] &
   Parameters<typeof resolvePayee>[0]["profile"] & { urlSlug: string | null };
@@ -469,6 +469,19 @@ export default function () {
         });
       }
 
+      if (
+        pointOfSale &&
+        !email &&
+        items.some((i) =>
+          ["trackGroup", "track", "catalogue", "subscription"].includes(i.type)
+        )
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description: POINT_OF_SALE_NEEDS_EMAIL,
+        });
+      }
+
       if (hasSubscription) {
         const subItem = items[0] as Extract<
           PurchaseItem,
@@ -554,17 +567,6 @@ export default function () {
         });
 
         return res.status(200).json(result);
-      }
-
-      if (
-        pointOfSale &&
-        !email &&
-        items.some((i) => ["trackGroup", "track", "catalogue"].includes(i.type))
-      ) {
-        throw new AppError({
-          httpCode: 400,
-          description: POINT_OF_SALE_DOWNLOAD_NEEDS_EMAIL,
-        });
       }
 
       const resolvedItems: ResolvedItem[] = [];
@@ -715,7 +717,7 @@ export default function () {
           if (pointOfSale && !email && merch.includePurchaseTrackGroupId) {
             throw new AppError({
               httpCode: 400,
-              description: POINT_OF_SALE_DOWNLOAD_NEEDS_EMAIL,
+              description: POINT_OF_SALE_NEEDS_EMAIL,
             });
           }
 
