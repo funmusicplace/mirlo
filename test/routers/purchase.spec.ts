@@ -490,6 +490,7 @@ describe("purchase", () => {
         {
           artistId: profile.id,
           readerId: "tmr_test",
+          email: "fan@test.com",
           items: [{ type: "subscription", tierId: 99999 }],
         },
         accessToken
