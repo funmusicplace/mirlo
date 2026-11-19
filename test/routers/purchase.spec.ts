@@ -272,6 +272,97 @@ describe("purchase", () => {
       assert.equal(response.statusCode, 404);
     });
 
+    describe("at a card reader", () => {
+      const setupReaderSale = async () => {
+        const { user: owner, accessToken } = await createUser({
+          email: "artist@test.com",
+          stripeAccountId: "acct_reader_sale",
+        });
+        const profile = await createProfile(owner.id);
+        return { owner, accessToken, profile };
+      };
+
+      it("sells merch without the buyer's email", async () => {
+        const { accessToken, profile } = await setupReaderSale();
+        const merch = await createMerch(profile.id, {
+          isPublic: true,
+          minPrice: 800,
+          quantityRemaining: 10,
+        });
+
+        const response = await postPurchase(
+          {
+            artistId: profile.id,
+            readerId: "tmr_test",
+            items: [{ type: "merch", id: merch.id, quantity: 1 }],
+          },
+          accessToken
+        );
+
+        assert.equal(response.statusCode, 200, response.text);
+        assert.ok(response.body.paymentIntentId);
+      });
+
+      it("needs the buyer's email to sell a release", async () => {
+        const { accessToken, profile } = await setupReaderSale();
+        const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+
+        const response = await postPurchase(
+          {
+            artistId: profile.id,
+            readerId: "tmr_test",
+            items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
+          },
+          accessToken
+        );
+
+        assert.equal(response.statusCode, 400);
+      });
+
+      it("needs the buyer's email to sell merch that comes with a release", async () => {
+        const { accessToken, profile } = await setupReaderSale();
+        const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+        const merch = await createMerch(profile.id, {
+          isPublic: true,
+          minPrice: 800,
+          quantityRemaining: 10,
+          includePurchaseTrackGroupId: tg.id,
+        });
+
+        const response = await postPurchase(
+          {
+            artistId: profile.id,
+            readerId: "tmr_test",
+            items: [{ type: "merch", id: merch.id, quantity: 1 }],
+          },
+          accessToken
+        );
+
+        assert.equal(response.statusCode, 400);
+      });
+
+      it("doesn't subscribe the person running the reader to the artist", async () => {
+        const { owner, accessToken, profile } = await setupReaderSale();
+        const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+
+        const response = await postPurchase(
+          {
+            artistId: profile.id,
+            readerId: "tmr_test",
+            email: "fan@test.com",
+            items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
+          },
+          accessToken
+        );
+
+        assert.equal(response.statusCode, 200, response.text);
+        const subscription = await prisma.profileUserSubscription.findFirst({
+          where: { userId: owner.id },
+        });
+        assert.equal(subscription, null);
+      });
+    });
+
     it("should return 400 when a card-reader subscription has no buyer email", async () => {
       const { user, accessToken } = await createUser({
         email: "artist@test.com",
@@ -3076,29 +3167,11 @@ describe("purchase", () => {
       email: "seller@test.com",
     } as unknown as Express.User;
 
-    it("credits a card-reader sale to the buyer's email, not the seller", () => {
-      assert.deepEqual(
-        resolveBuyer({
-          loggedInUser: seller,
-          email: "fan@test.com",
-          readerId: "tmr_test",
-        }),
-        { userEmail: "fan@test.com" }
-      );
-    });
-
-    it("falls back to the seller for a card-reader sale with no email", () => {
-      assert.deepEqual(
-        resolveBuyer({ loggedInUser: seller, readerId: "tmr_test" }),
-        { userEmail: "seller@test.com", userId: "7" }
-      );
-    });
-
     it("keeps the logged-in user over a typed email online", () => {
-      assert.deepEqual(
-        resolveBuyer({ loggedInUser: seller, email: "fan@test.com" }),
-        { userEmail: "seller@test.com", userId: "7" }
-      );
+      assert.deepEqual(resolveBuyer({ buyer: seller, email: "fan@test.com" }), {
+        userEmail: "seller@test.com",
+        userId: "7",
+      });
     });
 
     it("uses the typed email for a guest", () => {

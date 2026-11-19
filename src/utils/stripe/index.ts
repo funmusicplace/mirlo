@@ -1274,16 +1274,25 @@ export const completePurchaseFromIntent = async (
     }
   }
 
-  const { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
-    resolvedEmail,
-    userId
+  const messages = await findCheckoutMessages(metadata.checkoutId);
+  const items = (JSON.parse(metadata.items ?? "[]") as ResolvedItem[]).map(
+    (item, i) => ({ ...item, message: messages[i] ?? item.message })
   );
 
   const payment = await completedPaymentFromIntent(intent, accountId);
 
-  const messages = await findCheckoutMessages(metadata.checkoutId);
-  const items = (JSON.parse(metadata.items ?? "[]") as ResolvedItem[]).map(
-    (item, i) => ({ ...item, message: messages[i] ?? item.message })
+  if (
+    !resolvedEmail &&
+    !userId &&
+    items.every((item) => item.type === "merch" || item.type === "tip")
+  ) {
+    await completePurchase(null, items, payment);
+    return;
+  }
+
+  const { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
+    resolvedEmail,
+    userId
   );
 
   await completePurchase(Number(actualUserId), items, payment, { newUser });

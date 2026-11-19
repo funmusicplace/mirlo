@@ -651,8 +651,8 @@ interface UserTrackGroupWishlist {
 }
 
 interface UserTransaction {
-  userId: number;
-  user: User;
+  userId: number | null;
+  user: User | null;
   platformCut: number;
   currency: string;
   amount: number;
@@ -682,7 +682,7 @@ interface UserTrackPurchase {
 }
 
 interface UserArtistTip {
-  userId: number;
+  userId: number | null;
   artistId: number;
   pricePaid: number;
   currencyPaid: string;
@@ -839,8 +839,8 @@ interface MerchPurchase {
   merchId: string;
   id: string;
   merch: Merch;
-  user: User;
-  userId: number;
+  user: User | null;
+  userId: number | null;
   createdAt: string;
   updatedAt: string;
   quantity: number;

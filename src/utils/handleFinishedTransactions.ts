@@ -28,12 +28,12 @@ import { hasSubscriptionTiers } from "./subscriptionTier";
 import { registerPurchase, registerTrackPurchase } from "./trackGroup";
 
 export const recordCompletedTransaction = (
-  userId: number,
+  userId: number | null,
   payment?: CompletedPayment
 ) =>
   prisma.userTransaction.create({
     data: {
-      userId: Number(userId),
+      userId,
       amount: payment?.amount ?? 0,
       currency: payment?.currency ?? "usd",
       platformCut: payment?.platformCut ?? 0,
@@ -398,7 +398,7 @@ type SaleContext = {
 };
 
 type AttachContext = {
-  userId: number;
+  userId: number | null;
   user: SafeUser | null;
   transaction: Awaited<ReturnType<typeof recordCompletedTransaction>>;
   payment?: CompletedPayment;
@@ -412,13 +412,20 @@ type AttachResult = {
   genericNotification?: boolean;
 };
 
+const requireBuyer = (userId: number | null, type: ResolvedItem["type"]) => {
+  if (userId === null) {
+    throw new Error(`A ${type} purchase needs a buyer`);
+  }
+  return userId;
+};
+
 const attachTrackGroup = async (
   item: ResolvedItem,
   { userId, user, transaction, message, newUser }: AttachContext
 ): Promise<AttachResult> => {
   const trackGroupId = Number(item.id);
   const purchase = await registerPurchase({
-    userId,
+    userId: requireBuyer(userId, item.type),
     trackGroupId,
     pricePaid: item.amount,
     message: message ?? null,
@@ -491,7 +498,7 @@ const attachTrack = async (
 ): Promise<AttachResult> => {
   const trackId = Number(item.id);
   await registerTrackPurchase({
-    userId,
+    userId: requireBuyer(userId, item.type),
     trackId,
     message: message ?? null,
     transactionId: transaction.id,
@@ -587,7 +594,7 @@ const attachMerch = async (
     },
   });
 
-  if (merch.includePurchaseTrackGroupId) {
+  if (merch.includePurchaseTrackGroupId && userId) {
     try {
       await prisma.userTrackGroupPurchase.create({
         data: {
@@ -628,6 +635,7 @@ const attachCatalogue = async (
   item: ResolvedItem,
   { userId, user, transaction, message }: AttachContext
 ): Promise<AttachResult> => {
+  const buyerId = requireBuyer(userId, item.type);
   const profile = await prisma.profile.findFirst({
     where: { id: profileId },
     include: { user: true, paymentToUser: true },
@@ -642,7 +650,7 @@ const attachCatalogue = async (
   const purchases = await Promise.all(
     profileTrackGroups.map((trackGroup) =>
       registerPurchase({
-        userId,
+        userId: buyerId,
         trackGroupId: Number(trackGroup.id),
         message: message ?? null,
         pricePaid: Number(amountPaidPerTrackGroup.toFixed(2)),
@@ -712,7 +720,7 @@ const attachCatalogue = async (
 };
 
 export const completePurchase = async (
-  userId: number,
+  userId: number | null,
   items: ResolvedItem[],
   payment?: CompletedPayment,
   { newUser = false, profileId }: { newUser?: boolean; profileId?: number } = {}
@@ -737,7 +745,9 @@ export const completePurchase = async (
   }
 
   const transaction = await recordCompletedTransaction(userId, payment);
-  const user = await prisma.user.findFirst({ where: { id: userId } });
+  const user = userId
+    ? await prisma.user.findFirst({ where: { id: userId } })
+    : null;
   const resolvedProfileId = profileId ?? Number(payment?.metadata.artistId);
 
   let sale: SaleContext | undefined;

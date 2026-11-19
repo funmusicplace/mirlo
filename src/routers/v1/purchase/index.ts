@@ -88,6 +88,9 @@ type PostBody = {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const READER_DOWNLOAD_NEEDS_EMAIL =
+  "A download sold at a card reader needs the buyer's email";
+
 type DigitalReleaseProfile = Parameters<typeof subscribeUserToProfile>[0] &
   Parameters<typeof resolvePayee>[0]["profile"] & { urlSlug: string | null };
 
@@ -96,8 +99,7 @@ export const resolveDigitalPurchaseItem = async <
 >({
   type,
   id,
-  loggedInUser,
-  readerId,
+  buyer,
   price,
   message,
   minPrice,
@@ -111,8 +113,7 @@ export const resolveDigitalPurchaseItem = async <
 }: {
   type: T;
   id: number;
-  loggedInUser?: Express.User;
-  readerId?: string;
+  buyer?: Express.User;
   price?: string;
   message?: string;
   minPrice: number | null;
@@ -135,14 +136,14 @@ export const resolveDigitalPurchaseItem = async <
   };
   const stripeAccountId = payee.stripeAccountId ?? undefined;
 
-  if (loggedInUser && !quoteOnly) {
-    await subscribeUserToProfile(profile, loggedInUser);
+  if (buyer && !quoteOnly) {
+    await subscribeUserToProfile(profile, buyer);
   }
 
   let discountPercent = 0;
-  if (loggedInUser) {
+  if (buyer) {
     const discounts = await findUserDiscountPercentsForProfile(
-      loggedInUser.id,
+      buyer.id,
       profile.id
     );
     discountPercent = discounts.reduce(
@@ -153,19 +154,13 @@ export const resolveDigitalPurchaseItem = async <
 
   const { isPriceZero, priceNumber } = determinePrice(price, minPrice);
 
-  if (
-    isPriceZero &&
-    !readerId &&
-    loggedInUser &&
-    handleFreePurchase &&
-    !quoteOnly
-  ) {
+  if (isPriceZero && buyer && handleFreePurchase && !quoteOnly) {
     await handleFreePurchase();
     return {
       kind: "free",
       redirectUrl: `/${profile.urlSlug ?? profile.id}/release/${
         releaseUrlSlug ?? releaseId
-      }/download?email=${encodeURIComponent(loggedInUser.email)}`,
+      }/download?email=${encodeURIComponent(buyer.email)}`,
     };
   }
 
@@ -281,20 +276,15 @@ const assertAllowedSuccessUrl = (
 };
 
 export const resolveBuyer = ({
-  loggedInUser,
+  buyer,
   email,
-  readerId,
 }: {
-  loggedInUser?: Express.User;
+  buyer?: Express.User;
   email?: string;
-  readerId?: string;
-}): { userEmail: string; userId?: string } =>
-  readerId && email
-    ? { userEmail: email }
-    : {
-        userEmail: loggedInUser?.email ?? email ?? "",
-        userId: loggedInUser ? String(loggedInUser.id) : undefined,
-      };
+}): { userEmail: string; userId?: string } => ({
+  userEmail: buyer?.email ?? email ?? "",
+  userId: buyer ? String(buyer.id) : undefined,
+});
 
 export const cancelPreviousAttempt = async (checkout: {
   stripeId: string | null;
@@ -385,7 +375,9 @@ export default function () {
         await profileEditableByUser(profileId, loggedInUser);
       }
 
-      if (email && (!loggedInUser || readerId) && !EMAIL_REGEX.test(email)) {
+      const buyer = readerId ? undefined : loggedInUser;
+
+      if (email && !buyer && !EMAIL_REGEX.test(email)) {
         throw new AppError({
           httpCode: 400,
           description: "email is not a valid email address",
@@ -441,7 +433,7 @@ export default function () {
           deferred: {
             ...quote,
             checkoutId,
-            buyerEmailKnown: !!(loggedInUser || email),
+            buyerEmailKnown: !!(buyer || email),
             artistName: profile?.name ?? null,
             successUrl: successUrl ?? null,
           },
@@ -491,8 +483,8 @@ export default function () {
           profileId,
           tierId: subItem.tierId,
           amount: subItem.amount,
-          userEmail: loggedInUser?.email ?? email ?? "",
-          userId: loggedInUser?.id,
+          userEmail: buyer?.email ?? email ?? "",
+          userId: buyer?.id,
           userName: subItem.userName,
           deferred,
           shippingAddress,
@@ -539,8 +531,8 @@ export default function () {
           fundraiserId: pledgeItem.fundraiserId,
           price: pledgeItem.price,
           message: pledgeItem.message,
-          userEmail: loggedInUser?.email ?? email ?? "",
-          userId: loggedInUser?.id,
+          userEmail: buyer?.email ?? email ?? "",
+          userId: buyer?.id,
           deferred,
           checkoutId: checkout?.id,
         });
@@ -554,6 +546,17 @@ export default function () {
         });
 
         return res.status(200).json(result);
+      }
+
+      if (
+        readerId &&
+        !email &&
+        items.some((i) => ["trackGroup", "track", "catalogue"].includes(i.type))
+      ) {
+        throw new AppError({
+          httpCode: 400,
+          description: READER_DOWNLOAD_NEEDS_EMAIL,
+        });
       }
 
       const resolvedItems: ResolvedItem[] = [];
@@ -608,8 +611,7 @@ export default function () {
           const result = await resolveDigitalPurchaseItem({
             type: "trackGroup",
             id: tg.id,
-            loggedInUser,
-            readerId,
+            buyer,
             price: item.price,
             message: item.message,
             minPrice: tg.minPrice,
@@ -620,7 +622,7 @@ export default function () {
             releaseId: tg.id,
             quoteOnly,
             handleFreePurchase: canBeFree
-              ? () => handleTrackGroupPurchase(loggedInUser!.id, tg.id)
+              ? () => handleTrackGroupPurchase(buyer!.id, tg.id)
               : undefined,
           });
 
@@ -661,8 +663,7 @@ export default function () {
           const result = await resolveDigitalPurchaseItem({
             type: "track",
             id: track.id,
-            loggedInUser,
-            readerId,
+            buyer,
             price: item.price,
             message: item.message,
             minPrice: track.minPrice,
@@ -673,7 +674,7 @@ export default function () {
             releaseId: track.trackGroup.id,
             quoteOnly,
             handleFreePurchase: canBeFree
-              ? () => handleTrackPurchase(loggedInUser!.id, track.id)
+              ? () => handleTrackPurchase(buyer!.id, track.id)
               : undefined,
           });
 
@@ -703,11 +704,15 @@ export default function () {
             });
           }
 
-          const discounts = loggedInUser
-            ? await findUserDiscountPercentsForProfile(
-                loggedInUser.id,
-                profileId
-              )
+          if (readerId && !email && merch.includePurchaseTrackGroupId) {
+            throw new AppError({
+              httpCode: 400,
+              description: READER_DOWNLOAD_NEEDS_EMAIL,
+            });
+          }
+
+          const discounts = buyer
+            ? await findUserDiscountPercentsForProfile(buyer.id, profileId)
             : [];
           const resolved = resolveMerchPurchaseItem(
             merch,
@@ -754,8 +759,8 @@ export default function () {
             });
           }
 
-          if (loggedInUser && !quoteOnly) {
-            await subscribeUserToProfile(profile, loggedInUser);
+          if (buyer && !quoteOnly) {
+            await subscribeUserToProfile(profile, buyer);
           }
 
           const floorPrice = await calculateCatalogueFloorPrice(profile);
@@ -831,7 +836,7 @@ export default function () {
         readerId,
         profileId,
         items: resolvedItems,
-        ...resolveBuyer({ loggedInUser, email, readerId }),
+        ...resolveBuyer({ buyer, email }),
         clientId,
         stripeAccountId: payeeAccountId,
         checkoutId: checkout?.id,

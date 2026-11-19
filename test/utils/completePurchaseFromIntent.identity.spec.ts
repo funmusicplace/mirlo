@@ -11,6 +11,7 @@ import { completePurchaseFromIntent } from "../../src/utils/stripe";
 import {
   clearTables,
   createArtist,
+  createMerch,
   createTrackGroup,
   createUser,
 } from "../utils";
@@ -128,5 +129,35 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
       where: { trackGroupId: tg.id },
     });
     assert.equal(count, 0);
+  });
+
+  it("records a merch and tip sale with no buyer when there's nobody to credit", async () => {
+    const { user: artistUser } = await createUser({ email: "artist@test.com" });
+    const artist = await createArtist(artistUser.id);
+    const merch = await createMerch(artist.id, { quantityRemaining: 5 });
+
+    const intent = {
+      id: "pi_identity_walk_up",
+      amount_received: 1500,
+      currency: "usd",
+      metadata: {
+        purchaseType: "merch",
+        items: JSON.stringify([
+          { type: "merch", id: merch.id, quantity: 1, amount: 1000 },
+          { type: "tip", quantity: 1, amount: 500 },
+        ]),
+        artistId: String(artist.id),
+      },
+    } as unknown as Stripe.PaymentIntent;
+
+    await completePurchaseFromIntent(intent, "acct_identity_walk_up");
+
+    const transaction = await prisma.userTransaction.findFirst({
+      where: { stripeId: "pi_identity_walk_up" },
+      include: { merchPurchases: true, tips: true },
+    });
+    assert.equal(transaction?.userId, null);
+    assert.equal(transaction?.merchPurchases[0]?.userId, null);
+    assert.equal(transaction?.tips[0]?.userId, null);
   });
 });
