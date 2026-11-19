@@ -77,7 +77,7 @@ export default adminRankingRoute({
     { label: "Release date", value: (row) => isoDate(row.releaseDate) },
     { label: "Downloads", value: "downloadCount" },
     {
-      label: `Revenue (${currency.toUpperCase()})`,
+      label: `Revenue from orders including this album (${currency.toUpperCase()})`,
       value: (row) => majorUnits(row.revenueCents),
     },
     { label: "Sales", value: "salesCount" },

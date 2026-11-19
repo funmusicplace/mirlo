@@ -4,7 +4,8 @@ import { uniq } from "lodash";
 
 import {
   profileEditableByUser,
-  userOrAppLoggedInWithoutRedirectWithScope,
+  userAuthenticatedWithScope,
+  userOrAppLoggedInWithoutRedirect,
 } from "../../../auth/passport";
 import { subscribeUserToProfile } from "../../../utils/artist";
 import { calculateCatalogueFloorPrice } from "../../../utils/catalogue";
@@ -315,12 +316,18 @@ export const cancelPreviousAttempt = async (checkout: {
   return { alreadyPaid: false };
 };
 
+const isReaderSale = (req: Request) =>
+  !!req.body?.readerId && !req.body?.checkoutId;
+
+const posAuthenticated = userAuthenticatedWithScope("pos");
+
 export default function () {
   const operations = {
     POST: [
-      userOrAppLoggedInWithoutRedirectWithScope((req) =>
-        req.body?.readerId && !req.body?.checkoutId ? "pos" : "api"
-      ),
+      (req: Request, res: Response, next: NextFunction) =>
+        (isReaderSale(req)
+          ? posAuthenticated
+          : userOrAppLoggedInWithoutRedirect)(req, res, next),
       POST,
     ],
   };

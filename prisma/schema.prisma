@@ -1123,6 +1123,8 @@ model TrackPlay {
   ip        String?
   createdAt DateTime @default(now())
   owned     Boolean  @default(false)
+
+  @@index([createdAt])
 }
 
 model PostTrack {

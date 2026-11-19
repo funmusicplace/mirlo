@@ -112,7 +112,7 @@ describe("pos scope", () => {
         items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
       });
 
-    assert.equal(response.status, 401);
+    assert.equal(response.status, 403);
   });
 
   for (const method of ["get", "delete"] as const) {

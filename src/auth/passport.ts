@@ -132,11 +132,7 @@ const withBearer =
       required,
       apps,
       scope = "api",
-    }: {
-      required: boolean;
-      apps: "reads" | "all" | "none";
-      scope?: string | ((req: Request) => string);
-    }
+    }: { required: boolean; apps: "reads" | "all" | "none"; scope?: string }
   ) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -155,10 +151,9 @@ const withBearer =
           description: "This can only be done while signed in on the site",
         });
       }
-      const neededScope = typeof scope === "function" ? scope(req) : scope;
-      if (!hasScope(req, neededScope)) {
+      if (!hasScope(req, scope)) {
         return required
-          ? rejectBearer(res, next, "insufficient_scope", neededScope)
+          ? rejectBearer(res, next, "insufficient_scope", scope)
           : next();
       }
       req.user = bearer.user;
@@ -195,15 +190,6 @@ export const siteUserAuthenticated = withBearer(cookieUserAuthenticated, {
 
 export const userAuthenticatedWithScope = (scope: string) =>
   withBearer(cookieUserAuthenticated, { required: true, apps: "all", scope });
-
-export const userOrAppLoggedInWithoutRedirectWithScope = (
-  scope: (req: Request) => string
-) =>
-  withBearer(cookieUserLoggedInWithoutRedirect, {
-    required: false,
-    apps: "all",
-    scope,
-  });
 
 export const userHasPermission = (role: "admin" | "owner") => {
   return (req: Request, res: Response, next: NextFunction) => {
