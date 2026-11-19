@@ -24,4 +24,7 @@ docs/.vitepress/cache
 docs/.vitepress/dist
 
 .github/copilot-instructions.md
-.claude/*
+.claude/*/
+
+tags
+tags.*

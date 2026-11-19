@@ -1,0 +1,39 @@
+FROM node:22-bookworm-slim AS base
+
+# Install ffmpeg
+RUN apt-get update -qq && apt-get install -qq --no-install-recommends ffmpeg >/dev/null
+
+# Create app directory
+ENV NODE_APP_DIR=/var/www/api/src \
+	NODE_ENV=production
+WORKDIR /var/www/api
+
+# Prepare yarn@4.1.1 (this should match the version in package.json)
+RUN corepack enable
+RUN corepack prepare yarn@4.1.1 --activate
+
+COPY package.json yarn.lock .yarnrc.yml .
+COPY prisma/package.json ./prisma/package.json
+COPY client/package.json ./client/package.json
+
+# A separate stage for build, makes a much larger image size
+FROM base AS build
+RUN --mount=type=cache,target=/root/.yarn,sharing=locked YARN_CACHE_FOLDER=/root/.yarn yarn install --immutable
+COPY . .
+RUN yarn prisma:build
+RUN yarn api:build
+# RUN cd client
+# RUN --mount=type=cache,target=/root/.yarn,sharing=locked YARN_CACHE_FOLDER=/root/.yarn yarn install
+# RUN yarn client:build
+
+# Finally the production build
+FROM base
+RUN yarn workspaces focus mirlo @mirlo/prisma --production
+COPY . .
+COPY --from=build /var/www/api/dist dist
+COPY --from=build /var/www/api/prisma prisma
+# COPY --from=build /var/www/api/client client
+EXPOSE 3000
+
+CMD [ "/bin/sh", "-c", "yarn prisma:migrate:deploy && exec node --conditions=mirlo-dist --enable-source-maps dist/index.js" ]
+HEALTHCHECK --interval=10s --timeout=5s --retries=10 CMD ["node", "dist/healthcheck.js"]
