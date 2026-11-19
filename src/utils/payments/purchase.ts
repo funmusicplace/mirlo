@@ -74,7 +74,7 @@ export const initiatePayment = async ({
   stripeAccountId?: string;
   checkoutId?: string;
 }): Promise<
-  | { paymentIntentId: string }
+  | { paymentIntentId: string; stripeAccountId: string }
   | {
       clientSecret: string | null;
       stripeAccountId: string;
@@ -133,7 +133,7 @@ export const initiatePayment = async ({
       metadata,
       readerId,
     });
-    return { paymentIntentId: id };
+    return { paymentIntentId: id, stripeAccountId };
   }
 
   const { id, clientSecret } = await processor.createOnlinePayment({

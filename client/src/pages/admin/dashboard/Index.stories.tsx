@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { expect, userEvent, within } from "@storybook/test";
 import { delay, http, HttpResponse } from "msw";
+import type { TopRanking } from "queries/admin";
 
 import {
   makeAdminStats,
-  makeTopAccounts,
+  makeTopRankings,
   TOP_SELLER_NAME,
 } from "../../../../test/mocks";
 
@@ -20,14 +21,16 @@ const statsHandler = http.get("*/v1/admin/stats", ({ request }) =>
   })
 );
 
-const topAccountsHandler = http.get("*/v1/admin/topAccounts", ({ request }) =>
-  HttpResponse.json({
-    result: makeTopAccounts(
-      new URL(request.url).searchParams.get("period") === "year"
-        ? "year"
-        : "month"
-    ),
-  })
+const topRankingsHandler = http.get(
+  "*/v1/admin/stats/:ranking",
+  ({ request, params }) =>
+    HttpResponse.json({
+      result: makeTopRankings(
+        new URL(request.url).searchParams.get("period") === "year"
+          ? "year"
+          : "month"
+      )[params.ranking as TopRanking],
+    })
 );
 
 const meta = {
@@ -36,7 +39,7 @@ const meta = {
   parameters: {
     layout: "fullscreen",
     msw: {
-      handlers: { stats: statsHandler, topAccounts: topAccountsHandler },
+      handlers: { stats: statsHandler, topRankings: topRankingsHandler },
     },
   },
 } satisfies Meta<typeof AdminDashboard>;

@@ -5,6 +5,7 @@ const SCOPE_KEYS: Record<string, string> = {
   profile: "profile",
   email: "email",
   "subscribers:read": "subscribersRead",
+  pos: "pos",
   offline_access: "offline_access",
 };
 

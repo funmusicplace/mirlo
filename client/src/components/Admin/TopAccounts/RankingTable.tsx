@@ -1,7 +1,11 @@
 import Button from "components/common/Button";
+import DropdownMenu from "components/common/DropdownMenu";
 import Table from "components/common/Table";
+import { TopRanking, TopRankingPeriod } from "queries/admin";
 import React from "react";
 import { useTranslation } from "react-i18next";
+
+import DownloadRankingCsv from "./DownloadRankingCsv";
 
 export const COLLAPSED_ROWS = 10;
 
@@ -14,28 +18,40 @@ export type RankingColumn<T> = {
 function RankingTable<T>({
   title,
   emptyMessage,
+  ranking,
+  period,
   rows,
+  error,
   getKey,
   columns,
 }: {
   title: string;
   emptyMessage: string;
-  rows: T[];
+  ranking: TopRanking;
+  period: TopRankingPeriod;
+  rows?: T[];
+  error?: Error | null;
   getKey: (row: T) => React.Key;
   columns: RankingColumn<T>[];
 }) {
   const { t } = useTranslation("translation", { keyPrefix: "adminDashboard" });
   const [expanded, setExpanded] = React.useState(false);
 
-  const visibleRows = expanded ? rows : rows.slice(0, COLLAPSED_ROWS);
-  const canExpand = rows.length > COLLAPSED_ROWS;
+  const visibleRows = expanded ? rows : rows?.slice(0, COLLAPSED_ROWS);
+  const canExpand = (rows?.length ?? 0) > COLLAPSED_ROWS;
 
   return (
     <div className="p-4 rounded-md border border-(--mi-tint-x-color) bg-(--mi-background-color)">
-      <h4 className="mb-4 font-semibold">{title}</h4>
-      {rows.length === 0 ? (
-        <p>{emptyMessage}</p>
-      ) : (
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <h4 className="font-semibold">{title}</h4>
+        <DropdownMenu compact label={t("rankingOptions", { title })}>
+          <DownloadRankingCsv ranking={ranking} period={period} />
+        </DropdownMenu>
+      </div>
+      {error && <p>{t("error", { message: error.message })}</p>}
+      {!rows && !error && <p>{t("loadingTopAccounts")}</p>}
+      {rows?.length === 0 && <p>{emptyMessage}</p>}
+      {visibleRows && visibleRows.length > 0 && (
         <>
           <Table>
             <thead>
@@ -75,7 +91,7 @@ function RankingTable<T>({
             >
               {expanded
                 ? t("showTopRows", { count: COLLAPSED_ROWS })
-                : t("showAllRows", { count: rows.length })}
+                : t("showAllRows", { count: rows?.length })}
             </Button>
           )}
         </>

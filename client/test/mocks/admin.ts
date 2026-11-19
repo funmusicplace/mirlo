@@ -1,8 +1,11 @@
 import type {
   AdminStats,
-  AdminTopAccounts,
+  AdminTopArtist,
+  AdminTopRanking,
+  AdminTopRankingRows,
   StatsGranularity,
-  TopAccountsPeriod,
+  TopRanking,
+  TopRankingPeriod,
 } from "queries/admin";
 
 const ARTIST_NAMES = [
@@ -15,52 +18,99 @@ const ARTIST_NAMES = [
 
 export const TOP_SELLER_NAME = ARTIST_NAMES[0];
 
+export type TopRankings = {
+  [R in TopRanking]: AdminTopRanking<AdminTopRankingRows[R]>;
+};
+
+const makeArtist = (
+  id: number,
+  name: string,
+  overrides: Partial<AdminTopArtist>
+): AdminTopArtist => ({
+  id,
+  name,
+  urlSlug: `artist-${id}`,
+  email: `artist${id}@example.com`,
+  createdAt: "2025-03-14T00:00:00.000Z",
+  location: null,
+  label: null,
+  albumCount: 3,
+  trackCount: 24,
+  merchCount: 2,
+  tierCount: 1,
+  albumDownloads: 0,
+  freeDownloads: 0,
+  revenueCents: 0,
+  salesCount: 0,
+  albumsUploaded: 0,
+  tracksUploaded: 0,
+  ...overrides,
+});
+
 /**
  * Descending totals so the tables read like a real ranking. A year scales the
  * month's numbers by 12 so switching the period visibly changes them.
  */
-export const makeTopAccounts = (
-  period: TopAccountsPeriod,
+export const makeTopRankings = (
+  period: TopRankingPeriod,
   count = 12
-): AdminTopAccounts => {
+): TopRankings => {
   const scale = period === "year" ? 12 : 1;
-  return {
+  const ranked = <Row>(row: (index: number, weight: number) => Row) => ({
     period,
     currency: "usd",
-    sellers: Array.from({ length: count }, (_, index) => ({
-      id: index + 1,
-      name: ARTIST_NAMES[index] ?? `Artist ${index + 1}`,
-      urlSlug: `artist-${index + 1}`,
-      cents: (count - index) * 4250 * scale,
-      transactionCount: (count - index) * 3 * scale,
-    })),
-    purchasers: Array.from({ length: count }, (_, index) => ({
+    rows: Array.from({ length: count }, (_, index) =>
+      row(index, (count - index) * scale)
+    ),
+  });
+
+  return {
+    topSellers: ranked((index, weight) =>
+      makeArtist(index + 1, ARTIST_NAMES[index] ?? `Artist ${index + 1}`, {
+        revenueCents: weight * 4250,
+        salesCount: weight * 3,
+      })
+    ),
+    topPurchasers: ranked((index, weight) => ({
       id: 100 + index,
       // Every third purchaser has no name, so the email fallback shows.
       name: index % 3 === 2 ? null : `Listener ${index + 1}`,
       email: `listener${index + 1}@example.com`,
-      cents: (count - index) * 1800 * scale,
-      transactionCount: (count - index) * scale,
+      createdAt: "2025-06-01T00:00:00.000Z",
+      cents: weight * 1800,
+      transactionCount: weight,
+      artistCount: Math.ceil(weight / 2),
     })),
-    freeDownloads: Array.from({ length: count }, (_, index) => ({
-      id: 200 + index,
-      name: `Free Artist ${index + 1}`,
-      urlSlug: `free-artist-${index + 1}`,
-      downloadCount: (count - index) * 7 * scale,
+    topListeners: ranked((index, weight) => ({
+      id: 600 + index,
+      name: `Fan ${index + 1}`,
+      email: `fan${index + 1}@example.com`,
+      createdAt: "2025-06-01T00:00:00.000Z",
+      playCount: weight * 37,
+      trackCount: weight * 9,
+      artistCount: weight * 2,
     })),
-    uploaders: Array.from({ length: count }, (_, index) => ({
-      id: 300 + index,
-      name: `Uploader ${index + 1}`,
-      urlSlug: `uploader-${index + 1}`,
-      trackCount: (count - index) * 2 * scale,
-      trackGroupCount: Math.ceil(((count - index) * scale) / 5),
-    })),
-    downloadedAlbums: Array.from({ length: count }, (_, index) => ({
+    topFreeDownloads: ranked((index, weight) =>
+      makeArtist(200 + index, `Free Artist ${index + 1}`, {
+        freeDownloads: weight * 7,
+      })
+    ),
+    topUploaders: ranked((index, weight) =>
+      makeArtist(300 + index, `Uploader ${index + 1}`, {
+        tracksUploaded: weight * 2,
+        albumsUploaded: Math.ceil(weight / 5),
+      })
+    ),
+    topAlbums: ranked((index, weight) => ({
       id: 400 + index,
       title: `Album ${index + 1}`,
+      releaseDate: "2025-09-01T00:00:00.000Z",
       artistId: 500 + index,
       artistName: `Album Artist ${index + 1}`,
-      downloadCount: (count - index) * 11 * scale,
+      artistEmail: `album-artist${index + 1}@example.com`,
+      downloadCount: weight * 11,
+      revenueCents: weight * 900,
+      salesCount: weight,
     })),
   };
 };

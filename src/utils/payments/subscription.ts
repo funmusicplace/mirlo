@@ -108,7 +108,7 @@ export const initiateSubscription = async ({
   amount?: number;
   userEmail: string;
   userId?: string;
-}): Promise<{ setupIntentId: string }> => {
+}): Promise<{ setupIntentId: string; stripeAccountId: string }> => {
   const { resolvedAmount } = await resolveTierAndAmount(
     profileId,
     tierId,
@@ -129,16 +129,18 @@ export const initiateSubscription = async ({
   const { stripeAccountId, currency } =
     await resolveProfilePaymentContext(profileId);
 
-  return getPaymentProcessor().createTerminalSubscriptionSetup({
-    readerId,
-    tierId,
-    profileId,
-    accountId: stripeAccountId,
-    amount: resolvedAmount,
-    currency,
-    userEmail,
-    userId,
-  });
+  const { setupIntentId } =
+    await getPaymentProcessor().createTerminalSubscriptionSetup({
+      readerId,
+      tierId,
+      profileId,
+      accountId: stripeAccountId,
+      amount: resolvedAmount,
+      currency,
+      userEmail,
+      userId,
+    });
+  return { setupIntentId, stripeAccountId };
 };
 
 export const initiateOnlineSubscription = async ({
