@@ -1,5 +1,7 @@
 import prisma from "@mirlo/prisma";
-import { Image, InstanceLogo, Settings } from "@mirlo/prisma/client";
+import { Image, InstanceLogo, Prisma, Settings } from "@mirlo/prisma/client";
+
+import { FontWithFiles } from "../serializers/font";
 
 import { BucketConfig, DEFAULT_BUCKET_CONFIG } from "./storage";
 
@@ -10,7 +12,17 @@ export interface SettingsType extends Partial<Settings> {
   logo?: InstanceLogo | null;
   mobileLogo?: InstanceLogo | null;
   splashImage?: Image | null;
+  headingFont?: FontWithFiles | null;
+  bodyFont?: FontWithFiles | null;
 }
+
+const SETTINGS_INCLUDE = {
+  logo: true,
+  mobileLogo: true,
+  splashImage: true,
+  headingFont: { include: { files: true } },
+  bodyFont: { include: { files: true } },
+} satisfies Prisma.SettingsInclude;
 
 const defaultSettings = {
   platformPercent: 7,
@@ -62,7 +74,7 @@ export const resolveSetupStage = (settings: SettingsType): SetupStage => {
 
 export const getSiteSettings = async (): Promise<SettingsType> => {
   let [result] = await prisma.settings.findMany({
-    include: { logo: true, mobileLogo: true, splashImage: true },
+    include: SETTINGS_INCLUDE,
   });
   if (!result) {
     result = await prisma.settings.create({
@@ -75,7 +87,7 @@ export const getSiteSettings = async (): Promise<SettingsType> => {
         },
         bucketNames: DEFAULT_BUCKET_CONFIG,
       },
-      include: { logo: true, mobileLogo: true, splashImage: true },
+      include: SETTINGS_INCLUDE,
     });
   }
   const { settings } = result;

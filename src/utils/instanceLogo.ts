@@ -7,7 +7,7 @@ import sharp from "sharp";
 import logger from "../logger";
 
 import { AppError, HttpCode } from "./error";
-import { stripNullBytes } from "./sanitize";
+import { BufferedUpload, readBufferedUploads } from "./file";
 import { SettingsType } from "./settings";
 import { removeImagesByType, uploadOptimizedImageByType } from "./storage";
 import { isSvgMarkup, sanitizeSvg } from "./svgSanitizer";
@@ -16,7 +16,6 @@ export const MAX_LOGO_BYTES = 200 * 1024;
 const MAX_LOGO_PNG_WIDTH = 600;
 const MAX_LOGO_PNG_HEIGHT = 200;
 const MAX_LOGO_PNG_INPUT_PIXELS = 40_000_000;
-const MAX_LOGO_FILENAME_LENGTH = 255;
 const LOGO_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const PNG_SIGNATURE = Buffer.from([
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
@@ -29,8 +28,6 @@ export const INSTANCE_LOGO_FIELDS = {
 
 export type InstanceLogoKind = keyof typeof INSTANCE_LOGO_FIELDS;
 
-type LogoUpload = { buffer: Buffer; filename: string };
-
 type StoredLogo = Awaited<ReturnType<typeof storeLogoFile>>;
 
 const rejectFormat = () =>
@@ -39,60 +36,20 @@ const rejectFormat = () =>
     description: "The logo must be an SVG or PNG file.",
   });
 
-const rejectIncompleteUpload = () =>
-  new AppError({
-    httpCode: HttpCode.BAD_REQUEST,
-    description: "The upload did not complete. Try again.",
-  });
-
-export const readLogoUpload = (req: Request) =>
-  new Promise<LogoUpload>((resolve, reject) => {
-    if (!req.busboy) {
-      reject(rejectFormat());
-      return;
-    }
-    let upload: LogoUpload | undefined;
-    let isTooLarge = false;
-
-    req.on("close", () => {
-      if (!req.complete) {
-        reject(rejectIncompleteUpload());
-      }
+export const readLogoUpload = async (req: Request) => {
+  const result = await readBufferedUploads(req);
+  if (result?.tooLargeFilename !== undefined) {
+    throw new AppError({
+      httpCode: HttpCode.PAYLOAD_TOO_LARGE,
+      description: `The logo must be ${MAX_LOGO_BYTES / 1024} KB or smaller.`,
     });
-    req.busboy.on("file", (_fieldname, fileStream, fileInfo) => {
-      const chunks: Buffer[] = [];
-      fileStream.on("data", (chunk: Buffer) => chunks.push(chunk));
-      fileStream.on("limit", () => {
-        isTooLarge = true;
-      });
-      fileStream.on("error", () => reject(rejectIncompleteUpload()));
-      fileStream.on("end", () => {
-        upload = {
-          buffer: Buffer.concat(chunks),
-          filename: (stripNullBytes(fileInfo.filename) ?? "").slice(
-            0,
-            MAX_LOGO_FILENAME_LENGTH
-          ),
-        };
-      });
-    });
-    req.busboy.on("error", () => reject(rejectIncompleteUpload()));
-    req.busboy.on("close", () => {
-      if (isTooLarge) {
-        reject(
-          new AppError({
-            httpCode: HttpCode.PAYLOAD_TOO_LARGE,
-            description: `The logo must be ${MAX_LOGO_BYTES / 1024} KB or smaller.`,
-          })
-        );
-      } else if (!upload) {
-        reject(rejectFormat());
-      } else {
-        resolve(upload);
-      }
-    });
-    req.pipe(req.busboy);
-  });
+  }
+  const upload = result?.uploads[0];
+  if (!upload) {
+    throw rejectFormat();
+  }
+  return upload;
+};
 
 export const processLogo = async (buffer: Buffer) => {
   if (buffer.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE)) {
@@ -153,7 +110,7 @@ const deleteInstanceLogo = async (logoId: string) => {
   await removeInstanceLogoFiles(logoId);
 };
 
-export const storeLogoFile = async (upload: LogoUpload) => {
+export const storeLogoFile = async (upload: BufferedUpload) => {
   const { buffer, ...logo } = await processLogo(upload.buffer);
   const id = randomUUID();
   await uploadOptimizedImageByType(
@@ -233,7 +190,7 @@ export const attachInstanceLogos = async (
 export const replaceInstanceLogo = async (
   settingsId: SettingsType["id"],
   kind: InstanceLogoKind,
-  upload: LogoUpload
+  upload: BufferedUpload
 ) => {
   await attachInstanceLogos(settingsId, {
     [kind]: await storeLogoFile(upload),

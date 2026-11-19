@@ -27,6 +27,8 @@ const TRUNCATE_TABLES_SQL = `
     "DataMigration",
     "DownloadableContent",
     "EmailVerification",
+    "Font",
+    "FontFile",
     "Fundraiser",
     "FundraiserImage",
     "FundraiserPledge",

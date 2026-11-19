@@ -89,6 +89,89 @@ describe("analyzePathAndGenerateHTML", () => {
     });
   });
 
+  describe("instance fonts", () => {
+    it("declares the chosen fonts and preloads the regular text file", async () => {
+      const row = await createSiteSettings({ instanceCustomization: {} });
+      const font = await prisma.font.create({
+        data: {
+          name: '</style><script>alert("x")</script>',
+          category: "serif",
+          files: {
+            create: [
+              {
+                format: "woff2",
+                weightMin: 400,
+                weightMax: 400,
+                style: "normal",
+                scripts: ["latin"],
+                ascentOverride: 85.5,
+                descentOverride: 14.5,
+                byteSize: 1000,
+              },
+              {
+                format: "woff2",
+                weightMin: 700,
+                weightMax: 700,
+                style: "italic",
+                scripts: ["latin"],
+                byteSize: 1000,
+              },
+            ],
+          },
+        },
+        include: { files: true },
+      });
+      await prisma.settings.update({
+        where: { id: row.id },
+        data: { headingFontId: font.id, bodyFontId: font.id },
+      });
+
+      const $ = cheerio.load("<html><head><title></title></head></html>");
+      await analyzePathAndGenerateHTML("/", $);
+
+      const faces = $(`style[data-font-id="${font.id}"]`);
+      assert.equal(faces.length, 1);
+      assert.equal((faces.html()?.match(/@font-face/g) ?? []).length, 2);
+      assert.ok(faces.html()?.includes(`font-family: "mi-font-${font.id}"`));
+      assert.ok(faces.html()?.includes("font-weight: 700; font-style: italic"));
+      assert.equal(
+        (
+          faces
+            .html()
+            ?.match(/ascent-override: 85.5%; descent-override: 14.5%/g) ?? []
+        ).length,
+        1
+      );
+      assert.ok(!$.html().includes("<script>alert"));
+      assert.ok(
+        $.html().includes(
+          `--mi-instance-font-heading: "mi-font-${font.id}", serif;`
+        )
+      );
+      assert.ok(
+        $.html().includes(
+          `--mi-instance-font-body: "mi-font-${font.id}", serif;`
+        )
+      );
+      const regular = font.files.find((file) => file.weightMin === 400)!;
+      const preload = $('link[rel="preload"][as="font"]');
+      assert.equal(preload.length, 1);
+      assert.ok(preload.attr("href")?.endsWith(`${regular.id}.woff2`));
+      assert.equal(preload.attr("crossorigin"), "");
+    });
+
+    it("declares no font when none is chosen", async () => {
+      await createSiteSettings({ instanceCustomization: {} });
+
+      const $ = cheerio.load("<html><head><title></title></head></html>");
+      await analyzePathAndGenerateHTML("/", $);
+
+      assert.equal($("style[data-font-id]").length, 0);
+      assert.ok(!$.html().includes("--mi-instance-font-"));
+      assert.equal($('link[rel="preload"][as="font"]').length, 0);
+    });
+  });
+
   describe("getTrackGroupWidget", () => {
     it("should generate correct widget URL for track group", () => {
       const mockClient = { applicationUrl: "http://localhost:3000" };

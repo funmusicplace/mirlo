@@ -51,7 +51,7 @@ export const SplashTitle = styled.h1`
   font-weight: 400;
   line-height: 1.25;
 
-  font-family: "cubano", var(--mi-font-family-stack);
+  font-family: var(--mi-font-heading-stack);
 `;
 
 export const SplashButtonWrapper = styled.div`

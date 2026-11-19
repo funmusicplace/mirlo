@@ -33,11 +33,12 @@ New images are stored at the bucket root. Images uploaded before they moved
 to the central `Image` table stay under their old prefix, which is recorded in
 `Image.keyPrefix`:
 
-| Key prefix                                                                                  | Contents                                                                |
-| ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| _(bucket root)_                                                                             | Covers, avatars, backgrounds, post, merch and subscription tier images  |
-| `trackgroup-covers/`, `artist-avatars/`, `artist-banners/`, `merch-images/`, `post-images/` | The same kinds of images, uploaded before they moved to the bucket root |
-| `instance-logos/`                                                                           | Header logos uploaded by the instance admins                            |
+| Key prefix                                                                                  | Contents                                                                 |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| _(bucket root)_                                                                             | Covers, avatars, backgrounds, post, merch and subscription tier images   |
+| `trackgroup-covers/`, `artist-avatars/`, `artist-banners/`, `merch-images/`, `post-images/` | The same kinds of images, uploaded before they moved to the bucket root  |
+| `instance-logos/`                                                                           | Header logos uploaded by the instance admins                             |
+| `fonts/<fontId>/`                                                                           | Font files uploaded to the font library, one object per weight and style |
 
 Optimized images are stored in multiple sizes as `<imageId>-x<width>.webp`
 (plus `.jpg` for covers).
@@ -65,6 +66,11 @@ In production (S3/Backblaze), URLs point either at a CDN (`cdnUrl` in site
 settings) or directly at the provider's public bucket URL. URL construction
 lives in `generateFullStaticImageUrl` in `src/utils/images.ts`, which derives
 the bucket and key prefix from the same routing table used for uploads.
+
+Font files uploaded in the admin settings are always served by the API at
+`/images/<bucket>/fonts/...`, whatever the storage backend and even when a CDN
+is configured, so they get the API's CORS headers instead of depending on the
+storage provider's CORS rules.
 
 Buckets are created automatically on first use. Garage additionally
 pre-creates `mirlo-audio`, `mirlo-images` and `mirlo-downloads` in

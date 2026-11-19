@@ -50,6 +50,7 @@ describe("instance", () => {
         splashTitle: null,
         splashSubtitle: null,
         splashTextPosition: "center",
+        fonts: { heading: null, body: null },
       });
     });
 
@@ -98,6 +99,7 @@ describe("instance", () => {
       assert.deepEqual(Object.keys(result).sort(), [
         "colors",
         "contactEmail",
+        "fonts",
         "isClosedToPublicArtistSignup",
         "languages",
         "logo",
@@ -205,6 +207,50 @@ describe("instance", () => {
       assert.equal(result.logo.width, 119);
       assert.equal(result.logo.height, 40);
       assert.match(result.logo.url, new RegExp(`${logo.id}\\.svg$`));
+    });
+
+    it("returns the title and text fonts with their files", async () => {
+      const row = await createSiteSettings({ instanceCustomization: {} });
+      const font = await prisma.font.create({
+        data: {
+          name: "Poster",
+          category: "serif",
+          files: {
+            create: [
+              {
+                format: "woff2",
+                weightMin: 100,
+                weightMax: 900,
+                style: "normal",
+                scripts: ["latin"],
+                byteSize: 1000,
+              },
+            ],
+          },
+        },
+        include: { files: true },
+      });
+      await prisma.settings.update({
+        where: { id: row.id },
+        data: { headingFontId: font.id },
+      });
+
+      const response = await requestApp
+        .get("instance")
+        .set("Accept", "application/json");
+
+      const { fonts } = response.body.result;
+      assert.equal(fonts.body, null);
+      assert.equal(fonts.heading.id, font.id);
+      assert.equal(fonts.heading.family, `mi-font-${font.id}`);
+      assert.equal(fonts.heading.stack, `"mi-font-${font.id}", serif`);
+      assert.ok(fonts.heading.css.includes("font-weight: 100 900"));
+      assert.equal(fonts.heading.files[0].weightMin, 100);
+      assert.equal(fonts.heading.files[0].weightMax, 900);
+      assert.match(
+        fonts.heading.files[0].url,
+        new RegExp(`fonts/${font.id}/${font.files[0].id}\\.woff2$`)
+      );
     });
 
     it("hides the hero when the setting was never saved", async () => {

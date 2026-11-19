@@ -45,6 +45,59 @@ model Settings {
   mobileLogo                   InstanceLogo? @relation("mobileLogo", fields: [mobileLogoId], references: [id], onDelete: SetNull)
   splashImageId                String?       @unique @db.Uuid
   splashImage                  Image?        @relation("SettingsSplashImage", fields: [splashImageId], references: [id])
+  headingFontId                String?       @unique @db.Uuid
+  headingFont                  Font?         @relation("headingFont", fields: [headingFontId], references: [id], onDelete: SetNull)
+  bodyFontId                   String?       @unique @db.Uuid
+  bodyFont                     Font?         @relation("bodyFont", fields: [bodyFontId], references: [id], onDelete: SetNull)
+}
+
+model Font {
+  id              String       @id @default(uuid()) @db.Uuid
+  name            String
+  category        FontCategory
+  files           FontFile[]
+  headingSettings Settings?    @relation("headingFont")
+  bodySettings    Settings?    @relation("bodyFont")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model FontFile {
+  id               String     @id @default(uuid()) @db.Uuid
+  fontId           String     @db.Uuid
+  font             Font       @relation(fields: [fontId], references: [id], onDelete: Cascade)
+  format           FontFormat
+  weightMin        Int
+  weightMax        Int
+  style            FontStyle
+  scripts          String[]
+  ascentOverride   Float?
+  descentOverride  Float?
+  byteSize         Int
+  originalFilename String?
+  createdAt        DateTime   @default(now())
+
+  @@index([fontId])
+}
+
+enum FontCategory {
+  sans
+  serif
+  mono
+  display
+  handwriting
+}
+
+enum FontStyle {
+  normal
+  italic
+}
+
+enum FontFormat {
+  woff2
+  woff
+  ttf
+  otf
 }
 
 model InstanceLogo {

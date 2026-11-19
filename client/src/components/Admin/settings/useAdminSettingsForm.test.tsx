@@ -346,4 +346,21 @@ describe("useAdminSettingsForm", () => {
     await waitFor(() => expect(result.current.hasLoadError).toBe(true));
     expect(result.current.isLoaded).toBe(false);
   });
+
+  test("sends the chosen fonts, and null for a font set back to the default", async () => {
+    const { result } = await renderLoadedSettingsForm();
+
+    await act(() =>
+      result.current.saveSettings({
+        ...result.current.methods.getValues(),
+        headingFontId: "font-z",
+        bodyFontId: "",
+      })
+    );
+
+    expect(vi.mocked(api.post).mock.calls[0][1]).toMatchObject({
+      headingFontId: "font-z",
+      bodyFontId: null,
+    });
+  });
 });

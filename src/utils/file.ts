@@ -1,7 +1,64 @@
+import { Readable } from "stream";
+
 import { Request, Response } from "express";
 import { fromFile, fromStream } from "file-type";
-import { Readable } from "stream";
 import { Logger } from "winston";
+
+import { AppError, HttpCode } from "./error";
+import { stripNullBytes } from "./sanitize";
+
+const MAX_UPLOAD_FILENAME_LENGTH = 255;
+
+export type BufferedUpload = { buffer: Buffer; filename: string };
+
+type BufferedUploads = {
+  uploads: BufferedUpload[];
+  tooLargeFilename?: string;
+  hasTooManyFiles: boolean;
+};
+
+const rejectIncompleteUpload = () =>
+  new AppError({
+    httpCode: HttpCode.BAD_REQUEST,
+    description: "The upload did not complete. Try again.",
+  });
+
+export const readBufferedUploads = (req: Request) =>
+  new Promise<BufferedUploads | undefined>((resolve, reject) => {
+    const { busboy } = req;
+    if (!busboy) {
+      resolve(undefined);
+      return;
+    }
+    const result: BufferedUploads = { uploads: [], hasTooManyFiles: false };
+
+    req.on("close", () => {
+      if (!req.complete) {
+        reject(rejectIncompleteUpload());
+      }
+    });
+    busboy.on("filesLimit", () => {
+      result.hasTooManyFiles = true;
+    });
+    busboy.on("file", (_fieldname, fileStream, fileInfo) => {
+      const filename = (stripNullBytes(fileInfo.filename) ?? "").slice(
+        0,
+        MAX_UPLOAD_FILENAME_LENGTH
+      );
+      const chunks: Buffer[] = [];
+      fileStream.on("data", (chunk: Buffer) => chunks.push(chunk));
+      fileStream.on("limit", () => {
+        result.tooLargeFilename = filename;
+      });
+      fileStream.on("error", () => reject(rejectIncompleteUpload()));
+      fileStream.on("end", () => {
+        result.uploads.push({ buffer: Buffer.concat(chunks), filename });
+      });
+    });
+    busboy.on("error", () => reject(rejectIncompleteUpload()));
+    busboy.on("close", () => resolve(result));
+    req.pipe(busboy);
+  });
 
 export type APIContext = {
   req: Request;

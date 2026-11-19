@@ -1,5 +1,6 @@
 import FeaturedArtistsSelector from "components/Admin/FeaturedArtistsSelector";
 import EmailProviderSection from "components/Admin/settings/EmailProviderSection";
+import FontsSection from "components/Admin/settings/FontsSection";
 import GeneralSettingsSection from "components/Admin/settings/GeneralSettingsSection";
 import IdentitySettingsSection from "components/Admin/settings/IdentitySettingsSection";
 import PlatformPolicySection from "components/Admin/settings/PlatformPolicySection";
@@ -90,6 +91,7 @@ const Index = () => {
             <SettingsSectionNav />
             <div className="max-w-2xl">
               <IdentitySettingsSection />
+              <FontsSection />
               <GeneralSettingsSection />
               <PlatformPolicySection />
               <SettingsSection

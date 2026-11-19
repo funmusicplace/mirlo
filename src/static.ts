@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
 import {
+  fontContentType,
   getBufferFromStorage,
   getImagesBucket,
   imageContentType,
@@ -12,6 +13,7 @@ const SVG_CONTENT_SECURITY_POLICY =
 
 const contentTypeFor = (filename: string, storedContentType?: string) =>
   imageContentType(filename) ??
+  fontContentType(filename) ??
   (storedContentType?.startsWith("image/") &&
   storedContentType !== "image/svg+xml"
     ? storedContentType
