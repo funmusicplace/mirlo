@@ -75,6 +75,7 @@ type PurchaseItem =
 
 type PostBody = {
   readerId?: string;
+  pointOfSale?: boolean;
   artistId: number;
   items: PurchaseItem[];
   email?: string;
@@ -88,8 +89,8 @@ type PostBody = {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const READER_DOWNLOAD_NEEDS_EMAIL =
-  "A download sold at a card reader needs the buyer's email";
+const POINT_OF_SALE_DOWNLOAD_NEEDS_EMAIL =
+  "A download sold at the point of sale needs the buyer's email";
 
 type DigitalReleaseProfile = Parameters<typeof subscribeUserToProfile>[0] &
   Parameters<typeof resolvePayee>[0]["profile"] & { urlSlug: string | null };
@@ -342,6 +343,7 @@ export default function () {
       }
 
       const readerId = checkout ? undefined : body.readerId;
+      const pointOfSale = !checkout && (!!readerId || !!body.pointOfSale);
       const hosted = checkout ? false : body.hosted;
       const profileId = checkout ? checkout.profileId : body.artistId;
       const items = (checkout ? checkout.items : body.items) as PurchaseItem[];
@@ -364,18 +366,24 @@ export default function () {
         });
       }
 
-      if (readerId) {
+      if (pointOfSale) {
         if (!loggedInUser) {
           throw new AppError({
             httpCode: 401,
-            description:
-              "Dispatching to a terminal reader requires authentication",
+            description: "Selling at the point of sale requires authentication",
           });
         }
         await profileEditableByUser(profileId, loggedInUser);
       }
 
-      const buyer = readerId ? undefined : loggedInUser;
+      if (pointOfSale && !readerId && deferred) {
+        throw new AppError({
+          httpCode: 400,
+          description: "A point-of-sale sale can't open a checkout",
+        });
+      }
+
+      const buyer = pointOfSale ? undefined : loggedInUser;
 
       if (email && !buyer && !EMAIL_REGEX.test(email)) {
         throw new AppError({
@@ -513,11 +521,11 @@ export default function () {
       }
 
       if (hasFundraiserPledge) {
-        if (readerId) {
+        if (pointOfSale) {
           throw new AppError({
             httpCode: 400,
             description:
-              "Fundraiser pledges are not supported on a terminal reader",
+              "Fundraiser pledges are not supported at the point of sale",
           });
         }
 
@@ -549,13 +557,13 @@ export default function () {
       }
 
       if (
-        readerId &&
+        pointOfSale &&
         !email &&
         items.some((i) => ["trackGroup", "track", "catalogue"].includes(i.type))
       ) {
         throw new AppError({
           httpCode: 400,
-          description: READER_DOWNLOAD_NEEDS_EMAIL,
+          description: POINT_OF_SALE_DOWNLOAD_NEEDS_EMAIL,
         });
       }
 
@@ -704,10 +712,10 @@ export default function () {
             });
           }
 
-          if (readerId && !email && merch.includePurchaseTrackGroupId) {
+          if (pointOfSale && !email && merch.includePurchaseTrackGroupId) {
             throw new AppError({
               httpCode: 400,
-              description: READER_DOWNLOAD_NEEDS_EMAIL,
+              description: POINT_OF_SALE_DOWNLOAD_NEEDS_EMAIL,
             });
           }
 
@@ -834,6 +842,7 @@ export default function () {
 
       const result = await initiatePayment({
         readerId,
+        pointOfSale,
         profileId,
         items: resolvedItems,
         ...resolveBuyer({ buyer, email }),

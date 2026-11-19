@@ -462,6 +462,7 @@ type SessionMetaData = {
   trackId: string;
   transactionId: string;
   checkoutId?: string;
+  pointOfSale?: string;
   purchaseType:
     | "trackGroup"
     | "subscription"
@@ -1286,6 +1287,11 @@ export const completePurchaseFromIntent = async (
     !userId &&
     items.every((item) => item.type === "merch" || item.type === "tip")
   ) {
+    if (metadata.pointOfSale !== "true") {
+      logger.warn(
+        `completePurchaseFromIntent: ${intent.id} is an online sale with no buyer; recording it without one`
+      );
+    }
     await completePurchase(null, items, payment);
     return;
   }

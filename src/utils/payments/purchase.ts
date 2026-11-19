@@ -57,6 +57,7 @@ export const resolveProfilePaymentContext = async (
 // Initiates a payment against the profile's connected account.
 export const initiatePayment = async ({
   readerId,
+  pointOfSale,
   profileId,
   items,
   userEmail,
@@ -66,6 +67,7 @@ export const initiatePayment = async ({
   checkoutId,
 }: {
   readerId?: string;
+  pointOfSale?: boolean;
   profileId: number;
   items: ResolvedItem[];
   userEmail: string;
@@ -108,6 +110,7 @@ export const initiatePayment = async ({
     userEmail,
     ...(userId && { userId }),
     ...(clientId !== undefined && { clientId: String(clientId) }),
+    ...(pointOfSale && { pointOfSale: "true" }),
     ...(purchaseType === "trackGroup" &&
       items[0]?.id && { trackGroupId: items[0].id }),
     ...(purchaseType === "track" && items[0]?.id && { trackId: items[0].id }),

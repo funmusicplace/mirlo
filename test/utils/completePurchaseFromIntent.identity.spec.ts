@@ -132,6 +132,7 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
   });
 
   it("records a merch and tip sale with no buyer when there's nobody to credit", async () => {
+    const mail = sinon.stub(sendMailQueue, "add").resolves();
     const { user: artistUser } = await createUser({ email: "artist@test.com" });
     const artist = await createArtist(artistUser.id);
     const merch = await createMerch(artist.id, { quantityRemaining: 5 });
@@ -147,6 +148,7 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
           { type: "tip", quantity: 1, amount: 500 },
         ]),
         artistId: String(artist.id),
+        pointOfSale: "true",
       },
     } as unknown as Stripe.PaymentIntent;
 
@@ -159,5 +161,11 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
     assert.equal(transaction?.userId, null);
     assert.equal(transaction?.merchPurchases[0]?.userId, null);
     assert.equal(transaction?.tips[0]?.userId, null);
+
+    const [[, job]] = mail.args;
+    assert.equal(mail.callCount, 1);
+    assert.equal(job.template, "artist-purchase-notification");
+    assert.equal(job.message.to, "artist@test.com");
+    assert.equal(job.locals.email, null);
   });
 });

@@ -106,7 +106,12 @@ const apiDoc = {
         readerId: {
           type: "string",
           description:
-            "Stripe Terminal reader ID (tmr_*). Provide to dispatch to a physical reader; omit for an online PaymentIntent.",
+            "Stripe Terminal reader ID (tmr_*). Provide to dispatch to a physical reader; omit for an online PaymentIntent. Implies `pointOfSale`.",
+        },
+        pointOfSale: {
+          type: "boolean",
+          description:
+            "The logged-in user is selling on the artist's behalf, not buying: the sale is credited to `email`, or to no one when it's left out. Releases need `email`. Requires edit rights on the artist.",
         },
         artistId: {
           type: "number",

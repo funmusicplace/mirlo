@@ -41,6 +41,27 @@ const formatPrice = (cents?: number, currency?: string) =>
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const ChargeButton: React.FC<{
+  disabled: boolean;
+  missingEmail?: boolean;
+  onClick: () => void;
+}> = ({ disabled, missingEmail, onClick }) => (
+  <div className="flex items-center gap-2">
+    {missingEmail && (
+      <span className="text-xs text-(--mi-secondary-text-color)">
+        Needs the buyer&apos;s email
+      </span>
+    )}
+    <Button
+      size="compact"
+      disabled={disabled || missingEmail}
+      onClick={onClick}
+    >
+      Charge
+    </Button>
+  </div>
+);
+
 /**
  * Online (no reader) flow: render the Payment Element on the connected account
  * and confirm the PaymentIntent with Stripe.js.
@@ -146,6 +167,7 @@ const Index: React.FC = () => {
     null
   );
   const [isCanceling, setIsCanceling] = React.useState(false);
+  const hasEmail = !!email.trim();
 
   const pollIntent = React.useCallback(
     async (intentId: string) => {
@@ -199,6 +221,7 @@ const Index: React.FC = () => {
         {
           artistId: number;
           readerId?: string;
+          pointOfSale: boolean;
           email?: string;
           items: PurchaseItem[];
         },
@@ -206,6 +229,7 @@ const Index: React.FC = () => {
       >("purchase", {
         artistId: numericArtistId,
         readerId: readerId.trim() || undefined,
+        pointOfSale: true,
         email: email.trim() || undefined,
         items: [item],
       });
@@ -277,15 +301,22 @@ const Index: React.FC = () => {
           />
         )}
         <label className="text-sm font-bold" htmlFor="pos-email">
-          Buyer email (optional)
+          Buyer email
         </label>
         <InputEl
           id="pos-email"
           name="email"
+          type="email"
           placeholder="buyer@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          aria-describedby="pos-email-hint"
         />
+        <p id="pos-email-hint" className="text-sm">
+          Optional for merch. Releases, merch that comes with a release and
+          subscriptions need it, so the buyer gets their download or account.
+          The sale is never credited to you.
+        </p>
         {!stripeAccountId && (
           <p className="text-sm text-red-600">
             This artist has no connected Stripe account — charges will fail.
@@ -333,15 +364,13 @@ const Index: React.FC = () => {
             <span>
               {tg.title ?? "Untitled"} — {formatPrice(tg.minPrice, tg.currency)}
             </span>
-            <Button
-              size="compact"
+            <ChargeButton
               disabled={isCharging}
+              missingEmail={!hasEmail}
               onClick={() =>
                 charge({ type: "trackGroup", id: tg.id }, tg.title ?? "Release")
               }
-            >
-              Charge
-            </Button>
+            />
           </div>
         ))}
         {(trackGroups?.results ?? []).length === 0 && (
@@ -356,15 +385,13 @@ const Index: React.FC = () => {
             <span>
               {m.title} — {formatPrice(m.minPrice, m.currency)}
             </span>
-            <Button
-              size="compact"
+            <ChargeButton
               disabled={isCharging}
+              missingEmail={!!m.includePurchaseTrackGroupId && !hasEmail}
               onClick={() =>
                 charge({ type: "merch", id: m.id, quantity: 1 }, m.title)
               }
-            >
-              Charge
-            </Button>
+            />
           </div>
         ))}
         {(merch?.results ?? []).length === 0 && (
@@ -384,15 +411,13 @@ const Index: React.FC = () => {
               {tier.name} — {formatPrice(tier.minAmount, artist.user?.currency)}{" "}
               / {tier.interval.toLowerCase()}
             </span>
-            <Button
-              size="compact"
-              disabled={isCharging || !readerId.trim() || !email.trim()}
+            <ChargeButton
+              disabled={isCharging || !readerId.trim()}
+              missingEmail={!hasEmail}
               onClick={() =>
                 charge({ type: "subscription", tierId: tier.id }, tier.name)
               }
-            >
-              Charge
-            </Button>
+            />
           </div>
         ))}
         {(tiers?.results ?? []).length === 0 && (

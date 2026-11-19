@@ -80,9 +80,9 @@ export default function () {
       const totalAmount = trackGroup.fundraiser
         ? (await getFundraiserTotals(trackGroup.fundraiser)).amountRaised
         : results.reduce((acc, curr) => acc + curr.amount, 0);
-      const totalSupporters = uniq(
-        compact(results.map((curr) => curr.userId))
-      ).length;
+      const totalSupporters =
+        uniq(compact(results.map((curr) => curr.userId))).length +
+        results.filter((curr) => !curr.userId).length;
 
       res.json({
         total,

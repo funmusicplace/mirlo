@@ -200,7 +200,7 @@ export type PurchaseReceiptEmailType = {
 export type ArtistPurchaseNotificationEmailType = {
   transactions: PurchaseTransaction[];
   message: string | null;
-  email: string;
+  email: string | null;
   totalGross: number;
   totalNet: number;
   currency: string;
@@ -351,7 +351,7 @@ export const sendArtistSaleNotification = async ({
   message,
 }: {
   payee: Pick<SafeUser, "email" | "accountingEmail">;
-  purchaser: SafeUser;
+  purchaser: SafeUser | null;
   transactions: TransactionForEmails[];
   message?: string;
 }) => {
@@ -379,7 +379,7 @@ export const sendArtistSaleNotification = async ({
       ),
       currency: serializedTransactions[0]?.currency ?? "usd",
       message: message ?? null,
-      email: purchaser.email,
+      email: purchaser?.email ?? null,
       client: applicationUrl,
       host: process.env.API_DOMAIN,
     } as ArtistPurchaseNotificationEmailType,
@@ -795,10 +795,10 @@ export const completePurchase = async (
     }
   }
 
-  if (user && sale && (genericReceipt || genericNotification)) {
+  if (sale && (genericReceipt || genericNotification)) {
     try {
       const transactions = await transactionsForEmails([transaction.id]);
-      if (genericReceipt) {
+      if (genericReceipt && user) {
         await sendPurchaseReceipt(sale.artist, user, transactions);
       }
       if (genericNotification) {
