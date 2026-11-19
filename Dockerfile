@@ -35,6 +35,10 @@ HEALTHCHECK --interval=10s CMD ["true"]
 FROM base AS build
 RUN yarn api:build
 
-FROM build AS prod
+FROM base AS prod
+COPY --from=build /var/www/api/dist dist
+COPY --from=build /var/www/api/prisma prisma
+RUN yarn workspaces focus mirlo @mirlo/prisma --production
+
 CMD [ "/bin/sh", "-c", "yarn prisma:migrate:deploy && exec node --conditions=mirlo-dist --enable-source-maps dist/index.js" ]
 HEALTHCHECK --interval=10s --timeout=5s --retries=10 CMD ["node", "dist/healthcheck.js"]
