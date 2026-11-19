@@ -158,7 +158,7 @@ export const createProfile = async (
       defaultPlatformFee: data?.defaultPlatformFee,
       purchaseEntireCatalogMinPrice: data?.purchaseEntireCatalogMinPrice,
       purchaseEntireCatalogPercentage: data?.purchaseEntireCatalogPercentage,
-      purchaseEntireCatalogEnabled: data?.purchaseEntireCatalogEnabled,
+      purchaseEntireCatalogEnabled: data?.purchaseEntireCatalogEnabled ?? true,
     },
     include: {
       subscriptionTiers: true,

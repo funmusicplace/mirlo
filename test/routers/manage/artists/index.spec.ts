@@ -38,6 +38,26 @@ describe("manage/artists/{artistId}", () => {
       assert.equal(response.body.result.name, "hi");
     });
 
+    it("should create an artist with the catalogue purchase turned off", async () => {
+      const { accessToken } = await createUser({
+        email: "test@testcom",
+      });
+
+      const response = await requestApp
+        .post(`manage/artists`)
+        .set("Cookie", [`jwt=${accessToken}`])
+        .set("Accept", "application/json")
+        .send({
+          name: "hi",
+        });
+
+      assert.equal(response.statusCode, 200);
+      const profile = await prisma.profile.findUniqueOrThrow({
+        where: { id: response.body.result.id },
+      });
+      assert.equal(profile.purchaseEntireCatalogEnabled, false);
+    });
+
     it("should suffix the generated urlSlug when the name is already taken", async () => {
       const { user, accessToken } = await createUser({
         email: "test@testcom",
