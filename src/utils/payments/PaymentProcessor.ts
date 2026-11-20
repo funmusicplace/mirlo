@@ -136,8 +136,8 @@ export type PaymentAccountStatus = {
 export type PaymentStatusResult = {
   id: string;
   status: string;
-  /** The artist the intent pays, from its metadata. */
   profileId: string | null;
+  error: string | null;
 };
 
 import { StripePaymentProcessor } from "./stripeProcessor";

@@ -5132,7 +5132,25 @@ describe("purchase", () => {
         id: "pi_status",
         status: "requires_payment_method",
         profileId: "1",
+        error: null,
       });
+    });
+
+    it("reports why a reader attempt was declined", async () => {
+      sinon.stub(stripeUtils.stripe.paymentIntents, "retrieve").resolves({
+        id: "pi_declined",
+        status: "requires_payment_method",
+        metadata: { artistId: "1" },
+        last_payment_error: { message: "Your card was declined." },
+      } as unknown as Stripe.Response<Stripe.PaymentIntent>);
+
+      const result = await getIntentStatus({
+        id: "pi_declined",
+        stripeAccountId: "acct_test",
+      });
+
+      assert.equal(result.status, "requires_payment_method");
+      assert.equal(result.error, "Your card was declined.");
     });
 
     it("reads a seti_ id off the SetupIntent API instead, and tolerates metadata with no artist", async () => {
@@ -5155,6 +5173,7 @@ describe("purchase", () => {
         id: "seti_status",
         status: "succeeded",
         profileId: null,
+        error: null,
       });
       assert.equal(paymentIntents.callCount, 0);
     });

@@ -173,14 +173,21 @@ const Index: React.FC = () => {
     async (intentId: string) => {
       if (!stripeAccountId) return;
       for (let attempt = 0; attempt < 40; attempt++) {
-        const { result } = await api.get<{ id: string; status: string }>(
-          `purchase/${intentId}?stripeAccountId=${stripeAccountId}`
-        );
-        setMessage(`Reader status: ${result.status}`);
+        const { result } = await api.get<{
+          id: string;
+          status: string;
+          error: string | null;
+        }>(`purchase/${intentId}?stripeAccountId=${stripeAccountId}`);
         if (result.status === "succeeded" || result.status === "canceled") {
+          setMessage(`Reader status: ${result.status}`);
           setPendingIntentId(null);
           return;
         }
+        if (result.error) {
+          setMessage(`Payment failed: ${result.error}`);
+          return;
+        }
+        setMessage(`Reader status: ${result.status}`);
         await sleep(1500);
       }
       // Leave pendingIntentId set: the intent is still live on the reader, so
