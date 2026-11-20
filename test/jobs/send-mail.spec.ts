@@ -843,6 +843,21 @@ describe("send-mail job", () => {
         assert.ok(html.includes("Lumen Tide"));
         assert.ok(!html.includes("Next steps"));
       });
+
+      it("links follow confirmations to the instance, not mirlo.space", async () => {
+        await createSiteSettings({ emailProvider: mailgunProvider });
+
+        const html = await renderTemplate("artist-subscription-confirmation", {
+          artist: { id: 1, name: "Lumen Tide" },
+          email: "fan@example.com",
+          token: "tok",
+          host: "http://api.nightjar.test",
+          client: "https://nightjar.test",
+        });
+
+        assert.ok(html.includes('href="https://nightjar.test"'));
+        assert.ok(!html.includes("https://mirlo.space"));
+      });
     });
 
     it("should use default when configured fromEmail is invalid", async () => {
