@@ -236,12 +236,13 @@ export default function () {
     const log = req.logger ?? logger;
     let { artistId }: { artistId?: string } = req.params;
 
-    const { subscribers, artistSubscriptionTierId, confirmedNoSpam } =
-      req.body as {
-        subscribers: { email: string }[];
-        artistSubscriptionTierId?: number;
-        confirmedNoSpam?: boolean;
-      };
+    const { artistSubscriptionTierId, confirmedNoSpam } = req.body as {
+      artistSubscriptionTierId?: number;
+      confirmedNoSpam?: boolean;
+    };
+    const subscribers = (
+      req.body as { subscribers: { email: string }[] }
+    ).subscribers.map((s) => ({ email: s.email.trim().toLowerCase() }));
 
     try {
       const parsedArtistId = await findArtistIdForURLSlug(artistId);

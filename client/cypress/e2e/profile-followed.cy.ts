@@ -16,7 +16,7 @@ describe("/profile/followed", () => {
     }).then((result: any) => {
       const followerId = result.user.id;
 
-      cy.task("createUser", { email: "artistA@example.com", password }).then(
+      cy.task("createUser", { email: "artista@example.com", password }).then(
         (a: any) => {
           cy.task("createArtist", {
             userId: a.user.id,
@@ -37,7 +37,7 @@ describe("/profile/followed", () => {
         }
       );
 
-      cy.task("createUser", { email: "artistB@example.com", password }).then(
+      cy.task("createUser", { email: "artistb@example.com", password }).then(
         (b: any) => {
           cy.task("createArtist", {
             userId: b.user.id,

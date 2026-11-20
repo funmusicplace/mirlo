@@ -1076,7 +1076,7 @@ describe("send-mail job", () => {
     });
 
     it("matches the stored email case-insensitively and literally", async () => {
-      const { user } = await createUser({ email: "Gone_Away@Example.com" });
+      const { user } = await createUser({ email: "gone_away@example.com" });
       const { user: lookalike } = await createUser({
         email: "gonexaway@example.com",
       });

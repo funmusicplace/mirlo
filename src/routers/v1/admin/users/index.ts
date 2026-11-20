@@ -16,7 +16,9 @@ export default function () {
   };
 
   async function POST(req: Request, res: Response, next: NextFunction) {
-    const { users } = req.body as { users: { email: string }[] };
+    const users = (req.body as { users: { email: string }[] }).users.map(
+      (user) => ({ ...user, email: user.email.trim().toLowerCase() })
+    );
     try {
       const existingEmails = (
         await prisma.user.findMany({

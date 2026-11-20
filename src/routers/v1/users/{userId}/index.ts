@@ -78,7 +78,7 @@ export default function () {
     const log = req.logger ?? logger;
     const { userId } = req.params as unknown as { userId: string };
     const {
-      newEmail,
+      newEmail: rawNewEmail,
       accountingEmail,
       name,
       properties,
@@ -88,6 +88,10 @@ export default function () {
       isLabelAccount,
       combineSubscriptionEmails,
     } = req.body;
+    const newEmail =
+      typeof rawNewEmail === "string"
+        ? rawNewEmail.trim().toLowerCase()
+        : undefined;
     assertLoggedIn(req);
     const user = req.user;
 

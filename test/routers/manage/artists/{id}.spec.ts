@@ -60,7 +60,7 @@ describe("manage/artists/{artistId}", () => {
     it("should not return artist for logged in user if not owned", async () => {
       const { user } = await createUser({ email: "test@testcom" });
       const { accessToken: otherAccessToken } = await createUser({
-        email: "otherUser@test.com",
+        email: "otheruser@test.com",
       });
       const profile = await createProfile(user.id);
       const response = await requestApp
