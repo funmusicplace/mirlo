@@ -306,7 +306,7 @@ export const getPresignedUploadUrl = async (
   }
 ): Promise<string | null> => {
   const { expiresInSeconds = 3600, contentType, contentLength } = options ?? {};
-  await createBucketIfNotExists(bucket);
+  await ensureBucketCached(bucket);
 
   if (!presignClient) {
     return null;

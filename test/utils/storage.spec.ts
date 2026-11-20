@@ -29,6 +29,7 @@ import {
   removeStoredImage,
   removeDownloadableContent,
   removeAudioFiles,
+  getAudioUploadUrl,
   // Key prefix constants used in assertions
   instanceLogoPrefix,
   rootImagePrefix,
@@ -352,6 +353,14 @@ describe("storage bucket routing", () => {
           "staging-mirlo-downloads"
         );
       });
+    });
+  });
+
+  describe("getAudioUploadUrl", () => {
+    it("checks the bucket only once across uploads", async () => {
+      await getAudioUploadUrl("audio-1");
+      await getAudioUploadUrl("audio-2");
+      assert.equal(storage.inputs("HeadBucketCommand").length, 1);
     });
   });
 });
