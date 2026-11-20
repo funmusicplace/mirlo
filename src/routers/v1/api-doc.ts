@@ -23,6 +23,10 @@ const apiDoc = {
         about: { type: ["string", "null"] },
         coverImageAlt: { type: ["string", "null"] },
         coverCredit: { type: ["string", "null"] },
+        upc: {
+          type: ["string", "null"],
+          description: "UPC or EAN barcode",
+        },
       },
     },
     Fundraiser: {
