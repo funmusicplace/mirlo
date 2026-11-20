@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { uniq } from "lodash";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
@@ -70,20 +71,8 @@ export default function () {
 
       const total = results.length;
       const totalAmount = results.reduce((acc, curr) => acc + curr.amount, 0);
-      const totalSupporters = Object.keys(
-        results.reduce(
-          (acc, curr) => {
-            if (acc[curr.userId]) {
-              return acc;
-            } else {
-              return {
-                ...acc,
-                [curr.userId]: 1,
-              };
-            }
-          },
-          {} as Record<number, number>
-        )
+      const totalSupporters = uniq(
+        results.map((curr) => curr.userId ?? curr.id)
       ).length;
 
       // If CSV format is requested, fetch additional transaction details

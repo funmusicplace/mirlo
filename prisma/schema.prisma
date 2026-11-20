@@ -780,10 +780,10 @@ model MerchPurchase {
   updatedAt         DateTime          @default(now()) @updatedAt
   merch             Merch             @relation(fields: [merchId], references: [id])
   merchId           String            @db.Uuid
-  userId            Int
+  userId            Int?
   quantity          Int
   message           String?
-  user              User              @relation(fields: [userId], references: [id])
+  user              User?             @relation(fields: [userId], references: [id])
   shippingAddress   Json?
   billingAddress    Json?
   fulfillmentStatus FulfillmentStatus
@@ -803,8 +803,8 @@ enum FulfillmentStatus {
 }
 
 model UserProfileTip {
-  userId           Int
-  user             User             @relation(fields: [userId], references: [id])
+  userId           Int?
+  user             User?            @relation(fields: [userId], references: [id])
   profileId        Int
   profile          Profile          @relation(fields: [profileId], references: [id])
   datePurchased    DateTime         @default(now())
@@ -833,9 +833,9 @@ model UserTrackGroupPurchase {
 
 model UserTransaction {
   id                             String                          @id @default(uuid())
-  userId                         Int
+  userId                         Int?
   userFriendlyId                 String? // e.g., "MIRLO-0001"
-  user                           User                            @relation(fields: [userId], references: [id])
+  user                           User?                           @relation(fields: [userId], references: [id])
   createdAt                      DateTime                        @default(now())
   amount                         Int // in cents
   currency                       String

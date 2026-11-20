@@ -9,7 +9,7 @@ import { getArtistUrl } from "utils/artist";
 import usePagination from "utils/usePagination";
 
 interface AdminPurchase extends UserArtistTip {
-  user: User;
+  user: User | null;
   artist: Artist;
   transaction: {
     amount: number;
@@ -101,11 +101,11 @@ export const Index: React.FC = () => {
           </thead>
           <tbody>
             {results.map((tip, index) => (
-              <tr key={tip.artistId + tip.userId}>
+              <tr key={`${tip.artistId}-${tip.userId ?? index}`}>
                 <td>{index + 1}</td>
 
                 <td>
-                  {tip.user.email} (userId: {tip.userId})
+                  {tip.user ? `${tip.user.email} (userId: ${tip.userId})` : "—"}
                 </td>
                 <td>
                   <Link

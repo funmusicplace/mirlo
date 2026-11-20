@@ -102,7 +102,9 @@ export const Index: React.FC = () => {
                 <td>{index + 1}</td>
 
                 <td>
-                  {purchase.user.email} (userId: {purchase.userId})
+                  {purchase.user
+                    ? `${purchase.user.email} (userId: ${purchase.userId})`
+                    : "—"}
                 </td>
                 <td>
                   {purchase.trackGroupPurchases?.map((tgp) => (

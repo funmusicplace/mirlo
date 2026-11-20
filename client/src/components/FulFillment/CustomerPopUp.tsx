@@ -119,7 +119,7 @@ const CustomerPopUp: React.FC<{ purchase: MerchPurchase }> = ({ purchase }) => {
   return (
     <div>
       <Underline>
-        <h2>{purchase.user.name}</h2>
+        <h2>{purchase.user ? purchase.user.name : t("noBuyer")}</h2>
         <Section>
           <label>{t("itemArtist")}</label>{" "}
           <span>

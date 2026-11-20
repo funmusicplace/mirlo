@@ -51,10 +51,10 @@ export const sendShipmentUpdateEmail = async (
     id: string;
     quantity: number;
     merch: { title: string; profile: { name: string; urlSlug: string } };
-    user: { email: string; name: string | null };
+    user: { email: string; name: string | null } | null;
   }
 ) => {
-  if (!purchase.user.email) {
+  if (!purchase.user?.email) {
     return;
   }
   const client = await getClient();

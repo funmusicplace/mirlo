@@ -462,6 +462,7 @@ type SessionMetaData = {
   trackId: string;
   transactionId: string;
   checkoutId?: string;
+  pointOfSale?: string;
   purchaseType:
     | "trackGroup"
     | "subscription"
@@ -1265,7 +1266,7 @@ export const completePurchaseFromIntent = async (
   const { userId, userEmail } = metadata;
 
   let resolvedEmail = userEmail ?? "";
-  if (!resolvedEmail && !userId) {
+  if (!resolvedEmail && !userId && metadata.pointOfSale !== "true") {
     resolvedEmail = await recoverEmailFromIntent(intent, accountId);
     if (resolvedEmail) {
       logger.warn(
@@ -1274,16 +1275,30 @@ export const completePurchaseFromIntent = async (
     }
   }
 
-  const { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
-    resolvedEmail,
-    userId
+  const messages = await findCheckoutMessages(metadata.checkoutId);
+  const items = (JSON.parse(metadata.items ?? "[]") as ResolvedItem[]).map(
+    (item, i) => ({ ...item, message: messages[i] ?? item.message })
   );
 
   const payment = await completedPaymentFromIntent(intent, accountId);
 
-  const messages = await findCheckoutMessages(metadata.checkoutId);
-  const items = (JSON.parse(metadata.items ?? "[]") as ResolvedItem[]).map(
-    (item, i) => ({ ...item, message: messages[i] ?? item.message })
+  if (
+    !resolvedEmail &&
+    !userId &&
+    items.every((item) => item.type === "merch" || item.type === "tip")
+  ) {
+    if (metadata.pointOfSale !== "true") {
+      logger.warn(
+        `completePurchaseFromIntent: ${intent.id} is an online sale with no buyer; recording it without one`
+      );
+    }
+    await completePurchase(null, items, payment);
+    return;
+  }
+
+  const { userId: actualUserId, newUser } = await findOrCreateUserBasedOnEmail(
+    resolvedEmail,
+    userId
   );
 
   await completePurchase(Number(actualUserId), items, payment, { newUser });

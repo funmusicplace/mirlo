@@ -14,7 +14,10 @@ mixin purchaseRow(title, sku, transaction, trackGroup)
 
 block content
   p= t("emails.artistPurchaseNotification.intro", { instanceName })
-  p= t("emails.artistPurchaseNotification.purchasedBy", { email })
+  if email
+    p= t("emails.artistPurchaseNotification.purchasedBy", { email })
+  else
+    p= t("emails.artistPurchaseNotification.noBuyer")
 
   table
     thead

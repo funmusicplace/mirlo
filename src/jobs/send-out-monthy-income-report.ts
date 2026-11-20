@@ -1,5 +1,5 @@
 import prisma from "@mirlo/prisma";
-import { groupBy, keyBy, uniq } from "lodash";
+import { compact, groupBy, keyBy, uniq } from "lodash";
 
 import logger from "../logger";
 import { BULK_MAIL_PRIORITY, sendMailQueue } from "../queues/send-mail-queue";
@@ -93,7 +93,7 @@ const sendOutMonthlyIncomeReport = async () => {
       // uses it too, so it must not carry buyer PII) — look buyers up
       // separately.
       prisma.user.findMany({
-        where: { id: { in: uniq(sales.map((sale) => sale.userId)) } },
+        where: { id: { in: uniq(compact(sales.map((sale) => sale.userId))) } },
         select: { id: true, name: true, email: true },
       }),
       // Subscriptions that ended last month. TIER_SWITCHED is excluded: the
@@ -152,8 +152,8 @@ const sendOutMonthlyIncomeReport = async () => {
         serializeUserTransaction({
           ...sale,
           user: {
-            name: buyers[sale.userId]?.name || "",
-            email: buyers[sale.userId]?.email || "",
+            name: (sale.userId && buyers[sale.userId]?.name) || "",
+            email: (sale.userId && buyers[sale.userId]?.email) || "",
           },
         });
       const oneOffSales = userSales.filter(

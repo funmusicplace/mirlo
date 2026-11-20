@@ -82,6 +82,13 @@ export default function () {
         });
       }
 
+      if (!transaction.userId) {
+        throw new AppError({
+          httpCode: 400,
+          description: "This sale has no buyer to send a receipt to",
+        });
+      }
+
       const purchaser = await prisma.user.findFirst({
         where: { id: transaction.userId },
       });

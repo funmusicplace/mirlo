@@ -23,7 +23,7 @@ export const FulfillmentCard: React.FC<{ purchase: MerchPurchase }> = ({
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-0.5 min-w-0">
           <div className="text-lg font-semibold truncate">
-            {purchase.user.name}
+            {purchase.user ? purchase.user.name : t("noBuyer")}
           </div>
           <div className="text-xs text-(--mi-secondary-text-color) truncate">
             {purchase.merch.artist.name}
@@ -84,7 +84,7 @@ export const FulfillmentCard: React.FC<{ purchase: MerchPurchase }> = ({
           <div className="flex justify-between gap-3">
             <dt className="text-(--mi-secondary-text-color)">{t("email")}</dt>
             <dd className="text-right min-w-0 truncate">
-              {purchase.user.email}
+              {purchase.user?.email}
             </dd>
           </div>
           {purchase.options && purchase.options.length > 0 && (

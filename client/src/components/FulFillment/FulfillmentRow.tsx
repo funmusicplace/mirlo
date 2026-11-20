@@ -34,8 +34,8 @@ const FulfillmentRow: React.FC<{ purchase: MerchPurchase }> = ({
         </td>
         <td>{purchase.merch.artist.name}</td>
         <td>{purchase.merch.title} </td>
-        <td>{purchase.user.name}</td>
-        <td>{purchase.user.email}</td>
+        <td>{purchase.user ? purchase.user.name : t("noBuyer")}</td>
+        <td>{purchase.user?.email}</td>
         <td>{purchase.quantity}</td>
         <td>
           {purchase.options?.map((option) => (

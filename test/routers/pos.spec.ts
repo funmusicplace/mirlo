@@ -63,6 +63,7 @@ describe("pos scope", () => {
       .send({
         artistId: profile.id,
         readerId: "tmr_test",
+        email: "fan@test.com",
         items: [{ type: "trackGroup", id: tg.id, price: "1000" }],
       });
 
