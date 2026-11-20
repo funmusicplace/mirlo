@@ -187,7 +187,8 @@ export const resolveDigitalPurchaseItem = async <
 export const resolveMerchPurchaseItem = (
   merch: MerchWithOptionsAndShipping,
   item: Extract<PurchaseItem, { type: "merch" }>,
-  discountPercent = 0
+  discountPercent = 0,
+  skipShipping = false
 ): {
   item: ResolvedItem;
   requiresShipping: boolean;
@@ -209,7 +210,8 @@ export const resolveMerchPurchaseItem = (
 
   const { priceNumber } = determinePrice(item.price, merch.minPrice);
 
-  const requiresShipping = merch.shippingDestinations.length > 0;
+  const requiresShipping =
+    !skipShipping && merch.shippingDestinations.length > 0;
   let shippingCostCents = 0;
   let allowedCountries: string[] = [];
   if (requiresShipping) {
@@ -239,7 +241,9 @@ export const resolveMerchPurchaseItem = (
         ).discountedPriceNumber + shippingCostCents,
       message: item.message,
       optionIds: options.map((o) => o.id),
-      shippingDestinationId: item.shippingDestinationId,
+      shippingDestinationId: requiresShipping
+        ? item.shippingDestinationId
+        : undefined,
       shippingAmount: shippingCostCents,
       platformPercent: merch.platformPercent,
     },
@@ -727,7 +731,8 @@ export default function () {
           const resolved = resolveMerchPurchaseItem(
             merch,
             item,
-            Math.max(0, ...discounts.map((d) => d.merchDiscountPercent))
+            Math.max(0, ...discounts.map((d) => d.merchDiscountPercent)),
+            pointOfSale
           );
           payeeAccountIds.push(await resolveProfilePayeeAccountId());
           resolvedItems.push(resolved.item);

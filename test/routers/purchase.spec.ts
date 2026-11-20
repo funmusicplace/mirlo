@@ -303,6 +303,63 @@ describe("purchase", () => {
         assert.ok(response.body.paymentIntentId);
       });
 
+      it("sells merch that ships without asking for a destination", async () => {
+        const { accessToken, profile } = await setupReaderSale();
+        const merch = await createMerch(profile.id, {
+          isPublic: true,
+          minPrice: 800,
+          quantityRemaining: 10,
+        });
+        await createMerchShippingDestination({
+          merchId: merch.id,
+          costUnit: 500,
+          costExtraUnit: 100,
+        });
+
+        const response = await postPurchase(
+          {
+            artistId: profile.id,
+            readerId: "tmr_test",
+            items: [{ type: "merch", id: merch.id, quantity: 2 }],
+          },
+          accessToken
+        );
+
+        assert.equal(response.statusCode, 200, response.text);
+      });
+
+      it("leaves shipping off merch sold in person", async () => {
+        const { profile } = await setupReaderSale();
+        const merch = await createMerch(profile.id, {
+          isPublic: true,
+          minPrice: 800,
+          quantityRemaining: 10,
+        });
+        await createMerchShippingDestination({
+          merchId: merch.id,
+          costUnit: 500,
+          costExtraUnit: 100,
+        });
+        const fullMerch = await prisma.merch.findFirstOrThrow({
+          where: { id: merch.id },
+          include: {
+            optionTypes: { include: { options: true } },
+            shippingDestinations: true,
+          },
+        });
+
+        const { item, requiresShipping } = resolveMerchPurchaseItem(
+          fullMerch,
+          { type: "merch", id: merch.id, quantity: 2 },
+          0,
+          true
+        );
+
+        assert.equal(requiresShipping, false);
+        assert.equal(item.amount, 1600);
+        assert.equal(item.shippingAmount, 0);
+      });
+
       it("needs the buyer's email to sell a release", async () => {
         const { accessToken, profile } = await setupReaderSale();
         const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
