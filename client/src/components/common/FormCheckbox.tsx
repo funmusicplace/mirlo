@@ -6,9 +6,10 @@ import { InputEl } from "./Input";
 export const CheckBoxLabel = styled.label`
   display: flex;
   padding: 0.25rem;
-  align-items: center;
+  align-items: baseline;
   font-size: 1rem;
   input {
+    flex-shrink: 0;
     width: 2rem !important;
     margin-right: 0.45rem;
   }

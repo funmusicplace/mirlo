@@ -80,7 +80,14 @@ const ManageTrackDefaults: React.FC<BulkUpdateTracksProps> = ({
         </ToggleFormComponent>
       </FormProvider>
       {(trackGroup.tracks ?? []).length > 0 && (
-        <>
+        <div
+          role="group"
+          aria-labelledby="heading-apply-to-all-tracks"
+          className="border-1 border-(--mi-tint-x-color) px-4 py-3"
+        >
+          <h3 id="heading-apply-to-all-tracks" className="mt-0">
+            {t("applyToAllTracks")}
+          </h3>
           <div className="flex flex-wrap gap-4 py-2">
             <ArtistButton wrap onClick={() => handleSetAllTracksPreview(true)}>
               {t("setAllTracksAsPreview")}
@@ -97,7 +104,7 @@ const ManageTrackDefaults: React.FC<BulkUpdateTracksProps> = ({
             tracks={trackGroup.tracks ?? []}
             reload={reload}
           />
-        </>
+        </div>
       )}
     </div>
   );

@@ -223,42 +223,30 @@ const ManageTrackRow: React.FC<{
       >
         {track.audio?.duration && fmtMSS(track.audio?.duration)}
       </td>
-      <td
-        align="right"
-        className={css`
-          width: 150px;
-          display: flex;
-          flex-direction: row;
-          justify-content: flex-end;
-
-          button,
-          a {
-          }
-        `}
-      >
-        <ArtistButtonAnchor
-          size="compact"
-          startIcon={<FaDownload />}
-          variant="dashed"
-          href={getDownloadOriginalUrl()}
-          title={t("downloadOriginal") ?? ""}
-          style={{ marginRight: ".25rem" }}
-        />
-        <ArtistButton
-          size="compact"
-          startIcon={<FaPen />}
-          variant="dashed"
-          onClick={() => setIsEditing(true)}
-          title={t("edit") ?? ""}
-          style={{ marginRight: ".25rem" }}
-        />
-        <ArtistButton
-          variant="dashed"
-          startIcon={<FaTrash />}
-          size="compact"
-          onClick={onDeleteClick}
-          title={t("delete") ?? ""}
-        />
+      <td>
+        <div className="flex w-full justify-end gap-1 md:justify-center">
+          <ArtistButtonAnchor
+            size="compact"
+            startIcon={<FaDownload />}
+            variant="dashed"
+            href={getDownloadOriginalUrl()}
+            title={t("downloadOriginal") ?? ""}
+          />
+          <ArtistButton
+            size="compact"
+            startIcon={<FaPen />}
+            variant="dashed"
+            onClick={() => setIsEditing(true)}
+            title={t("edit") ?? ""}
+          />
+          <ArtistButton
+            variant="dashed"
+            startIcon={<FaTrash />}
+            size="compact"
+            onClick={onDeleteClick}
+            title={t("delete") ?? ""}
+          />
+        </div>
       </td>
     </TrackRow>
   );

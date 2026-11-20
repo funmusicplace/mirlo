@@ -139,16 +139,17 @@ const ManageTags: React.FC<{ tags?: string[] }> = ({ tags: existingTags }) => {
 
       <div
         className={css`
-          display: inline-flex;
-          max-width: 300px;
+          display: flex;
           align-items: center;
+          width: 100%;
 
-          input {
-            margin-right: 1rem;
+          > * {
+            flex: 1;
           }
         `}
       >
         <AutoComplete
+          className="me-0!"
           getOptions={findTags}
           id="input-album-tags"
           onSelect={saveTags}

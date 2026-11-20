@@ -61,6 +61,8 @@ const TRACKS: Track[] = [
       { artistName: "Featured Guest", role: "vocals", order: 2 },
     ],
     audio: { ...TRACK_EXAMPLE.audio!, duration: 412 },
+    isrc: "USRC17607839",
+    iswc: "T-123.456.789-0",
   }),
   makeTrack({ id: 44, order: 3, title: "Closer", isPreview: false }),
 ];
@@ -71,6 +73,7 @@ const TRACK_GROUP: TrackGroup = {
   about: "Recorded over a long weekend in a borrowed cabin.",
   credits: "Mixed by Someone. Mastered by Someone Else.",
   catalogNumber: "MIR-001",
+  upc: "012345678905",
   minPrice: 700,
   suggestedPrice: 1000,
   tracks: TRACKS,
@@ -181,5 +184,10 @@ export const MobileNoTracks: Story = {
 };
 
 export const Desktop: Story = {
+  parameters: { viewport: { defaultViewport: "desktop" } },
+};
+
+export const DesktopEditingTrack: Story = {
+  ...MobileEditingTrack,
   parameters: { viewport: { defaultViewport: "desktop" } },
 };
