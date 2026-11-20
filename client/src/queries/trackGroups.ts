@@ -203,6 +203,7 @@ async function saveAlbumForm(opts: {
     minPrice: toCentsOrNull(formData.minPrice),
     suggestedPrice: toCentsOrNull(formData.suggestedPrice),
     catalogNumber: formData.catalogNumber,
+    upc: formData.upc,
     coverImageAlt: formData.coverImageAlt,
     coverCredit: formData.coverCredit,
     urlSlug: formData.urlSlug,

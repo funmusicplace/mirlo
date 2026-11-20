@@ -29,12 +29,15 @@ import TrackArtistFormFields from "../TrackArtistFormFields";
 import ReplaceTrackAudioInput from "./ReplaceTrackAudioInput";
 import ShowRawID3Data from "./ShowRawID3Data";
 
+const ISWC_REGEX = /^T\d{10}$/i;
+
 export interface FormData {
   title: string;
   status: "preview" | "must-own";
   trackFile: FileList;
   licenseId: number | null;
   isrc: string;
+  iswc: string;
   lyrics: string;
   description: string;
   allowIndividualSale: boolean;
@@ -70,6 +73,8 @@ const EditTrackRow: React.FC<{
   const methods = useForm<FormData>({
     defaultValues: {
       ...track,
+      isrc: track.isrc ?? "",
+      iswc: track.iswc ?? "",
       status: track.isPreview ? "preview" : "must-own",
       minPrice: `${track?.minPrice !== undefined ? track.minPrice / 100 : "0"}`,
     },
@@ -83,8 +88,11 @@ const EditTrackRow: React.FC<{
   const allowIndividualSale = watch("allowIndividualSale");
   const isrcValue = watch("isrc");
   const isrcWarning =
-    !!isrcValue &&
+    !!isrcValue?.trim() &&
     !/^[A-Z]{2}[A-Z0-9]{3}[0-9]{7}$/.test(isrcValue.replace(/-/g, ""));
+  const iswcValue = watch("iswc");
+  const iswcWarning =
+    !!iswcValue?.trim() && !ISWC_REGEX.test(iswcValue.replace(/[\s.-]/g, ""));
   const {
     fields: trackArtists,
     append,
@@ -100,7 +108,8 @@ const EditTrackRow: React.FC<{
       trackArtists: track.trackArtists,
       status: track.isPreview ? "preview" : "must-own",
       licenseId: track.licenseId,
-      isrc: track.isrc,
+      isrc: track.isrc ?? "",
+      iswc: track.iswc ?? "",
       allowMirloPromo: track.allowMirloPromo,
       lyrics: track.lyrics,
       description: track.description,
@@ -118,6 +127,7 @@ const EditTrackRow: React.FC<{
           title: formData.title,
           trackArtists: formData.trackArtists,
           isrc: formData.isrc,
+          iswc: formData.iswc,
           lyrics: formData.lyrics,
           description: formData.description,
           allowMirloPromo: formData.allowMirloPromo,
@@ -349,19 +359,6 @@ const EditTrackRow: React.FC<{
       </IndentedTR>
       <IndentedTR>
         <td colSpan={2}>
-          <label htmlFor="isrc">{t("isrcCode")}</label>
-        </td>
-        <td colSpan={99}>
-          <InputEl
-            id="isrc"
-            {...register(`isrc`)}
-            disabled={isSaving || isDisabled}
-          />
-          {isrcWarning && <FormError>{t("isrcInvalid")}</FormError>}
-        </td>
-      </IndentedTR>
-      <IndentedTR>
-        <td colSpan={2}>
           <label htmlFor="lyrics">{t("lyrics")}</label>
         </td>
         <td colSpan={99}>
@@ -417,6 +414,43 @@ const EditTrackRow: React.FC<{
         </td>
         <td colSpan={99}>
           <ManageTrackLicense />
+        </td>
+      </IndentedTR>
+      <IndentedTR>
+        <td colSpan={2}>{t("identifiers")}</td>
+        <td colSpan={99}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor={`input-isrc-${track.id}`}>{t("isrcCode")}</label>
+              <InputEl
+                id={`input-isrc-${track.id}`}
+                aria-describedby={`hint-isrc-${track.id}${isrcWarning ? ` error-isrc-${track.id}` : ""}`}
+                {...register("isrc")}
+                disabled={isSaving || isDisabled}
+              />
+              <small id={`hint-isrc-${track.id}`}>{t("isrcHint")}</small>
+              {isrcWarning && (
+                <FormError id={`error-isrc-${track.id}`}>
+                  {t("isrcInvalid")}
+                </FormError>
+              )}
+            </div>
+            <div>
+              <label htmlFor={`input-iswc-${track.id}`}>{t("iswcCode")}</label>
+              <InputEl
+                id={`input-iswc-${track.id}`}
+                aria-describedby={`hint-iswc-${track.id}${iswcWarning ? ` error-iswc-${track.id}` : ""}`}
+                {...register("iswc")}
+                disabled={isSaving || isDisabled}
+              />
+              <small id={`hint-iswc-${track.id}`}>{t("iswcHint")}</small>
+              {iswcWarning && (
+                <FormError id={`error-iswc-${track.id}`}>
+                  {t("iswcInvalid")}
+                </FormError>
+              )}
+            </div>
+          </div>
         </td>
       </IndentedTR>
       <IndentedTR>
