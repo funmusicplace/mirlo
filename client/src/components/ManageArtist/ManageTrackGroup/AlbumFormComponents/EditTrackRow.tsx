@@ -309,52 +309,57 @@ const EditTrackRow: React.FC<{
         </td>
       </IndentedTR>
       <IndentedTR>
-        <td colSpan={101}>
-          <FormCheckbox
-            keyName="allowIndividualSale"
-            description={t("allowSaleDescription")}
-          />
+        <td colSpan={2}>
+          <span id={`label-track-settings-${track.id}`}>
+            {t("trackSettings")}
+          </span>
         </td>
-      </IndentedTR>
-      {allowIndividualSale && (
-        <IndentedTR>
-          <td colSpan={2}>
-            <label htmlFor="minPrice">{t("minPrice")}</label>
-          </td>
-          <td colSpan={99}>
-            <InputEl
-              id="minPrice"
-              type="number"
-              min={0}
-              step="0.01"
-              {...register("minPrice", { min: 0 })}
+        <td colSpan={99}>
+          <div
+            role="group"
+            aria-labelledby={`label-track-settings-${track.id}`}
+          >
+            <FormCheckbox
+              idPrefix={`${track.id}-`}
+              keyName="allowIndividualSale"
+              description={t("allowSaleDescription")}
             />
-          </td>
-        </IndentedTR>
-      )}
-      <IndentedTR>
-        <td colSpan={101}>
-          <FormCheckbox
-            idPrefix={`${track.id}-`}
-            keyName="allowMirloPromo"
-            description={
-              <p>
-                <Trans
-                  t={t}
-                  i18nKey={"allowMirloPromo"}
-                  components={{
-                    hype: (
-                      <Link
-                        className={openOutsideLinkAfter}
-                        to="/team/posts/236/"
-                        target="_blank"
-                      ></Link>
-                    ),
-                  }}
+            {allowIndividualSale && (
+              <div className="mt-2 mb-4">
+                <label htmlFor={`input-min-price-${track.id}`}>
+                  {t("minPrice")}
+                </label>
+                <InputEl
+                  id={`input-min-price-${track.id}`}
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  {...register("minPrice", { min: 0 })}
                 />
-              </p>
-            }
-          />
+              </div>
+            )}
+            <FormCheckbox
+              idPrefix={`${track.id}-`}
+              keyName="allowMirloPromo"
+              description={
+                <p>
+                  <Trans
+                    t={t}
+                    i18nKey={"allowMirloPromoTrack"}
+                    components={{
+                      hype: (
+                        <Link
+                          className={openOutsideLinkAfter}
+                          to="/team/posts/236/"
+                          target="_blank"
+                        ></Link>
+                      ),
+                    }}
+                  />
+                </p>
+              }
+            />
+          </div>
         </td>
       </IndentedTR>
       <IndentedTR>
