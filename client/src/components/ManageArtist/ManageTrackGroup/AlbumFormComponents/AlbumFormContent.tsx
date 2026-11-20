@@ -21,6 +21,7 @@ import FundraisingGoal from "./FundraisingGoal";
 import ManageTags from "./ManageTags";
 import PreOrderSection from "./PreOrderSection";
 import Pricing from "./Pricing";
+import ReleaseIdentifierFields from "./ReleaseIdentifierFields";
 import VisibilityRadio from "./VisibilityRadio";
 
 const COVER_IMAGE_ALT_MAX_LENGTH = 250;
@@ -220,24 +221,7 @@ const AlbumFormContent: React.FC<{
           </RestoredLabel>
           <TextArea id="input-credits" rows={5} {...register("credits")} />
         </FormComponent>
-        <div
-          className={css`
-            @media screen and (min-width: ${bp.medium}px) {
-              display: flex;
-              gap: 1rem;
-              > div {
-                width: 33%;
-              }
-            }
-          `}
-        >
-          <FormComponent>
-            <RestoredLabel htmlFor="input-catalog-number" field="catalogNumber">
-              {t("catalogNumber")}
-            </RestoredLabel>
-            <InputEl id="input-catalog-number" {...register("catalogNumber")} />
-          </FormComponent>
-        </div>
+        <ReleaseIdentifierFields />
       </FormSection>
       <FormSection>
         <FundraisingGoal

@@ -187,7 +187,8 @@ interface Track {
     name: string;
     link?: string;
   };
-  isrc?: string;
+  isrc?: string | null;
+  iswc?: string | null;
   urlSlug?: string;
   lyrics?: string;
 }
@@ -201,6 +202,7 @@ interface TrackGroup {
   adminEnabled: boolean;
   hideFromSearch?: boolean;
   catalogNumber?: string;
+  upc?: string | null;
   coverImageAlt?: string;
   coverCredit?: string | null;
   id: number;

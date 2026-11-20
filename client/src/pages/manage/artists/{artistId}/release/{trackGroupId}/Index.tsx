@@ -47,6 +47,7 @@ export interface TrackGroupFormData extends FundraiserFormData {
   about?: string;
   coverFile?: File[];
   catalogNumber?: string;
+  upc?: string;
   coverImageAlt?: string;
   coverCredit?: string;
 }
