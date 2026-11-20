@@ -9826,15 +9826,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sharp@npm:^0.31.1":
-  version: 0.31.1
-  resolution: "@types/sharp@npm:0.31.1"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 10/e5ec6cd7ae604111053bb6664a4c6ec5bdc60fc59c833305b0d12bff707e417c1a9119086c1b9bd4593ed2f2c8cb9f03178d5bc37dc7429adc40d132367745de
-  languageName: node
-  linkType: hard
-
 "@types/shasum@npm:^1.0.0":
   version: 1.0.2
   resolution: "@types/shasum@npm:1.0.2"
@@ -21414,7 +21405,6 @@ __metadata:
     "@types/qs": "npm:^6"
     "@types/rss": "npm:^0.0.30"
     "@types/sanitize-html": "npm:^2.16.2"
-    "@types/sharp": "npm:^0.31.1"
     "@types/shasum": "npm:^1.0.0"
     "@types/showdown": "npm:^2.0.2"
     "@types/sinon": "npm:^17.0.3"
