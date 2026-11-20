@@ -97,6 +97,7 @@ export const OtherInModalOverInlineForm: Story = {
   play: async () => {
     const dialog = within(await within(document.body).findByRole("dialog"));
     await userEvent.click(await dialog.findByText("Other"));
-    await expect(await dialog.findByRole("spinbutton")).toBeVisible();
+    const input = await dialog.findByRole("spinbutton");
+    await waitFor(() => expect(input).toBeVisible());
   },
 };
