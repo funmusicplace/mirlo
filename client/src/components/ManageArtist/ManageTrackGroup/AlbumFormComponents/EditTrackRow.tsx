@@ -21,6 +21,7 @@ import { useSnackbar } from "state/SnackbarContext";
 import { fmtMSS } from "utils/tracks";
 import useJobStatusCheck from "utils/useJobStatusCheck";
 
+import { bp } from "../../../../constants";
 import SelectTrackPreview from "../../SelectTrackPreview";
 import TrackUploadingState from "../../TrackUploadingState";
 import ManageTrackLicense from "../ManageTrackLicense";
@@ -50,10 +51,23 @@ const IndentedTR = styled("tr")`
   border-left: 1rem solid var(--mi-text-color);
   border-bottom: 1px solid var(--mi-text-color);
   td {
-    padding: 1rem 0;
+    padding: 1rem 1rem 1rem 3rem;
+
+    @media screen and (max-width: ${bp.medium}px) {
+      padding-left: 1rem;
+    }
   }
-  td:first-child {
-    padding-left: 3rem;
+`;
+
+const FieldRow = styled.div`
+  display: grid;
+  grid-template-columns: 10rem minmax(0, 1fr);
+  gap: 1rem;
+  width: 100%;
+
+  @media screen and (max-width: ${bp.medium}px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
   }
 `;
 
@@ -174,6 +188,7 @@ const EditTrackRow: React.FC<{
         className={css`
           td {
             padding-bottom: 1.5rem !important;
+            vertical-align: top;
           }
           ${isDisabled || isSaving
             ? `
@@ -217,7 +232,9 @@ const EditTrackRow: React.FC<{
           <SelectTrackPreview statusKey="status" />
         </td>
         <td align="right">
-          {track.audio?.duration && fmtMSS(+track.audio.duration)}
+          <span className="inline-block leading-10">
+            {track.audio?.duration && fmtMSS(+track.audio.duration)}
+          </span>
         </td>
         <td
           align="right"
@@ -261,207 +278,239 @@ const EditTrackRow: React.FC<{
         </td>
       </tr>
       <IndentedTR>
-        <td colSpan={2}>
-          <label htmlFor="listedArtists">
-            {t("listedArtists", { keyPrefix: "manageTrackTable" })}
-          </label>
-        </td>
         <td colSpan={99}>
-          <div
-            className={css`
-              display: flex;
-              flex-direction: column;
-            `}
-          >
+          <FieldRow>
             <div>
-              {trackArtists.map((a, artistIndex) => (
-                <TrackArtistFormFields
-                  artistIndex={artistIndex}
-                  key={a.id}
-                  disabled={isDisabled}
-                  onRemove={remove}
-                />
-              ))}
+              <span id={`label-listed-artists-${track.id}`}>
+                {t("listedArtists", { keyPrefix: "manageTrackTable" })}
+              </span>
             </div>
             <div
-              className={css`
-                margin-top: 1rem;
-                display: flex;
-                justify-content: space-between;
-                width: 100%;
-                align-items: center;
-              `}
+              role="group"
+              aria-labelledby={`label-listed-artists-${track.id}`}
             >
-              <ArtistButton
-                onClick={() => {
-                  append({ artistName: "", order: trackArtists.length });
-                }}
-                type="button"
-                size="compact"
-                disabled={isDisabled}
-                startIcon={<FaPlus />}
-                variant="dashed"
+              <div
+                className={css`
+                  display: flex;
+                  flex-direction: column;
+                `}
               >
-                {t("addNewArtist")}
-              </ArtistButton>
+                <div>
+                  {trackArtists.map((a, artistIndex) => (
+                    <TrackArtistFormFields
+                      artistIndex={artistIndex}
+                      key={a.id}
+                      disabled={isDisabled}
+                      onRemove={remove}
+                    />
+                  ))}
+                </div>
+                <div
+                  className={css`
+                    margin-top: 1rem;
+                    display: flex;
+                    justify-content: space-between;
+                    width: 100%;
+                    align-items: center;
+                  `}
+                >
+                  <ArtistButton
+                    onClick={() => {
+                      append({ artistName: "", order: trackArtists.length });
+                    }}
+                    type="button"
+                    size="compact"
+                    disabled={isDisabled}
+                    startIcon={<FaPlus />}
+                    variant="dashed"
+                  >
+                    {t("addNewArtist")}
+                  </ArtistButton>
+                </div>
+              </div>
             </div>
-          </div>
+          </FieldRow>
         </td>
       </IndentedTR>
       <IndentedTR>
-        <td colSpan={2}>
-          <span id={`label-track-settings-${track.id}`}>
-            {t("trackSettings")}
-          </span>
-        </td>
         <td colSpan={99}>
-          <div
-            role="group"
-            aria-labelledby={`label-track-settings-${track.id}`}
-          >
-            <FormCheckbox
-              idPrefix={`${track.id}-`}
-              keyName="allowIndividualSale"
-              description={t("allowSaleDescription")}
-            />
-            {allowIndividualSale && (
-              <div className="mt-2 mb-4">
-                <label htmlFor={`input-min-price-${track.id}`}>
-                  {t("minPrice")}
-                </label>
-                <InputEl
-                  id={`input-min-price-${track.id}`}
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  {...register("minPrice", { min: 0 })}
+          <FieldRow>
+            <div>
+              <span id={`label-track-settings-${track.id}`}>
+                {t("trackSettings")}
+              </span>
+            </div>
+            <div>
+              <div
+                role="group"
+                aria-labelledby={`label-track-settings-${track.id}`}
+              >
+                <FormCheckbox
+                  idPrefix={`${track.id}-`}
+                  keyName="allowIndividualSale"
+                  description={t("allowSaleDescription")}
+                />
+                {allowIndividualSale && (
+                  <div className="mt-2 mb-4">
+                    <label htmlFor={`input-min-price-${track.id}`}>
+                      {t("minPrice")}
+                    </label>
+                    <InputEl
+                      id={`input-min-price-${track.id}`}
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      {...register("minPrice", { min: 0 })}
+                    />
+                  </div>
+                )}
+                <FormCheckbox
+                  idPrefix={`${track.id}-`}
+                  keyName="allowMirloPromo"
+                  description={
+                    <p>
+                      <Trans
+                        t={t}
+                        i18nKey={"allowMirloPromoTrack"}
+                        components={{
+                          hype: (
+                            <Link
+                              className={openOutsideLinkAfter}
+                              to="/team/posts/236/"
+                              target="_blank"
+                            ></Link>
+                          ),
+                        }}
+                      />
+                    </p>
+                  }
                 />
               </div>
-            )}
-            <FormCheckbox
-              idPrefix={`${track.id}-`}
-              keyName="allowMirloPromo"
-              description={
-                <p>
+            </div>
+          </FieldRow>
+        </td>
+      </IndentedTR>
+      <IndentedTR>
+        <td colSpan={99}>
+          <FieldRow>
+            <div>
+              <label htmlFor={`input-lyrics-${track.id}`}>{t("lyrics")}</label>
+            </div>
+            <div>
+              <TextArea
+                id={`input-lyrics-${track.id}`}
+                {...register("lyrics")}
+                className={css`
+                  width: 100%;
+                `}
+                rows={8}
+              />
+            </div>
+          </FieldRow>
+        </td>
+      </IndentedTR>
+      <IndentedTR>
+        <td colSpan={99}>
+          <FieldRow>
+            <div>
+              <label htmlFor={`input-description-${track.id}`}>
+                {t("description")}
+              </label>
+            </div>
+            <div>
+              <TextArea
+                id={`input-description-${track.id}`}
+                {...register("description")}
+                className={css`
+                  width: 100%;
+                `}
+                rows={8}
+              />
+            </div>
+          </FieldRow>
+        </td>
+      </IndentedTR>
+      <IndentedTR>
+        <td colSpan={99}>
+          <FieldRow>
+            <div>
+              <div className="flex items-center gap-2">
+                {t("license")}
+                <Button
+                  onClick={() => setIsTrackLicenseModalOpen(true)}
+                  startIcon={<FaQuestionCircle />}
+                />
+                <Modal
+                  onClose={() => setIsTrackLicenseModalOpen(false)}
+                  open={isTrackLicenseModalOpen}
+                >
                   <Trans
                     t={t}
-                    i18nKey={"allowMirloPromoTrack"}
-                    components={{
-                      hype: (
-                        <Link
-                          className={openOutsideLinkAfter}
-                          to="/team/posts/236/"
-                          target="_blank"
-                        ></Link>
-                      ),
-                    }}
+                    i18nKey={"whatMeanLicense"}
+                    components={{ a: <a></a> }}
                   />
-                </p>
-              }
-            />
-          </div>
-        </td>
-      </IndentedTR>
-      <IndentedTR>
-        <td colSpan={2}>
-          <label htmlFor="lyrics">{t("lyrics")}</label>
-        </td>
-        <td colSpan={99}>
-          <TextArea
-            id="lyrics"
-            {...register("lyrics")}
-            className={css`
-              width: 100%;
-            `}
-            rows={8}
-          />
-        </td>
-      </IndentedTR>
-      <IndentedTR>
-        <td colSpan={2}>
-          <label htmlFor="description">{t("description")}</label>
-        </td>
-        <td colSpan={99}>
-          <TextArea
-            id="description"
-            {...register("description")}
-            className={css`
-              width: 100%;
-            `}
-            rows={8}
-          />
-        </td>
-      </IndentedTR>
-      <IndentedTR>
-        <td colSpan={2}>
-          <div
-            className={css`
-              display: flex;
-              align-items: center;
-            `}
-          >
-            {t("license")}
-            <Button
-              onClick={() => setIsTrackLicenseModalOpen(true)}
-              startIcon={<FaQuestionCircle />}
-            />
-            <Modal
-              onClose={() => setIsTrackLicenseModalOpen(false)}
-              open={isTrackLicenseModalOpen}
-            >
-              <Trans
-                t={t}
-                i18nKey={"whatMeanLicense"}
-                components={{ a: <a></a> }}
-              />
-            </Modal>
-          </div>
-        </td>
-        <td colSpan={99}>
-          <ManageTrackLicense />
-        </td>
-      </IndentedTR>
-      <IndentedTR>
-        <td colSpan={2}>{t("identifiers")}</td>
-        <td colSpan={99}>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label htmlFor={`input-isrc-${track.id}`}>{t("isrcCode")}</label>
-              <InputEl
-                id={`input-isrc-${track.id}`}
-                aria-describedby={`hint-isrc-${track.id}${isrcWarning ? ` error-isrc-${track.id}` : ""}`}
-                {...register("isrc")}
-                disabled={isSaving || isDisabled}
-              />
-              <small id={`hint-isrc-${track.id}`}>{t("isrcHint")}</small>
-              {isrcWarning && (
-                <FormError id={`error-isrc-${track.id}`}>
-                  {t("isrcInvalid")}
-                </FormError>
-              )}
+                </Modal>
+              </div>
             </div>
             <div>
-              <label htmlFor={`input-iswc-${track.id}`}>{t("iswcCode")}</label>
-              <InputEl
-                id={`input-iswc-${track.id}`}
-                aria-describedby={`hint-iswc-${track.id}${iswcWarning ? ` error-iswc-${track.id}` : ""}`}
-                {...register("iswc")}
-                disabled={isSaving || isDisabled}
-              />
-              <small id={`hint-iswc-${track.id}`}>{t("iswcHint")}</small>
-              {iswcWarning && (
-                <FormError id={`error-iswc-${track.id}`}>
-                  {t("iswcInvalid")}
-                </FormError>
-              )}
+              <ManageTrackLicense />
             </div>
-          </div>
+          </FieldRow>
         </td>
       </IndentedTR>
       <IndentedTR>
-        <td colSpan={2}>{t("id3Data")}</td>
         <td colSpan={99}>
-          <ShowRawID3Data track={track} />
+          <FieldRow>
+            <div>{t("identifiers")}</div>
+            <div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label htmlFor={`input-isrc-${track.id}`}>
+                    {t("isrcCode")}
+                  </label>
+                  <InputEl
+                    id={`input-isrc-${track.id}`}
+                    aria-describedby={`hint-isrc-${track.id}${isrcWarning ? ` error-isrc-${track.id}` : ""}`}
+                    {...register("isrc")}
+                    disabled={isSaving || isDisabled}
+                  />
+                  <small id={`hint-isrc-${track.id}`}>{t("isrcHint")}</small>
+                  {isrcWarning && (
+                    <FormError id={`error-isrc-${track.id}`}>
+                      {t("isrcInvalid")}
+                    </FormError>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor={`input-iswc-${track.id}`}>
+                    {t("iswcCode")}
+                  </label>
+                  <InputEl
+                    id={`input-iswc-${track.id}`}
+                    aria-describedby={`hint-iswc-${track.id}${iswcWarning ? ` error-iswc-${track.id}` : ""}`}
+                    {...register("iswc")}
+                    disabled={isSaving || isDisabled}
+                  />
+                  <small id={`hint-iswc-${track.id}`}>{t("iswcHint")}</small>
+                  {iswcWarning && (
+                    <FormError id={`error-iswc-${track.id}`}>
+                      {t("iswcInvalid")}
+                    </FormError>
+                  )}
+                </div>
+              </div>
+            </div>
+          </FieldRow>
+        </td>
+      </IndentedTR>
+      <IndentedTR>
+        <td colSpan={99}>
+          <FieldRow>
+            <div>{t("id3Data")}</div>
+            <div>
+              <ShowRawID3Data track={track} />
+            </div>
+          </FieldRow>
         </td>
       </IndentedTR>
       <IndentedTR>

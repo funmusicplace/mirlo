@@ -173,17 +173,14 @@ const Index: React.FC<{}> = () => {
       <FormSection>
         <RecommendedTrackGroups trackGroupId={trackGroup.id} />
       </FormSection>
-      <FormSection>
-        <MoveReleaseToArtist trackGroup={trackGroup} artist={artist} />
-      </FormSection>
-      <hr className="my-8 border-(--mi-tint-x-color)" />
+      <MoveReleaseToArtist trackGroup={trackGroup} artist={artist} />
       <ArtistButton
         startIcon={<FaTrash />}
         onClick={() => {
           void handleDeleteTrackGroup();
         }}
         isLoading={isDeletingTrackGroup}
-        className="!bg-(--mi-red-700) !border-(--mi-red-700) !text-(--mi-red-100) [&_svg]:!fill-(--mi-red-100) enabled:hover:!bg-(--mi-red-800) enabled:hover:!border-(--mi-red-800)"
+        className="mt-8 !bg-(--mi-red-700) !border-(--mi-red-700) !text-(--mi-red-100) [&_svg]:!fill-(--mi-red-100) enabled:hover:!bg-(--mi-red-800) enabled:hover:!border-(--mi-red-800)"
       >
         {manageArtistT("delete")}
       </ArtistButton>

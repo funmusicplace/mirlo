@@ -1,4 +1,3 @@
-import { css } from "@emotion/css";
 import FormComponent from "components/common/FormComponent";
 import { InputEl } from "components/common/Input";
 import { RestoredLabel } from "components/common/RestoredFields";
@@ -65,7 +64,7 @@ const AlbumFormContent: React.FC<{
         existingObject={existingObject}
         reload={reload}
         onSaveSuccess={onSaveSuccess}
-        className={`sticky z-[1001] mb-4 border-b border-(--mi-tint-x-color) transition-[top] duration-300 ${
+        className={`sticky z-[1001] border-b border-(--mi-tint-x-color) transition-[top] duration-300 ${
           headerShow === "down" ? "top-0" : "top-(--header-cover-sticky-height)"
         }`}
       />
@@ -107,18 +106,7 @@ const AlbumFormContent: React.FC<{
             </FormComponent>
           )}
         </div>
-        <div
-          className={css`
-            @media screen and (min-width: ${bp.medium}px) {
-              display: flex;
-              gap: 1rem;
-
-              > div {
-                width: 33%;
-              }
-            }
-          `}
-        >
+        <div className="md:grid md:grid-cols-2 gap-4">
           <FormComponent>
             <RestoredLabel htmlFor="input-release-date" field="releaseDate">
               {t("releaseDate")}
@@ -230,12 +218,6 @@ const AlbumFormContent: React.FC<{
           fundraiser={existingObject.fundraiser}
         />
       </FormSection>
-      <AlbumFormActions
-        existingObject={existingObject}
-        reload={reload}
-        onSaveSuccess={onSaveSuccess}
-        className="mt-2 border-t border-(--mi-tint-x-color)"
-      />
     </>
   );
 };

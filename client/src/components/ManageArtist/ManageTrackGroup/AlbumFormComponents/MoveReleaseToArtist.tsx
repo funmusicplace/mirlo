@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import { SelectEl } from "components/common/Select";
+import { FormSection } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import { queryManagedArtists } from "queries";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -67,34 +68,36 @@ const MoveReleaseToArtist: React.FC<{
   }
 
   return (
-    <FormComponent>
-      <label htmlFor="select-move-release">{t("moveReleaseToArtist")}</label>
-      <small className="block mb-2">{t("moveReleaseToArtistHint")}</small>
-      <div className="flex flex-wrap gap-2 items-center">
-        <SelectEl
-          id="select-move-release"
-          className="w-auto!"
-          value={chosenArtistId}
-          onChange={(e) => setChosenArtistId(e.target.value)}
-        >
-          <option value="">{t("chooseAnArtist")}</option>
-          {otherArtists.map((other) => (
-            <option value={other.id} key={other.id}>
-              {other.name}
-            </option>
-          ))}
-        </SelectEl>
-        <ArtistButton
-          type="button"
-          variant="outlined"
-          disabled={!chosenArtistId}
-          isLoading={isMoving}
-          onClick={doMove}
-        >
-          {t("moveRelease")}
-        </ArtistButton>
-      </div>
-    </FormComponent>
+    <FormSection>
+      <FormComponent>
+        <label htmlFor="select-move-release">{t("moveReleaseToArtist")}</label>
+        <small className="block mb-2">{t("moveReleaseToArtistHint")}</small>
+        <div className="flex flex-wrap gap-2 items-center">
+          <SelectEl
+            id="select-move-release"
+            className="w-auto!"
+            value={chosenArtistId}
+            onChange={(e) => setChosenArtistId(e.target.value)}
+          >
+            <option value="">{t("chooseAnArtist")}</option>
+            {otherArtists.map((other) => (
+              <option value={other.id} key={other.id}>
+                {other.name}
+              </option>
+            ))}
+          </SelectEl>
+          <ArtistButton
+            type="button"
+            variant="outlined"
+            disabled={!chosenArtistId}
+            isLoading={isMoving}
+            onClick={doMove}
+          >
+            {t("moveRelease")}
+          </ArtistButton>
+        </div>
+      </FormComponent>
+    </FormSection>
   );
 };
 
