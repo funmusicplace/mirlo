@@ -11,6 +11,7 @@ import {
 import React from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import useErrorHandler from "services/useErrorHandler";
 import { useAuthContext } from "state/AuthContext";
 
 const FundraisingGoal: React.FC<{
@@ -27,6 +28,7 @@ const FundraisingGoal: React.FC<{
 }> = ({ artistId, trackGroupId, fundraiser }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
   const { user } = useAuthContext();
+  const errorHandler = useErrorHandler();
   const { control } = useFormContext<TrackGroupFormData>();
   const platformPercent = useWatch({ control, name: "platformPercent" });
   const [didAddFundraiser, setDidAddFundraiser] = React.useState(false);
@@ -45,7 +47,7 @@ const FundraisingGoal: React.FC<{
       setDidAddFundraiser(true);
       await createFundraiser({ artistId, trackGroupId });
     } catch (e) {
-      console.error(e);
+      errorHandler(e);
     }
   };
 

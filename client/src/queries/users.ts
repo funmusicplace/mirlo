@@ -13,6 +13,7 @@ import {
   QUERY_KEY_MERCH,
   QUERY_KEY_PURCHASES,
   QUERY_KEY_SALES,
+  QUERY_KEY_TRACK_GROUPS,
   queryKeyIncludes,
   queryKeyMatches,
 } from "./queryKeys";
@@ -70,7 +71,7 @@ export function queryManagedArtist(artistId: number) {
 
 const fetchManagedTrackGroup: QueryFunction<
   TrackGroup,
-  ["fetchManagedTrackGroup", { trackGroupId: number }]
+  ["fetchManagedTrackGroup", { trackGroupId: number }, ...any]
 > = ({ queryKey: [_, { trackGroupId }], signal }) => {
   return api
     .get<{
@@ -81,7 +82,11 @@ const fetchManagedTrackGroup: QueryFunction<
 
 export function queryManagedTrackGroup(trackGroupId: number) {
   return queryOptions({
-    queryKey: ["fetchManagedTrackGroup", { trackGroupId }],
+    queryKey: [
+      "fetchManagedTrackGroup",
+      { trackGroupId },
+      QUERY_KEY_TRACK_GROUPS,
+    ],
     queryFn: fetchManagedTrackGroup,
     enabled: isFinite(trackGroupId),
   });
