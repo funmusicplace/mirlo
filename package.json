@@ -88,7 +88,7 @@
     "remark-breaks": "^4.0.0",
     "rss": "^1.2.2",
     "sanitize-html": "^2.17.0",
-    "sharp": "^0.34.2",
+    "sharp": "^0.35.5",
     "sharp-ico": "^0.1.5",
     "shasum": "^1.0.2",
     "showdown": "^2.1.0",
@@ -128,7 +128,6 @@
     "@types/pug": "^2.0.10",
     "@types/qs": "^6",
     "@types/sanitize-html": "^2.16.2",
-    "@types/sharp": "^0.31.1",
     "@types/shasum": "^1.0.0",
     "@types/sinon": "^17.0.3",
     "@types/stripe": "^8.0.417",
@@ -163,7 +162,8 @@
     "client"
   ],
   "resolutions": {
-    "@types/compression/@types/express": "4.17.14"
+    "@types/compression/@types/express": "4.17.14",
+    "request/form-data": "2.5.6"
   },
   "packageManager": "yarn@4.1.1"
 }
