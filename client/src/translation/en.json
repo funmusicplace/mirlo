@@ -1405,6 +1405,8 @@
     "isrcCode": "ISRC Code",
     "isrcHint": "Identifies this recording. Your distributor or national ISRC agency gives it to you. Leave empty if you don't have one.",
     "identifiers": "Identifiers",
+    "trackSettings": "Track settings",
+    "allowMirloPromoTrack": "Allow Mirlo's <hype>Hype Circle</hype> to use this track for promotional material of the platform. You will be credited.",
     "isrcInvalid": "Invalid ISRC format. Expected: CC-XXX-YY-NNNNN (e.g. US-RC1-76-07839)",
     "iswcCode": "ISWC Code",
     "iswcHint": "Identifies the song itself, not this recording. Your collecting society gives it to you after you register the work. Leave empty if you don't have one.",
