@@ -212,6 +212,7 @@ export const findOrCreateUserBasedOnEmail = async (
     | undefined
     | null;
   const trimmedName = name?.trim() || undefined;
+  userEmail = userEmail?.trim().toLowerCase();
 
   if (!userId && !userEmail) {
     // Neither identifier resolved — callers (webhook handlers) go on to

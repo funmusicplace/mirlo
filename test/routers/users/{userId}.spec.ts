@@ -49,7 +49,7 @@ describe("users/{userId}", () => {
         emailConfirmationToken: null,
       });
 
-      const newEmail = faker.internet.email();
+      const newEmail = faker.internet.email().toLowerCase();
       const response = await requestApp
         .put(`users/${user.id}`)
         .send({
@@ -74,7 +74,7 @@ describe("users/{userId}", () => {
         emailConfirmationToken: null,
       });
 
-      const newEmail = faker.internet.email();
+      const newEmail = faker.internet.email().toLowerCase();
       const response = await requestApp
         .put(`users/${user.id}`)
         .send({
@@ -103,11 +103,11 @@ describe("users/{userId}", () => {
         emailConfirmationToken: null,
       });
 
-      const newEmail = faker.internet.email();
+      const newEmail = faker.internet.email().toLowerCase();
       const response = await requestApp
         .put(`users/${user.id}`)
         .send({
-          newEmail: newEmail,
+          newEmail: ` ${newEmail.toUpperCase()} `,
           password: "test1234",
         })
         .set("Cookie", [`jwt=${accessToken}`])
@@ -166,7 +166,7 @@ describe("users/{userId}", () => {
         emailConfirmationToken: null,
       });
 
-      const newEmail = faker.internet.email();
+      const newEmail = faker.internet.email().toLowerCase();
 
       // First, request email change
       const changeResponse = await requestApp
@@ -218,7 +218,7 @@ describe("users/{userId}", () => {
         emailConfirmationToken: null,
       });
 
-      const newEmail = faker.internet.email();
+      const newEmail = faker.internet.email().toLowerCase();
 
       // Request email change
       await requestApp
@@ -257,7 +257,7 @@ describe("users/{userId}", () => {
         emailConfirmationToken: null,
       });
 
-      const newEmail = faker.internet.email();
+      const newEmail = faker.internet.email().toLowerCase();
       const expiredToken = faker.datatype.uuid();
 
       // Manually set expired token in database

@@ -61,6 +61,15 @@ describe("findOrCreateUserBasedOnEmail", () => {
     assert.equal(user?.name, "Original Name");
   });
 
+  it("finds an existing user whatever the case of the email", async () => {
+    const { user: existing } = await createUser({ email: "guest@test.com" });
+
+    const { user } = await findOrCreateUserBasedOnEmail(" Guest@Test.com ");
+
+    assert.equal(user?.id, existing.id);
+    assert.equal(await prisma.user.count(), 1);
+  });
+
   it("does not require a name", async () => {
     const { user } = await findOrCreateUserBasedOnEmail("plain@test.com");
     assert.ok(user, "user should be created");

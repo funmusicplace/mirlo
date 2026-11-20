@@ -52,7 +52,7 @@ export default function () {
       await prisma.user.update({
         where: { id: Number(req.params.id) },
         data: {
-          email,
+          email: email?.trim().toLowerCase(),
           isLabelAccount,
           featureFlags,
           isAdmin,

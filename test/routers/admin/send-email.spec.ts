@@ -1,18 +1,19 @@
 import assert from "node:assert";
-import { Request, Response } from "express";
 
 import * as dotenv from "dotenv";
+import { Request, Response } from "express";
+
 dotenv.config();
 import { describe, it } from "mocha";
+import sinon from "sinon";
 import request from "supertest";
-import { clearTables, createArtist, createUser } from "../../utils";
+
 import {
   sendMailQueue,
   sendMailQueueEvents,
 } from "../../../src/queues/send-mail-queue";
-import sinon from "sinon";
-
 import sendMailAdminEndpoint from "../../../src/routers/v1/admin/send-email";
+import { clearTables, createArtist, createUser } from "../../utils";
 
 const baseURL = `${process.env.API_DOMAIN}/v1/`;
 
@@ -74,7 +75,7 @@ describe("admin/send-email", () => {
       it("should POST and send to an artist", async () => {
         const stub = sinon.stub(sendMailQueue, "add");
         await createUser({
-          email: "admin@isAdmin.com",
+          email: "admin@isadmin.com",
           isAdmin: true,
         });
         const { user: artistUser } = await createUser({

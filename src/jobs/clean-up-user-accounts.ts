@@ -1,6 +1,7 @@
-import prisma from "@mirlo/prisma";
-import logger from "../logger";
 import { faker } from "@faker-js/faker";
+import prisma from "@mirlo/prisma";
+
+import logger from "../logger";
 import { hashPassword } from "../routers/auth/utils";
 
 const cleanUpUserAccounts = async () => {
@@ -22,7 +23,7 @@ const cleanUpUserAccounts = async () => {
           id: user.id,
         },
         data: {
-          email: faker.internet.email(),
+          email: faker.internet.email().toLowerCase(),
           name: "deletedUser",
           password: await hashPassword(faker.internet.password()),
           isAdmin: false,
