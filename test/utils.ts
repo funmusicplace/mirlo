@@ -525,9 +525,8 @@ export const createSiteSettings = async (data?: Record<string, any>) => {
 };
 
 export const completeInstanceSetup = async () => {
-  const { id } = await getSiteSettings();
-  await prisma.settings.update({
-    where: { id },
+  await getSiteSettings();
+  await prisma.settings.updateMany({
     data: { setupCompletedAt: new Date() },
   });
 };
