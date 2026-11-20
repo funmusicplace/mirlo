@@ -1,15 +1,11 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArtistButton,
-  ArtistButtonLink,
-} from "components/Artist/ArtistButtons";
+import { ArtistButton } from "components/Artist/ArtistButtons";
 import LoadingBlocks from "components/Artist/LoadingBlocks";
 import AlbumForm from "components/ManageArtist/AlbumForm";
 import BackToArtistLink from "components/ManageArtist/BackToArtistLink";
 import ManageSectionWrapper from "components/ManageArtist/ManageSectionWrapper";
-import AlbumPaymentReceiver from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/AlbumPaymentReceiver";
 import ManageTrackDefaults from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTrackDefaults";
 import MoveReleaseToArtist from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/MoveReleaseToArtist";
 import RecommendedTrackGroups from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/RecommendedTrackGroups";
@@ -25,7 +21,6 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FaTrash } from "react-icons/fa";
-import { MdOutlineDownloadForOffline } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistManageUrl } from "utils/artist";
@@ -131,7 +126,6 @@ const Index: React.FC<{}> = () => {
         <BackToArtistLink subPage="releases" />
         <h1 className="mt-4">{t(trackGroup ? "editAlbum" : "createAlbum")}</h1>
       </div>
-      <AlbumPaymentReceiver />
       {trackGroup.tracks.length === 0 && trackGroup && (
         <FormSection>
           <ZipDropZone
@@ -179,13 +173,6 @@ const Index: React.FC<{}> = () => {
       <FormSection>
         <RecommendedTrackGroups trackGroupId={trackGroup.id} />
       </FormSection>
-      <ArtistButtonLink
-        to={getArtistManageUrl(artist.id) + "/releases/tools"}
-        startIcon={<MdOutlineDownloadForOffline />}
-        variant="outlined"
-      >
-        {t("downloadCodes")}
-      </ArtistButtonLink>
       <FormSection>
         <MoveReleaseToArtist trackGroup={trackGroup} artist={artist} />
       </FormSection>

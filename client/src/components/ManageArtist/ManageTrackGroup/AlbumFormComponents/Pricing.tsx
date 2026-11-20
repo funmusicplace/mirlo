@@ -7,17 +7,18 @@ import FormError from "components/common/FormError";
 import { InputEl } from "components/common/Input";
 import { getCurrencySymbol } from "components/common/Money";
 import { FormSection } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
+import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
-import { getArtistManageTiersUrl } from "utils/artist";
+import { getArtistManageTiersUrl, getArtistManageUrl } from "utils/artist";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
-import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import SetPriceOfAllTracks from "../SetPriceOfAllTracks";
 
+import AlbumPaymentReceiver from "./AlbumPaymentReceiver";
 import PaymentSlider from "./PaymentSlider";
 
 type PricingMode = "free-or-donate" | "paid" | "no-payments";
@@ -202,9 +203,6 @@ const Pricing: React.FC<{
         <div hidden={!isAlbumGettable}>
           <FormComponent className="grow">
             <label htmlFor="input-minimum-price">{t("minimumPrice")}</label>
-            <small id="description-minimum-price" className="max-w-[72ch]">
-              {t("minimumPriceDescription")}
-            </small>
             <div
               className={css`
                 display: flex;
@@ -227,7 +225,7 @@ const Pricing: React.FC<{
                 </div>
               )}
               <InputEl
-                aria-describedby="unit-minimum-price description-minimum-price hint-minimum-price-access hint-minimum-price-currency"
+                aria-describedby="unit-minimum-price hint-minimum-price-access hint-minimum-price-currency"
                 id="input-minimum-price"
                 type="number"
                 step="0.01"
@@ -248,13 +246,6 @@ const Pricing: React.FC<{
 
           <FormComponent className="grow">
             <label htmlFor="input-suggested-price">{t("suggestedPrice")}</label>
-
-            <small id="hint-suggested-price" className="max-w-[72ch]">
-              {t("suggestedPriceDescription")}
-            </small>
-            <small id="hint-suggested-price-clarifier" className="max-w-[72ch]">
-              {t("suggestedPriceDescriptionClarifier")}
-            </small>
             <div
               className={css`
                 display: flex;
@@ -285,6 +276,12 @@ const Pricing: React.FC<{
                 {...register("suggestedPrice", { min: minPrice })}
               />
             </div>
+            <small id="hint-suggested-price" className="max-w-[72ch]">
+              {t("suggestedPriceDescription")}
+            </small>
+            <small id="hint-suggested-price-clarifier" className="max-w-[72ch]">
+              {t("suggestedPriceDescriptionClarifier")}
+            </small>
           </FormComponent>
 
           <FormComponent className="max-w-150">
@@ -302,6 +299,7 @@ const Pricing: React.FC<{
               reload={reload}
             />
           )}
+        <AlbumPaymentReceiver />
       </div>
       <div className="w-full flex flex-col gap-2 border-1 border-(--mi-tint-x-color) px-4 py-3">
         {!isAlbumGettable && <p>{t("albumNotAvailableForPurchase")}</p>}
@@ -340,6 +338,14 @@ const Pricing: React.FC<{
             </p>
           )}
       </div>
+      <p className="mt-4">
+        <ArtistRouterLink
+          to={getArtistManageUrl(artist.id) + "/releases/tools"}
+          target="_blank"
+        >
+          {t("downloadCodes")}
+        </ArtistRouterLink>
+      </p>
     </FormSection>
   );
 };

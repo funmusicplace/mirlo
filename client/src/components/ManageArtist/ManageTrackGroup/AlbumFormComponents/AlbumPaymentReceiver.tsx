@@ -80,7 +80,7 @@ const AlbumPaymentReceiver = () => {
   }
 
   return (
-    <div className="relative z-[1002]">
+    <div>
       <FormComponent>
         <label>{t("nameOfAccountToReceivePayment")}</label>
         <small

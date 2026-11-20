@@ -46,12 +46,6 @@ vi.mock("components/ManageArtist/Merch/DownloadableContent", () => ({
   default: () => null,
 }));
 vi.mock(
-  "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/AlbumPaymentReceiver",
-  () => ({
-    default: () => null,
-  })
-);
-vi.mock(
   "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTrackDefaults",
   () => ({
     default: () => null,
