@@ -8,4 +8,4 @@ block content
       a(href!=`${host}/v1/artists/${artist.id}/confirmFollow?email=${encodeURIComponent(email)}&token=${token}`)= t("emails.artistSubscriptionConfirmation.confirm")
     p 
       | #{t("emails.common.ignore")} 
-      | !{tHtml("emails.artistSubscriptionConfirmation.contactInfo", { url: "https://mirlo.space" })}
+      | !{tHtml("emails.artistSubscriptionConfirmation.contactInfo", { url: client })}
