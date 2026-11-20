@@ -196,6 +196,7 @@ export default function () {
         "defaultTrackMinPrice",
         "defaultIsPreview",
         "catalogNumber",
+        "upc",
         "coverImageAlt",
         "coverCredit",
         "urlSlug",
@@ -204,6 +205,10 @@ export default function () {
         "makeTracksPreviewableOnRelease",
         "isPublic",
       ]);
+
+      if (typeof newValues.upc === "string") {
+        newValues.upc = newValues.upc.trim() || null;
+      }
 
       const existingTrackGroup = await prisma.trackGroup.findFirst({
         where: { id: Number(trackGroupId) },

@@ -1,0 +1,3 @@
+ALTER TABLE "TrackGroup" ADD COLUMN "upc" TEXT;
+
+ALTER TABLE "Track" ADD COLUMN "iswc" TEXT;

@@ -18,6 +18,7 @@ interface TrackBody {
   licenseId?: number | string | null;
   lyrics: string;
   isrc: string;
+  iswc: string;
   minPrice: number;
   allowIndividualSale: boolean;
   allowMirloPromo: boolean;
@@ -50,6 +51,7 @@ export default function () {
       allowIndividualSale,
       lyrics,
       isrc,
+      iswc,
       description,
       allowMirloPromo,
     } = req.body as TrackBody;
@@ -85,7 +87,8 @@ export default function () {
         data: {
           title,
           lyrics,
-          isrc,
+          isrc: typeof isrc === "string" ? isrc.trim() || null : isrc,
+          iswc: typeof iswc === "string" ? iswc.trim() || null : iswc,
           isPreview,
           allowIndividualSale,
           minPrice,

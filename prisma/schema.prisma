@@ -948,6 +948,7 @@ model TrackGroup {
   orderIndex                      Int?
   credits                         String?
   catalogNumber                   String?
+  upc                             String?
   coverImageAlt                   String?
   coverCredit                     String?
   userTrackGroupWishlist          UserTrackGroupWishlist[]
@@ -1105,6 +1106,7 @@ model Track {
   licenseId           Int?
   lyrics              String?
   isrc                String?
+  iswc                String?
   stripeProductKey    String?
   minPrice            Int? // in cents
   allowIndividualSale Boolean             @default(false)
