@@ -21,7 +21,7 @@ const findManagedIntent = async (req: Request) => {
     });
   }
 
-  const { profileId, status } = await getPaymentProcessor().getStatus({
+  const { profileId, status, error } = await getPaymentProcessor().getStatus({
     id,
     accountId: stripeAccountId,
   });
@@ -35,7 +35,7 @@ const findManagedIntent = async (req: Request) => {
 
   await profileEditableByUser(Number(profileId), req.user as Express.User);
 
-  return { id, stripeAccountId, status };
+  return { id, stripeAccountId, status, error };
 };
 
 const idParameters = [
@@ -63,6 +63,11 @@ const intentStatusSchema = {
       properties: {
         id: { type: "string" },
         status: { type: "string" },
+        error: {
+          type: "string",
+          description:
+            "Why the last attempt failed, e.g. a declined card; null otherwise",
+        },
       },
     },
   },
@@ -76,8 +81,8 @@ export default function () {
 
   async function GET(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id, status } = await findManagedIntent(req);
-      res.status(200).json({ result: { id, status } });
+      const { id, status, error } = await findManagedIntent(req);
+      res.status(200).json({ result: { id, status, error } });
     } catch (e) {
       next(e);
     }
@@ -87,7 +92,8 @@ export default function () {
     summary: "Poll a pending purchase",
     description:
       "The status of a PaymentIntent (pi_*) or SetupIntent (seti_*), e.g. " +
-      "one dispatched to a terminal reader. Accepts the signed-in session " +
+      "one dispatched to a terminal reader. A declined card leaves the " +
+      "intent pending with `error` set. Accepts the signed-in session " +
       "or an OAuth token with the `pos` scope.",
     parameters: idParameters,
     responses: {
