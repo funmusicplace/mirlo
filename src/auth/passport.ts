@@ -25,6 +25,8 @@ const JWTStrategy = passportJWT.Strategy;
 
 const secret = process.env.JWT_SECRET;
 
+const LAST_SEEN_RESOLUTION_MS = 60 * 60 * 1000;
+
 const cookieExtractor: JwtFromRequestFunction = (req) => {
   let jwt = null;
 
@@ -65,6 +67,15 @@ passport.use(
         (jwtPayload.tokenVersion ?? 0) !== foundUser.tokenVersion
       ) {
         return done(null, false);
+      }
+      if (
+        !foundUser.lastSeenAt ||
+        Date.now() - foundUser.lastSeenAt.getTime() > LAST_SEEN_RESOLUTION_MS
+      ) {
+        await prisma.user.update({
+          where: { id: foundUser.id },
+          data: { lastSeenAt: new Date() },
+        });
       }
       return done(null, {
         ...jwtPayload,

@@ -64,6 +64,7 @@ export const Index: React.FC = () => {
               <th>Email</th>
               <th>Created at</th>
               <th>Updated at</th>
+              <th>Last seen</th>
               <th>Artists</th>
               <th>Stripe account ID</th>
               <th />
@@ -78,6 +79,7 @@ export const Index: React.FC = () => {
 
                 <td>{user.createdAt?.split("T")[0]}</td>
                 <td>{user.updatedAt?.split("T")[0]}</td>
+                <td>{user.lastSeenAt?.split("T")[0]}</td>
                 <td>
                   {user.artists.map((artist, i) => (
                     <React.Fragment key={artist.id}>

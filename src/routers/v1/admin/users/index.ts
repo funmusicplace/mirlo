@@ -72,6 +72,7 @@ export default function () {
           id: true,
           createdAt: true,
           updatedAt: true,
+          lastSeenAt: true,
           profiles: true,
           isLabelAccount: true,
           featureFlags: true,
