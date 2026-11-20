@@ -494,6 +494,7 @@ interface User {
   artists: Artist[];
   updatedAt: string;
   createdAt: string;
+  lastSeenAt?: string;
   currency: string;
   stripeAccountId?: string;
 }
@@ -520,6 +521,7 @@ interface UserFromAdmin {
   artists: Artist[];
   updatedAt: string;
   createdAt: string;
+  lastSeenAt?: string;
   stripeAccountId?: string;
   currency: string;
   hasPendingEmailConfirmation: boolean;

@@ -94,6 +94,7 @@ export default function () {
           name: true,
           createdAt: true,
           updatedAt: true,
+          lastSeenAt: true,
           id: true,
           canCreateArtists: true,
           profiles: true,

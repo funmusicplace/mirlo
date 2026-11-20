@@ -208,6 +208,7 @@ model User {
   failedLoginAttempts                 Int                              @default(0)
   lockedUntil                         DateTime?
   disabledAt                          DateTime?
+  lastSeenAt                          DateTime?
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   profileUserSubscriptions            ProfileUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]

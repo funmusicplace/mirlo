@@ -149,6 +149,10 @@ const Index = () => {
                 <td>{formatDate(user.updatedAt)}</td>
               </tr>
               <tr>
+                <td>last seen</td>
+                <td>{formatDate(user.lastSeenAt)}</td>
+              </tr>
+              <tr>
                 <td>
                   <label htmlFor="input-trust-level">Trust level</label>
                 </td>
