@@ -20,7 +20,7 @@
     "@tailwindcss/vite": "^4.2.2",
     "@tanstack/react-query": "^5.28.14",
     "@tanstack/react-query-devtools": "^5.28.14",
-    "@transifex/i18next": "^5.4.0",
+    "@transifex/i18next": "^8.0.3",
     "b64-to-blob": "^1.2.19",
     "buffer": "^6.0.3",
     "content-disposition": "^0.5.4",
