@@ -5,6 +5,8 @@ import { Prisma } from "@mirlo/prisma/client";
 
 import { AppError } from "../error";
 
+import type { ResolvedItem } from "./purchase";
+
 export const createCheckout = ({
   items,
   ...data
@@ -39,6 +41,22 @@ export const completeCheckout = async (id?: string) => {
       data: { completedAt: new Date() },
     });
   }
+};
+
+export const saveResolvedItems = (id: string, items: ResolvedItem[]) =>
+  prisma.checkout.update({
+    where: { id },
+    data: { resolvedItems: items as Prisma.InputJsonArray },
+  });
+
+export const findResolvedItems = async (id?: string) => {
+  const checkout = id
+    ? await prisma.checkout.findUnique({
+        where: { id },
+        select: { resolvedItems: true },
+      })
+    : null;
+  return (checkout?.resolvedItems ?? undefined) as ResolvedItem[] | undefined;
 };
 
 export const findCheckoutMessages = async (id?: string) => {

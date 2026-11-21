@@ -50,6 +50,9 @@ import {
 
 import { requestApp } from "./utils";
 
+const openCheckout = async (profileId: number) =>
+  (await prisma.checkout.create({ data: { profileId, items: [] } })).id;
+
 describe("purchase", () => {
   beforeEach(async () => {
     try {
@@ -2181,7 +2184,7 @@ describe("purchase", () => {
         { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
       ];
       const checkout = await prisma.checkout.create({
-        data: { profileId: profile.id, items },
+        data: { profileId: profile.id, items, resolvedItems: items },
       });
 
       await stripeUtils.handlePaymentIntentSucceeded(
@@ -2195,10 +2198,8 @@ describe("purchase", () => {
             purchaseType: "trackGroup",
             stripeAccountId: "acct_checkout_webhook",
             artistId: String(profile.id),
-            trackGroupId: String(tg.id),
             userId: String(buyer.id),
             userEmail: buyer.email,
-            items: JSON.stringify(items),
             checkoutId: checkout.id,
           },
         } as unknown as Stripe.PaymentIntent,
@@ -2659,6 +2660,7 @@ describe("purchase", () => {
       const result = await initiatePayment({
         readerId: "tmr_test",
         profileId: profile.id,
+        checkoutId: await openCheckout(profile.id),
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
         ],
@@ -2693,6 +2695,7 @@ describe("purchase", () => {
       await initiatePayment({
         pointOfSale: true,
         profileId: profile.id,
+        checkoutId: await openCheckout(profile.id),
         items: [{ type: "merch", id: merch.id, quantity: 1, amount: 800 }],
         userEmail: "",
       });
@@ -2702,7 +2705,7 @@ describe("purchase", () => {
       assert.equal(metadata.userId, undefined);
     });
 
-    it("tags a single online trackGroup purchase with purchaseType 'trackGroup' and its trackGroupId", async () => {
+    it("tags a single online trackGroup purchase with purchaseType 'trackGroup'", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_meta_tg",
@@ -2715,6 +2718,7 @@ describe("purchase", () => {
 
       const result = await initiatePayment({
         profileId: profile.id,
+        checkoutId: await openCheckout(profile.id),
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
         ],
@@ -2728,7 +2732,6 @@ describe("purchase", () => {
       );
       const metadata = metadataOf(createStub);
       assert.equal(metadata.purchaseType, "trackGroup");
-      assert.equal(metadata.trackGroupId, String(tg.id));
     });
 
     // The webhook is the only thing that marks a checkout paid, and it finds
@@ -2777,6 +2780,7 @@ describe("purchase", () => {
 
       await initiatePayment({
         profileId: profile.id,
+        checkoutId: await openCheckout(profile.id),
         items: [
           { type: "trackGroup", id: String(tg1.id), quantity: 1, amount: 1000 },
           { type: "trackGroup", id: String(tg2.id), quantity: 1, amount: 500 },
@@ -2787,10 +2791,9 @@ describe("purchase", () => {
 
       const metadata = metadataOf(createStub);
       assert.equal(metadata.purchaseType, "trackGroup");
-      assert.equal(metadata.trackGroupId, String(tg1.id));
     });
 
-    it("tags a single online track purchase with purchaseType 'track' and its trackId", async () => {
+    it("tags a single online track purchase with purchaseType 'track'", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_meta_track",
@@ -2807,6 +2810,7 @@ describe("purchase", () => {
 
       const result = await initiatePayment({
         profileId: profile.id,
+        checkoutId: await openCheckout(profile.id),
         items: [
           { type: "track", id: String(track.id), quantity: 1, amount: 500 },
         ],
@@ -2820,11 +2824,6 @@ describe("purchase", () => {
       );
       const metadata = metadataOf(createStub);
       assert.equal(metadata.purchaseType, "track");
-      assert.equal(metadata.trackId, String(track.id));
-      assert.ok(
-        !("trackGroupId" in metadata),
-        "a single-track purchase carries no trackGroupId"
-      );
     });
 
     it("tags a single online tip as purchaseType 'tip' and omits trackGroupId", async () => {
@@ -2839,6 +2838,7 @@ describe("purchase", () => {
 
       await initiatePayment({
         profileId: profile.id,
+        checkoutId: await openCheckout(profile.id),
         items: [{ type: "tip", quantity: 1, amount: 500 }],
         userEmail: buyer.email,
         userId: String(buyer.id),
@@ -2862,6 +2862,7 @@ describe("purchase", () => {
 
       await initiatePayment({
         profileId: profile.id,
+        checkoutId: await openCheckout(profile.id),
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
           { type: "tip", quantity: 1, amount: 500 },
@@ -2899,8 +2900,10 @@ describe("purchase", () => {
         },
       ];
 
+      const checkoutId = await openCheckout(profile.id);
       const result = await initiatePayment({
         profileId: profile.id,
+        checkoutId,
         items,
         userEmail: buyer.email,
         userId: String(buyer.id),
@@ -2914,7 +2917,11 @@ describe("purchase", () => {
       assert.equal(options.stripeAccount, "acct_meta_sum");
 
       const metadata = metadataOf(createStub);
-      assert.equal(metadata.items, JSON.stringify(items));
+      assert.equal(metadata.checkoutId, checkoutId);
+      const checkout = await prisma.checkout.findUnique({
+        where: { id: checkoutId },
+      });
+      assert.deepEqual(checkout?.resolvedItems, items);
       assert.equal(metadata.userEmail, buyer.email);
       assert.equal(metadata.userId, String(buyer.id));
       assert.equal(metadata.artistId, String(profile.id));
@@ -2930,38 +2937,47 @@ describe("purchase", () => {
       );
     });
 
-    it("leaves messages out of the metadata when there's a checkout to read them from", async () => {
+    // Stripe rejects metadata values over 500 characters, so a full cart
+    // can't travel as JSON in the intent.
+    it("keeps the items on the checkout, not in the metadata", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_meta_checkout",
       });
-      const { user: buyer } = await createUser({ email: "buyer@test.com" });
       const profile = await createProfile(artistUser.id);
-      const tg = await createTrackGroup(profile.id, { minPrice: 1000 });
+      const merch = await createMerch(profile.id, { minPrice: 800 });
 
       const createStub = stubStripeForOnline();
 
+      const items = Array.from({ length: 10 }, () => ({
+        type: "merch" as const,
+        id: merch.id,
+        quantity: 1,
+        amount: 800,
+        optionIds: [merch.id],
+        shippingDestinationId: merch.id,
+        message: "x".repeat(600),
+      }));
+      const checkoutId = await openCheckout(profile.id);
+
       await initiatePayment({
+        pointOfSale: true,
         profileId: profile.id,
-        items: [
-          {
-            type: "trackGroup",
-            id: String(tg.id),
-            quantity: 1,
-            amount: 1200,
-            message: "x".repeat(600),
-          },
-        ],
-        userEmail: buyer.email,
-        userId: String(buyer.id),
-        checkoutId: "checkout-1",
+        items,
+        userEmail: "",
+        checkoutId,
       });
 
       const metadata = metadataOf(createStub);
-      assert.deepEqual(JSON.parse(metadata.items), [
-        { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1200 },
-      ]);
-      assert.equal(metadata.checkoutId, "checkout-1");
+      assert.equal(metadata.items, undefined);
+      assert.equal(metadata.checkoutId, checkoutId);
+      for (const value of Object.values(metadata)) {
+        assert.ok(value.length <= 500);
+      }
+      const checkout = await prisma.checkout.findUnique({
+        where: { id: checkoutId },
+      });
+      assert.deepEqual(checkout?.resolvedItems, items);
     });
 
     describe("platform fee inheritance (album -> artist -> platform)", () => {
@@ -2983,6 +2999,7 @@ describe("purchase", () => {
 
         await initiatePayment({
           profileId: profile.id,
+          checkoutId: await openCheckout(profile.id),
           items: [
             {
               type: "trackGroup",
@@ -3043,6 +3060,7 @@ describe("purchase", () => {
 
         await initiatePayment({
           profileId: profile.id,
+          checkoutId: await openCheckout(profile.id),
           items: [item],
           userEmail: buyer.email,
           userId: String(buyer.id),
@@ -3073,6 +3091,7 @@ describe("purchase", () => {
 
         await initiatePayment({
           profileId: profile.id,
+          checkoutId: await openCheckout(profile.id),
           items: [
             {
               type: "trackGroup",
@@ -3113,6 +3132,7 @@ describe("purchase", () => {
 
         await initiatePayment({
           profileId: profile.id,
+          checkoutId: await openCheckout(profile.id),
           items: [
             {
               type: "trackGroup",
@@ -3153,6 +3173,7 @@ describe("purchase", () => {
 
         await initiatePayment({
           profileId: profile.id,
+          checkoutId: await openCheckout(profile.id),
           items: [
             {
               type: "trackGroup",
@@ -5331,6 +5352,7 @@ describe("purchase", () => {
         initiatePayment({
           readerId: "tmr_test",
           profileId: profile.id,
+          checkoutId: await openCheckout(profile.id),
           items: [
             {
               type: "trackGroup",

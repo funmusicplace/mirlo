@@ -1,10 +1,11 @@
 import prisma from "@mirlo/prisma";
-import { omit, uniq } from "lodash";
+import { uniq } from "lodash";
 
 import { AppError } from "../error";
 import { calculateAppFee } from "../processingPayments";
 import { getCurrency } from "../stripe/currency";
 
+import { saveResolvedItems } from "./checkout";
 import { resolvePayee } from "./payee";
 import { getPaymentProcessor } from "./PaymentProcessor";
 
@@ -74,7 +75,7 @@ export const initiatePayment = async ({
   userId?: string;
   clientId?: number;
   stripeAccountId?: string;
-  checkoutId?: string;
+  checkoutId: string;
 }): Promise<
   | { paymentIntentId: string; stripeAccountId: string }
   | {
@@ -111,19 +112,10 @@ export const initiatePayment = async ({
     ...(userId && { userId }),
     ...(clientId !== undefined && { clientId: String(clientId) }),
     ...(pointOfSale && { pointOfSale: "true" }),
-    ...(purchaseType === "trackGroup" &&
-      items[0]?.id && { trackGroupId: items[0].id }),
-    ...(purchaseType === "track" && items[0]?.id && { trackId: items[0].id }),
-    items: JSON.stringify(
-      items.map((item) =>
-        omit(
-          item,
-          checkoutId ? ["message", "shippingAmount"] : "shippingAmount"
-        )
-      )
-    ),
-    ...(checkoutId && { checkoutId }),
+    checkoutId,
   };
+
+  await saveResolvedItems(checkoutId, items);
 
   const processor = getPaymentProcessor();
 
