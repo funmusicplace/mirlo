@@ -1,8 +1,7 @@
 export const API_ROOT =
   import.meta.env.VITE_API_DOMAIN || window.location.origin;
 
-export const CLIENT_ROOT =
-  import.meta.env.VITE_CLIENT_DOMAIN || window.location.origin;
+export const CLIENT_ROOT = window.location.origin;
 
 export const bp = {
   small: "576",

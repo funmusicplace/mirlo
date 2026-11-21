@@ -114,14 +114,6 @@ STRIPE_WEBHOOK_CONNECT_SIGNING_SECRET=
 
 > **Note**: `STRIPE_KEY` You can also set the stripe key in the Admin settings once the instance is up. This is the preferred way of setting up Stripe in the app. that value lives in the database, takes precedence over `.env`, and is picked up immediately without restarting the API.
 
-If configuring manually, also create `client/.env` — the frontend bakes these
-values in at build time:
-
-```dotenv
-VITE_API_DOMAIN=https://yourdomain.com
-VITE_CLIENT_DOMAIN=https://yourdomain.com
-```
-
 > **Note**: if you're using Stripe, you'll also need to register two webhook
 > endpoints once your domain is live — see
 > [Register Stripe Webhooks](./index.md#register-stripe-webhooks). That step

@@ -47,38 +47,6 @@ export function useLogoutMutation() {
   });
 }
 
-type SignupBody = {
-  email: string;
-  name: string;
-  password: string;
-  receiveMailingList: boolean;
-  accountType: "listener";
-  client: string;
-};
-
-async function signup(body: Omit<SignupBody, "client">) {
-  const signupBody: SignupBody = {
-    ...body,
-    client: String(process.env.API_DOMAIN),
-  };
-
-  await api.post("auth/signup", signupBody, {
-    credentials: undefined,
-  });
-}
-
-export function useSignupMutation() {
-  const client = useQueryClient();
-  return useMutation({
-    mutationFn: signup,
-    onSuccess() {
-      client.invalidateQueries({
-        predicate: (query) => query.queryKey.includes(QUERY_KEY_AUTH),
-      });
-    },
-  });
-}
-
 export async function authRefresh() {
   await api.post("auth/refresh", {});
 }

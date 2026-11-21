@@ -150,10 +150,7 @@ export const preparePostContent = async (
 const widgetPathRegex = /^\/widget\/(track|trackGroup)\/\d+/;
 
 export const widgetBaseUrl = () =>
-  (process.env.CLIENT_DOMAIN ?? process.env.API_DOMAIN ?? "").replace(
-    /\/+$/,
-    ""
-  );
+  (process.env.API_DOMAIN ?? "").replace(/\/+$/, "");
 
 export const ownWidgetOrigins = async () =>
   uniq(

@@ -144,15 +144,15 @@ describe("postContent", () => {
     let previous: string | undefined;
 
     beforeEach(() => {
-      previous = process.env.CLIENT_DOMAIN;
-      process.env.CLIENT_DOMAIN = "https://now.example/";
+      previous = process.env.API_DOMAIN;
+      process.env.API_DOMAIN = "https://now.example/";
     });
 
     afterEach(() => {
       if (previous === undefined) {
-        delete process.env.CLIENT_DOMAIN;
+        delete process.env.API_DOMAIN;
       } else {
-        process.env.CLIENT_DOMAIN = previous;
+        process.env.API_DOMAIN = previous;
       }
     });
 
@@ -173,15 +173,15 @@ describe("postContent", () => {
     let previous: string | undefined;
 
     beforeEach(() => {
-      previous = process.env.CLIENT_DOMAIN;
-      process.env.CLIENT_DOMAIN = "https://now.example";
+      previous = process.env.API_DOMAIN;
+      process.env.API_DOMAIN = "https://now.example";
     });
 
     afterEach(() => {
       if (previous === undefined) {
-        delete process.env.CLIENT_DOMAIN;
+        delete process.env.API_DOMAIN;
       } else {
-        process.env.CLIENT_DOMAIN = previous;
+        process.env.API_DOMAIN = previous;
       }
     });
 

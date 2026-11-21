@@ -99,14 +99,6 @@ else
   SERVE_IMAGES_FROM_API_VALUE=true
 fi
 
-# Local dev serves the client from its own dev server on :8080; a deployed
-# instance serves it from the API.
-if [ "$MIRLO_DOMAIN" = "http://localhost:3000" ]; then
-  CLIENT_DOMAIN_VALUE=http://localhost:8080
-else
-  CLIENT_DOMAIN_VALUE=$MIRLO_DOMAIN
-fi
-
 # The postgres image names the database after POSTGRES_USER by default, and
 # DATABASE_URL is derived from the same values so they can never disagree.
 DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgsql:5432/${POSTGRES_USER}?schema=public"
@@ -116,7 +108,6 @@ sed -E \
   -e "s|^JWT_SECRET=.*|JWT_SECRET=${JWT_SECRET}|" \
   -e "s|^REFRESH_TOKEN_SECRET=.*|REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}|" \
   -e "s|^API_DOMAIN=.*|API_DOMAIN=${MIRLO_DOMAIN}|" \
-  -e "s|^CLIENT_DOMAIN=.*|CLIENT_DOMAIN=${CLIENT_DOMAIN_VALUE}|" \
   -e "s|^DATABASE_URL=.*|DATABASE_URL=\"${DATABASE_URL}\"|" \
   -e "s|^POSTGRES_USER=.*|POSTGRES_USER=${POSTGRES_USER}|" \
   -e "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=${POSTGRES_PASSWORD}|" \
@@ -143,11 +134,10 @@ elif [ "$MIRLO_DOMAIN" = "http://localhost:3000" ]; then
   cp client/.env.example client/.env
   echo "✓ Wrote client/.env (local dev defaults)"
 else
-  # Deployed instance: the API serves the built client, so both point at the
-  # same public URL.
+  # Deployed instance: the API serves the built client, which then calls the
+  # API on its own origin.
   sed -E \
-    -e "s|^VITE_API_DOMAIN=.*|VITE_API_DOMAIN=${MIRLO_DOMAIN}|" \
-    -e "s|^VITE_CLIENT_DOMAIN=.*|VITE_CLIENT_DOMAIN=${MIRLO_DOMAIN}|" \
+    -e "s|^VITE_API_DOMAIN=.*|# VITE_API_DOMAIN=|" \
     client/.env.example > client/.env
   echo "✓ Wrote client/.env"
 fi
