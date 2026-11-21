@@ -110,7 +110,7 @@ Every instance approves apps separately, so on a real instance you'll be waiting
 If you host a Mirlo instance, OAuth works out of the box, as long as:
 
 - `API_DOMAIN` is the instance's public address, such as `https://music.example`. It's the issuer in every token, and apps check it.
-- `CLIENT_DOMAIN` is where the frontend is served. On a deployed instance that's the same as `API_DOMAIN`. `scripts/generate-env.sh` sets both for you.
+- The `frontend` row in **Admin → API clients** has the address the frontend is served from as its application URL. That's where users approve apps. `scripts/install.sh` sets it for you.
 - The contact email is set in **Admin → Settings**, so you hear about apps asking for approval.
 
 Approve, block, or remove apps in **Admin → API clients**. Setting an app back to `pending` or `revoked`, or deleting it, signs it out of every account straight away.
