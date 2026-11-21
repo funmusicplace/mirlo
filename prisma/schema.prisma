@@ -874,6 +874,7 @@ model Checkout {
   profileId       Int
   profile         Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
   items           Json // PurchaseItem[]
+  resolvedItems   Json? // ResolvedItem[], priced by the pay call; the webhook reads them
   email           String?
   successUrl      String?
   clientId        Int? // The API client that opened it

@@ -847,6 +847,10 @@ export default function () {
         });
       }
 
+      const checkoutId =
+        checkout?.id ??
+        (await createCheckout({ profileId, items, email, clientId })).id;
+
       const result = await initiatePayment({
         readerId,
         pointOfSale,
@@ -855,7 +859,7 @@ export default function () {
         ...resolveBuyer({ buyer, email }),
         clientId,
         stripeAccountId: payeeAccountId,
-        checkoutId: checkout?.id,
+        checkoutId,
       });
 
       if ("clientSecret" in result) {

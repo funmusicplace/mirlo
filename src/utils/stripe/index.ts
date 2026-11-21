@@ -20,7 +20,11 @@ import {
 } from "../handleFinishedTransactions";
 import { merchImageUrl } from "../merch";
 import { recordPaymentAccountStatus } from "../paymentAccountStatus";
-import { completeCheckout, findCheckoutMessages } from "../payments/checkout";
+import {
+  completeCheckout,
+  findCheckoutMessages,
+  findResolvedItems,
+} from "../payments/checkout";
 import { resolvePayee } from "../payments/payee";
 import { ResolvedItem } from "../payments/purchase";
 import {
@@ -454,12 +458,10 @@ type SessionMetaData = {
   userEmail: string;
   userId: string;
   userName: string;
-  trackGroupId: string;
   stripeAccountId: string;
   gaveGift: string;
   merchId: string;
   artistId: string;
-  trackId: string;
   transactionId: string;
   checkoutId?: string;
   pointOfSale?: string;
@@ -1256,6 +1258,22 @@ const recoverEmailFromIntent = async (
   return charge?.billing_details?.email ?? "";
 };
 
+// Intents created before the items moved to the checkout row carry them as
+// JSON in their metadata.
+const itemsFromLegacyMetadata = async (metadata: {
+  items?: string;
+  checkoutId?: string;
+}) => {
+  if (!metadata.items) {
+    return undefined;
+  }
+  const messages = await findCheckoutMessages(metadata.checkoutId);
+  return (JSON.parse(metadata.items) as ResolvedItem[]).map((item, i) => ({
+    ...item,
+    message: messages[i] ?? item.message,
+  }));
+};
+
 export const completePurchaseFromIntent = async (
   intent: Stripe.PaymentIntent,
   accountId: string
@@ -1275,10 +1293,15 @@ export const completePurchaseFromIntent = async (
     }
   }
 
-  const messages = await findCheckoutMessages(metadata.checkoutId);
-  const items = (JSON.parse(metadata.items ?? "[]") as ResolvedItem[]).map(
-    (item, i) => ({ ...item, message: messages[i] ?? item.message })
-  );
+  let items =
+    (await findResolvedItems(metadata.checkoutId)) ??
+    (await itemsFromLegacyMetadata(metadata));
+  if (!items) {
+    logger.warn(
+      `completePurchaseFromIntent: ${intent.id} has no items on its checkout or in its metadata`
+    );
+    items = [];
+  }
 
   const payment = await completedPaymentFromIntent(intent, accountId);
 
