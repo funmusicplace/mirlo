@@ -15,7 +15,7 @@ describe("clean-up-checkouts", () => {
     await clearTables();
   });
 
-  it("deletes checkouts older than their lifetime, paid or not, and keeps newer ones", async () => {
+  it("deletes checkouts older than their lifetime, paid or never paid for, and keeps newer ones", async () => {
     const { user } = await createUser({ email: "artist@test.com" });
     const profile = await createProfile(user.id);
     const expired = new Date();
@@ -30,6 +30,14 @@ describe("clean-up-checkouts", () => {
           createdAt: expired,
           completedAt: expired,
         },
+        {
+          profileId: profile.id,
+          items: [],
+          createdAt: expired,
+          completedAt: expired,
+          stripeId: "pi_paid",
+          stripeAccountId: "acct_test",
+        },
       ],
     });
     const recent = await prisma.checkout.create({
@@ -40,5 +48,27 @@ describe("clean-up-checkouts", () => {
 
     const left = await prisma.checkout.findMany({ select: { id: true } });
     assert.deepEqual(left, [{ id: recent.id }]);
+  });
+
+  it("keeps an expired checkout whose payment hasn't finished", async () => {
+    const { user } = await createUser({ email: "artist@test.com" });
+    const profile = await createProfile(user.id);
+    const expired = new Date();
+    expired.setDate(expired.getDate() - CHECKOUT_LIFETIME_DAYS - 1);
+
+    const unfinished = await prisma.checkout.create({
+      data: {
+        profileId: profile.id,
+        items: [],
+        createdAt: expired,
+        stripeId: "pi_processing",
+        stripeAccountId: "acct_test",
+      },
+    });
+
+    await cleanUpCheckouts();
+
+    const left = await prisma.checkout.findMany({ select: { id: true } });
+    assert.deepEqual(left, [{ id: unfinished.id }]);
   });
 });

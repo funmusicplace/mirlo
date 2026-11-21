@@ -553,6 +553,14 @@ export const createSubscription = async (
   });
 };
 
+export const createCheckout = (
+  profileId: number,
+  resolvedItems?: Prisma.InputJsonArray
+) =>
+  prisma.checkout.create({
+    data: { profileId, items: [], resolvedItems },
+  });
+
 export const createContentFlag = async (
   data: Partial<Prisma.ContentFlagUncheckedCreateInput> = {}
 ) => {

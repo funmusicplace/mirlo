@@ -11,6 +11,7 @@ import { sendMailQueue } from "../../src/queues/send-mail-queue";
 import { completePurchaseFromIntent } from "../../src/utils/stripe";
 import {
   clearTables,
+  createCheckout,
   createProfile,
   createTrack,
   createTrackGroup,
@@ -21,8 +22,8 @@ import prisma from "@mirlo/prisma";
 
 // Covers the webhook-side routing added when track purchases moved onto the
 // unified POST /v1/purchase flow: a succeeded PaymentIntent tagged
-// purchaseType "track" (+ trackId) should record a UserTrackPurchase, the
-// same way purchaseType "trackGroup" already records a UserTrackGroupPurchase.
+// purchaseType "track" should record a UserTrackPurchase, the same way
+// purchaseType "trackGroup" already records a UserTrackGroupPurchase.
 describe("completePurchaseFromIntent - track routing", () => {
   beforeEach(async () => {
     try {
@@ -46,6 +47,9 @@ describe("completePurchaseFromIntent - track routing", () => {
     const profile = await createProfile(artistUser.id);
     const tg = await createTrackGroup(profile.id, { minPrice: 0 });
     const track = await createTrack(tg.id, { minPrice: 500 });
+    const checkout = await createCheckout(profile.id, [
+      { type: "track", id: String(track.id), quantity: 1, amount: 500 },
+    ]);
 
     const intent = {
       id: "pi_track_webhook_test",
@@ -53,10 +57,7 @@ describe("completePurchaseFromIntent - track routing", () => {
       currency: "usd",
       metadata: {
         purchaseType: "track",
-        trackId: String(track.id),
-        items: JSON.stringify([
-          { type: "track", id: String(track.id), quantity: 1, amount: 500 },
-        ]),
+        checkoutId: checkout.id,
         artistId: String(profile.id),
         userId: String(buyer.id),
         userEmail: buyer.email,
@@ -84,6 +85,48 @@ describe("completePurchaseFromIntent - track routing", () => {
     const tg = await createTrackGroup(profile.id, { minPrice: 0 });
     const track = await createTrack(tg.id, { minPrice: 500 });
     const message = "x".repeat(600);
+    const checkout = await createCheckout(profile.id, [
+      {
+        type: "track",
+        id: String(track.id),
+        quantity: 1,
+        amount: 500,
+        message,
+      },
+    ]);
+
+    const intent = {
+      id: "pi_track_checkout_message",
+      amount_received: 500,
+      currency: "usd",
+      metadata: {
+        purchaseType: "track",
+        artistId: String(profile.id),
+        userId: String(buyer.id),
+        userEmail: buyer.email,
+        checkoutId: checkout.id,
+      },
+    } as unknown as Stripe.PaymentIntent;
+
+    await completePurchaseFromIntent(intent, "acct_track_webhook");
+
+    const purchase = await prisma.userTrackPurchase.findFirst({
+      where: { userId: buyer.id, trackId: track.id },
+    });
+    assert.equal(purchase?.message, message);
+  });
+
+  it("reads an older intent's items from its metadata, with the message from its checkout", async () => {
+    sinon.stub(sendMailQueue, "add").resolves();
+
+    const { user: artistUser } = await createUser({
+      email: "artist@test.com",
+    });
+    const { user: buyer } = await createUser({ email: "buyer@test.com" });
+    const profile = await createProfile(artistUser.id);
+    const tg = await createTrackGroup(profile.id, { minPrice: 0 });
+    const track = await createTrack(tg.id, { minPrice: 500 });
+    const message = "x".repeat(600);
     const checkout = await prisma.checkout.create({
       data: {
         profileId: profile.id,
@@ -92,12 +135,11 @@ describe("completePurchaseFromIntent - track routing", () => {
     });
 
     const intent = {
-      id: "pi_track_checkout_message",
+      id: "pi_track_legacy_metadata",
       amount_received: 500,
       currency: "usd",
       metadata: {
         purchaseType: "track",
-        trackId: String(track.id),
         items: JSON.stringify([
           { type: "track", id: String(track.id), quantity: 1, amount: 500 },
         ]),
@@ -116,7 +158,7 @@ describe("completePurchaseFromIntent - track routing", () => {
     assert.equal(purchase?.message, message);
   });
 
-  it("does nothing when purchaseType is 'track' but trackId is missing", async () => {
+  it("does nothing when a 'track' intent carries no items", async () => {
     const { user: artistUser } = await createUser({
       email: "artist@test.com",
     });

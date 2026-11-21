@@ -15,6 +15,7 @@ import {
 } from "../../../src/utils/stripe/terminal";
 import {
   clearTables,
+  createCheckout,
   createProfile,
   createMerch,
   createTier,
@@ -133,6 +134,7 @@ describe("terminal.reader webhooks", () => {
         { type: "merch", id: merchA.id, quantity: 1, amount: 500 },
         { type: "merch", id: merchB.id, quantity: 2, amount: 800 },
       ];
+      const checkout = await createCheckout(profile.id, items);
 
       const intent = {
         id: "pi_merch_capture",
@@ -145,7 +147,7 @@ describe("terminal.reader webhooks", () => {
           userId: String(buyer.id),
           userEmail: buyer.email,
           artistId: String(profile.id),
-          items: JSON.stringify(items),
+          checkoutId: checkout.id,
         },
         payment_method_types: ["card_present"],
         status: "succeeded",

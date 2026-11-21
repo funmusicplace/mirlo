@@ -36,6 +36,7 @@ import { getIntentStatus } from "../../src/utils/stripe/status";
 import * as terminalUtils from "../../src/utils/stripe/terminal";
 import {
   clearTables,
+  createCheckout,
   createClient,
   createProfile,
   createFundraiser,
@@ -49,9 +50,6 @@ import {
 } from "../utils";
 
 import { requestApp } from "./utils";
-
-const openCheckout = async (profileId: number) =>
-  (await prisma.checkout.create({ data: { profileId, items: [] } })).id;
 
 describe("purchase", () => {
   beforeEach(async () => {
@@ -2660,7 +2658,7 @@ describe("purchase", () => {
       const result = await initiatePayment({
         readerId: "tmr_test",
         profileId: profile.id,
-        checkoutId: await openCheckout(profile.id),
+        checkoutId: (await createCheckout(profile.id)).id,
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
         ],
@@ -2695,7 +2693,7 @@ describe("purchase", () => {
       await initiatePayment({
         pointOfSale: true,
         profileId: profile.id,
-        checkoutId: await openCheckout(profile.id),
+        checkoutId: (await createCheckout(profile.id)).id,
         items: [{ type: "merch", id: merch.id, quantity: 1, amount: 800 }],
         userEmail: "",
       });
@@ -2718,7 +2716,7 @@ describe("purchase", () => {
 
       const result = await initiatePayment({
         profileId: profile.id,
-        checkoutId: await openCheckout(profile.id),
+        checkoutId: (await createCheckout(profile.id)).id,
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
         ],
@@ -2780,7 +2778,7 @@ describe("purchase", () => {
 
       await initiatePayment({
         profileId: profile.id,
-        checkoutId: await openCheckout(profile.id),
+        checkoutId: (await createCheckout(profile.id)).id,
         items: [
           { type: "trackGroup", id: String(tg1.id), quantity: 1, amount: 1000 },
           { type: "trackGroup", id: String(tg2.id), quantity: 1, amount: 500 },
@@ -2810,7 +2808,7 @@ describe("purchase", () => {
 
       const result = await initiatePayment({
         profileId: profile.id,
-        checkoutId: await openCheckout(profile.id),
+        checkoutId: (await createCheckout(profile.id)).id,
         items: [
           { type: "track", id: String(track.id), quantity: 1, amount: 500 },
         ],
@@ -2826,7 +2824,7 @@ describe("purchase", () => {
       assert.equal(metadata.purchaseType, "track");
     });
 
-    it("tags a single online tip as purchaseType 'tip' and omits trackGroupId", async () => {
+    it("tags a single online tip as purchaseType 'tip'", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_meta_tip",
@@ -2838,7 +2836,7 @@ describe("purchase", () => {
 
       await initiatePayment({
         profileId: profile.id,
-        checkoutId: await openCheckout(profile.id),
+        checkoutId: (await createCheckout(profile.id)).id,
         items: [{ type: "tip", quantity: 1, amount: 500 }],
         userEmail: buyer.email,
         userId: String(buyer.id),
@@ -2846,10 +2844,9 @@ describe("purchase", () => {
 
       const metadata = metadataOf(createStub);
       assert.equal(metadata.purchaseType, "tip");
-      assert.ok(!("trackGroupId" in metadata), "a tip carries no trackGroupId");
     });
 
-    it("falls back to purchaseType 'merch' for mixed item types and omits trackGroupId", async () => {
+    it("falls back to purchaseType 'merch' for mixed item types", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
         stripeAccountId: "acct_meta_mixed",
@@ -2862,7 +2859,7 @@ describe("purchase", () => {
 
       await initiatePayment({
         profileId: profile.id,
-        checkoutId: await openCheckout(profile.id),
+        checkoutId: (await createCheckout(profile.id)).id,
         items: [
           { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 1000 },
           { type: "tip", quantity: 1, amount: 500 },
@@ -2873,10 +2870,6 @@ describe("purchase", () => {
 
       const metadata = metadataOf(createStub);
       assert.equal(metadata.purchaseType, "merch");
-      assert.ok(
-        !("trackGroupId" in metadata),
-        "a mixed cart carries no trackGroupId"
-      );
     });
 
     it("charges the summed amount on the artist's connected account and echoes the cart in metadata", async () => {
@@ -2900,7 +2893,7 @@ describe("purchase", () => {
         },
       ];
 
-      const checkoutId = await openCheckout(profile.id);
+      const checkoutId = (await createCheckout(profile.id)).id;
       const result = await initiatePayment({
         profileId: profile.id,
         checkoutId,
@@ -2958,7 +2951,7 @@ describe("purchase", () => {
         shippingDestinationId: merch.id,
         message: "x".repeat(600),
       }));
-      const checkoutId = await openCheckout(profile.id);
+      const checkoutId = (await createCheckout(profile.id)).id;
 
       await initiatePayment({
         pointOfSale: true,
@@ -2999,7 +2992,7 @@ describe("purchase", () => {
 
         await initiatePayment({
           profileId: profile.id,
-          checkoutId: await openCheckout(profile.id),
+          checkoutId: (await createCheckout(profile.id)).id,
           items: [
             {
               type: "trackGroup",
@@ -3060,7 +3053,7 @@ describe("purchase", () => {
 
         await initiatePayment({
           profileId: profile.id,
-          checkoutId: await openCheckout(profile.id),
+          checkoutId: (await createCheckout(profile.id)).id,
           items: [item],
           userEmail: buyer.email,
           userId: String(buyer.id),
@@ -3091,7 +3084,7 @@ describe("purchase", () => {
 
         await initiatePayment({
           profileId: profile.id,
-          checkoutId: await openCheckout(profile.id),
+          checkoutId: (await createCheckout(profile.id)).id,
           items: [
             {
               type: "trackGroup",
@@ -3132,7 +3125,7 @@ describe("purchase", () => {
 
         await initiatePayment({
           profileId: profile.id,
-          checkoutId: await openCheckout(profile.id),
+          checkoutId: (await createCheckout(profile.id)).id,
           items: [
             {
               type: "trackGroup",
@@ -3173,7 +3166,7 @@ describe("purchase", () => {
 
         await initiatePayment({
           profileId: profile.id,
-          checkoutId: await openCheckout(profile.id),
+          checkoutId: (await createCheckout(profile.id)).id,
           items: [
             {
               type: "trackGroup",
@@ -5352,7 +5345,7 @@ describe("purchase", () => {
         initiatePayment({
           readerId: "tmr_test",
           profileId: profile.id,
-          checkoutId: await openCheckout(profile.id),
+          checkoutId: (await createCheckout(profile.id)).id,
           items: [
             {
               type: "trackGroup",
