@@ -1,5 +1,60 @@
 # Changelog
 
+## [1.4.0](https://github.com/funmusicplace/mirlo/compare/v1.3.0...v1.4.0) (2026-11-21)
+
+
+### Features
+
+* add UPC to releases and ISWC to tracks ([7213cfe](https://github.com/funmusicplace/mirlo/commit/7213cfea4437ba978fe0ceaee452bfba50516f3a))
+* **admin:** report dashboard figures in the instance default currency ([8eef4be](https://github.com/funmusicplace/mirlo/commit/8eef4be0b072b2a57eeeb93664ed090047e60a1f))
+* **admin:** show users' last seen timestamp ([2faf173](https://github.com/funmusicplace/mirlo/commit/2faf173a457c35b10b5c60b19894665f3c3dbb8b))
+* **admin:** split top-X stats into per-table endpoints with CSV export ([0ec42a7](https://github.com/funmusicplace/mirlo/commit/0ec42a7c323b90bff99246b9f4130c390658baaf))
+* let admins upload custom fonts and choose the title and text fonts ([79c9188](https://github.com/funmusicplace/mirlo/commit/79c9188b7c6940c35c13d8de8b28d0e60654f2a3))
+* **oauth:** add pos scope for card reader sales ([d728f3b](https://github.com/funmusicplace/mirlo/commit/d728f3b0042854b6e49c4d99cded5b05f93f037e))
+* **tiers:** let artists hide subscription tiers from their profile ([6165e49](https://github.com/funmusicplace/mirlo/commit/6165e4905bd7211bdf97d35813774b80ba738f4a))
+* **tiers:** return subscriber count on manage tier endpoints ([53d2a98](https://github.com/funmusicplace/mirlo/commit/53d2a9856d704dd4cd5b6ec31e9d8ae84344ab88))
+
+
+### Bug Fixes
+
+* **admin:** address review of top-X stats and pos scope ([#2623](https://github.com/funmusicplace/mirlo/issues/2623)) ([91ce97d](https://github.com/funmusicplace/mirlo/commit/91ce97d0e294a11d23f7703e06eadda07d6c0bd7))
+* **admin:** use the Turnstile secret saved in settings ([e4964c6](https://github.com/funmusicplace/mirlo/commit/e4964c6f7dc5aa4d33d2df73beb6f21466281308))
+* **auth:** answer password resets the same for any email ([0c7258f](https://github.com/funmusicplace/mirlo/commit/0c7258f7eef75920bb941bffd88a69f2857c056f))
+* **auth:** trim the signup response ([fc7af6e](https://github.com/funmusicplace/mirlo/commit/fc7af6e68f383356fd52f6042da4857b4b8dacf6))
+* **clients:** create the frontend client from API_DOMAIN ([eebfe2f](https://github.com/funmusicplace/mirlo/commit/eebfe2f55eb8ba77faea12bcd696b7cce094a90b)), closes [#2625](https://github.com/funmusicplace/mirlo/issues/2625)
+* **docker:** keep the host Prisma client out of images ([6eacbf9](https://github.com/funmusicplace/mirlo/commit/6eacbf93620b2089691d298feeebdf95a922b3e5))
+* **email:** link the instance, not mirlo.space, in follow confirmation ([a4ea95c](https://github.com/funmusicplace/mirlo/commit/a4ea95c15e4814f39beaf26b0321f3ec9f8d7fb3))
+* **emails:** open the purchase dialog from the album purchase email ([93026a6](https://github.com/funmusicplace/mirlo/commit/93026a696c8abc94ebdc5e15c88dfdd458d92cad))
+* embed single releases with the track widget instead of an empty trackgroup widget ([c8f286e](https://github.com/funmusicplace/mirlo/commit/c8f286e9c537e12f3819b4fc0ff4ae31f03e5978))
+* **fundraiser:** lock the fundraiser before cancelling pledges ([#2539](https://github.com/funmusicplace/mirlo/issues/2539)) ([45ce7f8](https://github.com/funmusicplace/mirlo/commit/45ce7f830e2834b0616586c605d78a966e1cea91))
+* **fundraiser:** make fundraiser delete atomic ([#2539](https://github.com/funmusicplace/mirlo/issues/2539)) ([5cc81eb](https://github.com/funmusicplace/mirlo/commit/5cc81eb8e6def39c15f34ef6076fa493531d10e9))
+* **fundraisers:** show a release's fundraiser once it's added ([#2629](https://github.com/funmusicplace/mirlo/issues/2629)) ([8147339](https://github.com/funmusicplace/mirlo/commit/8147339146ddee6570658544be750e25e6cfa14a))
+* group the sale and Hype Circle settings of a track under Track settings ([9cedcc9](https://github.com/funmusicplace/mirlo/commit/9cedcc928ffb94b75bfb7d6b6e74aee18ec175b6))
+* **images:** drop files of images deleted while processing ([968f538](https://github.com/funmusicplace/mirlo/commit/968f53896d329cce7d21497317f2e7fa634afe7f)), closes [#2596](https://github.com/funmusicplace/mirlo/issues/2596)
+* **merch:** show merch without shipping destinations ([c89f24e](https://github.com/funmusicplace/mirlo/commit/c89f24ef30ecf68ad6b31a06f50c5498e633d462))
+* **pos:** never credit point-of-sale sales to the seller ([59a1ca4](https://github.com/funmusicplace/mirlo/commit/59a1ca4aa7fba7f2cb504918879e3ba69710baca))
+* **pos:** report declined reader payments in purchase status ([3749bfc](https://github.com/funmusicplace/mirlo/commit/3749bfc0cca9635b97b87a360c58a04c6b757cd7))
+* **pos:** require email for subscriptions, skip email recovery ([ba53fa1](https://github.com/funmusicplace/mirlo/commit/ba53fa17edc475b0fda1d9eec0d7800fe76d8638))
+* **pos:** skip shipping on merch sold in person ([8ff9e9e](https://github.com/funmusicplace/mirlo/commit/8ff9e9ec79ef6dcef1904ba34a4855eab7eacdfe))
+* **pos:** stop crediting card reader sales to the operator ([6af40ba](https://github.com/funmusicplace/mirlo/commit/6af40ba57fb6b31f35980751c1a65064414d1d04))
+* **profile:** turn catalogue purchase off for new artists ([e45df9c](https://github.com/funmusicplace/mirlo/commit/e45df9c4404a9acba10d4a3d5831aad3314b7c4c)), closes [#2621](https://github.com/funmusicplace/mirlo/issues/2621)
+* put the payment receiver and download codes in the pricing section ([e0a5092](https://github.com/funmusicplace/mirlo/commit/e0a5092c5972b9d66c6d3df7b6d995e5f6cdb201))
+* **releases:** block moving a release with open pledges ([2ff059b](https://github.com/funmusicplace/mirlo/commit/2ff059b453d6fe4c0abbd3a0ed4aca3420f6aa3f))
+* **releases:** show why moving a release failed ([#2540](https://github.com/funmusicplace/mirlo/issues/2540)) ([0baa0ab](https://github.com/funmusicplace/mirlo/commit/0baa0ab28968ff5028b0dd365c661ce38990a468))
+* reset the widget elapsed time when the Mirlo player moves to another track ([20c0572](https://github.com/funmusicplace/mirlo/commit/20c05728c439e07d212b568869fa6050345842db))
+* restore two pre-order hints accidentally delete from the translation ([df6215c](https://github.com/funmusicplace/mirlo/commit/df6215c7689c676bedc5d8d870e59f94d3fec9dc))
+* **sales:** keep payee ids out of fundraiser success email ([e8fe130](https://github.com/funmusicplace/mirlo/commit/e8fe1308ccc926374db3fddb45d98546e188e526))
+* **sales:** leave failed charges out of sales ([bf7f31c](https://github.com/funmusicplace/mirlo/commit/bf7f31c68ae104cb258b27b7217ae3cd44731a3b))
+* **sales:** number fundraiser pledge charges ([b69f8dd](https://github.com/funmusicplace/mirlo/commit/b69f8dd855f5e1d9a0d75acd87afc41becd70359))
+* **sales:** number transaction IDs per seller ([d9ae30a](https://github.com/funmusicplace/mirlo/commit/d9ae30ab86b4dcbab1be9c897644ef7458ca7c16)), closes [#2594](https://github.com/funmusicplace/mirlo/issues/2594)
+* **setup:** save default currency from the platform policy step ([fcc86e6](https://github.com/funmusicplace/mirlo/commit/fcc86e6deb1eae5e3213cb43fb24f886b29c2c6c))
+* **spam:** require a Turnstile site key and reset after errors ([#2611](https://github.com/funmusicplace/mirlo/issues/2611)) ([a308ea0](https://github.com/funmusicplace/mirlo/commit/a308ea0c99608853c79e0d20245dd56ab05745e5))
+* **storage:** set up a bucket once, not on every upload URL ([5410245](https://github.com/funmusicplace/mirlo/commit/54102456454d61500d6ca76aed8aac26d6686ea8))
+* tidy some nitpicks in the edit release page layout ([61952b6](https://github.com/funmusicplace/mirlo/commit/61952b6d980518e6191e3408e8923b87d52a6500))
+* **tiers:** keep hidden tiers' releases subscriber exclusive ([#2619](https://github.com/funmusicplace/mirlo/issues/2619)) ([5d59d18](https://github.com/funmusicplace/mirlo/commit/5d59d18996810db1510e265b654646ba2fe2553b))
+* **upload:** decode UTF-8 text in WAV tags ([6ad92e6](https://github.com/funmusicplace/mirlo/commit/6ad92e66491938caea2c84a2979020c9da92f4f9)), closes [#2603](https://github.com/funmusicplace/mirlo/issues/2603)
+* **users:** store emails lowercase to stop case-duplicate accounts ([a801c71](https://github.com/funmusicplace/mirlo/commit/a801c71d8681a898cca47b1f16bcee28da08c6d5))
+
 ## [1.3.0](https://github.com/funmusicplace/mirlo/compare/v1.2.0...v1.3.0) (2026-11-16)
 
 
