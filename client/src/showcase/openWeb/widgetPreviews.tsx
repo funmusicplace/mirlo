@@ -16,14 +16,13 @@ export const widgetStorySrc = (storyId: string) =>
 
 /**
  * The embed preview in the "Embed or share" picker points at the real app
- * (VITE_CLIENT_DOMAIN/widget/...), which isn't running under Storybook.
+ * (CLIENT_ROOT/widget/...), which isn't running under Storybook.
  * Point it at the matching Features/Embeds/TrackGroupWidget story instead, and show
  * the copied code with the production domain.
  */
 export const useLocalWidgetPreviews: Decorator = (Story) => {
   React.useEffect(() => {
-    const clientDomain = String(CLIENT_ROOT ?? "");
-    const widgetPrefix = `${clientDomain}/widget/trackGroup/`;
+    const widgetPrefix = `${CLIENT_ROOT}/widget/trackGroup/`;
     const rewrite = () => {
       document.querySelectorAll("iframe").forEach((iframe) => {
         const src = iframe.getAttribute("src") ?? "";
@@ -34,15 +33,14 @@ export const useLocalWidgetPreviews: Decorator = (Story) => {
           widgetStorySrc(STORY_FOR_VARIANT[variant] ?? STORY_FOR_VARIANT.card)
         );
       });
-      if (!clientDomain) return;
       document.querySelectorAll("code").forEach((code) => {
         code.childNodes.forEach((node) => {
           if (
             node.nodeType === Node.TEXT_NODE &&
-            node.nodeValue?.includes(clientDomain)
+            node.nodeValue?.includes(CLIENT_ROOT)
           ) {
             node.nodeValue = node.nodeValue
-              .split(clientDomain)
+              .split(CLIENT_ROOT)
               .join("https://mirlo.space");
           }
         });

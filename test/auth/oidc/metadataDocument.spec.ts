@@ -138,7 +138,10 @@ describe("oauth client ID metadata documents", () => {
       .post(`/auth/oauth/${first.uid}/decision`)
       .send({ action: "requestApproval" });
     assert.equal(refused.status, 401);
-    assert.equal(await prisma.client.count(), 0);
+    assert.equal(
+      await prisma.client.count({ where: { clientIdUrl: { not: null } } }),
+      0
+    );
 
     const agent = loggedInAgent();
     for (let i = 0; i < 2; i++) {
@@ -154,7 +157,9 @@ describe("oauth client ID metadata documents", () => {
       assert.equal(requested.body.result.approval, "pending");
     }
 
-    const rows = await prisma.client.findMany();
+    const rows = await prisma.client.findMany({
+      where: { clientIdUrl: { not: null } },
+    });
     assert.equal(rows.length, 1);
     assert.equal(rows[0].clientIdUrl, CLIENT_ID);
     assert.equal(rows[0].status, "pending");

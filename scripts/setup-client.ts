@@ -2,6 +2,8 @@ import crypto from "crypto";
 
 import prisma from "@mirlo/prisma";
 
+import { getClient } from "../src/utils/getClient";
+
 async function setupClient() {
   console.log("\nCreating client...\n");
 
@@ -13,27 +15,16 @@ async function setupClient() {
   }
 
   try {
-    const existing = await prisma.client.findFirst({
-      where: { applicationUrl },
+    const client = await getClient();
+    await prisma.client.update({
+      where: { id: client.id },
+      data: {
+        applicationUrl,
+        allowedCorsOrigins: [applicationUrl],
+        key: client.key ?? crypto.randomUUID(),
+      },
     });
-
-    if (existing) {
-      await prisma.client.update({
-        where: { id: existing.id },
-        data: { allowedCorsOrigins: [applicationUrl] },
-      });
-      console.log(`\n✓ Client already exists for ${applicationUrl}\n`);
-    } else {
-      await prisma.client.create({
-        data: {
-          applicationName: "frontend",
-          applicationUrl,
-          allowedCorsOrigins: [applicationUrl],
-          key: crypto.randomUUID(),
-        },
-      });
-      console.log(`\n✓ Client created for ${applicationUrl}\n`);
-    }
+    console.log(`\n✓ Client set to ${applicationUrl}\n`);
 
     process.exit(0);
   } catch (error) {

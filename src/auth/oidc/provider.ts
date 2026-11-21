@@ -4,6 +4,7 @@ import Provider, { type ErrorOut, interactionPolicy } from "oidc-provider";
 
 import logger from "../../logger";
 import { AppError } from "../../utils/error";
+import { getClient } from "../../utils/getClient";
 
 import { adapterFor } from "./adapter";
 import {
@@ -20,13 +21,14 @@ export const OIDC_MOUNT_PATH = "/auth/oidc";
 
 export const issuer = () => process.env.API_DOMAIN ?? "http://localhost:3000";
 
-const clientRoot = () => process.env.CLIENT_DOMAIN ?? issuer();
+const clientRoot = async () =>
+  (await getClient()).applicationUrl.replace(/\/+$/, "");
 
-export const interactionUrl = (uid: string) =>
-  `${clientRoot()}/auth/oauth/${uid}`;
+export const interactionUrl = async (uid: string) =>
+  `${await clientRoot()}/auth/oauth/${uid}`;
 
-const errorPageUrl = (out: ErrorOut) => {
-  const url = new URL(`${clientRoot()}/auth/oauth/error`);
+const errorPageUrl = async (out: ErrorOut) => {
+  const url = new URL(`${await clientRoot()}/auth/oauth/error`);
   url.searchParams.set("error", out.error);
   if (out.error_description) {
     url.searchParams.set("error_description", out.error_description);
@@ -108,9 +110,9 @@ const buildProvider = async () => {
       url: (_ctx, interaction) => interactionUrl(interaction.uid),
       policy: policy(),
     },
-    renderError: (ctx, out) => {
+    renderError: async (ctx, out) => {
       ctx.status = 303;
-      ctx.redirect(errorPageUrl(out));
+      ctx.redirect(await errorPageUrl(out));
     },
     ttl: {
       AccessToken: 60 * 60,
