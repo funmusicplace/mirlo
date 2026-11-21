@@ -11,6 +11,7 @@ import { completePurchaseFromIntent } from "../../src/utils/stripe";
 import {
   clearTables,
   createArtist,
+  createCheckout,
   createMerch,
   createTrackGroup,
   createUser,
@@ -37,6 +38,10 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
     const artist = await createArtist(artistUser.id);
     const tg = await createTrackGroup(artist.id, { minPrice: 500 });
 
+    const checkout = await createCheckout(artist.id, [
+      { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 500 },
+    ]);
+
     const intent = {
       id: "pi_identity_recovered",
       amount_received: 500,
@@ -44,10 +49,7 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
       receipt_email: "recovered@test.com",
       metadata: {
         purchaseType: "trackGroup",
-        trackGroupId: String(tg.id),
-        items: JSON.stringify([
-          { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 500 },
-        ]),
+        checkoutId: checkout.id,
         artistId: String(artist.id),
       },
     } as unknown as Stripe.PaymentIntent;
@@ -73,6 +75,10 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
     const artist = await createArtist(artistUser.id);
     const tg = await createTrackGroup(artist.id, { minPrice: 500 });
 
+    const checkout = await createCheckout(artist.id, [
+      { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 500 },
+    ]);
+
     const intent = {
       id: "pi_identity_metadata_wins",
       amount_received: 500,
@@ -80,10 +86,7 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
       receipt_email: "someone-else@test.com",
       metadata: {
         purchaseType: "trackGroup",
-        trackGroupId: String(tg.id),
-        items: JSON.stringify([
-          { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 500 },
-        ]),
+        checkoutId: checkout.id,
         artistId: String(artist.id),
         userId: String(buyer.id),
         userEmail: buyer.email,
@@ -107,16 +110,17 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
     const artist = await createArtist(artistUser.id);
     const tg = await createTrackGroup(artist.id, { minPrice: 500 });
 
+    const checkout = await createCheckout(artist.id, [
+      { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 500 },
+    ]);
+
     const intent = {
       id: "pi_identity_unrecoverable",
       amount_received: 500,
       currency: "usd",
       metadata: {
         purchaseType: "trackGroup",
-        trackGroupId: String(tg.id),
-        items: JSON.stringify([
-          { type: "trackGroup", id: String(tg.id), quantity: 1, amount: 500 },
-        ]),
+        checkoutId: checkout.id,
         artistId: String(artist.id),
       },
     } as unknown as Stripe.PaymentIntent;
@@ -137,16 +141,18 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
     const artist = await createArtist(artistUser.id);
     const merch = await createMerch(artist.id, { quantityRemaining: 5 });
 
+    const checkout = await createCheckout(artist.id, [
+      { type: "merch", id: merch.id, quantity: 1, amount: 1000 },
+      { type: "tip", quantity: 1, amount: 500 },
+    ]);
+
     const intent = {
       id: "pi_identity_walk_up",
       amount_received: 1500,
       currency: "usd",
       metadata: {
         purchaseType: "merch",
-        items: JSON.stringify([
-          { type: "merch", id: merch.id, quantity: 1, amount: 1000 },
-          { type: "tip", quantity: 1, amount: 500 },
-        ]),
+        checkoutId: checkout.id,
         artistId: String(artist.id),
         pointOfSale: "true",
       },
@@ -175,6 +181,10 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
     const artist = await createArtist(artistUser.id);
     const merch = await createMerch(artist.id, { quantityRemaining: 5 });
 
+    const checkout = await createCheckout(artist.id, [
+      { type: "merch", id: merch.id, quantity: 1, amount: 1000 },
+    ]);
+
     const intent = {
       id: "pi_identity_pos_link",
       amount_received: 1000,
@@ -182,9 +192,7 @@ describe("completePurchaseFromIntent - buyer identity recovery", () => {
       receipt_email: "seller@test.com",
       metadata: {
         purchaseType: "merch",
-        items: JSON.stringify([
-          { type: "merch", id: merch.id, quantity: 1, amount: 1000 },
-        ]),
+        checkoutId: checkout.id,
         artistId: String(artist.id),
         pointOfSale: "true",
       },

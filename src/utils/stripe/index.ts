@@ -1293,15 +1293,10 @@ export const completePurchaseFromIntent = async (
     }
   }
 
-  let items =
+  const items =
     (await findResolvedItems(metadata.checkoutId)) ??
-    (await itemsFromLegacyMetadata(metadata));
-  if (!items) {
-    logger.warn(
-      `completePurchaseFromIntent: ${intent.id} has no items on its checkout or in its metadata`
-    );
-    items = [];
-  }
+    (await itemsFromLegacyMetadata(metadata)) ??
+    [];
 
   const payment = await completedPaymentFromIntent(intent, accountId);
 
