@@ -6,16 +6,31 @@ import request from "supertest";
 
 import wellKnown from "../src/wellKnown";
 
-type Component = { "/": string; exclude?: boolean };
+type Component = {
+  "/": string;
+  "?"?: Record<string, string>;
+  exclude?: boolean;
+};
 
-// Apple takes the first matching entry, and `*` also matches slashes
+// Apple takes the first matching entry, and `*` also matches slashes. Every
+// instance of a `?` item must have that exact value, a missing item counts as
+// empty, and other items are ignored
 const opensApp = (components: Component[], path: string) => {
+  const { pathname, searchParams } = new URL(path, "https://mirlo.space");
   for (const component of components) {
     const pattern = component["/"]
       .replace(/[.+^${}()|[\]\\]/g, "\\$&")
       .replace(/\*/g, ".*")
       .replace(/\?/g, ".");
-    if (new RegExp(`^${pattern}$`).test(path)) return !component.exclude;
+    const query = Object.entries(component["?"] ?? {});
+    if (
+      new RegExp(`^${pattern}$`).test(pathname) &&
+      query.every(([name, value]) => {
+        const values = searchParams.getAll(name);
+        return (values.length ? values : [""]).every((v) => v === value);
+      })
+    )
+      return !component.exclude;
   }
   return false;
 };
@@ -40,6 +55,9 @@ describe("apple-app-site-association", () => {
       "/constellation/releases",
       "/jessica-moss/release/unfolding",
       "/jessica-moss/release/unfolding/tracks/27045",
+      "/jessica-moss/release/unfolding?buy=false",
+      "/jessica-moss/release/unfolding?ref=x",
+      "/jessica-moss/release/unfolding/tracks/27045?ref=x",
     ]) {
       assert.ok(opensApp(components, path), `${path} should open the app`);
     }
@@ -48,6 +66,9 @@ describe("apple-app-site-association", () => {
       "/team/merch/3",
       "/team/support/2",
       "/jessica-moss/release/unfolding/download",
+      "/jessica-moss/release/unfolding?buy=true",
+      "/jessica-moss/release/unfolding?ref=x&buy=true",
+      "/jessica-moss/release/unfolding/tracks/27045?buy=true",
       "/login",
       "/search",
       "/pages/terms",

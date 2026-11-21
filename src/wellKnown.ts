@@ -30,7 +30,8 @@ const assetLinks = [
 // browser, where the user is logged in. Artist slugs share the site root with
 // routes like /login, so those roots are listed: a new single-segment route
 // needs a line here, a new route under an artist needs nothing. Entries match
-// in order, the first match wins, and `*` also matches slashes
+// in order, the first match wins, and `*` also matches slashes. A purchase link
+// (`?buy=true`) opens the web purchase dialog, so it stays in the browser
 const notAppReleasePaths = [
   "/*/release/*/download",
   "/*/release/*/redeem",
@@ -72,6 +73,7 @@ const appleAppSiteAssociation = {
         ],
         components: [
           ...notAppReleasePaths.map((path) => ({ "/": path, exclude: true })),
+          { "/": "/*/release/*", "?": { buy: "true" }, exclude: true },
           ...siteRoots.flatMap((root) => [
             { "/": `/${root}`, exclude: true },
             { "/": `/${root}/*`, exclude: true },
