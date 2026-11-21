@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    service: mirlo
+  name: mirlo-env
+data:
+  PORT: "3000"
+  # domain that will resolve to the API ingress
+  MIRLO_DOMAIN: https://mirlo.radisolar.org
+  CLIENT_DOMAIN: https://mirlo.radisolar.org
+  API_DOMAIN: https://mirlo.radisolar.org
+  STATIC_MEDIA_HOST: https://mirlo.radisolar.org
+
+  NODE_ENV: production
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  S3_REGION: "eu-central-1"
+  S3_ENDPOINT: "https://eu-central-1.linodeobjects.com"
+  TEMP_LOCATION: /tmp/data/media/
