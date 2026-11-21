@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { basename, join, relative, resolve } from "node:path";
 
 import { describe, it } from "mocha";
+import pug from "pug";
 
 const REPO_ROOT = resolve();
 const EMAILS_DIR = join(REPO_ROOT, "emails");
@@ -71,5 +72,28 @@ describe("email templates", () => {
       })
     );
     assert.deepEqual(problems, []);
+  });
+
+  it("open the purchase dialog from the album purchase link email", () => {
+    const html = pug.renderFile(
+      join(EMAILS_DIR, "album-purchase-link", "html.pug"),
+      {
+        t: (key: string) => key,
+        tHtml: (key: string) => key,
+        client: "https://mirlo.space",
+        instanceName: "Mirlo",
+        trackGroup: {
+          title: "Unfolding",
+          urlSlug: "unfolding",
+          artist: { name: "Jessica Moss", urlSlug: "jessica-moss" },
+        },
+      }
+    );
+    assert.ok(
+      html.includes(
+        'href="https://mirlo.space/jessica-moss/release/unfolding?buy=true"'
+      ),
+      html
+    );
   });
 });
