@@ -12,6 +12,7 @@ import {
   whereForAllProfilesUserCanEdit,
 } from "../utils/artist";
 import { AppError } from "../utils/error";
+import { isSecondFactorFresh } from "../utils/mfa/session";
 import {
   doesMerchBelongToUser,
   doesMerchPurchaseBelongToUser,
@@ -79,7 +80,7 @@ passport.use(
       }
       return done(null, {
         ...jwtPayload,
-        isAdmin: foundUser?.isAdmin,
+        isAdmin: foundUser.isAdmin && isSecondFactorFresh(jwtPayload.mfaAt),
         isLabelAccount: foundUser?.isLabelAccount,
         canCreateArtists: foundUser?.canCreateArtists,
         language: foundUser?.language,

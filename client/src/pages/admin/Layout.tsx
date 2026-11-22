@@ -30,6 +30,9 @@ const Layout: React.FC = () => {
         <li>
           <NavLink to="clients">{t("clients")}</NavLink>
         </li>
+        <li>
+          <NavLink to="security">{t("security")}</NavLink>
+        </li>
       </SectionNav>
       <Outlet />
     </div>

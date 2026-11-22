@@ -18,228 +18,240 @@ const Menu = forwardRef<
   {
     dialogId: string;
     isAdmin: boolean;
+    needsAdminVerification?: boolean;
     isLabelAccount: boolean;
     onClose: () => void;
   }
->(({ dialogId, isAdmin, isLabelAccount, onClose }, ref) => {
-  const { t } = useTranslation("translation", { keyPrefix: "headerMenu" });
+>(
+  (
+    { dialogId, isAdmin, needsAdminVerification, isLabelAccount, onClose },
+    ref
+  ) => {
+    const { t } = useTranslation("translation", { keyPrefix: "headerMenu" });
 
-  const {
-    data: { results: artists } = {},
-    isLoading,
-    refetch,
-  } = useQuery(queryManagedArtists());
+    const {
+      data: { results: artists } = {},
+      isLoading,
+      refetch,
+    } = useQuery(queryManagedArtists());
 
-  const seeOrderPages = isLabelAccount || !!artists?.length;
+    const seeOrderPages = isLabelAccount || !!artists?.length;
 
-  const snackbar = useSnackbar();
+    const snackbar = useSnackbar();
 
-  const navigate = useNavigate();
-  const { mutate: logout } = useLogoutMutation();
+    const navigate = useNavigate();
+    const { mutate: logout } = useLogoutMutation();
 
-  const onLogOut = useCallback(() => {
-    logout(undefined, {
-      onSuccess() {
-        refetch();
-        snackbar(t("logOutSuccess"), { type: "success" });
-        navigate("/");
-      },
-    });
-  }, [logout, navigate, snackbar, t]);
+    const onLogOut = useCallback(() => {
+      logout(undefined, {
+        onSuccess() {
+          refetch();
+          snackbar(t("logOutSuccess"), { type: "success" });
+          navigate("/");
+        },
+      });
+    }, [logout, navigate, snackbar, t]);
 
-  // Need to use ref in `onClick`, see https://stackoverflow.com/a/77055468
-  // This ref can be removed once `closedby` is baseline
-  const refHandle = useRef<HTMLDialogElement>(null);
-  useImperativeHandle(ref, () => refHandle.current!, []);
+    // Need to use ref in `onClick`, see https://stackoverflow.com/a/77055468
+    // This ref can be removed once `closedby` is baseline
+    const refHandle = useRef<HTMLDialogElement>(null);
+    useImperativeHandle(ref, () => refHandle.current!, []);
 
-  return (
-    <dialog
-      aria-label={t("menu")}
-      className="inset-s-0 sm:inset-s-auto sm:inset-e-0 max-w-[100vw] max-h-full w-screen sm:w-[300px] h-full bg-(--mi-background-color) text-(--mi-text-color) backdrop:bg-[rgba(0,0,0,.5)]"
-      closedby="any"
-      data-nosnippet
-      id={dialogId}
-      ref={refHandle}
-      onClick={(event) => {
-        // Workaround to close on click backdrop, part of dialog
-        // Click on dialog itself blocked by nested div
-        // This handler can be removed once `closedby` is baseline
-        const didClickBackdrop = event.target === refHandle.current;
-        didClickBackdrop && onClose();
-      }}
-      onKeyDown={(event) => {
-        event.key === "Escape" && onClose();
-      }}
-    >
-      {/* This div can be removed once `closedby` is baseline*/}
-      <div className="flex flex-col h-full p-[1rem]">
-        <Button
-          aria-label={t("close", { keyPrefix: "common" })}
-          autoFocus
-          className="self-end border-none bg-transparent! text-(--mi-text-color)! hover:bg-transparent! hover:no-underline focus:bg-transparent! focus:no-underline [&_svg]:fill-(--mi-text-color)!"
-          // @ts-ignore React doesn't support Invoker Commands API
-          command="close"
-          commandfor={dialogId}
-          onClick={() => onClose()}
-          onlyIcon
-          startIcon={<FaTimes />}
-        />
-        <nav aria-label={t("main")} className="flex-auto">
-          <ul>
-            <li>
-              <MenuLink onClick={onClose} to="/profile/notifications">
-                {t("yourFeed")}
-              </MenuLink>
-            </li>
-
-            <li>
-              <MenuLink onClick={onClose} to="/profile/collection">
-                {t("collection")}
-              </MenuLink>
-            </li>
-            <li
-              aria-hidden
-              className="border-t border-(--mi-tint-x-color) my-2"
-            />
-            <CanCreateArtists>
-              {isLabelAccount && (
-                <>
-                  <li>
-                    <MenuLink onClick={onClose} to="/account/label">
-                      {t("manageLabel")}
-                    </MenuLink>
-                  </li>
-                  {(() => {
-                    const labelArtist = artists?.find((a) => a.isLabelProfile);
-                    return labelArtist?.urlSlug ? (
-                      <li>
-                        <MenuLink
-                          onClick={onClose}
-                          to={`/${labelArtist.urlSlug}`}
-                        >
-                          <span className="flex items-center gap-2">
-                            <span className="min-w-0 wrap-anywhere">
-                              {t("viewLabelPage", {
-                                labelName: labelArtist.name,
-                              })}
-                            </span>
-                            <FaArrowRight className="shrink-0 text-xs" />
-                          </span>
-                        </MenuLink>
-                      </li>
-                    ) : null;
-                  })()}
-                </>
-              )}
-              {!isLabelAccount && (
-                <li>
-                  <MenuLink onClick={onClose} to="/manage">
-                    {t("manage")}
-                  </MenuLink>
-                </li>
-              )}
+    return (
+      <dialog
+        aria-label={t("menu")}
+        className="inset-s-0 sm:inset-s-auto sm:inset-e-0 max-w-[100vw] max-h-full w-screen sm:w-[300px] h-full bg-(--mi-background-color) text-(--mi-text-color) backdrop:bg-[rgba(0,0,0,.5)]"
+        closedby="any"
+        data-nosnippet
+        id={dialogId}
+        ref={refHandle}
+        onClick={(event) => {
+          // Workaround to close on click backdrop, part of dialog
+          // Click on dialog itself blocked by nested div
+          // This handler can be removed once `closedby` is baseline
+          const didClickBackdrop = event.target === refHandle.current;
+          didClickBackdrop && onClose();
+        }}
+        onKeyDown={(event) => {
+          event.key === "Escape" && onClose();
+        }}
+      >
+        {/* This div can be removed once `closedby` is baseline*/}
+        <div className="flex flex-col h-full p-[1rem]">
+          <Button
+            aria-label={t("close", { keyPrefix: "common" })}
+            autoFocus
+            className="self-end border-none bg-transparent! text-(--mi-text-color)! hover:bg-transparent! hover:no-underline focus:bg-transparent! focus:no-underline [&_svg]:fill-(--mi-text-color)!"
+            // @ts-ignore React doesn't support Invoker Commands API
+            command="close"
+            commandfor={dialogId}
+            onClick={() => onClose()}
+            onlyIcon
+            startIcon={<FaTimes />}
+          />
+          <nav aria-label={t("main")} className="flex-auto">
+            <ul>
               <li>
-                <ul
-                  className={css`
-                    margin: 0;
-                    padding: 0;
-                    max-height: 190px;
-                    overflow-y: auto;
-                    border-top: 1px solid var(--mi-tint-x-color);
-                    border-bottom: 1px solid var(--mi-tint-x-color);
-                    background-color: var(--mi-darken-background-color);
-                    box-shadow:
-                      inset 0 4px 4px -4px rgba(0, 0, 0, 0.15),
-                      inset 0 -4px 4px -4px rgba(0, 0, 0, 0.15);
-                  `}
-                >
-                  {isLoading && (
-                    <LoadingBlocks rows={1} height="2rem" margin=".25rem" />
-                  )}
-                  {artists
-                    ?.filter((a) => !a.isLabelProfile)
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((a) => {
-                      return (
-                        <li key={a.id}>
+                <MenuLink onClick={onClose} to="/profile/notifications">
+                  {t("yourFeed")}
+                </MenuLink>
+              </li>
+
+              <li>
+                <MenuLink onClick={onClose} to="/profile/collection">
+                  {t("collection")}
+                </MenuLink>
+              </li>
+              <li
+                aria-hidden
+                className="border-t border-(--mi-tint-x-color) my-2"
+              />
+              <CanCreateArtists>
+                {isLabelAccount && (
+                  <>
+                    <li>
+                      <MenuLink onClick={onClose} to="/account/label">
+                        {t("manageLabel")}
+                      </MenuLink>
+                    </li>
+                    {(() => {
+                      const labelArtist = artists?.find(
+                        (a) => a.isLabelProfile
+                      );
+                      return labelArtist?.urlSlug ? (
+                        <li>
                           <MenuLink
                             onClick={onClose}
-                            title={a.name}
-                            to={getArtistManageUrl(a.id)}
+                            to={`/${labelArtist.urlSlug}`}
                           >
-                            <span className="flex items-center justify-between gap-2">
-                              <span className="min-w-0 truncate">{a.name}</span>
-                              {a.relationship === "manager" && (
-                                <span className="shrink-0 text-xs opacity-75">
-                                  {t("sharedWithYou")}
-                                </span>
-                              )}
+                            <span className="flex items-center gap-2">
+                              <span className="min-w-0 wrap-anywhere">
+                                {t("viewLabelPage", {
+                                  labelName: labelArtist.name,
+                                })}
+                              </span>
+                              <FaArrowRight className="shrink-0 text-xs" />
                             </span>
                           </MenuLink>
                         </li>
-                      );
-                    })}
-                </ul>
+                      ) : null;
+                    })()}
+                  </>
+                )}
+                {!isLabelAccount && (
+                  <li>
+                    <MenuLink onClick={onClose} to="/manage">
+                      {t("manage")}
+                    </MenuLink>
+                  </li>
+                )}
+                <li>
+                  <ul
+                    className={css`
+                      margin: 0;
+                      padding: 0;
+                      max-height: 190px;
+                      overflow-y: auto;
+                      border-top: 1px solid var(--mi-tint-x-color);
+                      border-bottom: 1px solid var(--mi-tint-x-color);
+                      background-color: var(--mi-darken-background-color);
+                      box-shadow:
+                        inset 0 4px 4px -4px rgba(0, 0, 0, 0.15),
+                        inset 0 -4px 4px -4px rgba(0, 0, 0, 0.15);
+                    `}
+                  >
+                    {isLoading && (
+                      <LoadingBlocks rows={1} height="2rem" margin=".25rem" />
+                    )}
+                    {artists
+                      ?.filter((a) => !a.isLabelProfile)
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map((a) => {
+                        return (
+                          <li key={a.id}>
+                            <MenuLink
+                              onClick={onClose}
+                              title={a.name}
+                              to={getArtistManageUrl(a.id)}
+                            >
+                              <span className="flex items-center justify-between gap-2">
+                                <span className="min-w-0 truncate">
+                                  {a.name}
+                                </span>
+                                {a.relationship === "manager" && (
+                                  <span className="shrink-0 text-xs opacity-75">
+                                    {t("sharedWithYou")}
+                                  </span>
+                                )}
+                              </span>
+                            </MenuLink>
+                          </li>
+                        );
+                      })}
+                  </ul>
+                </li>
+              </CanCreateArtists>
+              {seeOrderPages && (
+                <>
+                  <li>
+                    <MenuLink onClick={onClose} to="/sales">
+                      {t("viewSalesPage")}
+                    </MenuLink>
+                  </li>
+                  <li>
+                    <MenuLink onClick={onClose} to="/fulfillment">
+                      {t("fulfillment")}
+                    </MenuLink>
+                  </li>
+                </>
+              )}
+              <li>
+                <MenuLink onClick={onClose} to="/account">
+                  {t("account")}
+                </MenuLink>
               </li>
-            </CanCreateArtists>
-            {seeOrderPages && (
-              <>
-                <li>
-                  <MenuLink onClick={onClose} to="/sales">
-                    {t("viewSalesPage")}
-                  </MenuLink>
-                </li>
-                <li>
-                  <MenuLink onClick={onClose} to="/fulfillment">
-                    {t("fulfillment")}
-                  </MenuLink>
-                </li>
-              </>
-            )}
-            <li>
-              <MenuLink onClick={onClose} to="/account">
-                {t("account")}
-              </MenuLink>
-            </li>
-            {isAdmin && (
-              <>
-                <li>
-                  <MenuLink onClick={onClose} to="/admin">
-                    {t("admin")}
-                  </MenuLink>
-                </li>
-                <li>
-                  <MenuLink onClick={onClose} to="/flagged-content">
-                    <span className="flex items-center gap-2">
-                      {t("flaggedContent")}
-                      <UnresolvedContentFlagsPill />
-                    </span>
-                  </MenuLink>
-                </li>
-              </>
-            )}
-            <li
-              aria-hidden
-              className="border-t border-(--mi-tint-x-color) my-2"
-            />
-            <li>
-              <MenuLink onClick={onClose} to="https://docs.mirlo.space">
-                {t("about")}
-              </MenuLink>
-            </li>
-          </ul>
-        </nav>
-        <Button
-          onClick={() => {
-            onClose();
-            onLogOut();
-          }}
-        >
-          {t("logOut")}
-        </Button>
-      </div>
-    </dialog>
-  );
-});
+              {isAdmin && (
+                <>
+                  <li>
+                    <MenuLink onClick={onClose} to="/admin">
+                      {t("admin")}
+                    </MenuLink>
+                  </li>
+                  <li>
+                    <MenuLink onClick={onClose} to="/flagged-content">
+                      <span className="flex items-center gap-2">
+                        {t("flaggedContent")}
+                        {!needsAdminVerification && (
+                          <UnresolvedContentFlagsPill />
+                        )}
+                      </span>
+                    </MenuLink>
+                  </li>
+                </>
+              )}
+              <li
+                aria-hidden
+                className="border-t border-(--mi-tint-x-color) my-2"
+              />
+              <li>
+                <MenuLink onClick={onClose} to="https://docs.mirlo.space">
+                  {t("about")}
+                </MenuLink>
+              </li>
+            </ul>
+          </nav>
+          <Button
+            onClick={() => {
+              onClose();
+              onLogOut();
+            }}
+          >
+            {t("logOut")}
+          </Button>
+        </div>
+      </dialog>
+    );
+  }
+);
 
 export default Menu;

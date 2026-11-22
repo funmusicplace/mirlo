@@ -6,7 +6,9 @@ import type { Logger } from "winston";
 
 declare global {
   namespace Express {
-    interface User extends PrismaUser {}
+    interface User extends PrismaUser {
+      mfaAt?: number;
+    }
     interface Request {
       client?: PrismaClient;
       oauth?: { clientId: string; scopes: string[] };

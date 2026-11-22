@@ -25,7 +25,8 @@ const refresh = (req: Request, res: Response, next: NextFunction) => {
           } else {
             // Correct token we send a new access token
 
-            const { email, id, tokenVersion } = (decoded as JwtPayload) ?? {};
+            const { email, id, tokenVersion, mfaAt } =
+              (decoded as JwtPayload) ?? {};
             const foundUser =
               email && id
                 ? await prisma.user.findFirst({ where: { id, email } })
@@ -35,7 +36,7 @@ const refresh = (req: Request, res: Response, next: NextFunction) => {
               return res.status(401).json({ error: "Unauthorized" });
             }
 
-            setTokens(res, foundUser);
+            setTokens(res, foundUser, mfaAt);
 
             res.status(200).json({
               message: "Success",

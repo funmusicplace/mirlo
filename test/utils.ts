@@ -126,7 +126,10 @@ export const createUser = async (data: Prisma.UserCreateArgs["data"]) => {
     data: createData,
   });
 
-  const { accessToken } = buildTokens(user);
+  const { accessToken } = buildTokens(
+    user,
+    user.isAdmin ? Date.now() : undefined
+  );
 
   return {
     user,

@@ -809,6 +809,15 @@ const routes: RouteObject[] = [
             },
           },
           {
+            path: "security",
+            handle: { title: "adminSecurity" },
+            async lazy() {
+              const { default: Component } =
+                await import("pages/admin/security/Index");
+              return { Component };
+            },
+          },
+          {
             path: "send-emails",
             handle: { title: "adminSendEmails" },
             async lazy() {

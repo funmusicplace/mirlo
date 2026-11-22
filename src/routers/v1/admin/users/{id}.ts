@@ -8,6 +8,7 @@ import {
 } from "../../../../auth/passport";
 import { serializeUser } from "../../../../serializers/user";
 import { AppError } from "../../../../utils/error";
+import { sendSecurityAlert } from "../../../../utils/securityAlerts";
 import { isTrustLevel, setUserTrustLevel } from "../../../../utils/trustLevel";
 import { deleteUser } from "../../../../utils/user";
 
@@ -49,8 +50,13 @@ export default function () {
           description: "Invalid trust level",
         });
       }
-      await prisma.user.update({
+      const previous = await prisma.user.findUnique({
         where: { id: Number(req.params.id) },
+        select: { isAdmin: true },
+      });
+      const updated = await prisma.user.update({
+        where: { id: Number(req.params.id) },
+        select: { email: true, isAdmin: true },
         data: {
           email: email?.trim().toLowerCase(),
           isLabelAccount,
@@ -70,6 +76,13 @@ export default function () {
       });
       if (disabled) {
         await revokeAllConnectedApps(Number(req.params.id));
+      }
+      if (previous && previous.isAdmin !== updated.isAdmin) {
+        await sendSecurityAlert(
+          req,
+          updated.isAdmin ? "adminGranted" : "adminRevoked",
+          { target: updated.email }
+        );
       }
       if (trustLevel !== undefined && req.user) {
         await setUserTrustLevel(Number(req.params.id), trustLevel, "ADMIN", {

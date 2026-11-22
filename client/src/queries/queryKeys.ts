@@ -9,6 +9,8 @@ import { identity, isMatch, pickBy } from "lodash";
  */
 export const QUERY_KEY_AUTH = "auth";
 
+export const QUERY_KEY_ADMIN_MFA = "admin-mfa";
+
 /**
  * Categorizes any query that should be invalidated when any artist is changed,
  * regardless of the artistId/artistSlug.
