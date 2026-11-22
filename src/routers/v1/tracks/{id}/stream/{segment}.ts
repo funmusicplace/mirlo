@@ -1,6 +1,6 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 import { isEmbeddedOnAnotherSite } from "../../../../../auth/firstParty";
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
@@ -42,7 +42,8 @@ const playlistLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => isDev || req.params.segment !== "playlist.m3u8",
-  keyGenerator: (req) => (req.user ? `user:${req.user.id}` : (req.ip ?? "")),
+  keyGenerator: (req) =>
+    req.user ? `user:${req.user.id}` : ipKeyGenerator(req.ip ?? ""),
   handler: (_req, _res, next) =>
     next(
       new AppError({

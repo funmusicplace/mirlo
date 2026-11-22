@@ -15678,7 +15678,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-rate-limit@npm:8":
+"express-rate-limit@npm:8, express-rate-limit@npm:8.2.1":
   version: 8.2.1
   resolution: "express-rate-limit@npm:8.2.1"
   dependencies:
@@ -15686,15 +15686,6 @@ __metadata:
   peerDependencies:
     express: ">= 4.11"
   checksum: 10/7cbf70df2e88e590e463d2d8f93380775b2ea181d97f2c50c2ff9f2c666c247f83109a852b21d9c99ccc5762119101f281f54a27252a2f1a0a918be6d71f955b
-  languageName: node
-  linkType: hard
-
-"express-rate-limit@npm:^7.1.4":
-  version: 7.5.1
-  resolution: "express-rate-limit@npm:7.5.1"
-  peerDependencies:
-    express: ">= 4.11"
-  checksum: 10/357c3398450144ab7bbce2841d0bf4f93a0f3fd9d1d5ed9a0ee331b557af969cc790941dc37b47f8d9b5672964aa0e31666f770e1f48b334dc7d1e69f6433040
   languageName: node
   linkType: hard
 
@@ -21434,7 +21425,7 @@ __metadata:
     eslint-plugin-unused-imports: "npm:^4.4.1"
     express: "npm:^5.1.0"
     express-openapi: "npm:^12.1.3"
-    express-rate-limit: "npm:^7.1.4"
+    express-rate-limit: "npm:8.2.1"
     express-slow-down: "npm:^3.0.0"
     file-type: "npm:16"
     filenamify: "npm:^4.3.0"
