@@ -1295,8 +1295,13 @@ export const completePurchaseFromIntent = async (
 
   const items =
     (await findResolvedItems(metadata.checkoutId)) ??
-    (await itemsFromLegacyMetadata(metadata)) ??
-    [];
+    (await itemsFromLegacyMetadata(metadata));
+  if (!items?.length) {
+    throw new AppError({
+      httpCode: 500,
+      description: `completePurchaseFromIntent: no items found for ${intent.id} (checkout ${metadata.checkoutId})`,
+    });
+  }
 
   const payment = await completedPaymentFromIntent(intent, accountId);
 

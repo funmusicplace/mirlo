@@ -1132,6 +1132,30 @@ describe("purchase", () => {
       assert.equal(response.body.stripeAccountId, "acct_tip_test");
     });
 
+    it("records the intent on the checkout it opens for a purchase made without one", async () => {
+      const { user: artistUser } = await createUser({
+        email: "artist@test.com",
+        stripeAccountId: "acct_tip_test",
+      });
+      const { accessToken } = await createUser({ email: "buyer@test.com" });
+      const profile = await createProfile(artistUser.id);
+
+      const response = await postPurchase(
+        {
+          artistId: profile.id,
+          items: [{ type: "tip", amount: 500 }],
+        },
+        accessToken
+      );
+
+      assert.equal(response.statusCode, 200);
+      const checkout = await prisma.checkout.findFirstOrThrow({
+        where: { profileId: profile.id },
+      });
+      assert.ok(checkout.stripeId);
+      assert.equal(checkout.stripeAccountId, "acct_tip_test");
+    });
+
     it("should return 200 with clientSecret for a catalogue purchase at the floor price", async () => {
       const { user: artistUser } = await createUser({
         email: "artist@test.com",
