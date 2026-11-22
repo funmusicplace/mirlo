@@ -474,6 +474,7 @@ model Profile {
   properties                          Json?
   defaultPlatformFee                  Int?                                  @default(10) // in percent
   trackArtists                        TrackArtist[]
+  trackGroupArtists                   TrackGroupArtist[]
   links                               String[] // Legacy, use linksJson instead
   /// [ArtistLink]
   linksJson                           Json[]
@@ -958,6 +959,7 @@ model TrackGroup {
   title                           String?
   isHiddenTrackGroupForSongDrafts Boolean                         @default(false)
   tracks                          Track[]
+  trackGroupArtists               TrackGroupArtist[]
   coverImageId                    String?                         @unique @db.Uuid
   cover                           Image?                          @relation("TrackGroupCoverImage", fields: [coverImageId], references: [id])
   publishedAt                     DateTime?
@@ -1168,15 +1170,35 @@ model License {
 }
 
 model TrackArtist {
-  id         String   @id @default(uuid()) @db.Uuid
+  id         String                @id @default(uuid()) @db.Uuid
   trackId    Int
-  track      Track    @relation(fields: [trackId], references: [id])
+  track      Track                 @relation(fields: [trackId], references: [id])
   artistName String?
   artistId   Int?
-  artist     Profile? @relation(fields: [artistId], references: [id])
+  artist     Profile?              @relation(fields: [artistId], references: [id])
   role       String?
-  isCoAuthor Boolean  @default(false)
-  order      Int      @default(0)
+  isCoAuthor Boolean               @default(false)
+  appearsAs  TrackArtistAppearance @default(CREDITS_ONLY)
+  order      Int                   @default(0)
+}
+
+enum TrackArtistAppearance {
+  MAIN
+  FEATURED
+  CREDITS_ONLY
+}
+
+model TrackGroupArtist {
+  id           String     @id @default(uuid()) @db.Uuid
+  trackGroupId Int
+  trackGroup   TrackGroup @relation(fields: [trackGroupId], references: [id], onDelete: Cascade)
+  artistName   String
+  profileId    Int?
+  profile      Profile?   @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  order        Int        @default(0)
+
+  @@unique([trackGroupId, profileId])
+  @@index([profileId])
 }
 
 model TrackAudio {
