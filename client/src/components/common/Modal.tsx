@@ -225,12 +225,13 @@ export const Modal: React.FC<{
     [onClose]
   );
 
+  // A dialog that mounts closed must leave another dialog's lock alone
   React.useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    return () => {
       document.body.style.overflow = "initial";
-    }
+    };
   }, [open]);
 
   const childrenWrapperId = React.useId();
