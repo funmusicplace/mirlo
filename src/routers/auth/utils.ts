@@ -8,7 +8,7 @@ export async function hashPassword(password: string) {
 
 type TokenUser = { email: string; id: number; tokenVersion: number };
 
-export const buildTokens = (user: TokenUser) => {
+export const buildTokens = (user: TokenUser, mfaAt?: number) => {
   const jwt_secret = process.env.JWT_SECRET;
   const refresh_secret = process.env.REFRESH_TOKEN_SECRET;
   if (!jwt_secret || !refresh_secret) {
@@ -21,6 +21,7 @@ export const buildTokens = (user: TokenUser) => {
     email: user.email,
     id: user.id,
     tokenVersion: user.tokenVersion,
+    ...(mfaAt ? { mfaAt } : {}),
   };
 
   const accessToken = jwt.sign(payload, jwt_secret, {
@@ -33,8 +34,8 @@ export const buildTokens = (user: TokenUser) => {
   return { accessToken, refreshToken };
 };
 
-export const setTokens = (res: Response, user: TokenUser) => {
-  const { accessToken, refreshToken } = buildTokens(user);
+export const setTokens = (res: Response, user: TokenUser, mfaAt?: number) => {
+  const { accessToken, refreshToken } = buildTokens(user, mfaAt);
 
   res
     .cookie("jwt", accessToken, {

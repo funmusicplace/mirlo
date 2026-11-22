@@ -17,6 +17,9 @@ export const SECRET_USER_FIELDS = {
   userConfirmationCode: true,
   pendingEmailToken: true,
   saleCount: true,
+  totpSecret: true,
+  totpPendingSecret: true,
+  webauthnChallenge: true,
 } as const;
 
 // A SafeUser is one that omits the secret fields

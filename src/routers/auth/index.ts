@@ -7,6 +7,7 @@ import { plainBodyValuesOnly } from "../../utils/plainInput";
 
 import confirmEmailToken from "./confirmEmailToken";
 import login from "./login";
+import mfa from "./mfa";
 import oauth from "./oauth";
 import {
   passwordResetConfirmation,
@@ -21,6 +22,8 @@ import { clearJWT, setTokens } from "./utils";
 import verifyEmail from "./verifyEmail";
 
 const router = express.Router();
+
+router.use("/mfa", mfa);
 
 router.use(plainBodyValuesOnly);
 

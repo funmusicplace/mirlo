@@ -1,0 +1,28 @@
+extends ../layout.pug
+include ../mixins.pug
+
+block content
+  +greeting()
+  case event
+    when "settingsChanged"
+      p= t("emails.securityAlert.settingsChanged", { actor, fields })
+    when "adminGranted"
+      p= t("emails.securityAlert.adminGranted", { actor, target })
+    when "adminRevoked"
+      p= t("emails.securityAlert.adminRevoked", { actor, target })
+    when "impersonated"
+      p= t("emails.securityAlert.impersonated", { actor, target })
+    when "securityKeyAdded"
+      p= t("emails.securityAlert.securityKeyAdded", { actor, name })
+    when "securityKeyRemoved"
+      p= t("emails.securityAlert.securityKeyRemoved", { actor, name })
+    when "authenticatorEnabled"
+      p= t("emails.securityAlert.authenticatorEnabled", { actor })
+    when "authenticatorDisabled"
+      p= t("emails.securityAlert.authenticatorDisabled", { actor })
+    when "recoveryCodesRegenerated"
+      p= t("emails.securityAlert.recoveryCodesRegenerated", { actor })
+    when "recoveryCodeUsed"
+      p= t("emails.securityAlert.recoveryCodeUsed", { actor, remaining })
+  p= t("emails.securityAlert.when", { time, ip })
+  p= t("emails.securityAlert.notYou")

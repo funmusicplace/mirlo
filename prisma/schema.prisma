@@ -209,6 +209,12 @@ model User {
   lockedUntil                         DateTime?
   disabledAt                          DateTime?
   lastSeenAt                          DateTime?
+  totpSecret                          String?
+  totpPendingSecret                   String?
+  totpLastUsedStep                    Int?
+  webauthnChallenge                   String?
+  webauthnCredentials                 WebAuthnCredential[]
+  recoveryCodes                       UserRecoveryCode[]
   userTrackGroupPurchases             UserTrackGroupPurchase[]
   profileUserSubscriptions            ProfileUserSubscription[]
   wishlist                            UserTrackGroupWishlist[]
@@ -237,6 +243,32 @@ model User {
   trustLevelChangesMade               UserTrustLevelChange[]           @relation("trustLevelChangeActor")
   managedProfiles                     ProfileManager[]                 @relation("profileManagerUser")
   profileManagerInvitesSent           ProfileManager[]                 @relation("profileManagerInvitedBy")
+}
+
+model WebAuthnCredential {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       Int
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credentialId String    @unique
+  publicKey    Bytes
+  counter      BigInt    @default(0)
+  transports   String[]
+  name         String
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  @@index([userId])
+}
+
+model UserRecoveryCode {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 enum TrustLevelChangeReason {

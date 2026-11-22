@@ -7,6 +7,7 @@ import {
   userHasPermission,
 } from "../../../../../auth/passport";
 import { logger } from "../../../../../logger";
+import { sendSecurityAlert } from "../../../../../utils/securityAlerts";
 import { setTokens } from "../../../../auth/utils";
 
 export default function () {
@@ -26,6 +27,7 @@ export default function () {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
+      await sendSecurityAlert(req, "impersonated", { target: user.email });
       setTokens(res, user);
       log.info(`Admin ${req.user.email} logged in as user ${user.email}`);
       res.json({ message: "success" });

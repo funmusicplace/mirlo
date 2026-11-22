@@ -8,6 +8,7 @@ describe("admin content pages", () => {
   let trackGroupId: number;
   let trackId: number;
   let userId: number;
+  let adminAccessToken: string;
 
   before(() => {
     cy.task("clearTables");
@@ -21,6 +22,7 @@ describe("admin content pages", () => {
     })
       .then((user: any) => {
         userId = user.user.id;
+        adminAccessToken = user.accessToken;
         return cy.task("createArtist", {
           userId,
           name: "Example Artist",
@@ -51,7 +53,7 @@ describe("admin content pages", () => {
   beforeEach(() => {
     cy.intercept("GET", "/auth/profile").as("authProfile");
 
-    cy.login({ email: adminUserEmail, password: adminPassword });
+    cy.setCookie("jwt", adminAccessToken, { httpOnly: true });
   });
 
   it("renders the content nav and links to each section", () => {

@@ -158,6 +158,7 @@ interface LoggedInUser {
     amount: number;
   }[];
   isAdmin: boolean;
+  needsAdminVerification?: boolean;
   currency?: string;
   featureFlags?: string[];
   isLabelAccount: boolean;

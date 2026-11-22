@@ -1,5 +1,6 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+import { isEqual, union } from "lodash";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import logger from "../../../logger";
@@ -8,6 +9,7 @@ import { AppError } from "../../../utils/error";
 import { assertFontIdExists } from "../../../utils/font";
 import { setCdnUrl } from "../../../utils/images";
 import { clearPageCache } from "../../../utils/pageCache";
+import { sendSecurityAlert } from "../../../utils/securityAlerts";
 import {
   getSiteSettings,
   resolveFromEmail,
@@ -21,6 +23,27 @@ import {
 } from "../../../utils/storage";
 import { refreshStripeClient, stripeKeyMode } from "../../../utils/stripe";
 import { isTrustLevelNames } from "../../../utils/trustLevel";
+
+const comparable = (value: unknown) =>
+  value === undefined ? null : JSON.parse(JSON.stringify(value));
+
+const changedSettingsFields = (
+  before: Record<string, unknown> & { settings: Record<string, unknown> },
+  after: Record<string, unknown> & { settings: Record<string, unknown> }
+) => [
+  ...union(Object.keys(before.settings), Object.keys(after.settings))
+    .filter(
+      (key) =>
+        !isEqual(
+          comparable(before.settings[key]),
+          comparable(after.settings[key])
+        )
+    )
+    .map((key) => `settings.${key}`),
+  ...Object.keys(after)
+    .filter((key) => key !== "settings" && after[key] !== undefined)
+    .filter((key) => !isEqual(comparable(before[key]), comparable(after[key]))),
+];
 
 export default function () {
   const operations = {
@@ -228,6 +251,29 @@ export default function () {
           id: existingSettings.id,
         },
       });
+      const changedFields = changedSettingsFields(
+        { ...existingSettings, settings: storedSettings },
+        {
+          settings: mergedSettings,
+          terms,
+          privacyPolicy,
+          cookiePolicy,
+          contentPolicy,
+          isClosedToPublicArtistSignup,
+          showQueueDashboard,
+          cdnUrl,
+          bucketNames,
+          headingFontId,
+          bodyFontId,
+          defconLevel:
+            defconLevel === undefined ? undefined : Number(defconLevel),
+        }
+      );
+      if (changedFields.length > 0) {
+        await sendSecurityAlert(req, "settingsChanged", {
+          fields: changedFields.join(", "),
+        });
+      }
       setCdnUrl(cdnUrl ?? undefined);
       await refreshStripeClient();
       if (bucketNames !== undefined) {

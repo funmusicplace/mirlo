@@ -240,7 +240,8 @@ const Header = () => {
             createPortal(
               <Menu
                 dialogId={menuDialogId}
-                isAdmin={user.isAdmin}
+                isAdmin={user.isAdmin || !!user.needsAdminVerification}
+                needsAdminVerification={user.needsAdminVerification}
                 isLabelAccount={user.isLabelAccount}
                 onClose={() => closeMenu()}
                 ref={menuRef}
