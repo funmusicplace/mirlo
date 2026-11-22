@@ -38,18 +38,18 @@ services:
           property: port
 
   # Umami analytics (https://umami.is)
-  # Runs against a separate `umami` database inside the existing blackbrd
-  # Postgres instance. Umami is itself a Prisma app, so it must NOT share
-  # Mirlo's database — both would write to the same _prisma_migrations table.
-  # umami/entrypoint.sh does the DATABASE_URL rewrite to point at /umami;
-  # blueprints don't support string interpolation in env var values, and
-  # Render's dockerCommand field doesn't reliably preserve shell quoting for
-  # && chains (it fails with "not found" on the whole command string), so
-  # that logic lives in the Dockerfile instead — matches the pattern in the
-  # root Dockerfile's own CMD.
-  # One-time setup:
-  #   1. psql <blackbrd external connection string>
-  #   2. CREATE DATABASE umami;
+  # Runs against a separate database inside the existing blackbrd Postgres
+  # instance, as its own `umami` role, so a compromised Umami can't read
+  # Mirlo's data. Umami is itself a Prisma app, so it must NOT share Mirlo's
+  # database — both would write to the same _prisma_migrations table.
+  # One-time setup, as blackbrd (temporarily add your IP to the database's
+  # ipAllowList):
+  #   CREATE ROLE umami LOGIN PASSWORD '<random>';
+  #   GRANT umami TO blackbrd;
+  #   CREATE DATABASE umami_app OWNER umami;
+  #   REVOKE CONNECT ON DATABASE umami_app FROM PUBLIC;
+  #   REVOKE CONNECT ON DATABASE <mirlo database> FROM PUBLIC;
+  # Then set DATABASE_URL to postgres://umami:<random>@<internal host>/umami_app.
   # Default login is admin / umami — change it immediately after first deploy.
   - type: web
     name: umami
@@ -60,10 +60,8 @@ services:
     autoDeploy: false
     healthCheckPath: /api/heartbeat
     envVars:
-      - key: BASE_DATABASE_URL
-        fromDatabase:
-          name: blackbrd
-          property: connectionString
+      - key: DATABASE_URL
+        sync: false
       - key: DATABASE_TYPE
         value: postgresql
       - key: APP_SECRET
@@ -104,9 +102,7 @@ services:
   # A Redis instance
   - type: redis
     name: redis
-    ipAllowList: # required
-      - source: 0.0.0.0/0
-        description: everywhere
+    ipAllowList: [] # internal connections only
     plan: standard # optional (defaults to starter)
     maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
 
@@ -115,11 +111,8 @@ databases:
     plan: standard
     # databaseName: postgres # optional (Render may add a suffix)
     user: blackbrd # optional
-  #   ipAllowList: # optional (defaults to allow all)
-  #     - source: 203.0.113.4/30
-  #       description: office
-  #     - source: 198.51.100.1
-  #       description: home
+    ipAllowList: [] # internal connections only; add your IP temporarily for psql
+
 
   # - name: private database
   #   databaseName: private
