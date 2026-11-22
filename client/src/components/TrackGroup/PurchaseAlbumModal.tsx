@@ -29,14 +29,16 @@ const PurchaseAlbumModal: React.FC<{
   fixed?: boolean;
   compact?: boolean;
   labelTarget?: "track" | "album";
-}> = ({ trackGroup, track, fixed, compact, labelTarget }) => {
+  openFromLink?: boolean;
+}> = ({ trackGroup, track, fixed, compact, labelTarget, openFromLink }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPurchasingAlbum, setIsPurchasingAlbum] = React.useState(false);
   const { data: artist } = useQuery(
     queryArtist({ artistSlug: trackGroup.artist.urlSlug })
   );
-  const wantsToBuy = searchParams.get("buy") === "true";
+  // A page can mount this button more than once, so only one opts in
+  const wantsToBuy = openFromLink && searchParams.get("buy") === "true";
 
   React.useEffect(() => {
     if (wantsToBuy && artist) {

@@ -253,7 +253,10 @@ function Index() {
                               trackGroup={trackGroup}
                             />
                           )}
-                          <PurchaseOrDownloadAlbum trackGroup={trackGroup} />
+                          <PurchaseOrDownloadAlbum
+                            trackGroup={trackGroup}
+                            openFromLink
+                          />
                         </div>
                       </UnderneathImage>
                       {trackGroup.merch && trackGroup.merch.length > 0 && (

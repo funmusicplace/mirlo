@@ -188,7 +188,11 @@ const SingleTrackView: React.FC<{
   const { isVisible: hasPrimaryAction } =
     useReleasePurchaseState(purchaseProps);
   const primaryAction = hasPrimaryAction ? (
-    <PurchaseOrDownloadAlbum {...purchaseProps} labelTarget={labelTarget} />
+    <PurchaseOrDownloadAlbum
+      {...purchaseProps}
+      labelTarget={labelTarget}
+      openFromLink
+    />
   ) : undefined;
 
   const showTrackSubtitle =
