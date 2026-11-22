@@ -1,7 +1,9 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
+import { isFromMirloOrApprovedClient } from "../../../../../auth/firstParty";
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
+import { AppError, HttpCode } from "../../../../../utils/error";
 import { canUserListenToTrack } from "../../../../../utils/ownership";
 import { getAudioSegmentBufferIfExists } from "../../../../../utils/storage";
 import { whereForTrackGroupVisibleTo } from "../../../../../utils/trackGroup";
@@ -65,6 +67,19 @@ export default function () {
       if (!track || !isUserAbleToListenToTrack) {
         res.status(404);
         return next();
+      }
+
+      if (
+        segment.includes("playlist.m3u8") &&
+        !isFromMirloOrApprovedClient(req)
+      ) {
+        return next(
+          new AppError({
+            httpCode: HttpCode.FORBIDDEN,
+            description:
+              "Streaming is only available on Mirlo or in apps approved by this instance",
+          })
+        );
       }
 
       if (
