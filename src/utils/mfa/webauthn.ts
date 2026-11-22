@@ -38,7 +38,7 @@ export const registrationOptions = (
     rpName: instanceName,
     rpID: relyingParty().rpID,
     userName: user.email,
-    userID: new TextEncoder().encode(`mirlo-user-${user.id}`),
+    userID: new Uint8Array(new TextEncoder().encode(`mirlo-user-${user.id}`)),
     attestationType: "none",
     excludeCredentials: existing.map(descriptor),
     authenticatorSelection: {
