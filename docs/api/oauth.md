@@ -119,7 +119,7 @@ Errors follow RFC 6750:
 - `401` with `WWW-Authenticate: Bearer error="invalid_token"`: the token expired, was revoked, the app was blocked on the instance, or the user's account was disabled. Refresh it, or start the flow again.
 - `403` with `error="insufficient_scope", scope="…"`: the route needs a scope your token doesn't have.
 
-To stream audio as the user, send the same `Authorization` header on the HLS manifest (`/v1/tracks/{id}/stream/playlist.m3u8`) and on every segment request. Without it, segments of tracks that aren't previews return `404`.
+To stream audio as the user, send the same `Authorization` header on the HLS manifest (`/v1/tracks/{id}/stream/playlist.m3u8`) and on every segment request. Without it, segments of tracks that aren't previews return `404`. A browser app on another site needs the token (or a `mirlo-api-key`) on the manifest even for previews: Mirlo refuses manifests requested from other sites without one, with `403`.
 
 ### What `api` tokens can do
 

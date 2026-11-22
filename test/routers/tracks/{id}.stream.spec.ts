@@ -1,4 +1,5 @@
 import assert from "node:assert";
+import { randomInt } from "node:crypto";
 import { Readable } from "node:stream";
 
 import prisma from "@mirlo/prisma";
@@ -141,9 +142,15 @@ describe("tracks/{id}/stream/{segment}", () => {
       );
     });
 
-    it("limits how many playlists one IP can start", async function () {
+    it("limits how many playlists one IP can start, but not logged-in users on it", async function () {
       this.timeout(60000);
       const path = await setup();
+      const { accessToken } = await createUser({
+        email: "listener@listener.com",
+      });
+      const randomIp = () =>
+        `10.${randomInt(256)}.${randomInt(256)}.${randomInt(1, 255)}`;
+      const sharedIp = randomIp();
       const fromIp = (ip: string) =>
         requestApp
           .get(path)
@@ -151,14 +158,19 @@ describe("tracks/{id}/stream/{segment}", () => {
           .set("X-Forwarded-For", ip);
 
       const allowed = await Promise.all(
-        Array.from({ length: 100 }, () => fromIp("203.0.113.7"))
+        Array.from({ length: 100 }, () => fromIp(sharedIp))
       );
       assert.deepEqual(
         allowed.map((r) => r.statusCode),
         Array(100).fill(200)
       );
-      assert.equal((await fromIp("203.0.113.7")).statusCode, 429);
-      assert.equal((await fromIp("203.0.113.8")).statusCode, 200);
+      assert.equal((await fromIp(sharedIp)).statusCode, 429);
+      assert.equal((await fromIp(randomIp())).statusCode, 200);
+      assert.equal(
+        (await fromIp(sharedIp).set("Cookie", [`jwt=${accessToken}`]))
+          .statusCode,
+        200
+      );
     });
   });
 });

@@ -935,7 +935,9 @@
     "buyThisTrack": "Buy this track",
     "buyThisAlbum": "Buy this album",
     "preOrderThisTrack": "Pre-order this track",
-    "preOrderThisAlbum": "Pre-order this album"
+    "preOrderThisAlbum": "Pre-order this album",
+    "tooManyTracksStarted": "Too many tracks were started from your network. Try again in a few minutes, or log in to keep listening.",
+    "cantPlayHere": "This track can't be played on this site."
   },
   "post": {
     "postByArtist": "by <link></link>",

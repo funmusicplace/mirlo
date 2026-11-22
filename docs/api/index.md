@@ -30,6 +30,8 @@ API keys are scoped to a registered client application.
 - **On mirlo.space:** Email [hi@mirlo.space](mailto:hi@mirlo.space) to request a key. Include a brief description of what you're building.
 - **Self-hosted instances:** You can issue a key directly by editing the `client` table in the database.
 
+If your app plays audio in a browser on its own site, send the key on HLS manifest requests (`/v1/tracks/{id}/stream/playlist.m3u8`), for example from hls.js's `xhrSetup`. Mirlo refuses manifests requested from other sites without a key or [OAuth token](./oauth.md), with `403`. Each IP can start 100 manifests every 10 minutes (`429` after that); logged-in users are counted per account instead.
+
 ### Acting on behalf of a user
 
 To read or change a user's data, don't ask for their password. Use [Sign in with Mirlo](./oauth.md), a standard OAuth 2.1 / OpenID Connect flow. Apps that identify themselves with a Client ID Metadata Document can connect to any Mirlo instance once that instance's admins approve them, with no key needed.
