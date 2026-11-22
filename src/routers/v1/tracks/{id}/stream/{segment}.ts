@@ -1,5 +1,6 @@
 import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
+import rateLimit from "express-rate-limit";
 
 import { isFromMirloOrApprovedClient } from "../../../../../auth/firstParty";
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
@@ -33,9 +34,24 @@ export const fetchFile = async (
   }
 };
 
+const playlistLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.params.segment !== "playlist.m3u8",
+  handler: (_req, _res, next) =>
+    next(
+      new AppError({
+        httpCode: HttpCode.TOO_MANY_REQUESTS,
+        description: "Too many tracks started, please try again later",
+      })
+    ),
+});
+
 export default function () {
   const operations = {
-    GET: [userLoggedInWithoutRedirect, GET],
+    GET: [playlistLimiter, userLoggedInWithoutRedirect, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {

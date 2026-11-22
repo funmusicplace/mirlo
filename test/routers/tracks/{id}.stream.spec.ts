@@ -135,5 +135,25 @@ describe("tracks/{id}/stream/{segment}", () => {
         403
       );
     });
+
+    it("limits how many playlists one IP can start", async function () {
+      this.timeout(60000);
+      const path = await setup();
+      const fromIp = (ip: string) =>
+        requestApp
+          .get(path)
+          .set("Sec-Fetch-Site", "same-origin")
+          .set("X-Forwarded-For", ip);
+
+      const allowed = await Promise.all(
+        Array.from({ length: 100 }, () => fromIp("203.0.113.7"))
+      );
+      assert.deepEqual(
+        allowed.map((r) => r.statusCode),
+        Array(100).fill(200)
+      );
+      assert.equal((await fromIp("203.0.113.7")).statusCode, 429);
+      assert.equal((await fromIp("203.0.113.8")).statusCode, 200);
+    });
   });
 });
