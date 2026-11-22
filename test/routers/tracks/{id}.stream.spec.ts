@@ -13,6 +13,7 @@ import {
 } from "../../../src/utils/storage";
 import {
   clearTables,
+  createClient,
   createProfile,
   createTrack,
   createTrackGroup,
@@ -79,5 +80,60 @@ describe("tracks/{id}/stream/{segment}", () => {
 
     const response = await requestApp.get(`tracks/${audio.id}/audio`);
     assert.equal(response.statusCode, 404);
+  });
+
+  describe("who may fetch the playlist", () => {
+    const setup = async () => {
+      const { user } = await createUser({ email: "artist@artist.com" });
+      const profile = await createProfile(user.id);
+      const trackGroup = await createTrackGroup(profile.id);
+      const track = await createTrack(trackGroup.id, { isPreview: true });
+      const audio = await prisma.trackAudio.findFirstOrThrow({
+        where: { trackId: track.id },
+      });
+      await createBucketIfNotExists(getAudioBucket());
+      await uploadAudioHlsFile(
+        audio.id,
+        "playlist.m3u8",
+        Readable.from(Buffer.from("#EXTM3U"))
+      );
+      return `tracks/${track.id}/stream/playlist.m3u8`;
+    };
+
+    it("serves Mirlo's own pages", async () => {
+      const path = await setup();
+
+      for (const site of ["same-origin", "same-site"]) {
+        const response = await requestApp.get(path).set("Sec-Fetch-Site", site);
+        assert.equal(response.statusCode, 200, site);
+      }
+    });
+
+    it("serves approved clients", async () => {
+      const path = await setup();
+      const client = await createClient("stream-test-key");
+
+      const response = await requestApp
+        .get(path)
+        .set("mirlo-api-key", client.key ?? "");
+      assert.equal(response.statusCode, 200);
+    });
+
+    it("refuses other sites and servers", async () => {
+      const path = await setup();
+      await createClient("stream-test-key");
+
+      assert.equal((await requestApp.get(path)).statusCode, 403);
+      assert.equal(
+        (await requestApp.get(path).set("Sec-Fetch-Site", "cross-site"))
+          .statusCode,
+        403
+      );
+      assert.equal(
+        (await requestApp.get(path).set("mirlo-api-key", "not-a-key"))
+          .statusCode,
+        403
+      );
+    });
   });
 });
