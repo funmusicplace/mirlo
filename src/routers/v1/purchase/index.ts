@@ -453,13 +453,16 @@ export default function () {
       };
 
       // So a retry can cancel this intent, or see that it was paid.
-      const recordIntent = async (intent: {
-        stripeId: string;
-        stripeAccountId: string;
-      }) => {
-        if (checkout) {
+      const recordIntent = async (
+        intent: {
+          stripeId: string;
+          stripeAccountId: string;
+        },
+        checkoutId = checkout?.id
+      ) => {
+        if (checkoutId) {
           await prisma.checkout.update({
-            where: { id: checkout.id },
+            where: { id: checkoutId },
             data: intent,
           });
         }
@@ -863,10 +866,13 @@ export default function () {
       });
 
       if ("clientSecret" in result) {
-        await recordIntent({
-          stripeId: result.paymentIntentId,
-          stripeAccountId: result.stripeAccountId,
-        });
+        await recordIntent(
+          {
+            stripeId: result.paymentIntentId,
+            stripeAccountId: result.stripeAccountId,
+          },
+          checkoutId
+        );
       }
 
       if ("clientSecret" in result && requiresShipping) {

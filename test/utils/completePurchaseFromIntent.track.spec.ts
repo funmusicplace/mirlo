@@ -158,7 +158,7 @@ describe("completePurchaseFromIntent - track routing", () => {
     assert.equal(purchase?.message, message);
   });
 
-  it("does nothing when a 'track' intent carries no items", async () => {
+  it("refuses a 'track' intent that carries no items", async () => {
     const { user: artistUser } = await createUser({
       email: "artist@test.com",
     });
@@ -177,7 +177,10 @@ describe("completePurchaseFromIntent - track routing", () => {
       },
     } as unknown as Stripe.PaymentIntent;
 
-    await completePurchaseFromIntent(intent, "acct_track_webhook_2");
+    await assert.rejects(
+      completePurchaseFromIntent(intent, "acct_track_webhook_2"),
+      /no items found/
+    );
 
     const count = await prisma.userTrackPurchase.count({
       where: { userId: buyer.id },
