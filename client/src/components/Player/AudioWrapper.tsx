@@ -1,7 +1,9 @@
 import Hls, { HlsConfig } from "hls.js";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
+import { useSnackbar } from "state/SnackbarContext";
 
 import SongTimeDisplay from "../common/SongTimeDisplay";
 
@@ -57,6 +59,8 @@ export const AudioWrapper: React.FC<{
   const [hasShownBuyModalBeenShown, setHasShownBuyModalBeenShown] =
     React.useState(false);
   const [hasOverplayedSong, setHasOverplayedSong] = React.useState(false);
+  const { t } = useTranslation("translation", { keyPrefix: "player" });
+  const snackbar = useSnackbar();
   const {
     state: { playerQueueIds, currentlyPlayingIndex, playing, looping },
     dispatch,
@@ -338,6 +342,12 @@ export const AudioWrapper: React.FC<{
                 responseText.includes("Track play limit exceeded");
               if (isPlayLimitExceeded && !hasShownBuyModalBeenShown) {
                 setHasOverplayedSong(true);
+              } else if (status === 403 || status === 429) {
+                dispatch({ type: "setPlaying", playing: false });
+                snackbar(
+                  t(status === 429 ? "tooManyTracksStarted" : "cantPlayHere"),
+                  { type: "warning" }
+                );
               }
             }
           }}

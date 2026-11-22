@@ -34,12 +34,15 @@ export const fetchFile = async (
   }
 };
 
+const isDev = process.env.NODE_ENV === "development";
+
 const playlistLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   limit: 100,
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => req.params.segment !== "playlist.m3u8",
+  skip: (req) => isDev || req.params.segment !== "playlist.m3u8",
+  keyGenerator: (req) => (req.user ? `user:${req.user.id}` : (req.ip ?? "")),
   handler: (_req, _res, next) =>
     next(
       new AppError({
@@ -51,7 +54,7 @@ const playlistLimiter = rateLimit({
 
 export default function () {
   const operations = {
-    GET: [playlistLimiter, userLoggedInWithoutRedirect, GET],
+    GET: [userLoggedInWithoutRedirect, playlistLimiter, GET],
   };
 
   async function GET(req: Request, res: Response, next: NextFunction) {
@@ -139,6 +142,17 @@ export default function () {
         schema: {
           $ref: "#/definitions/Track",
         },
+      },
+      402: {
+        description: "The free play limit for this track is used up",
+      },
+      403: {
+        description:
+          "The playlist was requested from another site without an approved client's mirlo-api-key or OAuth token",
+      },
+      429: {
+        description:
+          "Too many playlists started in 10 minutes, per user when logged in, otherwise per IP",
       },
       default: {
         description: "An error occurred",
