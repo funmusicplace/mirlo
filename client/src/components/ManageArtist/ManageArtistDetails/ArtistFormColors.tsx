@@ -6,12 +6,16 @@ import {
   useTransparentContainerPreview,
 } from "components/ArtistColorsProvider";
 import { InputEl } from "components/common/Input";
-import { useUpdateArtistMutation } from "queries";
+import { Toggle } from "components/common/Toggle";
+import { useForcedColors } from "utils/useForcedColors";
+import { useHighContrast } from "utils/useHighContrast";
+import { useProfileMutation, useUpdateArtistMutation } from "queries";
 import React from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
+import { sampleForcedColorsPalette } from "utils/sampleForcedColorsPalette";
 import useManagedArtistQuery from "utils/useManagedArtistQuery";
 
 import ColorInput from "./ColorInput";
@@ -27,11 +31,15 @@ const ColorInputWrapper = styled.div`
 const ArtistFormColors: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "artistForm" });
   const snackbar = useSnackbar();
-  const { user } = useAuthContext();
+  const { user, refreshLoggedInUser } = useAuthContext();
   const { data: artist } = useManagedArtistQuery();
   const setPreview = useArtistColorsPreview();
   const setTransparentPreview = useTransparentContainerPreview();
+  const accountHighContrast = useHighContrast();
+  const forcedColors = useForcedColors();
   const { mutateAsync: updateArtist, isPending } = useUpdateArtistMutation();
+  const { mutateAsync: updateProfile, isPending: isSavingHcPref } =
+    useProfileMutation();
 
   const { control, getValues, setValue, formState, register } = useFormContext<{
     properties: { colors?: ArtistColors; transparentContainer?: boolean };
@@ -58,6 +66,42 @@ const ArtistFormColors: React.FC = () => {
   const colorsDirty =
     Boolean(formState.dirtyFields.properties?.colors) ||
     Boolean(formState.dirtyFields.properties?.transparentContainer);
+
+  const hcOnForThisArtist = Boolean(
+    artist && !user?.properties?.highContrastOffArtistIds?.includes(artist.id)
+  );
+
+  const onToggleArtistHighContrast = async (enabled: boolean) => {
+    if (!user || !artist) return;
+    const current = user.properties?.highContrastOffArtistIds ?? [];
+    const nextIds = enabled
+      ? current.filter((id) => id !== artist.id)
+      : Array.from(new Set([...current, artist.id]));
+    try {
+      await updateProfile({
+        userId: user.id,
+        properties: {
+          ...(user.properties ?? {}),
+          highContrastOffArtistIds: nextIds,
+        },
+      });
+      await refreshLoggedInUser();
+      snackbar(
+        t(enabled ? "highContrastArtistOnSaved" : "highContrastArtistOffSaved"),
+        { type: "success" }
+      );
+    } catch {
+      snackbar(t("highContrastArtistSaveError"), { type: "warning" });
+    }
+  };
+
+  const onUseBrowserOsColors = () => {
+    const sampled = sampleForcedColorsPalette();
+    setValue("properties.colors", sampled, {
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+  };
 
   const onSaveColors = async () => {
     if (!user || !artist) return;
@@ -112,6 +156,47 @@ const ArtistFormColors: React.FC = () => {
       <legend>{t("customColors")}</legend>
 
       <ColorInputWrapper>
+        {accountHighContrast &&
+          (forcedColors ? (
+            <div>
+              <ArtistButton
+                type="button"
+                variant="outlined"
+                onClick={onUseBrowserOsColors}
+              >
+                {t("useBrowserOsContrastColors")}
+              </ArtistButton>
+              <small
+                className={css`
+                  display: block;
+                  margin-top: 0.25rem;
+                `}
+              >
+                {t("useBrowserOsContrastColorsDescription")}
+              </small>
+            </div>
+          ) : (
+            <div>
+              <Toggle
+                id="input-high-contrast-this-artist"
+                ariaDescribedBy="hint-high-contrast-this-artist"
+                label={t("highContrastForThisArtist")}
+                toggled={hcOnForThisArtist}
+                onClick={(on) => {
+                  void onToggleArtistHighContrast(on);
+                }}
+              />
+              <small
+                id="hint-high-contrast-this-artist"
+                className={css`
+                  display: block;
+                  margin-top: 0.25rem;
+                `}
+              >
+                {t("highContrastForThisArtistDescription")}
+              </small>
+            </div>
+          ))}
         <ColorInput
           name="properties.colors.background"
           title={t("backgroundColor")}
@@ -163,7 +248,7 @@ const ArtistFormColors: React.FC = () => {
         <ArtistButton
           type="button"
           onClick={onSaveColors}
-          disabled={!colorsDirty || isPending}
+          disabled={!colorsDirty || isPending || isSavingHcPref}
           isLoading={isPending}
         >
           {t("saveColors")}
@@ -172,7 +257,7 @@ const ArtistFormColors: React.FC = () => {
           type="button"
           variant="outlined"
           onClick={onCancel}
-          disabled={!colorsDirty || isPending}
+          disabled={!colorsDirty || isPending || isSavingHcPref}
         >
           {t("cancelColors")}
         </ArtistButton>

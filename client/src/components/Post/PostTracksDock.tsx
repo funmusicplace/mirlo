@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { ArtistColorsWrapper } from "components/ArtistColorsProvider";
+import ArtistColorsProvider from "components/ArtistColorsProvider";
 import TrackRow from "components/common/TrackList/TrackRow";
 import React from "react";
 import { createPortal } from "react-dom";
@@ -138,7 +138,7 @@ const PostTracksDock: React.FC<{
   const listId = `post-tracks-dock-list-${postId}`;
 
   return createPortal(
-    <ArtistColorsWrapper>
+    <ArtistColorsProvider>
       <aside
         aria-labelledby={labelId}
         className={`${asideBase} ${collapsed ? "" : expandedHeight}`}
@@ -178,7 +178,7 @@ const PostTracksDock: React.FC<{
           ))}
         </ul>
       </aside>
-    </ArtistColorsWrapper>,
+    </ArtistColorsProvider>,
     document.body
   );
 };

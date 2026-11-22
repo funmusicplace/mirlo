@@ -133,10 +133,11 @@ const fixedVariables = (
 
 export const deriveThemeVariables = (
   colors: ArtistColors,
-  profile: ThemeProfile
+  profile: ThemeProfile,
+  highContrast?: boolean
 ): Record<string, string> => ({
   ...baseVariables(colors, profile),
-  ...tintVariables(colors.background, profile),
-  ...buttonTintVariables(colors.button, profile),
-  ...fixedVariables(colors.background, profile),
+  ...(highContrast ? {} : tintVariables(colors.background, profile)),
+  ...(highContrast ? {} : buttonTintVariables(colors.button, profile)),
+  ...(highContrast ? {} : fixedVariables(colors.background, profile)),
 });
