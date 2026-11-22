@@ -97,6 +97,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
   hidePurchase?: boolean;
   singleTrack?: Track;
   labelTarget?: "track" | "album";
+  openFromLink?: boolean;
 }> = ({
   trackGroup,
   track,
@@ -106,6 +107,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
   hidePurchase,
   singleTrack,
   labelTarget,
+  openFromLink,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const {
@@ -164,6 +166,7 @@ const PurchaseOrDownloadAlbum: React.FC<{
             fixed={fixed}
             compact={collapse}
             labelTarget={labelTarget}
+            openFromLink={openFromLink}
           />
         )}
         {showPreOrdered && (
