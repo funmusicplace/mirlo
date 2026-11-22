@@ -100,38 +100,43 @@ describe("tracks/{id}/stream/{segment}", () => {
       return `tracks/${track.id}/stream/playlist.m3u8`;
     };
 
-    it("serves Mirlo's own pages", async () => {
+    it("serves Mirlo's own pages and browsers without Sec-Fetch-Site", async () => {
       const path = await setup();
 
-      for (const site of ["same-origin", "same-site"]) {
+      for (const site of ["same-origin", "same-site", "none"]) {
         const response = await requestApp.get(path).set("Sec-Fetch-Site", site);
         assert.equal(response.statusCode, 200, site);
       }
+      assert.equal((await requestApp.get(path)).statusCode, 200);
     });
 
-    it("serves approved clients", async () => {
+    it("serves approved clients on other sites", async () => {
       const path = await setup();
       const client = await createClient("stream-test-key");
 
       const response = await requestApp
         .get(path)
+        .set("Sec-Fetch-Site", "cross-site")
         .set("mirlo-api-key", client.key ?? "");
       assert.equal(response.statusCode, 200);
     });
 
-    it("refuses other sites and servers", async () => {
+    it("refuses other sites", async () => {
       const path = await setup();
       await createClient("stream-test-key");
 
-      assert.equal((await requestApp.get(path)).statusCode, 403);
       assert.equal(
         (await requestApp.get(path).set("Sec-Fetch-Site", "cross-site"))
           .statusCode,
         403
       );
       assert.equal(
-        (await requestApp.get(path).set("mirlo-api-key", "not-a-key"))
-          .statusCode,
+        (
+          await requestApp
+            .get(path)
+            .set("Sec-Fetch-Site", "cross-site")
+            .set("mirlo-api-key", "not-a-key")
+        ).statusCode,
         403
       );
     });

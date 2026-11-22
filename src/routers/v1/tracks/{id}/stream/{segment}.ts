@@ -2,7 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 
-import { isFromMirloOrApprovedClient } from "../../../../../auth/firstParty";
+import { isEmbeddedOnAnotherSite } from "../../../../../auth/firstParty";
 import { userLoggedInWithoutRedirect } from "../../../../../auth/passport";
 import { AppError, HttpCode } from "../../../../../utils/error";
 import { canUserListenToTrack } from "../../../../../utils/ownership";
@@ -58,6 +58,16 @@ export default function () {
     const { id, segment }: { id?: string; segment?: string } = req.params;
     const user = req.user;
 
+    if (segment.includes("playlist.m3u8") && isEmbeddedOnAnotherSite(req)) {
+      return next(
+        new AppError({
+          httpCode: HttpCode.FORBIDDEN,
+          description:
+            "Streaming is only available on Mirlo or in apps approved by this instance",
+        })
+      );
+    }
+
     try {
       const track = await prisma.track.findFirst({
         where: {
@@ -83,19 +93,6 @@ export default function () {
       if (!track || !isUserAbleToListenToTrack) {
         res.status(404);
         return next();
-      }
-
-      if (
-        segment.includes("playlist.m3u8") &&
-        !isFromMirloOrApprovedClient(req)
-      ) {
-        return next(
-          new AppError({
-            httpCode: HttpCode.FORBIDDEN,
-            description:
-              "Streaming is only available on Mirlo or in apps approved by this instance",
-          })
-        );
       }
 
       if (
