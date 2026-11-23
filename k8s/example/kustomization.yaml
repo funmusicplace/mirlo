@@ -1,0 +1,36 @@
+namespace: mirlo
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../base
+
+# namespace: mirlo
+images:
+  - name: txels/mirlo
+    newTag: ${VERSION}
+
+patches:
+  - target:
+      kind: Ingress
+      name: mirlo
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: ${HOSTNAME}
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: ${HOSTNAME}
+
+configMapGenerator:
+  - name: mirlo-env
+    envs:
+      - env.txt
+    literals:
+      - PORT=3000
+      - NODE_ENV=production
+
+secretGenerator:
+  - name: mirlo-secrets
+    envs:
+      - secrets.txt
+    type: Opaque
