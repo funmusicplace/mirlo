@@ -20,7 +20,8 @@ import useArtistQuery from "utils/useArtistQuery";
 const Index: React.FC = () => {
   const { user } = useAuthContext();
   const { data: artist } = useArtistQuery();
-  const { openTipModal } = useOutletContext<ArtistOutletContext>();
+  const openTipModal = useOutletContext<ArtistOutletContext | undefined>()
+    ?.openTipModal;
   const pageBackground = "var(--mi-background-color)";
   const { data: userStripeStatus, isPending } = useQuery(
     queryUserStripeStatus(artist?.userId || 0)
@@ -93,7 +94,7 @@ const Index: React.FC = () => {
 
   React.useEffect(() => {
     if (isTipOnly && canTip) {
-      openTipModal();
+      openTipModal?.();
     }
   }, [isTipOnly, canTip, openTipModal]);
 
