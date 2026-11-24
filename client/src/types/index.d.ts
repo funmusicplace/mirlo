@@ -206,8 +206,7 @@ interface Track {
     role?: string;
     artistId?: number;
     artistName?: string;
-    isCoAuthor?: boolean;
-    appearsAs?: TrackArtistAppearance;
+    appearsAs: TrackArtistAppearance;
     trackId?: number;
     order: number;
   }[];

@@ -94,4 +94,47 @@ describe("AutoComplete", () => {
     expect(onSelect).not.toHaveBeenCalled();
     await waitFor(() => expect(input).toHaveValue("Portland, Oregon"));
   });
+
+  describe("when a result has exactly the typed name", () => {
+    const getOptions = () => [{ id: 7, name: "Sam" }];
+
+    test("selects the matching result on Enter before the search returns with linkExactMatch", async () => {
+      const { onSelect, input } = renderAutoComplete({
+        allowNew: true,
+        linkExactMatch: true,
+        getOptions,
+      });
+
+      await userEvent.type(input, "Sam{Enter}");
+
+      await waitFor(() =>
+        expect(onSelect).toHaveBeenCalledWith({ id: 7, name: "Sam" })
+      );
+    });
+
+    test("still offers the typed text as a new option by default", async () => {
+      const { input } = renderAutoComplete({ allowNew: true, getOptions });
+
+      await userEvent.type(input, "Sam");
+
+      expect(
+        await screen.findByText('use "Sam"', undefined, { timeout: 2000 })
+      ).toBeInTheDocument();
+    });
+
+    test("hides the new option with linkExactMatch", async () => {
+      const { input } = renderAutoComplete({
+        allowNew: true,
+        linkExactMatch: true,
+        getOptions,
+      });
+
+      await userEvent.type(input, "Sam");
+
+      expect(
+        await screen.findByText("Sam", undefined, { timeout: 2000 })
+      ).toBeInTheDocument();
+      expect(screen.queryByText('use "Sam"')).not.toBeInTheDocument();
+    });
+  });
 });

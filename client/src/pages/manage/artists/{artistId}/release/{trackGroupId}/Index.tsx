@@ -43,6 +43,11 @@ export interface TrackGroupFormData extends FundraiserFormData {
   coverFile?: File[];
   catalogNumber?: string;
   upc?: string;
+  trackGroupArtists?: {
+    id?: string;
+    artistName: string;
+    artistId?: number | null;
+  }[];
   coverImageAlt?: string;
   coverCredit?: string;
 }

@@ -25,7 +25,12 @@ interface FormData {
 }
 
 export const BulkTrackUpload: React.FC<{
-  trackgroup: { artistId?: number; id: number; tracks: Track[] };
+  trackgroup: {
+    artistId?: number;
+    id: number;
+    tracks: Track[];
+    releaseArtists?: ArtistLink[];
+  };
   reload: (newTrack?: Track) => Promise<unknown>;
   multiple?: boolean;
 }> = ({ trackgroup, reload, multiple }) => {

@@ -16,6 +16,13 @@ const buildDefaultValues = (trackGroup: TrackGroup): TrackGroupFormData => {
     releaseDate: trackGroup?.releaseDate?.split("T")[0] ?? "",
     catalogNumber: trackGroup?.catalogNumber ?? "",
     upc: trackGroup?.upc ?? "",
+    trackGroupArtists: [...(trackGroup?.trackGroupArtists ?? [])]
+      .sort((a, b) => a.order - b.order)
+      .map((entry) => ({
+        id: entry.id,
+        artistName: entry.artistName,
+        artistId: entry.artistId,
+      })),
     coverImageAlt: trackGroup?.coverImageAlt ?? "",
     coverCredit: trackGroup?.coverCredit ?? "",
     publishedAt: trackGroup?.publishedAt?.split("T")[0],
@@ -43,8 +50,13 @@ const AlbumForm: React.FC<{
   });
 
   const { reset } = methods;
+  const resetTrackGroupRef = React.useRef(trackGroup);
 
   React.useEffect(() => {
+    if (resetTrackGroupRef.current === trackGroup) {
+      return;
+    }
+    resetTrackGroupRef.current = trackGroup;
     reset(buildDefaultValues(trackGroup), {
       keepDirtyValues: true,
       keepDirty: true,
@@ -67,6 +79,7 @@ const AlbumForm: React.FC<{
       releaseDate: t("releaseDate"),
       catalogNumber: t("catalogNumber"),
       upc: t("upc"),
+      trackGroupArtists: t("releaseArtists"),
       coverImageAlt: t("coverImageAlt"),
       coverCredit: t("coverCredit"),
       about: t("about"),

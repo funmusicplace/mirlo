@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import { Button } from "components/common/Button";
 import FormCheckbox from "components/common/FormCheckbox";
@@ -10,16 +11,18 @@ import Modal from "components/common/Modal";
 import TextArea from "components/common/TextArea";
 import { TrackData } from "components/ManageArtist/utils";
 import { openOutsideLinkAfter } from "components/Merch/IncludesDigitalDownload";
+import { queryManagedTrackGroup } from "queries";
 import React from "react";
 import { useFieldArray, useForm, FormProvider } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { FaPlus, FaQuestionCircle, FaSave, FaTimes } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import api from "services/api";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { fmtMSS } from "utils/tracks";
 import useJobStatusCheck from "utils/useJobStatusCheck";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import { bp } from "../../../../constants";
 import SelectTrackPreview from "../../SelectTrackPreview";
@@ -80,6 +83,14 @@ const EditTrackRow: React.FC<{
   const [isTrackLicenseModalOpen, setIsTrackLicenseModalOpen] =
     React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
+  const { trackGroupId } = useParams();
+  const { data: trackGroup } = useQuery(
+    queryManagedTrackGroup(Number(trackGroupId))
+  );
+  const { releaseArtistName: formatReleaseArtistName } = useReleaseArtistName();
+  const releaseArtistName = trackGroup
+    ? formatReleaseArtistName(trackGroup)
+    : "";
   const { uploadJobs, setUploadJobs } = useJobStatusCheck({
     reload: cancelEditing,
   });
@@ -302,6 +313,7 @@ const EditTrackRow: React.FC<{
                       key={a.id}
                       disabled={isDisabled}
                       onRemove={remove}
+                      releaseArtistName={releaseArtistName}
                     />
                   ))}
                 </div>
@@ -316,7 +328,11 @@ const EditTrackRow: React.FC<{
                 >
                   <ArtistButton
                     onClick={() => {
-                      append({ artistName: "", order: trackArtists.length });
+                      append({
+                        artistName: "",
+                        order: trackArtists.length,
+                        appearsAs: "CREDITS_ONLY",
+                      });
                     }}
                     type="button"
                     size="compact"

@@ -70,6 +70,7 @@ type Result = {
   id: number | string;
   name: string;
   isNew?: boolean;
+  description?: string;
   firstInCategory?: boolean;
   category?: string;
 };
@@ -105,6 +106,8 @@ const AutoComplete = React.forwardRef<
     ) => React.ReactNode;
     placeholder?: string | null;
     allowNew?: boolean;
+    linkExactMatch?: boolean;
+    newOptionFirst?: boolean;
     commitOnComma?: boolean;
     showBackground?: boolean;
     onEnter?: (val: string) => void;
@@ -125,6 +128,8 @@ const AutoComplete = React.forwardRef<
       onEnter,
       placeholder,
       allowNew,
+      linkExactMatch,
+      newOptionFirst,
       commitOnComma,
       showBackground,
       id,
@@ -138,6 +143,8 @@ const AutoComplete = React.forwardRef<
     const [isSearching, setIsSearching] = React.useState(false);
     const [searchResults, setSearchResults] = React.useState<Result[]>([]);
     const [navigationIndex, setNavigationIndex] = React.useState(0);
+    const searchedValueRef = React.useRef("");
+    const latestValueRef = React.useRef("");
     let location = useLocation();
 
     const onChangeValue = React.useCallback(
@@ -170,21 +177,34 @@ const AutoComplete = React.forwardRef<
           setShowSuggestions(true);
           setIsSearching(true);
           const results = await getOptions(searchString);
-          const searchResultsMatchSearch = searchResults.find(
-            (result) =>
-              result.name.toLowerCase().replaceAll(/\-| /g, "") === searchString
-          );
+          if (latestValueRef.current !== searchString) {
+            return;
+          }
+          const typedName = searchString.trim().toLowerCase();
+          const searchResultsMatchSearch =
+            linkExactMatch &&
+            results?.some(
+              (result) =>
+                !result.isNew && result.name.trim().toLowerCase() === typedName
+            );
           if (allowNew && !searchResultsMatchSearch && results) {
-            results.push({
+            const newOption = {
               id: searchString,
               name: searchString,
               isNew: true,
-            });
+            };
+            if (newOptionFirst) {
+              results.unshift(newOption);
+            } else {
+              results.push(newOption);
+            }
           }
           setSearchResults(results ?? []);
+          searchedValueRef.current = searchString;
           setIsSearching(false);
           setNavigationIndex(0);
         } else {
+          searchedValueRef.current = searchString;
           setSearchResults([]);
           setShowSuggestions(false);
         }
@@ -206,6 +226,7 @@ const AutoComplete = React.forwardRef<
     );
 
     React.useEffect(() => {
+      latestValueRef.current = searchValue;
       searchCallback(searchValue);
     }, [searchCallback, searchValue]);
 
@@ -245,7 +266,31 @@ const AutoComplete = React.forwardRef<
           onKeyUp={(e) => {
             e.preventDefault();
             if (e.keyCode === 31 || e.key === "Enter") {
-              if (searchResults.length > 0) {
+              if (
+                allowNew &&
+                linkExactMatch &&
+                searchValue.trim() &&
+                searchedValueRef.current !== searchValue
+              ) {
+                const typed = searchValue;
+                const typedName = typed.trim().toLowerCase();
+                setSearchValue("");
+                setShowSuggestions(false);
+                Promise.resolve(getOptions(typed))
+                  .then((results) => {
+                    const exactMatch = results?.find(
+                      (result) =>
+                        !result.isNew &&
+                        result.name.trim().toLowerCase() === typedName
+                    );
+                    onSelect?.(
+                      exactMatch ?? { id: typed, name: typed, isNew: true }
+                    );
+                  })
+                  .catch(() =>
+                    onSelect?.({ id: typed, name: typed, isNew: true })
+                  );
+              } else if (searchResults.length > 0) {
                 onSelectValue(searchValue, navigationIndex);
               } else {
                 onEnter?.(searchValue);
@@ -312,6 +357,12 @@ const AutoComplete = React.forwardRef<
                               onClick={() => onSelectValue(r.id, index)}
                             >
                               {r.isNew ? `use "${r.name}"` : r.name}
+                              {r.description && (
+                                <span className="opacity-70">
+                                  {" "}
+                                  {r.description}
+                                </span>
+                              )}
                             </Button>
                           )}
                         </SearchResult>
