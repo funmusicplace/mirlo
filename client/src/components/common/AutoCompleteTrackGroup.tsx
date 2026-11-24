@@ -1,8 +1,9 @@
+import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
 import React from "react";
+import api from "services/api";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import AutoComplete from "./AutoComplete";
-import api from "services/api";
-import { hasId } from "components/ManageArtist/ManageTrackGroup/AlbumFormComponents/ManageTags";
 
 const AutoCompleteTrackGroup: React.FC<{
   id: string;
@@ -19,6 +20,7 @@ const AutoCompleteTrackGroup: React.FC<{
   placeholder,
   includeLabelReleases,
 }) => {
+  const { releaseArtistName } = useReleaseArtistName();
   const getTrackGroupOptions = React.useCallback(
     async (searchString: string) => {
       if (filterByArtistId && includeLabelReleases) {
@@ -32,7 +34,7 @@ const AutoCompleteTrackGroup: React.FC<{
           )
           .slice(0, 10)
           .map((r) => ({
-            name: `${r.artist?.name} - ${r.title}`,
+            name: [releaseArtistName(r), r.title].filter(Boolean).join(" - "),
             id: r.id,
           }));
       }
@@ -42,11 +44,11 @@ const AutoCompleteTrackGroup: React.FC<{
         ...(filterByArtistId ? { artistId: `${filterByArtistId}` } : {}),
       });
       return results.results.map((r) => ({
-        name: `${r.artist?.name} - ${r.title}`,
+        name: [releaseArtistName(r), r.title].filter(Boolean).join(" - "),
         id: r.id,
       }));
     },
-    [filterByArtistId, includeLabelReleases]
+    [filterByArtistId, includeLabelReleases, releaseArtistName]
   );
 
   return (

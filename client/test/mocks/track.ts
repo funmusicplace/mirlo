@@ -15,6 +15,11 @@ export const TRACK_EXAMPLE: Track = {
   metadata: {},
   isPreview: true,
   isPlayable: true,
+  mainArtists: [
+    { name: "Example Artist", urlSlug: "example-artist", artistId: 1 },
+  ],
+  featuredArtists: [],
+  mainArtistsSource: "release",
   audio: {
     url: "",
     createdAt: "1999-09-09T09:09:09Z",

@@ -1504,7 +1504,17 @@
     "recommendationError": "Error managing recommendation",
     "remove": "Remove",
     "cancel": "Cancel",
-    "coAuthorCheck": "Display this artist's name next to the track title on the release page (as a featured guest or a secondary main artist)",
+    "appearsAsLabel": "How is {{name}} credited?",
+    "appearsAsLabelNoName": "How is this artist credited?",
+    "appearsAsMain": "Main artist",
+    "appearsAsMainHint": "Credited as the artist of this track, in place of {{releaseArtist}}.",
+    "appearsAsFeatured": "Featured",
+    "appearsAsFeaturedHint": "Shown next to the track title as a guest.",
+    "appearsAsCreditsOnly": "Credited only",
+    "appearsAsCreditsOnlyHint": "Listed in the track credits only.",
+    "releaseArtists": "Release artists",
+    "removeReleaseArtist": "Remove {{name}}",
+    "releaseArtistsHint": "Leave empty to credit {{artistName}}. Use it for a compilation (for example \"Various Artists\") or a release under another name.",
     "removeArtist": "Remove this artist",
     "saveDraft": "Save draft",
     "createAlbum": "Create release",
@@ -1533,7 +1543,7 @@
     "suggestedPriceDescription": "Shown as the starting amount at checkout.",
     "suggestedPriceDescriptionClarifier": "Supporters can change this amount, but they cannot pay below your minimum price.",
     "artistOnMirlo": "Artist with a presence on {{instanceName}}",
-    "artist": "Release Artist",
+    "trackArtistLabel": "Track artist",
     "nameOfAccountToReceivePayment": "Name of the account that will receive payments for this release.",
     "receivePaymentDescription": "You are seeing this because you are part of a label. This is the account that will receive payments for this release. If you are part of a label or collective, this will be the label or collective account. Go to your <artistPage>artist page</artistPage> to manage these relationships. If you leave this blank, payments will continue going to your personal account.",
     "labelReceivePaymentDescription": "You are a label who can manage releases for this artist. This is the account that will receive payments for this release. Go to your <labelPage>label page</labelPage> to manage these relationships. If you leave this blank, payments will go to the artist's personal account.",
@@ -2362,7 +2372,7 @@
     "isrc": "ISRC: {{isrc}}",
     "onThisPage": "On this page",
     "merch": "Merch",
-    "byArtistWithArtists": "by <artistLink>{{artist}}</artistLink> with <artists/>",
+    "byReleaseArtists": "by <releaseArtists/>",
     "onLabelStandalone": "On <labelLink>{{label}}</labelLink>"
   },
   "manageSubscriptionTierBox": {
@@ -2754,6 +2764,10 @@
     "uploadFailed": "Something went wrong uploading track {{title}}.",
     "uploadFailedContact": "Something went wrong uploading track {{title}}. Please report this incident to {{email}}."
   },
+  "trackArtists": {
+    "lineWithGuests": "{{main}} with {{featured}}",
+    "withGuests": "with <guests/>"
+  },
   "zipImport": {
     "previewTitle": "Import preview",
     "existingTracksWarning": "This release already has {{count}} track(s). Importing will add new tracks alongside them.",
@@ -2767,6 +2781,8 @@
     "importAlbumContent": "Want to import your entire album in one go? Just drop a ZIP file with your tracks and metadata, and we'll take care of the rest.",
     "albumTitle": "Title",
     "albumArtist": "Artist",
+    "creditReleaseTo": "Credit this release to {{name}}",
+    "creditReleaseToHint": "Your profile name is {{profile}}. Leave unchecked to credit {{profile}}.",
     "albumDescription": "Description",
     "releaseDate": "Release date",
     "label": "Label",

@@ -1,11 +1,16 @@
+import { useQuery } from "@tanstack/react-query";
 import { ArtistButton } from "components/Artist/ArtistButtons";
 import Modal from "components/common/Modal";
 import { uploadDownloadableContentFile } from "components/ManageArtist/Merch/DownloadableContent";
-import { useSaveAlbumFormMutation } from "queries";
+import { queryManagedTrackGroup, useSaveAlbumFormMutation } from "queries";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import { useUpload } from "state/UploadContext";
+
+import CreditAlbumArtistField, {
+  useCreditAlbumArtist,
+} from "./CreditAlbumArtistField";
 
 interface ZipImportPreviewProps {
   trackGroupId: number;
@@ -37,6 +42,15 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
   const { t } = useTranslation("translation", { keyPrefix: "zipImport" });
   const { enqueue, enqueueImage } = useUpload();
   const saveMutation = useSaveAlbumFormMutation();
+  const { data: trackGroup } = useQuery(queryManagedTrackGroup(trackGroupId));
+  const {
+    profileName,
+    fileAlbumArtist,
+    canCreditAlbumArtist,
+    creditAlbumArtist,
+    setCreditAlbumArtist,
+    trackGroupArtistsToSave,
+  } = useCreditAlbumArtist(trackGroup, preScanResult);
 
   const hasInvalidFiles = (preScanResult?.invalidFiles.length ?? 0) > 0;
 
@@ -73,16 +87,21 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
 
       // Update the track group with album meta data.
       const meta = result.albumMeta;
+      let releaseArtists = trackGroup?.releaseArtists;
       try {
-        await saveMutation.mutateAsync({
+        const [{ result: savedTrackGroup }] = await saveMutation.mutateAsync({
           trackGroupId,
           formData: {
             title: meta.title ?? "",
             releaseDate: meta.releaseDate ?? undefined,
             about: meta.description ?? undefined,
+            ...(trackGroupArtistsToSave
+              ? { trackGroupArtists: trackGroupArtistsToSave }
+              : {}),
           },
           artistId,
         });
+        releaseArtists = savedTrackGroup.releaseArtists;
       } catch (e) {
         console.error("Error saving album metadata", e);
       }
@@ -103,7 +122,12 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
       // Enqueue audio files using UploadContext — same pattern as BulkTrackUpload
       if (result.audioFiles.length > 0) {
         enqueue({
-          trackgroup: { id: trackGroupId, artistId, tracks: [] },
+          trackgroup: {
+            id: trackGroupId,
+            artistId,
+            tracks: [],
+            releaseArtists,
+          },
           files: result.audioFiles.map((af) => af.file),
           reload,
         });
@@ -121,7 +145,16 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
       onClose();
       reload();
     },
-    [trackGroupId, artistId, enqueue, enqueueImage, reload, onClose]
+    [
+      trackGroupId,
+      artistId,
+      enqueue,
+      enqueueImage,
+      reload,
+      onClose,
+      trackGroupArtistsToSave,
+      trackGroup?.releaseArtists,
+    ]
   );
 
   return (
@@ -209,6 +242,14 @@ export const ZipImportPreview: React.FC<ZipImportPreviewProps> = ({
                 </dt>
                 <dd className="m-0 text-[var(--mi-text-color)]">
                   {albumMeta.albumArtist}
+                  {canCreditAlbumArtist && (
+                    <CreditAlbumArtistField
+                      fileAlbumArtist={fileAlbumArtist}
+                      profileName={profileName}
+                      checked={creditAlbumArtist}
+                      onChange={setCreditAlbumArtist}
+                    />
+                  )}
                 </dd>
               </>
             )}

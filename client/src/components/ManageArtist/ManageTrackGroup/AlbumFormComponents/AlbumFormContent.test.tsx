@@ -32,6 +32,7 @@ vi.mock("components/ManageArtist/PublishButton", () => ({
 vi.mock("./VisibilityRadio", () => ({ default: () => null }));
 vi.mock("./PreOrderSection", () => ({ default: () => null }));
 vi.mock("./Pricing", () => ({ default: () => null }));
+vi.mock("./ReleaseArtistsField", () => ({ default: () => null }));
 vi.mock("./SchedulePublication", () => ({ default: () => null }));
 vi.mock("./FundraisingGoal", () => ({ default: () => null }));
 vi.mock("./ManageTags", () => ({ default: () => null }));

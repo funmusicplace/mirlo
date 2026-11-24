@@ -29,7 +29,12 @@ export type ImageQueueItem = {
   resourceKey?: string;
 };
 
-type Trackgroup = { artistId?: number; id: number; tracks: Track[] };
+type Trackgroup = {
+  artistId?: number;
+  id: number;
+  tracks: Track[];
+  releaseArtists?: ArtistLink[];
+};
 
 type EnqueueArgs = {
   trackgroup: Trackgroup;

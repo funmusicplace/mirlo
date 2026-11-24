@@ -204,6 +204,11 @@ async function saveAlbumForm(opts: {
     suggestedPrice: toCentsOrNull(formData.suggestedPrice),
     catalogNumber: formData.catalogNumber,
     upc: formData.upc,
+    trackGroupArtists: formData.trackGroupArtists?.map((entry) => ({
+      ...(entry.id ? { id: entry.id } : {}),
+      artistName: entry.artistName,
+      artistId: entry.artistId ?? null,
+    })),
     coverImageAlt: formData.coverImageAlt,
     coverCredit: formData.coverCredit,
     urlSlug: formData.urlSlug,

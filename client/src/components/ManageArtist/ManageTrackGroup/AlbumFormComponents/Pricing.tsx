@@ -1,11 +1,10 @@
 import { css } from "@emotion/css";
-import ArtistRouterLink, {
-  ArtistButton,
-} from "components/Artist/ArtistButtons";
+import ArtistRouterLink from "components/Artist/ArtistButtons";
 import FormComponent from "components/common/FormComponent";
 import FormError from "components/common/FormError";
 import { InputEl } from "components/common/Input";
 import { getCurrencySymbol } from "components/common/Money";
+import SegmentedRadioGroup from "components/common/SegmentedRadioGroup";
 import { FormSection } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import { TrackGroupFormData } from "pages/manage/artists/{artistId}/release/{trackGroupId}/Index";
 import React from "react";
@@ -130,75 +129,34 @@ const Pricing: React.FC<{
       <h2 id="label-pricing">{t("priceAndSuch")}</h2>
       <div className="flex flex-col gap-2">
         <FormComponent>
-          <div
-            aria-labelledby="label-pricing"
-            className={css`
-              display: flex;
-
-              & input:focus-visible + label > button {
-                outline: 5px auto Highlight;
-                outline: 5px auto -webkit-focus-ring-color;
-              }
-
-              & label:first-of-type > button {
-                border-start-end-radius: 0;
-                border-end-end-radius: 0;
-              }
-
-              & label ~ label > button {
-                border-radius: 0;
-              }
-
-              & label:last-of-type > button {
-                border-start-end-radius: var(--mi-border-radius);
-                border-end-end-radius: var(--mi-border-radius);
-              }
-            `}
-            role="group"
-          >
-            {[
+          <SegmentedRadioGroup
+            name="pricing"
+            idPrefix="pricing"
+            ariaLabelledBy="label-pricing"
+            value={selectedPricingMode}
+            onChange={onSelectPricingMode}
+            options={[
               {
-                key: "free-or-donate",
+                value: "free-or-donate",
                 label: t("pricingFreeOrDonate", {
                   currency: user?.currency
                     ? getCurrencySymbol(user?.currency)
                     : "",
                 }),
+                inputRef: pricingModeInputRefs["free-or-donate"],
               },
-              { key: "paid", label: t("pricingPaid") },
-              { key: "no-payments", label: t("pricingNoPayments") },
-            ].map((pricing) => {
-              const isSelected = selectedPricingMode === pricing.key;
-              const id = `pricing-${pricing.key}`;
-              return (
-                <React.Fragment key={pricing.key}>
-                  <input
-                    checked={isSelected}
-                    className="sr-only"
-                    id={id}
-                    name="pricing"
-                    onChange={() =>
-                      onSelectPricingMode(pricing.key as PricingMode)
-                    }
-                    ref={pricingModeInputRefs[pricing.key as PricingMode]}
-                    type="radio"
-                  />
-                  <label htmlFor={id}>
-                    <ArtistButton
-                      onClick={() =>
-                        onSelectPricingMode(pricing.key as PricingMode)
-                      }
-                      tabIndex={-1}
-                      type="button"
-                      variant={isSelected ? "default" : "outlined"}
-                    >
-                      {pricing.label}
-                    </ArtistButton>
-                  </label>
-                </React.Fragment>
-              );
-            })}
-          </div>
+              {
+                value: "paid",
+                label: t("pricingPaid"),
+                inputRef: pricingModeInputRefs.paid,
+              },
+              {
+                value: "no-payments",
+                label: t("pricingNoPayments"),
+                inputRef: pricingModeInputRefs["no-payments"],
+              },
+            ]}
+          />
         </FormComponent>
         <div hidden={!isAlbumGettable}>
           <FormComponent className="grow">

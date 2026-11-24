@@ -1,12 +1,10 @@
 import styled from "@emotion/styled";
 import StickyColumn from "components/common/StickyColumn";
-import {
-  CoAuthorNames,
-  getCoAuthors,
-} from "components/common/TrackList/TrackAuthors";
+import { TrackArtistNames } from "components/common/TrackList/TrackAuthors";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
+import { getTrackArtistsByAppearance } from "utils/artist";
 import { isSingleTrackRelease } from "utils/tracks";
 import { useActiveSection } from "utils/useActiveSection";
 import { useFitsBeside } from "utils/useFitsBeside";
@@ -173,7 +171,7 @@ const SingleTrackView: React.FC<{
     </>
   );
 
-  const coAuthors = getCoAuthors(track, artist);
+  const { main: mainArtists, featured } = getTrackArtistsByAppearance(track);
 
   const purchaseProps = {
     trackGroup,
@@ -233,9 +231,17 @@ const SingleTrackView: React.FC<{
                 track={track}
                 title={(isSingleRelease ? trackGroup.title : track.title) ?? ""}
                 subtitle={showTrackSubtitle ? track.title : undefined}
-                coArtists={
-                  coAuthors.length > 0 ? (
-                    <CoAuthorNames coAuthors={coAuthors} />
+                mainArtists={
+                  mainArtists.length > 0 ? (
+                    <TrackArtistNames mainArtists={mainArtists} />
+                  ) : undefined
+                }
+                featuredArtists={
+                  featured.length > 0 ? (
+                    <TrackArtistNames
+                      mainArtists={[]}
+                      featuredArtists={featured}
+                    />
                   ) : undefined
                 }
                 secondaryActions={secondaryActions}

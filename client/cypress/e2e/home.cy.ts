@@ -28,6 +28,9 @@ const popularRelease = {
     name: "Popular Artist",
     urlSlug: "popular-artist",
   },
+  releaseArtists: [
+    { name: "Popular Artist", urlSlug: "popular-artist", artistId: 2 },
+  ],
 };
 
 describe("home page", () => {

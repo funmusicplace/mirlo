@@ -11,11 +11,13 @@ import { useTranslation } from "react-i18next";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 function Index() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
+  const { releaseArtistName } = useReleaseArtistName();
   const [trackGroup, setTrackGroup] = React.useState<TrackGroup>();
   const [isOwned, setIsOwned] = React.useState(false);
   const [isLoadingTrackGroup, setIsLoadingTrackGroup] = React.useState(true);
@@ -102,7 +104,7 @@ function Index() {
         cover={trackGroup.cover?.sizes?.[300]}
         title={trackGroup.title ?? t("untitledRelease").toString()}
         titleLink={getReleaseUrl(artist, trackGroup)}
-        artistName={artist.name}
+        artistName={releaseArtistName(trackGroup)}
         artistUrl={getArtistUrl(artist)}
       >
         <div className="mt-4">

@@ -1,7 +1,11 @@
 import { type IAudioMetadata, parseBuffer } from "music-metadata";
 import { describe, expect, test } from "vitest";
 
-import { extractTrackArtists, normalizeMetadata } from "./utils";
+import {
+  convertMetaData,
+  extractTrackArtists,
+  normalizeMetadata,
+} from "./utils";
 
 const buildMetadata = (opts: {
   artists?: string[];
@@ -117,7 +121,7 @@ describe("extractTrackArtists", () => {
     });
 
     expect(extractTrackArtists(metadata)).toEqual([
-      { artistName: "Bon Iver", role: "", isCoAuthor: true },
+      { artistName: "Bon Iver", role: "", appearsAs: "MAIN" },
     ]);
   });
 
@@ -127,7 +131,7 @@ describe("extractTrackArtists", () => {
     });
 
     expect(extractTrackArtists(metadata)).toEqual([
-      { artistName: "The Coverist", role: "", isCoAuthor: true },
+      { artistName: "The Coverist", role: "", appearsAs: "MAIN" },
     ]);
   });
 
@@ -141,8 +145,12 @@ describe("extractTrackArtists", () => {
     });
 
     expect(extractTrackArtists(metadata)).toEqual([
-      { artistName: "The Coverist", role: "", isCoAuthor: true },
-      { artistName: "Leonard Cohen", role: "composer", isCoAuthor: false },
+      { artistName: "The Coverist", role: "", appearsAs: "MAIN" },
+      {
+        artistName: "Leonard Cohen",
+        role: "composer",
+        appearsAs: "CREDITS_ONLY",
+      },
     ]);
   });
 
@@ -155,7 +163,7 @@ describe("extractTrackArtists", () => {
     });
 
     expect(extractTrackArtists(metadata)).toEqual([
-      { artistName: "Same Band", role: "", isCoAuthor: true },
+      { artistName: "Same Band", role: "", appearsAs: "MAIN" },
     ]);
   });
 
@@ -168,11 +176,73 @@ describe("extractTrackArtists", () => {
     });
 
     expect(extractTrackArtists(metadata)).toEqual([
-      { artistName: "Lowercase Tag", role: "", isCoAuthor: true },
+      { artistName: "Lowercase Tag", role: "", appearsAs: "MAIN" },
     ]);
   });
 
   test("returns an empty list when no artist data is present", () => {
     expect(extractTrackArtists(buildMetadata({}))).toEqual([]);
+  });
+});
+
+describe("convertMetaData", () => {
+  const upload = (artists: string[]) =>
+    convertMetaData(
+      {
+        file: new File([], "track.flac"),
+        metadata: {
+          common: { title: "Track", track: { no: 1 }, artists },
+          native: {},
+          format: {},
+        } as never,
+      },
+      0,
+      {
+        tracks: [],
+        releaseArtists: [{ name: "Ada", urlSlug: "ada", artistId: 3 }],
+      }
+    ).trackArtists;
+
+  test("keeps a guest as a main artist next to the release artist", () => {
+    expect(upload(["Ada", "Theo"])).toEqual([
+      {
+        artistName: "Ada",
+        role: "",
+        appearsAs: "MAIN",
+        order: 0,
+        artistId: 3,
+      },
+      {
+        artistName: "Theo",
+        role: "",
+        appearsAs: "MAIN",
+        order: 1,
+        artistId: undefined,
+      },
+    ]);
+  });
+
+  test("lets the track fall back to the release when its artists are the release artists", () => {
+    expect(upload(["ada"])).toEqual([
+      {
+        artistName: "ada",
+        role: "",
+        appearsAs: "CREDITS_ONLY",
+        order: 0,
+        artistId: 3,
+      },
+    ]);
+  });
+
+  test("keeps a track by someone else as its own main artist", () => {
+    expect(upload(["Theo"])).toEqual([
+      {
+        artistName: "Theo",
+        role: "",
+        appearsAs: "MAIN",
+        order: 0,
+        artistId: undefined,
+      },
+    ]);
   });
 });

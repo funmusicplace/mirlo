@@ -6,6 +6,7 @@ import WishlistTrack from "components/TrackGroup/WishlistTrack";
 import React, { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import PlayableCover, {
   buildCoverImage,
@@ -42,6 +43,7 @@ function TrackCard({
   const { t: tPlay } = useTranslation("translation", {
     keyPrefix: "playableCover",
   });
+  const { trackArtistLine } = useReleaseArtistName();
   const linkUrl = determineItemLink(trackGroup.artist, {
     ...track,
     trackGroup,
@@ -49,8 +51,9 @@ function TrackCard({
   const goToLabel = tPlay("goToTrack");
   const trackIds = track.isPlayable === false ? [] : [track.id];
   const displayTitle = track.title?.length ? track.title : tPlay("untitled");
-  const artistName = trackGroup.artist.name;
-  const describedBy = [showArtist ? bylineId : "", goToId].join(" ");
+  const artistName = trackArtistLine(track);
+  const showArtistLine = !!showArtist && !!artistName;
+  const describedBy = [showArtistLine ? bylineId : "", goToId].join(" ");
 
   const Root = as ?? "li";
   const Heading = headingLevel;
@@ -99,10 +102,10 @@ function TrackCard({
           }
         />
       </div>
-      {showArtist && (
+      {showArtistLine && (
         <div className="order-3 min-w-0 mt-[0.2rem]">
           <ArtistLink
-            artist={trackGroup.artist}
+            artist={{ ...trackGroup.artist, name: artistName }}
             className="block overflow-hidden text-ellipsis whitespace-nowrap no-underline! hover:underline! focus-visible:outline-auto text-[calc(var(--mi-font-size-xsmall)*var(--page-scale,1))]"
           />
         </div>

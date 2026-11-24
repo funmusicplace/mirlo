@@ -21,6 +21,7 @@ import { useAuthContext } from "state/AuthContext";
 import { isTrackGroupPurchase, isTrackPurchase } from "types/typeguards";
 import { useDebounce } from "use-debounce";
 import { matchesTokens } from "utils/matchesTokens";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import { bp } from "../../constants";
 
@@ -35,6 +36,8 @@ type HeaderResultBase = {
 
 const HeaderSearch: React.FC = () => {
   const { t } = useTranslation("translation", { keyPrefix: "headerSearch" });
+  const { releaseArtistName: releaseArtist, trackArtistLine: trackArtist } =
+    useReleaseArtistName();
   const { t: tShared } = useTranslation("translation", {
     keyPrefix: "commandSearch",
   });
@@ -126,13 +129,19 @@ const HeaderSearch: React.FC = () => {
           isTrackPurchase(p) &&
           p.track &&
           matchesTokens(
-            [p.track.title, p.track.trackGroup?.artist?.name],
+            [
+              p.track.title,
+              p.track.trackGroup?.artist?.name,
+              trackArtist(p.track),
+            ],
             trimmed
           )
         ) {
           tracks.push({
             key: `track-${p.track.id}`,
-            name: `${p.track.trackGroup?.artist?.name ?? ""} · ${p.track.title}`,
+            name: [trackArtist(p.track), p.track.title]
+              .filter(Boolean)
+              .join(" · "),
             href: trackHref(p.track),
           });
         }
@@ -141,13 +150,19 @@ const HeaderSearch: React.FC = () => {
           isTrackGroupPurchase(p) &&
           p.trackGroup &&
           matchesTokens(
-            [p.trackGroup.title, p.trackGroup.artist?.name],
+            [
+              p.trackGroup.title,
+              p.trackGroup.artist?.name,
+              releaseArtist(p.trackGroup),
+            ],
             trimmed
           )
         ) {
           albums.push({
             key: `trackGroup-${p.trackGroup.id}`,
-            name: `${p.trackGroup.artist?.name ?? ""} · ${p.trackGroup.title}`,
+            name: [releaseArtist(p.trackGroup), p.trackGroup.title]
+              .filter(Boolean)
+              .join(" · "),
             href: trackGroupHref(p.trackGroup),
           });
         }
@@ -164,13 +179,19 @@ const HeaderSearch: React.FC = () => {
         (user.trackFavorites ?? []).forEach((tf) => {
           if (
             matchesTokens(
-              [tf.track.title, tf.track.trackGroup?.artist?.name],
+              [
+                tf.track.title,
+                tf.track.trackGroup?.artist?.name,
+                trackArtist(tf.track),
+              ],
               trimmed
             )
           ) {
             tracks.push({
               key: `track-${tf.trackId}`,
-              name: `${tf.track.trackGroup?.artist?.name ?? ""} · ${tf.track.title}`,
+              name: [trackArtist(tf.track), tf.track.title]
+                .filter(Boolean)
+                .join(" · "),
               href: trackHref(tf.track),
             });
           }
@@ -181,13 +202,19 @@ const HeaderSearch: React.FC = () => {
           if (
             w.trackGroup &&
             matchesTokens(
-              [w.trackGroup.title, w.trackGroup.artist?.name],
+              [
+                w.trackGroup.title,
+                w.trackGroup.artist?.name,
+                releaseArtist(w.trackGroup),
+              ],
               trimmed
             )
           ) {
             albums.push({
               key: `trackGroup-${w.trackGroupId}`,
-              name: `${w.trackGroup.artist?.name ?? ""} · ${w.trackGroup.title}`,
+              name: [releaseArtist(w.trackGroup), w.trackGroup.title]
+                .filter(Boolean)
+                .join(" · "),
               href: trackGroupHref(w.trackGroup),
             });
           }
@@ -220,7 +247,9 @@ const HeaderSearch: React.FC = () => {
       t("albums"),
       (trackGroupsQ.data?.results ?? []).map((tg) => ({
         key: `trackGroup-${tg.id}`,
-        name: `${tg.artist?.name ?? ""} · ${tg.title ?? t("untitled")}`,
+        name: [releaseArtist(tg), tg.title ?? t("untitled")]
+          .filter(Boolean)
+          .join(" · "),
         href: trackGroupHref(tg),
       }))
     );
@@ -229,7 +258,9 @@ const HeaderSearch: React.FC = () => {
       t("tracks"),
       (tracksQ.data?.results ?? []).map((tr) => ({
         key: `track-${tr.id}`,
-        name: `${tr.trackGroup.artist?.name ?? ""} · ${tr.title ?? t("untitled")}`,
+        name: [trackArtist(tr), tr.title ?? t("untitled")]
+          .filter(Boolean)
+          .join(" · "),
         href: trackHref(tr),
       }))
     );
@@ -260,6 +291,8 @@ const HeaderSearch: React.FC = () => {
     labelsQ.data,
     navigateAndClose,
     t,
+    releaseArtist,
+    trackArtist,
   ]);
 
   const isLoading =

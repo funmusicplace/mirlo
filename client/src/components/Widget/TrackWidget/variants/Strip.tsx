@@ -4,6 +4,7 @@ import { MetaCard } from "components/common/MetaCard";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { isTrackOwnedOrPreview, widgetUrl } from "utils/tracks";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import { PlayButtonsWrapper } from "../../PlayButtonsWrapper";
 import TrackTitleContent from "../../TrackTitleContent";
@@ -25,6 +26,7 @@ const Strip: React.FC<TrackWidgetData> = ({
   embeddedInMirlo,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackDetails" });
+  const { trackArtistLine } = useReleaseArtistName();
 
   if (isLoading) {
     return <LoadingBlocks />;
@@ -45,9 +47,7 @@ const Strip: React.FC<TrackWidgetData> = ({
       className="h-screen [&_a]:no-underline!"
     >
       <MetaCard
-        title={`${track.title} by ${
-          track.trackGroup.artist?.name ?? "Unknown"
-        }`}
+        title={`${track.title} by ${trackArtistLine(track) || "Unknown"}`}
         description={t("trackOnInstance")}
         image={track.trackGroup.cover?.sizes?.[300]}
         player={widgetUrl(track.id, "track")}

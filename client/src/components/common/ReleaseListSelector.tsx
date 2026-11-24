@@ -1,7 +1,9 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import api from "services/api";
+import { getReleaseArtistName } from "utils/artist";
 import { useFilterableList } from "utils/useFilterableList";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import { InputEl } from "./Input";
 import LoadingSpinner from "./LoadingSpinner";
@@ -17,7 +19,7 @@ interface ReleaseListSelectorProps {
 }
 
 const getReleaseSearchText = (r: TrackGroup) =>
-  `${r.title ?? ""} ${r.artist.name}`;
+  `${r.title ?? ""} ${r.artist.name} ${getReleaseArtistName(r)}`;
 
 const ReleaseListSelector: React.FC<ReleaseListSelectorProps> = ({
   artistId,
@@ -30,6 +32,7 @@ const ReleaseListSelector: React.FC<ReleaseListSelectorProps> = ({
 }) => {
   const radioName = React.useId();
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+  const { releaseArtistName } = useReleaseArtistName();
   const [releases, setReleases] = React.useState<TrackGroup[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const {
@@ -124,7 +127,7 @@ const ReleaseListSelector: React.FC<ReleaseListSelectorProps> = ({
                     <div className="w-10 h-10 rounded flex-shrink-0" />
                   )}
                   <span className="flex-1 truncate size-sm">
-                    {release.artist.name}
+                    {releaseArtistName(release)}
                   </span>
                   <span className="flex-1 truncate">{release.title}</span>
                 </label>

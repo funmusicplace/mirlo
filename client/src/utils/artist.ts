@@ -195,3 +195,83 @@ export const getManagePostURLReference = (post: Post) => {
   }
   return "";
 };
+
+const listFormatters = new Map<string, Intl.ListFormat>();
+
+const getListFormatter = (locale?: string) => {
+  const key = locale ?? "";
+  let formatter = listFormatters.get(key);
+  if (!formatter) {
+    formatter = new Intl.ListFormat(locale, { type: "conjunction" });
+    listFormatters.set(key, formatter);
+  }
+  return formatter;
+};
+
+export const listSeparators = (count: number, locale?: string) =>
+  count < 2
+    ? []
+    : getListFormatter(locale)
+        .formatToParts(Array.from({ length: count }, (_, index) => `${index}`))
+        .filter((part) => part.type === "literal")
+        .map((part) => part.value);
+
+const formatNameList = (names: string[], locale?: string) =>
+  names.length < 2 ? (names[0] ?? "") : getListFormatter(locale).format(names);
+
+export const getArtistLinkUrl = (link: ArtistLink) => {
+  if (link.urlSlug) {
+    return getArtistUrl({ urlSlug: link.urlSlug });
+  }
+  if (link.artistId) {
+    return `/${link.artistId}`;
+  }
+  return undefined;
+};
+
+export const getReleaseArtistLinks = (
+  trackGroup: Pick<TrackGroup, "releaseArtists">
+): ArtistLink[] => trackGroup.releaseArtists ?? [];
+
+export const getReleaseArtistName = (
+  trackGroup: Parameters<typeof getReleaseArtistLinks>[0],
+  locale?: string
+) =>
+  formatNameList(
+    getReleaseArtistLinks(trackGroup).map((link) => link.name),
+    locale
+  );
+
+export const hasCreditedReleaseArtists = (
+  trackGroup: Pick<TrackGroup, "releaseArtistsSource">
+) => trackGroup.releaseArtistsSource === "credited";
+
+export const getTrackArtistsByAppearance = (
+  track: Pick<Track, "mainArtists" | "featuredArtists" | "mainArtistsSource">
+) => ({
+  main: track.mainArtistsSource === "track" ? (track.mainArtists ?? []) : [],
+  featured: track.featuredArtists ?? [],
+});
+
+export const formatTrackArtistLine = (
+  track: Pick<Track, "mainArtists" | "featuredArtists">,
+  joinGuests: (main: string, featured: string) => string,
+  locale?: string
+) => {
+  const names = (links: ArtistLink[]) =>
+    formatNameList(
+      links.map((link) => link.name),
+      locale
+    );
+  const artistName = names(track.mainArtists ?? []);
+  const featured = track.featuredArtists ?? [];
+  return featured.length ? joinGuests(artistName, names(featured)) : artistName;
+};
+
+export const normalizeArtistName = (name: string) =>
+  name
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();

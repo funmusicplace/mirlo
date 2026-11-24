@@ -1,5 +1,10 @@
+import i18n, { toLanguageTag } from "i18n";
 import api from "services/api";
-import { getArtistUrl } from "utils/artist";
+import {
+  formatTrackArtistLine,
+  getArtistUrl,
+  getReleaseArtistName,
+} from "utils/artist";
 import { widgetPath } from "utils/tracks";
 
 import { SlashCommandConfig } from "./SlashCommands";
@@ -15,7 +20,17 @@ const SLASH_COMMANDS: SlashCommandConfig[] = [
       });
       return response.results.map((r) => ({
         id: r.id,
-        label: `${r.trackGroup.artist?.name} - ${r.title}`,
+        label: [
+          formatTrackArtistLine(
+            r,
+            (main, featured) =>
+              i18n.t("trackArtists.lineWithGuests", { main, featured }),
+            toLanguageTag(i18n.resolvedLanguage)
+          ),
+          r.title,
+        ]
+          .filter(Boolean)
+          .join(" - "),
       }));
     },
     onSelect: (item, chain) => {
@@ -55,7 +70,12 @@ const SLASH_COMMANDS: SlashCommandConfig[] = [
 
       return results.map((r) => ({
         id: r.id,
-        label: `${r.artist?.name} - ${r.title}`,
+        label: [
+          getReleaseArtistName(r, toLanguageTag(i18n.resolvedLanguage)),
+          r.title,
+        ]
+          .filter(Boolean)
+          .join(" - "),
       }));
     },
     onSelect: (item, chain) => {

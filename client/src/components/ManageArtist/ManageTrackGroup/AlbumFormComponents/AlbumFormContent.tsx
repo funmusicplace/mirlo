@@ -20,6 +20,7 @@ import FundraisingGoal from "./FundraisingGoal";
 import ManageTags from "./ManageTags";
 import PreOrderSection from "./PreOrderSection";
 import Pricing from "./Pricing";
+import ReleaseArtistsField from "./ReleaseArtistsField";
 import ReleaseIdentifierFields from "./ReleaseIdentifierFields";
 import VisibilityRadio from "./VisibilityRadio";
 
@@ -106,6 +107,7 @@ const AlbumFormContent: React.FC<{
             </FormComponent>
           )}
         </div>
+        <ReleaseArtistsField profileName={existingObject.artist.name} />
         <div className="md:grid md:grid-cols-2 gap-4">
           <FormComponent>
             <RestoredLabel htmlFor="input-release-date" field="releaseDate">

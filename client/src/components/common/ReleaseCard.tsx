@@ -9,8 +9,9 @@ import { useTranslation } from "react-i18next";
 import { FaLock } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
-import { isTrackGroupPublished } from "utils/artist";
+import { hasCreditedReleaseArtists, isTrackGroupPublished } from "utils/artist";
 import { isSingleTrackRelease } from "utils/tracks";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import ImageWithPlaceholder from "./ImageWithPlaceholder";
 import Pill from "./Pill";
@@ -56,6 +57,7 @@ function ReleaseCard({
     keyPrefix: "playableCover",
   });
   const { t } = useTranslation("translation", { keyPrefix: "manageArtist" });
+  const { releaseArtistName } = useReleaseArtistName();
   const isPublished = isTrackGroupPublished(trackGroup);
   const isPrivateView = !trackGroup.isPublic && isPublished;
 
@@ -73,8 +75,10 @@ function ReleaseCard({
   const displayTitle = trackGroup.title?.length
     ? trackGroup.title
     : tPlay("untitled");
-  const artistName = trackGroup.artist.name;
-  const describedBy = [showArtist ? bylineId : "", goToId].join(" ");
+  const artistName = releaseArtistName(trackGroup);
+  const showArtistLine =
+    !!artistName && (showArtist || hasCreditedReleaseArtists(trackGroup));
+  const describedBy = [showArtistLine ? bylineId : "", goToId].join(" ");
 
   const Root = as ?? "li";
   const Heading = headingLevel;
@@ -94,7 +98,7 @@ function ReleaseCard({
             <Heading className="m-0! mb-0! pb-0! min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-normal leading-[1.375]! text-[calc(var(--mi-font-size-small)*var(--page-scale,1))]! text-(--mi-normal-foreground-color)">
               {displayTitle}
             </Heading>
-            {showArtist && (
+            {showArtistLine && (
               <div className="min-w-0 mt-[0.2rem] overflow-hidden text-ellipsis whitespace-nowrap text-(--mi-normal-foreground-color) text-[calc(var(--mi-font-size-xsmall)*var(--page-scale,1))]">
                 {artistName}
               </div>
@@ -183,10 +187,10 @@ function ReleaseCard({
           </Pill>
         )}
       </div>
-      {showArtist && (
+      {showArtistLine && (
         <div className="order-3 min-w-0 mt-[0.2rem]">
           <ArtistLink
-            artist={trackGroup.artist}
+            artist={{ ...trackGroup.artist, name: artistName }}
             className="block overflow-hidden text-ellipsis whitespace-nowrap no-underline! hover:underline! focus-visible:outline-auto text-[calc(var(--mi-font-size-xsmall)*var(--page-scale,1))]"
           />
         </div>

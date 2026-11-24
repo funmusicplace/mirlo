@@ -1,6 +1,7 @@
 import produce from "immer";
 import { isPlainObject, mapValues } from "lodash";
 import type { IAudioMetadata, ICommonTagsResult, ITag } from "music-metadata";
+import { normalizeArtistName } from "utils/artist";
 
 import { ACCEPTED_AUDIO } from "./ManageTrackGroup/AlbumFormComponents/ReplaceTrackAudioInput";
 import { DOWNLOADABLE_CONTENT_MIME_TYPES } from "./Merch/DownloadableContent";
@@ -69,7 +70,7 @@ export interface TrackData {
     artistName?: string;
     artistId?: number;
     role?: string;
-    isCoAuthor?: boolean;
+    appearsAs: TrackArtistAppearance;
     id?: string;
     trackId?: number;
     order: number;
@@ -201,7 +202,7 @@ export const normalizeMetadata = (
 export interface ParsedTrackArtist {
   artistName: string;
   role: string;
-  isCoAuthor: boolean;
+  appearsAs: TrackArtistAppearance;
 }
 
 /**
@@ -243,12 +244,12 @@ export const extractTrackArtists = (
       ...performers.map((artistName) => ({
         artistName,
         role: "",
-        isCoAuthor: true,
+        appearsAs: "MAIN" as const,
       })),
       ...composers.map((artistName) => ({
         artistName,
         role: "composer",
-        isCoAuthor: false,
+        appearsAs: "CREDITS_ONLY" as const,
       })),
     ];
   }
@@ -256,7 +257,7 @@ export const extractTrackArtists = (
   return (metadata.common.artists ?? []).map((artistName) => ({
     artistName: artistName ?? "",
     role: "",
-    isCoAuthor: true,
+    appearsAs: "MAIN" as const,
   }));
 };
 
@@ -265,11 +266,27 @@ export const convertMetaData = (
   i: number,
   trackGroup: {
     tracks: Track[];
-    artist?: Artist;
-    artistId?: number;
+    releaseArtists?: ArtistLink[];
     defaultIsPreview?: boolean;
   }
 ) => {
+  const releaseArtistNamed = (name: string) =>
+    trackGroup.releaseArtists?.find(
+      (link) => normalizeArtistName(link.name) === normalizeArtistName(name)
+    );
+  const parsedArtists = extractTrackArtists(p.metadata);
+  const mainNames = parsedArtists
+    .filter((artist) => artist.appearsAs === "MAIN")
+    .map((artist) => artist.artistName);
+  const mainArtistsAreTheReleaseArtists =
+    mainNames.length > 0 &&
+    mainNames.every((name) => releaseArtistNamed(name)) &&
+    (trackGroup.releaseArtists ?? []).every((link) =>
+      mainNames.some(
+        (name) => normalizeArtistName(name) === normalizeArtistName(link.name)
+      )
+    );
+
   let title = p.metadata.common.title;
 
   if (!title) {
@@ -292,15 +309,15 @@ export const convertMetaData = (
     status: trackGroup.defaultIsPreview === false ? "must-own" : "preview",
     lyrics: p.metadata.common.lyrics,
     isrc: isrc,
-    trackArtists: extractTrackArtists(p.metadata).map((artist, idx) => ({
+    trackArtists: parsedArtists.map((artist, idx) => ({
       artistName: artist.artistName,
       role: artist.role,
-      isCoAuthor: artist.isCoAuthor,
+      appearsAs:
+        mainArtistsAreTheReleaseArtists && artist.appearsAs === "MAIN"
+          ? ("CREDITS_ONLY" as const)
+          : artist.appearsAs,
       order: idx,
-      artistId:
-        artist.artistName === trackGroup.artist?.name
-          ? trackGroup.artistId
-          : undefined,
+      artistId: releaseArtistNamed(artist.artistName)?.artistId,
     })),
   } as TrackData;
 };

@@ -171,6 +171,19 @@ describe("TrackTitleContent", () => {
       ).toBeInTheDocument();
     });
 
+    it("hides the by-line when the track has no artist name", () => {
+      renderTitle({
+        ...DRAFTS_ALBUM_TRACK_EXAMPLE,
+        mainArtists: [],
+        featuredArtists: [],
+      });
+
+      expect(screen.queryByText("by")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Example Artist" })
+      ).not.toBeInTheDocument();
+    });
+
     it("drops the separator when the by-line is combined", () => {
       const { container } = renderTitle(DRAFTS_ALBUM_TRACK_EXAMPLE, {
         combineFromAndBy: true,

@@ -31,6 +31,7 @@ import { useAuthContext } from "state/AuthContext";
 import { canUserEditArtist, isTrackGroupPublished } from "utils/artist";
 import { isSingleTrackRelease } from "utils/tracks";
 import { useMatchMedia } from "utils/useMatchMedia";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import { between, bp, coverSizeMax, coverSizeMin } from "../../../../constants";
 
@@ -154,6 +155,7 @@ function Index() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
+  const { releaseArtistName } = useReleaseArtistName();
   const isCompactLayout = useMatchMedia(between(bp.small, bp.xlarge));
   const isMobile = useMatchMedia(`screen and (max-width: ${bp.small}px)`);
 
@@ -198,7 +200,7 @@ function Index() {
       <MetaCard
         title={trackGroup.title ?? "Untitled release"}
         description={t("albumByArtist", {
-          artist: trackGroup.artist?.name ?? "an artist",
+          artist: releaseArtistName(trackGroup) || "an artist",
         })}
         image={trackGroup.cover?.sizes?.[600]}
       />

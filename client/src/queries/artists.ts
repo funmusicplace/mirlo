@@ -87,7 +87,7 @@ export function queryCataloguePrice(opts: { artistId?: number }) {
 export type ManagedArtist = Pick<
   Artist,
   "id" | "name" | "urlSlug" | "isLabelProfile" | "avatar"
-> & { relationship: "owner" | "manager" };
+> & { relationship: "owner" | "manager" | "label" };
 
 const fetchManagedArtists: QueryFunction<
   { results: ManagedArtist[] },
@@ -100,6 +100,24 @@ export function queryManagedArtists(opts?: {}) {
   return queryOptions({
     queryKey: ["fetchManagedArtists", opts ?? {}, QUERY_KEY_ARTISTS],
     queryFn: fetchManagedArtists,
+  });
+}
+
+const fetchLinkableArtists: QueryFunction<
+  { results: ManagedArtist[] },
+  ["fetchManagedArtists", { includeLabelArtists: true }, ...any]
+> = ({ signal }) => {
+  return api.get(`v1/manage/artists?includeLabelArtists=true`, { signal });
+};
+
+export function queryLinkableArtists() {
+  return queryOptions({
+    queryKey: [
+      "fetchManagedArtists",
+      { includeLabelArtists: true } as const,
+      QUERY_KEY_ARTISTS,
+    ],
+    queryFn: fetchLinkableArtists,
   });
 }
 

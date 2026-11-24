@@ -35,7 +35,7 @@ const makeTrack = (overrides: Partial<Track>): Track => ({
     {
       artistName: ARTIST.name,
       artistId: ARTIST.id,
-      isCoAuthor: true,
+      appearsAs: "MAIN",
       order: 1,
     },
   ],
@@ -55,10 +55,15 @@ const TRACKS: Track[] = [
       {
         artistName: ARTIST.name,
         artistId: ARTIST.id,
-        isCoAuthor: true,
+        appearsAs: "MAIN",
         order: 1,
       },
-      { artistName: "Featured Guest", role: "vocals", order: 2 },
+      {
+        artistName: "Featured Guest",
+        role: "vocals",
+        appearsAs: "FEATURED",
+        order: 2,
+      },
     ],
     audio: { ...TRACK_EXAMPLE.audio!, duration: 412 },
     isrc: "USRC17607839",

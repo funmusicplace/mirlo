@@ -14,11 +14,13 @@ import { useTranslation } from "react-i18next";
 import { FaTrash } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 import { useDebounce } from "use-debounce";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 const RecommendedTrackGroups: React.FC<{
   trackGroupId: number;
 }> = ({ trackGroupId }) => {
   const { t } = useTranslation("translation", { keyPrefix: "manageAlbum" });
+  const { releaseArtistName } = useReleaseArtistName();
   const { t: tShared } = useTranslation("translation", {
     keyPrefix: "commandSearch",
   });
@@ -96,7 +98,7 @@ const RecommendedTrackGroups: React.FC<{
       )
       .map((tg) => ({
         key: `trackGroup-${tg.id}`,
-        node: `${tg.artist?.name ?? ""} · ${tg.title}`,
+        node: [releaseArtistName(tg), tg.title].filter(Boolean).join(" · "),
         onSelect: () => handleAddRecommendation(tg.id),
       }));
     return items.length > 0
@@ -109,6 +111,7 @@ const RecommendedTrackGroups: React.FC<{
     trackGroupId,
     handleAddRecommendation,
     tShared,
+    releaseArtistName,
   ]);
 
   return (
@@ -133,7 +136,7 @@ const RecommendedTrackGroups: React.FC<{
                 <div>
                   <p className="text-sm font-bold m-0">{rec.title}</p>
                   <p className="text-xs text-(--mi-light-foreground-color) m-0">
-                    {rec.artist.name}
+                    {releaseArtistName(rec)}
                   </p>
                 </div>
                 <ArtistButton

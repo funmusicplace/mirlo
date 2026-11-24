@@ -5,6 +5,7 @@ import { RiDownloadLine } from "react-icons/ri";
 import api from "services/api";
 import useErrorHandler from "services/useErrorHandler";
 import { useSnackbar } from "state/SnackbarContext";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import { DropdownMenuItemButton } from "./DropdownMenuItem";
 import { FixedButton } from "./FixedButton";
@@ -51,6 +52,8 @@ const DownloadAlbumButton: React.FC<{
   labelTarget,
 }) => {
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
+  const { releaseArtistName } = useReleaseArtistName();
+  const artistName = releaseArtistName(trackGroup);
   const [chosenFormat, setChosenFormat] = React.useState("");
   const [isGeneratingAlbum, setIsGeneratingAlbum] = React.useState(0);
   const [isCheckingGeneration, setIsCheckingGeneration] = React.useState(false);
@@ -74,7 +77,7 @@ const DownloadAlbumButton: React.FC<{
       queryParams.append("token", token);
     }
     const endpoint = `${prefix}/download?${queryParams.toString()}`;
-    const fallbackName = `${trackGroup.artist?.name ?? "album"} - ${
+    const fallbackName = `${artistName || "album"} - ${
       trackGroup.title ?? "album"
     }.zip`;
 
@@ -101,7 +104,7 @@ const DownloadAlbumButton: React.FC<{
     snackbar,
     t,
     token,
-    trackGroup.artist?.name,
+    artistName,
     trackGroup.title,
   ]);
 

@@ -21,6 +21,9 @@ const track = {
     uploadState: "SUCCESS",
   },
   trackArtists: [],
+  mainArtists: TRACK_GROUP_EXAMPLE.releaseArtists,
+  featuredArtists: [],
+  mainArtistsSource: "release",
   license: null,
 };
 
