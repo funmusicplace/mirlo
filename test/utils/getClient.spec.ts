@@ -37,14 +37,14 @@ describe("getClient", () => {
     assert.equal(client.applicationUrl, "https://mirlo.example");
   });
 
-  it("creates the frontend client from CLIENT_DOMAIN on a fresh install", async () => {
-    const original = process.env.CLIENT_DOMAIN;
-    process.env.CLIENT_DOMAIN = "https://nightjar.test";
+  it("creates the frontend client from API_DOMAIN on a fresh install", async () => {
+    const original = process.env.API_DOMAIN;
+    process.env.API_DOMAIN = "https://nightjar.test";
     try {
       const client = await getClient();
       assert.equal(client.applicationUrl, "https://nightjar.test");
     } finally {
-      process.env.CLIENT_DOMAIN = original;
+      process.env.API_DOMAIN = original;
     }
   });
 });

@@ -10,6 +10,8 @@ import type {
   RegistrationResponseJSON,
 } from "@simplewebauthn/server";
 
+import { getClient } from "../getClient";
+
 type StoredCredential = {
   credentialId: string;
   publicKey: Uint8Array;
@@ -17,10 +19,8 @@ type StoredCredential = {
   transports: string[];
 };
 
-const relyingParty = () => {
-  const url = new URL(
-    process.env.CLIENT_DOMAIN ?? process.env.API_DOMAIN ?? "http://localhost"
-  );
+const relyingParty = async () => {
+  const url = new URL((await getClient()).applicationUrl);
   return { rpID: url.hostname, origin: url.origin };
 };
 
@@ -29,14 +29,14 @@ const descriptor = (credential: StoredCredential) => ({
   transports: credential.transports as AuthenticatorTransportFuture[],
 });
 
-export const registrationOptions = (
+export const registrationOptions = async (
   user: { id: number; email: string },
   existing: StoredCredential[],
   instanceName: string
 ) =>
   generateRegistrationOptions({
     rpName: instanceName,
-    rpID: relyingParty().rpID,
+    rpID: (await relyingParty()).rpID,
     userName: user.email,
     userID: new Uint8Array(new TextEncoder().encode(`mirlo-user-${user.id}`)),
     attestationType: "none",
@@ -51,7 +51,7 @@ export const verifyRegistration = async (
   response: RegistrationResponseJSON,
   expectedChallenge: string
 ) => {
-  const { rpID, origin } = relyingParty();
+  const { rpID, origin } = await relyingParty();
   const { verified, registrationInfo } = await verifyRegistrationResponse({
     response,
     expectedChallenge,
@@ -71,9 +71,9 @@ export const verifyRegistration = async (
   };
 };
 
-export const authenticationOptions = (existing: StoredCredential[]) =>
+export const authenticationOptions = async (existing: StoredCredential[]) =>
   generateAuthenticationOptions({
-    rpID: relyingParty().rpID,
+    rpID: (await relyingParty()).rpID,
     allowCredentials: existing.map(descriptor),
     userVerification: "preferred",
   });
@@ -83,7 +83,7 @@ export const verifyAuthentication = async (
   expectedChallenge: string,
   stored: StoredCredential
 ) => {
-  const { rpID, origin } = relyingParty();
+  const { rpID, origin } = await relyingParty();
   const { verified, authenticationInfo } = await verifyAuthenticationResponse({
     response,
     expectedChallenge,

@@ -5,6 +5,7 @@ dotenv.config();
 import { describe, it } from "mocha";
 import prisma from "@mirlo/prisma";
 
+import { getClient } from "../../../src/utils/getClient";
 import { clearTables, createProfile, createUser } from "../../utils";
 import { requestApp } from "../utils";
 
@@ -64,7 +65,8 @@ describe("artists/{id}/confirmFollow", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.status, 302);
-      const redirectTo = `http://localhost:8080/${profile.urlSlug}/checkout-complete?purchaseType=follow`;
+      const { applicationUrl } = await getClient();
+      const redirectTo = `${applicationUrl}/${profile.urlSlug}/checkout-complete?purchaseType=follow`;
 
       assert.equal(response.header["location"], redirectTo);
       const subscription =
@@ -109,9 +111,10 @@ describe("artists/{id}/confirmFollow", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.status, 302);
+      const { applicationUrl } = await getClient();
       assert.equal(
         response.header["location"],
-        "http://localhost:8080/?message=Something%20went%20wrong"
+        `${applicationUrl}/?message=Something%20went%20wrong`
       );
       assert.equal(
         await prisma.profileUserSubscriptionConfirmation.count({
@@ -150,7 +153,8 @@ describe("artists/{id}/confirmFollow", () => {
         .set("Accept", "application/json");
 
       assert.equal(response.status, 302);
-      const redirectTo = `http://localhost:8080/${profile.urlSlug}/checkout-complete?purchaseType=follow`;
+      const { applicationUrl } = await getClient();
+      const redirectTo = `${applicationUrl}/${profile.urlSlug}/checkout-complete?purchaseType=follow`;
 
       assert.equal(response.header["location"], redirectTo);
       const subscription =
