@@ -23,6 +23,7 @@ import {
 import { resolvePayee } from "./payments/payee";
 import type { ResolvedItem } from "./payments/purchase";
 import { calculateAppFee } from "./processingPayments";
+import { trackGroupArtistsInclude } from "./releaseArtists";
 import { numberSale } from "./saleNumber";
 import { hasSubscriptionTiers } from "./subscriptionTier";
 import { registerPurchase, registerTrackPurchase } from "./trackGroup";
@@ -243,6 +244,7 @@ export const transactionsForEmails = async (transactionIds: string[]) => {
               id: true,
               title: true,
               urlSlug: true,
+              trackGroupArtists: trackGroupArtistsInclude,
               profile: {
                 include: {
                   user: {
@@ -282,6 +284,7 @@ export const transactionsForEmails = async (transactionIds: string[]) => {
             include: {
               trackGroup: {
                 include: {
+                  trackGroupArtists: trackGroupArtistsInclude,
                   profile: {
                     include: {
                       user: true,
@@ -438,6 +441,7 @@ const attachTrackGroup = async (
   const trackGroup = await prisma.trackGroup.findFirst({
     where: { id: trackGroupId },
     include: {
+      trackGroupArtists: trackGroupArtistsInclude,
       profile: {
         include: { subscriptionTiers: true, user: true, paymentToUser: true },
       },
@@ -958,7 +962,10 @@ export const handleFundraiserPledgePaymentSuccess = async (
                   paymentToUser: { select: { id: true } },
                 },
               },
-              trackGroups: { where: { deletedAt: null } },
+              trackGroups: {
+                where: { deletedAt: null },
+                include: { trackGroupArtists: trackGroupArtistsInclude },
+              },
             },
           },
         },

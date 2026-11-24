@@ -9,6 +9,7 @@ import {
 import { processSingleTrackGroup } from "../../../../../../../serializers/trackGroup";
 import { AppError } from "../../../../../../../utils/error";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
+import { trackGroupArtistsInclude } from "../../../../../../../utils/releaseArtists";
 import { subscriptionTierReleasesCount } from "../../../../../../../utils/trackGroup";
 
 type Params = {
@@ -61,6 +62,7 @@ export default function () {
               cover: true,
               profile: true,
               _count: subscriptionTierReleasesCount,
+              trackGroupArtists: trackGroupArtistsInclude,
             },
           },
         },

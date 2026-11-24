@@ -3,6 +3,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { serializeProfile } from "../../../serializers/artist";
+import { trackGroupArtistsInclude } from "../../../utils/releaseArtists";
 import { turnItemsIntoRSS } from "../../../utils/rss";
 import { getInstanceName } from "../../../utils/settings";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
@@ -113,6 +114,7 @@ export default function () {
             where: whereForPublishedTrackGroups(),
             include: {
               cover: true,
+              trackGroupArtists: trackGroupArtistsInclude,
             },
             orderBy: { orderIndex: "asc" },
           },
@@ -140,6 +142,7 @@ export default function () {
                         where: whereForPublishedTrackGroups(),
                         include: {
                           cover: true,
+                          trackGroupArtists: trackGroupArtistsInclude,
                         },
                         take: 4,
                         orderBy: { orderIndex: "asc" },

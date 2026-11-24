@@ -1,8 +1,20 @@
-import { Track, TrackGroup, Post, Profile } from "@mirlo/prisma/client";
+import {
+  Track,
+  TrackArtist,
+  TrackGroup,
+  Post,
+  Profile,
+} from "@mirlo/prisma/client";
+import { escape } from "lodash";
 import RSS from "rss";
 
 import { getClient } from "./getClient";
 import { markdownAsHtml } from "./post";
+import {
+  ReleaseArtistRow,
+  releaseArtistText,
+  trackArtistTextForRelease,
+} from "./releaseArtists";
 import { isArtist, isPost, isTrack, isTrackGroup } from "./typeguards";
 
 type FeedArtistRef = { name: string; urlSlug: string; id: number } | null;
@@ -11,6 +23,7 @@ type FeedTrackGroup = Omit<TrackGroup, "profileId"> & {
   artistId?: number;
   artist: FeedArtistRef;
   tags?: string[];
+  trackGroupArtists?: ReleaseArtistRow[];
 };
 
 type FeedTrack = Track & {
@@ -50,7 +63,14 @@ export const turnItemsIntoRSS = async (
   for (const p of zipped) {
     if (isTrack(p)) {
       const tg = p.trackGroup;
-      const artistName = tg?.artist?.name ?? "an artist";
+      const feedReleaseArtists =
+        (tg as FeedTrackGroup | undefined)?.trackGroupArtists ?? [];
+      const feedOwnerName = tg?.artist?.name ?? "an artist";
+      const artistName = trackArtistTextForRelease(
+        (p as { trackArtists?: TrackArtist[] }).trackArtists ?? [],
+        feedReleaseArtists,
+        { name: feedOwnerName }
+      );
       feed.item({
         title: p.title
           ? `${p.title} by ${artistName}`
@@ -58,8 +78,8 @@ export const turnItemsIntoRSS = async (
         description: p.description
           ? markdownAsHtml(p.description)
           : tg?.title
-            ? `A track from "${tg.title}" by ${artistName}.`
-            : `A track by ${artistName}.`,
+            ? `A track from "${escape(tg.title)}" by ${escape(artistName)}.`
+            : `A track by ${escape(artistName)}.`,
         url:
           tg && tg.artist
             ? `${client?.applicationUrl}/${tg.artist.urlSlug}/release/${tg.urlSlug}/tracks/${p.id}`
@@ -69,13 +89,16 @@ export const turnItemsIntoRSS = async (
       });
     } else if (isTrackGroup(p)) {
       const tg = p as FeedTrackGroup;
+      const releaseArtistName = releaseArtistText(tg.trackGroupArtists ?? [], {
+        name: tg.artist?.name,
+      });
       feed.item({
         title: tg.title
-          ? `${tg.title} by ${tg.artist?.name}`
-          : `A release by ${tg.artist?.name}`,
+          ? `${tg.title} by ${releaseArtistName}`
+          : `A release by ${releaseArtistName}`,
         description: tg.about
           ? markdownAsHtml(tg.about)
-          : `<h2>A release by artist ${tg.artist?.name}.</h2>`,
+          : `<h2>A release by artist ${escape(releaseArtistName)}.</h2>`,
         url: `${client?.applicationUrl}/${tg.artist?.urlSlug}/release/${tg.urlSlug}`,
         date: tg.releaseDate ?? tg.createdAt,
         categories: tg.tags ?? [],

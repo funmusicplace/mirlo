@@ -3,7 +3,7 @@ include ../mixins.pug
 
 block content
   p= t("emails.albumFreeDownload.woohoo")
-  p!= tHtml("emails.albumFreeDownload.intro", { title: trackGroup.title, artistName: trackGroup.artist.name })
+  p!= tHtml("emails.albumFreeDownload.intro", { title: trackGroup.title, artistName: releaseArtistName(trackGroup) })
 
   table
     thead

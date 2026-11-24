@@ -2,6 +2,13 @@ import { Merch } from "@mirlo/prisma/client";
 
 import { addSizesToStoredImage } from "../utils/artist";
 import { MerchImageWithImage } from "../utils/merch";
+import {
+  ReleaseArtistRow,
+  releaseArtistsWhenLoaded,
+  resolveTrackArtists,
+  TrackArtistRow,
+  serializeTrackGroupArtists,
+} from "../utils/releaseArtists";
 
 import { omitPrivateProfileFields, Serialized } from "./utils";
 
@@ -28,7 +35,13 @@ export const serializeMerch = <T extends object>(
         } | null;
         includePurchaseTrackGroup?: {
           profileId?: number;
-          profile?: object | null;
+          profile?: {
+            id?: number;
+            name?: string | null;
+            urlSlug?: string | null;
+          } | null;
+          trackGroupArtists?: ReleaseArtistRow[];
+          tracks?: { trackArtists?: TrackArtistRow[] }[];
         } | null;
         downloadableContent?: {
           downloadableContent: object;
@@ -43,8 +56,25 @@ export const serializeMerch = <T extends object>(
           profile: iProf,
           ...iRest
         } = includePurchaseTrackGroup;
+        const releaseArtists = releaseArtistsWhenLoaded(
+          includePurchaseTrackGroup,
+          iProf
+        );
         return {
           ...iRest,
+          ...releaseArtists,
+          trackGroupArtists: serializeTrackGroupArtists(
+            includePurchaseTrackGroup.trackGroupArtists
+          ),
+          tracks: includePurchaseTrackGroup.tracks?.map((track) => ({
+            ...track,
+            ...(track.trackArtists && releaseArtists.releaseArtists
+              ? resolveTrackArtists(
+                  track.trackArtists,
+                  releaseArtists.releaseArtists
+                )
+              : {}),
+          })),
           artistId: iPid,
           artist:
             iProf && typeof iProf === "object"

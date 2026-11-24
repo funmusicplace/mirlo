@@ -5,6 +5,7 @@ import { assertLoggedIn } from "../../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../../auth/passport";
 import { serializeNotification } from "../../../../../serializers/notification";
 import { AppError } from "../../../../../utils/error";
+import { trackGroupArtistsInclude } from "../../../../../utils/releaseArtists";
 
 type Params = {
   userId: string;
@@ -53,6 +54,7 @@ export default function () {
                 omit: { apPrivateKey: true },
                 include: { user: { select: { currency: true } } },
               },
+              trackGroupArtists: trackGroupArtistsInclude,
               cover: true,
               tracks: {
                 where: { deletedAt: null },

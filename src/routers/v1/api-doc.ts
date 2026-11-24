@@ -1,3 +1,8 @@
+import {
+  MAX_RELEASE_ARTIST_NAME_LENGTH,
+  MAX_RELEASE_ARTISTS,
+} from "../../utils/trackGroup";
+
 const apiDoc = {
   swagger: "2.0",
   basePath: "/",
@@ -27,6 +32,44 @@ const apiDoc = {
           type: ["string", "null"],
           description: "UPC or EAN barcode",
         },
+        trackGroupArtists: {
+          type: "array",
+          description:
+            "Artists credited for the release, in place of the publishing profile",
+          maxItems: MAX_RELEASE_ARTISTS,
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              artistName: {
+                type: "string",
+                maxLength: MAX_RELEASE_ARTIST_NAME_LENGTH,
+              },
+              artistId: { type: ["number", "null"] },
+            },
+          },
+        },
+        releaseArtists: {
+          type: "array",
+          description:
+            "Read only, when the release artists are loaded. Names to show as the artist of the release: the credited release artists, else the publishing profile",
+          items: { $ref: "#/definitions/ArtistLink" },
+        },
+        releaseArtistsSource: {
+          type: "string",
+          enum: ["credited", "owner"],
+          description: "Read only. Where releaseArtists comes from",
+        },
+      },
+    },
+    ArtistLink: {
+      type: "object",
+      required: ["name"],
+      properties: {
+        name: { type: "string" },
+        urlSlug: { type: "string" },
+        artistId: { type: "number" },
+        role: { type: "string" },
       },
     },
     Fundraiser: {
@@ -259,6 +302,22 @@ const apiDoc = {
         string: {
           description: "Title of the track",
           type: "string",
+        },
+        mainArtists: {
+          type: "array",
+          description:
+            "Read only, when the track artists are loaded. The track's main artists, else the release artists",
+          items: { $ref: "#/definitions/ArtistLink" },
+        },
+        featuredArtists: {
+          type: "array",
+          description: "Read only, when the track artists are loaded",
+          items: { $ref: "#/definitions/ArtistLink" },
+        },
+        mainArtistsSource: {
+          type: "string",
+          enum: ["track", "release"],
+          description: "Read only. Where mainArtists comes from",
         },
       },
     },

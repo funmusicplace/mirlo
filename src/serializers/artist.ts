@@ -13,6 +13,11 @@ import { addSizesToStoredImage } from "../utils/artist";
 import { storedImageVariantUrl } from "../utils/images";
 import { resolvePayee } from "../utils/payments/payee";
 import { ContentImage } from "../utils/postContent";
+import {
+  joinArtistNames,
+  ReleaseArtistRow,
+  resolveReleaseArtists,
+} from "../utils/releaseArtists";
 
 import { LocalArtistLabel, serializeArtistLabel } from "./artistLabel";
 import { serializeMerch } from "./merch";
@@ -52,6 +57,7 @@ export interface LocalProfile extends Profile {
         avatar?: Image | null;
         background?: Image | null;
         trackGroups?: (TrackGroup & {
+          trackGroupArtists: ReleaseArtistRow[];
           cover?: Image | null;
           tracks?: Track[];
         })[];
@@ -89,7 +95,16 @@ export const serializeProfile = <T extends LocalProfile>(
     avatar: renameProfileIdToArtistId(addSizesToStoredImage(profile?.avatar)),
     trackGroups: profile?.trackGroups?.map((tg) =>
       processSingleTrackGroup(
-        { ...tg, profile: { ...tg.profile, user: profile.user } },
+        {
+          ...tg,
+          profile: {
+            id: profile.id,
+            name: profile.name,
+            urlSlug: profile.urlSlug,
+            ...tg.profile,
+            user: profile.user,
+          },
+        },
         { loggedInUserId: userId }
       )
     ),
@@ -117,7 +132,7 @@ export const serializeProfile = <T extends LocalProfile>(
                         {
                           ...tg,
                           profile: labelProfile,
-                        } as Parameters<typeof processSingleTrackGroup>[0],
+                        },
                         { loggedInUserId: userId }
                       )
                     ),
@@ -141,14 +156,16 @@ const canimusSupportsPayment = (artist: LocalProfile) =>
   );
 
 export const serializeSingleArtistTrackGroupIntoCanimus = (
-  trackGroup: TrackGroup,
+  trackGroup: LocalTrackGroup,
   artist: LocalProfile,
   instanceName: string
 ) =>
   serializeSingleTrackGroupIntoCanimus(
     trackGroup,
     canimusArtistUrl(artist),
-    artist.name,
+    joinArtistNames(
+      resolveReleaseArtists(trackGroup.trackGroupArtists, artist).releaseArtists
+    ),
     canimusSupportsPayment(artist),
     instanceName
   );
@@ -194,7 +211,7 @@ export const serializeSingleArtistIntoCanimus = (
     description: artist.bio,
     links: artistLinks,
     updated_date: artist.updatedAt?.toISOString().split("T")[0],
-    children: artist.trackGroups?.map((trackGroup: TrackGroup) =>
+    children: artist.trackGroups?.map((trackGroup) =>
       serializeSingleArtistTrackGroupIntoCanimus(
         trackGroup,
         artist,

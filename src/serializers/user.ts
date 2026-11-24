@@ -1,4 +1,9 @@
 import { addSizesToStoredImage } from "../utils/artist";
+import {
+  resolveReleaseArtists,
+  resolveTrackArtists,
+  serializeTrackGroupArtists,
+} from "../utils/releaseArtists";
 import { UserSelectPayload } from "../utils/user";
 
 import { serializeProfileUserSubscription } from "./profileUserSubscription";
@@ -30,12 +35,24 @@ export const serializeUser = <T extends object>(user: T): Serialized<T> => {
       ? {
           trackFavorites: trackFavorites.map((tf) => {
             const { profileId, profile, ...tgRest } = tf.track.trackGroup;
+            const releaseArtists = resolveReleaseArtists(
+              tf.track.trackGroup.trackGroupArtists,
+              profile
+            );
             return {
               ...tf,
               track: {
                 ...tf.track,
+                ...resolveTrackArtists(
+                  tf.track.trackArtists,
+                  releaseArtists.releaseArtists
+                ),
                 trackGroup: {
                   ...tgRest,
+                  trackGroupArtists: serializeTrackGroupArtists(
+                    tf.track.trackGroup.trackGroupArtists
+                  ),
+                  ...releaseArtists,
                   artistId: profileId,
                   artist: profile ? omitPrivateProfileFields(profile) : profile,
                   cover: addSizesToStoredImage(tf.track.trackGroup.cover),

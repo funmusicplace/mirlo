@@ -13,6 +13,7 @@ import {
   getPlatformFeeForArtist,
   whereForAllProfilesUserCanAddReleasesFor,
 } from "../../../../../utils/artist";
+import { trackGroupArtistsInclude } from "../../../../../utils/releaseArtists";
 
 export default function () {
   const operations = {
@@ -63,6 +64,7 @@ export default function () {
           },
           profile: { include: { user: { select: { currency: true } } } },
           cover: true,
+          trackGroupArtists: trackGroupArtistsInclude,
         },
       });
 
@@ -189,6 +191,7 @@ export default function () {
           adminEnabled: true,
           urlSlug,
         },
+        include: { trackGroupArtists: trackGroupArtistsInclude, profile: true },
       });
       return res.json({
         result: processSingleTrackGroup(result, {

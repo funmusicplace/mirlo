@@ -2,6 +2,7 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import {
   subscriptionTierReleasesCount,
   trackGroupPublishedObject,
@@ -42,6 +43,7 @@ export default function () {
         include: {
           recommendedTrackGroup: {
             include: {
+              trackGroupArtists: trackGroupArtistsInclude,
               profile: {
                 select: {
                   id: true,

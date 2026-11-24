@@ -62,7 +62,7 @@ const createTrackArtist = (overrides?: Partial<TrackArtist>): TrackArtist =>
     artistId: null,
     artistName: "Primary Artist",
     role: null,
-    isCoAuthor: true,
+    appearsAs: "MAIN",
     order: 0,
     ...overrides,
   }) as TrackArtist;
@@ -112,7 +112,7 @@ describe("utils/tracks.convertAudioToFormat", () => {
           artistName: "Writer One",
           role: "Songwriter",
           order: 1,
-          isCoAuthor: false,
+          appearsAs: "CREDITS_ONLY",
         }),
       ],
     });
@@ -120,7 +120,7 @@ describe("utils/tracks.convertAudioToFormat", () => {
     tracksUtils.convertAudioToFormat(
       {
         track,
-        artist: { name: "Album Artist" } as any,
+        releaseArtists: [{ name: "Album Artist" }],
         trackGroup: { title: "Album Name" },
       },
       Readable.from(Buffer.from("audio")),
@@ -188,7 +188,7 @@ describe("utils/tracks.convertAudioToFormat", () => {
     tracksUtils.convertAudioToFormat(
       {
         track,
-        artist: { name: "Album Artist" } as any,
+        releaseArtists: [{ name: "Album Artist" }],
         trackGroup: {
           title: "Numbered Album",
           releaseDate: new Date("2024-07-04T00:00:00.000Z"),
@@ -241,7 +241,7 @@ describe("utils/tracks.convertAudioToFormat", () => {
     tracksUtils.convertAudioToFormat(
       {
         track,
-        artist: { name: "Album Artist" } as any,
+        releaseArtists: [{ name: "Album Artist" }],
         trackGroup: {
           title: "Album with both",
           releaseDate: new Date("2024-01-15T00:00:00.000Z"),
@@ -279,7 +279,7 @@ describe("utils/tracks.convertAudioToFormat", () => {
     tracksUtils.convertAudioToFormat(
       {
         track: createTrackWithAudio(),
-        artist: { name: "Album Artist" } as any,
+        releaseArtists: [{ name: "Album Artist" }],
         trackGroup: {
           title: "Album Name",
           coverLocation: "/tmp/cover.jpg",
@@ -323,7 +323,7 @@ describe("utils/tracks.convertAudioToFormat", () => {
     tracksUtils.convertAudioToFormat(
       {
         track: createTrackWithAudio(),
-        artist: { name: "Album Artist" } as any,
+        releaseArtists: [{ name: "Album Artist" }],
         trackGroup: {
           title: "Album Name",
           coverLocation: "/tmp/cover.jpg",

@@ -4,6 +4,8 @@ import path from "path";
 import i18next, { i18n, TOptions } from "i18next";
 import { escape } from "lodash";
 
+import { ReleaseArtistRow, resolveReleaseArtists } from "./releaseArtists";
+
 const translationDir = path.resolve("client/src/translation");
 
 let instance: i18n | undefined;
@@ -66,6 +68,20 @@ export const getEmailLocals = (requestedLanguage?: string | null) => {
     tHtml: (key: string, options?: TOptions) =>
       t(key, { ...options, interpolation: { escapeValue: true } }),
     formatAmount: (cents: number) => amountFormat.format(cents / 100),
+    releaseArtistName: (
+      trackGroup?: {
+        trackGroupArtists?: ReleaseArtistRow[];
+        artist?: { name?: string | null };
+        profile?: { name?: string | null };
+      },
+      fallbackName?: string
+    ) => {
+      const names = resolveReleaseArtists(trackGroup?.trackGroupArtists ?? [], {
+        name:
+          fallbackName ?? trackGroup?.artist?.name ?? trackGroup?.profile?.name,
+      }).releaseArtists.map((link) => link.name);
+      return new Intl.ListFormat(locale, { type: "conjunction" }).format(names);
+    },
     formatMoney: (cents: number, currency: string) => {
       try {
         return new Intl.NumberFormat(locale, {

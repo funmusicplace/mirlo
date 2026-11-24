@@ -22,6 +22,7 @@ import {
   getUserSubscriptionsForProfiles,
 } from "../../../../utils/postAccess";
 import { postImagesForContent } from "../../../../utils/postContent";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import { turnItemsIntoRSS } from "../../../../utils/rss";
 import { getInstanceName } from "../../../../utils/settings";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
@@ -102,6 +103,7 @@ export const getAlbumsVisibleToUser = async (
     where: wherePublishedAlbumsForProfile(profile.id),
     include: {
       profile: { omit: { apPrivateKey: true } },
+      trackGroupArtists: trackGroupArtistsInclude,
       tags: { include: { tag: true } },
     },
     orderBy: albumFeedOrder,

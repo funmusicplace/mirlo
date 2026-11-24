@@ -73,7 +73,7 @@ export const registerHydration = (
  */
 export const registerTrackHydration = (
   hydrations: HydrationData[],
-  track: any
+  track: Parameters<typeof processSingleTrack>[0]
 ) => {
   registerHydration(hydrations, "__MIRLO_TRACK__", track.id, {
     track: processSingleTrack(track),
@@ -85,7 +85,7 @@ export const registerTrackHydration = (
  */
 export const registerTrackGroupHydration = (
   hydrations: HydrationData[],
-  trackGroup: any
+  trackGroup: Parameters<typeof processSingleTrackGroup>[0]
 ) => {
   registerHydration(hydrations, "__MIRLO_TRACKGROUP__", trackGroup.urlSlug, {
     trackGroup: processSingleTrackGroup(trackGroup, {}),

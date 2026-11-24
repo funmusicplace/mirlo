@@ -18,6 +18,14 @@ import { compact, keyBy } from "lodash";
 import { sendMailQueue } from "../queues/send-mail-queue";
 import { getClient } from "../utils/getClient";
 import {
+  ArtistLink,
+  joinArtistNames,
+  resolveReleaseArtists,
+  resolveTrackArtists,
+  trackArtistText,
+  trackGroupArtistsInclude,
+} from "../utils/releaseArtists";
+import {
   downloadOriginalAudio,
   getDownloadableContentBuffer,
   getCoverBuffer,
@@ -25,7 +33,7 @@ import {
   zipExists,
 } from "../utils/storage";
 import { hasSubscriptionTiers } from "../utils/subscriptionTier";
-import { convertAudioToFormat, resolveTrackArtistName } from "../utils/tracks";
+import { convertAudioToFormat } from "../utils/tracks";
 
 import { logger } from "./queue-worker";
 
@@ -82,7 +90,7 @@ const downloadTracks = async ({
   tempFolder,
   format,
   trackGroup,
-  artist,
+  releaseArtists,
 }: {
   tracks: (Track & { audio?: TrackAudio; trackArtists: TrackArtist[] })[];
   trackGroup: {
@@ -96,7 +104,7 @@ const downloadTracks = async ({
   job: Job;
   tempFolder: string;
   format: Format;
-  artist: Profile;
+  releaseArtists: ArtistLink[];
 }) => {
   let i = 0;
 
@@ -143,12 +151,11 @@ const downloadTracks = async ({
     );
 
     await new Promise((resolve, reject) => {
-      const trackArtistName = resolveTrackArtistName(
-        track.trackArtists ?? [],
-        artist.name
+      const trackArtistName = trackArtistText(
+        resolveTrackArtists(track.trackArtists, releaseArtists)
       );
       const namePrefix =
-        trackArtistName && trackArtistName !== artist.name
+        trackArtistName && trackArtistName !== joinArtistNames(releaseArtists)
           ? `${filenamify(trackArtistName)} - `
           : "";
       const trackFileName = `${tempFolder}/${track.order ?? i}-${namePrefix}${filenamify(track.title ?? "")}`;
@@ -168,7 +175,7 @@ const downloadTracks = async ({
               ...track,
               license: track.licenseId ? licenses[track.licenseId] : null,
             },
-            artist,
+            releaseArtists,
             trackGroup,
           },
           createReadStream(tempTrackPath),
@@ -353,7 +360,7 @@ const downloadAndZipTracks = async ({
   tracks,
   trackGroup,
   job,
-  artist,
+  releaseArtists,
   destinationType,
 }: {
   formatString: string;
@@ -367,7 +374,7 @@ const downloadAndZipTracks = async ({
     catalogNumber?: string | null;
   };
   job: Job;
-  artist: Profile;
+  releaseArtists: ArtistLink[];
   destinationType: "track" | "trackGroup";
 }) => {
   try {
@@ -403,7 +410,7 @@ const downloadAndZipTracks = async ({
         totalTracks: tracks.filter((t) => !t.deletedAt).length,
         catalogNumber: trackGroup.catalogNumber,
       },
-      artist,
+      releaseArtists,
     });
 
     logger.info(`Downloaded tracks ${tempFolder}`);
@@ -436,11 +443,13 @@ const notifyRequesters = async ({
   requestedByUserIds,
   trackGroup,
   artist,
+  releaseArtistRows,
   formatString,
 }: {
   requestedByUserIds: number[];
   trackGroup: TrackGroup;
   artist: Profile;
+  releaseArtistRows: { artistName: string; order: number }[];
   formatString: string;
 }) => {
   if (requestedByUserIds.length === 0) {
@@ -473,6 +482,7 @@ const notifyRequesters = async ({
               name: artist.name,
               urlSlug: artist.urlSlug,
             },
+            trackGroupArtists: releaseArtistRows,
           },
           format: formatString,
           client: applicationUrl,
@@ -488,13 +498,13 @@ export default async (job: Job) => {
   const {
     trackGroup,
     format: formatString,
-    tracks,
+    tracks: queuedTracks,
     destinationType = "trackGroup",
     requestedByUserIds = [],
   } = job.data as {
     tracks: (Track & {
       audio: TrackAudio;
-      trackArtists: TrackArtist[];
+      trackArtists?: TrackArtist[];
     })[];
     trackGroup: TrackGroup & {
       cover: Image;
@@ -503,6 +513,10 @@ export default async (job: Job) => {
     destinationType: "track" | "trackGroup";
     requestedByUserIds?: number[];
   };
+  const tracks = queuedTracks.map((track) => ({
+    ...track,
+    trackArtists: track.trackArtists ?? [],
+  }));
   const startedAt = Date.now();
   let tempFolder = `${TEMP_LOCATION}trackGroup/${trackGroup.id}/${formatString}`;
 
@@ -519,13 +533,19 @@ export default async (job: Job) => {
       throw "Couldn't find artist, weird";
     }
 
+    const releaseArtistRows = await prisma.trackGroupArtist.findMany({
+      where: { trackGroupId: trackGroup.id },
+      orderBy: trackGroupArtistsInclude.orderBy,
+    });
+    const { releaseArtists } = resolveReleaseArtists(releaseArtistRows, artist);
+
     await downloadAndZipTracks({
       formatString,
       tempFolder,
       tracks,
       trackGroup,
       job,
-      artist,
+      releaseArtists,
       destinationType,
     });
 
@@ -542,6 +562,7 @@ export default async (job: Job) => {
           requestedByUserIds,
           trackGroup,
           artist,
+          releaseArtistRows,
           formatString,
         });
       } catch (e) {

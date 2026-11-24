@@ -9,6 +9,7 @@ import { serializeUserTransaction } from "../../../serializers/userTransaction";
 import { getDateRange } from "../../../utils/dateRange";
 import { AppError } from "../../../utils/error";
 import { resolvePayee } from "../../../utils/payments/payee";
+import { trackGroupArtistsInclude } from "../../../utils/releaseArtists";
 import { numberSale } from "../../../utils/saleNumber";
 import { registerPurchase } from "../../../utils/trackGroup";
 
@@ -58,7 +59,10 @@ export default function () {
           trackGroupPurchases: {
             include: {
               trackGroup: {
-                include: { profile: { omit: { apPrivateKey: true } } },
+                include: {
+                  profile: { omit: { apPrivateKey: true } },
+                  trackGroupArtists: trackGroupArtistsInclude,
+                },
               },
             },
           },

@@ -9,6 +9,7 @@ import {
   createFundraiser,
   createProfile,
   createTier,
+  createTrack,
   createTrackGroup,
   createUser,
   createUserTrackGroupPurchase,
@@ -29,6 +30,96 @@ describe("trackGroups/{id}", () => {
   });
 
   describe("/", () => {
+    it("returns the resolved release artists and each track's artists", async () => {
+      const { user } = await createUser({ email: "rob@test.com" });
+      const rob = await createProfile(user.id, { name: "Rob", urlSlug: "rob" });
+      const trackGroup = await createTrackGroup(rob.id, {
+        title: "Nuit",
+        urlSlug: "nuit",
+      });
+      await prisma.trackGroupArtist.createMany({
+        data: [
+          { trackGroupId: trackGroup.id, artistName: "Moon", order: 1 },
+          {
+            trackGroupId: trackGroup.id,
+            artistName: "Rob",
+            profileId: rob.id,
+            order: 0,
+          },
+        ],
+      });
+      const plain = await createTrack(trackGroup.id, { order: 1 });
+      const own = await createTrack(trackGroup.id, { order: 2 });
+      await prisma.trackArtist.createMany({
+        data: [
+          { trackId: plain.id, artistName: "moon", appearsAs: "FEATURED" },
+          { trackId: own.id, artistName: "Bea", appearsAs: "MAIN", order: 0 },
+          {
+            trackId: own.id,
+            artistName: "Alice",
+            appearsAs: "FEATURED",
+            order: 1,
+          },
+          {
+            trackId: own.id,
+            artistName: "Sam",
+            appearsAs: "CREDITS_ONLY",
+            order: 2,
+          },
+        ],
+      });
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      const result = response.body.result;
+      assert.equal(result.releaseArtistsSource, "credited");
+      assert.deepEqual(
+        result.releaseArtists.map((a: { name: string; urlSlug: string }) => [
+          a.name,
+          a.urlSlug,
+        ]),
+        [
+          ["Rob", "rob"],
+          ["Moon", "rob"],
+        ]
+      );
+      const byId = (id: number) =>
+        result.tracks.find((t: { id: number }) => t.id === id);
+      assert.equal(byId(plain.id).mainArtistsSource, "release");
+      assert.deepEqual(byId(plain.id).featuredArtists, []);
+      assert.equal(byId(own.id).mainArtistsSource, "track");
+      assert.deepEqual(
+        byId(own.id).mainArtists.map((a: { name: string }) => a.name),
+        ["Bea"]
+      );
+      assert.deepEqual(
+        byId(own.id).featuredArtists.map((a: { name: string }) => a.name),
+        ["Alice"]
+      );
+    });
+
+    it("falls back to the owner profile when the release credits nobody", async () => {
+      const { user } = await createUser({ email: "rob@test.com" });
+      const rob = await createProfile(user.id, { name: "Rob", urlSlug: "rob" });
+      const trackGroup = await createTrackGroup(rob.id, { urlSlug: "nuit" });
+
+      const response = await requestApp
+        .get(`trackGroups/${trackGroup.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.body.result.releaseArtistsSource, "owner");
+      assert.deepEqual(
+        response.body.result.releaseArtists.map(
+          (a: { name: string }) => a.name
+        ),
+        ["Rob"]
+      );
+    });
+
     it("should GET / 404", async () => {
       const response = await requestApp
         .get("trackGroups/1")

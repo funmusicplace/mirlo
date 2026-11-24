@@ -3,7 +3,7 @@ include ../mixins.pug
 
 block content
     h2 #{trackGroup.title} 
-    p!= tHtml("emails.albumPurchaseLink.byArtist", { artistName: trackGroup.artist.name })
+    p!= tHtml("emails.albumPurchaseLink.byArtist", { artistName: releaseArtistName(trackGroup) })
   
     +releaseLink(trackGroup, "?buy=true")(style="background-color:#BE3455;color:#ffffff;padding:12px 24px;text-decoration:none;font-size:16px;border-radius:4px;display:inline-block;")= t("emails.albumPurchaseLink.buyNow")
 

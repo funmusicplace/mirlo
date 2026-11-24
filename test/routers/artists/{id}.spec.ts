@@ -449,6 +449,71 @@ describe("artists", () => {
       assert.equal(response.body.result.user?.artistLabels?.length, 1);
     });
 
+    it("should return the label roster artists' releases with their artist names", async () => {
+      const { user: labelUser } = await createUser({
+        email: "label4@test.com",
+        isLabelAccount: true,
+      });
+      const label = await createProfile(labelUser.id, {
+        name: "Busy Label",
+        urlSlug: "busy-label",
+        isLabelProfile: true,
+      });
+      const { user: profileOwner } = await createUser({
+        email: "rosterartist4@test.com",
+      });
+      const rosterArtist = await createProfile(profileOwner.id, {
+        name: "Roster Artist",
+        urlSlug: "roster-artist",
+      });
+      await createTrackGroup(rosterArtist.id, { urlSlug: "roster-release" });
+      await prisma.artistLabel.create({
+        data: {
+          artistId: rosterArtist.id,
+          labelUserId: labelUser.id,
+          isLabelApproved: true,
+          isArtistApproved: true,
+        },
+      });
+
+      const response = await requestApp
+        .get(`artists/${label.urlSlug}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const rosterReleases =
+        response.body.result.user.artistLabels[0].artist.trackGroups;
+      assert.equal(rosterReleases.length, 1);
+      assert.deepEqual(
+        rosterReleases[0].releaseArtists.map((a: { name: string }) => a.name),
+        ["Roster Artist"]
+      );
+    });
+
+    it("should name the profile as the artist of its releases that credit nobody", async () => {
+      const { user } = await createUser({ email: "plain@test.com" });
+      const artist = await createProfile(user.id, {
+        name: "Plain Artist",
+        urlSlug: "plain-artist",
+      });
+      await createTrackGroup(artist.id, { urlSlug: "plain-release" });
+
+      const response = await requestApp
+        .get(`artists/${artist.urlSlug}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const release = response.body.result.trackGroups[0];
+      assert.equal(release.releaseArtistsSource, "owner");
+      assert.deepEqual(
+        release.releaseArtists.map((a: { name: string; urlSlug: string }) => [
+          a.name,
+          a.urlSlug,
+        ]),
+        [["Plain Artist", "plain-artist"]]
+      );
+    });
+
     it("should not include soft-deleted roster artists in user.artistLabels", async () => {
       const { user: labelUser } = await createUser({
         email: "label3@test.com",

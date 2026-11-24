@@ -4,9 +4,9 @@ import { Readable } from "stream";
 import prisma from "@mirlo/prisma";
 import {
   License,
-  Profile,
   Track,
   TrackArtist,
+  TrackArtistAppearance,
   TrackAudio,
 } from "@mirlo/prisma/client";
 import ffmpeg from "fluent-ffmpeg";
@@ -14,6 +14,12 @@ import ffmpeg from "fluent-ffmpeg";
 import { Format } from "../jobs/generate-album";
 import logger from "../logger";
 
+import {
+  ArtistLink,
+  joinArtistNames,
+  resolveTrackArtists,
+  trackArtistText,
+} from "./releaseArtists";
 import { removeAudioFiles } from "./storage";
 
 export const deleteTrack = async (trackId: number) => {
@@ -252,33 +258,10 @@ const addTrackMetadataTags = (
   addMetadataTag(processor, "MusicBrainz Disc Id", common.musicbrainz_discid);
 };
 
-export const resolveTrackArtistName = (
-  trackArtists: Pick<TrackArtist, "artistName" | "isCoAuthor" | "order">[],
-  fallbackArtistName: string
-) => {
-  const sortedArtists = [...(trackArtists ?? [])].sort(
-    (a, b) => (a.order ?? 0) - (b.order ?? 0)
-  );
-
-  const coAuthors = sortedArtists
-    .filter((artist) => artist.isCoAuthor)
-    .map((artist) => artist.artistName)
-    .filter(Boolean);
-  const allArtistNames = sortedArtists
-    .map((artist) => artist.artistName)
-    .filter(Boolean);
-
-  return coAuthors.length > 0
-    ? coAuthors.join(", ")
-    : allArtistNames.length > 0
-      ? allArtistNames.join(", ")
-      : fallbackArtistName;
-};
-
 const addTrackArtistRoleTags = (
   processor: ffmpeg.FfmpegCommand,
   trackArtists: TrackArtist[],
-  fallbackArtistName: string
+  releaseArtists: ArtistLink[]
 ) => {
   const sortedArtists = [...(trackArtists ?? [])].sort(
     (a, b) => (a.order ?? 0) - (b.order ?? 0)
@@ -287,7 +270,7 @@ const addTrackArtistRoleTags = (
   addMetadataTag(
     processor,
     "artist",
-    resolveTrackArtistName(trackArtists, fallbackArtistName)
+    trackArtistText(resolveTrackArtists(trackArtists, releaseArtists))
   );
 
   const roleEntries = sortedArtists
@@ -318,7 +301,7 @@ export const convertAudioToFormat = (
       trackArtists: TrackArtist[];
       license?: License | null;
     };
-    artist: Profile;
+    releaseArtists: ArtistLink[];
     trackGroup: {
       title: string | null;
       coverLocation?: string;
@@ -389,7 +372,7 @@ export const convertAudioToFormat = (
     processor,
     content.track,
     content.trackGroup.title,
-    content.artist.name,
+    joinArtistNames(content.releaseArtists),
     format,
     {
       releaseDate: content.trackGroup.releaseDate,
@@ -399,8 +382,8 @@ export const convertAudioToFormat = (
   );
   addTrackArtistRoleTags(
     processor,
-    content.track.trackArtists ?? [],
-    content.artist.name
+    content.track.trackArtists,
+    content.releaseArtists
   );
 
   if (hasEmbeddedCoverArt && content.trackGroup.coverLocation) {
@@ -431,17 +414,58 @@ type TrackArtistInput = {
   artistName: string;
   artistId: number;
   role: string;
-  isCoAuthor: boolean;
+  appearsAs?: TrackArtistAppearance;
+  isCoAuthor?: boolean;
   order: number;
 };
 
-export const trackArtistFields = (ta: TrackArtistInput) => ({
-  artistId: ta.artistId,
-  artistName: ta.artistName,
-  role: ta.role,
-  isCoAuthor: ta.isCoAuthor,
-  order: ta.order,
-});
+type StoredAppearance = {
+  appearsAs: TrackArtistAppearance;
+  isCoAuthor: boolean;
+};
+
+const appearanceFromInput = (
+  ta: TrackArtistInput,
+  stored?: StoredAppearance
+) => {
+  const sentAppearance = Object.values(TrackArtistAppearance).includes(
+    ta.appearsAs as TrackArtistAppearance
+  )
+    ? ta.appearsAs
+    : undefined;
+  if (sentAppearance && sentAppearance !== stored?.appearsAs) {
+    return sentAppearance;
+  }
+  if (
+    typeof ta.isCoAuthor !== "boolean" ||
+    ta.isCoAuthor === stored?.isCoAuthor
+  ) {
+    return undefined;
+  }
+  if (!ta.isCoAuthor) {
+    return TrackArtistAppearance.CREDITS_ONLY;
+  }
+  return stored && stored.appearsAs !== TrackArtistAppearance.CREDITS_ONLY
+    ? stored.appearsAs
+    : TrackArtistAppearance.FEATURED;
+};
+
+export const trackArtistFields = (
+  ta: TrackArtistInput,
+  { stored }: { stored?: StoredAppearance } = {}
+) => {
+  const appearsAs = appearanceFromInput(ta, stored);
+  return {
+    artistId: ta.artistId,
+    artistName: ta.artistName,
+    role: ta.role,
+    appearsAs,
+    ...(appearsAs
+      ? { isCoAuthor: appearsAs !== TrackArtistAppearance.CREDITS_ONLY }
+      : {}),
+    order: ta.order,
+  };
+};
 
 export const updateTrackArtists = async (
   trackId: number,
@@ -478,7 +502,9 @@ export const updateTrackArtists = async (
           id: eta.id,
           trackId: Number(trackId),
         },
-        data: trackArtistFields(eta),
+        data: trackArtistFields(eta, {
+          stored: currentTrackArtists.find((cta) => cta.id === eta.id),
+        }),
       })
     )
   );

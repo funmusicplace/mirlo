@@ -9,6 +9,7 @@ import {
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { clearTrackGroupDownloads } from "../../../../../utils/downloadCache";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
+import { trackGroupArtistsInclude } from "../../../../../utils/releaseArtists";
 
 type Params = {
   trackGroupId: number;
@@ -55,6 +56,8 @@ export default function () {
               deletedAt: null,
             },
           },
+          trackGroupArtists: trackGroupArtistsInclude,
+          profile: true,
         },
       });
 

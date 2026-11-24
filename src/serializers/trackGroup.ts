@@ -11,6 +11,15 @@ import {
 import { addSizesToStoredImage } from "../utils/artist";
 import { storedImageVariantUrl } from "../utils/images";
 import { resolveFundraiserDescription } from "../utils/postContent";
+import {
+  ArtistLink,
+  ReleaseArtistRow,
+  ReleaseArtistsSource,
+  resolveReleaseArtists,
+  resolveTrackArtists,
+  TrackArtistRow,
+  serializeTrackGroupArtists,
+} from "../utils/releaseArtists";
 import { isTrackPlayableNested } from "../utils/trackPlayability";
 
 import { serializeMerch } from "./merch";
@@ -28,20 +37,23 @@ type TrackGroupOwner = Partial<Profile> & {
 };
 
 export interface LocalTrackGroup extends TrackGroup {
+  trackGroupArtists: ReleaseArtistRow[];
   cover?: Image | null;
   artist?: Partial<Profile>;
   profile?: Partial<Profile>;
   tracks?: CanimusTrack[];
 }
 
-type TrackGroupInput = TrackGroup & {
+export type TrackGroupInput = TrackGroup & {
+  trackGroupArtists: ReleaseArtistRow[];
   cover?: Image | null;
   artist?: TrackGroupOwner;
-  profile?: TrackGroupOwner;
+  profile: TrackGroupOwner & { name: string; urlSlug: string };
   paymentToUser?: { currency?: string | null } | null;
   merch?: (Merch & { images: MerchImage[] })[];
   tracks?: (Omit<Track, "metadata"> & {
     userTrackPurchases?: { userId: number }[];
+    trackArtists?: TrackArtistRow[];
   })[];
   tags?: (TrackGroupTag & { tag?: { tag?: string } })[];
   downloadableContent?: {
@@ -87,6 +99,8 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
   isSubscriberExclusive: boolean;
   subscriptionArtist?: SubscriptionArtist;
   tags: string[];
+  releaseArtists: ArtistLink[];
+  releaseArtistsSource: ReleaseArtistsSource;
 } => {
   const {
     _count,
@@ -98,10 +112,15 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
   } = tg;
   const owner = profile ?? artist;
   const currency = tg.paymentToUser?.currency ?? owner?.user?.currency ?? "usd";
+  const { releaseArtists, releaseArtistsSource } = resolveReleaseArtists(
+    tg.trackGroupArtists,
+    owner
+  );
 
   return {
     ...rest,
     artistId: profileId ?? owner?.id,
+    trackGroupArtists: serializeTrackGroupArtists(tg.trackGroupArtists),
     artist: owner
       ? {
           ...omitPrivateProfileFields(owner),
@@ -110,6 +129,8 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
             : undefined,
         }
       : undefined,
+    releaseArtists,
+    releaseArtistsSource,
     totalTracks: _count?.tracks ?? tg.tracks?.length,
     currency,
     hasNotifiedFollowers: tg.notifiedFollowersAt !== null,
@@ -121,6 +142,9 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
     ),
     tracks: tg.tracks?.map((track) => ({
       ...track,
+      ...(track.trackArtists
+        ? resolveTrackArtists(track.trackArtists, releaseArtists)
+        : {}),
       isPlayable:
         !!options?.canEdit ||
         (!!options?.loggedInUserId &&
@@ -164,6 +188,8 @@ export const processSingleTrackGroup = <T extends TrackGroupInput>(
     isSubscriberExclusive: boolean;
     subscriptionArtist?: SubscriptionArtist;
     tags: string[];
+    releaseArtists: ArtistLink[];
+    releaseArtistsSource: ReleaseArtistsSource;
   };
 };
 
@@ -245,7 +271,7 @@ export const serializeSingleTrackGroupIntoCanimus = (
 };
 
 export const serializeSingleDeletedTrackGroupIntoCanimus = (
-  trackGroup: LocalTrackGroup,
+  trackGroup: Pick<LocalTrackGroup, "id" | "title" | "urlSlug">,
   artistUrl: string
 ) => {
   return {

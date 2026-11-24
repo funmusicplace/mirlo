@@ -11,6 +11,7 @@ import {
   createFundraiser,
   createFundraiserPledge,
   createProfileImage,
+  createTrackGroup,
   createUser,
 } from "../../utils";
 import { requestApp } from "../utils";
@@ -68,6 +69,36 @@ describe("fundraisers/{id}", () => {
 
     assert.equal(response.statusCode, 200);
     assert.ok(response.body.result.artist.avatar.sizes[60]);
+  });
+
+  it("returns the release artists of the releases it is linked to", async () => {
+    const { user } = await createUser({ email: "artist@example.com" });
+    const artist = await createArtist(user.id, {
+      name: "Tidal Hours",
+      urlSlug: "tidal-hours",
+    });
+    const trackGroup = await createTrackGroup(artist.id, { urlSlug: "nuit" });
+    await prisma.trackGroupArtist.create({
+      data: { trackGroupId: trackGroup.id, artistName: "Moon", order: 0 },
+    });
+    await createFundraiser(artist.id, {
+      name: "A van",
+      urlSlug: "a-van",
+      isPublic: true,
+      trackGroupId: trackGroup.id,
+    });
+
+    const response = await requestApp
+      .get("fundraisers/a-van?artistId=tidal-hours")
+      .set("Accept", "application/json");
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(
+      response.body.result.trackGroups[0].releaseArtists.map(
+        (a: { name: string }) => a.name
+      ),
+      ["Moon"]
+    );
   });
 
   it("finds a public fundraiser by id", async () => {

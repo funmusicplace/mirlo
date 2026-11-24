@@ -56,6 +56,13 @@ import {
   getCanUserSeePostContent,
   loadPurchasesForPostTracks,
 } from "./utils/postAccess";
+import {
+  joinArtistNames,
+  resolveReleaseArtists,
+  resolveTrackArtists,
+  trackArtistText,
+  trackGroupArtistsInclude,
+} from "./utils/releaseArtists";
 import { getSiteSettings, resolveInstanceName } from "./utils/settings";
 import {
   trackGroupPublishedObject,
@@ -481,13 +488,24 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
 
   registerProfileHydration(hydrations, profile, { partial: true });
   registerTrackGroupHydration(hydrations, tg);
+  const { releaseArtists } = resolveReleaseArtists(
+    tg.trackGroupArtists,
+    tg.profile
+  );
+  const releaseArtistName = joinArtistNames(releaseArtists);
 
   // Check if it's a specific track
   if (trackId) {
     const track = tg.tracks.find((t) => t.id === trackId);
     if (!track) return;
+    const trackArtistName = trackArtistText(
+      resolveTrackArtists(track.trackArtists, releaseArtists)
+    );
 
-    registerTrackHydration(hydrations, track);
+    registerTrackHydration(hydrations, {
+      ...track,
+      trackGroup: { ...tg, tracks: undefined },
+    });
 
     const coverUrl = storedImageVariantUrl(tg.cover, 600);
     const trackUrl = `${client.applicationUrl}/${tg.profile?.urlSlug}/release/${tg.urlSlug}/tracks/${track.id}`;
@@ -495,10 +513,10 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
 
     const schema = buildMusicRecordingSchema({
       title: track.title ?? `A track on ${instanceName}`,
-      description: `A track by ${tg.profile.name}\nReleased ${releaseDate}`,
+      description: `A track by ${trackArtistName}\nReleased ${releaseDate}`,
       url: trackUrl,
       imageUrl: coverUrl,
-      profileName: tg.profile.name,
+      profileName: trackArtistName,
       profileUrl: `${client.applicationUrl}/${tg.profile?.urlSlug}`,
       releaseDate: releaseDate,
       duration: track.audio?.duration || undefined,
@@ -506,7 +524,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
 
     buildOpenGraphTags($, instanceName, {
       title: track.title ?? `A track on ${instanceName}`,
-      description: `A track by ${tg.profile.name}\nReleased ${releaseDate}`,
+      description: `A track by ${trackArtistName}\nReleased ${releaseDate}`,
       url: trackUrl,
       imageUrl: coverUrl,
       isSong: true,
@@ -520,7 +538,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
         width: 560,
         height: 315,
       },
-      profileName: tg.profile.name,
+      profileName: trackArtistName,
       releaseDate: releaseDate,
       schemas: [schema],
     });
@@ -536,7 +554,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       url: `${albumUrl}/tracks/${track.id}`,
     }));
 
-    let description = `An album by ${tg.profile.name}\nReleased ${releaseDate}`;
+    let description = `An album by ${releaseArtistName}\nReleased ${releaseDate}`;
 
     if (tg.about) {
       description += `\n${tg.about}`;
@@ -547,7 +565,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
       description: description,
       url: albumUrl,
       imageUrl: coverUrl,
-      profileName: tg.profile.name,
+      profileName: releaseArtistName,
       profileUrl: `${client.applicationUrl}/${tg.profile?.urlSlug}`,
       releaseDate: releaseDate,
       trackCount: tg.tracks.length,
@@ -570,7 +588,7 @@ const handleAlbum: RouteHandler<AlbumParams> = async ({
         width: 560,
         height: 315,
       },
-      profileName: tg.profile.name,
+      profileName: releaseArtistName,
       releaseDate: releaseDate,
       schemas: [schema],
     });
@@ -764,6 +782,7 @@ const handleTrackWidget: RouteHandler<TrackWidgetParams> = async ({
     include: {
       trackGroup: {
         include: {
+          trackGroupArtists: trackGroupArtistsInclude,
           profile: { include: { avatar: true } },
           cover: true,
         },
@@ -802,6 +821,7 @@ const handleTrackGroupWidget: RouteHandler<TrackGroupWidgetParams> = async ({
       ...trackGroupPublishedObject(),
     },
     include: {
+      trackGroupArtists: trackGroupArtistsInclude,
       tracks: {
         where: { deletedAt: null, audio: { uploadState: "SUCCESS" } },
         include: { audio: true, trackArtists: true, license: true },

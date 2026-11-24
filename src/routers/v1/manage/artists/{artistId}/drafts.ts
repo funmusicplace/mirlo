@@ -6,8 +6,9 @@ import {
   profileBelongsToLoggedInUser,
   userAuthenticated,
 } from "../../../../../auth/passport";
-import { deleteProfile } from "../../../../../utils/artist";
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
+import { deleteProfile } from "../../../../../utils/artist";
+import { trackGroupArtistsInclude } from "../../../../../utils/releaseArtists";
 
 type Params = {
   artistId: string;
@@ -33,6 +34,8 @@ export default function () {
               order: "asc",
             },
           },
+          trackGroupArtists: trackGroupArtistsInclude,
+          profile: true,
         },
       });
 
@@ -49,6 +52,8 @@ export default function () {
                 order: "asc",
               },
             },
+            trackGroupArtists: trackGroupArtistsInclude,
+            profile: true,
           },
         });
       }

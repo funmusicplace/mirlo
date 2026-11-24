@@ -34,13 +34,13 @@ block content
         if transaction.trackGroupPurchases
           each purchase in transaction.trackGroupPurchases
             if !purchase.proGratis
-              +purchaseRow(t("emails.artistPurchaseNotification.digitalItem", { artistName: purchase.trackGroup.artist.name, title: purchase.trackGroup.title }),
+              +purchaseRow(t("emails.artistPurchaseNotification.digitalItem", { artistName: releaseArtistName(purchase.trackGroup), title: purchase.trackGroup.title }),
                  purchase.trackGroup.catalogNumber,
                  transaction,
                  purchase.trackGroup)
         if transaction.trackPurchases
           each purchase in transaction.trackPurchases
-            +purchaseRow(t("emails.artistPurchaseNotification.digitalItem", { artistName: purchase.track.trackGroup.artist.name, title: purchase.track.title }),
+            +purchaseRow(t("emails.artistPurchaseNotification.digitalItem", { artistName: releaseArtistName(purchase.track.trackGroup), title: purchase.track.title }),
               purchase.track.isrc,
               transaction)
         if transaction.merchPurchases

@@ -1,24 +1,17 @@
-import {
-  Image,
-  Profile,
-  Track,
-  TrackAudio,
-  TrackArtist,
-  TrackGroup,
-} from "@mirlo/prisma/client";
+import { Track, TrackAudio, TrackArtist } from "@mirlo/prisma/client";
 
+import {
+  ArtistLink,
+  MainArtistsSource,
+  resolveTrackArtists,
+} from "../utils/releaseArtists";
 import { isTrackPlayableNested } from "../utils/trackPlayability";
 
-import { processSingleTrackGroup } from "./trackGroup";
+import { processSingleTrackGroup, TrackGroupInput } from "./trackGroup";
 import { Serialized } from "./utils";
 
 type TrackInput = Track & {
-  trackGroup?: TrackGroup & {
-    profile?: Partial<Profile> & { avatar?: Image | null };
-    artist?: Partial<Profile> & { avatar?: Image | null };
-    cover?: Image | null;
-    userTrackGroupPurchases?: { userId: number }[];
-  };
+  trackGroup: TrackGroupInput;
   trackArtists?: TrackArtist[];
   audio?: TrackAudio | null;
   userTrackPurchases?: { userId: number }[];
@@ -27,24 +20,29 @@ type TrackInput = Track & {
 export const processSingleTrack = <T extends TrackInput>(
   track: T,
   options?: { loggedInUserId?: number }
-): Serialized<T> & { isPlayable: boolean } =>
-  ({
+) => {
+  const trackGroup = processSingleTrackGroup(track.trackGroup, {
+    loggedInUserId: options?.loggedInUserId,
+  });
+  return {
     ...track,
+    ...(track.trackArtists
+      ? resolveTrackArtists(track.trackArtists, trackGroup.releaseArtists)
+      : {}),
     isPlayable: isTrackPlayableNested({
       isPreview: track.isPreview,
-      trackGroupPurchases: track.trackGroup?.userTrackGroupPurchases,
+      trackGroupPurchases: track.trackGroup.userTrackGroupPurchases,
       trackPurchases: track.userTrackPurchases,
       userId: options?.loggedInUserId,
     }),
-    trackGroup: track.trackGroup
-      ? processSingleTrackGroup(
-          track.trackGroup as Parameters<typeof processSingleTrackGroup>[0],
-          {
-            loggedInUserId: options?.loggedInUserId,
-          }
-        )
-      : undefined,
-  }) as Serialized<T> & { isPlayable: boolean };
+    trackGroup,
+  } as Serialized<T> & {
+    isPlayable: boolean;
+    mainArtists?: ArtistLink[];
+    featuredArtists?: ArtistLink[];
+    mainArtistsSource?: MainArtistsSource;
+  };
+};
 
 export interface CanimusTrack extends Track {
   audio?: { duration: number | null } | null;

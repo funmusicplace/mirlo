@@ -18,6 +18,7 @@ import {
 } from "../../../../../utils/fundraiser";
 import { resolvePayee } from "../../../../../utils/payments/payee";
 import { preparePostContent } from "../../../../../utils/postContent";
+import { trackGroupArtistsInclude } from "../../../../../utils/releaseArtists";
 import { videoEmbedUrl } from "../../../../../utils/videoEmbed";
 
 type Params = {
@@ -44,10 +45,12 @@ export default function () {
           trackGroups: {
             where: { deletedAt: null },
             include: {
+              trackGroupArtists: trackGroupArtistsInclude,
               profile: {
                 select: {
                   urlSlug: true,
                   id: true,
+                  name: true,
                   user: {
                     select: {
                       currency: true,

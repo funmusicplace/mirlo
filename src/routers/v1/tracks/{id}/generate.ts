@@ -36,6 +36,7 @@ export default function () {
         },
         include: {
           audio: { where: { uploadState: "SUCCESS" } },
+          trackArtists: true,
           trackGroup: basicTrackGroupInclude,
         },
       });

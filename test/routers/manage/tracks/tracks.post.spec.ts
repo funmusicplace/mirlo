@@ -144,7 +144,7 @@ describe("manage/tracks POST", () => {
     });
     assert.equal(trackArtist?.artistName, "Guest");
     assert.equal(trackArtist?.role, "vocals");
-    assert.equal(trackArtist?.isCoAuthor, true);
+    assert.equal(trackArtist?.appearsAs, "FEATURED");
     assert.equal(trackArtist?.artistId, null);
   });
 

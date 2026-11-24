@@ -12,6 +12,7 @@ import {
   getEditableProfileIds,
 } from "./artist";
 import countries from "./country-codes-currencies";
+import { trackGroupArtistsInclude } from "./releaseArtists";
 
 export const userSelect = {
   email: true,
@@ -33,8 +34,10 @@ export const userSelect = {
     include: {
       track: {
         include: {
+          trackArtists: true,
           trackGroup: {
             include: {
+              trackGroupArtists: trackGroupArtistsInclude,
               profile: true,
               cover: true,
             },

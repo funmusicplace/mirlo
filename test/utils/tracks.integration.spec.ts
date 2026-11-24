@@ -30,7 +30,7 @@ const createTrackArtist = (overrides?: Partial<TrackArtist>): TrackArtist => {
     artistId: null,
     artistName: "Lead Artist",
     role: "Vocal",
-    isCoAuthor: true,
+    appearsAs: "MAIN",
     order: 0,
     ...overrides,
   } as TrackArtist;
@@ -92,7 +92,7 @@ const convertAudio = async ({
         convertAudioToFormat(
           {
             track,
-            artist,
+            releaseArtists: [{ name: artist.name }],
             trackGroup,
           },
           stream,
@@ -188,7 +188,7 @@ describeIf("utils/tracks integration (real ffmpeg)", function () {
           id: "ta-integration-2",
           artistName: "Writer Person",
           role: "Songwriter",
-          isCoAuthor: false,
+          appearsAs: "CREDITS_ONLY",
           order: 1,
         }),
       ]),

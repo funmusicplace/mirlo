@@ -11,6 +11,7 @@ import { processSingleTrackGroup } from "../../../../../../../serializers/trackG
 import { whereForAllProfilesUserCanAddReleasesFor } from "../../../../../../../utils/artist";
 import { AppError } from "../../../../../../../utils/error";
 import { doesSubscriptionTierBelongToUser } from "../../../../../../../utils/ownership";
+import { trackGroupArtistsInclude } from "../../../../../../../utils/releaseArtists";
 import { grantReleaseToExistingSubscribers } from "../../../../../../../utils/subscriptionTier";
 import { subscriptionTierReleasesCount } from "../../../../../../../utils/trackGroup";
 
@@ -61,6 +62,7 @@ export default function () {
               cover: true,
               profile: true,
               _count: subscriptionTierReleasesCount,
+              trackGroupArtists: trackGroupArtistsInclude,
             },
           },
         },
@@ -183,6 +185,7 @@ export default function () {
                 cover: true,
                 profile: true,
                 _count: subscriptionTierReleasesCount,
+                trackGroupArtists: trackGroupArtistsInclude,
               },
             },
           },

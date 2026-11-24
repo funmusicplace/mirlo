@@ -3,6 +3,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { processSingleTrack } from "../../../serializers/track";
+import { trackGroupArtistsInclude } from "../../../utils/releaseArtists";
 
 export default function () {
   const operations = {
@@ -50,6 +51,7 @@ export default function () {
             include: {
               profile: true,
               cover: true,
+              trackGroupArtists: trackGroupArtistsInclude,
             },
           },
           audio: true,

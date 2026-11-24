@@ -8,11 +8,20 @@ const serializePartialProfile = (profile: ProfileForList, userId?: number) =>
   serializeProfile(profile as LocalProfile, userId);
 
 export const serializeManagedProfile = (
-  profile: ProfileForList & Pick<LocalProfile, "userId">,
+  {
+    managers,
+    ...profile
+  }: ProfileForList &
+    Pick<LocalProfile, "userId"> & { managers: { userId: number }[] },
   loggedInUserId: number
 ) => ({
   ...serializePartialProfile(profile, loggedInUserId),
-  relationship: profile.userId === loggedInUserId ? "owner" : "manager",
+  relationship:
+    profile.userId === loggedInUserId
+      ? "owner"
+      : managers.length > 0
+        ? "manager"
+        : "label",
 });
 
 type ManagerWithUser = ProfileManager & {

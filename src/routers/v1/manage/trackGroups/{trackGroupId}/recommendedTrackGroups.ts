@@ -10,6 +10,7 @@ import {
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { AppError } from "../../../../../utils/error";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
+import { trackGroupArtistsInclude } from "../../../../../utils/releaseArtists";
 import {
   subscriptionTierReleasesCount,
   trackGroupPublishedObject,
@@ -49,6 +50,7 @@ export default function () {
         include: {
           recommendedTrackGroup: {
             include: {
+              trackGroupArtists: trackGroupArtistsInclude,
               profile: {
                 select: {
                   id: true,
@@ -135,6 +137,7 @@ export default function () {
         include: {
           recommendedTrackGroup: {
             include: {
+              trackGroupArtists: trackGroupArtistsInclude,
               profile: {
                 select: {
                   id: true,

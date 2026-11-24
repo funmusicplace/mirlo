@@ -6,6 +6,7 @@ import {
   userOrAppAuthenticated,
 } from "../../../../../auth/passport";
 import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
+import { trackGroupArtistsInclude } from "../../../../../utils/releaseArtists";
 
 export default function () {
   const operations = {
@@ -44,6 +45,8 @@ export default function () {
               deletedAt: null,
             },
           },
+          trackGroupArtists: trackGroupArtistsInclude,
+          profile: true,
         },
       });
 

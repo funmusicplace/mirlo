@@ -31,6 +31,10 @@ import { getClient } from "./getClient";
 import { merchImagesInclude } from "./merch";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { clearImageSlot } from "./pendingImage";
+import {
+  normalizeArtistName,
+  trackGroupArtistsInclude,
+} from "./releaseArtists";
 import { streamOriginalAudio } from "./storage";
 import { grantReleaseToExistingSubscribers } from "./subscriptionTier";
 import { deleteTrack } from "./tracks";
@@ -59,7 +63,7 @@ export const grantReleaseToAutoPurchaseTiers = async (trackGroupId: number) => {
       ...whereForPublishedTrackGroups(),
       hideFromSearch: undefined,
     },
-    include: { profile: true },
+    include: { profile: true, trackGroupArtists: trackGroupArtistsInclude },
   });
   if (!trackGroup) return;
 
@@ -193,9 +197,17 @@ export const finalizeTrackGroupPublication = async (
       ? await prisma.trackGroup.update({
           where: { id: trackGroup.id },
           data,
+          include: {
+            trackGroupArtists: trackGroupArtistsInclude,
+            profile: true,
+          },
         })
       : await prisma.trackGroup.findUniqueOrThrow({
           where: { id: trackGroup.id },
+          include: {
+            trackGroupArtists: trackGroupArtistsInclude,
+            profile: true,
+          },
         });
 
   if (updated.isPublic) {
@@ -370,6 +382,220 @@ export const findTrackGroupIdForSlug = async (
   return foundtrackGroupId;
 };
 
+export const MAX_RELEASE_ARTISTS = 20;
+export const MAX_RELEASE_ARTIST_NAME_LENGTH = 200;
+
+type RequestedTrackGroupArtist = {
+  id: string | null;
+  artistName: string;
+  profileId: number | null;
+};
+
+const parseTrackGroupArtists = (
+  entries: { id?: unknown; artistName?: unknown; artistId?: unknown }[]
+): RequestedTrackGroupArtist[] =>
+  entries
+    .map((entry) => ({
+      id: typeof entry?.id === "string" ? entry.id : null,
+      artistName:
+        typeof entry?.artistName === "string" ? entry.artistName.trim() : "",
+      profileId: Number.isInteger(entry?.artistId)
+        ? (entry.artistId as number)
+        : null,
+    }))
+    .filter((entry) => entry.artistName !== "");
+
+export const assertValidTrackGroupArtists = (entries: unknown) => {
+  if (!Array.isArray(entries)) {
+    return;
+  }
+  const requested = parseTrackGroupArtists(entries);
+  if (
+    requested.length > MAX_RELEASE_ARTISTS ||
+    requested.some(
+      (entry) => entry.artistName.length > MAX_RELEASE_ARTIST_NAME_LENGTH
+    )
+  ) {
+    throw new AppError({
+      httpCode: 400,
+      description: `A release can credit up to ${MAX_RELEASE_ARTISTS} artists, with names of up to ${MAX_RELEASE_ARTIST_NAME_LENGTH} characters`,
+    });
+  }
+};
+
+const resolveTrackGroupArtistLinks = async (
+  requested: RequestedTrackGroupArtist[],
+  storedProfileIds: Set<number>,
+  userId: number
+) => {
+  const requestedProfileIds = requested
+    .map((entry) => entry.profileId)
+    .filter((id): id is number => id !== null);
+  const [existingProfiles, editableProfiles] = await Promise.all([
+    prisma.profile.findMany({
+      where: { id: { in: requestedProfileIds } },
+      select: { id: true, name: true },
+    }),
+    prisma.profile.findMany({
+      where: {
+        id: { in: requestedProfileIds },
+        ...whereForAllProfilesUserCanEdit(userId),
+      },
+      select: { id: true },
+    }),
+  ]);
+  const profileNames = new Map(
+    existingProfiles.map((profile) => [profile.id, profile.name])
+  );
+  const editableIds = new Set(editableProfiles.map((profile) => profile.id));
+  return requested.map((entry) => {
+    const { profileId } = entry;
+    const canLink =
+      profileId !== null &&
+      profileNames.has(profileId) &&
+      (storedProfileIds.has(profileId) || editableIds.has(profileId));
+    return canLink
+      ? {
+          ...entry,
+          artistName: profileNames.get(profileId) || entry.artistName,
+        }
+      : { ...entry, profileId: null };
+  });
+};
+
+const dedupeTrackGroupArtists = (entries: RequestedTrackGroupArtist[]) => {
+  const linkedNames = new Set(
+    entries
+      .filter((entry) => entry.profileId !== null)
+      .map((entry) => normalizeArtistName(entry.artistName))
+  );
+  const seenProfileIds = new Set<number>();
+  const seenNames = new Set<string>();
+  return entries.filter((entry) => {
+    if (entry.profileId !== null) {
+      if (seenProfileIds.has(entry.profileId)) {
+        return false;
+      }
+      seenProfileIds.add(entry.profileId);
+      return true;
+    }
+    const name = normalizeArtistName(entry.artistName);
+    if (linkedNames.has(name) || seenNames.has(name)) {
+      return false;
+    }
+    seenNames.add(name);
+    return true;
+  });
+};
+
+const matchCurrentTrackGroupArtists = <
+  Row extends { id: string; artistName: string; profileId: number | null },
+>(
+  entries: RequestedTrackGroupArtist[],
+  current: Row[]
+) => {
+  const claimed = new Set<string>();
+  const currentIds = new Set(current.map((row) => row.id));
+  const matches: (Row | undefined)[] = entries.map((entry) => {
+    if (entry.id && currentIds.has(entry.id) && !claimed.has(entry.id)) {
+      claimed.add(entry.id);
+      return current.find((row) => row.id === entry.id);
+    }
+    return undefined;
+  });
+  return entries.map((entry, index) => {
+    if (matches[index]) {
+      return matches[index];
+    }
+    const row = current.find(
+      (candidate) =>
+        !claimed.has(candidate.id) &&
+        (entry.profileId !== null
+          ? candidate.profileId === entry.profileId
+          : candidate.profileId === null &&
+            normalizeArtistName(candidate.artistName) ===
+              normalizeArtistName(entry.artistName))
+    );
+    if (row) {
+      claimed.add(row.id);
+    }
+    return row;
+  });
+};
+
+export const updateTrackGroupArtists = async (
+  trackGroupId: number,
+  entries: unknown,
+  userId: number
+) => {
+  if (!Array.isArray(entries)) {
+    return false;
+  }
+  const current = await prisma.trackGroupArtist.findMany({
+    where: { trackGroupId },
+    orderBy: { order: "asc" },
+  });
+  const storedProfileIds = new Set(
+    current
+      .map((row) => row.profileId)
+      .filter((id): id is number => id !== null)
+  );
+  const next = dedupeTrackGroupArtists(
+    await resolveTrackGroupArtistLinks(
+      parseTrackGroupArtists(entries),
+      storedProfileIds,
+      userId
+    )
+  );
+  const unchanged =
+    current.length === next.length &&
+    current.every(
+      (row, index) =>
+        row.artistName === next[index].artistName &&
+        row.profileId === next[index].profileId
+    );
+  if (unchanged) {
+    return false;
+  }
+  const matches = matchCurrentTrackGroupArtists(next, current);
+  const kept = new Set<string>();
+  const updates: Prisma.PrismaPromise<unknown>[] = [];
+  const creates: Prisma.TrackGroupArtistCreateManyInput[] = [];
+  next.forEach((entry, order) => {
+    const row = matches[order];
+    if (row && row.profileId === entry.profileId) {
+      kept.add(row.id);
+      updates.push(
+        prisma.trackGroupArtist.updateMany({
+          where: { id: row.id, trackGroupId },
+          data: { artistName: entry.artistName, order },
+        })
+      );
+      return;
+    }
+    creates.push({
+      ...(row ? { id: row.id } : {}),
+      trackGroupId,
+      artistName: entry.artistName,
+      profileId: entry.profileId,
+      order,
+    });
+  });
+  await prisma.$transaction([
+    prisma.trackGroupArtist.deleteMany({
+      where: {
+        trackGroupId,
+        id: {
+          in: current.filter((row) => !kept.has(row.id)).map((row) => row.id),
+        },
+      },
+    }),
+    ...updates,
+    prisma.trackGroupArtist.createMany({ data: creates, skipDuplicates: true }),
+  ]);
+  return true;
+};
+
 export const trackGroupSingleInclude = (options: {
   loggedInUserId?: number;
   ownerId?: number;
@@ -408,6 +634,7 @@ export const trackGroupSingleInclude = (options: {
       },
       orderBy: { order: "asc" },
     },
+    trackGroupArtists: trackGroupArtistsInclude,
     paymentToUser: {
       select: {
         id: true,
@@ -645,6 +872,7 @@ export const registerPurchase = async ({
       trackGroup: {
         include: {
           profile: true,
+          trackGroupArtists: trackGroupArtistsInclude,
         },
       },
       user: {
@@ -760,6 +988,7 @@ export const basicTrackGroupInclude = {
         trackArtists: true,
       },
     },
+    trackGroupArtists: trackGroupArtistsInclude,
     cover: true,
     profile: {
       include: {
@@ -808,6 +1037,7 @@ export const findTrackPurchaseAndVoidToken = async (
     include: {
       track: {
         include: {
+          trackArtists: true,
           trackGroup: basicTrackGroupInclude,
         },
       },
@@ -839,6 +1069,7 @@ export const findTrackPurchaseAndVoidToken = async (
       },
     },
     include: {
+      trackArtists: true,
       trackGroup: basicTrackGroupInclude,
     },
   });
@@ -925,6 +1156,7 @@ export const findTrackPurchaseBasedOnTokenAndUpdate = async (
     include: {
       track: {
         include: {
+          trackArtists: true,
           trackGroup: basicTrackGroupInclude,
         },
       },

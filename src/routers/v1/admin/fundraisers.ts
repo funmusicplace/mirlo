@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 
 import { userHasPermission } from "../../../auth/passport";
 import { serializeFundraiser } from "../../../serializers/fundraiser";
+import { trackGroupArtistsInclude } from "../../../utils/releaseArtists";
 
 export default function () {
   const operations = {
@@ -21,10 +22,12 @@ export default function () {
             select: {
               id: true,
               title: true,
+              trackGroupArtists: trackGroupArtistsInclude,
               profile: {
                 select: {
                   id: true,
                   name: true,
+                  urlSlug: true,
                 },
               },
             },

@@ -5,6 +5,8 @@ import { basename, join, relative, resolve } from "node:path";
 import { describe, it } from "mocha";
 import pug from "pug";
 
+import { getEmailLocals } from "../src/utils/emailTranslation";
+
 const REPO_ROOT = resolve();
 const EMAILS_DIR = join(REPO_ROOT, "emails");
 const en: Record<string, Record<string, unknown>> = JSON.parse(
@@ -80,6 +82,7 @@ describe("email templates", () => {
       {
         t: (key: string) => key,
         tHtml: (key: string) => key,
+        releaseArtistName: getEmailLocals().releaseArtistName,
         client: "https://mirlo.space",
         instanceName: "Mirlo",
         trackGroup: {

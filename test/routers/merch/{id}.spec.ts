@@ -11,6 +11,7 @@ import {
   createProfile,
   createMerch,
   createMerchShippingDestination,
+  createTrack,
   createTrackGroup,
   createUser,
 } from "../../utils";
@@ -141,6 +142,55 @@ describe("GET /v1/merch/{id}", () => {
       response.body.result.includePurchaseTrackGroup?.artist?.urlSlug,
       artist.urlSlug,
       "trackGroup carries its own artist so the album link points to /roster-artist/release/roster-album, not /timeless-records/release/..."
+    );
+  });
+
+  it("returns the release artists and track artists of the included release", async () => {
+    const { user } = await createUser({ email: "rob@example.com" });
+    const rob = await createProfile(user.id, { name: "Rob", urlSlug: "rob" });
+    const album = await createTrackGroup(rob.id, { urlSlug: "nuit" });
+    await prisma.trackGroupArtist.create({
+      data: { trackGroupId: album.id, artistName: "Rob & Moon", order: 0 },
+    });
+    const track = await createTrack(album.id, { order: 1 });
+    await prisma.trackArtist.create({
+      data: { trackId: track.id, artistName: "Bea", appearsAs: "MAIN" },
+    });
+    const merch = await createMerch(rob.id, {
+      title: "Vinyl",
+      includePurchaseTrackGroupId: album.id,
+    });
+    await prisma.merch.update({
+      where: { id: merch.id },
+      data: {
+        isPublic: true,
+        shippingDestinations: {
+          create: {
+            homeCountry: "US",
+            destinationCountry: null,
+            costUnit: 0,
+            costExtraUnit: 0,
+          },
+        },
+      },
+    });
+
+    const response = await requestApp
+      .get(`merch/${merch.urlSlug}?artistId=${rob.urlSlug}`)
+      .set("Accept", "application/json");
+
+    assert.equal(response.status, 200);
+    const included = response.body.result.includePurchaseTrackGroup;
+    assert.equal(included.releaseArtistsSource, "credited");
+    assert.deepEqual(
+      included.releaseArtists.map((a: { name: string }) => a.name),
+      ["Rob & Moon"]
+    );
+    assert.deepEqual(
+      included.tracks
+        .find((t: { id: number }) => t.id === track.id)
+        .mainArtists.map((a: { name: string }) => a.name),
+      ["Bea"]
     );
   });
 });

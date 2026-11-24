@@ -5,6 +5,7 @@ import { set } from "lodash";
 
 import { userAuthenticated, userHasPermission } from "../../../auth/passport";
 import { processSingleTrack } from "../../../serializers/track";
+import { trackGroupArtistsInclude } from "../../../utils/releaseArtists";
 
 export default function () {
   const operations = {
@@ -68,6 +69,7 @@ export default function () {
                 },
               },
               cover: true,
+              trackGroupArtists: trackGroupArtistsInclude,
             },
           },
         },
