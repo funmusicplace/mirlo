@@ -124,6 +124,7 @@ export default function () {
             ownerId: Number(loggedInUser.id),
           }),
           merch: {
+            where: { deletedAt: null },
             include: {
               images: merchImagesInclude,
             },
