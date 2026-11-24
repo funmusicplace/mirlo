@@ -28,7 +28,7 @@ import { sendBasecampAMessage } from "./basecamp";
 import { deleteDownloadableContent } from "./content";
 import { AppError } from "./error";
 import { getClient } from "./getClient";
-import { merchImagesInclude } from "./merch";
+import { merchImagesInclude, publicMerchArgs } from "./merch";
 import { doesTrackBelongToUser, doesTrackGroupBelongToUser } from "./ownership";
 import { clearImageSlot } from "./pendingImage";
 import {
@@ -683,7 +683,7 @@ export const trackGroupSingleInclude = (options: {
       },
     },
     merch: {
-      where: { isPublic: true },
+      where: { ...publicMerchArgs.where, profile: whereForVisibleProfile() },
       include: {
         images: merchImagesInclude,
         shippingDestinations: true,

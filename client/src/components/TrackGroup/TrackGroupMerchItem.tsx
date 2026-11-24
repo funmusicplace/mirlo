@@ -12,11 +12,15 @@ const TrackGroupMerchItem: React.FC<{ item: Merch; releaseArtist: Artist }> = ({
   releaseArtist,
 }) => {
   const isReleaseArtistMerch = item.artistId === releaseArtist.id;
-  const { data: merchArtist } = useQuery({
+  const { data: merchArtist, isError } = useQuery({
     ...queryArtist({ artistSlug: `${item.artistId}` }),
     enabled: !isReleaseArtistMerch,
   });
   const artist = isReleaseArtistMerch ? releaseArtist : merchArtist;
+
+  if (!artist && isError) {
+    return null;
+  }
 
   if (!artist) {
     return (
