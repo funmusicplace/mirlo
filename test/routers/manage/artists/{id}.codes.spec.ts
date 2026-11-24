@@ -4,6 +4,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import { describe, it } from "mocha";
 
+import { getClient } from "../../../../src/utils/getClient";
 import {
   clearTables,
   createArtist,
@@ -90,9 +91,10 @@ describe("manage/artists/{artistId}/codes", () => {
       assert.equal(response.text.split(",")[0], '"Album ID"');
       const rows = response.text.split("\n");
       assert.equal(rows[1].split(",")[0], codes[0].trackGroupId);
+      const { applicationUrl } = await getClient();
       assert.equal(
         rows[1].split(",")[6].replaceAll('"', ""),
-        `http://localhost:8080/${artist.urlSlug}/release/${trackGroup.urlSlug}/redeem?code=${codes[0].downloadCode}`
+        `${applicationUrl}/${artist.urlSlug}/release/${trackGroup.urlSlug}/redeem?code=${codes[0].downloadCode}`
       );
     });
   });

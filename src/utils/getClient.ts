@@ -12,10 +12,7 @@ export const getClient = async () => {
     client = await prisma.client.create({
       data: {
         applicationName: FRONTEND_CLIENT_NAME,
-        applicationUrl:
-          process.env.CLIENT_DOMAIN ??
-          process.env.API_DOMAIN ??
-          "http://localhost:8080",
+        applicationUrl: process.env.API_DOMAIN ?? "http://localhost:8080",
       },
     });
   }
