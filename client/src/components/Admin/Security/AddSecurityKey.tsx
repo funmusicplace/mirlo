@@ -3,11 +3,12 @@ import Button from "components/common/Button";
 import { InputEl } from "components/common/Input";
 import {
   fetchRegistrationOptions,
+  SecurityKeyKind,
   useRegisterSecurityKeyMutation,
 } from "queries/mfa";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FaKey } from "react-icons/fa";
+import { FaFingerprint, FaKey } from "react-icons/fa";
 import { useSnackbar } from "state/SnackbarContext";
 
 const AddSecurityKey: React.FC<{
@@ -16,15 +17,20 @@ const AddSecurityKey: React.FC<{
   const { t } = useTranslation("translation", { keyPrefix: "adminSecurity" });
   const snackbar = useSnackbar();
   const [name, setName] = React.useState("");
-  const [isWorking, setIsWorking] = React.useState(false);
+  const [working, setWorking] = React.useState<SecurityKeyKind>();
   const { mutateAsync: register } = useRegisterSecurityKeyMutation();
 
   const onSubmit = React.useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      setIsWorking(true);
+      const submitter = (e.nativeEvent as SubmitEvent).submitter;
+      const kind: SecurityKeyKind =
+        submitter?.getAttribute("value") === "passkey"
+          ? "passkey"
+          : "securityKey";
+      setWorking(kind);
       try {
-        const optionsJSON = await fetchRegistrationOptions();
+        const optionsJSON = await fetchRegistrationOptions(kind);
         const response = await startRegistration({ optionsJSON });
         const { recoveryCodes } = await register({
           name: name.trim(),
@@ -37,7 +43,7 @@ const AddSecurityKey: React.FC<{
       } catch {
         snackbar(t("securityKeyFailed"), { type: "warning" });
       } finally {
-        setIsWorking(false);
+        setWorking(undefined);
       }
     },
     [name, register, onRecoveryCodes, snackbar, t]
@@ -60,12 +66,23 @@ const AddSecurityKey: React.FC<{
         />
         <Button
           type="submit"
+          value="securityKey"
           buttonRole="primary"
           startIcon={<FaKey />}
-          isLoading={isWorking}
-          disabled={isWorking || !name.trim()}
+          isLoading={working === "securityKey"}
+          disabled={!!working || !name.trim()}
         >
           {t("addSecurityKey")}
+        </Button>
+        <Button
+          type="submit"
+          value="passkey"
+          variant="outlined"
+          startIcon={<FaFingerprint />}
+          isLoading={working === "passkey"}
+          disabled={!!working || !name.trim()}
+        >
+          {t("addPasskey")}
         </Button>
       </div>
     </form>

@@ -44,7 +44,8 @@ router.post(
       const options = await registrationOptions(
         account,
         account.webauthnCredentials,
-        resolveInstanceName(await getSiteSettings())
+        resolveInstanceName(await getSiteSettings()),
+        req.body?.kind === "securityKey" ? "securityKey" : "passkey"
       );
       await prisma.user.update({
         where: { id: account.id },

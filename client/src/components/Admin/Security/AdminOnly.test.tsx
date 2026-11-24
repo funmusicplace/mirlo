@@ -86,6 +86,29 @@ describe("AdminOnly", () => {
     expect(screen.queryByText("admin tools")).not.toBeInTheDocument();
   });
 
+  test.each([
+    ["addSecurityKey", "securityKey"],
+    ["addPasskey", "passkey"],
+  ])("%s asks for %s registration options", async (button, kind) => {
+    authState.user = { isAdmin: false, needsAdminVerification: true };
+    vi.mocked(get).mockResolvedValue(status({}));
+    vi.mocked(post).mockResolvedValue({ result: {} });
+    renderAdminOnly();
+
+    await userEvent.type(
+      await screen.findByLabelText("securityKeyName"),
+      "My key"
+    );
+    await userEvent.click(screen.getByText(button));
+
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        "auth/mfa/webauthn/registration-options",
+        { kind }
+      )
+    );
+  });
+
   test("asks an admin with factors to verify with one of them", async () => {
     authState.user = { isAdmin: false, needsAdminVerification: true };
     vi.mocked(get).mockResolvedValue(
