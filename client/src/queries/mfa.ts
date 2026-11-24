@@ -65,9 +65,12 @@ function useMfaMutation<V, R>(mutationFn: (variables: V) => Promise<R>) {
   });
 }
 
-export async function fetchRegistrationOptions() {
+export type SecurityKeyKind = "securityKey" | "passkey";
+
+export async function fetchRegistrationOptions(kind: SecurityKeyKind) {
   return postResult<PublicKeyCredentialCreationOptionsJSON>(
-    "auth/mfa/webauthn/registration-options"
+    "auth/mfa/webauthn/registration-options",
+    { kind }
   );
 }
 

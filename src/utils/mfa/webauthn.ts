@@ -29,10 +29,13 @@ const descriptor = (credential: StoredCredential) => ({
   transports: credential.transports as AuthenticatorTransportFuture[],
 });
 
+export type WebAuthnKeyKind = "securityKey" | "passkey";
+
 export const registrationOptions = async (
   user: { id: number; email: string },
   existing: StoredCredential[],
-  instanceName: string
+  instanceName: string,
+  kind: WebAuthnKeyKind
 ) =>
   generateRegistrationOptions({
     rpName: instanceName,
@@ -42,9 +45,11 @@ export const registrationOptions = async (
     attestationType: "none",
     excludeCredentials: existing.map(descriptor),
     authenticatorSelection: {
-      residentKey: "preferred",
+      residentKey: kind === "securityKey" ? "discouraged" : "preferred",
       userVerification: "preferred",
     },
+    preferredAuthenticatorType:
+      kind === "securityKey" ? "securityKey" : undefined,
   });
 
 export const verifyRegistration = async (
