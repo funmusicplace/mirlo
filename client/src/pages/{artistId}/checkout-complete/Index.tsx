@@ -66,7 +66,8 @@ function Index() {
   const isSimpleMessage =
     purchaseType === "tip" ||
     purchaseType === "follow" ||
-    purchaseType === "catalogue";
+    purchaseType === "catalogue" ||
+    purchaseType === "subscription";
   const hasSession = !!user || !!verifiedEmail;
   const showViewInCollection =
     hasSession && purchaseType !== "tip" && purchaseType !== "follow";
