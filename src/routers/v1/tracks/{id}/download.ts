@@ -6,6 +6,7 @@ import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { logger } from "../../../../logger";
 import { assertSupportedDownloadFormat } from "../../../../utils/audioFormats";
 import { AppError } from "../../../../utils/error";
+import { trackArtistTextForRelease } from "../../../../utils/releaseArtists";
 import { presignZip, streamZip, zipExists } from "../../../../utils/storage";
 import {
   FormatOptions,
@@ -84,6 +85,7 @@ export default function () {
               id: Number(trackId),
             },
             include: {
+              trackArtists: true,
               trackGroup: basicTrackGroupInclude,
             },
           });
@@ -110,7 +112,11 @@ export default function () {
 
       const title = cleanHeaderValue(
         filenamify(
-          `${track.trackGroup.profile.name} - ${track.title ?? "track"}`
+          `${trackArtistTextForRelease(
+            track.trackArtists,
+            track.trackGroup.trackGroupArtists,
+            track.trackGroup.profile
+          )} - ${track.title ?? "track"}`
         )
       );
 

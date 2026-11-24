@@ -18,6 +18,7 @@ import { deleteMerch, merchImagesInclude, publicMerchArgs } from "./merch";
 import { resolvePayee } from "./payments/payee";
 import { clearImageSlot } from "./pendingImage";
 import { postImagesForContent } from "./postContent";
+import { trackGroupArtistsInclude } from "./releaseArtists";
 import reservedProfileSlugs from "./reservedProfileSlugs";
 import { getSiteSettings } from "./settings";
 import { storedImagePrefix } from "./storage";
@@ -466,6 +467,11 @@ export const deleteProfile = async (userId: number, profileId: number) => {
     },
   });
 
+  await prisma.trackGroupArtist.updateMany({
+    where: { profileId: Number(profileId) },
+    data: { profileId: null },
+  });
+
   await deleteStripeSubscriptions({
     profileSubscriptionTier: { profileId: Number(profileId) },
   });
@@ -653,6 +659,7 @@ export const subscriptionTierInclude = ({
       select: {
         trackGroup: {
           select: {
+            trackGroupArtists: trackGroupArtistsInclude,
             cover: true,
             id: true,
             title: true,
@@ -730,6 +737,7 @@ export const singleInclude = (queryOptions?: {
         },
         cover: true,
         fundraiser: true,
+        trackGroupArtists: trackGroupArtistsInclude,
         paymentToUser: {
           select: { currency: true },
         },
@@ -830,6 +838,7 @@ export const singleInclude = (queryOptions?: {
                   include: {
                     cover: true,
                     tracks: true,
+                    trackGroupArtists: trackGroupArtistsInclude,
                   },
                   orderBy: { releaseDate: "desc" },
                   take: 4,

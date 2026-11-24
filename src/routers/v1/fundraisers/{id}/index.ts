@@ -10,6 +10,7 @@ import {
   whereForPublicFundraiser,
 } from "../../../../utils/fundraiser";
 import { resolvePayee } from "../../../../utils/payments/payee";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import { getCurrency, minimumPledge } from "../../../../utils/stripe/currency";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
@@ -57,6 +58,8 @@ export default function () {
               title: true,
               urlSlug: true,
               platformPercent: true,
+              trackGroupArtists: trackGroupArtistsInclude,
+              profile: { select: { id: true, name: true, urlSlug: true } },
             },
           },
         },

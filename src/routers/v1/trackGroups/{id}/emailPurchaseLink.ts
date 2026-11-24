@@ -7,6 +7,7 @@ import { sendMailQueue } from "../../../../queues/send-mail-queue";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import { AppError } from "../../../../utils/error";
 import { getClient } from "../../../../utils/getClient";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import { whereForPurchasableTrackGroup } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -26,6 +27,7 @@ export default function () {
         },
         include: {
           profile: true,
+          trackGroupArtists: trackGroupArtistsInclude,
         },
       });
 

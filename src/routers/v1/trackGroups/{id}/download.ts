@@ -8,6 +8,7 @@ import { logger } from "../../../../logger";
 import { startGeneratingZip } from "../../../../queues/album-queue";
 import { assertSupportedDownloadFormat } from "../../../../utils/audioFormats";
 import { AppError } from "../../../../utils/error";
+import { releaseArtistText } from "../../../../utils/releaseArtists";
 import { presignZip, streamZip, zipExists } from "../../../../utils/storage";
 import {
   FormatOptions,
@@ -120,7 +121,7 @@ export default function () {
         });
       }
 
-      const originalTitle = `${trackGroup.profile.name} - ${trackGroup.title ?? "album"}`;
+      const originalTitle = `${releaseArtistText(trackGroup.trackGroupArtists, trackGroup.profile)} - ${trackGroup.title ?? "album"}`;
       const asciiTitle = filenamify(originalTitle);
 
       // Takes the id rather than closing over `trackGroup`, which is a `let`

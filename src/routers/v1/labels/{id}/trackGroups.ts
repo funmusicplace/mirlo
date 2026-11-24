@@ -7,6 +7,7 @@ import {
   findArtistIdForURLSlug,
   whereForAllProfilesUserCanEdit,
 } from "../../../../utils/artist";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import {
   subscriptionTierReleasesCount,
   whereForPublishedTrackGroups,
@@ -65,6 +66,7 @@ export default function () {
         include: {
           cover: true,
           tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
+          trackGroupArtists: trackGroupArtistsInclude,
           _count: subscriptionTierReleasesCount,
           profile: {
             select: {

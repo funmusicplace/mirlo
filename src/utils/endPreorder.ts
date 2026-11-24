@@ -1,5 +1,8 @@
 import prisma from "@mirlo/prisma";
+
 import logger from "../logger";
+
+import { trackGroupArtistsInclude } from "./releaseArtists";
 
 /**
  * Core business logic for ending a pre-order campaign.
@@ -36,6 +39,7 @@ export const endPreorderForTrackGroup = async (
 
     const trackGroup = await tx.trackGroup.findFirst({
       where: { id: trackGroupId },
+      include: { trackGroupArtists: trackGroupArtistsInclude, profile: true },
     });
 
     if (!trackGroup) {

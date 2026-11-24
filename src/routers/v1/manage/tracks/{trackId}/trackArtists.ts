@@ -15,7 +15,8 @@ interface TrackBody {
     id: string;
     artistId: number;
     role: string;
-    isCoAuthor: boolean;
+    appearsAs?: "MAIN" | "FEATURED" | "CREDITS_ONLY";
+    isCoAuthor?: boolean;
     order: number;
   }[];
 }

@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { processSingleTrack } from "../../../../serializers/track";
 import { AppError } from "../../../../utils/error";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import { whereForTrackGroupVisibleTo } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -32,6 +33,7 @@ export default function () {
                 },
               },
               cover: true,
+              trackGroupArtists: trackGroupArtistsInclude,
               ...(loggedInUser
                 ? {
                     userTrackGroupPurchases: {

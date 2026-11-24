@@ -5,10 +5,9 @@ import { set } from "lodash";
 
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
-import {
-  processSingleTrackGroup,
-  serializeTrackGroupPurchase,
-} from "../../../../serializers/trackGroup";
+import { processSingleTrack } from "../../../../serializers/track";
+import { serializeTrackGroupPurchase } from "../../../../serializers/trackGroup";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import {
   subscriptionTierReleasesCount,
   whereForPublishedTrackGroups,
@@ -44,6 +43,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
+              trackGroupArtists: trackGroupArtistsInclude,
               profile: true,
               cover: true,
               _count: subscriptionTierReleasesCount,
@@ -76,8 +76,10 @@ export default function () {
         include: {
           track: {
             include: {
+              trackArtists: true,
               trackGroup: {
                 include: {
+                  trackGroupArtists: trackGroupArtistsInclude,
                   profile: true,
                   cover: true,
                   _count: subscriptionTierReleasesCount,
@@ -99,10 +101,9 @@ export default function () {
       );
 
       const mappedTracks = trackPurchases.map((purchase) => {
-        const processedTG = processSingleTrackGroup(purchase.track.trackGroup);
         return {
           ...purchase,
-          track: { ...purchase.track, trackGroup: processedTG },
+          track: { ...processSingleTrack(purchase.track), isPlayable: true },
         };
       });
 

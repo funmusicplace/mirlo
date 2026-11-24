@@ -8,7 +8,12 @@ dotenv.config();
 import { describe, it } from "mocha";
 
 import { getSiteSettings } from "../../../../src/utils/settings";
-import { clearTables, createProfile, createUser } from "../../../utils";
+import {
+  clearTables,
+  createArtistLabel,
+  createProfile,
+  createUser,
+} from "../../../utils";
 import { requestApp } from "../../utils";
 
 describe("manage/artists/{artistId}", () => {
@@ -178,6 +183,94 @@ describe("manage/artists/{artistId}", () => {
         assert.equal(response.statusCode, 200);
         assert.equal(response.body.result.name, "hi");
       });
+    });
+  });
+
+  describe("GET", () => {
+    const setup = async () => {
+      const { user, accessToken } = await createUser({
+        email: "label@testcom",
+      });
+      const own = await createProfile(user.id, { name: "Own" });
+      const { user: artistUser } = await createUser({
+        email: "artist@testcom",
+      });
+      const roster = await createProfile(artistUser.id, { name: "Roster" });
+      const rosterNotManaged = await createProfile(artistUser.id, {
+        name: "Roster not managed",
+      });
+      const managed = await createProfile(artistUser.id, { name: "Managed" });
+      await createArtistLabel({
+        artistId: roster.id,
+        labelUserId: user.id,
+        canLabelManageArtist: true,
+      });
+      await createArtistLabel({
+        artistId: rosterNotManaged.id,
+        labelUserId: user.id,
+        canLabelManageArtist: false,
+      });
+      await createArtistLabel({
+        artistId: managed.id,
+        labelUserId: user.id,
+        canLabelManageArtist: true,
+      });
+      await prisma.profileManager.create({
+        data: {
+          profileId: managed.id,
+          userId: user.id,
+          invitedById: artistUser.id,
+          acceptedAt: new Date(),
+        },
+      });
+      const get = (query = "") =>
+        requestApp
+          .get(`manage/artists${query}`)
+          .set("Cookie", [`jwt=${accessToken}`])
+          .set("Accept", "application/json");
+      return { own, roster, managed, get };
+    };
+
+    it("returns only the owned and managed profiles by default", async () => {
+      const { own, managed, get } = await setup();
+      const response = await get();
+      assert.equal(response.statusCode, 200);
+      assert.deepEqual(
+        response.body.results
+          .map((p: { id: number; relationship: string }) => [
+            p.id,
+            p.relationship,
+          ])
+          .sort(),
+        [
+          [own.id, "owner"],
+          [managed.id, "manager"],
+        ].sort()
+      );
+    });
+
+    it("adds the label roster artists the label can manage with includeLabelArtists, without exposing managers", async () => {
+      const { own, roster, managed, get } = await setup();
+      const response = await get("?includeLabelArtists=true");
+      assert.equal(response.statusCode, 200);
+      assert.deepEqual(
+        response.body.results
+          .map((p: { id: number; relationship: string }) => [
+            p.id,
+            p.relationship,
+          ])
+          .sort(),
+        [
+          [own.id, "owner"],
+          [roster.id, "label"],
+          [managed.id, "manager"],
+        ].sort()
+      );
+      assert.ok(
+        response.body.results.every(
+          (p: Record<string, unknown>) => p.managers === undefined
+        )
+      );
     });
   });
 });

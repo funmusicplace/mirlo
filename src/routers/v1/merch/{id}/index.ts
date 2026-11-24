@@ -6,6 +6,7 @@ import { serializeMerch } from "../../../../serializers/merch";
 import { whereForVisibleProfile } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
 import { merchImagesInclude } from "../../../../utils/merch";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 
 export default function () {
   const operations = {
@@ -57,6 +58,7 @@ export default function () {
           includePurchaseTrackGroup: {
             include: {
               profile: true,
+              trackGroupArtists: trackGroupArtistsInclude,
               tracks: {
                 where: {
                   deletedAt: null,

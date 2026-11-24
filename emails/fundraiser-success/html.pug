@@ -3,7 +3,7 @@ include ../mixins.pug
 
 block content
   if trackGroup
-    p= t("emails.fundraiserSuccess.fundedRelease", { artistName: artist.name, title: trackGroup.title })
+    p= t("emails.fundraiserSuccess.fundedRelease", { artistName: releaseArtistName(trackGroup, artist.name), title: trackGroup.title })
   else
     p= t("emails.fundraiserSuccess.funded", { artistName: artist.name, fundraiserName })
 

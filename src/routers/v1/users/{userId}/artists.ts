@@ -6,6 +6,7 @@ import {
   userHasPermission,
 } from "../../../../auth/passport";
 import { processSingleArtist } from "../../../../serializers/artist";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 
 type Params = {
   userId: string;
@@ -29,19 +30,15 @@ export default function () {
           where: {
             deletedAt: null,
           },
-          select: {
-            title: true,
-            id: true,
-            urlSlug: true,
+          include: {
+            trackGroupArtists: trackGroupArtistsInclude,
           },
         },
       },
     });
 
     res.json({
-      results: artists.map((a) =>
-        processSingleArtist(a as Parameters<typeof processSingleArtist>[0])
-      ),
+      results: artists.map((a) => processSingleArtist(a)),
     });
   }
 

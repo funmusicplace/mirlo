@@ -158,6 +158,19 @@ const artistFixture = (
   ...overrides,
 });
 
+const releaseArtistFixture = (profileId: number) => ({
+  id: `release-artist-${profileId}`,
+  trackGroupId: 7,
+  artistName: `Artist ${profileId}`,
+  profileId,
+  order: 0,
+  profile: {
+    id: profileId,
+    name: `Artist ${profileId}`,
+    urlSlug: `artist-${profileId}`,
+  },
+});
+
 describe("outbound serializers", () => {
   describe("omitPrivateProfileFields / renameProfileIdToArtistId", () => {
     it("removes private profile data from artist references", () => {
@@ -224,11 +237,13 @@ describe("outbound serializers", () => {
             trackId: 1,
             track: {
               id: 1,
+              trackArtists: [],
               trackGroup: {
                 id: 7,
                 profileId: 4,
                 profile: artistFixture(4),
                 cover: null,
+                trackGroupArtists: [releaseArtistFixture(4)],
               },
             },
           },
@@ -327,6 +342,7 @@ describe("outbound serializers", () => {
           id: 7,
           profileId: 4,
           profile: artistFixture(4),
+          trackGroupArtists: [releaseArtistFixture(4)],
         },
       };
       const merch = serializeMerch(input);
@@ -380,6 +396,7 @@ describe("outbound serializers", () => {
               title: "Album",
               profileId: 4,
               profile: artistFixture(4),
+              trackGroupArtists: [releaseArtistFixture(4)],
             },
           },
         ],
@@ -497,6 +514,7 @@ describe("outbound serializers", () => {
         title: "Album",
         profileId: 4,
         notifiedFollowersAt: null,
+        trackGroupArtists: [releaseArtistFixture(4)],
         profile: {
           ...artistFixture(4),
           user: { currency: "gbp" },
@@ -533,6 +551,7 @@ describe("outbound serializers", () => {
         id: 7,
         title: "Album",
         notifiedFollowersAt: null,
+        trackGroupArtists: [releaseArtistFixture(4)],
         artist: artistFixture(4),
       } as unknown as Parameters<typeof processSingleTrackGroup>[0]);
 
@@ -554,6 +573,7 @@ describe("outbound serializers", () => {
           title: "Album",
           profileId: 4,
           notifiedFollowersAt: null,
+          trackGroupArtists: [releaseArtistFixture(4)],
           userTrackGroupPurchases: [],
           profile: artistFixture(4),
         },
@@ -633,6 +653,7 @@ describe("outbound serializers", () => {
             title: "Album",
             profileId: 4,
             notifiedFollowersAt: null,
+            trackGroupArtists: [releaseArtistFixture(4)],
             profile: artistFixture(4),
           },
         ] as never,
@@ -667,13 +688,14 @@ describe("outbound serializers", () => {
   describe("serializeFundraiser / serializeFundraiserPledge", () => {
     it("serializes nested fundraiser track groups", () => {
       const input = {
-        id: "fund-1",
+        id: 1,
         trackGroups: [
           {
             id: 7,
             title: "Album",
             profileId: 4,
             notifiedFollowersAt: null,
+            trackGroupArtists: [releaseArtistFixture(4)],
             profile: artistFixture(4),
           },
         ] as never,
@@ -688,15 +710,16 @@ describe("outbound serializers", () => {
 
     it("serializes the fundraiser nested in a pledge", () => {
       const input = {
-        id: "pledge-1",
+        id: 1,
         fundraiser: {
-          id: "fund-1",
+          id: 1,
           trackGroups: [
             {
               id: 7,
               title: "Album",
               profileId: 4,
               notifiedFollowersAt: null,
+              trackGroupArtists: [releaseArtistFixture(4)],
               profile: artistFixture(4),
             },
           ] as never,
@@ -709,7 +732,7 @@ describe("outbound serializers", () => {
     });
 
     it("tolerates a null fundraiser", () => {
-      const pledge = serializeFundraiserPledge({ id: "p", fundraiser: null });
+      const pledge = serializeFundraiserPledge({ id: 1, fundraiser: null });
       assert.equal(pledge.fundraiser, null);
     });
   });
@@ -742,6 +765,7 @@ describe("outbound serializers", () => {
           profile: { ...artistFixture(4), user: { currency: "cad" } },
           cover: { url: [] },
           purchase: { id: "purchase-1" },
+          trackGroupArtists: [releaseArtistFixture(4)],
         },
         relatedUser: {
           id: 100,

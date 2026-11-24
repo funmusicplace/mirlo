@@ -1,5 +1,10 @@
 import { addSizesToStoredImage } from "../utils/artist";
 import { storedImageFileUrl } from "../utils/images";
+import {
+  ReleaseArtistRow,
+  resolveReleaseArtists,
+  serializeTrackGroupArtists,
+} from "../utils/releaseArtists";
 
 import {
   omitPrivateProfileFields,
@@ -52,10 +57,14 @@ export const serializeNotification = <T extends object>(
     trackGroup?: {
       profileId?: number | null;
       profile?: {
+        id?: number;
+        name?: string | null;
+        urlSlug?: string | null;
         user?: { currency?: string | null } | null;
       } | null;
       cover?: { url: string[]; keyPrefix: string | null } | null;
       purchase?: unknown;
+      trackGroupArtists: ReleaseArtistRow[];
     } | null;
     relatedUser?: {
       profiles?: {
@@ -112,6 +121,10 @@ export const serializeNotification = <T extends object>(
           } = trackGroup;
           return {
             ...tgRest,
+            ...resolveReleaseArtists(trackGroup.trackGroupArtists, tgProfile),
+            trackGroupArtists: serializeTrackGroupArtists(
+              trackGroup.trackGroupArtists
+            ),
             artistId: tgProfileId,
             artist: tgProfile ? omitPrivateProfileFields(tgProfile) : tgProfile,
             currency: tgProfile?.user?.currency ?? "usd",

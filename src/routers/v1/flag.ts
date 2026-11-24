@@ -6,6 +6,7 @@ import { processSingleTrackGroup } from "../../serializers/trackGroup";
 import { requireSpamChallenge } from "../../utils/cloudflare";
 import { AppError } from "../../utils/error";
 import { getClient } from "../../utils/getClient";
+import { trackGroupArtistsInclude } from "../../utils/releaseArtists";
 import { getSiteSettings, resolveSupportEmail } from "../../utils/settings";
 
 export default function () {
@@ -21,6 +22,7 @@ export default function () {
         where: { id: trackGroupId },
         include: {
           profile: true,
+          trackGroupArtists: trackGroupArtistsInclude,
         },
       });
 

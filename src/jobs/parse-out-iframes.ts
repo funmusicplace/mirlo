@@ -7,6 +7,13 @@ import pug from "pug";
 import logger from "../logger";
 import { getClient } from "../utils/getClient";
 import { convertURLArrayToSizes } from "../utils/images";
+import {
+  joinArtistNames,
+  resolveReleaseArtists,
+  resolveTrackArtists,
+  trackArtistText,
+  trackGroupArtistsInclude,
+} from "../utils/releaseArtists";
 import { storedImagePrefix } from "../utils/storage";
 
 const renderWidgetCard = pug.compileFile(
@@ -87,14 +94,26 @@ export const parseOutIframes = async (
       trackGroupIds.length
         ? prisma.trackGroup.findMany({
             where: { id: { in: trackGroupIds } },
-            include: { profile: true, tracks: true, cover: true },
+            include: {
+              profile: true,
+              tracks: true,
+              cover: true,
+              trackGroupArtists: trackGroupArtistsInclude,
+            },
           })
         : Promise.resolve([]),
       trackIds.length
         ? prisma.track.findMany({
             where: { id: { in: trackIds }, deletedAt: null },
             include: {
-              trackGroup: { include: { profile: true, cover: true } },
+              trackArtists: true,
+              trackGroup: {
+                include: {
+                  profile: true,
+                  cover: true,
+                  trackGroupArtists: trackGroupArtistsInclude,
+                },
+              },
             },
           })
         : Promise.resolve([]),
@@ -119,7 +138,11 @@ export const parseOutIframes = async (
             ...cardColors(tg.profile.properties),
             cover: coverUrl(tg.cover),
             title: tg.title,
-            artistName: tg.profile?.name || "Unknown",
+            artistName:
+              joinArtistNames(
+                resolveReleaseArtists(tg.trackGroupArtists, tg.profile)
+                  .releaseArtists
+              ) || "Unknown",
             artistUrl: `${applicationUrl}/${tg.profile.urlSlug}`,
             trackCount: tg.tracks.length,
             // If the trackGroup is unreachable (draft/private/deleted/unreleased),
@@ -138,7 +161,16 @@ export const parseOutIframes = async (
             ...cardColors(t.trackGroup.profile.properties),
             cover: coverUrl(t.trackGroup.cover),
             title: t.title,
-            artistName: t.trackGroup.profile?.name || "Unknown",
+            artistName:
+              trackArtistText(
+                resolveTrackArtists(
+                  t.trackArtists,
+                  resolveReleaseArtists(
+                    t.trackGroup.trackGroupArtists,
+                    t.trackGroup.profile
+                  ).releaseArtists
+                )
+              ) || "Unknown",
             artistUrl: `${applicationUrl}/${t.trackGroup.profile.urlSlug}`,
             // Same fallback as the trackGroup branch: when a track's parent
             // album is unreachable to the public, link to the post that embeds

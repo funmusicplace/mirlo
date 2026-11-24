@@ -1,12 +1,14 @@
+import prisma from "@mirlo/prisma";
+import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
+
 import {
   userAuthenticated,
   userHasPermission,
 } from "../../../../auth/passport";
-import prisma from "@mirlo/prisma";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import { processTrackGroupQueryOrder } from "../../../../utils/trackGroup";
-import { Prisma } from "@mirlo/prisma/client";
 
 export default function () {
   const operations = {
@@ -60,6 +62,7 @@ export default function () {
             },
           },
           cover: true,
+          trackGroupArtists: trackGroupArtistsInclude,
         },
       });
       res.json({

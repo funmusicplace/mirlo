@@ -8,6 +8,7 @@ import {
 } from "../../../../../auth/passport";
 import { logger } from "../../../../../logger";
 import { AppError } from "../../../../../utils/error";
+import { trackArtistTextForRelease } from "../../../../../utils/releaseArtists";
 import { streamOriginalAudio } from "../../../../../utils/storage";
 import { basicTrackGroupInclude } from "../../../../../utils/trackGroup";
 import { cleanHeaderValue } from "../../../../../utils/validate-http-headers";
@@ -27,6 +28,7 @@ export default function () {
           id: Number(trackId),
         },
         include: {
+          trackArtists: true,
           trackGroup: basicTrackGroupInclude,
           audio: true,
         },
@@ -44,7 +46,11 @@ export default function () {
       try {
         const title = cleanHeaderValue(
           filenamify(
-            `${track.trackGroup.profile.name} - ${track.title ?? "track"}`
+            `${trackArtistTextForRelease(
+              track.trackArtists,
+              track.trackGroup.trackGroupArtists,
+              track.trackGroup.profile
+            )} - ${track.title ?? "track"}`
           )
         );
         log.info(`downloading ${title}.zip`);

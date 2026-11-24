@@ -6,9 +6,10 @@ import {
   userAuthenticated,
   artistBelongsToLoggedInUser,
 } from "../../../../../auth/passport";
+import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { downloadCSVFile } from "../../../../../utils/download";
 import { getClient } from "../../../../../utils/getClient";
-import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
+import { trackGroupArtistsInclude } from "../../../../../utils/releaseArtists";
 
 type Params = {
   artistId: string;
@@ -73,6 +74,7 @@ export default function () {
           trackGroup: {
             include: {
               profile: true,
+              trackGroupArtists: trackGroupArtistsInclude,
             },
           },
           redeemedByUser: true,

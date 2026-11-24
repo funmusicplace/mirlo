@@ -8,6 +8,7 @@ import {
 } from "../utils/fundraiser";
 import { merchImagesInclude } from "../utils/merch";
 import { postImagesForContent } from "../utils/postContent";
+import { trackGroupArtistsInclude } from "../utils/releaseArtists";
 import { trackGroupPublishedObject } from "../utils/trackGroup";
 
 export async function fetchProfileMetadata(profileSlug: string): Promise<any> {
@@ -39,9 +40,10 @@ export async function fetchAlbumMetadata(
     include: {
       profile: true,
       cover: true,
+      trackGroupArtists: trackGroupArtistsInclude,
       tracks: {
         where: { deletedAt: null },
-        include: { audio: true },
+        include: { audio: true, trackArtists: true },
         orderBy: { order: "asc" },
       },
     },

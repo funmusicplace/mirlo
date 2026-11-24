@@ -3,6 +3,7 @@ import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 import { processSingleTrackGroup } from "../../../serializers/trackGroup";
+import { trackGroupArtistsInclude } from "../../../utils/releaseArtists";
 import {
   subscriptionTierReleasesCount,
   whereForPublishedTrackGroups,
@@ -60,6 +61,7 @@ export default function () {
           tracks: { orderBy: { order: "asc" }, where: { deletedAt: null } },
           cover: true,
           _count: subscriptionTierReleasesCount,
+          trackGroupArtists: trackGroupArtistsInclude,
         },
       });
 

@@ -18,6 +18,7 @@ import {
   isProfileSlugTaken,
   singleInclude,
 } from "../../../../../utils/artist";
+import { clearTrackGroupDownloads } from "../../../../../utils/downloadCache";
 import { AppError } from "../../../../../utils/error";
 import generateSlug from "../../../../../utils/generateSlug";
 import { merchImagesInclude } from "../../../../../utils/merch";
@@ -136,6 +137,7 @@ export default function () {
         }
       }
 
+      let renamedTrackGroupIds: number[] = [];
       const updatedCount = await prisma.$transaction(async (tx) => {
         if (paymentToUserId !== undefined && paymentToUserId !== null) {
           const approvedLabel = await tx.artistLabel.findFirst({
@@ -233,6 +235,23 @@ export default function () {
           },
         });
 
+        if (typeof name === "string" && name.trim() !== "") {
+          const outdatedCredits = {
+            profileId: Number(profileId),
+            artistName: { not: name },
+          };
+          renamedTrackGroupIds = (
+            await tx.trackGroupArtist.findMany({
+              where: outdatedCredits,
+              select: { trackGroupId: true },
+            })
+          ).map((credit) => credit.trackGroupId);
+          await tx.trackGroupArtist.updateMany({
+            where: outdatedCredits,
+            data: { artistName: name },
+          });
+        }
+
         if (tourDates) {
           await tx.artistTourDate.deleteMany({
             where: {
@@ -251,6 +270,10 @@ export default function () {
 
         return result.count;
       });
+
+      for (const trackGroupId of new Set(renamedTrackGroupIds)) {
+        await clearTrackGroupDownloads(trackGroupId);
+      }
 
       if (updatedCount) {
         const artist = await prisma.profile.findFirst({

@@ -1,6 +1,7 @@
 import { addSizesToStoredImage } from "../utils/artist";
 import { FundraiserImageWithImage } from "../utils/fundraiser";
 import { resolveFundraiserDescription } from "../utils/postContent";
+import { ReleaseArtistRow } from "../utils/releaseArtists";
 import { videoEmbedUrl } from "../utils/videoEmbed";
 
 import { processSingleTrackGroup } from "./trackGroup";
@@ -32,7 +33,17 @@ const serializeFundraiserArtist = (profile: object) => {
   };
 };
 
-export const serializeFundraiser = <T extends object>(
+export const serializeFundraiser = <
+  T extends {
+    id: number;
+    trackGroups?:
+      | {
+          trackGroupArtists: ReleaseArtistRow[];
+          profile: { name: string; urlSlug: string };
+        }[]
+      | null;
+  },
+>(
   fundraiser: T
 ): Serialized<T> => {
   const { trackGroups, images, profile, ...rest } = fundraiser as T & {
@@ -64,12 +75,15 @@ export const serializeFundraiser = <T extends object>(
   } as Serialized<T>;
 };
 
-export const serializeFundraiserPledge = <T extends object>(
+export const serializeFundraiserPledge = <
+  T extends {
+    id: number;
+    fundraiser?: Parameters<typeof serializeFundraiser>[0] | null;
+  },
+>(
   pledge: T
 ): Serialized<T> => {
-  const { fundraiser, ...rest } = pledge as T & {
-    fundraiser?: object | null;
-  };
+  const { fundraiser, ...rest } = pledge;
   return {
     ...rest,
     ...(fundraiser !== undefined

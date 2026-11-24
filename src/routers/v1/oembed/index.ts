@@ -19,6 +19,10 @@ import {
   storedImageVariantUrl,
 } from "../../../utils/images";
 import { merchImageUrl } from "../../../utils/merch";
+import {
+  releaseArtistText,
+  trackArtistTextForRelease,
+} from "../../../utils/releaseArtists";
 import { getInstanceName } from "../../../utils/settings";
 
 interface oEmbedResponse {
@@ -99,8 +103,11 @@ export default function () {
               html: `<iframe src="${client.applicationUrl}/widget/trackGroup/${album.id}?variant=card" width="560" height="315" frameborder="0" allow="autoplay"></iframe>`,
               width: 560,
               height: 315,
-              title: `${album.title} by ${album.profile.name}`,
-              author_name: album.profile.name,
+              title: `${album.title} by ${releaseArtistText(album.trackGroupArtists, album.profile)}`,
+              author_name: releaseArtistText(
+                album.trackGroupArtists,
+                album.profile
+              ),
               author_url: `${client.applicationUrl}/${album.profile.urlSlug}`,
               thumbnail_url: coverUrl,
               thumbnail_width: 300,
@@ -123,8 +130,12 @@ export default function () {
                 html: `<iframe src="${client.applicationUrl}/widget/track/${track.id}?variant=card" width="560" height="315" frameborder="0" allow="autoplay"></iframe>`,
                 width: 560,
                 height: 315,
-                title: `${track.title} by ${album.profile.name}`,
-                author_name: album.profile.name,
+                title: `${track.title} by ${trackArtistTextForRelease(track.trackArtists, album.trackGroupArtists, album.profile)}`,
+                author_name: trackArtistTextForRelease(
+                  track.trackArtists,
+                  album.trackGroupArtists,
+                  album.profile
+                ),
                 author_url: `${client.applicationUrl}/${album.profile.urlSlug}`,
                 thumbnail_url: coverUrl,
                 thumbnail_width: 300,

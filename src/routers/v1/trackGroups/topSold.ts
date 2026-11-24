@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { processSingleTrackGroup } from "../../../serializers/trackGroup";
+import { trackGroupArtistsInclude } from "../../../utils/releaseArtists";
 import {
   subscriptionTierReleasesCount,
   whereForPublishedTrackGroups,
@@ -66,6 +67,7 @@ export default function () {
       const trackGroups = await prisma.trackGroup.findMany({
         where: { ...where, id: { in: trackGroupIds } },
         include: {
+          trackGroupArtists: trackGroupArtistsInclude,
           _count: {
             select: {
               userTrackGroupPurchases: true,

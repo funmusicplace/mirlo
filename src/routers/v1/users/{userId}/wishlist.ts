@@ -5,6 +5,7 @@ import { Request, Response } from "express";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import { serializeTrackGroupPurchase } from "../../../../serializers/trackGroup";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import { subscriptionTierReleasesCount } from "../../../../utils/trackGroup";
 
 type Params = {
@@ -34,6 +35,7 @@ export default function () {
         include: {
           trackGroup: {
             include: {
+              trackGroupArtists: trackGroupArtistsInclude,
               profile: true,
               cover: true,
               _count: subscriptionTierReleasesCount,

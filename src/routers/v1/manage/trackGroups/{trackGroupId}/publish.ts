@@ -7,6 +7,7 @@ import { processSingleTrackGroup } from "../../../../../serializers/trackGroup";
 import { AppError, HttpCode } from "../../../../../utils/error";
 import { doesTrackGroupBelongToUser } from "../../../../../utils/ownership";
 import { clearPageCache } from "../../../../../utils/pageCache";
+import { trackGroupArtistsInclude } from "../../../../../utils/releaseArtists";
 import { finalizeTrackGroupPublication } from "../../../../../utils/trackGroup";
 
 export default function () {
@@ -43,6 +44,10 @@ export default function () {
         updatedTrackgroup = await prisma.trackGroup.update({
           where: { id: Number(trackGroupId) || undefined },
           data: { publishedAt: null },
+          include: {
+            trackGroupArtists: trackGroupArtistsInclude,
+            profile: true,
+          },
         });
       } else {
         updatedTrackgroup = await finalizeTrackGroupPublication(

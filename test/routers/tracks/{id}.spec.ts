@@ -35,6 +35,47 @@ describe("tracks/{id}", () => {
       assert.equal(response.statusCode, 404);
     });
 
+    it("returns the track's own main and featured artists", async () => {
+      const { user } = await createUser({ email: "rob@artist.com" });
+      const profile = await createProfile(user.id, {
+        name: "Rob",
+        urlSlug: "rob",
+      });
+      const trackGroup = await createTrackGroup(profile.id);
+      const track = await createTrack(trackGroup.id);
+      await prisma.trackArtist.createMany({
+        data: [
+          { trackId: track.id, artistName: "Bea", appearsAs: "MAIN", order: 0 },
+          {
+            trackId: track.id,
+            artistName: "Alice",
+            appearsAs: "FEATURED",
+            order: 1,
+          },
+        ],
+      });
+
+      const response = await requestApp
+        .get(`tracks/${track.id}`)
+        .set("Accept", "application/json");
+
+      assert.equal(response.status, 200);
+      const result = response.body.result;
+      assert.equal(result.mainArtistsSource, "track");
+      assert.deepEqual(
+        result.mainArtists.map((a: { name: string }) => a.name),
+        ["Bea"]
+      );
+      assert.deepEqual(
+        result.featuredArtists.map((a: { name: string }) => a.name),
+        ["Alice"]
+      );
+      assert.deepEqual(
+        result.trackGroup.releaseArtists.map((a: { name: string }) => a.name),
+        ["Rob"]
+      );
+    });
+
     it("should GET / 404 when the artist is disabled", async () => {
       const { user } = await createUser({ email: "artist@artist.com" });
       const profile = await createProfile(user.id, { enabled: false });

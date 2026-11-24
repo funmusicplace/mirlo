@@ -5,6 +5,7 @@ import { set } from "lodash";
 
 import { userLoggedInWithoutRedirect } from "../../../auth/passport";
 import { processSingleTrackGroup } from "../../../serializers/trackGroup";
+import { trackGroupArtistsInclude } from "../../../utils/releaseArtists";
 import { turnItemsIntoRSS } from "../../../utils/rss";
 import { getInstanceName } from "../../../utils/settings";
 import {
@@ -224,6 +225,7 @@ export default function () {
         skip: skip && !where.id ? Number(skip) : undefined,
         take: take && !where.id ? Number(take) : undefined,
         include: {
+          trackGroupArtists: trackGroupArtistsInclude,
           profile: {
             select: {
               name: true,

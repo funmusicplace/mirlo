@@ -2,7 +2,7 @@ extends ../layout.pug
 include ../mixins.pug
 
 block content
-  p!= tHtml("emails.albumDownload.intro", { title: trackGroup.title, artistName: trackGroup.artist.name })
+  p!= tHtml("emails.albumDownload.intro", { title: trackGroup.title, artistName: releaseArtistName(trackGroup) })
   table 
     tr 
       td #{trackGroup.title}

@@ -4,12 +4,11 @@ import { Request, Response } from "express";
 import { assertLoggedIn } from "../../../../auth/getLoggedInUser";
 import { userAuthenticated } from "../../../../auth/passport";
 import { serializeMerch } from "../../../../serializers/merch";
-import {
-  processSingleTrackGroup,
-  serializeTrackGroupPurchase,
-} from "../../../../serializers/trackGroup";
+import { processSingleTrack } from "../../../../serializers/track";
+import { serializeTrackGroupPurchase } from "../../../../serializers/trackGroup";
 import { serializeUserTransaction } from "../../../../serializers/userTransaction";
 import { merchImagesInclude } from "../../../../utils/merch";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import { subscriptionTierReleasesCount } from "../../../../utils/trackGroup";
 
 type Params = {
@@ -39,6 +38,7 @@ export default function () {
                   profile: true,
                   cover: true,
                   _count: subscriptionTierReleasesCount,
+                  trackGroupArtists: trackGroupArtistsInclude,
                   tracks: {
                     orderBy: {
                       order: "asc",
@@ -65,11 +65,13 @@ export default function () {
             include: {
               track: {
                 include: {
+                  trackArtists: true,
                   trackGroup: {
                     include: {
                       profile: true,
                       cover: true,
                       _count: subscriptionTierReleasesCount,
+                      trackGroupArtists: trackGroupArtistsInclude,
                     },
                   },
                 },
@@ -94,16 +96,17 @@ export default function () {
           ...mp,
           merch: serializeMerch(mp.merch),
         })),
-        trackPurchases: p.trackPurchases?.map((tp) => ({
-          ...tp,
-          track: {
-            ...tp.track,
-            isPlayable: true,
-            trackGroup: processSingleTrackGroup(tp.track.trackGroup, {
-              loggedInUserId: loggedInUser.id,
-            }),
-          },
-        })),
+        trackPurchases: p.trackPurchases?.map((tp) => {
+          return {
+            ...tp,
+            track: {
+              ...processSingleTrack(tp.track, {
+                loggedInUserId: loggedInUser.id,
+              }),
+              isPlayable: true,
+            },
+          };
+        }),
       }));
       const apiResults = results.map((p) => serializeUserTransaction(p));
       res.json({ results: apiResults });

@@ -14,6 +14,7 @@ import {
   createProfileForUser,
   generateUniqueProfileSlug,
   isProfileSlugTaken,
+  whereForAllProfilesUserCanEdit,
   whereForProfilesUserOwnsOrManages,
 } from "../../../../utils/artist";
 import { AppError } from "../../../../utils/error";
@@ -28,9 +29,12 @@ export default function () {
   async function GET(req: Request, res: Response, next: NextFunction) {
     assertLoggedIn(req);
     const loggedInUser = req.user;
+    const includeLabelArtists = req.query.includeLabelArtists === "true";
     try {
       const profiles = await prisma.profile.findMany({
-        where: whereForProfilesUserOwnsOrManages(loggedInUser.id),
+        where: includeLabelArtists
+          ? whereForAllProfilesUserCanEdit(loggedInUser.id)
+          : whereForProfilesUserOwnsOrManages(loggedInUser.id),
         select: {
           id: true,
           name: true,
@@ -38,6 +42,10 @@ export default function () {
           isLabelProfile: true,
           avatar: true,
           userId: true,
+          managers: {
+            where: { userId: loggedInUser.id, acceptedAt: { not: null } },
+            select: { userId: true },
+          },
         },
       });
       res.json({
@@ -52,7 +60,15 @@ export default function () {
 
   GET.apiDoc = {
     summary:
-      "Returns artists the user owns or manages. Each has a `relationship` of `owner` or `manager`",
+      "Returns artists the user owns or manages. Each has a `relationship` of `owner` or `manager`. With includeLabelArtists=true, also returns the label roster artists the user can edit, with a `relationship` of `label`",
+    parameters: [
+      {
+        in: "query",
+        name: "includeLabelArtists",
+        type: "string",
+        required: false,
+      },
+    ],
     responses: {
       200: {
         description: "A track that matches the id",

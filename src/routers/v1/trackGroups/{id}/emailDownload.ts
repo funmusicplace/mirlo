@@ -7,6 +7,7 @@ import { userOrAppLoggedInWithoutRedirect } from "../../../../auth/passport";
 import { sendMailQueue } from "../../../../queues/send-mail-queue";
 import { processSingleTrackGroup } from "../../../../serializers/trackGroup";
 import { getClient } from "../../../../utils/getClient";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import { hasSubscriptionTiers } from "../../../../utils/subscriptionTier";
 import { whereForPurchasableTrackGroup } from "../../../../utils/trackGroup";
 
@@ -27,6 +28,7 @@ export default function () {
         },
         include: {
           profile: true,
+          trackGroupArtists: trackGroupArtistsInclude,
           tracks: {
             include: {
               audio: true,

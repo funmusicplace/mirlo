@@ -1,6 +1,7 @@
 import { Prisma } from "@mirlo/prisma/client";
 
 import { federatedProfile, whereForVisibleProfile } from "./artist";
+import { trackGroupArtistsInclude } from "./releaseArtists";
 import { whereForPublishedTrackGroups } from "./trackGroup";
 
 export const whereForListedProfile = (
@@ -26,6 +27,7 @@ export const whereForListedTrackGroups = (): Prisma.TrackGroupWhereInput => ({
 });
 
 export const listedTrackGroupInclude = {
+  trackGroupArtists: trackGroupArtistsInclude,
   cover: true,
   tracks: {
     where: listedTracks,

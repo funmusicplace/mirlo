@@ -11,6 +11,7 @@ import { processSingleTrack } from "../../../../serializers/track";
 import { whereForProfilesUserOwnsOrManages } from "../../../../utils/artist";
 import { assertSupportedAudioExtension } from "../../../../utils/audioFormats";
 import { doesTrackGroupBelongToUser } from "../../../../utils/ownership";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import { getAudioUploadUrl } from "../../../../utils/storage";
 import { trackArtistFields } from "../../../../utils/tracks";
 
@@ -28,6 +29,14 @@ export default function () {
       where: {
         trackGroup: {
           profile: whereForProfilesUserOwnsOrManages(loggedInUser.id),
+        },
+      },
+      include: {
+        trackGroup: {
+          include: {
+            trackGroupArtists: trackGroupArtistsInclude,
+            profile: true,
+          },
         },
       },
     });
@@ -113,7 +122,10 @@ export default function () {
             },
           },
           trackArtists: {
-            create: trackArtists?.map(trackArtistFields),
+            create: trackArtists?.map(
+              (ta: Parameters<typeof trackArtistFields>[0]) =>
+                trackArtistFields(ta)
+            ),
           },
         },
       });
@@ -123,7 +135,12 @@ export default function () {
           id: createdTrack.id,
         },
         include: {
-          trackGroup: true,
+          trackGroup: {
+            include: {
+              trackGroupArtists: trackGroupArtistsInclude,
+              profile: true,
+            },
+          },
           trackArtists: true,
           audio: true,
         },

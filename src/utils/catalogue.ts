@@ -1,5 +1,7 @@
 import prisma from "@mirlo/prisma";
 
+import { trackGroupArtistsInclude } from "./releaseArtists";
+
 export const findCataloguePurchasableTrackGroups = async (profile: {
   id: number;
   userId: number;
@@ -17,6 +19,7 @@ export const findCataloguePurchasableTrackGroups = async (profile: {
     },
     include: {
       profile: true,
+      trackGroupArtists: trackGroupArtistsInclude,
     },
   });
 };

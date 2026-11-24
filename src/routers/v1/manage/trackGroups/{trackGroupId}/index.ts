@@ -16,10 +16,13 @@ import { isFundraiserSlugTaken } from "../../../../../utils/fundraiser";
 import generateSlug from "../../../../../utils/generateSlug";
 import { merchImagesInclude } from "../../../../../utils/merch";
 import { clearPageCache } from "../../../../../utils/pageCache";
+import { trackGroupArtistsInclude } from "../../../../../utils/releaseArtists";
 import {
   deleteTrackGroup,
   finalizeTrackGroupPublication,
   trackGroupSingleInclude,
+  assertValidTrackGroupArtists,
+  updateTrackGroupArtists,
 } from "../../../../../utils/trackGroup";
 
 type Params = {
@@ -156,6 +159,8 @@ export default function () {
     const data = req.body;
 
     try {
+      assertValidTrackGroupArtists(data.trackGroupArtists);
+
       if (data.isPublic !== undefined && typeof data.isPublic !== "boolean") {
         throw new AppError({
           httpCode: 400,
@@ -356,6 +361,12 @@ export default function () {
         },
       });
 
+      const releaseArtistsChanged = await updateTrackGroupArtists(
+        Number(trackGroupId),
+        data.trackGroupArtists,
+        Number(req.user?.id)
+      );
+
       if (movingToNewProfile && existingTrackGroup.fundraiserId) {
         await prisma.fundraiser.update({
           where: { id: existingTrackGroup.fundraiserId },
@@ -365,6 +376,7 @@ export default function () {
 
       let trackGroup = await prisma.trackGroup.findFirst({
         where: { id: Number(trackGroupId) },
+        include: { trackGroupArtists: trackGroupArtistsInclude, profile: true },
       });
 
       const isPublishedNow =
@@ -394,6 +406,10 @@ export default function () {
         });
         trackGroup = await prisma.trackGroup.findFirst({
           where: { id: Number(trackGroupId) },
+          include: {
+            trackGroupArtists: trackGroupArtistsInclude,
+            profile: true,
+          },
         });
       }
 
@@ -402,7 +418,8 @@ export default function () {
         (trackGroup.title !== existingTrackGroup.title ||
           trackGroup.releaseDate?.getTime() !==
             existingTrackGroup.releaseDate?.getTime() ||
-          movingToNewProfile)
+          movingToNewProfile ||
+          releaseArtistsChanged)
       ) {
         await clearTrackGroupDownloads(trackGroup.id);
       }

@@ -1,6 +1,11 @@
 import { Image } from "@mirlo/prisma/client";
 
 import { addSizesToStoredImage } from "../utils/artist";
+import {
+  ReleaseArtistRow,
+  releaseArtistsWhenLoaded,
+  serializeTrackGroupArtists,
+} from "../utils/releaseArtists";
 import { isTrackPlayableNested } from "../utils/trackPlayability";
 
 import { isSubscriberExclusive } from "./trackGroup";
@@ -26,8 +31,14 @@ export const serializeProfileSubscriptionTier = <T extends object>(
     releases?: {
       trackGroup?: {
         profileId?: number;
-        profile?: { id?: number; user?: { currency?: string } | null } | null;
+        profile?: {
+          id?: number;
+          name?: string | null;
+          urlSlug?: string | null;
+          user?: { currency?: string } | null;
+        } | null;
         paymentToUser?: { currency?: string } | null;
+        trackGroupArtists?: ReleaseArtistRow[];
         cover?: Image | null;
         isGettable?: boolean;
         _count?: { subscriptionTierReleases?: number };
@@ -57,6 +68,10 @@ export const serializeProfileSubscriptionTier = <T extends object>(
         ...rel,
         trackGroup: {
           ...tgRest,
+          ...releaseArtistsWhenLoaded(rel.trackGroup ?? {}, tgProf),
+          trackGroupArtists: serializeTrackGroupArtists(
+            rel.trackGroup?.trackGroupArtists
+          ),
           currency: paymentToUser?.currency ?? tgProf?.user?.currency ?? "usd",
           tracks: rel.trackGroup?.tracks?.map((track) => ({
             ...track,

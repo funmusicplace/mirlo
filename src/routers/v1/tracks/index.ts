@@ -1,9 +1,10 @@
 import prisma from "@mirlo/prisma";
 import { Prisma } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
+import { omit } from "lodash";
 
 import { processSingleTrack } from "../../../serializers/track";
-import { processSingleTrackGroup } from "../../../serializers/trackGroup";
+import { trackGroupArtistsInclude } from "../../../utils/releaseArtists";
 import { turnItemsIntoRSS } from "../../../utils/rss";
 import { getInstanceName } from "../../../utils/settings";
 import { whereForPublishedTrackGroups } from "../../../utils/trackGroup";
@@ -65,8 +66,10 @@ export default function () {
 
       const tracks = await prisma.track.findMany({
         include: {
+          trackArtists: true,
           trackGroup: {
             include: {
+              trackGroupArtists: trackGroupArtistsInclude,
               profile: {
                 include: {
                   user: {
@@ -108,12 +111,11 @@ export default function () {
       }
 
       res.json({
-        results: tracks.map((tr) => ({
-          ...tr,
-          trackGroup: processSingleTrackGroup(tr.trackGroup, {
-            loggedInUserId: req.user?.id,
-          }),
-        })),
+        results: tracks.map((tr) =>
+          omit(processSingleTrack(tr, { loggedInUserId: req.user?.id }), [
+            "isPlayable",
+          ])
+        ),
       });
     } catch (e) {
       next(e);

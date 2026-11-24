@@ -2,8 +2,9 @@ import prisma from "@mirlo/prisma";
 import { NextFunction, Request, Response } from "express";
 
 import { userLoggedInWithoutRedirect } from "../../../../auth/passport";
-import { findProfileIdForURLSlug } from "../../../../utils/artist";
 import { processSingleTrack } from "../../../../serializers/track";
+import { findProfileIdForURLSlug } from "../../../../utils/artist";
+import { trackGroupArtistsInclude } from "../../../../utils/releaseArtists";
 import { whereForPublishedTrackGroups } from "../../../../utils/trackGroup";
 
 export default function () {
@@ -57,9 +58,11 @@ export default function () {
           isPreview: true,
         },
         include: {
+          trackArtists: true,
           trackGroup: {
             include: {
               profile: true,
+              trackGroupArtists: trackGroupArtistsInclude,
             },
           },
         },
