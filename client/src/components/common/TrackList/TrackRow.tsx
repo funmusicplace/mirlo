@@ -14,6 +14,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { getArtistUrl } from "utils/artist";
 import { usePlayerSyncRequest } from "utils/playerSync";
 import { fmtMSS, isTrackOwnedOrPreview } from "utils/tracks";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 import { isEmbeddedInMirlo } from "utils/widgetContext";
 
 import DropdownMenu from "../DropdownMenu";
@@ -238,6 +239,8 @@ const TrackRow: React.FC<{
     dispatch,
   } = useGlobalStateContext();
   const { user } = useAuthContext();
+  const { trackArtistLine } = useReleaseArtistName();
+  const artistLine = trackArtistLine(track);
 
   const canPlayTrack = isTrackOwnedOrPreview(track, user, trackGroup);
   const embeddedInMirlo = isEmbeddedInMirlo();
@@ -356,7 +359,7 @@ const TrackRow: React.FC<{
               )}
               {track.title ?? <i>{t("untitled")}</i>}
             </span>
-            {trackGroup.artist?.name && (
+            {artistLine && (
               <span className="truncate text-[0.65rem] max-md:text-xs leading-tight! mt-1">
                 {t("by")}{" "}
                 <Link
@@ -364,7 +367,7 @@ const TrackRow: React.FC<{
                   onClick={(e) => e.stopPropagation()}
                   className="font-bold text-(--mi-text-color)!"
                 >
-                  {trackGroup.artist.name}
+                  {artistLine}
                 </Link>
               </span>
             )}

@@ -3,6 +3,7 @@ import ScrollRail from "components/common/ScrollRail";
 import { queryPublicRecommendedTrackGroups } from "queries/trackGroups";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import ReleaseLinkCard from "./ReleaseLinkCard";
 
@@ -13,6 +14,7 @@ const RecommendedAlbums: React.FC<{
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
+  const { releaseArtistName } = useReleaseArtistName();
 
   const { data: recommendedTrackGroups } = useQuery(
     queryPublicRecommendedTrackGroups(trackGroupId)
@@ -35,7 +37,7 @@ const RecommendedAlbums: React.FC<{
             trackGroup={rec}
             subtitle={
               <span className="text-(--mi-button-color)">
-                {rec.artist?.name}
+                {releaseArtistName(rec)}
               </span>
             }
           />

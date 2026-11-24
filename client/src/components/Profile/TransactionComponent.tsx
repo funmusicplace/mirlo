@@ -1,14 +1,16 @@
-import React from "react";
-import { Trans, useTranslation } from "react-i18next";
-import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
-import { moneyDisplay } from "components/common/Money";
-import { Link } from "react-router-dom";
-import { getArtistUrl } from "utils/artist";
-import { formatDate } from "components/TrackGroup/ReleaseDate";
 import { css } from "@emotion/css";
 import { Button } from "components/common/Button";
-import Tooltip from "components/common/Tooltip";
+import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import Modal from "components/common/Modal";
+import { moneyDisplay } from "components/common/Money";
+import Tooltip from "components/common/Tooltip";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
+import React from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { getArtistUrl } from "utils/artist";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
+
 import MerchPopUp from "./MerchPopUp";
 
 const MerchPurchaseDetails: React.FC<{
@@ -49,6 +51,7 @@ const TransactionComponent: React.FC<{
   const isTrackGroupPurchase = !!userTransaction.trackGroupPurchases?.length;
   const isMerchPurchase = !!userTransaction.merchPurchases?.length;
   const isTrackPurchase = !!userTransaction.trackPurchases?.length;
+  const { releaseArtistName, trackArtistLine } = useReleaseArtistName();
 
   const imageSrc = isTrackGroupPurchase
     ? userTransaction.trackGroupPurchases?.[0]?.trackGroup?.cover?.sizes?.[60]
@@ -72,6 +75,15 @@ const TransactionComponent: React.FC<{
       : isTrackPurchase
         ? userTransaction.trackPurchases?.[0]?.track?.trackGroup?.artist
         : undefined;
+  const purchasedTrackGroup =
+    userTransaction.trackGroupPurchases?.[0]?.trackGroup;
+  const purchasedTrack = userTransaction.trackPurchases?.[0]?.track;
+  const artistName =
+    isTrackGroupPurchase && purchasedTrackGroup
+      ? releaseArtistName(purchasedTrackGroup)
+      : isTrackPurchase && purchasedTrack
+        ? trackArtistLine(purchasedTrack)
+        : artist?.name;
   const url = isTrackGroupPurchase
     ? `/${artist?.urlSlug}/release/${userTransaction.trackGroupPurchases?.[0]?.trackGroup?.urlSlug}`
     : isMerchPurchase
@@ -98,11 +110,12 @@ const TransactionComponent: React.FC<{
           </div>
         )}
         <div>
-          {artist && (
+          {artist && !artistName && <Link to={url}>{title}</Link>}
+          {artist && artistName && (
             <Trans
               t={t}
               i18nKey="albumLink"
-              values={{ albumTitle: title, artistName: artist.name }}
+              values={{ albumTitle: title, artistName }}
               components={{
                 albumLink: <Link to={url}></Link>,
                 artistLink: <Link to={getArtistUrl(artist)}></Link>,

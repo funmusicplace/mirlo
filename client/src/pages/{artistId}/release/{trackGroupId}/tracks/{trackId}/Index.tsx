@@ -12,12 +12,14 @@ import { queryArtist, queryTrackGroup } from "queries";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { getReleaseUrl } from "utils/artist";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 function Index() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
   const navigate = useNavigate();
+  const { trackArtistLine } = useReleaseArtistName();
   const { artistId, trackGroupId, trackId } = useParams();
   const { data: artist, isLoading: isLoadingArtist } = useQuery(
     queryArtist({ artistSlug: artistId ?? "" })
@@ -50,7 +52,7 @@ function Index() {
       <MetaCard
         title={filteredTrack.title ?? "Untitled track"}
         description={t("trackByArtist", {
-          artist: trackGroup.artist?.name ?? "an artist",
+          artist: trackArtistLine(filteredTrack) || "an artist",
         })}
         image={trackGroup.cover?.sizes?.[600]}
       />

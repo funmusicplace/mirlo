@@ -32,6 +32,10 @@ export const TRACK_GROUP_EXAMPLE: TrackGroup = {
     federatedStreaming: false,
     isLabelProfile: false,
   },
+  releaseArtists: [
+    { name: "Example Artist", urlSlug: "example-artist", artistId: 1 },
+  ],
+  releaseArtistsSource: "owner",
   cover: {
     id: "00000000-0000-0000-0000-000000000000",
     url: [],

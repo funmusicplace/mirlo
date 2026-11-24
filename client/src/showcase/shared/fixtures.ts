@@ -89,10 +89,13 @@ export const makeTracks = (trackGroupId: number, count = 6): Track[] =>
       {
         artistName: SHOWCASE_ARTIST.name,
         artistId: SHOWCASE_ARTIST.id,
-        isCoAuthor: true,
+        appearsAs: "MAIN",
         order: 1,
       },
     ],
+    mainArtists: [{ name: SHOWCASE_ARTIST.name, artistId: SHOWCASE_ARTIST.id }],
+    featuredArtists: [],
+    mainArtistsSource: "track",
     audio: {
       ...TRACK_EXAMPLE.audio!,
       duration,
@@ -113,6 +116,14 @@ const release = (
   title,
   urlSlug,
   artist: ARTIST_ON_RELEASE,
+  releaseArtists: [
+    {
+      name: ARTIST_ON_RELEASE.name,
+      urlSlug: ARTIST_ON_RELEASE.urlSlug,
+      artistId: ARTIST_ON_RELEASE.id,
+    },
+  ],
+  releaseArtistsSource: "owner",
   cover,
   about: "Recorded over a long winter in a converted boathouse.",
   credits: "Mixed by Ada Rivers. Mastered by Theo Marsh.",

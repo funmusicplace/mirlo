@@ -19,6 +19,7 @@ import {
   getReleaseUrl,
   getTrackUrl,
 } from "utils/artist";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 function Index() {
   const { t } = useTranslation("translation", {
@@ -27,6 +28,7 @@ function Index() {
   const { t: tPost } = useTranslation("translation", {
     keyPrefix: "post",
   });
+  const { releaseArtistName, trackArtistLine } = useReleaseArtistName();
 
   const { artistId } = useParams();
   const { user } = useAuthContext();
@@ -93,6 +95,13 @@ function Index() {
           ? merch.title
           : null;
 
+  const itemArtistName =
+    purchaseType === "trackGroup" && trackGroup
+      ? releaseArtistName(trackGroup)
+      : purchaseType === "track" && track
+        ? trackArtistLine(track)
+        : artist.name;
+
   const itemCover =
     purchaseType === "merch" && merch
       ? merch.images?.[0]?.sizes?.[300]
@@ -115,7 +124,7 @@ function Index() {
         cover={isSimpleMessage ? undefined : itemCover}
         title={isSimpleMessage ? undefined : (itemTitle ?? undefined)}
         titleLink={itemLink ?? undefined}
-        artistName={artist.name}
+        artistName={itemArtistName}
         artistUrl={getArtistUrl(artist)}
       >
         {!hasSession && !isSimpleMessage && (

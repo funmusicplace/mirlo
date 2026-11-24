@@ -108,7 +108,8 @@ const SingleTrackHero: React.FC<{
   track: Track;
   title: string;
   subtitle?: React.ReactNode;
-  coArtists?: React.ReactElement;
+  mainArtists?: React.ReactElement;
+  featuredArtists?: React.ReactElement;
   secondaryActions: React.ReactNode;
   primaryAction?: React.ReactNode;
   badge?: React.ReactNode;
@@ -118,7 +119,8 @@ const SingleTrackHero: React.FC<{
   track,
   title,
   subtitle,
-  coArtists,
+  mainArtists,
+  featuredArtists,
   secondaryActions,
   primaryAction,
   badge,
@@ -137,7 +139,8 @@ const SingleTrackHero: React.FC<{
         trackGroup={trackGroup}
         title={title}
         subtitle={subtitle}
-        coArtists={coArtists}
+        mainArtists={mainArtists}
+        featuredArtists={featuredArtists}
         centered
       />
       <CoverSlot reserve={reserve}>

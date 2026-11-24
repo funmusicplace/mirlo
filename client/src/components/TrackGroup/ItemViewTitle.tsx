@@ -95,8 +95,16 @@ const TrackGroupTitle: React.FC<{
   title: string;
   centered?: boolean;
   subtitle?: React.ReactNode;
-  coArtists?: React.ReactElement;
-}> = ({ trackGroup, title, centered, subtitle, coArtists }) => {
+  mainArtists?: React.ReactElement;
+  featuredArtists?: React.ReactElement;
+}> = ({
+  trackGroup,
+  title,
+  centered,
+  subtitle,
+  mainArtists,
+  featuredArtists,
+}) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
@@ -126,7 +134,8 @@ const TrackGroupTitle: React.FC<{
           artist={artist}
           trackGroup={trackGroup}
           hideLabel
-          coArtists={coArtists}
+          mainArtists={mainArtists}
+          featuredArtists={featuredArtists}
         />
         {(showFromAlbum || label) && (
           <div className="text-base text-balance wrap-anywhere">

@@ -4,13 +4,14 @@ import PlayableCover, {
   playableCoverCardRevealClass,
 } from "components/common/PlayableCover";
 import PurchaseOrDownloadAlbum from "components/TrackGroup/PurchaseOrDownloadAlbumModal";
-import Wishlist from "components/TrackGroup/Wishlist";
 import { formatRelativeTime } from "components/TrackGroup/ReleaseDate";
+import Wishlist from "components/TrackGroup/Wishlist";
 import React, { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import { useAuthContext } from "state/AuthContext";
+import { getArtistUrl, getReleaseUrl } from "utils/artist";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 function NewArtistAlbum({ notification }: { notification: Notification }) {
   const { t, i18n } = useTranslation("translation", {
@@ -20,6 +21,7 @@ function NewArtistAlbum({ notification }: { notification: Notification }) {
     keyPrefix: "playableCover",
   });
   const { user } = useAuthContext();
+  const { releaseArtistName } = useReleaseArtistName();
   const goToId = useId();
 
   if (!notification.trackGroup?.artist) {
@@ -35,6 +37,7 @@ function NewArtistAlbum({ notification }: { notification: Notification }) {
     .map((t) => t.id);
   const releaseUrl = getReleaseUrl(artist, trackGroup);
   const goToLabel = tPlay("goToAlbum");
+  const artistName = releaseArtistName(trackGroup);
 
   return (
     <div
@@ -59,14 +62,19 @@ function NewArtistAlbum({ notification }: { notification: Notification }) {
         <div className="metadata text-xs text-(--mi-light-foreground-color) mt-0.5">
           {t("newReleaseCount", {
             count: (trackGroup as TrackGroup).tracks?.length ?? 0,
-          })}{" "}
-          {t("by")}{" "}
-          <Link
-            to={getArtistUrl(artist)}
-            className="underline focus-visible:outline-auto"
-          >
-            {artist.name}
-          </Link>
+          })}
+          {artistName && (
+            <>
+              {" "}
+              {t("by")}{" "}
+              <Link
+                to={getArtistUrl(artist)}
+                className="underline focus-visible:outline-auto"
+              >
+                {artistName}
+              </Link>
+            </>
+          )}
         </div>
         <div className="text-xs text-(--mi-light-foreground-color) mt-1.5">
           {formatRelativeTime({ date: notification.createdAt, i18n })}

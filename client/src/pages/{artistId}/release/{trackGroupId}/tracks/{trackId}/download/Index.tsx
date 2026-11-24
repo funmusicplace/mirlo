@@ -13,11 +13,13 @@ import { useTranslation } from "react-i18next";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import api from "services/api";
 import { getArtistUrl, getTrackUrl } from "utils/artist";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 function Index() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
+  const { trackArtistLine } = useReleaseArtistName();
   const [track, setTrack] = React.useState<Track>();
   const [isOwned, setIsOwned] = React.useState(false);
   const [isLoadingTrack, setIsLoadingTrack] = React.useState(true);
@@ -120,7 +122,7 @@ function Index() {
           />
           <SmallTileDetails
             title={track.title ?? ""}
-            subtitle={track.trackGroup.artist?.name ?? ""}
+            subtitle={trackArtistLine(track)}
           />
         </div>
         <DownloadAlbumButton

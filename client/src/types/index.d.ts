@@ -207,9 +207,13 @@ interface Track {
     artistId?: number;
     artistName?: string;
     isCoAuthor?: boolean;
+    appearsAs?: TrackArtistAppearance;
     trackId?: number;
     order: number;
   }[];
+  mainArtists?: ArtistLink[];
+  featuredArtists?: ArtistLink[];
+  mainArtistsSource?: "track" | "release";
   licenseId?: number | null;
   license?: {
     short: string;
@@ -226,12 +230,32 @@ interface Tag {
   tag: string;
 }
 
+type TrackArtistAppearance = "MAIN" | "FEATURED" | "CREDITS_ONLY";
+
+interface ArtistLink {
+  name: string;
+  urlSlug?: string;
+  artistId?: number;
+  role?: string;
+}
+
+interface TrackGroupArtist {
+  id: string;
+  artistName: string;
+  artistId: number | null;
+  order: number;
+  artist: { id: number; name: string; urlSlug: string } | null;
+}
+
 interface TrackGroup {
   title?: string;
   adminEnabled: boolean;
   hideFromSearch?: boolean;
   catalogNumber?: string;
   upc?: string | null;
+  trackGroupArtists?: TrackGroupArtist[];
+  releaseArtists?: ArtistLink[];
+  releaseArtistsSource?: "credited" | "owner";
   coverImageAlt?: string;
   coverCredit?: string | null;
   id: number;

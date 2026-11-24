@@ -5,6 +5,7 @@ import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 const NOTIFICATION_COPY_KEYS: Partial<
   Record<
@@ -33,6 +34,7 @@ const UserBoughtYourAlbum: React.FC<{
   const { t, i18n } = useTranslation("translation", {
     keyPrefix: "notifications",
   });
+  const { releaseArtistName } = useReleaseArtistName();
 
   const copy = NOTIFICATION_COPY_KEYS[notification.notificationType];
 
@@ -47,6 +49,7 @@ const UserBoughtYourAlbum: React.FC<{
   );
   const buyerName =
     notification.relatedUser?.name ?? notification.relatedUser?.email;
+  const artistName = releaseArtistName(notification.trackGroup);
 
   return (
     <div
@@ -102,11 +105,11 @@ const UserBoughtYourAlbum: React.FC<{
             }}
           />
         </div>
-        {notification.trackGroup.artist && (
+        {notification.trackGroup.artist && artistName && (
           <div className="text-xs text-(--mi-light-foreground-color) mt-0.5">
             <span>{t("by")} </span>
             <Link to={getArtistUrl(notification.trackGroup.artist)}>
-              {notification.trackGroup.artist.name}
+              {artistName}
             </Link>
           </div>
         )}

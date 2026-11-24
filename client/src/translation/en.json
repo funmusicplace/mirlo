@@ -2362,7 +2362,7 @@
     "isrc": "ISRC: {{isrc}}",
     "onThisPage": "On this page",
     "merch": "Merch",
-    "byArtistWithArtists": "by <artistLink>{{artist}}</artistLink> with <artists/>",
+    "byReleaseArtists": "by <releaseArtists/>",
     "onLabelStandalone": "On <labelLink>{{label}}</labelLink>"
   },
   "manageSubscriptionTierBox": {
@@ -2753,6 +2753,10 @@
     "keepBrowserOpen": "Keep this tab open until uploads finish. You can keep browsing.",
     "uploadFailed": "Something went wrong uploading track {{title}}.",
     "uploadFailedContact": "Something went wrong uploading track {{title}}. Please report this incident to {{email}}."
+  },
+  "trackArtists": {
+    "lineWithGuests": "{{main}} with {{featured}}",
+    "withGuests": "with <guests/>"
   },
   "zipImport": {
     "previewTitle": "Import preview",

@@ -17,6 +17,7 @@ import {
 } from "utils/artist";
 import useIsSubscribedToArtist from "utils/useIsSubscribedToArtist";
 import { useMatchMedia } from "utils/useMatchMedia";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import { bp } from "../../constants";
 
@@ -129,6 +130,7 @@ const ReleaseArtistBlock: React.FC<{
     keyPrefix: "trackGroupDetails",
   });
   const { t: tArtist } = useTranslation("translation", { keyPrefix: "artist" });
+  const { releaseArtistName } = useReleaseArtistName();
 
   const identityLinkRef = React.useRef<HTMLAnchorElement>(null);
   const identityHeaderRef = React.useRef<HTMLDivElement>(null);
@@ -252,7 +254,7 @@ const ReleaseArtistBlock: React.FC<{
                 ).getFullYear()
               : undefined;
             const subtitle = artist.isLabelProfile
-              ? [release.artist?.name, year].filter(Boolean).join(" · ")
+              ? [releaseArtistName(release), year].filter(Boolean).join(" · ")
               : year;
             return (
               <li key={release.id}>

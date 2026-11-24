@@ -17,6 +17,7 @@ import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import useArtistQuery from "utils/useArtistQuery";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import { bp } from "../../../../../constants";
 
@@ -24,6 +25,7 @@ function Index() {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
+  const { releaseArtistName } = useReleaseArtistName();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
   const { user } = useAuthContext();
@@ -148,9 +150,13 @@ function Index() {
               }
               textColor="var(--mi-text-color)"
               subtitle={
-                <Link to={getArtistUrl(trackGroup.artist)}>
-                  {trackGroup.artist?.name ?? ""}
-                </Link>
+                releaseArtistName(trackGroup) ? (
+                  <Link to={getArtistUrl(trackGroup.artist)}>
+                    {releaseArtistName(trackGroup)}
+                  </Link>
+                ) : (
+                  ""
+                )
               }
             />
             <RedeemCodeForm onRedeem={redeemAlbum} />

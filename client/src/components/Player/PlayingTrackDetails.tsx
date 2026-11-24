@@ -1,4 +1,7 @@
 import { css, cx } from "@emotion/css";
+import ArtistNameList, {
+  MainAndFeaturedArtists,
+} from "components/common/ArtistNameList";
 import ImageWithPlaceholder from "components/common/ImageWithPlaceholder";
 import { TrackTitleContent } from "components/Widget/TrackTitleContent";
 import React from "react";
@@ -12,45 +15,35 @@ export const TrackArtistLinks: React.FC<{
   target?: "_blank";
   fullLink?: boolean;
 }> = ({ track, target, fullLink }) => {
-  const artists: { artistId?: string | number; artistName?: string }[] =
-    track.trackArtists?.filter((artist) => artist.isCoAuthor) ?? [];
+  const renderLink = (artist: ArtistLink, url: string) =>
+    fullLink ? (
+      <a
+        target="_blank"
+        rel="noopener noreferrer"
+        href={`${CLIENT_ROOT}${url}`}
+      >
+        {artist.name}
+      </a>
+    ) : (
+      <Link
+        to={url}
+        className="web-scrobbler-artist"
+        target={target}
+        rel={target === "_blank" ? "noopener noreferrer" : undefined}
+      >
+        {artist.name}
+      </Link>
+    );
 
-  if (artists.length === 0) {
-    artists.push({
-      artistId: track.trackGroup.artist.urlSlug ?? track.trackGroup.artistId,
-      artistName: track.trackGroup.artist.name,
-    });
-  }
-
-  return artists.map((artist, index) => (
-    <React.Fragment key={artist.artistName}>
-      {artist.artistId ? (
-        <>
-          {fullLink ? (
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              href={`${CLIENT_ROOT}/${artist.artistId}`}
-            >
-              {artist.artistName}
-            </a>
-          ) : (
-            <Link
-              to={`/${artist.artistId}`}
-              className="web-scrobbler-artist"
-              target={target}
-              rel={target === "_blank" ? "noopener noreferrer" : undefined}
-            >
-              {artist.artistName}
-            </Link>
-          )}
-        </>
-      ) : (
-        artist.artistName
+  return (
+    <MainAndFeaturedArtists
+      main={track.mainArtists ?? []}
+      featured={track.featuredArtists ?? []}
+      renderList={(artists) => (
+        <ArtistNameList artists={artists} renderLink={renderLink} />
       )}
-      {index < artists.length - 1 && ", "}
-    </React.Fragment>
-  ));
+    />
+  );
 };
 
 const PlayingTrackDetails: React.FC<{

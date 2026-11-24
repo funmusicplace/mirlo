@@ -1,7 +1,13 @@
 import { css } from "@emotion/css";
 import { ArtistButtonLink } from "components/Artist/ArtistButtons";
+import ArtistNameList from "components/common/ArtistNameList";
 import { Trans, useTranslation } from "react-i18next";
-import { getArtistUrl, getReleaseUrl } from "utils/artist";
+import {
+  getArtistUrl,
+  getReleaseArtistLinks,
+  getReleaseUrl,
+  hasCreditedReleaseArtists,
+} from "utils/artist";
 
 import { coverSizeMax } from "../../constants";
 
@@ -77,12 +83,29 @@ export const OnLabel: React.FC<{
   );
 };
 
+const ReleaseArtistLinks: React.FC<{
+  trackGroup: TrackGroup;
+}> = ({ trackGroup }) => {
+  return (
+    <ArtistNameList
+      artists={getReleaseArtistLinks(trackGroup)}
+      itemAs="span"
+      renderLink={(link, url) => (
+        <ArtistButtonLink className={inlineLink} variant="link" to={url}>
+          {link.name}
+        </ArtistButtonLink>
+      )}
+    />
+  );
+};
+
 const ArtistByLine: React.FC<{
   artist: Artist;
-  trackGroup?: TrackGroup;
+  trackGroup: TrackGroup;
   hideLabel?: boolean;
-  coArtists?: React.ReactElement;
-}> = ({ artist, trackGroup, hideLabel, coArtists }) => {
+  mainArtists?: React.ReactElement;
+  featuredArtists?: React.ReactElement;
+}> = ({ artist, trackGroup, hideLabel, mainArtists, featuredArtists }) => {
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
@@ -104,23 +127,35 @@ const ArtistByLine: React.FC<{
       `}
     >
       <div>
-        <Trans
-          t={t}
-          i18nKey={coArtists ? "byArtistWithArtists" : "byArtist"}
-          values={{
-            artist: artist.name,
-          }}
-          components={{
-            artistLink: (
-              <ArtistButtonLink
-                className={inlineLink}
-                variant="link"
-                to={getArtistUrl(artist)}
-              ></ArtistButtonLink>
-            ),
-            ...(coArtists ? { artists: coArtists } : {}),
-          }}
-        />
+        {mainArtists || hasCreditedReleaseArtists(trackGroup) ? (
+          <Trans
+            t={t}
+            i18nKey="byReleaseArtists"
+            components={{
+              releaseArtists: mainArtists ?? (
+                <ReleaseArtistLinks trackGroup={trackGroup} />
+              ),
+            }}
+          />
+        ) : (
+          <Trans
+            t={t}
+            i18nKey="byArtist"
+            values={{
+              artist: artist.name,
+            }}
+            components={{
+              artistLink: (
+                <ArtistButtonLink
+                  className={inlineLink}
+                  variant="link"
+                  to={getArtistUrl(artist)}
+                ></ArtistButtonLink>
+              ),
+            }}
+          />
+        )}
+        {featuredArtists && <> {featuredArtists}</>}
         {labelArtist && (
           <>
             {" "}

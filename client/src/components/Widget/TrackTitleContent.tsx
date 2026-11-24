@@ -5,6 +5,7 @@ import { MdLyrics } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { getArtistUrl, getReleaseUrl } from "utils/artist";
 import { isSingleTrackRelease } from "utils/tracks";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import { WidgetLink } from "./utils";
 
@@ -31,6 +32,7 @@ export const TrackTitleContent: React.FC<{
   const { t: tTrackGroup } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
+  const { trackArtistLine } = useReleaseArtistName();
 
   const isInHiddenDraftAlbum =
     !!track.trackGroup.isHiddenTrackGroupForSongDrafts;
@@ -58,20 +60,22 @@ export const TrackTitleContent: React.FC<{
     </WidgetLink>
   );
 
-  const artistLink = track.trackGroup.artist ? (
-    embeddedInMirlo ? (
-      <TrackArtistLinks track={track} target="_blank" fullLink />
-    ) : useTrackArtistLinks ? (
-      <TrackArtistLinks track={track} />
-    ) : (
-      <WidgetLink
-        to={getArtistUrl(track.trackGroup.artist)}
-        embeddedInMirlo={false}
-      >
-        {track.trackGroup.artist.name}
-      </WidgetLink>
-    )
-  ) : null;
+  const artistLine = trackArtistLine(track);
+  const artistLink =
+    track.trackGroup.artist && artistLine ? (
+      embeddedInMirlo ? (
+        <TrackArtistLinks track={track} target="_blank" fullLink />
+      ) : useTrackArtistLinks ? (
+        <TrackArtistLinks track={track} />
+      ) : (
+        <WidgetLink
+          to={getArtistUrl(track.trackGroup.artist)}
+          embeddedInMirlo={false}
+        >
+          {artistLine}
+        </WidgetLink>
+      )
+    ) : null;
 
   const titleNode = titleLinkTo ? (
     <Link className="hover:underline! ms-1" to={titleLinkTo}>
@@ -146,9 +150,11 @@ export const TrackTitleContent: React.FC<{
             </div>
           )}
           <div className={byLineWrapperClass}>
-            <span className={byLineTruncateClass}>
-              <span className="opacity-60">{t("by")}</span> {artistLink}
-            </span>
+            {artistLink && (
+              <span className={byLineTruncateClass}>
+                <span className="opacity-60">{t("by")}</span> {artistLink}
+              </span>
+            )}
             {byLineEnd && (
               <div className="hidden max-sm:flex shrink-0 items-center gap-1 ">
                 {byLineEnd}

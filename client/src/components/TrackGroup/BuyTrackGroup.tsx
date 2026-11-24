@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "state/AuthContext";
 import { useSnackbar } from "state/SnackbarContext";
 import { buildCheckoutCompletePath } from "utils/artist";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import AddToCollection from "./AddToCollection";
 import PaymentInputElement from "./PaymentInputElement";
@@ -43,6 +44,7 @@ const BuyTrackGroup: React.FC<{
   const [stripeLoading, setStripeLoading] = React.useState(false);
   const { t } = useTranslation("translation", { keyPrefix: "trackGroupCard" });
   const { user, refreshLoggedInUser } = useAuthContext();
+  const { releaseArtistName } = useReleaseArtistName();
 
   const isPledgeMode =
     !!trackGroup.fundraiser?.isAllOrNothing &&
@@ -285,7 +287,12 @@ const BuyTrackGroup: React.FC<{
             {isPledgeMode && !user && (
               <EmailVerification
                 setVerifiedEmail={setVerifiedEmail}
-                contextSubject={`${trackGroup.title}: ${trackGroup.artist?.name}`}
+                contextSubject={[
+                  trackGroup.title,
+                  releaseArtistName(trackGroup),
+                ]
+                  .filter(Boolean)
+                  .join(": ")}
               />
             )}
 

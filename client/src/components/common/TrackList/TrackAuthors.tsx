@@ -2,67 +2,41 @@ import { cx } from "@emotion/css";
 import styled from "@emotion/styled";
 import React from "react";
 import { Link } from "react-router-dom";
-import { isReleaseArtist } from "utils/artist";
+import { getTrackArtistsByAppearance } from "utils/artist";
 import { useMatchMedia } from "utils/useMatchMedia";
 
 import { bp } from "../../../constants";
-import Tooltip from "../Tooltip";
+import ArtistNameList, { MainAndFeaturedArtists } from "../ArtistNameList";
 
-const AuthorName: React.FC<{
-  artist: NonNullable<Track["trackArtists"]>[number];
-  disableLink?: boolean;
-}> = ({ artist, disableLink }) => {
-  const content =
-    artist.artistId && !disableLink ? (
-      <Link to={`/${artist.artistId}`}>{artist.artistName}</Link>
-    ) : (
-      <span>{artist.artistName}</span>
-    );
+const renderPlainName = (artist: ArtistLink) => <span>{artist.name}</span>;
 
-  if (artist.role) {
-    return (
-      <Tooltip
-        position="right"
-        hoverText={artist.role}
-        underline={false}
-        compact
-      >
-        {content}
-      </Tooltip>
-    );
-  }
-
-  return content;
-};
-
-type CoAuthor = NonNullable<Track["trackArtists"]>[number];
-
-export const getCoAuthors = (track: Track, excludeArtist?: Artist) =>
-  (
-    track.trackArtists?.filter(
-      (artist) =>
-        artist.isCoAuthor &&
-        artist.artistName?.trim() &&
-        !isReleaseArtist(artist, excludeArtist)
-    ) ?? []
-  ).sort((a, b) => a.order - b.order);
-
-export const CoAuthorNames: React.FC<{
-  coAuthors: CoAuthor[];
+export const TrackArtistNames: React.FC<{
+  mainArtists: ArtistLink[];
+  featuredArtists?: ArtistLink[];
   className?: string;
   disableLinks?: boolean;
-}> = ({ coAuthors, className, disableLinks }) => (
+}> = ({ mainArtists, featuredArtists = [], className, disableLinks }) => (
   <span className={cx("track-authors", className)}>
-    {coAuthors.map((artist, index) => (
-      <React.Fragment key={artist.artistName}>
-        <AuthorName artist={artist} disableLink={disableLinks} />
-        {index < coAuthors.length - 1 && ", "}
-      </React.Fragment>
-    ))}
+    <MainAndFeaturedArtists
+      main={mainArtists}
+      featured={featuredArtists}
+      renderList={(artists) => (
+        <ArtistNameList
+          artists={artists}
+          showRoles
+          renderPlain={renderPlainName}
+          renderLink={
+            disableLinks
+              ? renderPlainName
+              : (artist, url) => <Link to={url}>{artist.name}</Link>
+          }
+        />
+      )}
+    />
   </span>
 );
 
-const TrackRowAuthorNames = styled(CoAuthorNames)`
+const TrackRowAuthorNames = styled(TrackArtistNames)`
   color: var(--mi-text-color);
   opacity: 0.5;
   margin-left: 0.5rem;
@@ -80,13 +54,19 @@ const TrackRowAuthorNames = styled(CoAuthorNames)`
 
 const TrackAuthors: React.FC<{ track: Track }> = ({ track }) => {
   const isMobile = useMatchMedia(`screen and (max-width: ${bp.small}px)`);
-  const coAuthors = getCoAuthors(track);
+  const { main, featured } = getTrackArtistsByAppearance(track);
 
-  if (coAuthors.length === 0) {
+  if (main.length === 0 && featured.length === 0) {
     return null;
   }
 
-  return <TrackRowAuthorNames coAuthors={coAuthors} disableLinks={isMobile} />;
+  return (
+    <TrackRowAuthorNames
+      mainArtists={main}
+      featuredArtists={featured}
+      disableLinks={isMobile}
+    />
+  );
 };
 
 export default TrackAuthors;

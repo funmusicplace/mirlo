@@ -1,31 +1,58 @@
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { isReleaseArtist } from "utils/artist";
+import {
+  getReleaseArtistLinks,
+  isReleaseArtist,
+  normalizeArtistName,
+} from "utils/artist";
 import { fmtMSS } from "utils/tracks";
 
 import ReleaseCreditLines from "./ReleaseCreditLines";
 import ReleaseDate from "./ReleaseDate";
 import TrackGroupPills from "./TrackGroupPills";
 
+type CreditedArtist = NonNullable<Track["trackArtists"]>[number];
+
 const getCreditedArtists = (
   track: Track,
   trackGroup: TrackGroup
 ): NonNullable<Track["trackArtists"]> => {
   const trackArtists = (
-    track.trackArtists?.filter((artist) => artist.artistName?.trim()) ?? []
+    track.trackArtists?.filter(
+      (artist): artist is CreditedArtist & { artistName: string } =>
+        !!artist.artistName?.trim()
+    ) ?? []
   ).sort((a, b) => a.order - b.order);
-  const releaseArtist = trackGroup.artist;
-
-  if (
-    !releaseArtist ||
-    trackArtists.some((artist) => isReleaseArtist(artist, releaseArtist))
-  ) {
-    return trackArtists;
+  const mainArtists = trackArtists.filter(
+    (artist) => artist.appearsAs === "MAIN"
+  );
+  if (mainArtists.length > 0) {
+    return [
+      ...mainArtists,
+      ...trackArtists.filter((artist) => artist.appearsAs !== "MAIN"),
+    ];
   }
+  const missingReleaseArtists = getReleaseArtistLinks(trackGroup).filter(
+    (releaseArtist) =>
+      !trackArtists.some((artist) =>
+        releaseArtist.artistId
+          ? isReleaseArtist(artist, {
+              id: releaseArtist.artistId,
+              name: releaseArtist.name,
+            })
+          : normalizeArtistName(artist.artistName) ===
+            normalizeArtistName(releaseArtist.name)
+      )
+  );
 
   return [
-    { artistName: releaseArtist.name, artistId: releaseArtist.id, order: -1 },
+    ...missingReleaseArtists.map((releaseArtist, index) => ({
+      artistName: releaseArtist.name,
+      artistId: releaseArtist.artistId,
+      appearsAs: "MAIN" as const,
+      order: index - missingReleaseArtists.length,
+    })),
     ...trackArtists,
   ];
 };

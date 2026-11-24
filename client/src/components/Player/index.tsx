@@ -10,6 +10,7 @@ import { useGlobalStateContext } from "state/GlobalState";
 import { useBroadcastPlayerSync } from "utils/playerSync";
 import { isSchemeLight } from "utils/themeVariables";
 import { isTrackOwnedOrPreview } from "utils/tracks";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import { bp } from "../../constants";
 import { useIsArtistPageLight } from "../ArtistColorsProvider";
@@ -44,6 +45,7 @@ const ControlWrapper = styled.span`
 
 const Player = () => {
   const { t } = useTranslation("translation", { keyPrefix: "player" });
+  const { trackArtistLine } = useReleaseArtistName();
   const { user } = useAuthContext();
   const { state, dispatch } = useGlobalStateContext();
 
@@ -136,7 +138,7 @@ const Player = () => {
           {currentTrack.title
             ? t("nowPlayingAnnouncement", {
                 title: currentTrack.title,
-                artist: currentTrack.trackGroup.artist?.name ?? "",
+                artist: trackArtistLine(currentTrack),
               })
             : ""}
         </div>

@@ -13,13 +13,23 @@ const FEATURED_ARTIST: Artist = {
   urlSlug: "lumen-tide",
 };
 
+const FEATURED_ARTIST_LINKS: ArtistLink[] = [
+  {
+    name: FEATURED_ARTIST.name,
+    urlSlug: FEATURED_ARTIST.urlSlug,
+    artistId: FEATURED_ARTIST.id,
+  },
+];
+
 const FEATURED_TRACK: Track = {
   ...TRACK_EXAMPLE,
   id: 501,
   title: "Dawn Chorus",
+  mainArtists: FEATURED_ARTIST_LINKS,
   trackGroup: {
     ...TRACK_EXAMPLE.trackGroup!,
     artist: FEATURED_ARTIST,
+    releaseArtists: FEATURED_ARTIST_LINKS,
   },
 };
 

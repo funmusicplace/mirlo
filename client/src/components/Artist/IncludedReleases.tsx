@@ -1,10 +1,12 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 const IncludedReleases: React.FC<{
   tier: ArtistSubscriptionTier;
 }> = ({ tier }) => {
   const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const { releaseArtistName } = useReleaseArtistName();
 
   return (
     <>
@@ -31,7 +33,7 @@ const IncludedReleases: React.FC<{
                   />
                 )}
                 <span className="truncate text-sm">
-                  {release.trackGroup.artist.name}
+                  {releaseArtistName(release.trackGroup)}
                 </span>
                 <span className="truncate text-sm">
                   {release.trackGroup.title}

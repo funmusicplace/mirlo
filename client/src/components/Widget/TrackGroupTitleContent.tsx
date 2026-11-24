@@ -5,6 +5,7 @@ import {
   getArtistUrlReference,
   getReleaseUrl,
 } from "utils/artist";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import { ElapsedTime, WidgetLink } from "./utils";
 
@@ -24,8 +25,11 @@ export const TrackGroupTitleContent: React.FC<{
   const { t } = useTranslation("translation", {
     keyPrefix: "trackGroupDetails",
   });
+  const { releaseArtistName } = useReleaseArtistName();
 
   if (!trackGroup.artist) return null;
+
+  const artistName = releaseArtistName(trackGroup);
 
   const artistRef = embeddedInMirlo
     ? getArtistUrl(trackGroup.artist)
@@ -42,11 +46,15 @@ export const TrackGroupTitleContent: React.FC<{
         </WidgetLink>
       </div>
       <div className="text-sm opacity-85 leading-normal truncate break-normal max-sm:text-xs max-xs:text-[0.65rem] [&_a:hover]:underline!">
-        {t("by")}{" "}
-        <WidgetLink to={artistRef} embeddedInMirlo={embeddedInMirlo}>
-          {trackGroup.artist.name}
-        </WidgetLink>
-        {" · "}
+        {artistName && (
+          <>
+            {t("by")}{" "}
+            <WidgetLink to={artistRef} embeddedInMirlo={embeddedInMirlo}>
+              {artistName}
+            </WidgetLink>
+            {" · "}
+          </>
+        )}
         {t("trackCount", { count: trackGroup.tracks.length })}
       </div>
       {(currentTrack || playingLineEnd) && (

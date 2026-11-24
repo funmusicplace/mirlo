@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import api from "services/api";
 import { useGlobalStateContext } from "state/GlobalState";
 import { useSnackbar } from "state/SnackbarContext";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import SongTimeDisplay from "../common/SongTimeDisplay";
 
@@ -65,6 +66,7 @@ export const AudioWrapper: React.FC<{
     state: { playerQueueIds, currentlyPlayingIndex, playing, looping },
     dispatch,
   } = useGlobalStateContext();
+  const { trackArtistLine } = useReleaseArtistName();
   const [mostlyListened, setMostlyListened] = React.useState(false);
   const playerRef = React.useRef<HTMLVideoElement>(null);
   const playingRef = React.useRef(playing);
@@ -202,14 +204,9 @@ export const AudioWrapper: React.FC<{
   React.useEffect(() => {
     if (currentTrack) {
       if ("mediaSession" in navigator) {
-        const artist = currentTrack.trackArtists
-          ?.filter((ta) => ta.isCoAuthor)
-          .map((ta) => ta.artistName)
-          .join(", ");
-
         navigator.mediaSession.metadata = new MediaMetadata({
           title: currentTrack.title,
-          artist: (artist || currentTrack.trackGroup?.artist?.name) ?? "",
+          artist: trackArtistLine(currentTrack),
           album: currentTrack.trackGroup?.title ?? "",
           artwork: [
             {
@@ -269,7 +266,7 @@ export const AudioWrapper: React.FC<{
         });
       }
     }
-  }, [currentTrack, dispatch]);
+  }, [currentTrack, dispatch, trackArtistLine]);
 
   const streamUrl = api.streamUrl(currentTrack);
 

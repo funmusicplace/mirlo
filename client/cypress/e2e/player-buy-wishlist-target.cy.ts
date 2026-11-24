@@ -35,6 +35,9 @@ const buildTrack = ({
   isPreview: true,
   audio: { id: `audio-${id}`, duration: 60, uploadState: "SUCCESS" },
   trackArtists: [],
+  mainArtists: TRACK_GROUP_EXAMPLE.releaseArtists,
+  featuredArtists: [],
+  mainArtistsSource: "release",
   license: null,
 });
 

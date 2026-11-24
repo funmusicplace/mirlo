@@ -15,6 +15,7 @@ import { isTrackGroupPurchase, isTrackPurchase } from "types/typeguards";
 import { useDebounce } from "use-debounce";
 import { matchesTokens } from "utils/matchesTokens";
 import { widgetPath } from "utils/tracks";
+import { useReleaseArtistName } from "utils/useReleaseArtistName";
 
 import Button from "../Button";
 import CommandSearch, {
@@ -34,6 +35,8 @@ const InsertMirloWidgetButton: React.FC<{
   const { t: tShared } = useTranslation("translation", {
     keyPrefix: "commandSearch",
   });
+  const { releaseArtistName: releaseArtist, trackArtistLine: trackArtist } =
+    useReleaseArtistName();
   const { user } = useAuthContext();
 
   const [view, setView] = React.useState<"closed" | "search" | "upload">(
@@ -104,11 +107,11 @@ const InsertMirloWidgetButton: React.FC<{
     if (useBackendSearch) {
       tracks = (tracksQ.data?.results ?? []).map((r) => ({
         id: r.id,
-        name: `${r.trackGroup.artist?.name ?? ""} · ${r.title}`,
+        name: [trackArtist(r), r.title].filter(Boolean).join(" · "),
       }));
       albums = (trackGroupsQ.data?.results ?? []).map((r) => ({
         id: r.id,
-        name: `${r.artist?.name ?? ""} · ${r.title}`,
+        name: [releaseArtist(r), r.title].filter(Boolean).join(" · "),
       }));
     } else if (scope === "collection") {
       (collectionQ.data ?? []).forEach((p) => {
@@ -116,26 +119,38 @@ const InsertMirloWidgetButton: React.FC<{
           isTrackPurchase(p) &&
           p.track &&
           matchesTokens(
-            [p.track.title, p.track.trackGroup?.artist?.name],
+            [
+              p.track.title,
+              p.track.trackGroup?.artist?.name,
+              trackArtist(p.track),
+            ],
             trimmed
           )
         ) {
           tracks.push({
             id: p.track.id,
-            name: `${p.track.trackGroup?.artist?.name ?? ""} · ${p.track.title}`,
+            name: [trackArtist(p.track), p.track.title]
+              .filter(Boolean)
+              .join(" · "),
           });
         }
         if (
           isTrackGroupPurchase(p) &&
           p.trackGroup &&
           matchesTokens(
-            [p.trackGroup.title, p.trackGroup.artist?.name],
+            [
+              p.trackGroup.title,
+              p.trackGroup.artist?.name,
+              releaseArtist(p.trackGroup),
+            ],
             trimmed
           )
         ) {
           albums.push({
             id: p.trackGroup.id,
-            name: `${p.trackGroup.artist?.name ?? ""} · ${p.trackGroup.title}`,
+            name: [releaseArtist(p.trackGroup), p.trackGroup.title]
+              .filter(Boolean)
+              .join(" · "),
           });
         }
       });
@@ -145,13 +160,19 @@ const InsertMirloWidgetButton: React.FC<{
       (user?.trackFavorites ?? []).forEach((tf) => {
         if (
           matchesTokens(
-            [tf.track.title, tf.track.trackGroup?.artist?.name],
+            [
+              tf.track.title,
+              tf.track.trackGroup?.artist?.name,
+              trackArtist(tf.track),
+            ],
             trimmed
           )
         ) {
           tracks.push({
             id: tf.trackId,
-            name: `${tf.track.trackGroup?.artist?.name ?? ""} · ${tf.track.title}`,
+            name: [trackArtist(tf.track), tf.track.title]
+              .filter(Boolean)
+              .join(" · "),
           });
         }
       });
@@ -159,13 +180,19 @@ const InsertMirloWidgetButton: React.FC<{
         if (
           w.trackGroup &&
           matchesTokens(
-            [w.trackGroup.title, w.trackGroup.artist?.name],
+            [
+              w.trackGroup.title,
+              w.trackGroup.artist?.name,
+              releaseArtist(w.trackGroup),
+            ],
             trimmed
           )
         ) {
           albums.push({
             id: w.trackGroupId,
-            name: `${w.trackGroup.artist?.name ?? ""} · ${w.trackGroup.title}`,
+            name: [releaseArtist(w.trackGroup), w.trackGroup.title]
+              .filter(Boolean)
+              .join(" · "),
           });
         }
       });
@@ -209,6 +236,8 @@ const InsertMirloWidgetButton: React.FC<{
     embedTrack,
     embedTrackGroup,
     tShared,
+    releaseArtist,
+    trackArtist,
   ]);
 
   const isLoading =
