@@ -20,14 +20,8 @@ const AddSecurityKey: React.FC<{
   const [working, setWorking] = React.useState<SecurityKeyKind>();
   const { mutateAsync: register } = useRegisterSecurityKeyMutation();
 
-  const onSubmit = React.useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      const submitter = (e.nativeEvent as SubmitEvent).submitter;
-      const kind: SecurityKeyKind =
-        submitter?.getAttribute("value") === "passkey"
-          ? "passkey"
-          : "securityKey";
+  const addKey = React.useCallback(
+    async (kind: SecurityKeyKind) => {
       setWorking(kind);
       try {
         const optionsJSON = await fetchRegistrationOptions(kind);
@@ -49,6 +43,11 @@ const AddSecurityKey: React.FC<{
     [name, register, onRecoveryCodes, snackbar, t]
   );
 
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addKey("securityKey");
+  };
+
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-2">
       <label htmlFor="security-key-name" className="font-semibold">
@@ -66,7 +65,6 @@ const AddSecurityKey: React.FC<{
         />
         <Button
           type="submit"
-          value="securityKey"
           buttonRole="primary"
           startIcon={<FaKey />}
           isLoading={working === "securityKey"}
@@ -75,8 +73,8 @@ const AddSecurityKey: React.FC<{
           {t("addSecurityKey")}
         </Button>
         <Button
-          type="submit"
-          value="passkey"
+          type="button"
+          onClick={() => addKey("passkey")}
           variant="outlined"
           startIcon={<FaFingerprint />}
           isLoading={working === "passkey"}
