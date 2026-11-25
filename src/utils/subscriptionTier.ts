@@ -66,16 +66,23 @@ export const registerSubscription = async ({
     select: { profileId: true },
   });
 
-  const existingFreeSubscription = tier
-    ? await prisma.profileUserSubscription.findFirst({
-        where: {
-          userId: Number(userId),
-          profileSubscriptionTierId: { not: Number(tierId) },
-          stripeSubscriptionKey: null,
-          profileSubscriptionTier: { profileId: tier.profileId },
-        },
-      })
-    : null;
+  const existingSubscription =
+    (await prisma.profileUserSubscription.findFirst({
+      where: { userId, profileSubscriptionTierId: tierId },
+    })) ??
+    (tier
+      ? await prisma.profileUserSubscription.findFirst({
+          where: {
+            userId,
+            stripeSubscriptionKey: null,
+            profileSubscriptionTier: { profileId: tier.profileId },
+          },
+        })
+      : null);
+
+  const keptName = (
+    existingSubscription?.shippingAddress as { name?: string } | null
+  )?.name;
 
   const updateData = {
     profileSubscriptionTierId: Number(tierId),
@@ -86,8 +93,9 @@ export const registerSubscription = async ({
     platformCut,
     stripeSubscriptionKey: paymentProcessorKey,
     stripeAccountId,
-    shippingAddress,
+    shippingAddress: shippingAddress ?? (keptName ? { name: keptName } : null),
     nextBillingDate,
+    expiresAt: null,
   };
 
   const includeArgs = {
@@ -104,9 +112,9 @@ export const registerSubscription = async ({
   };
 
   let profileUserSubscription;
-  if (existingFreeSubscription) {
+  if (existingSubscription) {
     profileUserSubscription = await prisma.profileUserSubscription.update({
-      where: { id: existingFreeSubscription.id },
+      where: { id: existingSubscription.id },
       data: updateData,
       include: includeArgs,
     });

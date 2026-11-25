@@ -5,6 +5,7 @@ export type SupportTier = {
   amount: number;
   deleteReason?: string | null;
   nextBillingDate?: string;
+  expiresAt?: string | null;
   shippingAddress: {
     name: string;
     address: Object;
@@ -25,6 +26,8 @@ export type SupportTier = {
 // without payment (e.g. a comp), so we surface it as "Free".
 export const isFreeSubscription = (r: SupportTier) =>
   !r.artistUserSubscriptionCharges?.some((charge) => charge.transactionId);
+
+export const supporterName = (r: SupportTier) => r.shippingAddress?.name;
 
 export const joinedInPastMonth = (r: SupportTier, now = new Date()) => {
   const monthAgo = new Date(now);
@@ -51,7 +54,7 @@ const comparators: Record<
   (a: SupportTier, b: SupportTier) => number
 > = {
   createdAt: (a, b) => (a.createdAt > b.createdAt ? -1 : 1),
-  name: (a, b) => compareText(a.shippingAddress?.name, b.shippingAddress?.name),
+  name: (a, b) => compareText(supporterName(a), supporterName(b)),
   email: (a, b) => compareText(a.user.email, b.user.email),
   tier: (a, b) =>
     compareText(a.artistSubscriptionTier.name, b.artistSubscriptionTier.name),

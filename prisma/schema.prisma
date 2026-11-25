@@ -703,6 +703,7 @@ model ProfileUserSubscription {
   nextBillingDate                DateTime? // When Stripe will charge next (from invoice)
   receiveEmail                   Boolean                         @default(true) // Whether the user still wants post-notification emails; toggled off via the email "stop receiving emails" link
   keepFollowingOnCancel          Boolean                         @default(false) // If true, when this paid subscription's Stripe subscription ends, convert to the artist's default (free) tier instead of deleting
+  expiresAt                      DateTime?
 
   @@unique([userId, profileSubscriptionTierId])
 }

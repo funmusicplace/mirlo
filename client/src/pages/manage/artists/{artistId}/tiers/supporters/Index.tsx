@@ -7,6 +7,7 @@ import Select from "components/common/Select";
 import SpaceBetweenDiv from "components/common/SpaceBetweenDiv";
 import StatCard from "components/common/StatCard";
 import Table from "components/common/Table";
+import ArtistAddSubscriber from "components/ManageArtist/ArtistAddSubscriber";
 import ArtistSubscriberDataDownload from "components/ManageArtist/ArtistSubscriberDataDownload";
 import ArtistSubscriberUploadData from "components/ManageArtist/ArtistSubscriberUploadData";
 import { ManageSectionWrapper } from "components/ManageArtist/ManageSectionWrapper";
@@ -154,6 +155,7 @@ const Index = () => {
           <h4>{t("supporters")}</h4>
 
           <DropdownMenu dashed>
+            <ArtistAddSubscriber artistId={artistId} onDone={() => refetch()} />
             <ArtistSubscriberDataDownload />
             <ArtistSubscriberUploadData onDone={() => refetch()} />
           </DropdownMenu>

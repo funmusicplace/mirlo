@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import {
   isFreeSubscription,
   joinedInPastMonth,
+  supporterName,
   SupportTier,
 } from "./supporters";
 
@@ -30,11 +31,21 @@ const SupporterRow: React.FC<{
       }
       title={isNew ? t("joinedInPastMonth") : undefined}
     >
-      <td>{r.shippingAddress?.name ?? "-"}</td>
+      <td>{supporterName(r) ?? "-"}</td>
       <td>{r.user.email}</td>
       <td>
         {r.artistSubscriptionTier.name}
         {isFreeSubscription(r) && <Pill className="ml-2">{t("free")}</Pill>}
+        {r.expiresAt && (
+          <>
+            <br />
+            <small>
+              {t("expiresOn", {
+                date: formatDate({ date: r.expiresAt, i18n }),
+              })}
+            </small>
+          </>
+        )}
         {r.deleteReason && (
           <Pill
             variant="warning"
@@ -71,7 +82,7 @@ const SupporterRow: React.FC<{
           <CancelSupporterButton
             artistId={artistId}
             subscriptionId={r.id}
-            supporterName={r.shippingAddress?.name ?? r.user.email}
+            supporterName={supporterName(r) ?? r.user.email}
           />
         )}
       </td>

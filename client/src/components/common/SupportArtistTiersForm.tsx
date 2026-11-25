@@ -80,10 +80,14 @@ const SupportArtistTiersForm: React.FC<{
   );
   const [switchingTo, setSwitchingTo] =
     React.useState<ArtistSubscriptionTier | null>(null);
+  const isFreeOnTier = (tierId: number) =>
+    !!currentSubscription &&
+    !currentSubscription.isPaid &&
+    currentSubscription.artistSubscriptionTierId === tierId;
 
   const subscribeToTier = async () => {
     const tier = methods.getValues("tier");
-    if (!tier.isDefaultTier && currentSubscription) {
+    if (!tier.isDefaultTier && currentSubscription && !isFreeOnTier(tier.id)) {
       setSwitchingTo(options.find((option) => option.id === tier.id) ?? null);
       return;
     }
@@ -185,7 +189,10 @@ const SupportArtistTiersForm: React.FC<{
     methods.formState.isValid || isEmpty(methods.formState.errors);
 
   const isSubscribedToCurrentTier =
-    value && currentTier && value.id === currentTier.id;
+    value &&
+    currentTier &&
+    value.id === currentTier.id &&
+    !isFreeOnTier(value.id);
 
   let buttonLabel: string;
   if (isSubscribedToCurrentTier) {

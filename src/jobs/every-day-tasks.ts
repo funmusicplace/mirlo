@@ -7,11 +7,13 @@ import sendSubscriptionRenewalReminders from "./send-subscription-renewal-remind
 import cleanUpCheckouts from "./tasks/clean-up-checkouts";
 import cleanUpOAuthPayloads from "./tasks/clean-up-oauth-payloads";
 import cleanUpOrphanedImages from "./tasks/clean-up-orphaned-images";
+import endExpiredSubscriptions from "./tasks/end-expired-subscriptions";
 import syncPaymentAccountStatuses from "./tasks/sync-payment-account-statuses";
 
 export const dailyTasks = async () => {
   await sendOnboardingEmail();
   await sendSubscriptionRenewalReminders();
+  await endExpiredSubscriptions();
   await syncPaymentAccountStatuses();
   await cleanUpCheckouts();
   await cleanUpOAuthPayloads();

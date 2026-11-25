@@ -89,6 +89,7 @@ const SubscriptionTierActions: React.FC<{
       ?.paymentStatus === "FAILED";
 
   const isCancelled = isSubscriptionCancelled(currentSubscription);
+  const isFreeOnTier = !!currentSubscription && !currentSubscription.isPaid;
 
   const hasOtherPaidTiers = artist.subscriptionTiers.some(
     (tier) => !tier.isDefaultTier && tier.id !== subscriptionTier.id
@@ -104,7 +105,9 @@ const SubscriptionTierActions: React.FC<{
 
   return (
     <>
-      {((!isSubscribedToTier && !isSubscribedToArtist) || isCancelled) && (
+      {((!isSubscribedToTier && !isSubscribedToArtist) ||
+        isCancelled ||
+        isFreeOnTier) && (
         <ArtistVariableSupport tier={subscriptionTier} button={supportButton} />
       )}
       {(isSubscribedToTier || isSubscribedToArtist) && (
@@ -136,7 +139,7 @@ const SubscriptionTierActions: React.FC<{
             user &&
             isSubscribedToTier &&
             !isCancelled &&
-            currentSubscription && (
+            currentSubscription?.isPaid && (
               <ChangePaymentMethodButton
                 subscriptionId={currentSubscription.id}
                 onUpdated={refresh}

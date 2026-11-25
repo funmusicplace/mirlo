@@ -836,6 +836,7 @@
     "unsubscribeEntirely": "Unsubscribe entirely",
     "stopPaymentsKeepFollowing": "Stop payments but keep following",
     "nevermind": "Nevermind",
+    "freeSubscriptionUntil": "Your free subscription lasts until {{ date }}. Subscribe to this tier to keep it after that.",
     "supportingArtistAtTier": "You are supporting this artist at the <strong>{{tierName}}</strong> tier!",
     "subscriptionCancelled": "Your subscription has been cancelled",
     "subscriptionTierChanged": "You've switched to {{tierName}} — the new price applies at your next billing date.",
@@ -1691,9 +1692,19 @@
     "confirmNoSpam": "These people agreed to hear from me, and I won't use this list to send spam.",
     "importNeedsVerifiedPayments": "You can import subscribers once your payment account is set up and verified.",
     "addToTier": "Add subscribers to tier",
-    "tierFollowLabel": "{{ name }} (free follow tier)"
+    "tierFollowLabel": "{{ name }} (free follow tier)",
+    "manuallyAddSubscriber": "Manually add subscriber",
+    "addSubscriber": "Add subscriber",
+    "addSubscriberDescription": "Give someone a free subscription to one of your tiers, for example as a promo. If they start paying for a subscription later, it replaces this one.",
+    "addSubscriberNeedsTier": "Create a subscription tier before adding subscribers to it.",
+    "subscriberAdded": "Subscriber added",
+    "name": "Name",
+    "tier": "Tier",
+    "expiresOn": "Free until",
+    "expiresOnHint": "After this date they go back to just following you. Leave empty to keep the subscription until you cancel it."
   },
   "artistSupporters": {
+    "expiresOn": "Free until {{ date }}",
     "supporters": "Supporters",
     "new": "New",
     "totalComingInMonthly": "Total coming in monthly",

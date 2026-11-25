@@ -20,6 +20,7 @@ type SubscriberRow = {
   deleteReason?: string | null;
   deletedAt?: Date | null;
   nextBillingDate?: Date | null;
+  expiresAt?: Date | null;
 };
 
 const csvColumns = [
@@ -57,6 +58,10 @@ const csvColumns = [
     label: "Cancel At",
     value: (row: SubscriberRow) =>
       !row.deletedAt && row.deleteReason ? (row.nextBillingDate ?? "") : "",
+  },
+  {
+    label: "Expires At",
+    value: (row: SubscriberRow) => row.expiresAt ?? "",
   },
   {
     label: "Ended At",
@@ -150,6 +155,7 @@ export default function () {
           },
           shippingAddress: true,
           nextBillingDate: true,
+          expiresAt: true,
           profileSubscriptionTier: true,
           profileUserSubscriptionCharges: {
             select: {
@@ -241,8 +247,14 @@ export default function () {
       confirmedNoSpam?: boolean;
     };
     const subscribers = (
-      req.body as { subscribers: { email: string }[] }
-    ).subscribers.map((s) => ({ email: s.email.trim().toLowerCase() }));
+      req.body as { subscribers: { email: string; name?: string }[] }
+    ).subscribers.map((s) => ({
+      email: s.email.trim().toLowerCase(),
+      name: s.name?.trim() || undefined,
+    }));
+    const expiresAt = req.body.expiresAt
+      ? new Date(req.body.expiresAt)
+      : undefined;
 
     try {
       const parsedArtistId = await findArtistIdForURLSlug(artistId);
@@ -259,6 +271,13 @@ export default function () {
           httpCode: 403,
           description:
             "Importing subscribers is available once the artist's payment account is verified",
+        });
+      }
+
+      if (expiresAt && !(expiresAt > new Date())) {
+        throw new AppError({
+          httpCode: 400,
+          description: "The expiry date must be in the future",
         });
       }
 
@@ -309,6 +328,25 @@ export default function () {
               },
             });
 
+            if (
+              found &&
+              !found.stripeSubscriptionKey &&
+              (expiresAt || subscriber.name)
+            ) {
+              await prisma.profileUserSubscription.update({
+                where: { id: found.id },
+                data: {
+                  expiresAt,
+                  shippingAddress: subscriber.name
+                    ? {
+                        ...((found.shippingAddress as object) ?? {}),
+                        name: subscriber.name,
+                      }
+                    : undefined,
+                },
+              });
+            }
+
             if (!found) {
               try {
                 await prisma.profileUserSubscription.create({
@@ -316,6 +354,10 @@ export default function () {
                     userId: created.id,
                     profileSubscriptionTierId: tier.id,
                     amount: 0,
+                    expiresAt,
+                    shippingAddress: subscriber.name
+                      ? { name: subscriber.name }
+                      : undefined,
                   },
                 });
 
@@ -381,12 +423,27 @@ export default function () {
               type: "array",
               items: {
                 type: "object",
+                required: ["email"],
+                properties: {
+                  email: { type: "string" },
+                  name: {
+                    type: "string",
+                    description:
+                      "Stored as the subscription's shipping name, not on the user's account",
+                  },
+                },
               },
             },
             artistSubscriptionTierId: {
               description:
                 "The tier to add subscribers to. Defaults to the artist's default (follow) tier.",
               type: "integer",
+            },
+            expiresAt: {
+              description:
+                "When these free subscriptions end and drop to the default (follow) tier. Also extends an existing free subscription to the tier.",
+              type: "string",
+              format: "date-time",
             },
             confirmedNoSpam: {
               description:

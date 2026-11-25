@@ -372,6 +372,7 @@ describe("ArtistSupportBox", () => {
         artistUserSubscriptions: [
           {
             id: 55,
+            isPaid: true,
             artistSubscriptionTier: tier,
           },
         ],
