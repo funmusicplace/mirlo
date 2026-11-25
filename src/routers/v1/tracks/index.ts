@@ -1,5 +1,5 @@
 import prisma from "@mirlo/prisma";
-import { Prisma } from "@mirlo/prisma/client";
+import { Prisma, TrackArtistAppearance } from "@mirlo/prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { omit } from "lodash";
 
@@ -54,6 +54,28 @@ export default function () {
                     trackGroup: {
                       profile: {
                         name: { contains: token, mode: "insensitive" },
+                      },
+                    },
+                  },
+                  {
+                    trackGroup: {
+                      trackGroupArtists: {
+                        some: {
+                          artistName: { contains: token, mode: "insensitive" },
+                        },
+                      },
+                    },
+                  },
+                  {
+                    trackArtists: {
+                      some: {
+                        appearsAs: {
+                          in: [
+                            TrackArtistAppearance.MAIN,
+                            TrackArtistAppearance.FEATURED,
+                          ],
+                        },
+                        artistName: { contains: token, mode: "insensitive" },
                       },
                     },
                   },

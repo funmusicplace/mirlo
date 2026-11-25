@@ -81,10 +81,16 @@ export default function () {
       }
 
       if (profileName && typeof profileName === "string") {
-        if (!where.profile) {
-          where.profile = {};
-        }
-        where.profile.name = { contains: profileName, mode: "insensitive" };
+        where.OR = [
+          { profile: { name: { contains: profileName, mode: "insensitive" } } },
+          {
+            trackGroupArtists: {
+              some: {
+                artistName: { contains: profileName, mode: "insensitive" },
+              },
+            },
+          },
+        ];
       }
 
       if (license && license !== "" && license !== "all") {
@@ -146,6 +152,13 @@ export default function () {
                   {
                     profile: {
                       name: { contains: token, mode: "insensitive" },
+                    },
+                  },
+                  {
+                    trackGroupArtists: {
+                      some: {
+                        artistName: { contains: token, mode: "insensitive" },
+                      },
                     },
                   },
                 ],
