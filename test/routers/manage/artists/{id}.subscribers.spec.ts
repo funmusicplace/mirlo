@@ -314,6 +314,90 @@ describe("manage/artists/{artistId}/subscribers", () => {
       assert.notEqual(subscription, null);
     });
 
+    it("should add a named free subscription that expires", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+        trustLevel: 1,
+      });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id, { minAmount: 500 });
+      const expiresAt = new Date(Date.now() + 7 * 86400000);
+
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/subscribers`)
+        .send({
+          confirmedNoSpam: true,
+          artistSubscriptionTierId: tier.id,
+          expiresAt: expiresAt.toISOString(),
+          subscribers: [{ email: "Promo@Email.com ", name: " Promo Fan " }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 200);
+      const subscription = await prisma.profileUserSubscription.findFirst({
+        where: {
+          user: { email: "promo@email.com" },
+          profileSubscriptionTierId: tier.id,
+        },
+        include: { user: true },
+      });
+      assert(subscription);
+      assert.equal(
+        subscription.expiresAt?.toISOString(),
+        expiresAt.toISOString()
+      );
+      assert.equal(subscription.amount, 0);
+      assert.deepEqual(subscription.shippingAddress, { name: "Promo Fan" });
+      assert.equal(subscription.user.name, null);
+    });
+
+    it("should not touch an existing user's account name", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+        trustLevel: 1,
+      });
+      await createUser({ email: "promo@email.com", name: "Their Own Name" });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id, { minAmount: 500 });
+
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/subscribers`)
+        .send({
+          confirmedNoSpam: true,
+          artistSubscriptionTierId: tier.id,
+          subscribers: [{ email: "promo@email.com", name: "Artist Typed" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 200);
+      const subscriber = await prisma.user.findFirstOrThrow({
+        where: { email: "promo@email.com" },
+      });
+      assert.equal(subscriber.name, "Their Own Name");
+    });
+
+    it("should reject an expiry date in the past", async () => {
+      const { user, accessToken } = await createUser({
+        email: "test@testcom",
+        trustLevel: 1,
+      });
+      const artist = await createArtist(user.id);
+      const tier = await createTier(artist.id, { minAmount: 500 });
+
+      const response = await requestApp
+        .post(`manage/artists/${artist.id}/subscribers`)
+        .send({
+          confirmedNoSpam: true,
+          artistSubscriptionTierId: tier.id,
+          expiresAt: new Date(Date.now() - 86400000).toISOString(),
+          subscribers: [{ email: "promo@email.com" }],
+        })
+        .set("Cookie", [`jwt=${accessToken}`]);
+
+      assert.equal(response.statusCode, 400);
+      assert.equal(await prisma.profileUserSubscription.count(), 0);
+    });
+
     it("should handle a double subscription", async () => {
       const { user, accessToken } = await createUser({
         email: "test@testcom",

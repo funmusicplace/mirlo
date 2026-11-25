@@ -74,6 +74,60 @@ describe("registerSubscription", () => {
     assert.equal(rows[0].amount, 500);
   });
 
+  it("converts a free promo on the same tier in place and clears its expiry, retiring nothing else", async () => {
+    const { user: artistUser } = await createUser({
+      email: "artist-promo@example.com",
+    });
+    const { user: fan } = await createUser({ email: "fan-promo@example.com" });
+
+    const artist = await createArtist(artistUser.id, {
+      name: "Promo artist",
+      userId: artistUser.id,
+      enabled: true,
+      subscriptionTiers: {
+        create: [
+          { name: "Follow", isDefaultTier: true },
+          { name: "Paid tier", minAmount: 4 },
+        ],
+      },
+    });
+    const freeTier = artist.subscriptionTiers![0];
+    const paidTier = artist.subscriptionTiers![1];
+
+    await prisma.profileUserSubscription.create({
+      data: {
+        profileSubscriptionTierId: freeTier.id,
+        userId: fan.id,
+        amount: 0,
+      },
+    });
+    const promo = await prisma.profileUserSubscription.create({
+      data: {
+        profileSubscriptionTierId: paidTier.id,
+        userId: fan.id,
+        amount: 0,
+        shippingAddress: { name: "Promo Fan" },
+        expiresAt: new Date(Date.now() + 86400000),
+      },
+    });
+
+    const result = await registerSubscription({
+      tierId: paidTier.id,
+      userId: fan.id,
+      amount: 500,
+      paymentProcessorKey: "sub_promo_paid",
+      stripeAccountId: "acct_test",
+    });
+
+    assert.equal(result.id, promo.id);
+    const row = await prisma.profileUserSubscription.findFirstOrThrow({
+      where: { id: promo.id },
+    });
+    assert.equal(row.stripeSubscriptionKey, "sub_promo_paid");
+    assert.equal(row.expiresAt, null);
+    assert.deepEqual(row.shippingAddress, { name: "Promo Fan" });
+  });
+
   it("creates a new row when the user has no existing subscription for this artist", async () => {
     const { user: artistUser } = await createUser({
       email: "artist2@example.com",

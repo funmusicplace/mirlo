@@ -30,6 +30,9 @@ vi.mock("components/ManageArtist/ManageSectionWrapper", () => {
   );
   return { __esModule: true, default: Wrapper, ManageSectionWrapper: Wrapper };
 });
+vi.mock("components/ManageArtist/ArtistAddSubscriber", () => ({
+  default: () => null,
+}));
 vi.mock("components/ManageArtist/ArtistSubscriberDataDownload", () => ({
   default: () => null,
 }));

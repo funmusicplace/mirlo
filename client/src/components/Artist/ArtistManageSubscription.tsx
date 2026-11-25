@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import Modal from "components/common/Modal";
+import { formatDate } from "components/TrackGroup/ReleaseDate";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { FaPen } from "react-icons/fa";
@@ -23,7 +24,7 @@ const ArtistManageSubscription: React.FC<{
   const [isEditOpen, setIsEditOpen] = React.useState(false);
   const [isConfirmingCancel, setIsConfirmingCancel] = React.useState(false);
   const [isCancelling, setIsCancelling] = React.useState(false);
-  const { t } = useTranslation("translation", { keyPrefix: "artist" });
+  const { t, i18n } = useTranslation("translation", { keyPrefix: "artist" });
   const { refreshLoggedInUser } = useAuthContext();
   const snackbar = useSnackbar();
   const errorHandler = useErrorHandler();
@@ -78,6 +79,15 @@ const ArtistManageSubscription: React.FC<{
           />
         </p>
         <SubscriptionCancelledNotice subscription={userSubscription} />
+        {userSubscription?.expiresAt && !userSubscription.isPaid && (
+          <p>
+            <small>
+              {t("freeSubscriptionUntil", {
+                date: formatDate({ date: userSubscription.expiresAt, i18n }),
+              })}
+            </small>
+          </p>
+        )}
       </div>
       {!isCancelled && (
         <Button startIcon={<FaPen />} onClick={() => setIsEditOpen(true)} />
