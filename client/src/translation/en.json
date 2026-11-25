@@ -3187,7 +3187,7 @@
   "adminSecurity": {
     "gateTitle": "Verify it's you",
     "gateIntroSetup": "Admin tools need a second factor. Set up a security key, passkey or authenticator app to continue. You'll get recovery codes to keep in case you lose it.",
-    "gateIntroVerify": "Admin tools need a second factor. Verify with one of yours to continue. You'll stay verified for 12 hours.",
+    "gateIntroVerify": "Admin tools need a second factor. Verify with one of yours to continue. You'll stay verified for 7 days.",
     "securityKeyName": "Name for this key",
     "securityKeyNamePlaceholder": "e.g. YubiKey, MacBook",
     "addSecurityKey": "Add security key",
