@@ -140,6 +140,7 @@ export const AlreadySubscribed: Story = {
             {
               id: 1,
               amount: 500,
+              isPaid: true,
               userId: USER_EXAMPLE.id,
               artistSubscriptionTierId: SUPPORTER_TIER.id,
               artistSubscriptionTier: SUPPORTER_TIER,
