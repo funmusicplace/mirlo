@@ -32,7 +32,7 @@ const descriptor = (credential: StoredCredential) => ({
 export type WebAuthnKeyKind = "securityKey" | "passkey";
 
 export const registrationOptions = async (
-  user: { id: number; email: string },
+  user: { id: number; email: string; name: string | null },
   existing: StoredCredential[],
   instanceName: string,
   kind: WebAuthnKeyKind
@@ -41,6 +41,7 @@ export const registrationOptions = async (
     rpName: instanceName,
     rpID: (await relyingParty()).rpID,
     userName: user.email,
+    userDisplayName: user.name || user.email,
     userID: new Uint8Array(new TextEncoder().encode(`mirlo-user-${user.id}`)),
     attestationType: "none",
     excludeCredentials: existing.map(descriptor),
