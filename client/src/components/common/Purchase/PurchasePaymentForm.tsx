@@ -4,12 +4,7 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import {
-  ConfirmPaymentData,
-  StripeAddressElementChangeEvent,
-  StripeError,
-  StripePaymentElementChangeEvent,
-} from "@stripe/stripe-js";
+import { ConfirmPaymentData, StripeError } from "@stripe/stripe-js";
 import Skeleton from "components/common/Skeleton";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -47,9 +42,6 @@ const PurchasePaymentForm: React.FC<{
   const needsEmail = !!quote && !quote.buyerEmailKnown;
 
   const [showButton, setShowButton] = React.useState(false);
-  const [isFormComplete, setIsFormComplete] = React.useState(false);
-  const [isAddressComplete, setIsAddressComplete] =
-    React.useState(!requiresShipping);
   const [isLoading, setIsLoading] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [emailError, setEmailError] = React.useState(false);
@@ -202,14 +194,6 @@ const PurchasePaymentForm: React.FC<{
     handler(t("somethingWentWrongStripe") ?? "");
   };
 
-  const handleOnChange = (e: StripePaymentElementChangeEvent) => {
-    setIsFormComplete(e.complete);
-  };
-
-  const handleAddressOnChange = (e: StripeAddressElementChangeEvent) => {
-    setIsAddressComplete(e.complete);
-  };
-
   return (
     <div className="p-4 m-auto">
       {needsEmail && (
@@ -239,7 +223,6 @@ const PurchasePaymentForm: React.FC<{
             mode: "shipping",
             ...(allowedCountries?.length ? { allowedCountries } : {}),
           }}
-          onChange={handleAddressOnChange}
           className="mb-6"
         />
       )}
@@ -248,20 +231,13 @@ const PurchasePaymentForm: React.FC<{
         options={{ layout: "accordion" }}
         onReady={() => setShowButton(true)}
         onLoadError={handleOnError}
-        onChange={handleOnChange}
       />
       {showButton && (
         <Button
           onClick={handleSubmit}
           size="big"
           isLoading={isLoading}
-          disabled={
-            !stripe ||
-            !elements ||
-            !isFormComplete ||
-            !isAddressComplete ||
-            (needsEmail && !email)
-          }
+          disabled={!stripe || !elements}
           className="mt-4"
         >
           {buttonLabel}

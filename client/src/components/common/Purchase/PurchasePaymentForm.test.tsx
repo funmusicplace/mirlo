@@ -38,21 +38,10 @@ const submit = vi.fn((): Promise<{ error?: { message: string } }> => {
 vi.mock("@stripe/react-stripe-js", () => ({
   useStripe: () => ({ confirmSetup, confirmPayment }),
   useElements: () => ({ getElement, submit }),
-  PaymentElement: ({ onReady, onChange }: any) => (
-    <div
-      data-testid="payment-element"
-      onClick={() => {
-        onReady();
-        onChange({ complete: true });
-      }}
-    />
+  PaymentElement: ({ onReady }: any) => (
+    <div data-testid="payment-element" onClick={() => onReady()} />
   ),
-  AddressElement: ({ onChange }: any) => (
-    <div
-      data-testid="address-element"
-      onClick={() => onChange({ complete: true })}
-    />
-  ),
+  AddressElement: () => <div data-testid="address-element" />,
 }));
 
 const postMock = vi.fn(
