@@ -1,0 +1,11 @@
+namespace: mirlo
+labels:
+  - pairs:
+      service: mirlo
+
+resources:
+  - api-deployment.yaml
+  - api-ingress.yaml
+  - api-service.yaml
+  - background-deployment.yaml
+  - volume-claims.yaml
