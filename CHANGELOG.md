@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.5.0](https://github.com/funmusicplace/mirlo/compare/v1.4.0...v1.5.0) (2026-11-28)
+
+
+### Features
+
+* **auth:** keep admins verified for 7 days instead of 12 hours ([2edd8d6](https://github.com/funmusicplace/mirlo/commit/2edd8d60a1b41b163ca5cddc58ebb8156284cc17))
+* **auth:** require a second factor for admin powers, alert admins ([b9f0820](https://github.com/funmusicplace/mirlo/commit/b9f08203de6dc2555dc5cc644adcec69746d1c50))
+* credit a release to several artists and mark track artists as main or featured ([bd5a6e1](https://github.com/funmusicplace/mirlo/commit/bd5a6e199d7e21386d25b5b1f3abfe8b7116cedc))
+* **supporters:** manually add promo subscribers with an expiry date ([580b0fb](https://github.com/funmusicplace/mirlo/commit/580b0fb952715f20de19f500ebfcc4109d0ed2b2))
+
+
+### Bug Fixes
+
+* **admin:** register security keys separately from passkeys ([919a8b2](https://github.com/funmusicplace/mirlo/commit/919a8b2219c3d585175b66c8984fb4f6bd59b0ad))
+* **admin:** set a WebAuthn display name so LastPass hands off keys ([99861c2](https://github.com/funmusicplace/mirlo/commit/99861c26afb051d84af2df3d6c1164ce4013a6cc))
+* **artist:** don't crash when support is the home page's default section ([56e0557](https://github.com/funmusicplace/mirlo/commit/56e0557bf168d5336be965d20ff7fbddee26b06e))
+* **auth:** widen webauthn userID to the Uint8Array type the lib expects ([191a631](https://github.com/funmusicplace/mirlo/commit/191a631fe478183b664e4f3c6f2d81f508e65327))
+* **checkout:** don't gate the pay button on Stripe's complete flag ([f3d9276](https://github.com/funmusicplace/mirlo/commit/f3d92763aebd4570a4658535f7a812245430e2a8))
+* **checkout:** don't offer a download link after a subscription ([756c3f0](https://github.com/funmusicplace/mirlo/commit/756c3f099d2194bc8bc828d62fae047887eaf5f6))
+* **config:** drop the last CLIENT_DOMAIN reads after domain consolidation ([284854c](https://github.com/funmusicplace/mirlo/commit/284854cc773db2583e30934c3a56053558b2a487))
+* find releases and tracks even for the new credited artist names ([ddaba29](https://github.com/funmusicplace/mirlo/commit/ddaba294a08e2321fed8b5faf5291a622fa40fca))
+* find releases and tracks even for the new credited artist names ([5839148](https://github.com/funmusicplace/mirlo/commit/583914855f5069a0bcf293db253fe1efdc566c2b))
+* **render:** restrict db/redis to internal, give umami its own role ([4279ff2](https://github.com/funmusicplace/mirlo/commit/4279ff23489a83c6a2b701182b1691a2ba814362))
+* show legacy co-authors as main track artists again ([84a54dc](https://github.com/funmusicplace/mirlo/commit/84a54dc24bc003d8c556ca3ea9946a97ee7e7c24))
+* show legacy co-authors as main track artists again ([fe32cb5](https://github.com/funmusicplace/mirlo/commit/fe32cb5d42f8240e7cc0922e26a017d15fcb8950))
+* stop listing deleted merch on release pages ([b28d0f9](https://github.com/funmusicplace/mirlo/commit/b28d0f9d93a924f11fd7548f8104186f7e16bd55))
+* stop listing deleted merch on release pages ([c10d9f5](https://github.com/funmusicplace/mirlo/commit/c10d9f5d0a16ab8eb9d134ef642fc23625dba686))
+* **trackGroups:** email purchase link only to the signed-in user ([7d595f8](https://github.com/funmusicplace/mirlo/commit/7d595f89f66118663d958cff5d91885034dbb2d8))
+
 ## [1.4.0](https://github.com/funmusicplace/mirlo/compare/v1.3.0...v1.4.0) (2026-11-23)
 
 
